@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PassManager","Structure that tracks all registered passes for the compiler."]],"type":[["PassClosure","Top-level type for all passes that transform an [ir::Context]"]]});

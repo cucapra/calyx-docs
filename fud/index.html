@@ -1,0 +1,344 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>fud: The Calyx Driver - Calyx Documentation</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../fud/index.html" class="active"><strong aria-hidden="true">2.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">2.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/synthesis.html"><strong aria-hidden="true">2.2.</strong> Synthesis and HLS Backend</a></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">2.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">2.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">2.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">3.</strong> The Calyx Compiler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">3.1.</strong> Primitive Library</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">4.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded "><a href="../tools/index.html"><strong aria-hidden="true">5.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">5.1.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">5.2.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">5.3.</strong> Editor Highlighting</a></li></ol></li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">6.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">6.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">6.2.</strong> Passing Memories by Reference</a></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">6.3.</strong> Attributes</a></li></ol></li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">7.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">8.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">9.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">9.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">9.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">9.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">9.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">9.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><a href="../optimizations/index.html"><strong aria-hidden="true">10.</strong> Optimizations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">10.1.</strong> Dataflow Analysis</a></li></ol></li><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">11.</strong> Debugging Tips</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Calyx Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="fud-the-calyx-driver"><a class="header" href="#fud-the-calyx-driver"><code>fud</code>: The Calyx Driver</a></h1>
+<p>Working with Calyx involves a lot of command-line tools. For example, an
+incomplete yet daunting list of CLI tools used by Calyx is:</p>
+<ul>
+<li>All the Calyx <a href="./frontends/index.html">frontends</a>.</li>
+<li>Calyx compiler and its various command line tools</li>
+<li>Verilator, the Verilog simulation framework used to test Calyx-generated designs.</li>
+<li>Waveform viewers to see the results of simulation</li>
+</ul>
+<p><code>fud</code> aims to provide a simple interface for using these toolchains and
+executing them in a pipeline. The source for fud is
+<a href="https://github.com/cucapra/futil/tree/master/fud">here</a>.</p>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<p>You need <a href="https://flit.readthedocs.io/en/latest/">Flit</a> to install <code>fud</code>. Install it with <code>pip3 install flit</code>.</p>
+<p>You can then install <code>fud</code> with</p>
+<pre><code class="language-bash">flit install
+</code></pre>
+<p>(If using this method to install <code>fud</code>, <code>pip3</code> should be version &gt;= 20)</p>
+<p>If you are working on <code>fud</code> itself, you can install it with a symlink with:</p>
+<pre><code class="language-bash">flit install --symlink
+</code></pre>
+<p>You can also install <code>fud</code> with</p>
+<pre><code class="language-bash">flit build
+pip3 install dist/fud-0.1.0-py3-none-any.whl
+</code></pre>
+<p>Finally, point <code>fud</code> to the root of the repository:</p>
+<pre><code>fud config global.futil_directory &lt;full path to Calyx repository&gt;
+</code></pre>
+<h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
+<p>Fud uses a global configuration file to locate tool paths and default values.
+To view the configuration, use <code>fud c</code> or <code>fud config</code>.</p>
+<p><strong>Check.</strong>
+Fud can automatically check if your configuration is valid and can help you set
+certain variables. Perform this check with:</p>
+<pre><code class="language-bash">fud check
+</code></pre>
+<p><strong>Viewing keys.</strong>
+To view the current value of a key, use <code>fud config key</code>. For example, the
+following shows the path to the Calyx compiler.</p>
+<pre><code class="language-bash">fud config stages.futil.exec
+</code></pre>
+<p><strong>Updating keys.</strong>
+Keys can be updated using <code>fud config key value</code>.
+For example, the following command updates the path to the Calyx compiler.</p>
+<pre><code class="language-bash">fud config stages.futil.exec ./target/debug/futil
+</code></pre>
+<h2 id="adding-backends"><a class="header" href="#adding-backends">Adding Backends</a></h2>
+<p><code>fud</code> wraps both frontends and backends for Calyx.
+For a minimally useful <code>fud</code> installation, you need to configure the Verilator
+backend and accompanying tools.</p>
+<h3 id="verilator"><a class="header" href="#verilator">Verilator</a></h3>
+<p>We use the open source <a href="https://www.veripool.org/wiki/verilator">Verilator</a> tool to simulate Verilog programs
+generated by the Calyx compiler.
+Install Verilator by <a href="https://www.veripool.org/projects/verilator/wiki/Installing">following the instructions</a>.</p>
+<p>By default, <code>fud</code> will use the <code>verilator</code> executable to run Verilator.
+To use a different binary, configure the path by:</p>
+<pre><code>fud config stages.verilog.exec &lt;binary&gt;
+</code></pre>
+<p><strong>Vcdump.</strong>
+Vcdump is a tool for converting <code>vcd</code> (Value Change Dump) files to JSON for
+easier analysis with the command line.</p>
+<p>Install it with:</p>
+<pre><code class="language-bash">cargo install vcdump
+</code></pre>
+<h3 id="icarus-verilog"><a class="header" href="#icarus-verilog">Icarus Verilog</a></h3>
+<p><code>fud</code> also supports <a href="http://iverilog.icarus.com/">Icarus Verilog</a> as a simulation backend.
+Since Icarus Verilog interprets programs, it can often be faster than
+<code>verilator</code>.
+First <a href="https://iverilog.fandom.com/wiki/Installation_Guide">install Icarus Verilog</a> and ensure that <code>iverilog</code> and
+<code>vvp</code> are on your path.
+Next, register the <code>icarus-verilog</code> external stage with <code>fud</code>:</p>
+<pre><code>fud register icarus-verilog -p fud/icarus/icarus.py
+</code></pre>
+<p>To test the simulation backend, run:</p>
+<pre><code>fud e --to dat examples/tutorial/language-tutorial-iterate.futil -s verilog.data examples/tutorial/data.json --through icarus-verilog
+</code></pre>
+<p>Registering this stage will define multiple paths in the fud transformation
+graph between <code>futil</code> and the <code>vcd</code> and <code>dat</code> stages.
+If you'd like <code>fud</code> to default to <code>verilog</code> stage, give it a <a href="./multiple-paths.html#using-stage-priority">high
+priority</a>:</p>
+<pre><code>fud c stages.verilog.priority 1
+</code></pre>
+<h2 id="dahlia-frontend"><a class="header" href="#dahlia-frontend">Dahlia Frontend</a></h2>
+<p>In order to use the Dahlia frontend with Fud, first <a href="../frontends/dahlia.html">install
+Dahlia</a>.
+Once Dahlia is compiled, point <code>fud</code> to the Dahlia compiler binary:</p>
+<pre><code class="language-bash">fud config stages.dahlia.exec &lt;full path to dahlia repo&gt;/fuse
+</code></pre>
+<h2 id="python-frontends-systolic-array-ntt-mrxl-tvm-relay"><a class="header" href="#python-frontends-systolic-array-ntt-mrxl-tvm-relay">Python frontends (Systolic array, NTT, MrXL, TVM Relay)</a></h2>
+<p>You need <a href="https://flit.readthedocs.io/en/latest/">flit</a> to install our Python frontends.</p>
+<pre><code>pip3 install flit
+</code></pre>
+<p>Our Python <a href="../frontends">frontends</a> use a Calyx ast library written in Python. Install with:</p>
+<pre><code>cd calyx-py &amp;&amp; flit install -s
+</code></pre>
+<p>Frontend specific instructions:</p>
+<ul>
+<li><a href="../frontends/systolic-array.html">Systolic array</a>: Nothing else needed.</li>
+<li><a href="../frontends/ntt.html">NTT</a>:
+<ul>
+<li>Install dependencies: <code>pip3 install prettytable</code></li>
+<li>Install external <code>fud</code> stage: <code>fud register ntt -p frontends/ntt-pipeline/fud/ntt.py</code></li>
+</ul>
+</li>
+<li><a href="../frontends/mrxl.html">MrXL</a>:
+<ul>
+<li>Install <code>mrxl</code> binary: <code>cd frontends/mrxl &amp;&amp; flit install -s</code></li>
+<li>Install <code>mrxl</code> <a href="./external.html">external stage</a> for <code>fud</code>: <code>fud register mrxl -p frontends/mrxl/fud/mrxl.py</code></li>
+</ul>
+</li>
+<li><a href="../frontends/tvm-relay.html">TVM Relay</a>: See instructions.</li>
+</ul>
+<h2 id="adding-synthesis-backends"><a class="header" href="#adding-synthesis-backends">Adding Synthesis Backends</a></h2>
+<p><code>fud</code> supports wraps the Vivado (<code>synth-verilog</code>) and Vivado HLS (<code>vivado-hls</code>)
+tools to generate area and resource estimates for Calyx designs.
+See <a href="./synthesis.html">the instructions</a> to configure them.</p>
+<h2 id="working-with-stages"><a class="header" href="#working-with-stages">Working with Stages</a></h2>
+<p>Fud is structured as a sequence of stages that transform inputs of one form
+to outputs.</p>
+<p><strong>Stages.</strong>
+<code>fud</code> transforms a file in one stage into a file in a later stage.
+The <code>--from</code> and <code>--to</code> options specify the input and output stages to the
+<code>fud exec</code> subcommand.
+Use <code>fud info</code> to view all possible stages.</p>
+<p><strong>Guessing stages.</strong>
+<code>fud</code> will try to guess the starting stage by looking at the extension of the
+input file and output file (if specified using the <code>-o</code> flag).
+If it fails to guess correctly or doesn't know about the extension, you can
+manually set the stages using <code>--to</code> and <code>--from</code>.</p>
+<h2 id="profiling"><a class="header" href="#profiling">Profiling</a></h2>
+<p>Fud provides some very basic profiling tools through the use of the <code>--dump_prof</code> (or <code>-pr</code>) flag.
+You can get overall stage durations for a <code>fud</code> run by simply using <code>-pr</code>.
+For example, </p>
+<pre><code class="language-bash">  fud e examples/dahlia/dot-product.fuse --to dat \
+  -s verilog.data examples/dahlia/dot-product.fuse.data \
+  -pr
+</code></pre>
+<p>will output:</p>
+<pre><code>stage                           elapsed time (s)
+dahlia                          1.231
+futil                           0.029
+verilog                         4.915
+</code></pre>
+<p>If you want time elapsed for each step in a stage, you can also provide one or more stages after the flag.
+For example,</p>
+<pre><code class="language-bash">  fud e examples/dahlia/dot-product.fuse --to dat \
+  -s verilog.data examples/dahlia/dot-product.fuse.data \
+  -pr verilog
+</code></pre>
+<p>will output:</p>
+<pre><code>verilog                         elapsed time (s)
+mktmp                           0.0
+json_to_dat                     0.004
+compile_with_verilator          5.584
+simulate                        0.161
+output_json                     0.003
+cleanup                         0.003
+</code></pre>
+<p>If you want time elapsed for a single step, you can specify the given step, e.g.</p>
+<pre><code class="language-bash">  fud e examples/dahlia/dot-product.fuse --to dat \
+  -s verilog.data examples/dahlia/dot-product.fuse.data \
+  -pr verilog.simulate
+</code></pre>
+<p>will output:</p>
+<pre><code>verilog                         elapsed time (s)
+simulate                        0.161
+</code></pre>
+<p>Lastly, the <code>-csv</code> flag will provide the profiling information in CSV format.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../fud/examples.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../fud/examples.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

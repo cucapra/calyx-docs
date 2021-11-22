@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["calyx"] = [{"text":"impl&lt;'de&gt; <a class=\"trait\" href=\"https://docs.rs/serde/1.0.130/serde/de/trait.Deserialize.html\" title=\"trait serde::de::Deserialize\">Deserialize</a>&lt;'de&gt; for <a class=\"struct\" href=\"calyx/ir/struct.Id.html\" title=\"struct calyx::ir::Id\">Id</a>","synthetic":false,"types":["calyx::ir::id::Id"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

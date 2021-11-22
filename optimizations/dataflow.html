@@ -1,0 +1,310 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Dataflow Analysis - Calyx Documentation</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">2.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">2.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/synthesis.html"><strong aria-hidden="true">2.2.</strong> Synthesis and HLS Backend</a></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">2.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">2.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">2.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">3.</strong> The Calyx Compiler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">3.1.</strong> Primitive Library</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">4.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded "><a href="../tools/index.html"><strong aria-hidden="true">5.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">5.1.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">5.2.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">5.3.</strong> Editor Highlighting</a></li></ol></li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">6.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">6.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">6.2.</strong> Passing Memories by Reference</a></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">6.3.</strong> Attributes</a></li></ol></li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">7.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">8.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">9.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">9.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">9.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">9.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">9.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">9.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><a href="../optimizations/index.html"><strong aria-hidden="true">10.</strong> Optimizations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../optimizations/dataflow.html" class="active"><strong aria-hidden="true">10.1.</strong> Dataflow Analysis</a></li></ol></li><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">11.</strong> Debugging Tips</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Calyx Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="dataflow-optimizations"><a class="header" href="#dataflow-optimizations">Dataflow Optimizations</a></h1>
+<p>In general, dataflow analysis uses the control and data flow of a program to compute
+various properties (liveness, reaching definitions, ...) at each point in a program.</p>
+<p>For Calyx, dataflow analyses use the explicit control program and knowledge about
+the dataflow of each group to compute properties about each group.</p>
+<h2 id="basic-blocks-vs-groups"><a class="header" href="#basic-blocks-vs-groups">Basic blocks vs. Groups</a></h2>
+<p>Normally, dataflow analyses compute a property at each basic block of a control
+flow graph (CFG). Calyx doesn't have a notion of basic blocks, and so Calyx computes
+a property at each group in a program.</p>
+<p>Because Calyx separates the control flow of a program from the specification of
+groups, it's possible for a group to appear multiple times in the control program.
+For this reason we compute a property at each group <em>enable</em> rather than each group
+<em>definition</em>. The property at each group <em>definition</em> can easily be computed
+as the meet over all group enables.</p>
+<h2 id="dataflow-on-an-ast"><a class="header" href="#dataflow-on-an-ast">Dataflow on an AST</a></h2>
+<p>Dataflow analyses are typically performed by finding the fixed point
+of a set of equations defined at each node of a control flow graph (CFG)
+using the <a href="https://en.wikipedia.org/wiki/Data-flow_analysis#An_iterative_algorithm">worklist algorithm</a>.</p>
+<p>Because our control AST is little more than just the edges of a <a href="https://en.wikipedia.org/wiki/Control-flow_graph#Reducibility">reducible cfg</a>,
+we don't bother to build an explicit CFG and instead perform the
+dataflow analysis directly on the AST using Calyx's visitor infrastructure.</p>
+<h3 id="abstract-algorithm"><a class="header" href="#abstract-algorithm">Abstract Algorithm</a></h3>
+<p>We model each control statement <code>s</code> as a function, <code>f: p -&gt; p</code> where <code>p</code> is
+the type of the property. Control statements that have children define how information
+flows between its children.</p>
+<h4 id="enable"><a class="header" href="#enable">Enable</a></h4>
+<p><code>f</code> for <code>enable A</code> is similar to the transfer function in standard dataflow analysis. It
+uses information from the definition of group <code>A</code> to modify the input in some way. For example,
+if <code>p</code> is the set of live variables, the enable <code>f</code> is defined as:</p>
+<pre><code>f(enable A, inputs) = (inputs - kill(A)) | gen(A)
+</code></pre>
+<h4 id="seq"><a class="header" href="#seq">Seq</a></h4>
+<p><code>seq</code> defines sequential control flow edges between its children.
+It is implemented by threading its input through all of its children to produce an output.</p>
+<pre><code>f(seq { A; B; C; ...; Z; }, inputs) =
+     f(A, inputs)
+  |&gt; f(B, _)
+  |&gt; f(C, _)
+  |&gt; ...
+  |&gt; f(Z, _)
+</code></pre>
+<p>To implement a backwards dataflow analysis, all you need to do is reverse the
+order that <code>seq</code> pipes inputs to its children:</p>
+<pre><code>// reverse
+f(seq { A; B; C; ...; Z; }, inputs) =
+     f(Z, inputs)
+  |&gt; ...
+  |&gt; f(C, _)
+  |&gt; f(B, _)
+  |&gt; f(A, _)
+</code></pre>
+<h4 id="if"><a class="header" href="#if">If</a></h4>
+<p><code>if</code> passes its inputs to its condition group and then feeds the result of this
+to both of its children. The output is the union of the outputs of both of its
+children. This is standard.</p>
+<pre><code>f(if some.port with G { True; } else { False; }, inputs) =
+  f(True, f(G, inputs)) | f(False, f(G, inputs))
+</code></pre>
+<h4 id="while"><a class="header" href="#while">While</a></h4>
+<p><code>while</code> statements are interesting because the outputs of the body may affect the
+input to the body. For this reason, we need to find a fixed point:</p>
+<pre><code>f(while some.port with G { body; }, inputs) =
+  P = inputs;
+  loop until P stops changing {
+    P = f(body, f(G, inputs))
+  }
+</code></pre>
+<h4 id="par"><a class="header" href="#par">Par</a></h4>
+<p>Par is the only statement that differs substantially from traditional dataflow because
+control flow graphs don't support nodes running in parallel. In other words, there is only
+ever one thing executing. However, <code>par</code> changes this and allows multiple things to
+execute at the same time. Consider the following example where we are computing
+the liveness of <code>x</code> to see why this is weird:</p>
+<pre><code>F; // wr x
+...
+par {
+  A; // wr x
+  B;
+}
+G; // rd x
+</code></pre>
+<p>Is <code>x</code> alive between <code>X</code> and the beginning of <code>par</code>? The answer is no because we know
+that <em>both</em> <code>A</code> and <code>B</code> will run. Therefore the write to <code>x</code> in <code>F</code> can not be seen by any
+group.</p>
+<p>At first glance this doesn't seem like a problem. Great, we say, we can just take
+the union of the outputs of the children of <code>par</code> and call it a day.</p>
+<img src="par1.png" width="35%"/>
+<p>This is wrong because <code>B</code> doesn't kill <code>x</code> and so <code>x</code> is alive coming into <code>B</code>.
+The union preserves this information and results in <code>x</code> being alive above <code>par</code>.</p>
+<p>Taking the set intersection is not quite right here either. Consider adding another group
+<code>C</code> that reads from <code>x</code>.</p>
+<img src="par2.png" width="40%"/>
+<p>We have no information about how this read is ordered with the write
+to <code>x</code> in <code>A</code> so we have to assume that <code>x</code> is alive above <code>par</code>. If we take the intersection
+here:</p>
+<pre><code>  live(A) &amp; live(B) &amp; live(C)
+= {} &amp; {x} &amp; {x}
+= {}
+</code></pre>
+<p>We get the wrong answer. More generally, we can see that union clobbers
+any writes and intersection clobbers any reads that happen in the par.</p>
+<p>The solution to this problem is solved by passing the <code>gen</code> and <code>kill</code> sets along
+with the <code>live</code> sets. Then <code>par</code> can set its output to be </p>
+<pre><code>(union(live(children)) - union(kill(children))) | union(gen(children))
+</code></pre>
+<p>The final tricky bit is thinking about how information flows between siblings in a <code>par</code> statement.
+Consider again the picture above with three nodes: <code>A</code>, <code>B</code>, and <code>C</code>. Should <code>x</code> be live
+at <code>B</code>? For liveness it turns out to be yes, but bare with me for a second for a thought experiment
+and consider the case where we have the guarantee that statements running in parallel can not interact 
+with each other. This lets us reorder statements in some cases.
+Then there seems to be an information trade-off for how to define the liveness of <code>x</code> at <code>B</code>:</p>
+<ul>
+<li>You could say that <code>x</code> is dead at <code>B</code> because it doesn't see any previous writes to <code>x</code>
+and doesn't read from <code>x</code>. This implies that you could potentially replace writes to other
+registers with <code>x</code>. However, this by itself would cause <code>x</code> to be written to twice in parallel.
+You would have to reorder <code>B</code> to run before <code>A</code>. The takeaway here is that calling <code>x</code> dead
+at <code>B</code> gives the register reuse pass more information to work with. To compute
+this information <code>B</code> needs the <code>gens</code> and <code>kills</code> from all of its siblings (for the same reason that <code>par</code>)
+needed it. This is not particularly hard to implement, but it's worthy of noting.</li>
+<li>If you say that <code>x</code> is live at <code>B</code>, then you can never rewrite <code>B</code> to use <code>x</code> instead
+of some other register, but you also don't have to worry about reordering statements in a <code>par</code>.</li>
+</ul>
+<p>Leaving thought experiment land, in our case we can never reorder statements in a <code>par</code> because
+siblings may interact with each other in arbitrary ways. For this reason, we must say that <code>x</code>
+is live at <code>B</code>. However, it's not immediately clear to me that this will be true of all dataflow
+analyses. That's why I set this thought experiment down in writing.</p>
+<h3 id="equivalence-to-worklist-algorithm"><a class="header" href="#equivalence-to-worklist-algorithm">Equivalence to worklist algorithm</a></h3>
+<p>In the normal worklist algorithm, we add a statement back to the worklist when
+its predecessor has changed.</p>
+<p>The intuition for why this algorithm is equivalent to worklist algorithm is
+that because the only entry into the children for each parent control statement
+is the parent control statement itself. The only way that a child statement would
+need to be recomputed is if the inputs to the parent need to be recomputed. Anything
+above the parent in the tree will take care of this re-computation.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../optimizations/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../debug/debug.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../optimizations/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../debug/debug.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

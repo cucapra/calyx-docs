@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["calyx"] = [{"text":"impl <a class=\"trait\" href=\"https://docs.rs/pest/pest/parser/trait.Parser.html\" title=\"trait pest::parser::Parser\">Parser</a>&lt;<a class=\"enum\" href=\"calyx/frontend/parser/enum.Rule.html\" title=\"enum calyx::frontend::parser::Rule\">Rule</a>&gt; for <a class=\"struct\" href=\"calyx/frontend/parser/struct.CalyxParser.html\" title=\"struct calyx::frontend::parser::CalyxParser\">CalyxParser</a>","synthetic":false,"types":["calyx::frontend::parser::CalyxParser"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

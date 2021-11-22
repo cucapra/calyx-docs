@@ -1,0 +1,348 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Frontend Tutorial - Calyx Documentation</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">2.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">2.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/synthesis.html"><strong aria-hidden="true">2.2.</strong> Synthesis and HLS Backend</a></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">2.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">2.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">2.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">3.</strong> The Calyx Compiler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">3.1.</strong> Primitive Library</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">4.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded "><a href="../tools/index.html"><strong aria-hidden="true">5.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">5.1.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">5.2.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">5.3.</strong> Editor Highlighting</a></li></ol></li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">6.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">6.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">6.2.</strong> Passing Memories by Reference</a></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">6.3.</strong> Attributes</a></li></ol></li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">7.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html" class="active"><strong aria-hidden="true">8.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">9.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">9.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">9.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">9.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">9.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">9.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><a href="../optimizations/index.html"><strong aria-hidden="true">10.</strong> Optimizations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">10.1.</strong> Dataflow Analysis</a></li></ol></li><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">11.</strong> Debugging Tips</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Calyx Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="building-a-frontend-for-calyx"><a class="header" href="#building-a-frontend-for-calyx">Building a Frontend for Calyx</a></h1>
+<p>In this tutorial, we're going to build a compiler for a small language called MrXL.</p>
+<h2 id="mrxl-overview"><a class="header" href="#mrxl-overview">MrXL Overview</a></h2>
+<p>MrXL provides constructs to create arrays, and perform <code>map</code> and <code>reduce</code> operations on those arrays. Here's an example of a dot product implementation in MrXL:</p>
+<pre><code>input avec: int[4]
+input bvec: int[4]
+output dot: int
+prodvec := map 1 (a &lt;- avec, b &lt;- bvec) { a * b }
+dot := reduce 1 (a, b &lt;- prodvec) 0 { a + b }
+</code></pre>
+<p>A <code>map</code> expressions produces a new vector, each element an evaluated expression that can use elements of other vectors. In the above example, the <code>map</code> expression multiplies the values of <code>avec</code> and <code>bvec</code>. These expressions also have <em>parallelism factors</em>: in the above code snippet, the <code>map</code> expression has a parallelism factor of 16, which means we stamp out 16 multipliers to speed up the computation.</p>
+<p><code>reduce</code> expressions walk over memories and accumulate a result into a register. In the above code snippet, we add together all of the elements of <code>prodvec</code> and place them in a register named <code>dot</code>.</p>
+<p>Arrays can be <code>input</code> arrays, which we populate with some input data, or <code>output</code> arrays, which the program will populate for us.</p>
+<h2 id="run-a-mrxl-program"><a class="header" href="#run-a-mrxl-program">Run a MrXL Program</a></h2>
+<p>First, you'll need to have the MrXL stage installed for <code>fud</code>. See the <a href="https://github.com/cucapra/futil/tree/master/frontends/mrxl">MrXL docs</a>.</p>
+<p>MrXL programs need to be fed data in the form of JSON files. Let's try to run this program, which has a parallelism factor of two:</p>
+<pre><code>input foo: int[4]
+output baz: int[4]
+baz := map 2 (a &lt;- foo) { a + 5 }
+</code></pre>
+<p>with this data file, containing banked memories to allow for the parallelism:</p>
+<pre><code>{
+  &quot;foo_b0&quot;: {
+    &quot;data&quot;: [
+      1,
+      2
+    ],
+    &quot;format&quot;: {
+      &quot;numeric_type&quot;: &quot;bitnum&quot;,
+      &quot;is_signed&quot;: false,
+      &quot;width&quot;: 32
+    }
+  },
+  &quot;foo_b1&quot;: {
+    &quot;data&quot;: [
+      3,
+      4
+    ],
+    &quot;format&quot;: {
+      &quot;numeric_type&quot;: &quot;bitnum&quot;,
+      &quot;is_signed&quot;: false,
+      &quot;width&quot;: 32
+    }
+  },
+  &quot;baz_b0&quot;: {
+    &quot;data&quot;: [
+      0,
+      0
+    ],
+    &quot;format&quot;: {
+      &quot;numeric_type&quot;: &quot;bitnum&quot;,
+      &quot;is_signed&quot;: false,
+      &quot;width&quot;: 32
+    }
+  },
+  &quot;baz_b1&quot;: {
+    &quot;data&quot;: [
+      0,
+      0
+    ],
+    &quot;format&quot;: {
+      &quot;numeric_type&quot;: &quot;bitnum&quot;,
+      &quot;is_signed&quot;: false,
+      &quot;width&quot;: 32
+    }
+  }
+}
+</code></pre>
+<p>Run the program with the supplied data by typing:</p>
+<pre><code>fud exec frontends/mrxl/test/add.mrxl --from mrxl --to vcd -s verilog.data frontends/mrxl/test/add.mrxl.data
+</code></pre>
+<h2 id="build-a-compiler-for-mrxl"><a class="header" href="#build-a-compiler-for-mrxl">Build a Compiler for MrXL</a></h2>
+<p>This guide will walk you through the steps to build a Python program that compiles MrXL programs to Calyx code. To simplify things, we'll make a few assumptions:</p>
+<ul>
+<li>Every array in a MrXL program has the same length.</li>
+<li>Every integer in our generated hardware will be 32 bits.</li>
+<li>Every <code>map</code> and <code>reduce</code> body will be either a multiplication or addition of either an array element or an integer.</li>
+</ul>
+<p>The following sections will outline these two high level tasks:</p>
+<ol>
+<li>Parse MrXL into a representation we can process with Python</li>
+<li>Generate Calyx code</li>
+</ol>
+<h3 id="parse-mrxl-into-an-ast"><a class="header" href="#parse-mrxl-into-an-ast">Parse MrXL into an AST</a></h3>
+<p>To start, we'll parse this MrXL program into a Python AST representation. We chose to represent <a href="https://github.com/cucapra/futil/blob/mrxl/mrxl/mrxl/ast.py">AST</a> nodes with Python <code>dataclass</code>s. Our toplevel AST node looks like this:</p>
+<pre><code>@dataclass
+class Prog:
+    decls: List[Decl]
+    stmts: List[Stmt]
+</code></pre>
+<p><code>Decl</code> nodes correspond to array declarations like <code>input avec: int[1024]</code>, and carry data about whether they're an <code>input</code> or <code>output</code> array, their name, and their type:</p>
+<pre><code>@dataclass
+class Decl:
+    input: bool  # Otherwise, output.
+    name: str
+    type: Type
+</code></pre>
+<p><code>Stmt</code> nodes represent statements such as <code>dot := reduce 4 (a, b &lt;- prodvec) 0 { a + b }</code>, and contain more nested nodes representing their function header and body, and type of operation.</p>
+<p>Now we can decide on rules for generating code depending on which AST node we're working on. Depending on the AST node, we might need to add code to <code>cells</code>, <code>wires</code> or <code>control</code>.</p>
+<h3 id="generate-calyx-code"><a class="header" href="#generate-calyx-code">Generate Calyx Code</a></h3>
+<p>The skeleton of a Calyx program has three sections, and looks like this:</p>
+<pre><code>component main() -&gt; {
+  cells { }
+  wires { }
+  control { }
+}
+</code></pre>
+<p><code>cells</code> contains declarations for logical hardware units like adders, memories and registers. <code>wires</code> contains <code>group</code>s that connect together the units declared in <code>cell</code>s and form the structure of the hardware. <code>control</code> contains the logic specifying when the <code>group</code>s will perform their computation. Walking the nodes of the AST we defined earlier, we'll generate strings that we'll insert into each of these sections. The next few sections will discuss the different node types.</p>
+<h4 id="decl-nodes"><a class="header" href="#decl-nodes"><code>Decl</code> nodes</a></h4>
+<p><code>Decl</code> nodes instantiate new memories and registers. We need these to be instantiated in the <code>cells</code> section of our Calyx output. Here's Calyx code that creates a new memory <code>foo</code>, with 4 32-bit elements and a 32-bit indexor:</p>
+<pre><code>foo = std_mem_d1(32, 4, 32);
+</code></pre>
+<p>For each <code>Decl</code> node, we need to determine if we're instantiating a memory or a register, and then translate that to a corresponding Calyx declaration and place that inside the <code>cells</code> section of our generated program. Here's some code from our compiler that walks through each register and memory declaration, and generates a Calyx program with those registers:</p>
+<p>def emit(prog):
+&quot;&quot;&quot;
+Returns a string containing a Calyx program, compiled from <code>prog</code>, a MrXL
+program.
+&quot;&quot;&quot;
+cells, wires, control = [], [], []</p>
+<p>(<code>emit_mem_decl</code> emits a string of the form <code>&quot;mem_name = std_mem_d1(&lt;element_width&gt;, &lt;num_elements&gt;, &lt;index_width&gt;)&quot;</code>.)</p>
+<h4 id="map-and-reduce-nodes"><a class="header" href="#map-and-reduce-nodes"><code>Map</code> and <code>Reduce</code> nodes</a></h4>
+<p>For every map or reduce node, we need to generate Calyx code that iterates over an array, performs some kind of computation, and then stores the result of that computation. For <code>map</code> operations, we'll perform a computation on an element of an input array, and then store the result in a result array. For <code>reduce</code> operations, we'll also use an element of an input array, but we'll also use an <em>accumulator</em> register that we'll use in each computation, and we'll also store to. For example, if we were writing a <code>reduce</code> that summed up the elements of an input array, we'd use an accumulator register that was initialized to hold the value 0, and add to the value of this register each element of an input array.</p>
+<p>We can implement these behaviors using Calyx groups:</p>
+<ul>
+<li><code>incr_idx</code>: Increments an <code>idx</code> register using an adder. This group is done when the <code>idx</code> register is written to.</li>
+<li><code>cond</code>: Applies a &quot;less than&quot; operator to <code>idx</code>, and the length of our input arrays, using the <code>le</code> hardware unit.</li>
+<li><code>eval_body</code>: Reads from an array, performs some kind of computation, and writes the result of the computation to an accumulator register or another array.</li>
+</ul>
+<p>We'll make these groups for each <code>Map</code> and <code>Reduce</code> node, so to avoid naming collisions, we'll suffix each group with an integer starting at 0, incrementing each time we need to add a new set of  groups. These groups will be added to the <code>wires</code> section. We'll also need to add logic to the <code>control</code> section as well that uses these groups to process arrays:</p>
+<pre><code>while le0.out with cond0 {
+  seq { eval_body0; incr_idx0; }
+}
+</code></pre>
+<p>This logic orchestrates our groups, basically representing iterating over our array and evaluating some computation on each element of the array. On each iteration we signal for the <code>eval_body0</code> group to do its work, followed sequentially by <code>incr_idx0</code> to advance our index register so that we can work on the next element of the array.</p>
+<h3 id="add-parallelization"><a class="header" href="#add-parallelization">Add Parallelization</a></h3>
+<p>MrXL allows you to parallelize your <code>map</code> and <code>reduce</code> operations. Let's revisit the <code>map</code> example from earlier:</p>
+<pre><code>input foo: int[4]
+output baz: int[4]
+baz := map 4 (a &lt;- foo) { a + 5 }
+</code></pre>
+<p>The number 4 after the <code>map</code> specifies the number of adders we can use at once to parallelize this computation. There are a few ways we could parallelize this program, and one of them is to split the memories used in the <code>map</code> operation into 4 separate memory <em>banks</em>, and then we can read from each bank of <code>foo</code> and write into each bank of <code>baz</code> simultaneously. In general, we can break memories of size <code>m</code> into <code>b</code> banks (each with size <code>m/b</code>), and then simultaneously process those <code>b</code> banks. Realizing this in Calyx means creating separate memories for each bank, and creating <code>group</code>s to process each bank. Here's a section of the compiler that generates banked memories:</p>
+<pre><code>    Group,
+    CompVar,
+    Stdlib,
+    Cell,
+    Program,
+    Component,
+    Import,
+    SeqComp,
+    ConstantPort,
+    HolePort,
+    CompPort,
+    Enable,
+    While,
+    ParComp,
+    CombGroup,
+</code></pre>
+<p>In the <code>Map</code> and <code>Reduce</code> code generation section we described <code>group</code>s that could be orchestrated to iterate over a memory and process it. We'll now have to do that for each memory bank, and then parallelize these operations in the generated Calyx's <code>control</code> section. We can accomplish this with Calyx's <code>par</code> keyword, signalling to execute groups in parallel. Here's an example of executing four while loops in parallel:</p>
+<pre><code>par {
+  while le_b0.out with cond_b0 { seq { eval_body_b0; incr_idx_b0; } }
+  while le_b1.out with cond_b1 { seq { eval_body_b1; incr_idx_b1; } }
+  while le_b2.out with cond_b2 { seq { eval_body_b2; incr_idx_b2; } }
+  while le_b3.out with cond_b3 { seq { eval_body_b3; incr_idx_b3; } }
+}
+</code></pre>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>Hopefully this should be enough to get you started with writing your own MrXL compiler. Some more follow up tasks you could try if you're interested:</p>
+<ul>
+<li>Implement code generation to implement <code>reduce</code> statements, which we do not include in our compiler.</li>
+<li>Implement code generation that allows memories that differ from one another in size.</li>
+<li>Implement complex function body expressions. We only support binary operations with simple operands, like <code>a + 5</code>. Different hardware components take multiple cycles to execute: for example, a register takes 1 cycle to write data to, but a memory might take more. This complicates hardware design, as you need to account for differing latencies among hardware components.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../calyx-py.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../frontends/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../calyx-py.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../frontends/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

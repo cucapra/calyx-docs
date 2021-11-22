@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["ast_to_ir","Construct an IR representation using a parsed AST and command line options."]]});

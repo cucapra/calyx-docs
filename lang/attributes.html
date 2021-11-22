@@ -1,0 +1,294 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Attributes - Calyx Documentation</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">2.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">2.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/synthesis.html"><strong aria-hidden="true">2.2.</strong> Synthesis and HLS Backend</a></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">2.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">2.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">2.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">3.</strong> The Calyx Compiler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">3.1.</strong> Primitive Library</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">4.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded "><a href="../tools/index.html"><strong aria-hidden="true">5.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">5.1.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">5.2.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">5.3.</strong> Editor Highlighting</a></li></ol></li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">6.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">6.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">6.2.</strong> Passing Memories by Reference</a></li><li class="chapter-item expanded "><a href="../lang/attributes.html" class="active"><strong aria-hidden="true">6.3.</strong> Attributes</a></li></ol></li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">7.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">8.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">9.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">9.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">9.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">9.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">9.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">9.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><a href="../optimizations/index.html"><strong aria-hidden="true">10.</strong> Optimizations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">10.1.</strong> Dataflow Analysis</a></li></ol></li><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">11.</strong> Debugging Tips</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Calyx Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="attributes"><a class="header" href="#attributes">Attributes</a></h1>
+<p>Calyx has an attribute system that allows information to be associated with
+every basic Calyx construct. This information can then be used to optimize the program
+or change how the program is compiled.</p>
+<p>Attributes can decorate lots of things in Calyx: components, groups, cells, ports, and control statements.
+The syntax looks like <code>name&lt;&quot;attr&quot;=value&gt;</code> for components and groups or <code>@attr(value)</code> for other constructs.
+Attributes always map keys to values.
+Because it's common to have a &quot;Boolean&quot; attribute that always maps to the value 1, the syntax <code>@attr</code> is a shorthand for <code>@attr(1)</code>.</p>
+<p>Here is the syntax for attributes in different parts of the AST:</p>
+<h4 id="component-and-port-attributes"><a class="header" href="#component-and-port-attributes"><strong>Component and Port Attributes</strong></a></h4>
+<pre><code>component main&lt;&quot;static&quot;=10&gt;(@go go: 1) -&gt; (@done done: 1) {
+ ...
+}
+</code></pre>
+<h4 id="cell-attributes"><a class="header" href="#cell-attributes"><strong>Cell Attributes</strong></a></h4>
+<pre><code>cells {
+  @external mem = std_mem_d1(32, 8, 4);
+  reg = std_reg(32);
+  ...
+}
+</code></pre>
+<h4 id="group-attributes"><a class="header" href="#group-attributes"><strong>Group Attributes</strong></a></h4>
+<pre><code>group cond&lt;&quot;static&quot;=1&gt; {
+  ...
+}
+</code></pre>
+<h4 id="control-attributes"><a class="header" href="#control-attributes"><strong>Control Attributes</strong></a></h4>
+<pre><code>control {
+  @static(3) seq {
+    @static(1) A;
+    @static(2) B;
+  }
+}
+</code></pre>
+<h2 id="meaning-of-attributes"><a class="header" href="#meaning-of-attributes">Meaning of Attributes</a></h2>
+<h3 id="toplevel"><a class="header" href="#toplevel"><code>toplevel</code></a></h3>
+<p>The entrypoint for the Calyx program. If no component has this attribute, then
+the compiler looks for a component named <code>main</code>. If neither is found, the
+compiler errors out.</p>
+<h3 id="external"><a class="header" href="#external"><code>external</code></a></h3>
+<p>The <code>external</code> attribute has meaning when it is attached to a cell.
+It has two meanings:</p>
+<ol>
+<li>If the <code>externalize</code> pass is enabled, the cell is turned into an &quot;external&quot;
+cell by exposing all its ports through the current component and rewriting
+assignments to the use the ports. See the documentation on
+See <a href="https://capra.cs.cornell.edu/docs/calyx/source/calyx/passes/struct.Externalize.html" title="Externalize Pass">externalize</a> for more information.</li>
+<li>If the cell is a memory and has an <code>external</code> attribute on it, the verilog backend (<code>-b verilog</code>) generates code to read <code>&lt;cell_name&gt;.dat</code> to initialize the memory state and dumps out its final value after execution.</li>
+</ol>
+<h3 id="staticn"><a class="header" href="#staticn"><code>static(n)</code></a></h3>
+<p>Can be attached to components, groups, and control statements. They indicate how
+many cycles a component, group, or control statement will take to run and are used
+by <code>-p static-timing</code> to generate more efficient control FSMs.</p>
+<h3 id="go-done-and-reset"><a class="header" href="#go-done-and-reset"><code>go</code>, <code>done</code>, and <code>reset</code></a></h3>
+<p>These three ports are part of the interface to Calyx components.
+They are the mechanism for how an &quot;outer&quot; component invokes an &quot;inner&quot; cell that it contains.</p>
+<p>The <code>go</code> and <code>done</code> attributes are, in particular, used by the <code>infer-static-timing</code> pass to configure which ports are used like
+<code>go</code> and <code>done</code> signals.
+Along with the <code>static(n)</code> attribute, this allows the pass to calculate when
+a particular done signal of a primitive will be high.</p>
+<h3 id="stable"><a class="header" href="#stable"><code>stable</code></a></h3>
+<p>Applied to port definitions of primitives and components. The intended semantics
+are that after invoking the component, the value on the port remains latched
+till the next invocation.</p>
+<p>For example</p>
+<pre><code>cells {
+  m = std_mult_pipe(32);
+}
+wires {
+  group use_m_out { // uses m.out }
+}
+control {
+  invoke m(left = 32'd10, right = 32'd4)();
+  use_m_out;
+}
+</code></pre>
+<p>The value of <code>m.out</code> in <code>use_m_out</code> will be <code>32'd40</code>.</p>
+<p>This annotation is currently used by the primitives library and the Dahlia
+frontend and is not checked by any pass.</p>
+<h3 id="share"><a class="header" href="#share"><code>share</code></a></h3>
+<p>Can be attached to a component and indicates that a component can be shared
+across groups. This is used by the <code>-p resource-sharing</code> to decide which components
+can be shared.</p>
+<h3 id="boundn"><a class="header" href="#boundn"><code>bound(n)</code></a></h3>
+<p>Used in <code>infer-static-timing</code> and <code>static-timing</code> when the number of iterations
+of a <code>While</code> control is known statically, as indicated by <code>n</code>.</p>
+<h3 id="generated"><a class="header" href="#generated"><code>generated</code></a></h3>
+<p>Added by <a href="https://capra.cs.cornell.edu/docs/calyx/source/calyx/ir/struct.Builder.html"><code>ir::Builder</code></a> to denote that the cell was added by a pass.</p>
+<h3 id="clk"><a class="header" href="#clk"><code>clk</code></a></h3>
+<p>Marks the special clock signal inserted by the <code>clk-insertion</code> pass, which helps with lowering to RTL languages that require an explicit clock.</p>
+<h3 id="write_togethern"><a class="header" href="#write_togethern"><code>write_together(n)</code></a></h3>
+<p>Used by the <code>papercut</code> pass.
+Defines a group <code>n</code> of signals that all must be driven together:</p>
+<pre><code>primitive std_mem_d2&lt;&quot;static&quot;=1&gt;[WIDTH, D0_SIZE, D1_SIZE, D0_IDX_SIZE, D1_IDX_SIZE](
+  @write_together(2) addr0: D0_IDX_SIZE,
+  @write_together(2) addr1: D1_IDX_SIZE,
+  @write_together(1) write_data: WIDTH,
+  @write_together(1) @go write_en: 1,
+  ...
+) -&gt; (...);
+</code></pre>
+<p>This defines two groups.
+The first group requires that <code>write_en</code> and <code>write_data</code> signals together
+while the second requires that <code>addr0</code> and <code>addr1</code> are driven together.</p>
+<p>Note that <code>@write_together</code> specifications cannot encode implication of the
+form &quot;if port <code>x</code> is driven then <code>y</code> should be driven&quot;.</p>
+<h3 id="read_togethern"><a class="header" href="#read_togethern"><code>read_together(n)</code></a></h3>
+<p>Used by the <code>papercut</code> pass.
+Defines a group <code>n</code> in which when the read port is used then all the write
+ports must be driven as well.</p>
+<pre><code>primitive std_mem_d1&lt;&quot;static&quot;=1&gt;[WIDTH, SIZE, IDX_SIZE](
+  @read_together(1) addr0: IDX_SIZE, ...
+) -&gt; (
+  @read_together(1) read_data: WIDTH, ...
+);
+</code></pre>
+<p>This requires that when <code>read_data</code> is used then <code>addr0</code> must be driven.
+Note that each group must have exactly one output port in it.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../lang/memories-by-reference.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../calyx-py.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../lang/memories-by-reference.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../calyx-py.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

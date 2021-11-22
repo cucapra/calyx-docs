@@ -1,0 +1,315 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Debugging Tips - Calyx Documentation</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">2.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">2.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/synthesis.html"><strong aria-hidden="true">2.2.</strong> Synthesis and HLS Backend</a></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">2.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">2.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">2.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">3.</strong> The Calyx Compiler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">3.1.</strong> Primitive Library</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">4.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded "><a href="../tools/index.html"><strong aria-hidden="true">5.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">5.1.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">5.2.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">5.3.</strong> Editor Highlighting</a></li></ol></li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">6.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">6.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">6.2.</strong> Passing Memories by Reference</a></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">6.3.</strong> Attributes</a></li></ol></li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">7.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">8.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">9.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">9.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">9.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">9.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">9.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">9.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><a href="../optimizations/index.html"><strong aria-hidden="true">10.</strong> Optimizations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">10.1.</strong> Dataflow Analysis</a></li></ol></li><li class="chapter-item expanded "><a href="../debug/debug.html" class="active"><strong aria-hidden="true">11.</strong> Debugging Tips</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Calyx Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="debugging-tips"><a class="header" href="#debugging-tips">Debugging Tips</a></h1>
+<p>Debugging Calyx programs that run to completion and generate the wrong value
+can be challenging.
+We can first try to eliminate some common causes of problems.</p>
+<h2 id="disabling-optimizations"><a class="header" href="#disabling-optimizations">Disabling Optimizations</a></h2>
+<p>The first step is disabling optimization passes.
+The Calyx compiler refers to bundles of optimizations using two <em>aliases</em>:
+<code>pre-opt</code> and <code>post-opt</code>.
+<code>pre-opt</code> passes run before the main compilation passes that remove the control
+program while <code>post-opt</code> passes run after.</p>
+<p>To disable the passes, add the flag <code>-d pre-opt -d post-opt</code> to compiler invocation:</p>
+<ol>
+<li>For the compiler: <code>futil &lt;filename&gt; -d pre-opt -d post-opt</code>.</li>
+<li>For <code>fud</code>: <code>fud ... -s futil.flags &quot;-d pre-opt -d post-opt&quot;</code>.</li>
+</ol>
+<p>If the execution generates the right result, then one of the optimizations
+passes is incorrect.
+To identify which optimization pass is wrong, add back individual passes and see
+when the execution fails.
+To do so, first run <code>futil --list-passes</code> to see the names of the passes that make
+up the <code>pre-opt</code> and <code>post-opt</code> aliases.
+Next, re-enable each pass by doing: <code>-d pre-opt -d post-opt -p &lt;pass1&gt; -p &lt;pass2&gt;</code> and so on.</p>
+<h2 id="disabling-static-timing"><a class="header" href="#disabling-static-timing">Disabling Static Timing</a></h2>
+<p><code>static-timing</code> is one of the two control compilation passes.
+It uses the latency information on groups to generate faster hardware.
+Disable it using the flag <code>-d static-timing</code>.</p>
+<h2 id="reducing-test-files"><a class="header" href="#reducing-test-files">Reducing Test Files</a></h2>
+<p>It is often possible to reduce the size of the example program that is
+generating incorrect results.
+In order to perform a reduction, we need to run the program twice, once with
+a &quot;golden workflow&quot; that we trust to generate the right result and once with
+the buggy workflow.</p>
+<p>For example, if we've identified the problem to be in one of the Calyx passes,
+the &quot;golden workflow&quot; is running the program without the pass while the buggy
+workflow is running the program with the pass enabled.
+This case is so common that we've written <a href="https://github.com/cucapra/calyx/blob/master/tools/flag-compare.sh">a script</a> that can run
+programs with different set of flags to the Calyx compiler and show the
+difference in the outputs after simulation.</p>
+<p>The script is invoked as:</p>
+<pre><code>tools/flag-compare.sh &lt;calyx program&gt; &lt;data&gt;
+</code></pre>
+<p>By default, the script will try to run the programs by simulating them through
+Verilator by providing <code>fud</code> with the target <code>--to dat</code>.
+If you'd like to use the Calyx Interpreter instead, run the following command:</p>
+<pre><code>tools/flag-compare.sh &lt;calyx program&gt; &lt;data&gt; interpreter-out
+</code></pre>
+<h3 id="reducing-calyx-programs"><a class="header" href="#reducing-calyx-programs">Reducing Calyx Programs</a></h3>
+<p>The best way to reduce Calyx program deleting group enables from the control
+program and seeing if the generated program still generates the wrong output.
+While doing this, make sure that you're not deleting an update to a loop
+variable which might cause infinite loops.</p>
+<p>By default, the compiler will complain if the program contains a <code>group</code> that
+is not used in the control program which can get in the way of minimizing
+programs.
+To get around this, run the <a href="https://capra.cs.cornell.edu/docs/calyx/source/calyx/passes/struct.DeadGroupRemoval.html"><code>dead-group-removal</code></a> pass before the validation
+passes:</p>
+<pre><code>futil -p dead-group-removal -p validate ...
+</code></pre>
+<h3 id="reducing-dahlia-programs"><a class="header" href="#reducing-dahlia-programs">Reducing Dahlia Programs</a></h3>
+<p>If you're working with Dahlia programs, it is also possible to reduce the
+program with the script since it simply uses <code>fud</code> to run the program with the
+simulator.
+As with Calyx reduction, try deleting parts of the program and seeing if the
+flag configurations for the Calyx program still generate different outputs.</p>
+<h2 id="waveform-debugging"><a class="header" href="#waveform-debugging">Waveform Debugging</a></h2>
+<p>Waveform debugging is the final way of debugging Calyx programs.
+A waveform captures the value of every port at every clock cycle and can be
+viewed using a wave viewer program like <a href="http://gtkwave.sourceforge.net/">GTKWave</a> or
+<a href="https://marketplace.visualstudio.com/items?itemName=wavetrace.wavetrace">WaveTrace</a> to look at the wave form.
+Because of this level of granularity, it generates a lot of information.
+To make the information a little more digestible, we can use information
+generated by Calyx during compilation.</p>
+<p>For waveform debugging, we recommend disabling the optimization passes and
+static timing compilation (unless you're debugging these passes).
+In this debugging strategy, we'll do the following:</p>
+<ol>
+<li>Dump out the control FSM for the program we're debugging.</li>
+<li>Find the FSM states that enable the particular groups that might be misbehaving.</li>
+<li>Open the waveform viewer and find clock cycles where the FSM takes the corresponding
+values and identify other signals that we care about.</li>
+</ol>
+<p>Consider the control section from <a href="https://github.com/cucapra/calyx/blob/master/examples/futil/dot-product.futil">examples/futil/dot-product.futil</a>:</p>
+<pre><code>    seq {
+      let0;
+      while le0.out with cond0 {
+        seq {
+          par {
+            upd0;
+            upd1;
+          }
+          let1;
+          let2;
+          upd2;
+          upd3;
+        }
+      }
+    }
+</code></pre>
+<p>Suppose that we want to make sure that <code>let0</code> is correctly performing its
+computation.
+We can generate the control FSM for the program using:</p>
+<pre><code>  futil &lt;filename&gt; -p top-down-cc
+</code></pre>
+<p>This generates a Calyx program with several new groups.
+We want to look for groups with the prefix <code>tdcc</code> which look something like
+this:</p>
+<pre><code>group tdcc {
+  let0[go] = !let0[done] &amp; fsm.out == 4'd0 ? 1'd1;
+  cs_wh.in = fsm.out == 4'd1 ? le0.out;
+  cs_wh.write_en = fsm.out == 4'd1 ? 1'd1;
+  cond0[go] = fsm.out == 4'd1 ? 1'd1;
+  par[go] = !par[done] &amp; cs_wh.out &amp; fsm.out == 4'd2 ? 1'd1;
+  let1[go] = !let1[done] &amp; cs_wh.out &amp; fsm.out == 4'd3 ? 1'd1;
+  let2[go] = !let2[done] &amp; cs_wh.out &amp; fsm.out == 4'd4 ? 1'd1;
+  upd2[go] = !upd2[done] &amp; cs_wh.out &amp; fsm.out == 4'd5 ? 1'd1;
+  upd3[go] = !upd3[done] &amp; cs_wh.out &amp; fsm.out == 4'd6 ? 1'd1;
+  ...
+}
+</code></pre>
+<p>The assignments to <code>let0[go]</code> indicate what conditions make the <code>let0</code> group
+execute.
+In this program, we have:</p>
+<pre><code>let0[go] = !let0[done] &amp; fsm.out == 4'd0 ? 1'd1;
+</code></pre>
+<p>Which states that <code>let0</code> will be active when the state of the <code>fsm</code> register
+is <code>0</code> along with some other conditions.
+The remainder of the group defines how the state in the <code>fsm</code> variable changes:</p>
+<pre><code>  ...
+  fsm.in = fsm.out == 4'd0 &amp; let0[done] ? 4'd1;
+  fsm.write_en = fsm.out == 4'd0 &amp; let0[done] ? 1'd1;
+  fsm.in = fsm.out == 4'd1 &amp; cond0[done] ? 4'd2;
+  fsm.write_en = fsm.out == 4'd1 &amp; cond0[done] ? 1'd1;
+  ...
+</code></pre>
+<p>For example, we can see that when the value of the FSM is 0 and <code>let0[done]</code>
+becomes high, the FSM will take the value 1.</p>
+<p>Once we have this information, we can open the VCD file and look at points when
+the <code>fsm</code> register has the value 1 and check to see if the assignments in
+<code>let0</code> activated in the way we expected.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../optimizations/dataflow.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../contributors.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../optimizations/dataflow.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../contributors.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

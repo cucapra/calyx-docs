@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["calyx"] = [{"text":"impl <a class=\"trait\" href=\"https://docs.rs/petgraph/0.4/petgraph/matrix_graph/trait.Zero.html\" title=\"trait petgraph::matrix_graph::Zero\">Zero</a> for <a class=\"struct\" href=\"calyx/utils/struct.BoolIdx.html\" title=\"struct calyx::utils::BoolIdx\">BoolIdx</a>","synthetic":false,"types":["calyx::utils::weight_graph::BoolIdx"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
