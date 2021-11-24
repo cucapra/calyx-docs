@@ -154,9 +154,9 @@ make heavy use of control operators, to fully lowered Calyx programs.
 <p>Here's how to run a Calyx program:</p>
 <pre><code>fud e --to interpreter-out interp/tests/control/if.futil
 </code></pre>
-<p>To provide input data, set the <code>interpreter.data</code> variable, like so:</p>
+<p>To provide input data, set the <code>verilog.data</code> variable, like so:</p>
 <pre><code>fud e --to interpreter-out \
-    -s interpreter.data tests/correctness/while.futil.data \
+    -s verilog.data tests/correctness/while.futil.data \
     tests/correctness/while.futil
 </code></pre>
 <p>By default, fud will not transform the Calyx code before feeding it to the interpreter.
