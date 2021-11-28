@@ -222,11 +222,12 @@
 <span id="222">222</span>
 <span id="223">223</span>
 <span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{
     <span class="ident">Assignment</span>, <span class="ident">Attributes</span>, <span class="ident">Builder</span>, <span class="ident">Cell</span>, <span class="ident">CellType</span>, <span class="ident">CloneName</span>, <span class="ident">CombGroup</span>,
     <span class="ident">Control</span>, <span class="ident">Direction</span>, <span class="ident">GetName</span>, <span class="ident">Group</span>, <span class="ident">Id</span>, <span class="ident">RRC</span>,
 };
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::RESERVED_NAMES</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>;
 <span class="kw">use</span> <span class="ident">linked_hash_map::LinkedHashMap</span>;
 <span class="kw">use</span> <span class="ident">std::cell::RefCell</span>;
@@ -282,7 +283,6 @@
         <span class="kw">let</span> <span class="ident">prev_names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ports</span>
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">name</span>.<span class="ident">as_ref</span>().<span class="ident">to_string</span>())
-            .<span class="ident">chain</span>(<span class="ident">RESERVED_NAMES</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_string</span>()))
             .<span class="ident">collect</span>();
 
         <span class="kw">let</span> <span class="ident">this_sig</span> <span class="op">=</span> <span class="ident">Builder::cell_from_signature</span>(
@@ -308,6 +308,10 @@
             <span class="ident">namegen</span>: <span class="ident">utils::NameGenerator::with_prev_defined_names</span>(<span class="ident">prev_names</span>),
             <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
         }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">add_names</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) {
+        <span class="self">self</span>.<span class="ident">namegen</span>.<span class="ident">add_names</span>(<span class="ident">names</span>)
     }
 
     <span class="doccomment">/// Return a reference to the group with `name` if present.</span>

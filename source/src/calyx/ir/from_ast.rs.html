@@ -536,10 +536,15 @@
 <span id="536">536</span>
 <span id="537">537</span>
 <span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{
     <span class="ident">Assignment</span>, <span class="ident">Attributes</span>, <span class="ident">BackendConf</span>, <span class="ident">Builder</span>, <span class="ident">CellType</span>, <span class="ident">Component</span>, <span class="ident">Context</span>,
     <span class="ident">Control</span>, <span class="ident">Direction</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">Invoke</span>, <span class="ident">LibrarySignatures</span>,
-    <span class="ident">Port</span>, <span class="ident">PortDef</span>, <span class="ident">Width</span>, <span class="ident">RRC</span>,
+    <span class="ident">Port</span>, <span class="ident">PortDef</span>, <span class="ident">Width</span>, <span class="ident">RESERVED_NAMES</span>, <span class="ident">RRC</span>,
 };
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>},
@@ -787,6 +792,11 @@
     <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">control</span> <span class="op">=</span> <span class="ident">control</span>;
 
     <span class="ident">ir_component</span>.<span class="ident">attributes</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">attributes</span>;
+
+    <span class="comment">// Add reserved names to the component&#39;s namegenerator so future conflicts</span>
+    <span class="comment">// don&#39;t occur</span>
+    <span class="ident">ir_component</span>
+        .<span class="ident">add_names</span>(<span class="ident">RESERVED_NAMES</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_string</span>()).<span class="ident">collect</span>());
 
     <span class="prelude-val">Ok</span>(<span class="ident">ir_component</span>)
 }
