@@ -827,7 +827,7 @@
 
 <span class="kw">impl</span> <span class="ident">CalyxParser</span> {
     <span class="doccomment">/// Parse a Calyx program into an AST representation.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_file</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">ast::NamespaceDef</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_file</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">ast::NamespaceDef</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">content</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">fs::read</span>(<span class="ident">path</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
             <span class="ident">errors::Error::InvalidFile</span>(<span class="macro">format!</span>(
                 <span class="string">&quot;Failed to read {}: {}&quot;</span>,
@@ -850,7 +850,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">CalyxParser::file</span>(<span class="ident">input</span>)<span class="question-mark">?</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Read</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">r</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">ast::NamespaceDef</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Read</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">r</span>: <span class="ident">R</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">ast::NamespaceDef</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">String::new</span>();
         <span class="ident">r</span>.<span class="ident">read_to_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
             <span class="ident">errors::Error::InvalidFile</span>(<span class="macro">format!</span>(
@@ -877,20 +877,20 @@
 
 <span class="attribute">#[<span class="ident">pest_consume::parser</span>]</span>
 <span class="kw">impl</span> <span class="ident">CalyxParser</span> {
-    <span class="kw">fn</span> <span class="ident">EOI</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">EOI</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">semi</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">semi</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">comb</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">comb</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="comment">// ================ Literals =====================</span>
-    <span class="kw">fn</span> <span class="ident">identifier</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">identifier</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">ud</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">user_data</span>();
         <span class="prelude-val">Ok</span>(<span class="ident">ir::Id::new</span>(
             <span class="ident">input</span>.<span class="ident">as_str</span>(),
@@ -902,42 +902,42 @@
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">bitwidth</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">bitwidth</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="ident">input</span>
             .<span class="ident">as_str</span>()
             .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>()
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">input</span>.<span class="ident">error</span>(<span class="string">&quot;Expected valid bitwidth&quot;</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">bad_num</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">bad_num</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="prelude-val">Err</span>(<span class="ident">input</span>.<span class="ident">error</span>(<span class="string">&quot;Expected number with bitwidth (like 32&#39;d10).&quot;</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">hex</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">hex</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="ident">u64::from_str_radix</span>(<span class="ident">input</span>.<span class="ident">as_str</span>(), <span class="number">16</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">input</span>.<span class="ident">error</span>(<span class="string">&quot;Expected hexadecimal number&quot;</span>))
     }
-    <span class="kw">fn</span> <span class="ident">decimal</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">decimal</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::from_str_radix_10</span>)]</span>
         <span class="ident">u64::from_str_radix</span>(<span class="ident">input</span>.<span class="ident">as_str</span>(), <span class="number">10</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">input</span>.<span class="ident">error</span>(<span class="string">&quot;Expected decimal number&quot;</span>))
     }
-    <span class="kw">fn</span> <span class="ident">octal</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">octal</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="ident">u64::from_str_radix</span>(<span class="ident">input</span>.<span class="ident">as_str</span>(), <span class="number">8</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">input</span>.<span class="ident">error</span>(<span class="string">&quot;Expected octal number&quot;</span>))
     }
-    <span class="kw">fn</span> <span class="ident">binary</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">binary</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="ident">u64::from_str_radix</span>(<span class="ident">input</span>.<span class="ident">as_str</span>(), <span class="number">2</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">input</span>.<span class="ident">error</span>(<span class="string">&quot;Expected binary number&quot;</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">num_lit</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">BitNum</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">num_lit</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">BitNum</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">ud</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">user_data</span>();
         <span class="kw">let</span> <span class="ident">input_ref</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">ud</span>.<span class="ident">input</span>);
         <span class="kw">let</span> <span class="ident">file_ref</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">ud</span>.<span class="ident">file</span>);
         <span class="kw">let</span> <span class="ident">num</span> <span class="op">=</span> <span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">clone</span>().<span class="ident">into_children</span>();
-            [<span class="ident">bitwidth</span>(<span class="ident">width</span>), <span class="ident">decimal</span>(<span class="ident">val</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BitNum</span> {
+            [<span class="ident">bitwidth</span>(<span class="ident">width</span>), <span class="ident">decimal</span>(<span class="ident">val</span>)] =&gt; <span class="ident">BitNum</span> {
                     <span class="ident">width</span>,
                     <span class="ident">num_type</span>: <span class="ident">NumType::Decimal</span>,
                     <span class="ident">val</span>,
@@ -947,7 +947,7 @@
                         <span class="ident">input_ref</span>,
                     )),
                 },
-            [<span class="ident">bitwidth</span>(<span class="ident">width</span>), <span class="ident">hex</span>(<span class="ident">val</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BitNum</span> {
+            [<span class="ident">bitwidth</span>(<span class="ident">width</span>), <span class="ident">hex</span>(<span class="ident">val</span>)] =&gt; <span class="ident">BitNum</span> {
                     <span class="ident">width</span>,
                     <span class="ident">num_type</span>: <span class="ident">NumType::Hex</span>,
                     <span class="ident">val</span>,
@@ -957,7 +957,7 @@
                         <span class="ident">input_ref</span>,
                     )),
                 },
-            [<span class="ident">bitwidth</span>(<span class="ident">width</span>), <span class="ident">octal</span>(<span class="ident">val</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BitNum</span> {
+            [<span class="ident">bitwidth</span>(<span class="ident">width</span>), <span class="ident">octal</span>(<span class="ident">val</span>)] =&gt; <span class="ident">BitNum</span> {
                     <span class="ident">width</span>,
                     <span class="ident">num_type</span>: <span class="ident">NumType::Octal</span>,
                     <span class="ident">val</span>,
@@ -967,7 +967,7 @@
                         <span class="ident">input_ref</span>,
                     )),
                 },
-            [<span class="ident">bitwidth</span>(<span class="ident">width</span>), <span class="ident">binary</span>(<span class="ident">val</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BitNum</span> {
+            [<span class="ident">bitwidth</span>(<span class="ident">width</span>), <span class="ident">binary</span>(<span class="ident">val</span>)] =&gt; <span class="ident">BitNum</span> {
                     <span class="ident">width</span>,
                     <span class="ident">num_type</span>: <span class="ident">NumType::Binary</span>,
                     <span class="ident">val</span>,
@@ -982,16 +982,16 @@
 
         <span class="comment">// the below cast is safe since the width must be less than 64 for</span>
         <span class="comment">// the given literal to be unrepresentable</span>
-        <span class="kw">if</span> <span class="ident">num</span>.<span class="ident">width</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+        <span class="kw">if</span> <span class="ident">num</span>.<span class="ident">width</span> <span class="op">==</span> <span class="number">0</span>
             <span class="op">|</span><span class="op">|</span> (<span class="ident">num</span>.<span class="ident">width</span> <span class="op">&lt;</span> <span class="number">64</span> <span class="op">&amp;&amp;</span> <span class="op">!</span>(<span class="ident">u64::pow</span>(<span class="number">2</span>, <span class="ident">num</span>.<span class="ident">width</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&gt;</span> <span class="ident">num</span>.<span class="ident">val</span>))
         {
             <span class="kw">let</span> <span class="ident">lit_str</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">num</span>.<span class="ident">num_type</span> {
-                <span class="ident">NumType::Binary</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;{:b}&quot;</span>, <span class="ident">num</span>.<span class="ident">val</span>),
-                <span class="ident">NumType::Decimal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">num</span>.<span class="ident">val</span>),
-                <span class="ident">NumType::Octal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;{:o}&quot;</span>, <span class="ident">num</span>.<span class="ident">val</span>),
-                <span class="ident">NumType::Hex</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, <span class="ident">num</span>.<span class="ident">val</span>),
+                <span class="ident">NumType::Binary</span> =&gt; <span class="macro">format!</span>(<span class="string">&quot;{:b}&quot;</span>, <span class="ident">num</span>.<span class="ident">val</span>),
+                <span class="ident">NumType::Decimal</span> =&gt; <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">num</span>.<span class="ident">val</span>),
+                <span class="ident">NumType::Octal</span> =&gt; <span class="macro">format!</span>(<span class="string">&quot;{:o}&quot;</span>, <span class="ident">num</span>.<span class="ident">val</span>),
+                <span class="ident">NumType::Hex</span> =&gt; <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, <span class="ident">num</span>.<span class="ident">val</span>),
             };
-            <span class="kw">let</span> <span class="ident">bit_plural</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">num</span>.<span class="ident">width</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> { <span class="string">&quot;bit&quot;</span> } <span class="kw">else</span> { <span class="string">&quot;bits&quot;</span> };
+            <span class="kw">let</span> <span class="ident">bit_plural</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">num</span>.<span class="ident">width</span> <span class="op">==</span> <span class="number">1</span> { <span class="string">&quot;bit&quot;</span> } <span class="kw">else</span> { <span class="string">&quot;bits&quot;</span> };
             <span class="prelude-val">Err</span>(<span class="ident">input</span>.<span class="ident">error</span>(<span class="macro">format!</span>(
                 <span class="string">&quot;Cannot represent given literal &#39;{}&#39; in {} {}&quot;</span>,
                 <span class="ident">lit_str</span>, <span class="ident">num</span>.<span class="ident">width</span>, <span class="ident">bit_plural</span>
@@ -1001,94 +1001,94 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">char</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">char</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">input</span>.<span class="ident">as_str</span>())
     }
 
-    <span class="kw">fn</span> <span class="ident">string_lit</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">string_lit</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">char</span>(<span class="ident">c</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">c</span>.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">join</span>(<span class="string">&quot;&quot;</span>)
+            [<span class="ident">char</span>(<span class="ident">c</span>)..] =&gt; <span class="ident">c</span>.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">join</span>(<span class="string">&quot;&quot;</span>)
         ))
     }
 
     <span class="comment">// ================ Attributes =====================</span>
-    <span class="kw">fn</span> <span class="ident">attribute</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">u64</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">attribute</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">u64</span>)<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">string_lit</span>(<span class="ident">key</span>), <span class="ident">bitwidth</span>(<span class="ident">num</span>)] <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">key</span>, <span class="ident">num</span>)
+            [<span class="ident">string_lit</span>(<span class="ident">key</span>), <span class="ident">bitwidth</span>(<span class="ident">num</span>)] =&gt; (<span class="ident">key</span>, <span class="ident">num</span>)
         ))
     }
-    <span class="kw">fn</span> <span class="ident">attributes</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ir::Attributes</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">attributes</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ir::Attributes</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">attribute</span>(<span class="ident">kvs</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">kvs</span>.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">into</span>()
+            [<span class="ident">attribute</span>(<span class="ident">kvs</span>)..] =&gt; <span class="ident">kvs</span>.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">into</span>()
         ))
     }
     <span class="kw">fn</span> <span class="ident">name_with_attribute</span>(
         <span class="ident">input</span>: <span class="ident">Node</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Attributes</span>)<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Attributes</span>)<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">identifier</span>(<span class="ident">name</span>), <span class="ident">attributes</span>(<span class="ident">attrs</span>)] <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">name</span>, <span class="ident">attrs</span>),
-            [<span class="ident">identifier</span>(<span class="ident">name</span>)] <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">name</span>, <span class="macro">vec!</span>[].<span class="ident">into</span>()),
+            [<span class="ident">identifier</span>(<span class="ident">name</span>), <span class="ident">attributes</span>(<span class="ident">attrs</span>)] =&gt; (<span class="ident">name</span>, <span class="ident">attrs</span>),
+            [<span class="ident">identifier</span>(<span class="ident">name</span>)] =&gt; (<span class="ident">name</span>, <span class="macro">vec!</span>[].<span class="ident">into</span>()),
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">attr_val</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">attr_val</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">bitwidth</span>(<span class="ident">num</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">num</span>
+            [<span class="ident">bitwidth</span>(<span class="ident">num</span>)] =&gt; <span class="ident">num</span>
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">at_attribute</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">u64</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">at_attribute</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">u64</span>)<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">identifier</span>(<span class="ident">key</span>), <span class="ident">attr_val</span>(<span class="ident">num</span>)] <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">key</span>.<span class="ident">id</span>, <span class="ident">num</span>),
-            [<span class="ident">identifier</span>(<span class="ident">key</span>)] <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">key</span>.<span class="ident">id</span>, <span class="number">1</span>)
+            [<span class="ident">identifier</span>(<span class="ident">key</span>), <span class="ident">attr_val</span>(<span class="ident">num</span>)] =&gt; (<span class="ident">key</span>.<span class="ident">id</span>, <span class="ident">num</span>),
+            [<span class="ident">identifier</span>(<span class="ident">key</span>)] =&gt; (<span class="ident">key</span>.<span class="ident">id</span>, <span class="number">1</span>)
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">at_attributes</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ir::Attributes</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">at_attributes</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ir::Attributes</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">at_attribute</span>(<span class="ident">kvs</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">kvs</span>.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">into</span>()
+            [<span class="ident">at_attribute</span>(<span class="ident">kvs</span>)..] =&gt; <span class="ident">kvs</span>.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">into</span>()
         ))
     }
 
     <span class="comment">// ================ Signature =====================</span>
-    <span class="kw">fn</span> <span class="ident">params</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">params</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">identifier</span>(<span class="ident">id</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">id</span>.<span class="ident">collect</span>()
+            [<span class="ident">identifier</span>(<span class="ident">id</span>)..] =&gt; <span class="ident">id</span>.<span class="ident">collect</span>()
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">args</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">args</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">bitwidth</span>(<span class="ident">bw</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">bw</span>.<span class="ident">collect</span>(),
-            [] <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec!</span>[]
+            [<span class="ident">bitwidth</span>(<span class="ident">bw</span>)..] =&gt; <span class="ident">bw</span>.<span class="ident">collect</span>(),
+            [] =&gt; <span class="macro">vec!</span>[]
         ))
     }
 
     <span class="kw">fn</span> <span class="ident">io_port</span>(
         <span class="ident">input</span>: <span class="ident">Node</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Width</span>, <span class="ident">ir::Attributes</span>)<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Width</span>, <span class="ident">ir::Attributes</span>)<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">id</span>), <span class="ident">bitwidth</span>(<span class="ident">value</span>)] <span class="op">=</span><span class="op">&gt;</span>
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">id</span>), <span class="ident">bitwidth</span>(<span class="ident">value</span>)] =&gt;
                 (<span class="ident">id</span>, <span class="ident">ir::Width::Const</span> { <span class="ident">value</span> }, <span class="ident">attrs</span>),
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">id</span>), <span class="ident">identifier</span>(<span class="ident">value</span>)] <span class="op">=</span><span class="op">&gt;</span>
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">id</span>), <span class="ident">identifier</span>(<span class="ident">value</span>)] =&gt;
                 (<span class="ident">id</span>, <span class="ident">ir::Width::Param</span> { <span class="ident">value</span> }, <span class="ident">attrs</span>)
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">inputs</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::PortDef</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">inputs</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::PortDef</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">io_port</span>(<span class="ident">ins</span>)..] <span class="op">=</span><span class="op">&gt;</span> {
+            [<span class="ident">io_port</span>(<span class="ident">ins</span>)..] =&gt; {
                 <span class="ident">ins</span>.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="ident">width</span>, <span class="ident">attributes</span>)<span class="op">|</span> <span class="ident">ir::PortDef</span> {
                     <span class="ident">name</span>, <span class="ident">width</span>, <span class="ident">direction</span>: <span class="ident">ir::Direction::Input</span>, <span class="ident">attributes</span>
                 }).<span class="ident">collect</span>()
@@ -1096,10 +1096,10 @@
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">outputs</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::PortDef</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">outputs</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::PortDef</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">io_port</span>(<span class="ident">outs</span>)..] <span class="op">=</span><span class="op">&gt;</span> {
+            [<span class="ident">io_port</span>(<span class="ident">outs</span>)..] =&gt; {
                 <span class="ident">outs</span>.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="ident">width</span>, <span class="ident">attributes</span>)<span class="op">|</span> <span class="ident">ir::PortDef</span> {
                     <span class="ident">name</span>, <span class="ident">width</span>, <span class="ident">direction</span>: <span class="ident">ir::Direction::Output</span>, <span class="ident">attributes</span>
                 }).<span class="ident">collect</span>()
@@ -1107,15 +1107,15 @@
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">signature</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::PortDef</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">signature</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::PortDef</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
             <span class="comment">// NOTE(rachit): We expect the signature to be extended to have `go`,</span>
             <span class="comment">// `done`, and `clk`.</span>
-            [] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec::with_capacity</span>(<span class="number">3</span>),
-            [<span class="ident">inputs</span>(<span class="ident">ins</span>)] <span class="op">=</span><span class="op">&gt;</span>  <span class="ident">ins</span> ,
-            [<span class="ident">outputs</span>(<span class="ident">outs</span>)] <span class="op">=</span><span class="op">&gt;</span>  <span class="ident">outs</span> ,
-            [<span class="ident">inputs</span>(<span class="ident">ins</span>), <span class="ident">outputs</span>(<span class="ident">outs</span>)] <span class="op">=</span><span class="op">&gt;</span> {
+            [] =&gt; <span class="ident">Vec::with_capacity</span>(<span class="number">3</span>),
+            [<span class="ident">inputs</span>(<span class="ident">ins</span>)] =&gt;  <span class="ident">ins</span> ,
+            [<span class="ident">outputs</span>(<span class="ident">outs</span>)] =&gt;  <span class="ident">outs</span> ,
+            [<span class="ident">inputs</span>(<span class="ident">ins</span>), <span class="ident">outputs</span>(<span class="ident">outs</span>)] =&gt; {
                 <span class="ident">ins</span>.<span class="ident">into_iter</span>().<span class="ident">chain</span>(<span class="ident">outs</span>.<span class="ident">into_iter</span>()).<span class="ident">collect</span>()
             },
         ))
@@ -1124,24 +1124,24 @@
     <span class="comment">// ==============Primitives=====================</span>
     <span class="kw">fn</span> <span class="ident">sig_with_params</span>(
         <span class="ident">input</span>: <span class="ident">Node</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::PortDef</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::PortDef</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">params</span>(<span class="ident">p</span>), <span class="ident">signature</span>(<span class="ident">s</span>)] <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">p</span>, <span class="ident">s</span>),
-            [<span class="ident">signature</span>(<span class="ident">s</span>)] <span class="op">=</span><span class="op">&gt;</span> (<span class="macro">vec!</span>[], <span class="ident">s</span>),
+            [<span class="ident">params</span>(<span class="ident">p</span>), <span class="ident">signature</span>(<span class="ident">s</span>)] =&gt; (<span class="ident">p</span>, <span class="ident">s</span>),
+            [<span class="ident">signature</span>(<span class="ident">s</span>)] =&gt; (<span class="macro">vec!</span>[], <span class="ident">s</span>),
         ))
     }
-    <span class="kw">fn</span> <span class="ident">primitive</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ir::Primitive</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">primitive</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ir::Primitive</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">name_with_attribute</span>((<span class="ident">name</span>, <span class="ident">attrs</span>)), <span class="ident">sig_with_params</span>((<span class="ident">p</span>, <span class="ident">s</span>))] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::Primitive</span> {
+            [<span class="ident">name_with_attribute</span>((<span class="ident">name</span>, <span class="ident">attrs</span>)), <span class="ident">sig_with_params</span>((<span class="ident">p</span>, <span class="ident">s</span>))] =&gt; <span class="ident">ir::Primitive</span> {
                 <span class="ident">name</span>,
                 <span class="ident">params</span>: <span class="ident">p</span>,
                 <span class="ident">signature</span>: <span class="ident">s</span>,
                 <span class="ident">attributes</span>: <span class="ident">attrs</span>,
                 <span class="ident">is_comb</span>: <span class="bool-val">false</span>,
             },
-            [<span class="ident">comb</span>(<span class="kw">_</span>), <span class="ident">name_with_attribute</span>((<span class="ident">name</span>, <span class="ident">attrs</span>)), <span class="ident">sig_with_params</span>((<span class="ident">p</span>, <span class="ident">s</span>))] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::Primitive</span> {
+            [<span class="ident">comb</span>(<span class="kw">_</span>), <span class="ident">name_with_attribute</span>((<span class="ident">name</span>, <span class="ident">attrs</span>)), <span class="ident">sig_with_params</span>((<span class="ident">p</span>, <span class="ident">s</span>))] =&gt; <span class="ident">ir::Primitive</span> {
                 <span class="ident">name</span>,
                 <span class="ident">params</span>: <span class="ident">p</span>,
                 <span class="ident">signature</span>: <span class="ident">s</span>,
@@ -1152,97 +1152,97 @@
     }
 
     <span class="comment">// ================ Cells =====================</span>
-    <span class="kw">fn</span> <span class="ident">cell_without_semi</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Cell</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">cell_without_semi</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Cell</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">id</span>), <span class="ident">identifier</span>(<span class="ident">prim</span>), <span class="ident">args</span>(<span class="ident">args</span>)] <span class="op">=</span><span class="op">&gt;</span>
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">id</span>), <span class="ident">identifier</span>(<span class="ident">prim</span>), <span class="ident">args</span>(<span class="ident">args</span>)] =&gt;
             <span class="ident">ast::Cell::from</span>(<span class="ident">id</span>, <span class="ident">prim</span>, <span class="ident">args</span>, <span class="ident">attrs</span>)
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">cell</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Cell</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">cell</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Cell</span><span class="op">&gt;</span> {
         <span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">clone</span>().<span class="ident">into_children</span>();
-            [<span class="ident">cell_without_semi</span>(<span class="kw">_</span>)] <span class="op">=</span><span class="op">&gt;</span>
+            [<span class="ident">cell_without_semi</span>(<span class="kw">_</span>)] =&gt;
                 <span class="prelude-val">Err</span>(<span class="ident">input</span>.<span class="ident">error</span>(<span class="string">&quot;Declaration is missing `;`&quot;</span>)),
-            [<span class="ident">cell_without_semi</span>(<span class="ident">node</span>), <span class="ident">semi</span>(<span class="kw">_</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">node</span>),
+            [<span class="ident">cell_without_semi</span>(<span class="ident">node</span>), <span class="ident">semi</span>(<span class="kw">_</span>)] =&gt; <span class="prelude-val">Ok</span>(<span class="ident">node</span>),
         )
     }
 
-    <span class="kw">fn</span> <span class="ident">cells</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ast::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">cells</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ast::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
                 <span class="ident">input</span>.<span class="ident">into_children</span>();
-                [<span class="ident">cell</span>(<span class="ident">cells</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cells</span>.<span class="ident">collect</span>()
+                [<span class="ident">cell</span>(<span class="ident">cells</span>)..] =&gt; <span class="ident">cells</span>.<span class="ident">collect</span>()
         ))
     }
 
     <span class="comment">// ================ Wires =====================</span>
-    <span class="kw">fn</span> <span class="ident">port</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Port</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">port</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Port</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">identifier</span>(<span class="ident">component</span>), <span class="ident">identifier</span>(<span class="ident">port</span>)] <span class="op">=</span><span class="op">&gt;</span>
+            [<span class="ident">identifier</span>(<span class="ident">component</span>), <span class="ident">identifier</span>(<span class="ident">port</span>)] =&gt;
                 <span class="ident">ast::Port::Comp</span> { <span class="ident">component</span>, <span class="ident">port</span> },
-            [<span class="ident">identifier</span>(<span class="ident">port</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Port::This</span> { <span class="ident">port</span> }
+            [<span class="ident">identifier</span>(<span class="ident">port</span>)] =&gt; <span class="ident">ast::Port::This</span> { <span class="ident">port</span> }
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">hole</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Port</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">hole</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Port</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">identifier</span>(<span class="ident">group</span>), <span class="ident">identifier</span>(<span class="ident">name</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Port::Hole</span> { <span class="ident">group</span>, <span class="ident">name</span> }
+            [<span class="ident">identifier</span>(<span class="ident">group</span>), <span class="ident">identifier</span>(<span class="ident">name</span>)] =&gt; <span class="ident">ast::Port::Hole</span> { <span class="ident">group</span>, <span class="ident">name</span> }
         ))
     }
 
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::upper_case_acronyms</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">LHS</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Port</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">LHS</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Port</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">port</span>(<span class="ident">port</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">port</span>,
-            [<span class="ident">hole</span>(<span class="ident">hole</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">hole</span>
+            [<span class="ident">port</span>(<span class="ident">port</span>)] =&gt; <span class="ident">port</span>,
+            [<span class="ident">hole</span>(<span class="ident">hole</span>)] =&gt; <span class="ident">hole</span>
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">expr</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Atom</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">expr</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Atom</span><span class="op">&gt;</span> {
         <span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">LHS</span>(<span class="ident">port</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ast::Atom::Port</span>(<span class="ident">port</span>)),
-            [<span class="ident">num_lit</span>(<span class="ident">num</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ast::Atom::Num</span>(<span class="ident">num</span>)),
-            [<span class="ident">bad_num</span>(<span class="kw">_</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(<span class="string">&quot;bad_num returned non-error result&quot;</span>),
+            [<span class="ident">LHS</span>(<span class="ident">port</span>)] =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ast::Atom::Port</span>(<span class="ident">port</span>)),
+            [<span class="ident">num_lit</span>(<span class="ident">num</span>)] =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ast::Atom::Num</span>(<span class="ident">num</span>)),
+            [<span class="ident">bad_num</span>(<span class="kw">_</span>)] =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;bad_num returned non-error result&quot;</span>),
         )
     }
 
-    <span class="kw">fn</span> <span class="ident">guard_eq</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">guard_eq</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
-    <span class="kw">fn</span> <span class="ident">guard_neq</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">guard_neq</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
-    <span class="kw">fn</span> <span class="ident">guard_leq</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">guard_leq</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
-    <span class="kw">fn</span> <span class="ident">guard_geq</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">guard_geq</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
-    <span class="kw">fn</span> <span class="ident">guard_lt</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">guard_lt</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
-    <span class="kw">fn</span> <span class="ident">guard_gt</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">guard_gt</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">cmp_expr</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::GuardExpr</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">cmp_expr</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::GuardExpr</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_eq</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::GuardExpr::Eq</span>(<span class="ident">l</span>, <span class="ident">r</span>),
-            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_neq</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::GuardExpr::Neq</span>(<span class="ident">l</span>, <span class="ident">r</span>),
-            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_geq</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::GuardExpr::Geq</span>(<span class="ident">l</span>, <span class="ident">r</span>),
-            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_leq</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::GuardExpr::Leq</span>(<span class="ident">l</span>, <span class="ident">r</span>),
-            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_gt</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] <span class="op">=</span><span class="op">&gt;</span>  <span class="ident">ast::GuardExpr::Gt</span>(<span class="ident">l</span>, <span class="ident">r</span>),
-            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_lt</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] <span class="op">=</span><span class="op">&gt;</span>  <span class="ident">ast::GuardExpr::Lt</span>(<span class="ident">l</span>, <span class="ident">r</span>),
+            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_eq</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] =&gt; <span class="ident">ast::GuardExpr::Eq</span>(<span class="ident">l</span>, <span class="ident">r</span>),
+            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_neq</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] =&gt; <span class="ident">ast::GuardExpr::Neq</span>(<span class="ident">l</span>, <span class="ident">r</span>),
+            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_geq</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] =&gt; <span class="ident">ast::GuardExpr::Geq</span>(<span class="ident">l</span>, <span class="ident">r</span>),
+            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_leq</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] =&gt; <span class="ident">ast::GuardExpr::Leq</span>(<span class="ident">l</span>, <span class="ident">r</span>),
+            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_gt</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] =&gt;  <span class="ident">ast::GuardExpr::Gt</span>(<span class="ident">l</span>, <span class="ident">r</span>),
+            [<span class="ident">expr</span>(<span class="ident">l</span>), <span class="ident">guard_lt</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">r</span>)] =&gt;  <span class="ident">ast::GuardExpr::Lt</span>(<span class="ident">l</span>, <span class="ident">r</span>),
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">guard_not</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">guard_not</span>(<span class="ident">_input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1251,67 +1251,67 @@
         <span class="ident">l</span>: <span class="ident">ast::GuardExpr</span>,
         <span class="ident">op</span>: <span class="ident">Node</span>,
         <span class="ident">r</span>: <span class="ident">ast::GuardExpr</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::GuardExpr</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::GuardExpr</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">op</span>.<span class="ident">as_rule</span>() {
-            <span class="ident">Rule::guard_or</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ast::GuardExpr::Or</span>(<span class="ident">Box::new</span>(<span class="ident">l</span>), <span class="ident">Box::new</span>(<span class="ident">r</span>))),
-            <span class="ident">Rule::guard_and</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Rule::guard_or</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ast::GuardExpr::Or</span>(<span class="ident">Box::new</span>(<span class="ident">l</span>), <span class="ident">Box::new</span>(<span class="ident">r</span>))),
+            <span class="ident">Rule::guard_and</span> =&gt; {
                 <span class="prelude-val">Ok</span>(<span class="ident">ast::GuardExpr::And</span>(<span class="ident">Box::new</span>(<span class="ident">l</span>), <span class="ident">Box::new</span>(<span class="ident">r</span>)))
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+            <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">term</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::GuardExpr</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">term</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::GuardExpr</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">guard_expr</span>(<span class="ident">guard</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">guard</span>,
-            [<span class="ident">cmp_expr</span>(<span class="ident">e</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>,
-            [<span class="ident">expr</span>(<span class="ident">e</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::GuardExpr::Atom</span>(<span class="ident">e</span>),
-            [<span class="ident">guard_not</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">e</span>)] <span class="op">=</span><span class="op">&gt;</span> {
+            [<span class="ident">guard_expr</span>(<span class="ident">guard</span>)] =&gt; <span class="ident">guard</span>,
+            [<span class="ident">cmp_expr</span>(<span class="ident">e</span>)] =&gt; <span class="ident">e</span>,
+            [<span class="ident">expr</span>(<span class="ident">e</span>)] =&gt; <span class="ident">ast::GuardExpr::Atom</span>(<span class="ident">e</span>),
+            [<span class="ident">guard_not</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">e</span>)] =&gt; {
                 <span class="ident">ast::GuardExpr::Not</span>(<span class="ident">Box::new</span>(<span class="ident">ast::GuardExpr::Atom</span>(<span class="ident">e</span>)))
             },
-            [<span class="ident">guard_not</span>(<span class="kw">_</span>), <span class="ident">cmp_expr</span>(<span class="ident">e</span>)] <span class="op">=</span><span class="op">&gt;</span> {
+            [<span class="ident">guard_not</span>(<span class="kw">_</span>), <span class="ident">cmp_expr</span>(<span class="ident">e</span>)] =&gt; {
                 <span class="ident">ast::GuardExpr::Not</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>))
             },
-            [<span class="ident">guard_not</span>(<span class="kw">_</span>), <span class="ident">guard_expr</span>(<span class="ident">e</span>)] <span class="op">=</span><span class="op">&gt;</span> {
+            [<span class="ident">guard_not</span>(<span class="kw">_</span>), <span class="ident">guard_expr</span>(<span class="ident">e</span>)] =&gt; {
                 <span class="ident">ast::GuardExpr::Not</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>))
             },
-            [<span class="ident">guard_not</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">e</span>)] <span class="op">=</span><span class="op">&gt;</span>
+            [<span class="ident">guard_not</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">e</span>)] =&gt;
                 <span class="ident">ast::GuardExpr::Not</span>(<span class="ident">Box::new</span>(<span class="ident">ast::GuardExpr::Atom</span>(<span class="ident">e</span>)))
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">switch_stmt</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Guard</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">switch_stmt</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Guard</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">guard_expr</span>(<span class="ident">guard</span>), <span class="ident">expr</span>(<span class="ident">expr</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Guard</span> { <span class="ident">guard</span>: <span class="prelude-val">Some</span>(<span class="ident">guard</span>), <span class="ident">expr</span> },
+            [<span class="ident">guard_expr</span>(<span class="ident">guard</span>), <span class="ident">expr</span>(<span class="ident">expr</span>)] =&gt; <span class="ident">ast::Guard</span> { <span class="ident">guard</span>: <span class="prelude-val">Some</span>(<span class="ident">guard</span>), <span class="ident">expr</span> },
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">wire</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Wire</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">wire</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Wire</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">LHS</span>(<span class="ident">dest</span>), <span class="ident">expr</span>(<span class="ident">expr</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Wire</span> {
+            [<span class="ident">LHS</span>(<span class="ident">dest</span>), <span class="ident">expr</span>(<span class="ident">expr</span>)] =&gt; <span class="ident">ast::Wire</span> {
                 <span class="ident">src</span>: <span class="ident">ast::Guard</span> { <span class="ident">guard</span>: <span class="prelude-val">None</span>, <span class="ident">expr</span> },
                 <span class="ident">dest</span>
             },
-            [<span class="ident">LHS</span>(<span class="ident">dest</span>), <span class="ident">switch_stmt</span>(<span class="ident">src</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Wire</span> {
+            [<span class="ident">LHS</span>(<span class="ident">dest</span>), <span class="ident">switch_stmt</span>(<span class="ident">src</span>)] =&gt; <span class="ident">ast::Wire</span> {
                 <span class="ident">src</span>,
                 <span class="ident">dest</span>
             }
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">group</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Group</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">group</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Group</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">name_with_attribute</span>((<span class="ident">name</span>, <span class="ident">attrs</span>)), <span class="ident">wire</span>(<span class="ident">wire</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Group</span> {
+            [<span class="ident">name_with_attribute</span>((<span class="ident">name</span>, <span class="ident">attrs</span>)), <span class="ident">wire</span>(<span class="ident">wire</span>)..] =&gt; <span class="ident">ast::Group</span> {
                 <span class="ident">name</span>,
                 <span class="ident">attributes</span>: <span class="ident">attrs</span>,
                 <span class="ident">wires</span>: <span class="ident">wire</span>.<span class="ident">collect</span>(),
                 <span class="ident">is_comb</span>: <span class="bool-val">false</span>,
             },
-            [<span class="ident">comb</span>(<span class="kw">_</span>), <span class="ident">name_with_attribute</span>((<span class="ident">name</span>, <span class="ident">attrs</span>)), <span class="ident">wire</span>(<span class="ident">wire</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Group</span> {
+            [<span class="ident">comb</span>(<span class="kw">_</span>), <span class="ident">name_with_attribute</span>((<span class="ident">name</span>, <span class="ident">attrs</span>)), <span class="ident">wire</span>(<span class="ident">wire</span>)..] =&gt; <span class="ident">ast::Group</span> {
                 <span class="ident">name</span>,
                 <span class="ident">attributes</span>: <span class="ident">attrs</span>,
                 <span class="ident">wires</span>: <span class="ident">wire</span>.<span class="ident">collect</span>(),
@@ -1322,40 +1322,40 @@
 
     <span class="kw">fn</span> <span class="ident">connections</span>(
         <span class="ident">input</span>: <span class="ident">Node</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ast::Wire</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ast::Group</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ast::Wire</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ast::Group</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wires</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">groups</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">for</span> <span class="ident">node</span> <span class="kw">in</span> <span class="ident">input</span>.<span class="ident">into_children</span>() {
             <span class="kw">match</span> <span class="ident">node</span>.<span class="ident">as_rule</span>() {
-                <span class="ident">Rule::wire</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">wires</span>.<span class="ident">push</span>(<span class="ident"><span class="self">Self</span>::wire</span>(<span class="ident">node</span>)<span class="question-mark">?</span>),
-                <span class="ident">Rule::group</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">groups</span>.<span class="ident">push</span>(<span class="ident"><span class="self">Self</span>::group</span>(<span class="ident">node</span>)<span class="question-mark">?</span>),
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+                <span class="ident">Rule::wire</span> =&gt; <span class="ident">wires</span>.<span class="ident">push</span>(<span class="ident"><span class="self">Self</span>::wire</span>(<span class="ident">node</span>)<span class="question-mark">?</span>),
+                <span class="ident">Rule::group</span> =&gt; <span class="ident">groups</span>.<span class="ident">push</span>(<span class="ident"><span class="self">Self</span>::group</span>(<span class="ident">node</span>)<span class="question-mark">?</span>),
+                <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
             }
         }
         <span class="prelude-val">Ok</span>((<span class="ident">wires</span>, <span class="ident">groups</span>))
     }
 
     <span class="comment">// ================ Control program =====================</span>
-    <span class="kw">fn</span> <span class="ident">invoke_arg</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ast::Atom</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">invoke_arg</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ast::Atom</span>)<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">identifier</span>(<span class="ident">name</span>), <span class="ident">port</span>(<span class="ident">p</span>)] <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">name</span>, <span class="ident">ast::Atom::Port</span>(<span class="ident">p</span>)),
-            [<span class="ident">identifier</span>(<span class="ident">name</span>), <span class="ident">num_lit</span>(<span class="ident">bn</span>)] <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">name</span>, <span class="ident">ast::Atom::Num</span>(<span class="ident">bn</span>))
+            [<span class="ident">identifier</span>(<span class="ident">name</span>), <span class="ident">port</span>(<span class="ident">p</span>)] =&gt; (<span class="ident">name</span>, <span class="ident">ast::Atom::Port</span>(<span class="ident">p</span>)),
+            [<span class="ident">identifier</span>(<span class="ident">name</span>), <span class="ident">num_lit</span>(<span class="ident">bn</span>)] =&gt; (<span class="ident">name</span>, <span class="ident">ast::Atom::Num</span>(<span class="ident">bn</span>))
 
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">invoke_args</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ast::Atom</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">invoke_args</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ast::Atom</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">invoke_arg</span>(<span class="ident">args</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">args</span>.<span class="ident">collect</span>()
+            [<span class="ident">invoke_arg</span>(<span class="ident">args</span>)..] =&gt; <span class="ident">args</span>.<span class="ident">collect</span>()
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">invoke</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">invoke</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">comp</span>), <span class="ident">invoke_args</span>(<span class="ident">inputs</span>), <span class="ident">invoke_args</span>(<span class="ident">outputs</span>)] <span class="op">=</span><span class="op">&gt;</span>
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">comp</span>), <span class="ident">invoke_args</span>(<span class="ident">inputs</span>), <span class="ident">invoke_args</span>(<span class="ident">outputs</span>)] =&gt;
                 <span class="ident">ast::Control::Invoke</span> {
                     <span class="ident">comp</span>,
                     <span class="ident">inputs</span>,
@@ -1363,7 +1363,7 @@
                     <span class="ident">attributes</span>: <span class="ident">attrs</span>,
                     <span class="ident">comb_group</span>: <span class="prelude-val">None</span>
                 },
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">comp</span>), <span class="ident">invoke_args</span>(<span class="ident">inputs</span>), <span class="ident">invoke_args</span>(<span class="ident">outputs</span>), <span class="ident">identifier</span>(<span class="ident">group</span>)] <span class="op">=</span><span class="op">&gt;</span>
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">comp</span>), <span class="ident">invoke_args</span>(<span class="ident">inputs</span>), <span class="ident">invoke_args</span>(<span class="ident">outputs</span>), <span class="ident">identifier</span>(<span class="ident">group</span>)] =&gt;
                 <span class="ident">ast::Control::Invoke</span> {
                     <span class="ident">comp</span>,
                     <span class="ident">inputs</span>,
@@ -1374,55 +1374,55 @@
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">enable</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">enable</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">name</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Control::Enable</span> {
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">identifier</span>(<span class="ident">name</span>)] =&gt; <span class="ident">ast::Control::Enable</span> {
                 <span class="ident">comp</span>: <span class="ident">name</span>,
                 <span class="ident">attributes</span>: <span class="ident">attrs</span>
             }
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">seq</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">seq</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">stmt</span>(<span class="ident">stmt</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Control::Seq</span> {
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">stmt</span>(<span class="ident">stmt</span>)..] =&gt; <span class="ident">ast::Control::Seq</span> {
                 <span class="ident">stmts</span>: <span class="ident">stmt</span>.<span class="ident">collect</span>(),
                 <span class="ident">attributes</span>: <span class="ident">attrs</span>,
             }
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">par</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">par</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">stmt</span>(<span class="ident">stmt</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Control::Par</span> {
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">stmt</span>(<span class="ident">stmt</span>)..] =&gt; <span class="ident">ast::Control::Par</span> {
                 <span class="ident">stmts</span>: <span class="ident">stmt</span>.<span class="ident">collect</span>(),
                 <span class="ident">attributes</span>: <span class="ident">attrs</span>,
             }
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">port_with</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">ast::Port</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">port_with</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">ast::Port</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">port</span>(<span class="ident">port</span>), <span class="ident">identifier</span>(<span class="ident">cond</span>)] <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">port</span>, <span class="prelude-val">Some</span>(<span class="ident">cond</span>)),
-            [<span class="ident">port</span>(<span class="ident">port</span>)] <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">port</span>, <span class="prelude-val">None</span>),
+            [<span class="ident">port</span>(<span class="ident">port</span>), <span class="ident">identifier</span>(<span class="ident">cond</span>)] =&gt; (<span class="ident">port</span>, <span class="prelude-val">Some</span>(<span class="ident">cond</span>)),
+            [<span class="ident">port</span>(<span class="ident">port</span>)] =&gt; (<span class="ident">port</span>, <span class="prelude-val">None</span>),
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">if_stmt</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">if_stmt</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">port_with</span>((<span class="ident">port</span>, <span class="ident">cond</span>)), <span class="ident">block</span>(<span class="ident">stmt</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Control::If</span> {
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">port_with</span>((<span class="ident">port</span>, <span class="ident">cond</span>)), <span class="ident">block</span>(<span class="ident">stmt</span>)] =&gt; <span class="ident">ast::Control::If</span> {
                 <span class="ident">port</span>,
                 <span class="ident">cond</span>,
                 <span class="ident">tbranch</span>: <span class="ident">Box::new</span>(<span class="ident">stmt</span>),
                 <span class="ident">fbranch</span>: <span class="ident">Box::new</span>(<span class="ident">ast::Control::Empty</span>{}),
                 <span class="ident">attributes</span>: <span class="ident">attrs</span>,
             },
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">port_with</span>((<span class="ident">port</span>, <span class="ident">cond</span>)), <span class="ident">block</span>(<span class="ident">tbranch</span>), <span class="ident">block</span>(<span class="ident">fbranch</span>)] <span class="op">=</span><span class="op">&gt;</span>
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">port_with</span>((<span class="ident">port</span>, <span class="ident">cond</span>)), <span class="ident">block</span>(<span class="ident">tbranch</span>), <span class="ident">block</span>(<span class="ident">fbranch</span>)] =&gt;
                 <span class="ident">ast::Control::If</span> {
                     <span class="ident">port</span>,
                     <span class="ident">cond</span>,
@@ -1430,7 +1430,7 @@
                     <span class="ident">fbranch</span>: <span class="ident">Box::new</span>(<span class="ident">fbranch</span>),
                     <span class="ident">attributes</span>: <span class="ident">attrs</span>,
                 },
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">port_with</span>((<span class="ident">port</span>, <span class="ident">cond</span>)), <span class="ident">block</span>(<span class="ident">tbranch</span>), <span class="ident">if_stmt</span>(<span class="ident">fbranch</span>)] <span class="op">=</span><span class="op">&gt;</span>
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">port_with</span>((<span class="ident">port</span>, <span class="ident">cond</span>)), <span class="ident">block</span>(<span class="ident">tbranch</span>), <span class="ident">if_stmt</span>(<span class="ident">fbranch</span>)] =&gt;
                 <span class="ident">ast::Control::If</span> {
                     <span class="ident">port</span>,
                     <span class="ident">cond</span>,
@@ -1442,10 +1442,10 @@
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">while_stmt</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">while_stmt</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">port_with</span>((<span class="ident">port</span>, <span class="ident">cond</span>)), <span class="ident">block</span>(<span class="ident">stmt</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Control::While</span> {
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">port_with</span>((<span class="ident">port</span>, <span class="ident">cond</span>)), <span class="ident">block</span>(<span class="ident">stmt</span>)] =&gt; <span class="ident">ast::Control::While</span> {
                 <span class="ident">port</span>,
                 <span class="ident">cond</span>,
                 <span class="ident">body</span>: <span class="ident">Box::new</span>(<span class="ident">stmt</span>),
@@ -1454,43 +1454,43 @@
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">stmt</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">stmt</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">enable</span>(<span class="ident">data</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">data</span>,
-            [<span class="ident">invoke</span>(<span class="ident">data</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">data</span>,
-            [<span class="ident">seq</span>(<span class="ident">data</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">data</span>,
-            [<span class="ident">par</span>(<span class="ident">data</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">data</span>,
-            [<span class="ident">if_stmt</span>(<span class="ident">data</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">data</span>,
-            [<span class="ident">while_stmt</span>(<span class="ident">data</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">data</span>,
+            [<span class="ident">enable</span>(<span class="ident">data</span>)] =&gt; <span class="ident">data</span>,
+            [<span class="ident">invoke</span>(<span class="ident">data</span>)] =&gt; <span class="ident">data</span>,
+            [<span class="ident">seq</span>(<span class="ident">data</span>)] =&gt; <span class="ident">data</span>,
+            [<span class="ident">par</span>(<span class="ident">data</span>)] =&gt; <span class="ident">data</span>,
+            [<span class="ident">if_stmt</span>(<span class="ident">data</span>)] =&gt; <span class="ident">data</span>,
+            [<span class="ident">while_stmt</span>(<span class="ident">data</span>)] =&gt; <span class="ident">data</span>,
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">block</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">block</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">stmt</span>(<span class="ident">stmt</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">stmt</span>,
-            [<span class="ident">stmts_without_block</span>(<span class="kw">_</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>()
+            [<span class="ident">stmt</span>(<span class="ident">stmt</span>)] =&gt; <span class="ident">stmt</span>,
+            [<span class="ident">stmts_without_block</span>(<span class="kw">_</span>)] =&gt; <span class="macro">unreachable!</span>()
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">stmts_without_block</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">stmts_without_block</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
         <span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">clone</span>().<span class="ident">into_children</span>();
-            [<span class="ident">stmt</span>(<span class="kw">_</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(
+            [<span class="ident">stmt</span>(<span class="kw">_</span>)..] =&gt; <span class="prelude-val">Err</span>(
                 <span class="ident">input</span>.<span class="ident">error</span>(<span class="string">&quot;Sequence of control statements should be enclosed in `seq` or `par`.&quot;</span>))
         )
     }
 
-    <span class="kw">fn</span> <span class="ident">control</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">control</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">block</span>(<span class="ident">stmt</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">stmt</span>,
-            [] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ast::Control::Empty</span>{}
+            [<span class="ident">block</span>(<span class="ident">stmt</span>)] =&gt; <span class="ident">stmt</span>,
+            [] =&gt; <span class="ident">ast::Control::Empty</span>{}
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">component</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::ComponentDef</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">component</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::ComponentDef</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
             [
@@ -1499,7 +1499,7 @@
                 <span class="ident">cells</span>(<span class="ident">cells</span>),
                 <span class="ident">connections</span>(<span class="ident">connections</span>),
                 <span class="ident">control</span>(<span class="ident">control</span>)
-            ] <span class="op">=</span><span class="op">&gt;</span> {
+            ] =&gt; {
                 <span class="kw">let</span> (<span class="ident">continuous_assignments</span>, <span class="ident">groups</span>) <span class="op">=</span> <span class="ident">connections</span>;
                 <span class="ident">ast::ComponentDef</span> {
                     <span class="ident">name</span>,
@@ -1513,32 +1513,32 @@
         }))
     }
 
-    <span class="kw">fn</span> <span class="ident">imports</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">imports</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">string_lit</span>(<span class="ident">path</span>)..] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">path</span>.<span class="ident">collect</span>()
+            [<span class="ident">string_lit</span>(<span class="ident">path</span>)..] =&gt; <span class="ident">path</span>.<span class="ident">collect</span>()
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">ext</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Primitive</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">ext</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Primitive</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">string_lit</span>(<span class="ident">file</span>), <span class="ident">primitive</span>(<span class="ident">prims</span>)..] <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">file</span>, <span class="ident">prims</span>.<span class="ident">collect</span>())
+            [<span class="ident">string_lit</span>(<span class="ident">file</span>), <span class="ident">primitive</span>(<span class="ident">prims</span>)..] =&gt; (<span class="ident">file</span>, <span class="ident">prims</span>.<span class="ident">collect</span>())
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">extern_or_component</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ExtOrComp</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">extern_or_component</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ExtOrComp</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">component</span>(<span class="ident">comp</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ExtOrComp::Comp</span>(<span class="ident">comp</span>),
-            [<span class="ident">ext</span>(<span class="ident">ext</span>)] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ExtOrComp::Ext</span>(<span class="ident">ext</span>)
+            [<span class="ident">component</span>(<span class="ident">comp</span>)] =&gt; <span class="ident">ExtOrComp::Comp</span>(<span class="ident">comp</span>),
+            [<span class="ident">ext</span>(<span class="ident">ext</span>)] =&gt; <span class="ident">ExtOrComp::Ext</span>(<span class="ident">ext</span>)
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">file</span>(<span class="ident">input</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::NamespaceDef</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">file</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::NamespaceDef</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">imports</span>(<span class="ident">imports</span>), <span class="ident">extern_or_component</span>(<span class="ident">mixed</span>).., <span class="ident">_EOI</span>] <span class="op">=</span><span class="op">&gt;</span> {
+            [<span class="ident">imports</span>(<span class="ident">imports</span>), <span class="ident">extern_or_component</span>(<span class="ident">mixed</span>).., <span class="ident">_EOI</span>] =&gt; {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">namespace</span> <span class="op">=</span>
                     <span class="ident">ast::NamespaceDef</span> {
                         <span class="ident">imports</span>,
@@ -1547,8 +1547,8 @@
                     };
                 <span class="kw">for</span> <span class="ident">m</span> <span class="kw">in</span> <span class="ident">mixed</span> {
                     <span class="kw">match</span> <span class="ident">m</span> {
-                        <span class="ident">ExtOrComp::Ext</span>(<span class="ident">ext</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">namespace</span>.<span class="ident">externs</span>.<span class="ident">push</span>(<span class="ident">ext</span>),
-                        <span class="ident">ExtOrComp::Comp</span>(<span class="ident">comp</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">namespace</span>.<span class="ident">components</span>.<span class="ident">push</span>(<span class="ident">comp</span>),
+                        <span class="ident">ExtOrComp::Ext</span>(<span class="ident">ext</span>) =&gt; <span class="ident">namespace</span>.<span class="ident">externs</span>.<span class="ident">push</span>(<span class="ident">ext</span>),
+                        <span class="ident">ExtOrComp::Comp</span>(<span class="ident">comp</span>) =&gt; <span class="ident">namespace</span>.<span class="ident">components</span>.<span class="ident">push</span>(<span class="ident">comp</span>),
                     }
                 }
                 <span class="ident">namespace</span>

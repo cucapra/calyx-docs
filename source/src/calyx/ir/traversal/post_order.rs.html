@@ -122,7 +122,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Panics</span>
     <span class="doccomment">/// Panics if there is no post-order traversal of the vectors possible.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">comps</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Component</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">comps</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Component</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">graph</span>: <span class="ident">DiGraph</span><span class="op">&lt;</span><span class="ident">usize</span>, ()<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">DiGraph::new</span>();
         <span class="comment">// Reverse mapping from index to comps.</span>
         <span class="kw">let</span> <span class="ident">rev_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">NodeIndex</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">comps</span>
@@ -148,9 +148,9 @@
     }
 
     <span class="doccomment">/// Traverses components in post-order and applies `upd`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">apply_update</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">upd</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">apply_update</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">upd</span>: <span class="ident">F</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
+        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
     {
         <span class="self">self</span>.<span class="ident">order</span>
             .<span class="ident">clone</span>()
@@ -160,7 +160,7 @@
     }
 
     <span class="doccomment">/// Returns the underlying component vector in original order.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Component</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take</span>(<span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Component</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">comps</span>
     }
 }

@@ -284,7 +284,7 @@
         <span class="ident">import</span>: <span class="ident">S</span>,
         <span class="ident">parent</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
         <span class="ident">lib_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>
+    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
     {
@@ -310,7 +310,7 @@
     <span class="kw">fn</span> <span class="ident">canonicalize_extern</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(
         <span class="ident">extern_path</span>: <span class="ident">S</span>,
         <span class="ident">parent</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>
+    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
     {
@@ -330,7 +330,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">construct</span>(
         <span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
         <span class="ident">lib_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::construct_with_all_deps</span>(<span class="ident">file</span>, <span class="ident">lib_path</span>, <span class="bool-val">false</span>)
     }
 
@@ -339,16 +339,16 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">construct_shallow</span>(
         <span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
         <span class="ident">lib_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::construct_with_all_deps</span>(<span class="ident">file</span>, <span class="ident">lib_path</span>, <span class="bool-val">true</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">get_parent</span>(<span class="ident">p</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PathBuf</span> {
+    <span class="kw">fn</span> <span class="ident">get_parent</span>(<span class="ident">p</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">PathBuf</span> {
         <span class="kw">let</span> <span class="ident">maybe_parent</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">parent</span>();
         <span class="kw">match</span> <span class="ident">maybe_parent</span> {
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">PathBuf::from</span>(<span class="string">&quot;.&quot;</span>),
-            <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">to_string_lossy</span>() <span class="op">=</span><span class="op">=</span> <span class="string">&quot;&quot;</span> {
+            <span class="prelude-val">None</span> =&gt; <span class="ident">PathBuf::from</span>(<span class="string">&quot;.&quot;</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">path</span>) =&gt; {
+                <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">to_string_lossy</span>() <span class="op">==</span> <span class="string">&quot;&quot;</span> {
                     <span class="ident">PathBuf::from</span>(<span class="string">&quot;.&quot;</span>)
                 } <span class="kw">else</span> {
                     <span class="ident">PathBuf::from</span>(<span class="ident">path</span>)
@@ -364,7 +364,7 @@
         <span class="ident">lib_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
         <span class="comment">// Parse imported components as declarations</span>
         <span class="ident">shallow</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="comment">// Construct initial namespace.</span>
         <span class="kw">let</span> <span class="ident">namespace</span> <span class="op">=</span> <span class="ident">NamespaceDef::construct</span>(<span class="ident">file</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">parent_path</span> <span class="op">=</span> <span class="ident">file</span>
@@ -394,7 +394,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">merge_into_ws</span> <span class="op">=</span> <span class="op">|</span><span class="ident">ns</span>: <span class="ident">NamespaceDef</span>,
                                  <span class="ident">parent</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
                                  <span class="ident">shallow</span>: <span class="ident">bool</span><span class="op">|</span>
-         <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+         -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span> {
             <span class="comment">// Canonicalize the extern paths and add them</span>
             <span class="ident">workspace</span>.<span class="ident">externs</span>.<span class="ident">append</span>(
                 <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ns</span>

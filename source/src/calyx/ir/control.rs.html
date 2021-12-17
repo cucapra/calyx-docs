@@ -376,27 +376,27 @@
 }
 
 <span class="kw">impl</span> <span class="ident">GetAttributes</span> <span class="kw">for</span> <span class="ident">Control</span> {
-    <span class="kw">fn</span> <span class="ident">get_mut_attributes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Attributes</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_mut_attributes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Attributes</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Seq</span>(<span class="ident">Seq</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Par</span>(<span class="ident">Par</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::If</span>(<span class="ident">If</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::While</span>(<span class="ident">While</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Invoke</span>(<span class="ident">Invoke</span> { <span class="ident">attributes</span>, .. })
-            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Enable</span>(<span class="ident">Enable</span> { <span class="ident">attributes</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">attributes</span>),
-            <span class="ident"><span class="self">Self</span>::Empty</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Enable</span>(<span class="ident">Enable</span> { <span class="ident">attributes</span>, .. }) =&gt; <span class="prelude-val">Some</span>(<span class="ident">attributes</span>),
+            <span class="ident"><span class="self">Self</span>::Empty</span>(..) =&gt; <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">get_attributes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Attributes</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_attributes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Attributes</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Seq</span>(<span class="ident">Seq</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Par</span>(<span class="ident">Par</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::If</span>(<span class="ident">If</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::While</span>(<span class="ident">While</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Invoke</span>(<span class="ident">Invoke</span> { <span class="ident">attributes</span>, .. })
-            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Enable</span>(<span class="ident">Enable</span> { <span class="ident">attributes</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">attributes</span>),
-            <span class="ident"><span class="self">Self</span>::Empty</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Enable</span>(<span class="ident">Enable</span> { <span class="ident">attributes</span>, .. }) =&gt; <span class="prelude-val">Some</span>(<span class="ident">attributes</span>),
+            <span class="ident"><span class="self">Self</span>::Empty</span>(..) =&gt; <span class="prelude-val">None</span>,
         }
     }
 }
@@ -404,12 +404,12 @@
 <span class="kw">impl</span> <span class="ident">Control</span> {
     <span class="comment">// ================ Constructor methods ================</span>
     <span class="doccomment">/// Convience constructor for empty.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">Control::Empty</span>(<span class="ident">Empty</span> {})
     }
 
     <span class="doccomment">/// Convience constructor for seq.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">seq</span>(<span class="ident">stmts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">seq</span>(<span class="ident">stmts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Control::Seq</span>(<span class="ident">Seq</span> {
             <span class="ident">stmts</span>,
             <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
@@ -417,7 +417,7 @@
     }
 
     <span class="doccomment">/// Convience constructor for par.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">par</span>(<span class="ident">stmts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">par</span>(<span class="ident">stmts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Control::Par</span>(<span class="ident">Par</span> {
             <span class="ident">stmts</span>,
             <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
@@ -425,7 +425,7 @@
     }
 
     <span class="doccomment">/// Convience constructor for enable.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">enable</span>(<span class="ident">group</span>: <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Group</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">enable</span>(<span class="ident">group</span>: <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Group</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Control::Enable</span>(<span class="ident">Enable</span> {
             <span class="ident">group</span>,
             <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
@@ -433,7 +433,7 @@
     }
 
     <span class="doccomment">/// Convience constructor for invoke.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">invoke</span>(<span class="ident">comp</span>: <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Cell</span><span class="op">&gt;</span>, <span class="ident">inputs</span>: <span class="ident">PortMap</span>, <span class="ident">outputs</span>: <span class="ident">PortMap</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">invoke</span>(<span class="ident">comp</span>: <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Cell</span><span class="op">&gt;</span>, <span class="ident">inputs</span>: <span class="ident">PortMap</span>, <span class="ident">outputs</span>: <span class="ident">PortMap</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Control::Invoke</span>(<span class="ident">Invoke</span> {
             <span class="ident">comp</span>,
             <span class="ident">inputs</span>,
@@ -449,7 +449,7 @@
         <span class="ident">cond</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">CombGroup</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">tbranch</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>,
         <span class="ident">fbranch</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="ident">Control::If</span>(<span class="ident">If</span> {
             <span class="ident">port</span>,
             <span class="ident">cond</span>,
@@ -464,7 +464,7 @@
         <span class="ident">port</span>: <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span>,
         <span class="ident">cond</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">CombGroup</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">body</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="ident">Control::While</span>(<span class="ident">While</span> {
             <span class="ident">port</span>,
             <span class="ident">cond</span>,
@@ -479,13 +479,13 @@
     <span class="doccomment">/// [Clone] trait because cloning control is not very common and clones</span>
     <span class="doccomment">/// should be explicit.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::should_implement_trait</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clone</span>(<span class="ident">con</span>: <span class="kw-2">&amp;</span><span class="ident">Control</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Control</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clone</span>(<span class="ident">con</span>: <span class="kw-2">&amp;</span><span class="ident">Control</span>) -&gt; <span class="ident">Control</span> {
         <span class="kw">match</span> <span class="ident">con</span> {
-            <span class="ident">Control::Seq</span>(<span class="ident">Seq</span> { <span class="ident">stmts</span>, <span class="ident">attributes</span> }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Control::Seq</span>(<span class="ident">Seq</span> {
+            <span class="ident">Control::Seq</span>(<span class="ident">Seq</span> { <span class="ident">stmts</span>, <span class="ident">attributes</span> }) =&gt; <span class="ident">Control::Seq</span>(<span class="ident">Seq</span> {
                 <span class="ident">stmts</span>: <span class="ident">stmts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">stmt</span><span class="op">|</span> <span class="ident">Control::clone</span>(<span class="ident">stmt</span>)).<span class="ident">collect</span>(),
                 <span class="ident">attributes</span>: <span class="ident">attributes</span>.<span class="ident">clone</span>(),
             }),
-            <span class="ident">Control::Par</span>(<span class="ident">Par</span> { <span class="ident">stmts</span>, <span class="ident">attributes</span> }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Control::Par</span>(<span class="ident">Par</span> {
+            <span class="ident">Control::Par</span>(<span class="ident">Par</span> { <span class="ident">stmts</span>, <span class="ident">attributes</span> }) =&gt; <span class="ident">Control::Par</span>(<span class="ident">Par</span> {
                 <span class="ident">stmts</span>: <span class="ident">stmts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">stmt</span><span class="op">|</span> <span class="ident">Control::clone</span>(<span class="ident">stmt</span>)).<span class="ident">collect</span>(),
                 <span class="ident">attributes</span>: <span class="ident">attributes</span>.<span class="ident">clone</span>(),
             }),
@@ -495,7 +495,7 @@
                 <span class="ident">tbranch</span>,
                 <span class="ident">fbranch</span>,
                 <span class="ident">attributes</span>,
-            }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Control::If</span>(<span class="ident">If</span> {
+            }) =&gt; <span class="ident">Control::If</span>(<span class="ident">If</span> {
                 <span class="ident">port</span>: <span class="ident">Rc::clone</span>(<span class="ident">port</span>),
                 <span class="ident">cond</span>: <span class="ident">cond</span>.<span class="ident">clone</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">cg</span><span class="op">|</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">cg</span>)),
                 <span class="ident">tbranch</span>: <span class="ident">Box::new</span>(<span class="ident">Control::clone</span>(<span class="ident">tbranch</span>)),
@@ -507,7 +507,7 @@
                 <span class="ident">cond</span>,
                 <span class="ident">body</span>,
                 <span class="ident">attributes</span>,
-            }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Control::While</span>(<span class="ident">While</span> {
+            }) =&gt; <span class="ident">Control::While</span>(<span class="ident">While</span> {
                 <span class="ident">port</span>: <span class="ident">Rc::clone</span>(<span class="ident">port</span>),
                 <span class="ident">cond</span>: <span class="ident">cond</span>.<span class="ident">clone</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">cg</span><span class="op">|</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">cg</span>)),
                 <span class="ident">body</span>: <span class="ident">Box::new</span>(<span class="ident">Control::clone</span>(<span class="ident">body</span>)),
@@ -519,7 +519,7 @@
                 <span class="ident">outputs</span>,
                 <span class="ident">attributes</span>,
                 <span class="ident">comb_group</span>,
-            }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Control::Invoke</span>(<span class="ident">Invoke</span> {
+            }) =&gt; <span class="ident">Control::Invoke</span>(<span class="ident">Invoke</span> {
                 <span class="ident">comp</span>: <span class="ident">Rc::clone</span>(<span class="ident">comp</span>),
                 <span class="ident">inputs</span>: <span class="ident">inputs</span>
                     .<span class="ident">iter</span>()
@@ -532,13 +532,13 @@
                 <span class="ident">comb_group</span>: <span class="ident">comb_group</span>.<span class="ident">clone</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">cg</span><span class="op">|</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">cg</span>)),
                 <span class="ident">attributes</span>: <span class="ident">attributes</span>.<span class="ident">clone</span>(),
             }),
-            <span class="ident">Control::Enable</span>(<span class="ident">Enable</span> { <span class="ident">group</span>, <span class="ident">attributes</span> }) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Control::Enable</span>(<span class="ident">Enable</span> { <span class="ident">group</span>, <span class="ident">attributes</span> }) =&gt; {
                 <span class="ident">Control::Enable</span>(<span class="ident">Enable</span> {
                     <span class="ident">group</span>: <span class="ident">Rc::clone</span>(<span class="ident">group</span>),
                     <span class="ident">attributes</span>: <span class="ident">attributes</span>.<span class="ident">clone</span>(),
                 })
             }
-            <span class="ident">Control::Empty</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Control::empty</span>(),
+            <span class="ident">Control::Empty</span>(<span class="kw">_</span>) =&gt; <span class="ident">Control::empty</span>(),
         }
     }
 }

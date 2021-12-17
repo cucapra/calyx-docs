@@ -2,22 +2,22 @@
 <p>The analyses construct data-structures that make answering certain queries
 about Calyx programs easier.</p>
 </div></details><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="mod" href="reaching_defns/index.html" title="calyx::analysis::reaching_defns mod">reaching_defns</a></div><div class="item-right docblock-short"><p>Calculate the reaching definitions in a control program.</p>
-</div></div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="struct" href="struct.ControlPorts.html" title="calyx::analysis::ControlPorts struct">ControlPorts</a></div><div class="item-right docblock-short"><p>Contains a mapping from name of groups to the ports read by the control
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="reaching_defns/index.html" title="calyx::analysis::reaching_defns mod">reaching_defns</a></div><div class="item-right docblock-short"><p>Calculate the reaching definitions in a control program.</p>
+</div></div></div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ControlPorts.html" title="calyx::analysis::ControlPorts struct">ControlPorts</a></div><div class="item-right docblock-short"><p>Contains a mapping from name of groups to the ports read by the control
 program.
 The vector of ports is guaranteed to only contain unique ports.</p>
-</div><div class="item-left module-item"><a class="struct" href="struct.GraphAnalysis.html" title="calyx::analysis::GraphAnalysis struct">GraphAnalysis</a></div><div class="item-right docblock-short"><p>Constructs a graph based representation of a component. Each node represents
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.GraphAnalysis.html" title="calyx::analysis::GraphAnalysis struct">GraphAnalysis</a></div><div class="item-right docblock-short"><p>Constructs a graph based representation of a component. Each node represents
 a <a href="../ir/struct.Port.html"><code>ir::Port</code></a> and each directed edge (<code>X -&gt; Y</code>) means
 that <code>X</code>’s value is read in an assignment to <code>Y</code>.</p>
-</div><div class="item-left module-item"><a class="struct" href="struct.GraphColoring.html" title="calyx::analysis::GraphColoring struct">GraphColoring</a></div><div class="item-right docblock-short"><p>Defines a greedy graph coloring algorithm over a generic conflict graph.</p>
-</div><div class="item-left module-item"><a class="struct" href="struct.LiveRangeAnalysis.html" title="calyx::analysis::LiveRangeAnalysis struct">LiveRangeAnalysis</a></div><div class="item-right docblock-short"><p>This analysis implements a parallel version of a classic liveness analysis.
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.GraphColoring.html" title="calyx::analysis::GraphColoring struct">GraphColoring</a></div><div class="item-right docblock-short"><p>Defines a greedy graph coloring algorithm over a generic conflict graph.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.LiveRangeAnalysis.html" title="calyx::analysis::LiveRangeAnalysis struct">LiveRangeAnalysis</a></div><div class="item-right docblock-short"><p>This analysis implements a parallel version of a classic liveness analysis.
 For each group, it returns a list of the registers that are “alive” during
 an execution of a group.</p>
-</div><div class="item-left module-item"><a class="struct" href="struct.ReadWriteSet.html" title="calyx::analysis::ReadWriteSet struct">ReadWriteSet</a></div><div class="item-right docblock-short"><p>Calcuate the reads-from and writes-to set for a given set of assignments.</p>
-</div><div class="item-left module-item"><a class="struct" href="struct.ScheduleConflicts.html" title="calyx::analysis::ScheduleConflicts struct">ScheduleConflicts</a></div><div class="item-right docblock-short"><p>A conflict graph that describes which groups are being run in parallel
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ReadWriteSet.html" title="calyx::analysis::ReadWriteSet struct">ReadWriteSet</a></div><div class="item-right docblock-short"><p>Calcuate the reads-from and writes-to set for a given set of assignments.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ScheduleConflicts.html" title="calyx::analysis::ScheduleConflicts struct">ScheduleConflicts</a></div><div class="item-right docblock-short"><p>A conflict graph that describes which groups are being run in parallel
 to each other.</p>
-</div><div class="item-left module-item"><a class="struct" href="struct.VariableDetection.html" title="calyx::analysis::VariableDetection struct">VariableDetection</a></div><div class="item-right docblock-short"><p>Detects if a group is solely being used to update a register.</p>
-</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="calyx" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.VariableDetection.html" title="calyx::analysis::VariableDetection struct">VariableDetection</a></div><div class="item-right docblock-short"><p>Detects if a group is solely being used to update a register.</p>
+</div></div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="calyx" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script>
 </body></html>

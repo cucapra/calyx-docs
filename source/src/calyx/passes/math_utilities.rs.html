@@ -90,15 +90,15 @@
 <span class="doccomment">/// `get_bit_width_from(4)` == 2 // 4 states can be represented with exactly 2 bits.</span>
 <span class="doccomment">/// `get_bit_width_from(5)` == 3 // 5 states requires a minimum of 3 bits.</span>
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_bit_width_from</span>(<span class="ident">n</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
-    <span class="kw">if</span> <span class="ident">n</span> <span class="op">=</span><span class="op">=</span> <span class="number">0_u64</span> <span class="op">|</span><span class="op">|</span> <span class="ident">n</span> <span class="op">=</span><span class="op">=</span> <span class="number">1_u64</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_bit_width_from</span>(<span class="ident">n</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
+    <span class="kw">if</span> <span class="ident">n</span> <span class="op">==</span> <span class="number">0_u64</span> <span class="op">|</span><span class="op">|</span> <span class="ident">n</span> <span class="op">==</span> <span class="number">1_u64</span> {
         <span class="kw">return</span> <span class="ident">n</span>;
     }
     <span class="kw">for</span> <span class="ident">index</span> <span class="kw">in</span> <span class="number">0u8</span>..<span class="number">63</span> {
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> (<span class="number">63</span> <span class="op">-</span> <span class="ident">index</span>) <span class="kw">as</span> <span class="ident">u64</span>;
         <span class="kw">if</span> <span class="ident">n</span> <span class="op">&amp;</span> (<span class="number">1u64</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">x</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
             <span class="comment">// If n is a power of two, return x. Otherwise, x + 1.</span>
-            <span class="kw">return</span> <span class="kw">if</span> (<span class="ident">n</span> <span class="op">&amp;</span> (<span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>)) <span class="op">=</span><span class="op">=</span> <span class="number">0u64</span> { <span class="ident">x</span> } <span class="kw">else</span> { <span class="ident">x</span> <span class="op">+</span> <span class="number">1</span> };
+            <span class="kw">return</span> <span class="kw">if</span> (<span class="ident">n</span> <span class="op">&amp;</span> (<span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>)) <span class="op">==</span> <span class="number">0u64</span> { <span class="ident">x</span> } <span class="kw">else</span> { <span class="ident">x</span> <span class="op">+</span> <span class="number">1</span> };
         }
     }
     <span class="macro">panic!</span>();

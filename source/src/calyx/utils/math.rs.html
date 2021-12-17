@@ -13,15 +13,15 @@
 <span id="13">13</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::cmp</span>;
 
-<span class="kw">fn</span> <span class="ident">bits_helper</span>(<span class="ident">n</span>: <span class="ident">u64</span>, <span class="ident">i</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
-    <span class="kw">if</span> <span class="ident">n</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+<span class="kw">fn</span> <span class="ident">bits_helper</span>(<span class="ident">n</span>: <span class="ident">u64</span>, <span class="ident">i</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
+    <span class="kw">if</span> <span class="ident">n</span> <span class="op">==</span> <span class="number">0</span> {
         <span class="ident">i</span>
     } <span class="kw">else</span> {
         <span class="ident">bits_helper</span>(<span class="ident">n</span> <span class="op">/</span> <span class="number">2</span>, <span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>)
     }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bits_needed_for</span>(<span class="ident">n</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bits_needed_for</span>(<span class="ident">n</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
     <span class="ident">cmp::max</span>(<span class="ident">bits_helper</span>(<span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>, <span class="number">0</span>), <span class="number">1</span>)
 }
 </code></pre></div>

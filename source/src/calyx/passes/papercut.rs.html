@@ -335,7 +335,7 @@
 <span class="doccomment">/// Construct @write_together specs from the primitive definitions.</span>
 <span class="kw">fn</span> <span class="ident">write_together_specs</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
     <span class="ident">primitives</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ir::Primitive</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">write_together</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
     <span class="kw">for</span> <span class="ident">prim</span> <span class="kw">in</span> <span class="ident">primitives</span> {
         <span class="kw">let</span> <span class="ident">writes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">prim</span>
@@ -361,7 +361,7 @@
 <span class="doccomment">/// Construct @read_together specs from the primitive definitions.</span>
 <span class="kw">fn</span> <span class="ident">read_together_specs</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
     <span class="ident">primitives</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ir::Primitive</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ReadTogether</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ReadTogether</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">read_together</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
     <span class="kw">for</span> <span class="ident">prim</span> <span class="kw">in</span> <span class="ident">primitives</span> {
         <span class="kw">let</span> <span class="ident">reads</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ReadTogether</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">prim</span>
@@ -379,7 +379,7 @@
                     <span class="kw">if</span> <span class="ident">outputs</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">1</span> {
                         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Papercut</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid @read_together specification for primitive `{}`. Each specification groups is only allowed to have one output port specified.&quot;</span>, <span class="ident">prim</span>.<span class="ident">name</span>), <span class="ident">prim</span>.<span class="ident">name</span>.<span class="ident">clone</span>()))
                     }
-                    <span class="macro">assert!</span>(<span class="ident">outputs</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span>);
+                    <span class="macro">assert!</span>(<span class="ident">outputs</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span>);
                     <span class="prelude-val">Ok</span>((
                         <span class="ident">outputs</span>[<span class="number">0</span>].<span class="ident">name</span>.<span class="ident">clone</span>(),
                         <span class="ident">inputs</span>
@@ -397,7 +397,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ConstructVisitor</span> <span class="kw">for</span> <span class="ident">Papercut</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Context</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">write_together</span> <span class="op">=</span> <span class="ident">write_together_specs</span>(<span class="ident">ctx</span>.<span class="ident">lib</span>.<span class="ident">signatures</span>());
         <span class="kw">let</span> <span class="ident">read_together</span> <span class="op">=</span> <span class="ident">read_together_specs</span>(<span class="ident">ctx</span>.<span class="ident">lib</span>.<span class="ident">signatures</span>())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">Papercut</span> {
@@ -412,11 +412,11 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Named</span> <span class="kw">for</span> <span class="ident">Papercut</span> {
-    <span class="kw">fn</span> <span class="ident">name</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">name</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="string">&quot;papercut&quot;</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">description</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">description</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="string">&quot;Detect various common made mistakes&quot;</span>
     }
 }
@@ -424,7 +424,7 @@
 <span class="doccomment">/// Extract information about a port.</span>
 <span class="kw">fn</span> <span class="ident">port_information</span>(
     <span class="ident">port_ref</span>: <span class="ident">ir::RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>((<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>), <span class="ident">ir::Id</span>)<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>((<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>), <span class="ident">ir::Id</span>)<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">port_ref</span>.<span class="ident">borrow</span>();
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell_wref</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">parent</span> {
         <span class="kw">let</span> <span class="ident">cell_ref</span> <span class="op">=</span> <span class="ident">cell_wref</span>.<span class="ident">upgrade</span>();
@@ -444,7 +444,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VisResult</span> {
+    ) -&gt; <span class="ident">VisResult</span> {
         <span class="comment">// If the control program is empty, check that the `done` signal</span>
         <span class="comment">// has been assigned to.</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::Control::Empty</span>(..) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>() {
@@ -453,7 +453,7 @@
                     <span class="kw">let</span> <span class="ident">assign</span> <span class="op">=</span> <span class="ident">assign_ref</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>();
                     <span class="comment">// If at least one assignment used the `done` port, then</span>
                     <span class="comment">// we&#39;re good.</span>
-                    <span class="ident">assign</span>.<span class="ident">name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;done&quot;</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">assign</span>.<span class="ident">is_hole</span>()
+                    <span class="ident">assign</span>.<span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;done&quot;</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">assign</span>.<span class="ident">is_hole</span>()
                 });
             <span class="kw">if</span> <span class="ident">done_use</span>.<span class="ident">is_none</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Papercut</span>(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` has an empty control program and does not assign to the `done` port. Without an assignment to the `done`, the component cannot return control flow.&quot;</span>, <span class="ident">comp</span>.<span class="ident">name</span>.<span class="ident">clone</span>()), <span class="ident">comp</span>.<span class="ident">name</span>.<span class="ident">clone</span>()));
@@ -559,7 +559,7 @@
         <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::While</span>,
         <span class="ident">_comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VisResult</span> {
+    ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">is_none</span>() {
             <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">port</span>.<span class="ident">borrow</span>();
             <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell_wref</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">parent</span> {
@@ -586,7 +586,7 @@
         <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::If</span>,
         <span class="ident">_comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VisResult</span> {
+    ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">is_none</span>() {
             <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">port</span>.<span class="ident">borrow</span>();
             <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell_wref</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">parent</span> {

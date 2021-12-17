@@ -103,11 +103,11 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Named</span> <span class="kw">for</span> <span class="ident">DeadGroupRemoval</span> {
-    <span class="kw">fn</span> <span class="ident">name</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">name</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="string">&quot;dead-group-removal&quot;</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">description</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">description</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="string">&quot;removes unsed groups from components&quot;</span>
     }
 }
@@ -118,7 +118,7 @@
         <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Enable</span>,
         <span class="ident">_comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">ir::LibrarySignatures</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VisResult</span> {
+    ) -&gt; <span class="ident">VisResult</span> {
         <span class="self">self</span>.<span class="ident">used_groups</span>.<span class="ident">insert</span>(<span class="ident">s</span>.<span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">clone_name</span>());
         <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
     }
@@ -128,7 +128,7 @@
         <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::If</span>,
         <span class="ident">_comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">ir::LibrarySignatures</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VisResult</span> {
+    ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cg</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">cond</span> {
             <span class="self">self</span>.<span class="ident">used_comb_groups</span>.<span class="ident">insert</span>(<span class="ident">cg</span>.<span class="ident">borrow</span>().<span class="ident">clone_name</span>());
         }
@@ -140,7 +140,7 @@
         <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::While</span>,
         <span class="ident">_comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">ir::LibrarySignatures</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VisResult</span> {
+    ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cg</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">cond</span> {
             <span class="self">self</span>.<span class="ident">used_comb_groups</span>.<span class="ident">insert</span>(<span class="ident">cg</span>.<span class="ident">borrow</span>().<span class="ident">clone_name</span>());
         }
@@ -151,13 +151,13 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VisResult</span> {
+    ) -&gt; <span class="ident">VisResult</span> {
         <span class="comment">// Groups that are driven by their `go` signals should not be</span>
         <span class="comment">// removed.</span>
         <span class="kw">for</span> <span class="ident">group</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>() {
             <span class="kw">for</span> <span class="ident">assign</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">assignments</span> {
                 <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">assign</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>();
-                <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">is_hole</span>() <span class="op">&amp;&amp;</span> <span class="ident">dst</span>.<span class="ident">name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;go&quot;</span> {
+                <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">is_hole</span>() <span class="op">&amp;&amp;</span> <span class="ident">dst</span>.<span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;go&quot;</span> {
                     <span class="self">self</span>.<span class="ident">used_groups</span>.<span class="ident">insert</span>(<span class="ident">dst</span>.<span class="ident">get_parent_name</span>().<span class="ident">clone</span>());
                 }
             }

@@ -74,7 +74,7 @@
 <span class="kw">impl</span> <span class="ident">NameGenerator</span> {
     <span class="doccomment">/// Create a NameGenerator where `names` are already defined so that this generator</span>
     <span class="doccomment">/// will never generate those names.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_prev_defined_names</span>(<span class="ident">names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_prev_defined_names</span>(<span class="ident">names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">NameGenerator</span> {
             <span class="ident">generated_names</span>: <span class="ident">names</span>,
             <span class="ident">name_hash</span>: <span class="ident">HashMap::default</span>(),
@@ -92,7 +92,7 @@
     <span class="doccomment">/// namegen.gen_name(&quot;seq&quot;);  // Generates &quot;seq0&quot;</span>
     <span class="doccomment">/// namegen.gen_name(&quot;seq&quot;);  // Generates &quot;seq1&quot;</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_name</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">prefix</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Id</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_name</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">prefix</span>: <span class="ident">S</span>) -&gt; <span class="ident">ir::Id</span>
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ToString</span> <span class="op">+</span> <span class="ident">Clone</span>,
     {
@@ -105,7 +105,7 @@
                 .<span class="ident">and_modify</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>)
                 .<span class="ident">or_insert</span>(<span class="op">-</span><span class="number">1</span>);
 
-            <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">count</span> <span class="op">=</span><span class="op">=</span> <span class="op">-</span><span class="number">1</span> {
+            <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">count</span> <span class="op">==</span> <span class="op">-</span><span class="number">1</span> {
                 <span class="ident">cur_prefix</span>
             } <span class="kw">else</span> {
                 <span class="ident">ir::Id::from</span>(<span class="ident">cur_prefix</span>.<span class="ident">to_string</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">count</span>.<span class="ident">to_string</span>())

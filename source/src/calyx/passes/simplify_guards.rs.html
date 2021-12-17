@@ -164,28 +164,28 @@
 <span class="kw">use</span> <span class="ident">ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">VisResult</span>};
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">ir::Guard</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Expr</span><span class="op">&lt;</span><span class="ident">ir::Guard</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">guard</span>: <span class="ident">ir::Guard</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">guard</span>: <span class="ident">ir::Guard</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">match</span> <span class="ident">guard</span> {
-            <span class="ident">ir::Guard::And</span>(<span class="ident">l</span>, <span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Expr::and</span>((<span class="kw-2">*</span><span class="ident">l</span>).<span class="ident">into</span>(), (<span class="kw-2">*</span><span class="ident">r</span>).<span class="ident">into</span>()),
-            <span class="ident">ir::Guard::Or</span>(<span class="ident">l</span>, <span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Expr::or</span>((<span class="kw-2">*</span><span class="ident">l</span>).<span class="ident">into</span>(), (<span class="kw-2">*</span><span class="ident">r</span>).<span class="ident">into</span>()),
-            <span class="ident">ir::Guard::Not</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Expr::not</span>((<span class="kw-2">*</span><span class="ident">e</span>).<span class="ident">into</span>()),
-            <span class="ident">ir::Guard::True</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Expr::Const</span>(<span class="bool-val">true</span>),
-            <span class="ident">ir::Guard::Neq</span>(<span class="ident">l</span>, <span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Expr::not</span>(<span class="ident">ir::Guard::Eq</span>(<span class="ident">l</span>, <span class="ident">r</span>).<span class="ident">into</span>()),
-            <span class="ident">ir::Guard::Leq</span>(<span class="ident">l</span>, <span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Expr::not</span>(<span class="ident">ir::Guard::Gt</span>(<span class="ident">l</span>, <span class="ident">r</span>).<span class="ident">into</span>()),
-            <span class="ident">ir::Guard::Geq</span>(<span class="ident">l</span>, <span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Expr::not</span>(<span class="ident">ir::Guard::Lt</span>(<span class="ident">l</span>, <span class="ident">r</span>).<span class="ident">into</span>()),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Expr::Terminal</span>(<span class="ident">guard</span>),
+            <span class="ident">ir::Guard::And</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Expr::and</span>((<span class="kw-2">*</span><span class="ident">l</span>).<span class="ident">into</span>(), (<span class="kw-2">*</span><span class="ident">r</span>).<span class="ident">into</span>()),
+            <span class="ident">ir::Guard::Or</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Expr::or</span>((<span class="kw-2">*</span><span class="ident">l</span>).<span class="ident">into</span>(), (<span class="kw-2">*</span><span class="ident">r</span>).<span class="ident">into</span>()),
+            <span class="ident">ir::Guard::Not</span>(<span class="ident">e</span>) =&gt; <span class="ident">Expr::not</span>((<span class="kw-2">*</span><span class="ident">e</span>).<span class="ident">into</span>()),
+            <span class="ident">ir::Guard::True</span> =&gt; <span class="ident">Expr::Const</span>(<span class="bool-val">true</span>),
+            <span class="ident">ir::Guard::Neq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Expr::not</span>(<span class="ident">ir::Guard::Eq</span>(<span class="ident">l</span>, <span class="ident">r</span>).<span class="ident">into</span>()),
+            <span class="ident">ir::Guard::Leq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Expr::not</span>(<span class="ident">ir::Guard::Gt</span>(<span class="ident">l</span>, <span class="ident">r</span>).<span class="ident">into</span>()),
+            <span class="ident">ir::Guard::Geq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Expr::not</span>(<span class="ident">ir::Guard::Lt</span>(<span class="ident">l</span>, <span class="ident">r</span>).<span class="ident">into</span>()),
+            <span class="kw">_</span> =&gt; <span class="ident">Expr::Terminal</span>(<span class="ident">guard</span>),
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Expr</span><span class="op">&lt;</span><span class="ident">ir::Guard</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ir::Guard</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">expr</span>: <span class="ident">Expr</span><span class="op">&lt;</span><span class="ident">ir::Guard</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">expr</span>: <span class="ident">Expr</span><span class="op">&lt;</span><span class="ident">ir::Guard</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">match</span> <span class="ident">expr</span> {
-            <span class="ident">Expr::Terminal</span>(<span class="ident">g</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">g</span>,
-            <span class="ident">Expr::And</span>(<span class="ident">l</span>, <span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::Guard::and</span>((<span class="kw-2">*</span><span class="ident">l</span>).<span class="ident">into</span>(), (<span class="kw-2">*</span><span class="ident">r</span>).<span class="ident">into</span>()),
-            <span class="ident">Expr::Or</span>(<span class="ident">l</span>, <span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::Guard::or</span>((<span class="kw-2">*</span><span class="ident">l</span>).<span class="ident">into</span>(), (<span class="kw-2">*</span><span class="ident">r</span>).<span class="ident">into</span>()),
-            <span class="ident">Expr::Not</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="op">!</span><span class="ident">ir::Guard::from</span>(<span class="kw-2">*</span><span class="ident">e</span>),
-            <span class="ident">Expr::Const</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Expr::Terminal</span>(<span class="ident">g</span>) =&gt; <span class="ident">g</span>,
+            <span class="ident">Expr::And</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">ir::Guard::and</span>((<span class="kw-2">*</span><span class="ident">l</span>).<span class="ident">into</span>(), (<span class="kw-2">*</span><span class="ident">r</span>).<span class="ident">into</span>()),
+            <span class="ident">Expr::Or</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">ir::Guard::or</span>((<span class="kw-2">*</span><span class="ident">l</span>).<span class="ident">into</span>(), (<span class="kw-2">*</span><span class="ident">r</span>).<span class="ident">into</span>()),
+            <span class="ident">Expr::Not</span>(<span class="ident">e</span>) =&gt; <span class="op">!</span><span class="ident">ir::Guard::from</span>(<span class="kw-2">*</span><span class="ident">e</span>),
+            <span class="ident">Expr::Const</span>(<span class="ident">b</span>) =&gt; {
                 <span class="kw">if</span> <span class="ident">b</span> {
                     <span class="ident">ir::Guard::True</span>
                 } <span class="kw">else</span> {
@@ -202,44 +202,44 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SimplifyGuards</span>;
 
 <span class="kw">impl</span> <span class="ident">Named</span> <span class="kw">for</span> <span class="ident">SimplifyGuards</span> {
-    <span class="kw">fn</span> <span class="ident">name</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">name</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="string">&quot;simplify-guards&quot;</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">description</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">description</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="string">&quot;Aggressively simplify guards using binary decision diagrams&quot;</span>
     }
 }
 
 <span class="kw">fn</span> <span class="ident">extract_dnf</span>(<span class="ident">expr</span>: <span class="ident">Expr</span><span class="op">&lt;</span><span class="ident">ir::Guard</span><span class="op">&gt;</span>, <span class="ident">acc</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Expr</span><span class="op">&lt;</span><span class="ident">ir::Guard</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
     <span class="kw">match</span> <span class="ident">expr</span> {
-        <span class="ident">Expr::Or</span>(<span class="ident">l</span>, <span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Expr::Or</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; {
             <span class="ident">extract_dnf</span>(<span class="kw-2">*</span><span class="ident">l</span>, <span class="ident">acc</span>);
             <span class="ident">extract_dnf</span>(<span class="kw-2">*</span><span class="ident">r</span>, <span class="ident">acc</span>);
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">acc</span>.<span class="ident">push</span>(<span class="ident">expr</span>),
+        <span class="kw">_</span> =&gt; <span class="ident">acc</span>.<span class="ident">push</span>(<span class="ident">expr</span>),
     }
 }
 
 <span class="kw">fn</span> <span class="ident">extract_cnf</span>(<span class="ident">expr</span>: <span class="ident">Expr</span><span class="op">&lt;</span><span class="ident">ir::Guard</span><span class="op">&gt;</span>, <span class="ident">acc</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Expr</span><span class="op">&lt;</span><span class="ident">ir::Guard</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
     <span class="kw">match</span> <span class="ident">expr</span> {
-        <span class="ident">Expr::And</span>(<span class="ident">l</span>, <span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Expr::And</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; {
             <span class="ident">extract_cnf</span>(<span class="kw-2">*</span><span class="ident">l</span>, <span class="ident">acc</span>);
             <span class="ident">extract_cnf</span>(<span class="kw-2">*</span><span class="ident">r</span>, <span class="ident">acc</span>);
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">acc</span>.<span class="ident">push</span>(<span class="ident">expr</span>),
+        <span class="kw">_</span> =&gt; <span class="ident">acc</span>.<span class="ident">push</span>(<span class="ident">expr</span>),
     }
 }
 
 <span class="doccomment">/// Simplify the guard using a few simple tricks.</span>
-<span class="kw">fn</span> <span class="ident">simplify_guard</span>(<span class="ident">guard</span>: <span class="ident">ir::Guard</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Guard</span> {
+<span class="kw">fn</span> <span class="ident">simplify_guard</span>(<span class="ident">guard</span>: <span class="ident">ir::Guard</span>) -&gt; <span class="ident">ir::Guard</span> {
     <span class="comment">// Use the BBD library to get a sum-of-product or DNF form.</span>
     <span class="kw">let</span> <span class="ident">sop</span> <span class="op">=</span> <span class="ident">Expr::from</span>(<span class="ident">guard</span>).<span class="ident">simplify_via_bdd</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">disjuncts</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="ident">extract_dnf</span>(<span class="ident">sop</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">disjuncts</span>);
 
     <span class="comment">// If this isn&#39;t a disjunct, return</span>
-    <span class="kw">if</span> <span class="ident">disjuncts</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+    <span class="kw">if</span> <span class="ident">disjuncts</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
         <span class="kw">return</span> <span class="ident">disjuncts</span>.<span class="ident">pop</span>().<span class="ident">unwrap</span>().<span class="ident">into</span>();
     }
 
@@ -287,7 +287,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VisResult</span> {
+    ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">for</span> <span class="ident">group</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>() {
             <span class="ident">group</span>
                 .<span class="ident">borrow_mut</span>()
