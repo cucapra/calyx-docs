@@ -339,6 +339,11 @@
 <span id="339">339</span>
 <span id="340">340</span>
 <span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
@@ -439,6 +444,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
+        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
         <span class="self">self</span>.<span class="ident">updated</span> <span class="op">=</span> <span class="bool-val">false</span>;
 
@@ -547,6 +553,7 @@
         <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Invoke</span>,
         <span class="ident">_comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
+        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">comb_group</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new_group</span> <span class="op">=</span> <span class="prelude-val">None</span>;
@@ -596,6 +603,7 @@
         <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::While</span>,
         <span class="ident">_comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
+        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">is_some</span>() {
             <span class="comment">// Construct a new `while` statement</span>
@@ -632,6 +640,7 @@
         <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::If</span>,
         <span class="ident">_comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
+        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">is_some</span>() {
             <span class="comment">// Construct a new `if` statement</span>
@@ -670,6 +679,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
+        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">updated</span> <span class="op">&amp;&amp;</span> <span class="ident">comp</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>).<span class="ident">is_some</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::PassAssumption</span>(

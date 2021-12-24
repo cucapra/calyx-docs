@@ -303,6 +303,9 @@
 <span id="303">303</span>
 <span id="304">304</span>
 <span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{
@@ -444,6 +447,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
+        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
         <span class="comment">// If the control program is empty, check that the `done` signal</span>
         <span class="comment">// has been assigned to.</span>
@@ -559,6 +563,7 @@
         <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::While</span>,
         <span class="ident">_comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
+        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">is_none</span>() {
             <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">port</span>.<span class="ident">borrow</span>();
@@ -586,6 +591,7 @@
         <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::If</span>,
         <span class="ident">_comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
+        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">is_none</span>() {
             <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">port</span>.<span class="ident">borrow</span>();
