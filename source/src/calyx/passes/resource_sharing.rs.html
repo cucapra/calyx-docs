@@ -120,7 +120,7 @@
     <span class="ident">used_cells_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 
     <span class="doccomment">/// This is used to rewrite all uses of `old_cell` with `new_cell` in the group.</span>
-    <span class="ident">rewrites</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
+    <span class="ident">rewrites</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 
     <span class="doccomment">/// Set of shareable components.</span>
     <span class="ident">shareable_components</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
@@ -153,14 +153,14 @@
         }
         <span class="prelude-val">Ok</span>(<span class="ident">ResourceSharing</span> {
             <span class="ident">used_cells_map</span>: <span class="ident">HashMap::new</span>(),
-            <span class="ident">rewrites</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">rewrites</span>: <span class="ident">HashMap::new</span>(),
             <span class="ident">shareable_components</span>,
         })
     }
 
     <span class="kw">fn</span> <span class="ident">clear_data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">used_cells_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-        <span class="self">self</span>.<span class="ident">rewrites</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="self">self</span>.<span class="ident">rewrites</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
     }
 }
 
@@ -206,11 +206,11 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">set_rewrites</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">rewrites</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>)<span class="op">&gt;</span>) {
+    <span class="kw">fn</span> <span class="ident">set_rewrites</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">rewrites</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
         <span class="self">self</span>.<span class="ident">rewrites</span> <span class="op">=</span> <span class="ident">rewrites</span>;
     }
 
-    <span class="kw">fn</span> <span class="ident">get_rewrites</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[(<span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>)] {
+    <span class="kw">fn</span> <span class="ident">get_rewrites</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">rewrites</span>
     }
 }
