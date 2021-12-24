@@ -482,11 +482,11 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clone</span>(<span class="ident">con</span>: <span class="kw-2">&amp;</span><span class="ident">Control</span>) -&gt; <span class="ident">Control</span> {
         <span class="kw">match</span> <span class="ident">con</span> {
             <span class="ident">Control::Seq</span>(<span class="ident">Seq</span> { <span class="ident">stmts</span>, <span class="ident">attributes</span> }) =&gt; <span class="ident">Control::Seq</span>(<span class="ident">Seq</span> {
-                <span class="ident">stmts</span>: <span class="ident">stmts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">stmt</span><span class="op">|</span> <span class="ident">Control::clone</span>(<span class="ident">stmt</span>)).<span class="ident">collect</span>(),
+                <span class="ident">stmts</span>: <span class="ident">stmts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">Control::clone</span>).<span class="ident">collect</span>(),
                 <span class="ident">attributes</span>: <span class="ident">attributes</span>.<span class="ident">clone</span>(),
             }),
             <span class="ident">Control::Par</span>(<span class="ident">Par</span> { <span class="ident">stmts</span>, <span class="ident">attributes</span> }) =&gt; <span class="ident">Control::Par</span>(<span class="ident">Par</span> {
-                <span class="ident">stmts</span>: <span class="ident">stmts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">stmt</span><span class="op">|</span> <span class="ident">Control::clone</span>(<span class="ident">stmt</span>)).<span class="ident">collect</span>(),
+                <span class="ident">stmts</span>: <span class="ident">stmts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">Control::clone</span>).<span class="ident">collect</span>(),
                 <span class="ident">attributes</span>: <span class="ident">attributes</span>.<span class="ident">clone</span>(),
             }),
             <span class="ident">Control::If</span>(<span class="ident">If</span> {

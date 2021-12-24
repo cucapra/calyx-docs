@@ -668,7 +668,7 @@
     ) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">signature</span>.<span class="ident">borrow</span>();
         <span class="kw">let</span> (<span class="ident">inputs</span>, <span class="ident">outputs</span>): (<span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>) <span class="op">=</span>
-            <span class="ident">sig</span>.<span class="ident">ports</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">Rc::clone</span>(<span class="ident">p</span>)).<span class="ident">partition</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> {
+            <span class="ident">sig</span>.<span class="ident">ports</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">Rc::clone</span>).<span class="ident">partition</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> {
                 <span class="comment">// Cell signature stores the ports in reversed direction.</span>
                 <span class="macro">matches!</span>(<span class="ident">p</span>.<span class="ident">borrow</span>().<span class="ident">direction</span>, <span class="ident">ir::Direction::Output</span>)
             });
