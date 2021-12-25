@@ -45,6 +45,8 @@
 <span id="45">45</span>
 <span id="46">46</span>
 <span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Internal representation for the Calyx compiler.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The representation is generated from the frontend AST.</span>
@@ -65,6 +67,7 @@
 <span class="kw">mod</span> <span class="ident">primitives</span>;
 <span class="kw">mod</span> <span class="ident">printer</span>;
 <span class="kw">mod</span> <span class="ident">reserved_names</span>;
+<span class="kw">mod</span> <span class="ident">rewriter</span>;
 <span class="kw">mod</span> <span class="ident">structure</span>;
 
 <span class="comment">// Re-export types at the module level.</span>
@@ -77,8 +80,9 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">guard::Guard</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">id::Id</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">PortDef</span>, <span class="ident">Primitive</span>, <span class="ident">Width</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">printer::IRPrinter</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">printer::Printer</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">reserved_names::RESERVED_NAMES</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rewriter::Rewriter</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">structure</span>::{
     <span class="ident">Assignment</span>, <span class="ident">Binding</span>, <span class="ident">Cell</span>, <span class="ident">CellIterator</span>, <span class="ident">CellType</span>, <span class="ident">CloneName</span>, <span class="ident">CombGroup</span>,
     <span class="ident">Direction</span>, <span class="ident">GetName</span>, <span class="ident">Group</span>, <span class="ident">Port</span>, <span class="ident">PortIterator</span>, <span class="ident">PortParent</span>,

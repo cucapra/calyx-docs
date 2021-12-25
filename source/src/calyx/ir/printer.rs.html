@@ -524,9 +524,9 @@
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
 <span class="doccomment">/// Printer for the IR.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">IRPrinter</span>;
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Printer</span>;
 
-<span class="kw">impl</span> <span class="ident">IRPrinter</span> {
+<span class="kw">impl</span> <span class="ident">Printer</span> {
     <span class="doccomment">/// Format attributes of the form `@static(1)`.</span>
     <span class="doccomment">/// Returns the empty string if the `attrs` is empty.</span>
     <span class="kw">fn</span> <span class="ident">format_at_attributes</span>(<span class="ident">attrs</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Attributes</span>) -&gt; <span class="ident">String</span> {

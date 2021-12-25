@@ -802,7 +802,7 @@
         <span class="ident">LibrarySignatures</span>, <span class="ident">RRC</span>,
     },
 };
-<span class="kw">use</span> <span class="ident">ir::IRPrinter</span>;
+<span class="kw">use</span> <span class="ident">ir::Printer</span>;
 <span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
 <span class="kw">use</span> <span class="ident">petgraph::graph::DiGraph</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
@@ -989,7 +989,7 @@
             .<span class="ident">for_each</span>(<span class="op">|</span>(<span class="ident">state</span>, <span class="ident">assigns</span>)<span class="op">|</span> {
                 <span class="macro">writeln!</span>(<span class="ident">out</span>, <span class="string">&quot;{}:&quot;</span>, <span class="ident">state</span>).<span class="ident">unwrap</span>();
                 <span class="ident">assigns</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
-                    <span class="ident">IRPrinter::write_assignment</span>(<span class="ident">assign</span>, <span class="number">2</span>, <span class="ident">out</span>).<span class="ident">unwrap</span>();
+                    <span class="ident">Printer::write_assignment</span>(<span class="ident">assign</span>, <span class="number">2</span>, <span class="ident">out</span>).<span class="ident">unwrap</span>();
                     <span class="macro">writeln!</span>(<span class="ident">out</span>).<span class="ident">unwrap</span>();
                 })
             });
@@ -999,7 +999,7 @@
             .<span class="ident">iter</span>()
             .<span class="ident">sorted_by</span>(<span class="op">|</span>(<span class="ident">k1</span>, <span class="kw">_</span>, <span class="kw">_</span>), (<span class="ident">k2</span>, <span class="kw">_</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">k1</span>.<span class="ident">cmp</span>(<span class="ident">k2</span>))
             .<span class="ident">for_each</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>, <span class="ident">g</span>)<span class="op">|</span> {
-                <span class="macro">writeln!</span>(<span class="ident">out</span>, <span class="string">&quot;  ({}, {}): {}&quot;</span>, <span class="ident">i</span>, <span class="ident">f</span>, <span class="ident">IRPrinter::guard_str</span>(<span class="ident">g</span>))
+                <span class="macro">writeln!</span>(<span class="ident">out</span>, <span class="string">&quot;  ({}, {}): {}&quot;</span>, <span class="ident">i</span>, <span class="ident">f</span>, <span class="ident">Printer::guard_str</span>(<span class="ident">g</span>))
                     .<span class="ident">unwrap</span>();
             });
     }

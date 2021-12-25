@@ -631,7 +631,7 @@
     <span class="doccomment">/// which can be ignored if one is not rewriting values</span>
     <span class="doccomment">/// **NOTE**: Assumes that each group appears at only one place in the control</span>
     <span class="doccomment">/// structure.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">_comp</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Component</span>, <span class="ident">control</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">control</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">initial_set</span> <span class="op">=</span> <span class="ident">DefSet::default</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">analysis</span> <span class="op">=</span> <span class="ident">ReachingDefinitionAnalysis::default</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
