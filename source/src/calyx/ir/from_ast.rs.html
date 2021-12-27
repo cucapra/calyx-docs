@@ -840,8 +840,8 @@
 
 <span class="comment">///////////////// Group Construction /////////////////////////</span>
 
-<span class="doccomment">/// Build an [ir::Group] from an [ast::Group] and attach it to the [ir::Compoennt]</span>
-<span class="doccomment">/// associated with the [ir::Builder]</span>
+<span class="doccomment">/// Build an [super::Group] from an [ast::Group] and attach it to the [Component]</span>
+<span class="doccomment">/// associated with the [Builder]</span>
 <span class="kw">fn</span> <span class="ident">add_group</span>(<span class="ident">group</span>: <span class="ident">ast::Group</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Builder</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">group</span>.<span class="ident">is_comb</span> {
         <span class="kw">let</span> <span class="ident">ir_group</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_comb_group</span>(<span class="ident">group</span>.<span class="ident">name</span>);

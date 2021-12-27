@@ -1348,10 +1348,10 @@
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// The cycle-level timing for this FSM will look like:</span>
-<span class="doccomment">///     - cycle 0: (f.out == 0), enable one</span>
-<span class="doccomment">///     - cycle t: (f.out == 0), (one[done] == 1), disable one</span>
-<span class="doccomment">///     - cycle t+1: (f.out == 1), enable two</span>
-<span class="doccomment">///     - cycle t+l: (f.out == 1), (two[done] == 1), disable two</span>
+<span class="doccomment">///     - cycle 0: (`f.out` == 0), enable one</span>
+<span class="doccomment">///     - cycle t: (`f.out` == 0), (`one[done]` == 1), disable one</span>
+<span class="doccomment">///     - cycle t+1: (`f.out` == 1), enable two</span>
+<span class="doccomment">///     - cycle t+l: (`f.out` == 1), (`two[done]` == 1), disable two</span>
 <span class="doccomment">///     - cycle t+l+1: finish</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// The transition t -&gt; t+1 represents one where group one is done but group two hasn&#39;t started</span>

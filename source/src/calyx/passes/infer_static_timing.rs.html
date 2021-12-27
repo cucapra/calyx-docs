@@ -805,7 +805,7 @@
     }
 
     <span class="doccomment">/// Attempts to infer the number of cycles starting when</span>
-    <span class="doccomment">/// group[go] is high, and port is high. If inference is</span>
+    <span class="doccomment">/// `group[go]` is high, and port is high. If inference is</span>
     <span class="doccomment">/// not possible, returns None.</span>
     <span class="kw">fn</span> <span class="ident">infer_latency</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">group</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Group</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="comment">// Creates a write dependency graph, which contains an edge (`a`, `b`) if:</span>

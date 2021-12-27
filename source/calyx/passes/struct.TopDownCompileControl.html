@@ -45,10 +45,10 @@ transitions.</p>
 <span class="ident">one</span>[<span class="ident">go</span>] <span class="op">=</span> <span class="op">!</span><span class="ident">one</span>[<span class="ident">done</span>] <span class="op">&amp;</span> <span class="ident">f</span>.<span class="ident">out</span> <span class="op">==</span> <span class="number">0</span>;
 <span class="ident">two</span>[<span class="ident">go</span>] <span class="op">=</span> <span class="op">!</span><span class="ident">two</span>[<span class="ident">done</span>] <span class="op">&amp;</span> <span class="ident">f</span>.<span class="ident">out</span> <span class="op">==</span> <span class="number">1</span>;</code></pre></div>
 <p>The cycle-level timing for this FSM will look like:
-- cycle 0: (f.out == 0), enable one
-- cycle t: (f.out == 0), (one[done] == 1), disable one
-- cycle t+1: (f.out == 1), enable two
-- cycle t+l: (f.out == 1), (two[done] == 1), disable two
+- cycle 0: (<code>f.out</code> == 0), enable one
+- cycle t: (<code>f.out</code> == 0), (<code>one[done]</code> == 1), disable one
+- cycle t+1: (<code>f.out</code> == 1), enable two
+- cycle t+l: (<code>f.out</code> == 1), (<code>two[done]</code> == 1), disable two
 - cycle t+l+1: finish</p>
 <p>The transition t -&gt; t+1 represents one where group one is done but group two hasn’t started
 executing.</p>
