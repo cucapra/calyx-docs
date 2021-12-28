@@ -604,7 +604,7 @@
 <span class="kw">type</span> <span class="ident">OverlapMap</span> <span class="op">=</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BTreeSet</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">GroupOrInvoke</span>)<span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// A struct used to compute a reaching definition analysis. The only field is a</span>
-<span class="doccomment">/// map between GroupOrInvoke labels and the definitions that exit the given</span>
+<span class="doccomment">/// map between [GroupOrInvoke] labels and the definitions that exit the given</span>
 <span class="doccomment">/// group or the given Invoke node. This analysis is conservative and will only</span>
 <span class="doccomment">/// kill a definition if the group MUST write the given register and does not</span>
 <span class="doccomment">/// read it. If this is not the case old definitions will remain in the reaching</span>
@@ -614,7 +614,7 @@
 <span class="doccomment">/// within the control structure and will provide inaccurate results if this</span>
 <span class="doccomment">/// expectation is violated.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Like LiveRangeAnalysis par blocks are treated via a parallel CFG approach.</span>
+<span class="doccomment">/// Like [LiveRangeAnalysis] par blocks are treated via a parallel CFG approach.</span>
 <span class="doccomment">/// Concretely this means that after a par block executes any id that is killed</span>
 <span class="doccomment">/// by one arm is killed and all defs introduced (but not killed) by any arm are</span>
 <span class="doccomment">/// defined. Note that this assumes separate arms are not writing the same</span>

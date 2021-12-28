@@ -190,90 +190,48 @@
 <span id="190">190</span>
 <span id="191">191</span>
 <span id="192">192</span>
-<span id="193">193</span>
-<span id="194">194</span>
-<span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
-<span id="198">198</span>
-<span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
-<span id="221">221</span>
-<span id="222">222</span>
-<span id="223">223</span>
-<span id="224">224</span>
-<span id="225">225</span>
-<span id="226">226</span>
-<span id="227">227</span>
-<span id="228">228</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">RRC</span>};
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::CloneName</span>;
 
-<span class="doccomment">/// IR Rewriter. Defines methods to rewrite various parts of the IR using</span>
-<span class="doccomment">/// rewrite maps.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Rewriter</span>;
-
 <span class="doccomment">/// Map to rewrite cell uses. Maps name of the old cell to the new [ir::Cell]</span>
 <span class="doccomment">/// instance.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CellRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">CellRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Map to rewrite port uses. Maps the canonical name of an old port (generated using</span>
 <span class="doccomment">/// [ir::Port::canonical]) to the new [ir::Port] instance.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">PortRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>), <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">PortRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>), <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Map name of old group to new group</span>
 <span class="kw">type</span> <span class="ident">GroupRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 <span class="doccomment">/// Map name of old combination group to new combinational group</span>
 <span class="kw">type</span> <span class="ident">CombGroupRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::CombGroup</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-<span class="kw">impl</span> <span class="ident">Rewriter</span> {
-    <span class="doccomment">/// Get [ir::Port] with the same name as `port` from `cell`.</span>
-    <span class="doccomment">/// Panics if a port with the same name doesn&#39;t exist.</span>
-    <span class="kw">fn</span> <span class="ident">get_port</span>(<span class="ident">port</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>, <span class="ident">cell</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>) -&gt; <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span> {
-        <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">name</span>))
+<span class="doccomment">/// A structure to track rewrite maps for ports. Stores both cell rewrites and direct port</span>
+<span class="doccomment">/// rewrites. Attempts to apply port rewrites first before trying the cell</span>
+<span class="doccomment">/// rewrite.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Rewriter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">cell_map</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CellRewriteMap</span>,
+    <span class="ident">port_map</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">PortRewriteMap</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Rewriter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
+        <span class="ident">cell_map</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CellRewriteMap</span>,
+        <span class="ident">port_map</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">PortRewriteMap</span>,
+    ) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> { <span class="ident">cell_map</span>, <span class="ident">port_map</span> }
     }
 
-    <span class="doccomment">/// Return a port rewrite if it is defeind in the set of rewrites.</span>
-    <span class="kw">fn</span> <span class="ident">get_port_rewrite</span>(
-        <span class="ident">rewrites</span>: <span class="kw-2">&amp;</span><span class="ident">CellRewriteMap</span>,
-        <span class="ident">port</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">rewrite</span> <span class="op">=</span>
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell_wref</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">parent</span> {
-                <span class="kw">let</span> <span class="ident">cell_ref</span> <span class="op">=</span> <span class="ident">cell_wref</span>.<span class="ident">upgrade</span>();
-                <span class="kw">let</span> <span class="ident">cell_name</span> <span class="op">=</span> <span class="ident">cell_ref</span>.<span class="ident">borrow</span>();
-                <span class="ident">rewrites</span>.<span class="ident">get</span>(<span class="ident">cell_name</span>.<span class="ident">name</span>())
-            } <span class="kw">else</span> {
-                <span class="prelude-val">None</span>
-            };
-        <span class="ident">rewrite</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">new_cell</span><span class="op">|</span> <span class="ident"><span class="self">Self</span>::get_port</span>(<span class="ident">port</span>, <span class="ident">new_cell</span>))
+    <span class="doccomment">/// Return the rewrite for a cell</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_cell_rewrite</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cell</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">cell_map</span>.<span class="ident">get</span>(<span class="ident">cell</span>).<span class="ident">map</span>(<span class="ident">Rc::clone</span>)
     }
 
-    <span class="doccomment">/// Rewrite reads and writes from `cell` in the given assingments to</span>
-    <span class="doccomment">/// the same ports on `new_cell`.</span>
+    <span class="doccomment">/// Return a cell rewrite for the given port. A cell rewrite will attempt</span>
+    <span class="doccomment">/// to give the port with the same name on the new cell.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// For example, given with `cell = a` and `new_cell = b`</span>
     <span class="doccomment">/// ```</span>
@@ -284,70 +242,57 @@
     <span class="doccomment">/// b.in = b.done ? b.out;</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rename_cell_use</span>(
-        <span class="ident">rewrites</span>: <span class="kw-2">&amp;</span><span class="ident">CellRewriteMap</span>,
-        <span class="ident">assign</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Assignment</span>,
-    ) {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_port</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_port_rewrite</span>(<span class="ident">rewrites</span>, <span class="kw-2">&amp;</span><span class="ident">assign</span>.<span class="ident">src</span>) {
-            <span class="ident">assign</span>.<span class="ident">src</span> <span class="op">=</span> <span class="ident">new_port</span>;
+    <span class="kw">fn</span> <span class="ident">get_cell_port_rewrite</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">port_ref</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">cell_map</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_port</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_port_rewrite</span>(<span class="ident">rewrites</span>, <span class="kw-2">&amp;</span><span class="ident">assign</span>.<span class="ident">dst</span>) {
-            <span class="ident">assign</span>.<span class="ident">dst</span> <span class="op">=</span> <span class="ident">new_port</span>;
-        }
-        <span class="ident">assign</span>.<span class="ident">guard</span>.<span class="ident">for_each</span>(<span class="kw-2">&amp;</span><span class="op">|</span><span class="ident">port</span><span class="op">|</span> {
-            <span class="ident"><span class="self">Self</span>::get_port_rewrite</span>(<span class="ident">rewrites</span>, <span class="kw-2">&amp;</span><span class="ident">port</span>).<span class="ident">map</span>(<span class="ident">ir::Guard::port</span>)
-        });
+
+        <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">port_ref</span>.<span class="ident">borrow</span>();
+        <span class="kw">let</span> <span class="ident">new_cell</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell_wref</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">parent</span> {
+            <span class="kw">let</span> <span class="ident">cell_ref</span> <span class="op">=</span> <span class="ident">cell_wref</span>.<span class="ident">upgrade</span>();
+            <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cell_ref</span>.<span class="ident">borrow</span>();
+            <span class="self">self</span>.<span class="ident">cell_map</span>.<span class="ident">get</span>(<span class="ident">cell</span>.<span class="ident">name</span>())
+        } <span class="kw">else</span> {
+            <span class="prelude-val">None</span>
+        };
+        <span class="comment">// Return port with the same name on the new_cell.</span>
+        <span class="ident">new_cell</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">new_cell</span><span class="op">|</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">new_cell</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">name</span>)))
     }
 
-    <span class="doccomment">/// Convinience wrapper around [Self::rename_cell_use] that operates</span>
-    <span class="doccomment">/// over given set of assignments.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rename_cell_uses</span>(
-        <span class="ident">rewrites</span>: <span class="kw-2">&amp;</span><span class="ident">CellRewriteMap</span>,
-        <span class="ident">assigns</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span>,
-    ) {
-        <span class="kw">for</span> <span class="ident">assign</span> <span class="kw">in</span> <span class="ident">assigns</span> {
-            <span class="ident"><span class="self">Self</span>::rename_cell_use</span>(<span class="ident">rewrites</span>, <span class="ident">assign</span>)
-        }
-    }
-
-    <span class="doccomment">/// Rename uses of specific ports if they are defined within `rewrites`</span>
-    <span class="doccomment">/// to the mapped port.</span>
-    <span class="doccomment">/// Uses [ir::Port::canonical] values as the key.</span>
+    <span class="doccomment">/// Return a port rewrite if present.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rename_port_use</span>(
-        <span class="ident">rewrites</span>: <span class="kw-2">&amp;</span><span class="ident">PortRewriteMap</span>,
-        <span class="ident">assign</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Assignment</span>,
-    ) {
-        <span class="kw">let</span> <span class="ident">new_src</span> <span class="op">=</span> <span class="ident">rewrites</span>
-            .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">assign</span>.<span class="ident">src</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>())
-            .<span class="ident">map</span>(<span class="ident">Rc::clone</span>);
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">src</span>) <span class="op">=</span> <span class="ident">new_src</span> {
-            <span class="ident">assign</span>.<span class="ident">src</span> <span class="op">=</span> <span class="ident">src</span>;
+    <span class="kw">fn</span> <span class="ident">get_port_rewrite</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">port_ref</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">port_map</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
 
-        <span class="kw">let</span> <span class="ident">new_dst</span> <span class="op">=</span> <span class="ident">rewrites</span>
-            .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">assign</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>())
-            .<span class="ident">map</span>(<span class="ident">Rc::clone</span>);
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">dst</span>) <span class="op">=</span> <span class="ident">new_dst</span> {
-            <span class="ident">assign</span>.<span class="ident">dst</span> <span class="op">=</span> <span class="ident">dst</span>;
-        }
-
-        <span class="ident">assign</span>.<span class="ident">guard</span>.<span class="ident">for_each</span>(<span class="kw-2">&amp;</span><span class="op">|</span><span class="ident">port</span><span class="op">|</span> {
-            <span class="ident">rewrites</span>
-                .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>())
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">ir::Guard::port</span>(<span class="ident">Rc::clone</span>(<span class="ident">p</span>)))
-        });
+        <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">port_ref</span>.<span class="ident">borrow</span>();
+        <span class="self">self</span>.<span class="ident">port_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">canonical</span>()).<span class="ident">map</span>(<span class="ident">Rc::clone</span>)
     }
 
+    <span class="doccomment">/// Get any port rewrite defined for the given port.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">port_ref</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">get_port_rewrite</span>(<span class="ident">port_ref</span>)
+            .<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">get_cell_port_rewrite</span>(<span class="ident">port_ref</span>))
+    }
+
+    <span class="comment">// =========== Control Rewriting Methods =============</span>
     <span class="doccomment">/// Rewrite a `invoke` node using a [CellRewriteMap] and a [CombGroupRewriteMap]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rewrite_invoke</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">inv</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Invoke</span>,
-        <span class="ident">cell_map</span>: <span class="kw-2">&amp;</span><span class="ident">CellRewriteMap</span>,
         <span class="ident">comb_group_map</span>: <span class="kw-2">&amp;</span><span class="ident">CombGroupRewriteMap</span>,
     ) {
         <span class="comment">// Rewrite the name of the cell</span>
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">inv</span>.<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">clone_name</span>();
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_cell</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">cell_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_cell</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">get_cell_rewrite</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>) {
             <span class="ident">inv</span>.<span class="ident">comp</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(<span class="ident">new_cell</span>);
         }
 
@@ -364,8 +309,7 @@
             .<span class="ident">iter_mut</span>()
             .<span class="ident">chain</span>(<span class="ident">inv</span>.<span class="ident">outputs</span>.<span class="ident">iter_mut</span>())
             .<span class="ident">for_each</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">port</span>)<span class="op">|</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_port</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_port_rewrite</span>(<span class="ident">cell_map</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">port</span>)
-                {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_port</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">port</span>) {
                     <span class="kw-2">*</span><span class="ident">port</span> <span class="op">=</span> <span class="ident">new_port</span>;
                 }
             });
@@ -374,8 +318,8 @@
     <span class="doccomment">/// Given a control program, rewrite all uses of cells, groups, and comb groups using the given</span>
     <span class="doccomment">/// rewrite maps.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rewrite_control</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Control</span>,
-        <span class="ident">cell_map</span>: <span class="kw-2">&amp;</span><span class="ident">CellRewriteMap</span>,
         <span class="ident">group_map</span>: <span class="kw-2">&amp;</span><span class="ident">GroupRewriteMap</span>,
         <span class="ident">comb_group_map</span>: <span class="kw-2">&amp;</span><span class="ident">CombGroupRewriteMap</span>,
     ) {
@@ -390,19 +334,12 @@
             <span class="ident">ir::Control::Seq</span>(<span class="ident">ir::Seq</span> { <span class="ident">stmts</span>, .. })
             <span class="op">|</span> <span class="ident">ir::Control::Par</span>(<span class="ident">ir::Par</span> { <span class="ident">stmts</span>, .. }) =&gt; {
                 <span class="ident">stmts</span>.<span class="ident">iter_mut</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> {
-                    <span class="ident"><span class="self">Self</span>::rewrite_control</span>(
-                        <span class="ident">c</span>,
-                        <span class="ident">cell_map</span>,
-                        <span class="ident">group_map</span>,
-                        <span class="ident">comb_group_map</span>,
-                    )
+                    <span class="self">self</span>.<span class="ident">rewrite_control</span>(<span class="ident">c</span>, <span class="ident">group_map</span>, <span class="ident">comb_group_map</span>)
                 })
             }
             <span class="ident">ir::Control::If</span>(<span class="ident">ife</span>) =&gt; {
                 <span class="comment">// Rewrite port use</span>
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_port</span>) <span class="op">=</span>
-                    <span class="ident"><span class="self">Self</span>::get_port_rewrite</span>(<span class="ident">cell_map</span>, <span class="kw-2">&amp;</span><span class="ident">ife</span>.<span class="ident">port</span>)
-                {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_port</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">ife</span>.<span class="ident">port</span>) {
                     <span class="ident">ife</span>.<span class="ident">port</span> <span class="op">=</span> <span class="ident">new_port</span>;
                 }
                 <span class="comment">// Rewrite conditional comb group if defined</span>
@@ -413,24 +350,20 @@
                     }
                 }
                 <span class="comment">// rewrite branches</span>
-                <span class="ident"><span class="self">Self</span>::rewrite_control</span>(
+                <span class="self">self</span>.<span class="ident">rewrite_control</span>(
                     <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ife</span>.<span class="ident">tbranch</span>,
-                    <span class="ident">cell_map</span>,
                     <span class="ident">group_map</span>,
                     <span class="ident">comb_group_map</span>,
                 );
-                <span class="ident"><span class="self">Self</span>::rewrite_control</span>(
+                <span class="self">self</span>.<span class="ident">rewrite_control</span>(
                     <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ife</span>.<span class="ident">fbranch</span>,
-                    <span class="ident">cell_map</span>,
                     <span class="ident">group_map</span>,
                     <span class="ident">comb_group_map</span>,
                 );
             }
             <span class="ident">ir::Control::While</span>(<span class="ident">wh</span>) =&gt; {
                 <span class="comment">// Rewrite port use</span>
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_port</span>) <span class="op">=</span>
-                    <span class="ident"><span class="self">Self</span>::get_port_rewrite</span>(<span class="ident">cell_map</span>, <span class="kw-2">&amp;</span><span class="ident">wh</span>.<span class="ident">port</span>)
-                {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_port</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">wh</span>.<span class="ident">port</span>) {
                     <span class="ident">wh</span>.<span class="ident">port</span> <span class="op">=</span> <span class="ident">new_port</span>;
                 }
                 <span class="comment">// Rewrite conditional comb group if defined</span>
@@ -441,15 +374,10 @@
                     }
                 }
                 <span class="comment">// rewrite body</span>
-                <span class="ident"><span class="self">Self</span>::rewrite_control</span>(
-                    <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">wh</span>.<span class="ident">body</span>,
-                    <span class="ident">cell_map</span>,
-                    <span class="ident">group_map</span>,
-                    <span class="ident">comb_group_map</span>,
-                );
+                <span class="self">self</span>.<span class="ident">rewrite_control</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">wh</span>.<span class="ident">body</span>, <span class="ident">group_map</span>, <span class="ident">comb_group_map</span>);
             }
             <span class="ident">ir::Control::Invoke</span>(<span class="ident">inv</span>) =&gt; {
-                <span class="ident"><span class="self">Self</span>::rewrite_invoke</span>(<span class="ident">inv</span>, <span class="ident">cell_map</span>, <span class="ident">comb_group_map</span>)
+                <span class="self">self</span>.<span class="ident">rewrite_invoke</span>(<span class="ident">inv</span>, <span class="ident">comb_group_map</span>)
             }
         }
     }

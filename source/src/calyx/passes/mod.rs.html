@@ -57,11 +57,14 @@
 <span id="57">57</span>
 <span id="58">58</span>
 <span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.</span>
 <span class="kw">mod</span> <span class="ident">clk_insertion</span>;
 <span class="kw">mod</span> <span class="ident">collapse_control</span>;
 <span class="kw">mod</span> <span class="ident">compile_empty</span>;
 <span class="kw">mod</span> <span class="ident">compile_invoke</span>;
+<span class="kw">mod</span> <span class="ident">component_iniliner</span>;
 <span class="kw">mod</span> <span class="ident">component_interface</span>;
 <span class="kw">mod</span> <span class="ident">dead_cell_removal</span>;
 <span class="kw">mod</span> <span class="ident">dead_group_removal</span>;
@@ -69,8 +72,8 @@
 <span class="kw">mod</span> <span class="ident">go_insertion</span>;
 <span class="kw">mod</span> <span class="ident">group_to_invoke</span>;
 <span class="kw">mod</span> <span class="ident">guard_canonical</span>;
+<span class="kw">mod</span> <span class="ident">hole_inliner</span>;
 <span class="kw">mod</span> <span class="ident">infer_static_timing</span>;
-<span class="kw">mod</span> <span class="ident">inliner</span>;
 <span class="kw">mod</span> <span class="ident">lower_guards</span>;
 <span class="kw">mod</span> <span class="ident">math_utilities</span>;
 <span class="kw">mod</span> <span class="ident">merge_assign</span>;
@@ -92,6 +95,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">collapse_control::CollapseControl</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">compile_empty::CompileEmpty</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">compile_invoke::CompileInvoke</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">component_iniliner::ComponentInliner</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">component_interface::ComponentInterface</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">dead_cell_removal::DeadCellRemoval</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">dead_group_removal::DeadGroupRemoval</span>;
@@ -99,8 +103,8 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">go_insertion::GoInsertion</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">group_to_invoke::GroupToInvoke</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">guard_canonical::GuardCanonical</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hole_inliner::HoleInliner</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">infer_static_timing::InferStaticTiming</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">inliner::Inliner</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">lower_guards::LowerGuards</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">merge_assign::MergeAssign</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">minimize_regs::MinimizeRegs</span>;

@@ -205,18 +205,53 @@
 <span id="205">205</span>
 <span id="206">206</span>
 <span id="207">207</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis::reaching_defns</span>::{
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Pass to unshare registers by analyzing the live ranges of values stored</span>
+<span class="doccomment">//! within them.</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis::reaching_defns</span>::{
     <span class="ident">GroupOrInvoke</span>, <span class="ident">ReachingDefinitionAnalysis</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">Builder</span>, <span class="ident">Cell</span>, <span class="ident">CloneName</span>, <span class="ident">LibrarySignatures</span>, <span class="ident">RRC</span>};
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 
+<span class="doccomment">/// Unsharing registers reduces the amount of multiplexers used in the final design, trading them</span>
+<span class="doccomment">/// off for more memory.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// A register use is said to be shared if it is used to store multiple, non-overlapping values in</span>
+<span class="doccomment">/// it. Unsharing, then, is the process of identifying such usages of registers and generating</span>
+<span class="doccomment">/// new registers to store non-overlapping values. For example, the following program:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// let x = 1;</span>
+<span class="doccomment">/// x = x + 2;</span>
+<span class="doccomment">/// x = x + 3</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Can be rewritten as:</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// let x = 1;</span>
+<span class="doccomment">/// let y = x + 2;</span>
+<span class="doccomment">/// let z = y + 3;</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// On the other hand, the following use of a register cannot be unshared:</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// let x = 0;</span>
+<span class="doccomment">/// for i in 0..10 {</span>
+<span class="doccomment">///   x = x + 1;</span>
+<span class="doccomment">/// }</span>
+<span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RegisterUnsharing</span> {
-    <span class="comment">// This is an option because it cannot be initialized until the component is</span>
-    <span class="comment">// seen</span>
-    <span class="ident">bookkeeper</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Bookkeeper</span><span class="op">&gt;</span>,
+    <span class="ident">bookkeeper</span>: <span class="ident">Bookkeeper</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Named</span> <span class="kw">for</span> <span class="ident">RegisterUnsharing</span> {
@@ -232,6 +267,7 @@
 <span class="kw">type</span> <span class="ident">RewriteMap</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Cell</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="comment">// A struct for managing the overlapping analysis and rewrite information</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
 <span class="kw">struct</span> <span class="ident">Bookkeeper</span> {
     <span class="ident">analysis</span>: <span class="ident">ReachingDefinitionAnalysis</span>,
     <span class="ident">widths</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">u64</span><span class="op">&gt;</span>,
@@ -262,16 +298,13 @@
             })
             .<span class="ident">collect</span>();
 
-        <span class="kw">let</span> <span class="ident">analysis</span> <span class="op">=</span> <span class="ident">ReachingDefinitionAnalysis::new</span>(<span class="kw-2">&amp;</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>());
-
-        <span class="kw">let</span> <span class="ident">invoke_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-
         <span class="self">Self</span> {
-            <span class="ident">analysis</span>,
             <span class="ident">widths</span>,
-            <span class="ident">invoke_map</span>,
+            <span class="ident">analysis</span>: <span class="ident">ReachingDefinitionAnalysis::new</span>(<span class="kw-2">&amp;</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>()),
+            <span class="ident">invoke_map</span>: <span class="ident">HashMap::new</span>(),
         }
     }
+
     <span class="doccomment">/// This method takes the reaching definition analysis and uses it to</span>
     <span class="doccomment">/// determine the set of of overlapping definitions for each register.</span>
     <span class="doccomment">/// Registers may be split into X registers where X is the number of sets in</span>
@@ -320,37 +353,38 @@
 
     <span class="kw">fn</span> <span class="ident">rename</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Builder</span>,
+        <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Component</span>,
         <span class="ident">rename_list</span>: <span class="kw-2">&amp;</span>[(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GroupOrInvoke</span><span class="op">&gt;</span>)],
     ) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">grp_map</span>: <span class="ident">RewriteMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">invoke_map</span>: <span class="ident">RewriteMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
         <span class="kw">for</span> (<span class="ident">new_name</span>, <span class="ident">old_name</span>, <span class="ident">grouplist</span>) <span class="kw">in</span> <span class="ident">rename_list</span> {
             <span class="kw">for</span> <span class="ident">group_or_invoke</span> <span class="kw">in</span> <span class="ident">grouplist</span> {
+                <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">old_name</span>.<span class="ident">clone</span>();
+                <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">find_cell</span>(<span class="ident">new_name</span>).<span class="ident">unwrap</span>();
                 <span class="kw">match</span> <span class="ident">group_or_invoke</span> {
                     <span class="ident">GroupOrInvoke::Group</span>(<span class="ident">group</span>) =&gt; {
-                        <span class="ident">grp_map</span>.<span class="ident">entry</span>(<span class="ident">group</span>).<span class="ident">or_default</span>().<span class="ident">insert</span>(
-                            <span class="ident">old_name</span>.<span class="ident">clone</span>(),
-                            <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">find_cell</span>(<span class="ident">new_name</span>).<span class="ident">unwrap</span>(),
-                        );
+                        <span class="ident">grp_map</span>.<span class="ident">entry</span>(<span class="ident">group</span>).<span class="ident">or_default</span>().<span class="ident">insert</span>(<span class="ident">name</span>, <span class="ident">cell</span>);
                     }
                     <span class="ident">GroupOrInvoke::Invoke</span>(<span class="ident">invoke</span>) =&gt; {
-                        <span class="ident">invoke_map</span>.<span class="ident">entry</span>(<span class="ident">invoke</span>.<span class="ident">clone</span>()).<span class="ident">or_default</span>().<span class="ident">insert</span>(
-                            <span class="ident">old_name</span>.<span class="ident">clone</span>(),
-                            <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">find_cell</span>(<span class="ident">new_name</span>).<span class="ident">unwrap</span>(),
-                        );
+                        <span class="ident">invoke_map</span>
+                            .<span class="ident">entry</span>(<span class="ident">invoke</span>.<span class="ident">clone</span>())
+                            .<span class="ident">or_default</span>()
+                            .<span class="ident">insert</span>(<span class="ident">name</span>, <span class="ident">cell</span>);
                     }
                 }
             }
         }
 
         <span class="kw">for</span> (<span class="ident">grp</span>, <span class="ident">rename_cells</span>) <span class="kw">in</span> <span class="ident">grp_map</span> {
-            <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">find_group</span>(<span class="ident">grp</span>).<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">group_ref</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">borrow_mut</span>();
-            <span class="ident">ir::Rewriter::rename_cell_uses</span>(
-                <span class="kw-2">&amp;</span><span class="ident">rename_cells</span>,
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">group_ref</span>.<span class="ident">assignments</span>,
-            )
+            <span class="kw">let</span> <span class="ident">group_ref</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">find_group</span>(<span class="ident">grp</span>).<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">group_ref</span>.<span class="ident">borrow_mut</span>();
+            <span class="kw">let</span> <span class="ident">empty_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
+            <span class="kw">let</span> <span class="ident">rewriter</span> <span class="op">=</span> <span class="ident">ir::Rewriter::new</span>(<span class="kw-2">&amp;</span><span class="ident">rename_cells</span>, <span class="kw-2">&amp;</span><span class="ident">empty_map</span>);
+            <span class="ident">group</span>
+                .<span class="ident">assignments</span>
+                .<span class="ident">iter_mut</span>()
+                .<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> <span class="ident">assign</span>.<span class="ident">for_each_port</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">rewriter</span>.<span class="ident">get</span>(<span class="ident">p</span>)));
         }
 
         <span class="self">self</span>.<span class="ident">invoke_map</span> <span class="op">=</span> <span class="ident">invoke_map</span>;
@@ -364,20 +398,12 @@
         <span class="ident">sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
         <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
-        <span class="self">self</span>.<span class="ident">bookkeeper</span>.<span class="ident">replace</span>(<span class="ident">Bookkeeper::new</span>(<span class="ident">comp</span>));
+        <span class="self">self</span>.<span class="ident">bookkeeper</span> <span class="op">=</span> <span class="ident">Bookkeeper::new</span>(<span class="ident">comp</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">Builder::new</span>(<span class="ident">comp</span>, <span class="ident">sigs</span>);
-
-        <span class="kw">let</span> <span class="ident">rename_list</span> <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">bookkeeper</span>
-            .<span class="ident">as_mut</span>()
-            .<span class="ident">unwrap</span>()
-            .<span class="ident">create_new_regs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">builder</span>);
-
-        <span class="self">self</span>.<span class="ident">bookkeeper</span>
-            .<span class="ident">as_mut</span>()
-            .<span class="ident">unwrap</span>()
-            .<span class="ident">rename</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">builder</span>, <span class="kw-2">&amp;</span><span class="ident">rename_list</span>);
-
+        <span class="comment">// Build a rename list</span>
+        <span class="kw">let</span> <span class="ident">rename_list</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bookkeeper</span>.<span class="ident">create_new_regs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">builder</span>);
+        <span class="comment">// Perform the structural renaming.</span>
+        <span class="self">self</span>.<span class="ident">bookkeeper</span>.<span class="ident">rename</span>(<span class="ident">comp</span>, <span class="kw-2">&amp;</span><span class="ident">rename_list</span>);
         <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
     }
 
@@ -388,24 +414,14 @@
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
         <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">bookkeeper</span>
-            .<span class="ident">as_ref</span>()
-            .<span class="ident">unwrap</span>()
-            .<span class="ident">analysis</span>
-            .<span class="ident">meta</span>
-            .<span class="ident">fetch_label</span>(<span class="ident">invoke</span>)
-        {
-            <span class="kw">let</span> <span class="ident">vec_array</span> <span class="op">=</span>
-                <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bookkeeper</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">invoke_map</span>.<span class="ident">get</span>(<span class="ident">name</span>);
+        <span class="kw">let</span> <span class="ident">book</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bookkeeper</span>;
 
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span> <span class="ident">book</span>.<span class="ident">analysis</span>.<span class="ident">meta</span>.<span class="ident">fetch_label</span>(<span class="ident">invoke</span>) {
             <span class="comment">// only do rewrites if there is actually rewriting to do</span>
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">rename_vec</span>) <span class="op">=</span> <span class="ident">vec_array</span> {
-                <span class="ident">ir::Rewriter::rewrite_invoke</span>(
-                    <span class="ident">invoke</span>,
-                    <span class="ident">rename_vec</span>,
-                    <span class="kw-2">&amp;</span><span class="ident">HashMap::new</span>(),
-                );
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">rename_vec</span>) <span class="op">=</span> <span class="ident">book</span>.<span class="ident">invoke_map</span>.<span class="ident">get</span>(<span class="ident">name</span>) {
+                <span class="kw">let</span> <span class="ident">empty_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
+                <span class="kw">let</span> <span class="ident">rewriter</span> <span class="op">=</span> <span class="ident">ir::Rewriter::new</span>(<span class="ident">rename_vec</span>, <span class="kw-2">&amp;</span><span class="ident">empty_map</span>);
+                <span class="ident">rewriter</span>.<span class="ident">rewrite_invoke</span>(<span class="ident">invoke</span>, <span class="kw-2">&amp;</span><span class="ident">HashMap::new</span>());
             }
         }
 

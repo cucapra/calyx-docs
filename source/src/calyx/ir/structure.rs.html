@@ -425,6 +425,58 @@
 <span id="425">425</span>
 <span id="426">426</span>
 <span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.</span>
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
@@ -479,6 +531,15 @@
     <span class="doccomment">/// Checks if this port is a hole</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_hole</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">parent</span>, <span class="ident">PortParent::Group</span>(<span class="kw">_</span>))
+    }
+
+    <span class="doccomment">/// Returns the parent of the [Port] which must be [Cell]. Throws an error</span>
+    <span class="doccomment">/// otherwise.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cell_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Cell</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">PortParent::Cell</span>(<span class="ident">cell_wref</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">parent</span> {
+            <span class="kw">return</span> <span class="ident">cell_wref</span>.<span class="ident">upgrade</span>();
+        }
+        <span class="macro">unreachable!</span>(<span class="string">&quot;This port should have a cell parent&quot;</span>)
     }
 
     <span class="doccomment">/// Checks if this port is a constant of value: `val`.</span>
@@ -633,6 +694,16 @@
         })
     }
 
+    <span class="doccomment">/// Returns true iff this cell is an instance of a Calyx-defined component.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_component</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">prototype</span>, <span class="ident">CellType::Component</span> { .. })
+    }
+
+    <span class="doccomment">/// Returns true iff this cell is an instance of a primitive.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_primitive</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">prototype</span>, <span class="ident">CellType::Primitive</span> { .. })
+    }
+
     <span class="doccomment">/// Get a reference to the first port with the attribute `attr` and throw an error if none</span>
     <span class="doccomment">/// exist.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_with_attr</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attr</span>: <span class="ident">S</span>) -&gt; <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span>
@@ -706,6 +777,22 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ports</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span>; <span class="number">10</span>]<span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ports</span>
     }
+
+    <span class="comment">// Get the signature of this cell as a vector. Each element corresponds to a port in the Cell.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_signature</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Id</span>, <span class="ident">u64</span>, <span class="ident">Direction</span>, <span class="ident">Attributes</span>)<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">ports</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">port_ref</span><span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">port_ref</span>.<span class="ident">borrow</span>();
+                (
+                    <span class="ident">port</span>.<span class="ident">name</span>.<span class="ident">clone</span>(),
+                    <span class="ident">port</span>.<span class="ident">width</span>,
+                    <span class="ident">port</span>.<span class="ident">direction</span>.<span class="ident">clone</span>(),
+                    <span class="ident">port</span>.<span class="ident">attributes</span>.<span class="ident">clone</span>(),
+                )
+            })
+            .<span class="ident">collect</span>()
+    }
 }
 
 <span class="doccomment">/// Generic wrapper for iterators that return [RRC] of [super::Cell].</span>
@@ -732,6 +819,23 @@
 
     <span class="doccomment">/// The guard for this assignment.</span>
     <span class="kw">pub</span> <span class="ident">guard</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Guard</span><span class="op">&gt;</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Assignment</span> {
+    <span class="doccomment">/// Apply function `f` to each port contained within the assignment and</span>
+    <span class="doccomment">/// replace the port with the generated value if not None.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_each_port</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>)
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_src</span>) <span class="op">=</span> <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">src</span>) {
+            <span class="self">self</span>.<span class="ident">src</span> <span class="op">=</span> <span class="ident">new_src</span>;
+        }
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_dst</span>) <span class="op">=</span> <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dst</span>) {
+            <span class="self">self</span>.<span class="ident">dst</span> <span class="op">=</span> <span class="ident">new_dst</span>;
+        }
+        <span class="self">self</span>.<span class="ident">guard</span>.<span class="ident">for_each</span>(<span class="kw-2">&amp;</span><span class="op">|</span><span class="ident">port</span><span class="op">|</span> <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>).<span class="ident">map</span>(<span class="ident">Guard::port</span>))
+    }
 }
 
 <span class="doccomment">/// A Group of assignments that perform a logical action.</span>

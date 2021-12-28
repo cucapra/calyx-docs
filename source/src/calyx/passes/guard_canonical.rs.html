@@ -67,14 +67,14 @@
     <span class="ident">LibrarySignatures</span>,
 };
 
-<span class="comment">// For each group and continuous assignments, canonicalize guard</span>
-<span class="comment">// statements that has constant 1 as either a source or a guard.</span>
-<span class="comment">//</span>
-<span class="comment">// # Example</span>
-<span class="comment">// ```</span>
-<span class="comment">// a[done] = 1&#39;d1 ? r1.done -&gt; a[done] = r1.done</span>
-<span class="comment">// a[done] = r1.done ? 1&#39;d1 -&gt; a[done] = r1.done</span>
-<span class="comment">// ```</span>
+<span class="doccomment">/// For each group and continuous assignments, canonicalize guard</span>
+<span class="doccomment">/// statements that has constant 1 as either a source or a guard.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Example</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// a[done] = 1&#39;d1 ? r1.done -&gt; a[done] = r1.done</span>
+<span class="doccomment">/// a[done] = r1.done ? 1&#39;d1 -&gt; a[done] = r1.done</span>
+<span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GuardCanonical</span>;
 

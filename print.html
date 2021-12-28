@@ -1742,6 +1742,10 @@ They are the mechanism for how an &quot;outer&quot; component invokes an &quot;i
 <code>go</code> and <code>done</code> signals.
 Along with the <code>static(n)</code> attribute, this allows the pass to calculate when
 a particular done signal of a primitive will be high.</p>
+<h3 id="inline"><a class="header" href="#inline"><code>inline</code></a></h3>
+<p>Used by the <code>inline</code> pass on cell definitions. Instructs the pass to completely
+inline the instance into the parent component and replace all <code>invoke</code>s of the
+instance with the control program of the instance.</p>
 <h3 id="stable"><a class="header" href="#stable"><code>stable</code></a></h3>
 <p>Applied to port definitions of primitives and components. The intended semantics
 are that after invoking the component, the value on the port remains latched

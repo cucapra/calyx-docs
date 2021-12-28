@@ -184,14 +184,6 @@
 <span id="184">184</span>
 <span id="185">185</span>
 <span id="186">186</span>
-<span id="187">187</span>
-<span id="188">188</span>
-<span id="189">189</span>
-<span id="190">190</span>
-<span id="191">191</span>
-<span id="192">192</span>
-<span id="193">193</span>
-<span id="194">194</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines common traits for methods that attempt to share components.</span>
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">analysis</span>::{<span class="ident">GraphColoring</span>, <span class="ident">ScheduleConflicts</span>},
@@ -361,24 +353,16 @@
             }
         }
 
-        <span class="comment">// apply the coloring as a renaming of registers for both groups</span>
-        <span class="comment">// and continuous assignments</span>
-        <span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ir::Builder::new</span>(<span class="ident">comp</span>, <span class="ident">sigs</span>);
-        <span class="kw">for</span> <span class="ident">group_ref</span> <span class="kw">in</span> <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">groups</span>.<span class="ident">iter</span>() {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">group_ref</span>.<span class="ident">borrow_mut</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">assigns</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">drain</span>(..).<span class="ident">collect</span>();
-            <span class="ident">ir::Rewriter::rename_cell_uses</span>(<span class="kw-2">&amp;</span><span class="ident">coloring</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">assigns</span>);
-            <span class="ident">group</span>.<span class="ident">assignments</span> <span class="op">=</span> <span class="ident">assigns</span>;
-        }
+        <span class="comment">// Rewrite assignments using the coloring generated.</span>
+        <span class="kw">let</span> <span class="ident">empty_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
+        <span class="kw">let</span> <span class="ident">rewriter</span> <span class="op">=</span> <span class="ident">ir::Rewriter::new</span>(<span class="kw-2">&amp;</span><span class="ident">coloring</span>, <span class="kw-2">&amp;</span><span class="ident">empty_map</span>);
+        <span class="ident">comp</span>.<span class="ident">for_each_assignment</span>(<span class="kw-2">&amp;</span><span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
+            <span class="ident">assign</span>.<span class="ident">for_each_port</span>(<span class="op">|</span><span class="ident">port</span><span class="op">|</span> <span class="ident">rewriter</span>.<span class="ident">get</span>(<span class="ident">port</span>));
+        });
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">assigns</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">continuous_assignments</span>.<span class="ident">drain</span>(..).<span class="ident">collect</span>();
-        <span class="ident">ir::Rewriter::rename_cell_uses</span>(<span class="kw-2">&amp;</span><span class="ident">coloring</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">assigns</span>);
-        <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">continuous_assignments</span> <span class="op">=</span> <span class="ident">assigns</span>;
-
-        <span class="ident">ir::Rewriter::rewrite_control</span>(
+        <span class="comment">// Rewrite control uses of ports</span>
+        <span class="ident">rewriter</span>.<span class="ident">rewrite_control</span>(
             <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow_mut</span>(),
-            <span class="kw-2">&amp;</span><span class="ident">coloring</span>,
             <span class="kw-2">&amp;</span><span class="ident">HashMap::new</span>(),
             <span class="kw-2">&amp;</span><span class="ident">HashMap::new</span>(),
         );
