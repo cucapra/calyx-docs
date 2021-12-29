@@ -541,6 +541,31 @@
 <span id="541">541</span>
 <span id="542">542</span>
 <span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{
     <span class="ident">Assignment</span>, <span class="ident">Attributes</span>, <span class="ident">BackendConf</span>, <span class="ident">Builder</span>, <span class="ident">CellType</span>, <span class="ident">Component</span>, <span class="ident">Context</span>,
     <span class="ident">Control</span>, <span class="ident">Direction</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">Invoke</span>, <span class="ident">LibrarySignatures</span>,
@@ -549,6 +574,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>},
     <span class="ident">frontend</span>::{<span class="self">self</span>, <span class="ident">ast</span>},
+    <span class="ident">ir::PortComp</span>,
     <span class="ident">utils::NameGenerator</span>,
 };
 <span class="kw">use</span> <span class="ident">linked_hash_map::LinkedHashMap</span>;
@@ -941,12 +967,36 @@
         <span class="ident">GE::Or</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::or</span>(<span class="ident">build_guard</span>(<span class="kw-2">*</span><span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">build_guard</span>(<span class="kw-2">*</span><span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
         <span class="ident">GE::And</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::and</span>(<span class="ident">build_guard</span>(<span class="kw-2">*</span><span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">build_guard</span>(<span class="kw-2">*</span><span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
         <span class="ident">GE::Not</span>(<span class="ident">g</span>) =&gt; <span class="ident">Guard::Not</span>(<span class="ident">into_box_guard</span>(<span class="ident">g</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
-        <span class="ident">GE::Eq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::Eq</span>(<span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
-        <span class="ident">GE::Neq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::Neq</span>(<span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
-        <span class="ident">GE::Gt</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::Gt</span>(<span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
-        <span class="ident">GE::Lt</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::Lt</span>(<span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
-        <span class="ident">GE::Geq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::Geq</span>(<span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
-        <span class="ident">GE::Leq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::Leq</span>(<span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
+        <span class="ident">GE::Eq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::CompOp</span>(
+            <span class="ident">PortComp::Eq</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+        ),
+        <span class="ident">GE::Neq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::CompOp</span>(
+            <span class="ident">PortComp::Neq</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+        ),
+        <span class="ident">GE::Gt</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::CompOp</span>(
+            <span class="ident">PortComp::Gt</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+        ),
+        <span class="ident">GE::Lt</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::CompOp</span>(
+            <span class="ident">PortComp::Lt</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+        ),
+        <span class="ident">GE::Geq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::CompOp</span>(
+            <span class="ident">PortComp::Geq</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+        ),
+        <span class="ident">GE::Leq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::CompOp</span>(
+            <span class="ident">PortComp::Leq</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+            <span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
+        ),
     })
 }
 

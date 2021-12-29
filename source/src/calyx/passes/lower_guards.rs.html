@@ -171,9 +171,6 @@
 <span id="171">171</span>
 <span id="172">172</span>
 <span id="173">173</span>
-<span id="174">174</span>
-<span id="175">175</span>
-<span id="176">176</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
     <span class="self">self</span>,
     <span class="ident">traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>},
@@ -199,12 +196,14 @@
     <span class="kw">let</span> <span class="ident">var_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">guard</span> {
         <span class="ident">ir::Guard::Or</span>(..) =&gt; <span class="string">&quot;or&quot;</span>,
         <span class="ident">ir::Guard::And</span>(..) =&gt; <span class="string">&quot;and&quot;</span>,
-        <span class="ident">ir::Guard::Eq</span>(..) =&gt; <span class="string">&quot;eq&quot;</span>,
-        <span class="ident">ir::Guard::Neq</span>(..) =&gt; <span class="string">&quot;neq&quot;</span>,
-        <span class="ident">ir::Guard::Gt</span>(..) =&gt; <span class="string">&quot;gt&quot;</span>,
-        <span class="ident">ir::Guard::Lt</span>(..) =&gt; <span class="string">&quot;lt&quot;</span>,
-        <span class="ident">ir::Guard::Geq</span>(..) =&gt; <span class="string">&quot;ge&quot;</span>,
-        <span class="ident">ir::Guard::Leq</span>(..) =&gt; <span class="string">&quot;le&quot;</span>,
+        <span class="ident">ir::Guard::CompOp</span>(<span class="ident">op</span>, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="kw">match</span> <span class="ident">op</span> {
+            <span class="ident">ir::PortComp::Eq</span> =&gt; <span class="string">&quot;eq&quot;</span>,
+            <span class="ident">ir::PortComp::Neq</span> =&gt; <span class="string">&quot;neq&quot;</span>,
+            <span class="ident">ir::PortComp::Gt</span> =&gt; <span class="string">&quot;gt&quot;</span>,
+            <span class="ident">ir::PortComp::Lt</span> =&gt; <span class="string">&quot;lt&quot;</span>,
+            <span class="ident">ir::PortComp::Geq</span> =&gt; <span class="string">&quot;ge&quot;</span>,
+            <span class="ident">ir::PortComp::Leq</span> =&gt; <span class="string">&quot;le&quot;</span>,
+        },
         <span class="ident">ir::Guard::True</span> <span class="op">|</span> <span class="ident">ir::Guard::Not</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">ir::Guard::Port</span>(<span class="kw">_</span>) =&gt; {
             <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
@@ -242,12 +241,7 @@
             <span class="ident">prim</span>.<span class="ident">get</span>(<span class="string">&quot;out&quot;</span>)
         }
 
-        <span class="ident">ir::Guard::Eq</span>(<span class="ident">l</span>, <span class="ident">r</span>)
-        <span class="op">|</span> <span class="ident">ir::Guard::Neq</span>(<span class="ident">l</span>, <span class="ident">r</span>)
-        <span class="op">|</span> <span class="ident">ir::Guard::Gt</span>(<span class="ident">l</span>, <span class="ident">r</span>)
-        <span class="op">|</span> <span class="ident">ir::Guard::Lt</span>(<span class="ident">l</span>, <span class="ident">r</span>)
-        <span class="op">|</span> <span class="ident">ir::Guard::Geq</span>(<span class="ident">l</span>, <span class="ident">r</span>)
-        <span class="op">|</span> <span class="ident">ir::Guard::Leq</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; {
+        <span class="ident">ir::Guard::CompOp</span>(<span class="kw">_</span>, <span class="ident">l</span>, <span class="ident">r</span>) =&gt; {
             <span class="kw">let</span> <span class="ident">prim</span> <span class="op">=</span> <span class="ident">maybe_prim</span>.<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">prim_name</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;std_{}&quot;</span>, <span class="ident">prim</span>);
             <span class="kw">let</span> <span class="ident">prim_cell</span> <span class="op">=</span>
