@@ -464,19 +464,6 @@
 <span id="464">464</span>
 <span id="465">465</span>
 <span id="466">466</span>
-<span id="467">467</span>
-<span id="468">468</span>
-<span id="469">469</span>
-<span id="470">470</span>
-<span id="471">471</span>
-<span id="472">472</span>
-<span id="473">473</span>
-<span id="474">474</span>
-<span id="475">475</span>
-<span id="476">476</span>
-<span id="477">477</span>
-<span id="478">478</span>
-<span id="479">479</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.</span>
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
@@ -792,19 +779,6 @@
                 )
             })
             .<span class="ident">collect</span>()
-    }
-}
-
-<span class="doccomment">/// Generic wrapper for iterators that return [RRC] of [super::Cell].</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CellIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="ident">iter</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Cell</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">CellIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Cell</span><span class="op">&gt;</span>;
-
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">next</span>()
     }
 }
 
