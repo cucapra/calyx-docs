@@ -475,6 +475,10 @@
 <span id="475">475</span>
 <span id="476">476</span>
 <span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">analysis</span>::{<span class="ident">ReadWriteSet</span>, <span class="ident">VariableDetection</span>},
     <span class="ident">ir</span>::{<span class="self">self</span>, <span class="ident">CloneName</span>, <span class="ident">RRC</span>},
@@ -737,7 +741,11 @@
     }
     <span class="doccomment">/// Look up the set of things live at a group definition.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">group</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">live</span>[<span class="ident">group</span>].<span class="ident">set</span>
+        <span class="kw-2">&amp;</span><span class="self">self</span>
+            .<span class="ident">live</span>
+            .<span class="ident">get</span>(<span class="ident">group</span>)
+            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">panic!</span>(<span class="string">&quot;Live set missing for {}&quot;</span>, <span class="ident">group</span>))
+            .<span class="ident">set</span>
     }
 
     <span class="doccomment">/// Get a unique list of all live registers in `component`.</span>
