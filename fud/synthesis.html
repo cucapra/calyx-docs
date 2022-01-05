@@ -202,9 +202,13 @@ Hopefully someone will figure this out and document it in the future.</p>
 <h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
 <p>The first step in the Xilinx toolchain is to generate <a href="https://xilinx.github.io/XRT/2021.2/html/formats.html#xclbin">an <code>xclbin</code> executable file</a>.
 Here's an example of going all the way from a Calyx program to that:</p>
-<pre><code>fud e --to xclbin examples/futil/dot-product.futil
+<pre><code>fud e examples/futil/dot-product.futil -o foo.xclbin
 </code></pre>
-<p>On our machines, compiling even a simple example like the above for simulation takes about 2 minutes, end to end.</p>
+<p>On our machines, compiling even a simple example like the above for simulation takes about 5 minutes, end to end.
+A failed run takes about 2 minutes to produce an error.</p>
+<p>By default, the Xilinx tools run in a temporary directory that is deleted when <code>fud</code> finishes.
+To instead keep the sandbox directory, use <code>-s xclbin.save_temps true</code>.
+You can then find the results in a directory named <code>fud-out-N</code> for some number <code>N</code>.</p>
 <h3 id="how-it-works"><a class="header" href="#how-it-works">How it Works</a></h3>
 <p>The first step is to generate input files.
 We need to generate:</p>
