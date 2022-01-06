@@ -534,6 +534,13 @@ device = &quot;xilinx_u50_gen3x16_xdma_201920_3&quot;
 <p>The options for <code>mode</code> are <code>hw_emu</code> (simulation) and <code>hw</code> (on-FPGA execution).
 The device string above is for the <a href="https://www.xilinx.com/products/boards-and-kits/alveo/u50.html">Alveo U50</a> card, which we have at Cornell, but I honestly don't know how you're supposed to find the right string for a different FPGA target.
 Hopefully someone will figure this out and document it in the future.</p>
+<p>To use hardware emulation, you will also need to configure the <code>wdb</code> stage.
+It has similar <code>ssh_host</code>, <code>ssh_username</code>, and <code>remote</code> options to the <code>xclbin</code> stage.
+You will also need to configure the stage to point to your installations of <a href="https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html">Vitis</a> and <a href="https://xilinx.github.io/XRT/">XRT</a>, like this:</p>
+<pre><code>[stages.wdb]
+xilinx_location: /scratch/opt/Xilinx/Vitis/2020.2
+xrt_location: /opt/xilinx/xrt
+</code></pre>
 <h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
 <p>The first step in the Xilinx toolchain is to generate <a href="https://xilinx.github.io/XRT/2021.2/html/formats.html#xclbin">an <code>xclbin</code> executable file</a>.
 Here's an example of going all the way from a Calyx program to that:</p>
@@ -544,6 +551,16 @@ A failed run takes about 2 minutes to produce an error.</p>
 <p>By default, the Xilinx tools run in a temporary directory that is deleted when <code>fud</code> finishes.
 To instead keep the sandbox directory, use <code>-s xclbin.save_temps true</code>.
 You can then find the results in a directory named <code>fud-out-N</code> for some number <code>N</code>.</p>
+<h3 id="emulate"><a class="header" href="#emulate">Emulate</a></h3>
+<p>You can also execute compiled designs through Xilinx hardware emulation.
+Use the <code>wdb</code> state as your <code>fud</code> target:</p>
+<pre><code>fud e -vv foo.xclbin -s wdb.save_temps true -o out.wdb
+</code></pre>
+<p>This stage produces a Vivado <a href="https://support.xilinx.com/s/article/64000?language=en_US">waveform database (WDB) file</a>
+Through the magic of <code>fud</code>, you can also go all the way from a Calyx program to a <code>wdb</code> file in the same way.
+There is also a <code>wdb.save_temps</code> option, as with the <code>xclbin</code> stage.</p>
+<p>You also need to provide a host C++ program via the <code>wdb.host</code> parameter, but I don't know much about that yet, so documentation about that will have to wait.
+Similarly, I don't yet know what you're supposed to <em>do</em> with a WDB file; maybe we should figure out how to produce a VCD instead.</p>
 <h3 id="how-it-works"><a class="header" href="#how-it-works">How it Works</a></h3>
 <p>The first step is to generate input files.
 We need to generate:</p>
