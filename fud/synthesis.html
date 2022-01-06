@@ -234,17 +234,42 @@ We need to generate:</p>
 <li>A Verilog interface wrapper, using <code>XilinxInterfaceBackend</code>, via <code>-b xilinx</code>. We call this <code>toplevel.v</code>.</li>
 <li>An XML document describing the interface, using <code>XilinxXmlBackend</code>, via <code>-b xilinx-xml</code>. This file gets named <code>kernel.xml</code>.</li>
 </ul>
-<p>We also use <a href="https://github.com/cucapra/calyx/blob/master/fud/bitstream/gen_xo.tcl">a static Tcl script, <code>gen_xo.tcl</code>,</a> to drive the Xilinx tools.
-The <code>fud</code> driver gathers these files together in a sandbox directory.
-Then, the Xilinx toolchain's first step is to compile the Verilog to a <code>.xo</code> file, which is a Xilinx analog of a <code>.o</code> object file.
+<p>The <code>fud</code> driver gathers these files together in a sandbox directory.
+The next step is to run the Xilinx tools.</p>
+<h4 id="background-xo-and-xclbin"><a class="header" href="#background-xo-and-xclbin">Background: <code>.xo</code> and <code>.xclbin</code></a></h4>
+<p>In the Xilinx toolchain, compilation to an executable bitstream (or simulation blob) appears to requires two steps:
+taking your Verilog sources and creating an <code>.xo</code> file, and then taking that and producing an <code>.xclbin</code> “executable” file.
+The idea appears to be a kind of metaphor for a standard C compilation workflow in software-land: <code>.xo</code> is like a <code>.o</code> object file, and <code>.xclbin</code> contains actual executable code (bitstream or emulation equivalent), like a software executable binary.
+Going from Verilog to <code>.xo</code> is like “compilation” and going from <code>.xo</code> to <code>.xclbin</code> is like “linking.”</p>
+<p>However,  this analogy is kind of a lie.
+Generating an <code>.xo</code> file actually does very little work:
+it just packages up the Verilog source code and some auxiliary files.
+An <code>.xo</code> is literally a zip file with that stuff packed up inside.
+All the actual work happens during “linking,” i.e., going from <code>.xo</code> to <code>.xclbin</code> using the <code>v++</code> tool.
+This situation is a poignant reminder of how impossible separate compilation is in the EDA world.
+A proper analogy would involve separately compiling the Verilog into some kind of low-level representation, and then linking would properly smash together those separately-compiled objects.
+Instead, in Xilinx-land, “compilation” is just simple bundling and “linking” does all the compilation in one monolithic step.
+It’s kind of cute that the Xilinx toolchain is pretending the world is otherwise, but it’s also kind of sad.</p>
+<p>Anyway, the only way to produce a <code>.xo</code> file from RTL code appears to be to use Vivado (i.e., the actual <code>vivado</code> program).
+Nothing from the newer Vitis package currently appears capable of producing <code>.xo</code> files from Verilog (although <code>v++</code> can produce these files during HLS compilation, presumably by invoking Vivado).</p>
+<p>The main components in an <code>.xo</code> file, aside from the Verilog source code itself, are two XML files:
+<code>kernel.xml</code>, a short file describing the argument interfaces to the hardware design,
+and <code>component.xml</code>, a much longer and more complicated <a href="https://en.wikipedia.org/wiki/IP-XACT">IP-XACT</a> file that also has to do with the interface to the RTL.
+We currently generate <code>kernel.xml</code> ourselves (with the <code>xilinx-xml</code> backend described above) and then use Vivado, via a Tcl script, to generate the IP-XACT file.</p>
+<p>In the future, we could consider trying to route around using Vivado by generating the IP-XACT file ourselves, using a tool such as <a href="https://github.com/sifive/duh">DUH</a>.</p>
+<h4 id="our-workflow"><a class="header" href="#our-workflow">Our Workflow</a></h4>
+<p>The first step is to produce an <code>.xo</code> file.
+We also use <a href="https://github.com/cucapra/calyx/blob/master/fud/bitstream/gen_xo.tcl">a static Tcl script, <code>gen_xo.tcl</code>,</a> which is a simplified version of <a href="https://github.com/Xilinx/Vitis-Tutorials/blob/2021.1/Hardware_Acceleration/Feature_Tutorials/01-rtl_kernel_workflow/reference-files/scripts/package_kernel.tcl">a script from Xilinx's Vitis tutorials</a>.
+The gist of this script is that it creates a Vivado project, adds the source files, twiddles some settings, and then uses the <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/package_xo-Command"><code>package_xo</code> command</a> to read stuff from this project as an &quot;IP directory&quot; and produce an <code>.xo</code> file.
 The Vivado command line looks roughly like this:</p>
-<pre><code>vivado -mode batch -source gen_xo.tcl -tclargs xclbin/kernel.xo kernel hw_emu xilinx_u50_gen3x16_xdma_201920_3
+<pre><code>vivado -mode batch -source gen_xo.tcl -tclargs xclbin/kernel.xo
 </code></pre>
-<p>Those arguments after <code>-tclargs</code>, unsurprisingly, get passed to <a href="https://github.com/cucapra/calyx/blob/master/fud/bitstream/gen_xo.tcl"><code>gen_xo.tcl</code></a>.</p>
-<p>Then, we take this <code>.xo</code> and turn it into an <a href="https://xilinx.github.io/XRT/2021.2/html/formats.html#xclbin"><code>.xclbin</code></a>, in a step that is Xilinx's analog of &quot;linking&quot; an executable.
+<p>That output filename after <code>-tclargs</code>, unsurprisingly, gets passed to <a href="https://github.com/cucapra/calyx/blob/master/fud/bitstream/gen_xo.tcl"><code>gen_xo.tcl</code></a>.</p>
+<p>Then, we take this <code>.xo</code> and turn it into an <a href="https://xilinx.github.io/XRT/2021.2/html/formats.html#xclbin"><code>.xclbin</code></a>.
 This step uses the <code>v++</code> tool, with a command line that looks like this:</p>
 <pre><code>v++ -g -t hw_emu --platform xilinx_u50_gen3x16_xdma_201920_3 --save-temps --profile.data all:all:all --profile.exec all:all:all -lo xclbin/kernel.xclbin xclbin/kernel.xo
 </code></pre>
+<p>Fortunately, the <code>v++</code> tool doesn't need any Tcl to drive it; all the action happens on the command line.</p>
 
                     </main>
 
