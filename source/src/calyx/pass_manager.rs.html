@@ -189,6 +189,13 @@
 <span id="189">189</span>
 <span id="190">190</span>
 <span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Define the PassManager structure that is used to construct and run pass</span>
 <span class="doccomment">//! passes.</span>
 <span class="kw">use</span> <span class="kw">crate</span>::{
@@ -364,6 +371,13 @@
 }
 
 <span class="doccomment">/// Simple macro to register an alias with a pass manager.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ## Example</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// let pm = PassManager::default();</span>
+<span class="doccomment">/// // Register passes WellFormed, Papercut, and Canonicalize.</span>
+<span class="doccomment">/// register_alias!(pm, &quot;validate&quot;, [WellFormed, Papercut, Canonicalize]);</span>
+<span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">register_alias</span> {
     (@<span class="ident">unwrap_name</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pass</span>:<span class="ident">ident</span>) =&gt; {
