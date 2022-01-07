@@ -269,17 +269,6 @@
 <span id="269">269</span>
 <span id="270">270</span>
 <span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx</span>
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 
@@ -354,19 +343,6 @@
     <span class="ident">Hole</span> { <span class="ident">group</span>: <span class="ident">ir::Id</span>, <span class="ident">name</span>: <span class="ident">ir::Id</span> },
 }
 
-<span class="kw">impl</span> <span class="ident">Port</span> {
-    <span class="doccomment">/// Returns the name of the port being referenced.</span>
-    <span class="doccomment">///  - `(@ comp A)` returns `A`</span>
-    <span class="doccomment">///  - `(@ this B)` returns `B`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">port_name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">ir::Id</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Port::Comp</span> { <span class="ident">port</span>, .. } =&gt; <span class="ident">port</span>,
-            <span class="ident">Port::This</span> { <span class="ident">port</span> } =&gt; <span class="ident">port</span>,
-            <span class="ident">Port::Hole</span> { <span class="ident">name</span>, .. } =&gt; <span class="ident">name</span>,
-        }
-    }
-}
-
 <span class="comment">// ===================================</span>
 <span class="comment">// AST for wire guard expressions</span>
 <span class="comment">// ===================================</span>
@@ -420,8 +396,7 @@
     <span class="ident">Leq</span>,
 }
 
-<span class="doccomment">/// A guard is a conditions in `guard_conj` which guard the value</span>
-<span class="doccomment">/// represented by `expr`.</span>
+<span class="doccomment">/// Guards `expr` using the optional guard condition `guard`.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Guard</span> {
     <span class="kw">pub</span> <span class="ident">guard</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GuardExpr</span><span class="op">&gt;</span>,
@@ -488,6 +463,9 @@
 
     <span class="doccomment">/// Guarded destinations of the wire.</span>
     <span class="kw">pub</span> <span class="ident">dest</span>: <span class="ident">Port</span>,
+
+    <span class="doccomment">/// Attributes for this assignment</span>
+    <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">ir::Attributes</span>,
 }
 
 <span class="doccomment">/// Control AST nodes.</span>
