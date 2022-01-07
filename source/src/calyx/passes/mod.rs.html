@@ -60,6 +60,7 @@
 <span id="60">60</span>
 <span id="61">61</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.</span>
+<span class="kw">mod</span> <span class="ident">canonical</span>;
 <span class="kw">mod</span> <span class="ident">clk_insertion</span>;
 <span class="kw">mod</span> <span class="ident">collapse_control</span>;
 <span class="kw">mod</span> <span class="ident">compile_empty</span>;
@@ -71,7 +72,6 @@
 <span class="kw">mod</span> <span class="ident">externalize</span>;
 <span class="kw">mod</span> <span class="ident">go_insertion</span>;
 <span class="kw">mod</span> <span class="ident">group_to_invoke</span>;
-<span class="kw">mod</span> <span class="ident">guard_canonical</span>;
 <span class="kw">mod</span> <span class="ident">hole_inliner</span>;
 <span class="kw">mod</span> <span class="ident">infer_static_timing</span>;
 <span class="kw">mod</span> <span class="ident">lower_guards</span>;
@@ -91,6 +91,7 @@
 <span class="kw">mod</span> <span class="ident">well_formed</span>;
 <span class="kw">mod</span> <span class="ident">wire_inliner</span>;
 
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">canonical::Canonicalize</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">clk_insertion::ClkInsertion</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">collapse_control::CollapseControl</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">compile_empty::CompileEmpty</span>;
@@ -102,7 +103,6 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">externalize::Externalize</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">go_insertion::GoInsertion</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">group_to_invoke::GroupToInvoke</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">guard_canonical::GuardCanonical</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hole_inliner::HoleInliner</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">infer_static_timing::InferStaticTiming</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">lower_guards::LowerGuards</span>;

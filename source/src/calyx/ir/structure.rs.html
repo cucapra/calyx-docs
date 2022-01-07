@@ -459,11 +459,6 @@
 <span id="459">459</span>
 <span id="460">460</span>
 <span id="461">461</span>
-<span id="462">462</span>
-<span id="463">463</span>
-<span id="464">464</span>
-<span id="465">465</span>
-<span id="466">466</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.</span>
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
@@ -684,11 +679,6 @@
     <span class="doccomment">/// Returns true iff this cell is an instance of a Calyx-defined component.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_component</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">prototype</span>, <span class="ident">CellType::Component</span> { .. })
-    }
-
-    <span class="doccomment">/// Returns true iff this cell is an instance of a primitive.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_primitive</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">prototype</span>, <span class="ident">CellType::Primitive</span> { .. })
     }
 
     <span class="doccomment">/// Get a reference to the first port with the attribute `attr` and throw an error if none</span>

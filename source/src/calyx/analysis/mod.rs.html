@@ -19,24 +19,32 @@
 <span id="19">19</span>
 <span id="20">20</span>
 <span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Analysis for Calyx programs.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The analyses construct data-structures that make answering certain queries</span>
 <span class="doccomment">//! about Calyx programs easier.</span>
 
 <span class="kw">mod</span> <span class="ident">control_ports</span>;
+<span class="kw">mod</span> <span class="ident">dataflow_order</span>;
 <span class="kw">mod</span> <span class="ident">graph</span>;
 <span class="kw">mod</span> <span class="ident">graph_coloring</span>;
 <span class="kw">mod</span> <span class="ident">live_range_analysis</span>;
+<span class="kw">mod</span> <span class="ident">port_interface</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">reaching_defns</span>;
 <span class="kw">mod</span> <span class="ident">read_write_set</span>;
 <span class="kw">mod</span> <span class="ident">schedule_conflicts</span>;
 <span class="kw">mod</span> <span class="ident">variable_detection</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">control_ports::ControlPorts</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">dataflow_order::DataflowOrder</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">graph::GraphAnalysis</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">graph_coloring::GraphColoring</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">live_range_analysis::LiveRangeAnalysis</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">port_interface::PortInterface</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">read_write_set::ReadWriteSet</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">schedule_conflicts::ScheduleConflicts</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">variable_detection::VariableDetection</span>;
