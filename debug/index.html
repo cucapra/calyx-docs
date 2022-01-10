@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>External Stages - Calyx Documentation</title>
+        <title>Debugging - Calyx Documentation</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">2.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">2.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/xilinx.html"><strong aria-hidden="true">2.2.</strong> Xilinx Tools</a></li><li class="chapter-item expanded "><a href="../fud/external.html" class="active"><strong aria-hidden="true">2.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">2.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">2.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">3.</strong> The Calyx Compiler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">3.1.</strong> Primitive Library</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">4.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded "><a href="../tools/index.html"><strong aria-hidden="true">5.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">5.1.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">5.2.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">5.3.</strong> Editor Highlighting</a></li></ol></li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">6.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">6.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">6.2.</strong> Passing Memories by Reference</a></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">6.3.</strong> Attributes</a></li></ol></li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">7.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">8.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">9.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">9.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">9.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">9.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">9.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">9.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><a href="../optimizations/index.html"><strong aria-hidden="true">10.</strong> Optimizations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">10.1.</strong> Dataflow Analysis</a></li></ol></li><li class="chapter-item expanded "><a href="../debug/index.html"><strong aria-hidden="true">11.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">11.1.</strong> Tips</a></li><li class="chapter-item expanded "><a href="../debug/cider.html"><strong aria-hidden="true">11.2.</strong> Interactive Debugger</a></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../contributors.html">Contributors</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">2.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">2.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/xilinx.html"><strong aria-hidden="true">2.2.</strong> Xilinx Tools</a></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">2.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">2.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">2.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">3.</strong> The Calyx Compiler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">3.1.</strong> Primitive Library</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">4.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded "><a href="../tools/index.html"><strong aria-hidden="true">5.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">5.1.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">5.2.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">5.3.</strong> Editor Highlighting</a></li></ol></li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">6.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">6.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">6.2.</strong> Passing Memories by Reference</a></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">6.3.</strong> Attributes</a></li></ol></li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">7.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">8.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">9.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">9.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">9.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">9.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">9.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">9.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><a href="../optimizations/index.html"><strong aria-hidden="true">10.</strong> Optimizations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">10.1.</strong> Dataflow Analysis</a></li></ol></li><li class="chapter-item expanded "><a href="../debug/index.html" class="active"><strong aria-hidden="true">11.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">11.1.</strong> Tips</a></li><li class="chapter-item expanded "><a href="../debug/cider.html"><strong aria-hidden="true">11.2.</strong> Interactive Debugger</a></li><li class="spacer"></li></ol></li><li class="chapter-item expanded "><a href="../contributors.html">Contributors</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -134,83 +134,21 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="external-stages"><a class="header" href="#external-stages">External Stages</a></h1>
-<p><code>fud</code> supports using stages that aren't defined in its main source tree.
-These are known as 'external stages' and the provide a mechanism
-for projects using Calyx to take advantage of <code>fud</code>. You can register an
-external stage with:</p>
-<pre><code>fud register stage_name -p /path/to/stage.py
-</code></pre>
-<p>Once an external stage is registered, it behaves exactly like any other stage.</p>
-<p>You can remove an external stage with:</p>
-<pre><code>fud register stage_name --delete
-</code></pre>
-<p>The following defines a stage that transforms <a href="../frontends/mrxl.html">MrXL</a> programs to Calyx
-programs.</p>
-<pre><code class="language-python">from fud.stages import Stage, SourceType
-from fud.utils import shell
-
-
-class MrXLStage(Stage):
-    &quot;&quot;&quot;
-    Stage that invokes the MrXL frontend.
-    &quot;&quot;&quot;
-
-    name = &quot;mrxl&quot;
-
-    def __init__(self, config):
-        super().__init__(
-            src_state=&quot;mrxl&quot;,
-            target_state=&quot;futil&quot;,
-            input_type=SourceType.Path,
-            output_type=SourceType.Stream,
-            config=config,
-            description=&quot;Compiles MrXL to Calyx.&quot;,
-        )
-        self.setup()
-
-    @staticmethod
-    def defaults():
-        return {&quot;exec&quot;: &quot;mrxl&quot;}
-
-    def _define_steps(self, input_path):
-        @self.step(description=self.cmd)
-        def run_mrxl(mrxl_prog: SourceType.Path) -&gt; SourceType.Stream:
-            return shell(f&quot;{self.cmd} {str(mrxl_prog)}&quot;)
-
-        return run_mrxl(input_path)
-
-
-# Export the defined stages to fud
-__STAGES__ = [MrXLStage]
-</code></pre>
-<p>External stages <em>must</em> define default values for configuration keys using the
-<code>Stage.defaults()</code> static method and the name of the stage using the static
-<code>name</code> field.</p>
-<h2 id="stage-configuration"><a class="header" href="#stage-configuration">Stage Configuration</a></h2>
-<p>Like normal stages, external stages can have persistent configuration
-information saved using <code>fud config</code>.</p>
-<p>To add persistent stage configuration, run:</p>
-<pre><code>fud config stages.&lt;stage-name&gt;.&lt;key&gt; &lt;value&gt;
-</code></pre>
-<p>To dynamically override the value of a field during execution, use the <code>-s flag</code>:</p>
-<pre><code>fud e -s &lt;stage-name&gt;.&lt;key&gt; &lt;value&gt; ...
-</code></pre>
-<p>The override order for stage configuration is:</p>
-<ol>
-<li>Dynamic values provided by <code>-s</code>.</li>
-<li>Configuration value in the fud config.</li>
-<li>Default value provided by <code>Stage.defaults()</code></li>
-</ol>
+                        <h1 id="debugging"><a class="header" href="#debugging">Debugging</a></h1>
+<p>This section contains tips and tools for debugging Calyx programs.</p>
+<ul>
+<li><a href="./debug.html">Debugging Tips</a></li>
+<li><a href="./cider.html">Calyx Interactive Debugger</a></li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../fud/xilinx.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../optimizations/dataflow.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                            <a rel="next" href="../fud/multiple-paths.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../debug/debug.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         <div style="clear: both"></div>
@@ -219,10 +157,10 @@ information saved using <code>fud config</code>.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../fud/xilinx.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../optimizations/dataflow.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                    <a rel="next" href="../fud/multiple-paths.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../debug/debug.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
