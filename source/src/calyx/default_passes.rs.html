@@ -115,15 +115,23 @@
 <span id="114">114</span>
 <span id="115">115</span>
 <span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::passes</span>::{
-    <span class="ident">Canonicalize</span>, <span class="ident">ClkInsertion</span>, <span class="ident">CollapseControl</span>, <span class="ident">CompileEmpty</span>, <span class="ident">CompileInvoke</span>,
-    <span class="ident">ComponentInliner</span>, <span class="ident">ComponentInterface</span>, <span class="ident">DeadCellRemoval</span>, <span class="ident">DeadGroupRemoval</span>,
-    <span class="ident">Externalize</span>, <span class="ident">GoInsertion</span>, <span class="ident">GroupToInvoke</span>, <span class="ident">HoleInliner</span>, <span class="ident">InferStaticTiming</span>,
-    <span class="ident">LowerGuards</span>, <span class="ident">MergeAssign</span>, <span class="ident">MinimizeRegs</span>, <span class="ident">Papercut</span>, <span class="ident">ParToSeq</span>,
-    <span class="ident">RegisterUnsharing</span>, <span class="ident">RemoveCombGroups</span>, <span class="ident">ResetInsertion</span>, <span class="ident">ResourceSharing</span>,
-    <span class="ident">SimplifyGuards</span>, <span class="ident">SynthesisPapercut</span>, <span class="ident">TopDownCompileControl</span>, <span class="ident">WellFormed</span>,
-    <span class="ident">WireInliner</span>,
+    <span class="ident">Canonicalize</span>, <span class="ident">ClkInsertion</span>, <span class="ident">CollapseControl</span>, <span class="ident">CombProp</span>, <span class="ident">CompileEmpty</span>,
+    <span class="ident">CompileInvoke</span>, <span class="ident">ComponentInliner</span>, <span class="ident">ComponentInterface</span>, <span class="ident">DeadCellRemoval</span>,
+    <span class="ident">DeadGroupRemoval</span>, <span class="ident">Externalize</span>, <span class="ident">GoInsertion</span>, <span class="ident">GroupToInvoke</span>, <span class="ident">HoleInliner</span>,
+    <span class="ident">InferStaticTiming</span>, <span class="ident">LowerGuards</span>, <span class="ident">MergeAssign</span>, <span class="ident">MinimizeRegs</span>, <span class="ident">Papercut</span>,
+    <span class="ident">ParToSeq</span>, <span class="ident">RegisterUnsharing</span>, <span class="ident">RemoveCombGroups</span>, <span class="ident">ResetInsertion</span>,
+    <span class="ident">ResourceSharing</span>, <span class="ident">SimplifyGuards</span>, <span class="ident">SynthesisPapercut</span>, <span class="ident">TopDownCompileControl</span>,
+    <span class="ident">WellFormed</span>, <span class="ident">WireInliner</span>,
 };
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">errors::CalyxResult</span>, <span class="ident">ir::traversal::Named</span>, <span class="ident">pass_manager::PassManager</span>,
@@ -135,38 +143,46 @@
         <span class="comment">// Construct the pass manager and register all passes.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pm</span> <span class="op">=</span> <span class="ident">PassManager::default</span>();
 
-        <span class="comment">// Register passes.</span>
+        <span class="comment">// Validation passes</span>
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">WellFormed</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="comment">// pm.register_pass::&lt;StaticTiming&gt;()?;</span>
-        <span class="comment">// pm.register_pass::&lt;CompileControl&gt;()?;</span>
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">CompileInvoke</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">Papercut</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">Canonicalize</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+
+        <span class="comment">// Optimization passes</span>
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">CombProp</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ComponentInliner</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">GoInsertion</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ComponentInterface</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">WireInliner</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">HoleInliner</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">Externalize</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">CollapseControl</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">CompileEmpty</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">Papercut</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ClkInsertion</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ResetInsertion</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ResourceSharing</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">DeadCellRemoval</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">DeadGroupRemoval</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">MinimizeRegs</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">InferStaticTiming</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">SimplifyGuards</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">MergeAssign</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">TopDownCompileControl</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="comment">// pm.register_pass::&lt;TopDownStaticTiming&gt;()?;</span>
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">SynthesisPapercut</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">RegisterUnsharing</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">Canonicalize</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">LowerGuards</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ParToSeq</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+
+        <span class="comment">// Compilation passes</span>
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">CompileInvoke</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">RemoveCombGroups</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">TopDownCompileControl</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+
+        <span class="comment">// Lowering passes</span>
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">GoInsertion</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ComponentInterface</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">HoleInliner</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ClkInsertion</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ResetInsertion</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">MergeAssign</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+
+        <span class="comment">// Enabled in the synthesis compilation flow</span>
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">SynthesisPapercut</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">Externalize</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+
+        <span class="comment">// Disabled by default</span>
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">DeadGroupRemoval</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">SimplifyGuards</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">RegisterUnsharing</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">GroupToInvoke</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ParToSeq</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">LowerGuards</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">WireInliner</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
 
         <span class="macro">register_alias!</span>(<span class="ident">pm</span>, <span class="string">&quot;validate&quot;</span>, [<span class="ident">WellFormed</span>, <span class="ident">Papercut</span>, <span class="ident">Canonicalize</span>]);
         <span class="macro">register_alias!</span>(
@@ -174,6 +190,7 @@
             <span class="string">&quot;pre-opt&quot;</span>,
             [
                 <span class="ident">ComponentInliner</span>,
+                <span class="ident">CombProp</span>,
                 <span class="ident">RemoveCombGroups</span>, <span class="comment">// Must run before `infer-static-timing`.</span>
                 <span class="ident">InferStaticTiming</span>,
                 <span class="ident">CollapseControl</span>,
@@ -184,14 +201,13 @@
         <span class="macro">register_alias!</span>(
             <span class="ident">pm</span>,
             <span class="string">&quot;compile&quot;</span>,
-            [
-                <span class="ident">CompileInvoke</span>,
-                <span class="ident">CompileEmpty</span>,
-                <span class="comment">// StaticTiming,</span>
-                <span class="ident">TopDownCompileControl</span>
-            ]
+            [<span class="ident">CompileInvoke</span>, <span class="ident">CompileEmpty</span>, <span class="ident">TopDownCompileControl</span>]
         );
-        <span class="macro">register_alias!</span>(<span class="ident">pm</span>, <span class="string">&quot;post-opt&quot;</span>, [<span class="ident">DeadCellRemoval</span>]);
+        <span class="macro">register_alias!</span>(
+            <span class="ident">pm</span>,
+            <span class="string">&quot;post-opt&quot;</span>,
+            [<span class="ident">DeadGroupRemoval</span>, <span class="ident">DeadCellRemoval</span>, <span class="ident">CombProp</span>]
+        );
         <span class="macro">register_alias!</span>(
             <span class="ident">pm</span>,
             <span class="string">&quot;lower&quot;</span>,
@@ -205,7 +221,7 @@
             ]
         );
 
-        <span class="comment">// Register aliases</span>
+        <span class="comment">// Default flow</span>
         <span class="macro">register_alias!</span>(
             <span class="ident">pm</span>,
             <span class="string">&quot;all&quot;</span>,

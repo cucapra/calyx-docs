@@ -60,10 +60,13 @@
 <span id="59">59</span>
 <span id="60">60</span>
 <span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.</span>
 <span class="kw">mod</span> <span class="ident">canonical</span>;
 <span class="kw">mod</span> <span class="ident">clk_insertion</span>;
 <span class="kw">mod</span> <span class="ident">collapse_control</span>;
+<span class="kw">mod</span> <span class="ident">comb_prop</span>;
 <span class="kw">mod</span> <span class="ident">compile_empty</span>;
 <span class="kw">mod</span> <span class="ident">compile_invoke</span>;
 <span class="kw">mod</span> <span class="ident">component_iniliner</span>;
@@ -95,6 +98,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">canonical::Canonicalize</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">clk_insertion::ClkInsertion</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">collapse_control::CollapseControl</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">comb_prop::CombProp</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">compile_empty::CompileEmpty</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">compile_invoke::CompileInvoke</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">component_iniliner::ComponentInliner</span>;
