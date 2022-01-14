@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx&#x2F;src&#x2F;ir&#x2F;from_ast.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>from_ast.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../calyx/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx&#x2F;src&#x2F;ir&#x2F;from_ast.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>from_ast.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../calyx/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -673,7 +674,7 @@
 ];
 
 <span class="doccomment">/// Extend the signature with magical ports.</span>
-<span class="kw">fn</span> <span class="ident">extend_signature</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PortDef</span><span class="op">&gt;</span>) {
+<span class="kw">fn</span> <span class="ident">extend_signature</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PortDef</span><span class="op">&gt;</span>) {
     <span class="kw">let</span> <span class="ident">port_names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span>
         <span class="ident">sig</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> <span class="ident">pd</span>.<span class="ident">name</span>.<span class="ident">to_string</span>()).<span class="ident">collect</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">namegen</span> <span class="op">=</span> <span class="ident">NameGenerator::with_prev_defined_names</span>(<span class="ident">port_names</span>);
@@ -725,20 +726,20 @@
     };
 
     <span class="comment">// Add declarations to context</span>
-    <span class="kw">for</span> <span class="ident">comp</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">workspace</span>.<span class="ident">declarations</span> {
+    <span class="kw">for</span> <span class="ident">comp</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="ident">workspace</span>.<span class="ident">declarations</span> {
         <span class="ident">check_signature</span>(<span class="kw-2">&amp;</span><span class="ident">comp</span>.<span class="ident">signature</span>)<span class="question-mark">?</span>;
         <span class="comment">// extend the signature</span>
-        <span class="ident">extend_signature</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">comp</span>.<span class="ident">signature</span>);
+        <span class="ident">extend_signature</span>(<span class="kw-2">&amp;mut</span> <span class="ident">comp</span>.<span class="ident">signature</span>);
         <span class="ident">sig_ctx</span>
             .<span class="ident">comp_sigs</span>
             .<span class="ident">insert</span>(<span class="ident">comp</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">comp</span>.<span class="ident">signature</span>.<span class="ident">clone</span>());
     }
 
     <span class="comment">// Add components to context</span>
-    <span class="kw">for</span> <span class="ident">comp</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">workspace</span>.<span class="ident">components</span> {
+    <span class="kw">for</span> <span class="ident">comp</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="ident">workspace</span>.<span class="ident">components</span> {
         <span class="ident">check_signature</span>(<span class="kw-2">&amp;</span><span class="ident">comp</span>.<span class="ident">signature</span>)<span class="question-mark">?</span>;
         <span class="comment">// extend the signature</span>
-        <span class="ident">extend_signature</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">comp</span>.<span class="ident">signature</span>);
+        <span class="ident">extend_signature</span>(<span class="kw-2">&amp;mut</span> <span class="ident">comp</span>.<span class="ident">signature</span>);
         <span class="ident">sig_ctx</span>
             .<span class="ident">comp_sigs</span>
             .<span class="ident">insert</span>(<span class="ident">comp</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">comp</span>.<span class="ident">signature</span>.<span class="ident">clone</span>());
@@ -829,28 +830,28 @@
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>,
     );
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span>
-        <span class="ident">Builder::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir_component</span>, <span class="kw-2">&amp;</span><span class="ident">sig_ctx</span>.<span class="ident">lib</span>).<span class="ident">not_generated</span>();
+        <span class="ident">Builder::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">ir_component</span>, <span class="kw-2">&amp;</span><span class="ident">sig_ctx</span>.<span class="ident">lib</span>).<span class="ident">not_generated</span>();
 
     <span class="comment">// For each ast::Cell, add a Cell that contains all the</span>
     <span class="comment">// required information.</span>
     <span class="ident">comp</span>.<span class="ident">cells</span>
         .<span class="ident">into_iter</span>()
-        .<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">add_cell</span>(<span class="ident">cell</span>, <span class="ident">sig_ctx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">builder</span>));
+        .<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">add_cell</span>(<span class="ident">cell</span>, <span class="ident">sig_ctx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>));
 
     <span class="ident">comp</span>.<span class="ident">groups</span>
         .<span class="ident">into_iter</span>()
-        .<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">g</span><span class="op">|</span> <span class="ident">add_group</span>(<span class="ident">g</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">builder</span>))<span class="question-mark">?</span>;
+        .<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">g</span><span class="op">|</span> <span class="ident">add_group</span>(<span class="ident">g</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>))<span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">continuous_assignments</span> <span class="op">=</span> <span class="ident">comp</span>
         .<span class="ident">continuous_assignments</span>
         .<span class="ident">into_iter</span>()
-        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">build_assignment</span>(<span class="ident">w</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">builder</span>))
+        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">build_assignment</span>(<span class="ident">w</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>))
         .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
     <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">continuous_assignments</span> <span class="op">=</span> <span class="ident">continuous_assignments</span>;
 
     <span class="comment">// Build the Control ast using ast::Control.</span>
     <span class="kw">let</span> <span class="ident">control</span> <span class="op">=</span>
-        <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">build_control</span>(<span class="ident">comp</span>.<span class="ident">control</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">builder</span>)<span class="question-mark">?</span>));
+        <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">build_control</span>(<span class="ident">comp</span>.<span class="ident">control</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>)<span class="question-mark">?</span>));
     <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">control</span> <span class="op">=</span> <span class="ident">control</span>;
 
     <span class="ident">ir_component</span>.<span class="ident">attributes</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">attributes</span>;
@@ -865,7 +866,7 @@
 
 <span class="comment">///////////////// Cell Construction /////////////////////////</span>
 
-<span class="kw">fn</span> <span class="ident">add_cell</span>(<span class="ident">cell</span>: <span class="ident">ast::Cell</span>, <span class="ident">sig_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">SigCtx</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Builder</span>) {
+<span class="kw">fn</span> <span class="ident">add_cell</span>(<span class="ident">cell</span>: <span class="ident">ast::Cell</span>, <span class="ident">sig_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">SigCtx</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>) {
     <span class="kw">let</span> <span class="ident">proto_name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">prototype</span>.<span class="ident">name</span>;
 
     <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">sig_ctx</span>.<span class="ident">lib</span>.<span class="ident">find_primitive</span>(<span class="ident">proto_name</span>).<span class="ident">is_some</span>() {
@@ -904,7 +905,7 @@
 
 <span class="doccomment">/// Build an [super::Group] from an [ast::Group] and attach it to the [Component]</span>
 <span class="doccomment">/// associated with the [Builder]</span>
-<span class="kw">fn</span> <span class="ident">add_group</span>(<span class="ident">group</span>: <span class="ident">ast::Group</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Builder</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">add_group</span>(<span class="ident">group</span>: <span class="ident">ast::Group</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">group</span>.<span class="ident">is_comb</span> {
         <span class="kw">let</span> <span class="ident">ir_group</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_comb_group</span>(<span class="ident">group</span>.<span class="ident">name</span>);
         <span class="kw">let</span> <span class="ident">assigns</span> <span class="op">=</span> <span class="ident">group</span>
@@ -963,7 +964,7 @@
 <span class="doccomment">/// from it.</span>
 <span class="kw">fn</span> <span class="ident">atom_to_port</span>(
     <span class="ident">atom</span>: <span class="ident">ast::Atom</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Builder</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>,
 ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">atom</span> {
         <span class="ident">ast::Atom::Num</span>(<span class="ident">n</span>) =&gt; {
@@ -1000,7 +1001,7 @@
 <span class="doccomment">/// The Assignment contains pointers to the relevant ports.</span>
 <span class="kw">fn</span> <span class="ident">build_assignment</span>(
     <span class="ident">wire</span>: <span class="ident">ast::Wire</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Builder</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>,
 ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Assignment</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">src_port</span>: <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ensure_direction</span>(
         <span class="ident">atom_to_port</span>(<span class="ident">wire</span>.<span class="ident">src</span>.<span class="ident">expr</span>, <span class="ident">builder</span>)<span class="question-mark">?</span>,
@@ -1027,10 +1028,10 @@
 }
 
 <span class="doccomment">/// Transform an ast::GuardExpr to an ir::Guard.</span>
-<span class="kw">fn</span> <span class="ident">build_guard</span>(<span class="ident">guard</span>: <span class="ident">ast::GuardExpr</span>, <span class="ident">bd</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Builder</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Guard</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">build_guard</span>(<span class="ident">guard</span>: <span class="ident">ast::GuardExpr</span>, <span class="ident">bd</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Guard</span><span class="op">&gt;</span> {
     <span class="kw">use</span> <span class="ident">ast::GuardExpr</span> <span class="kw">as</span> <span class="ident">GE</span>;
 
-    <span class="kw">let</span> <span class="ident">into_box_guard</span> <span class="op">=</span> <span class="op">|</span><span class="ident">g</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">GE</span><span class="op">&gt;</span>, <span class="ident">bd</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Builder</span><span class="op">|</span> -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">into_box_guard</span> <span class="op">=</span> <span class="op">|</span><span class="ident">g</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">GE</span><span class="op">&gt;</span>, <span class="ident">bd</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span><span class="op">|</span> -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">build_guard</span>(<span class="kw-2">*</span><span class="ident">g</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>))
     };
 
@@ -1063,7 +1064,7 @@
 <span class="doccomment">/// Transform ast::Control to ir::Control.</span>
 <span class="kw">fn</span> <span class="ident">build_control</span>(
     <span class="ident">control</span>: <span class="ident">ast::Control</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Builder</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>,
 ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span> {
     <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">control</span> {
         <span class="ident">ast::Control::Enable</span> {
@@ -1208,5 +1209,4 @@
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
 </body></html>
