@@ -149,6 +149,9 @@
 <span id="148">148</span>
 <span id="149">149</span>
 <span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">Direction</span>, <span class="ident">Id</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
 <span class="kw">use</span> <span class="ident">linked_hash_map::LinkedHashMap</span>;
@@ -193,11 +196,13 @@
         <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Id</span>, <span class="ident">u64</span>, <span class="ident">Direction</span>, <span class="ident">Attributes</span>)<span class="op">&gt;</span>,
     )<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">params</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">parameters</span>.<span class="ident">len</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidParamBinding</span>(
-                <span class="self">self</span>.<span class="ident">name</span>.<span class="ident">clone</span>(),
-                <span class="self">self</span>.<span class="ident">params</span>.<span class="ident">len</span>(),
-                <span class="ident">parameters</span>.<span class="ident">len</span>(),
-            ));
+            <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(
+               <span class="string">&quot;Invalid parameter binding for primitive `{}`. Requires {} parameters but provided with {}.&quot;</span>,
+               <span class="self">self</span>.<span class="ident">name</span>.<span class="ident">clone</span>(),
+               <span class="self">self</span>.<span class="ident">params</span>.<span class="ident">len</span>(),
+               <span class="ident">parameters</span>.<span class="ident">len</span>(),
+            );
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="ident">msg</span>));
         }
         <span class="kw">let</span> <span class="ident">bindings</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">params</span>
@@ -291,10 +296,11 @@
                 <span class="prelude-val">Some</span>(<span class="ident">width</span>) =&gt; {
                     <span class="prelude-val">Ok</span>((<span class="self">self</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="kw-2">*</span><span class="ident">width</span>, <span class="self">self</span>.<span class="ident">attributes</span>.<span class="ident">clone</span>()))
                 }
-                <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::ParamBindingMissing</span>(
-                    <span class="self">self</span>.<span class="ident">name</span>.<span class="ident">clone</span>(),
-                    <span class="ident">value</span>.<span class="ident">clone</span>(),
-                )),
+                <span class="prelude-val">None</span> =&gt; {
+                    <span class="kw">let</span> <span class="ident">param_name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">name</span>;
+                    <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Failed to resolve: {param_name}&quot;</span>);
+                    <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="ident">msg</span>).<span class="ident">with_pos</span>(<span class="ident">value</span>))
+                }
             },
         }
     }

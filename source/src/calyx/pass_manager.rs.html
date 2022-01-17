@@ -235,7 +235,7 @@
     {
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">Pass::name</span>().<span class="ident">to_string</span>();
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">passes</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>) {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Misc</span>(<span class="macro">format!</span>(
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::misc</span>(<span class="macro">format!</span>(
                 <span class="string">&quot;Pass with name &#39;{}&#39; is already registered.&quot;</span>,
                 <span class="ident">name</span>
             )));
@@ -257,7 +257,7 @@
         <span class="ident">passes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">aliases</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>) {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Misc</span>(<span class="macro">format!</span>(
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::misc</span>(<span class="macro">format!</span>(
                 <span class="string">&quot;Alias with name &#39;{}&#39;  already registered.&quot;</span>,
                 <span class="ident">name</span>
             )));
@@ -339,7 +339,7 @@
         <span class="comment">// Validate that names of passes in incl and excl sets are known</span>
         <span class="ident">passes</span>.<span class="ident">iter</span>().<span class="ident">chain</span>(<span class="ident">excl_set</span>.<span class="ident">iter</span>()).<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">pass</span><span class="op">|</span> {
             <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">passes</span>.<span class="ident">contains_key</span>(<span class="ident">pass</span>) {
-                <span class="prelude-val">Err</span>(<span class="ident">Error::Misc</span>(<span class="macro">format!</span>(
+                <span class="prelude-val">Err</span>(<span class="ident">Error::misc</span>(<span class="macro">format!</span>(
                     <span class="string">&quot;Unknown pass: {pass}. Run compiler with --list-passes to view registered passes.&quot;</span>
                 )))
             } <span class="kw">else</span> {

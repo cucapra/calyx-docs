@@ -195,6 +195,18 @@
 <span id="194">194</span>
 <span id="195">195</span>
 <span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
@@ -251,7 +263,8 @@
         <span class="kw">for</span> <span class="ident">cell_ref</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">cells</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cell_ref</span>.<span class="ident">borrow</span>();
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">reserved_names</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">name</span>().<span class="ident">id</span>) {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::ReservedName</span>(<span class="ident">cell</span>.<span class="ident">clone_name</span>()));
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::reserved_name</span>(<span class="ident">cell</span>.<span class="ident">clone_name</span>())
+                    .<span class="ident">with_pos</span>(<span class="ident">cell</span>.<span class="ident">name</span>()));
             }
         }
 
@@ -268,18 +281,18 @@
             }).<span class="ident">map</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
                 <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">assign</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>();
                 <span class="kw">if</span> <span class="ident">gname</span> <span class="op">!</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">get_parent_name</span>() {
-                    <span class="prelude-val">Err</span>(<span class="ident">Error::MalformedStructure</span>(
+                    <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(
                             <span class="macro">format!</span>(<span class="string">&quot;Group `{}` refers to the done condition of another group (`{}`).&quot;</span>,
                             <span class="ident">group</span>.<span class="ident">name</span>(),
-                            <span class="ident">dst</span>.<span class="ident">get_parent_name</span>())))
+                            <span class="ident">dst</span>.<span class="ident">get_parent_name</span>())).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">attributes</span>))
                 } <span class="kw">else</span> {
                     <span class="prelude-val">Ok</span>(())
                 }
             }).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
             <span class="kw">if</span> <span class="ident">done</span>.<span class="ident">is_empty</span>() {
-                <span class="prelude-val">Err</span>(<span class="ident">Error::MalformedStructure</span>(<span class="ident">gname</span>.<span class="ident">fmt_err</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(
                     <span class="string">&quot;No writes to the `done&#39; hole for group `{gname}&#39;&quot;</span>,
-                ))))
+                )).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">attributes</span>))
             } <span class="kw">else</span> {
                 <span class="prelude-val">Ok</span>(())
             }
@@ -317,7 +330,7 @@
             .<span class="ident">unwrap_or</span>(<span class="bool-val">false</span>)
             <span class="op">|</span><span class="op">|</span> <span class="ident">done_assign</span>.<span class="ident">unwrap_or</span>(<span class="bool-val">false</span>)
         {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::MalformedStructure</span>(<span class="ident">group</span>.<span class="ident">name</span>().<span class="ident">fmt_err</span>(<span class="string">&quot;Group with constant done condition are invalid. Use `comb group` instead to define a combinational group.&quot;</span>)));
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="string">&quot;Group with constant done condition are invalid. Use `comb group` instead to define a combinational group.&quot;</span>).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">attributes</span>));
         }
 
         <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
@@ -371,22 +384,33 @@
         <span class="ident">_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
         <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
+        <span class="comment">// Find unused groups</span>
         <span class="kw">let</span> <span class="ident">all_groups</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">g</span><span class="op">|</span> <span class="ident">g</span>.<span class="ident">clone_name</span>()).<span class="ident">collect</span>();
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">group</span>) <span class="op">=</span>
             <span class="ident">all_groups</span>.<span class="ident">difference</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">used_groups</span>).<span class="ident">into_iter</span>().<span class="ident">next</span>()
         {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnusedGroup</span>(<span class="ident">group</span>.<span class="ident">clone</span>()));
+            <span class="kw">let</span> <span class="ident">gr</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">find_group</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>).<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">gr</span> <span class="op">=</span> <span class="ident">gr</span>.<span class="ident">borrow</span>();
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(
+                <span class="ident">Error::unused</span>(<span class="ident">group</span>.<span class="ident">clone</span>(), <span class="string">&quot;group&quot;</span>).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">gr</span>.<span class="ident">attributes</span>)
+            );
         };
 
         <span class="kw">let</span> <span class="ident">all_comb_groups</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="ident">comp</span>.<span class="ident">comb_groups</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">g</span><span class="op">|</span> <span class="ident">g</span>.<span class="ident">clone_name</span>()).<span class="ident">collect</span>();
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">group</span>) <span class="op">=</span> <span class="ident">all_comb_groups</span>
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group</span>) <span class="op">=</span> <span class="ident">all_comb_groups</span>
             .<span class="ident">difference</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">used_comb_groups</span>)
             .<span class="ident">into_iter</span>()
             .<span class="ident">next</span>()
         {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnusedGroup</span>(<span class="ident">group</span>.<span class="ident">clone</span>()));
+            <span class="kw">let</span> <span class="ident">cgr</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">find_group</span>(<span class="kw-2">&amp;</span><span class="ident">comb_group</span>).<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">cgr</span> <span class="op">=</span> <span class="ident">cgr</span>.<span class="ident">borrow</span>();
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::unused</span>(
+                <span class="ident">comb_group</span>.<span class="ident">clone</span>(),
+                <span class="string">&quot;combinational group&quot;</span>,
+            )
+            .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">cgr</span>.<span class="ident">attributes</span>));
         }
         <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
     }

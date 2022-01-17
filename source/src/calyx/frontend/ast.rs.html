@@ -299,7 +299,7 @@
                 <span class="kw">if</span> <span class="ident">atty::isnt</span>(<span class="ident">Stream::Stdin</span>) {
                     <span class="ident">parser::CalyxParser::parse</span>(<span class="ident">std::io::stdin</span>())
                 } <span class="kw">else</span> {
-                    <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidFile</span>(
+                    <span class="prelude-val">Err</span>(<span class="ident">Error::invalid_file</span>(
                         <span class="string">&quot;No file provided and terminal not a TTY&quot;</span>.<span class="ident">to_string</span>(),
                     ))
                 }

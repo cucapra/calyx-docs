@@ -1180,7 +1180,7 @@
             ..
         }) =&gt; {
             <span class="kw">if</span> <span class="ident">cond</span>.<span class="ident">is_some</span>() {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::MalformedStructure</span>(<span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of if. This should have compiled away.&quot;</span>, <span class="ident">TopDownCompileControl::name</span>(), <span class="ident">cond</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>().<span class="ident">name</span>())));
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of if. This should have compiled away.&quot;</span>, <span class="ident">TopDownCompileControl::name</span>(), <span class="ident">cond</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>().<span class="ident">name</span>())));
             }
             <span class="kw">let</span> <span class="ident">port_guard</span>: <span class="ident">ir::Guard</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(<span class="ident">port</span>).<span class="ident">into</span>();
             <span class="comment">// Previous states transitioning into true branch need the conditional</span>
@@ -1211,7 +1211,7 @@
             <span class="ident">cond</span>, <span class="ident">port</span>, <span class="ident">body</span>, ..
         }) =&gt; {
             <span class="kw">if</span> <span class="ident">cond</span>.<span class="ident">is_some</span>() {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::MalformedStructure</span>(<span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of if. This should have compiled away.&quot;</span>, <span class="ident">TopDownCompileControl::name</span>(), <span class="ident">cond</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>().<span class="ident">name</span>())));
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of if. This should have compiled away.&quot;</span>, <span class="ident">TopDownCompileControl::name</span>(), <span class="ident">cond</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>().<span class="ident">name</span>())));
             }
 
             <span class="kw">let</span> <span class="ident">port_guard</span>: <span class="ident">ir::Guard</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(<span class="ident">port</span>).<span class="ident">into</span>();

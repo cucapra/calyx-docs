@@ -152,7 +152,7 @@
         } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::Control::Empty</span>(..) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">control</span> {
             <span class="prelude-val">Ok</span>(<span class="ident">Action::Stop</span>)
         } <span class="kw">else</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">Error::MalformedControl</span>(<span class="macro">format!</span>(
+            <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_control</span>(<span class="macro">format!</span>(
                 <span class="string">&quot;{}: Structure has more than one group&quot;</span>,
                 <span class="ident"><span class="self">Self</span>::name</span>()
             )))

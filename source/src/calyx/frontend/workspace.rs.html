@@ -298,7 +298,7 @@
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">lib</span>);
         }
 
-        <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidFile</span>(
+        <span class="prelude-val">Err</span>(<span class="ident">Error::invalid_file</span>(
             <span class="macro">format!</span>(<span class="string">&quot;Import path `{}` found neither in the parent ({}) nor library path ({})&quot;</span>,
             <span class="ident">import</span>.<span class="ident">as_ref</span>().<span class="ident">to_string_lossy</span>(),
             <span class="ident">parent</span>.<span class="ident">to_string_lossy</span>(),
@@ -319,7 +319,7 @@
         <span class="kw">if</span> <span class="ident">parent_path</span>.<span class="ident">exists</span>() {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">parent_path</span>);
         }
-        <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidFile</span>(<span class="macro">format!</span>(
+        <span class="prelude-val">Err</span>(<span class="ident">Error::invalid_file</span>(<span class="macro">format!</span>(
             <span class="string">&quot;Extern path `{}` not found in parent directory ({})&quot;</span>,
             <span class="ident">extern_path</span>.<span class="ident">as_ref</span>().<span class="ident">to_string_lossy</span>(),
             <span class="ident">parent</span>.<span class="ident">to_string_lossy</span>(),
@@ -380,7 +380,7 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">workspace</span> <span class="op">=</span> <span class="ident">Workspace::default</span>();
         <span class="kw">let</span> <span class="ident">abs_lib_path</span> <span class="op">=</span> <span class="ident">lib_path</span>.<span class="ident">canonicalize</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
-            <span class="ident">Error::InvalidFile</span>(<span class="macro">format!</span>(
+            <span class="ident">Error::invalid_file</span>(<span class="macro">format!</span>(
                 <span class="string">&quot;Failed to canonicalize library path `{}`: {}&quot;</span>,
                 <span class="ident">lib_path</span>.<span class="ident">to_string_lossy</span>(),
                 <span class="ident">err</span>
@@ -429,7 +429,7 @@
 
         <span class="comment">// Merge the initial namespace</span>
         <span class="kw">let</span> <span class="ident">parent_canonical</span> <span class="op">=</span> <span class="ident">parent_path</span>.<span class="ident">canonicalize</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
-            <span class="ident">Error::InvalidFile</span>(<span class="macro">format!</span>(
+            <span class="ident">Error::invalid_file</span>(<span class="macro">format!</span>(
                 <span class="string">&quot;Failed to canonicalize parent path `{}`: {}&quot;</span>,
                 <span class="ident">parent_path</span>.<span class="ident">to_string_lossy</span>(),
                 <span class="ident">err</span>
