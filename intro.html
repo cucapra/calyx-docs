@@ -175,7 +175,7 @@ Install the following tools for running the core tests:</p>
 </code></pre>
 <p>If everything has been installed correctly, this should not produce any failing
 tests.</p>
-<h2 id="installing-the-command-line-driver"><a class="header" href="#installing-the-command-line-driver">Installing the Command-line Driver</a></h2>
+<h2 id="installing-the-command-line-driver"><a class="header" href="#installing-the-command-line-driver">Installing the Command-Line Driver</a></h2>
 <p><a href="./fud">The Calyx driver</a> wraps the various compiler frontends and
 backends to simplify running Calyx programs.</p>
 <p>Install <a href="https://flit.readthedocs.io/en/latest/">Flit</a>:</p>
@@ -191,31 +191,21 @@ backends to simplify running Calyx programs.</p>
 <pre><code>fud check
 </code></pre>
 <p><code>fud</code> will report certain tools are not available. This is expected.</p>
-<h2 id="simulating-with-verilator"><a class="header" href="#simulating-with-verilator">Simulating with Verilator</a></h2>
-<p><a href="https://www.veripool.org/wiki/verilator">Verilator</a> is the default simulation backend for Calyx. If you want to
-run your Calyx programs, you need to install Verilator.</p>
-<p>On a Mac, install with:</p>
-<pre><code>brew install verilator
+<h2 id="simulation"><a class="header" href="#simulation">Simulation</a></h2>
+<p>There are three ways to run Calyx programs:
+<a href="https://www.veripool.org/wiki/verilator">Verilator</a>, <a href="http://iverilog.icarus.com">Icarus Verilog</a>, and Calyx's native <a href="./interpreter.html">interpreter</a>.
+You'll want to set up at least one of these options so you can try out your code.</p>
+<p>Icarus is an easy way to get started on most platforms.
+On a Mac, you can install Icarus Verilog with <a href="https://brew.sh">Homebrew</a> by typing <code>brew install icarus-verilog</code>.
+On Ubuntu, try <code>apt install iverilog</code>.
+Then install the relevant <a href="./fud/index.html#icarus-verilog">fud support</a> by running:</p>
+<pre><code>fud register icarus-verilog -p fud/icarus/icarus.py
 </code></pre>
-<p>Otherwise, you will probably need to compile it from source yourself (the versions in Linux repositories are generally out of date).
-There instructions are stolen from <a href="https://www.veripool.org/projects/verilator/wiki/Installing">Verilator's installation instructions</a>:</p>
-<pre><code>git clone https://github.com/verilator/verilator
-cd verilator
-git pull
-git checkout master
-autoconf
-./configure
-make
-sudo make install
-</code></pre>
-<p>Use <code>fud</code> to check you have the right version:</p>
-<pre><code>fud check
-</code></pre>
-<p><code>fud</code> should report that the <code>verilator</code> binary was installed and has the
-right version.
-Some tools will be reported missing. This is expected.</p>
+<p>Type <code>fud check</code> to make sure the new stage is working.
+(Some missing tools are expected; just pay attention to the report for <code>stages.icarus-verilog.exec</code>.)</p>
+<p>You can instead consider <a href="./fud/index.html#verilator">setting up Verilator</a> for faster long-running simulations or using the <a href="./interpreter.html">interpreter</a> to avoid RTL simulation altogether.</p>
 <h3 id="generating-simulation-results"><a class="header" href="#generating-simulation-results">Generating Simulation Results</a></h3>
-<p>By default, simulating with Verilator will produce a <a href="https://en.wikipedia.org/wiki/Value_change_dump">VCD file</a> which
+<p>By default, simulating with Icarus or Verilator will produce a <a href="https://en.wikipedia.org/wiki/Value_change_dump">VCD file</a>, which
 is not human-readable.
 Our tests use <a href="https://github.com/sgpthomas/vcdump">vcdump</a> to transform VCD file into JSON files.</p>
 <p>Install vcdump:</p>
@@ -231,8 +221,9 @@ Some tools will be reported missing. This is expected.</p>
 <p>We're all set to run a Calyx hardware design now. Run the following command:</p>
 <pre><code>fud e examples/tutorial/language-tutorial-iterate.futil \
   -s verilog.data examples/tutorial/data.json \
-  --to dat -v
+  --to dat -v --through icarus-verilog
 </code></pre>
+<p>(Change the last bit to <code>--through verilog</code> to use Verilator instead.)</p>
 <p>This command will compile <code>examples/tutorial/language-tutorial-iterate.futil</code> to Verilog
 using the Calyx compiler, simulate the design using the data in <code>examples/tutorial/data.json</code>, and generate a JSON representation of the
 final memory state.</p>
