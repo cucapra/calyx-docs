@@ -639,27 +639,47 @@ class MrXLStage(Stage):
 
     name = &quot;mrxl&quot;
 
-    def __init__(self, config):
+    def __init__(self):
+        &quot;&quot;&quot;
+        Initialize this stage. Initializing a stage *does not* construct its
+        computation graph.
+        &quot;&quot;&quot;
         super().__init__(
             src_state=&quot;mrxl&quot;,
             target_state=&quot;futil&quot;,
             input_type=SourceType.Path,
             output_type=SourceType.Stream,
-            config=config,
             description=&quot;Compiles MrXL to Calyx.&quot;,
         )
-        self.setup()
 
     @staticmethod
     def defaults():
+        &quot;&quot;&quot;
+        Specify defaults that should be added to fud's configuration file when
+        this stage is registered.
+        &quot;&quot;&quot;
         return {&quot;exec&quot;: &quot;mrxl&quot;}
 
-    def _define_steps(self, input_path):
-        @self.step(description=self.cmd)
-        def run_mrxl(mrxl_prog: SourceType.Path) -&gt; SourceType.Stream:
-            return shell(f&quot;{self.cmd} {str(mrxl_prog)}&quot;)
+    def _define_steps(self, input, builder, config):
+        &quot;&quot;&quot;
+        Define the steps that will execute in this stage. Each step represents
+        a delayed computation that will occur when the stage is executed.
+        &quot;&quot;&quot;
 
-        return run_mrxl(input_path)
+        # Commands at the top-level are evaluated when the computation is being
+        # staged
+        cmd = config[&quot;stages&quot;, self.name, &quot;exec&quot;]
+
+        # Computations within a step are delayed from being executed until
+        # the full execution pipeline is generated.
+        @builder.step(description=cmd)
+        def run_mrxl(mrxl_prog: SourceType.Path) -&gt; SourceType.Stream:
+            return shell(f&quot;{cmd} {str(mrxl_prog)}&quot;)
+
+        # Define a schedule using the steps.
+        # A schedule *looks* like an imperative program but actually represents
+        # a computation graph that is executed later on.
+        return run_mrxl(input)
 
 
 # Export the defined stages to fud
