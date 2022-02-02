@@ -357,7 +357,7 @@
         <span class="comment">// Rewrite assignments using the coloring generated.</span>
         <span class="kw">let</span> <span class="ident">empty_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
         <span class="kw">let</span> <span class="ident">rewriter</span> <span class="op">=</span> <span class="ident">ir::Rewriter::new</span>(<span class="kw-2">&amp;</span><span class="ident">coloring</span>, <span class="kw-2">&amp;</span><span class="ident">empty_map</span>);
-        <span class="ident">comp</span>.<span class="ident">for_each_assignment</span>(<span class="kw-2">&amp;</span><span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
+        <span class="ident">comp</span>.<span class="ident">for_each_assignment</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
             <span class="ident">assign</span>.<span class="ident">for_each_port</span>(<span class="op">|</span><span class="ident">port</span><span class="op">|</span> <span class="ident">rewriter</span>.<span class="ident">get</span>(<span class="ident">port</span>));
         });
 

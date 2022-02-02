@@ -335,16 +335,6 @@
 <span id="334">334</span>
 <span id="335">335</span>
 <span id="336">336</span>
-<span id="337">337</span>
-<span id="338">338</span>
-<span id="339">339</span>
-<span id="340">340</span>
-<span id="341">341</span>
-<span id="342">342</span>
-<span id="343">343</span>
-<span id="344">344</span>
-<span id="345">345</span>
-<span id="346">346</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
@@ -423,8 +413,6 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RemoveCombGroups</span> {
     <span class="comment">// Mapping from (group_name, (cell_name, port_name)) -&gt; (port, group).</span>
     <span class="ident">port_rewrite</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">PortInGroup</span>, (<span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
-    <span class="comment">// The pass updated combinational groups for this component.</span>
-    <span class="ident">updated</span>: <span class="ident">bool</span>,
 }
 
 <span class="doccomment">/// Represents (group_name, (cell_name, port_name))</span>
@@ -447,17 +435,12 @@
         <span class="ident">sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
         <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
-        <span class="self">self</span>.<span class="ident">updated</span> <span class="op">=</span> <span class="bool-val">false</span>;
-
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">used_ports</span> <span class="op">=</span>
-            <span class="ident">analysis::ControlPorts::from</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>());
+            <span class="ident">analysis::ControlPorts</span>::<span class="op">&lt;</span><span class="bool-val">false</span><span class="op">&gt;</span><span class="ident">::from</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>());
 
-        <span class="comment">// If any groups were updated, tell the pass that updates</span>
-        <span class="comment">// were made.</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">comp</span>.<span class="ident">comb_groups</span>.<span class="ident">is_empty</span>() {
-            <span class="self">self</span>.<span class="ident">updated</span> <span class="op">=</span> <span class="bool-val">true</span>;
-        } <span class="kw">else</span> {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
+        <span class="comment">// Early return if there are no combinational groups</span>
+        <span class="kw">if</span> <span class="ident">comp</span>.<span class="ident">comb_groups</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Stop</span>);
         }
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ir::Builder::new</span>(<span class="ident">comp</span>, <span class="ident">sigs</span>);
@@ -606,32 +589,29 @@
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
         <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">is_some</span>() {
-            <span class="comment">// Construct a new `while` statement</span>
-            <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> (
-                <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>(),
-                <span class="ident">s</span>.<span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>(),
-            );
-            <span class="kw">let</span> (<span class="ident">port_ref</span>, <span class="ident">cond_ref</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">port_rewrite</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="ident">cond_in_body</span> <span class="op">=</span> <span class="ident">ir::Control::enable</span>(<span class="ident">Rc::clone</span>(<span class="ident">cond_ref</span>));
-            <span class="kw">let</span> <span class="ident">body</span> <span class="op">=</span> <span class="ident">std::mem::replace</span>(<span class="ident">s</span>.<span class="ident">body</span>.<span class="ident">as_mut</span>(), <span class="ident">ir::Control::empty</span>());
-            <span class="kw">let</span> <span class="ident">new_body</span> <span class="op">=</span> <span class="ident">ir::Control::seq</span>(<span class="macro">vec!</span>[<span class="ident">body</span>, <span class="ident">cond_in_body</span>]);
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">while_</span> <span class="op">=</span> <span class="ident">ir::Control::while_</span>(
-                <span class="ident">Rc::clone</span>(<span class="ident">port_ref</span>),
-                <span class="prelude-val">None</span>,
-                <span class="ident">Box::new</span>(<span class="ident">new_body</span>),
-            );
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">attrs</span>) <span class="op">=</span> <span class="ident">while_</span>.<span class="ident">get_mut_attributes</span>() {
-                <span class="kw-2">*</span><span class="ident">attrs</span> <span class="op">=</span> <span class="ident">std::mem::take</span>(<span class="kw-2">&amp;mut</span> <span class="ident">s</span>.<span class="ident">attributes</span>);
-            }
-            <span class="kw">let</span> <span class="ident">cond_before_body</span> <span class="op">=</span> <span class="ident">ir::Control::enable</span>(<span class="ident">Rc::clone</span>(<span class="ident">cond_ref</span>));
-            <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">ir::Control::seq</span>(<span class="macro">vec!</span>[
-                <span class="ident">cond_before_body</span>,
-                <span class="ident">while_</span>,
-            ])))
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
+        <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">is_none</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
         }
+
+        <span class="comment">// Construct a new `while` statement</span>
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> (
+            <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>(),
+            <span class="ident">s</span>.<span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>(),
+        );
+        <span class="kw">let</span> (<span class="ident">port_ref</span>, <span class="ident">cond_ref</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">port_rewrite</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">cond_in_body</span> <span class="op">=</span> <span class="ident">ir::Control::enable</span>(<span class="ident">Rc::clone</span>(<span class="ident">cond_ref</span>));
+        <span class="kw">let</span> <span class="ident">body</span> <span class="op">=</span> <span class="ident">std::mem::replace</span>(<span class="ident">s</span>.<span class="ident">body</span>.<span class="ident">as_mut</span>(), <span class="ident">ir::Control::empty</span>());
+        <span class="kw">let</span> <span class="ident">new_body</span> <span class="op">=</span> <span class="ident">ir::Control::seq</span>(<span class="macro">vec!</span>[<span class="ident">body</span>, <span class="ident">cond_in_body</span>]);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">while_</span> <span class="op">=</span>
+            <span class="ident">ir::Control::while_</span>(<span class="ident">Rc::clone</span>(<span class="ident">port_ref</span>), <span class="prelude-val">None</span>, <span class="ident">Box::new</span>(<span class="ident">new_body</span>));
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">attrs</span>) <span class="op">=</span> <span class="ident">while_</span>.<span class="ident">get_mut_attributes</span>() {
+            <span class="kw-2">*</span><span class="ident">attrs</span> <span class="op">=</span> <span class="ident">std::mem::take</span>(<span class="kw-2">&amp;mut</span> <span class="ident">s</span>.<span class="ident">attributes</span>);
+        }
+        <span class="kw">let</span> <span class="ident">cond_before_body</span> <span class="op">=</span> <span class="ident">ir::Control::enable</span>(<span class="ident">Rc::clone</span>(<span class="ident">cond_ref</span>));
+        <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">ir::Control::seq</span>(<span class="macro">vec!</span>[
+            <span class="ident">cond_before_body</span>,
+            <span class="ident">while_</span>,
+        ])))
     }
 
     <span class="doccomment">/// Transforms a `if-with` into a `seq-if` which first runs the cond group</span>
@@ -643,37 +623,37 @@
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
         <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">is_some</span>() {
-            <span class="comment">// Construct a new `if` statement</span>
-            <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> (
-                <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>(),
-                <span class="ident">s</span>.<span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>(),
-            );
-            <span class="kw">let</span> (<span class="ident">port_ref</span>, <span class="ident">cond_ref</span>) <span class="op">=</span>
-                <span class="self">self</span>.<span class="ident">port_rewrite</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                    <span class="macro">panic!</span>(
-                        <span class="string">&quot;{}: Port `{}.{}` in group `{}` doesn&#39;t have a rewrite&quot;</span>,
-                        <span class="ident"><span class="self">Self</span>::name</span>(),
-                        <span class="ident">key</span>.<span class="number">1</span> .<span class="number">0</span>,
-                        <span class="ident">key</span>.<span class="number">1</span> .<span class="number">1</span>,
-                        <span class="ident">key</span>.<span class="number">0</span>
-                    )
-                });
-            <span class="kw">let</span> <span class="ident">tbranch</span> <span class="op">=</span>
-                <span class="ident">std::mem::replace</span>(<span class="ident">s</span>.<span class="ident">tbranch</span>.<span class="ident">as_mut</span>(), <span class="ident">ir::Control::empty</span>());
-            <span class="kw">let</span> <span class="ident">fbranch</span> <span class="op">=</span>
-                <span class="ident">std::mem::replace</span>(<span class="ident">s</span>.<span class="ident">fbranch</span>.<span class="ident">as_mut</span>(), <span class="ident">ir::Control::empty</span>());
-            <span class="kw">let</span> <span class="ident">if_</span> <span class="op">=</span> <span class="ident">ir::Control::if_</span>(
-                <span class="ident">Rc::clone</span>(<span class="ident">port_ref</span>),
-                <span class="prelude-val">None</span>,
-                <span class="ident">Box::new</span>(<span class="ident">tbranch</span>),
-                <span class="ident">Box::new</span>(<span class="ident">fbranch</span>),
-            );
-            <span class="kw">let</span> <span class="ident">cond</span> <span class="op">=</span> <span class="ident">ir::Control::enable</span>(<span class="ident">Rc::clone</span>(<span class="ident">cond_ref</span>));
-            <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">ir::Control::seq</span>(<span class="macro">vec!</span>[<span class="ident">cond</span>, <span class="ident">if_</span>])))
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
+        <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">is_none</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
         }
+
+        <span class="comment">// Construct a new `if` statement</span>
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> (
+            <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>(),
+            <span class="ident">s</span>.<span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>(),
+        );
+        <span class="kw">let</span> (<span class="ident">port_ref</span>, <span class="ident">cond_ref</span>) <span class="op">=</span>
+            <span class="self">self</span>.<span class="ident">port_rewrite</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;{}: Port `{}.{}` in group `{}` doesn&#39;t have a rewrite&quot;</span>,
+                    <span class="ident"><span class="self">Self</span>::name</span>(),
+                    <span class="ident">key</span>.<span class="number">1</span> .<span class="number">0</span>,
+                    <span class="ident">key</span>.<span class="number">1</span> .<span class="number">1</span>,
+                    <span class="ident">key</span>.<span class="number">0</span>
+                )
+            });
+        <span class="kw">let</span> <span class="ident">tbranch</span> <span class="op">=</span>
+            <span class="ident">std::mem::replace</span>(<span class="ident">s</span>.<span class="ident">tbranch</span>.<span class="ident">as_mut</span>(), <span class="ident">ir::Control::empty</span>());
+        <span class="kw">let</span> <span class="ident">fbranch</span> <span class="op">=</span>
+            <span class="ident">std::mem::replace</span>(<span class="ident">s</span>.<span class="ident">fbranch</span>.<span class="ident">as_mut</span>(), <span class="ident">ir::Control::empty</span>());
+        <span class="kw">let</span> <span class="ident">if_</span> <span class="op">=</span> <span class="ident">ir::Control::if_</span>(
+            <span class="ident">Rc::clone</span>(<span class="ident">port_ref</span>),
+            <span class="prelude-val">None</span>,
+            <span class="ident">Box::new</span>(<span class="ident">tbranch</span>),
+            <span class="ident">Box::new</span>(<span class="ident">fbranch</span>),
+        );
+        <span class="kw">let</span> <span class="ident">cond</span> <span class="op">=</span> <span class="ident">ir::Control::enable</span>(<span class="ident">Rc::clone</span>(<span class="ident">cond_ref</span>));
+        <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">ir::Control::seq</span>(<span class="macro">vec!</span>[<span class="ident">cond</span>, <span class="ident">if_</span>])))
     }
 
     <span class="kw">fn</span> <span class="ident">finish</span>(
@@ -682,7 +662,7 @@
         <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
         <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">updated</span> <span class="op">&amp;&amp;</span> <span class="ident">comp</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>).<span class="ident">is_some</span>() {
+        <span class="kw">if</span> <span class="ident">comp</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>).<span class="ident">is_some</span>() {
             <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span>
                 <span class="macro">format!</span>(<span class="string">&quot;Component {} has both a top-level \&quot;static\&quot; annotations and combinational groups which is not supported&quot;</span>, <span class="ident">comp</span>.<span class="ident">name</span>);
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::pass_assumption</span>(<span class="ident"><span class="self">Self</span>::name</span>().<span class="ident">to_string</span>(), <span class="ident">msg</span>)

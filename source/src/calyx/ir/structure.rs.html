@@ -466,9 +466,28 @@
 <span id="465">465</span>
 <span id="466">466</span>
 <span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.</span>
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
-<span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
+<span class="kw">use</span> <span class="ident">smallvec</span>::{<span class="ident">smallvec</span>, <span class="ident">SmallVec</span>};
 <span class="kw">use</span> <span class="ident">std::hash::Hash</span>;
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
@@ -626,7 +645,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Cell</span> {
     <span class="doccomment">/// Name of this cell.</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">name</span>: <span class="ident">Id</span>,
+    <span class="ident">name</span>: <span class="ident">Id</span>,
     <span class="doccomment">/// Ports on this cell</span>
     <span class="kw">pub</span> <span class="ident">ports</span>: <span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span>; <span class="number">10</span>]<span class="op">&gt;</span>,
     <span class="doccomment">/// Underlying type for this cell</span>
@@ -646,6 +665,16 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Cell</span> {
+    <span class="doccomment">/// Construct a cell</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">name</span>: <span class="ident">Id</span>, <span class="ident">prototype</span>: <span class="ident">CellType</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">name</span>,
+            <span class="ident">ports</span>: <span class="macro">smallvec!</span>[],
+            <span class="ident">prototype</span>,
+            <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
+        }
+    }
+
     <span class="doccomment">/// Get a reference to the named port if it exists.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="ident">S</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
@@ -805,9 +834,9 @@
 <span class="kw">impl</span> <span class="ident">Assignment</span> {
     <span class="doccomment">/// Apply function `f` to each port contained within the assignment and</span>
     <span class="doccomment">/// replace the port with the generated value if not None.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_each_port</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_each_port</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>)
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_src</span>) <span class="op">=</span> <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">src</span>) {
             <span class="self">self</span>.<span class="ident">src</span> <span class="op">=</span> <span class="ident">new_src</span>;
@@ -815,7 +844,7 @@
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_dst</span>) <span class="op">=</span> <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dst</span>) {
             <span class="self">self</span>.<span class="ident">dst</span> <span class="op">=</span> <span class="ident">new_dst</span>;
         }
-        <span class="self">self</span>.<span class="ident">guard</span>.<span class="ident">for_each</span>(<span class="kw-2">&amp;</span><span class="op">|</span><span class="ident">port</span><span class="op">|</span> <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>).<span class="ident">map</span>(<span class="ident">Guard::port</span>))
+        <span class="self">self</span>.<span class="ident">guard</span>.<span class="ident">for_each</span>(<span class="kw-2">&amp;mut</span> <span class="op">|</span><span class="ident">port</span><span class="op">|</span> <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>).<span class="ident">map</span>(<span class="ident">Guard::port</span>))
     }
 }
 
@@ -823,7 +852,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Group</span> {
     <span class="doccomment">/// Name of this group</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">name</span>: <span class="ident">Id</span>,
+    <span class="ident">name</span>: <span class="ident">Id</span>,
 
     <span class="doccomment">/// The assignments used in this group</span>
     <span class="kw">pub</span> <span class="ident">assignments</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Assignment</span><span class="op">&gt;</span>,
@@ -835,6 +864,15 @@
     <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">Attributes</span>,
 }
 <span class="kw">impl</span> <span class="ident">Group</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">name</span>: <span class="ident">Id</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">name</span>,
+            <span class="ident">assignments</span>: <span class="macro">vec!</span>[],
+            <span class="ident">holes</span>: <span class="macro">smallvec!</span>[],
+            <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
+        }
+    }
+
     <span class="doccomment">/// Get a reference to the named hole if it exists.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">S</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
