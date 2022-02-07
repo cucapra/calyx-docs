@@ -485,6 +485,9 @@
 <span id="484">484</span>
 <span id="485">485</span>
 <span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.</span>
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
 <span class="kw">use</span> <span class="ident">smallvec</span>::{<span class="ident">smallvec</span>, <span class="ident">SmallVec</span>};
@@ -829,6 +832,9 @@
 
     <span class="doccomment">/// The guard for this assignment.</span>
     <span class="kw">pub</span> <span class="ident">guard</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Guard</span><span class="op">&gt;</span>,
+
+    <span class="doccomment">/// Attributes for this assignment.</span>
+    <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">Attributes</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Assignment</span> {

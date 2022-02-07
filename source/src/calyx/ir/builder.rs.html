@@ -296,6 +296,7 @@
 <span id="295">295</span>
 <span id="296">296</span>
 <span id="297">297</span>
+<span id="298">298</span>
 </pre><pre class="rust"><code><span class="doccomment">//! IR Builder. Provides convience methods to build various parts of the internal</span>
 <span class="doccomment">//! representation.</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">LibrarySignatures</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
@@ -546,6 +547,7 @@
             <span class="ident">dst</span>,
             <span class="ident">src</span>,
             <span class="ident">guard</span>: <span class="ident">Box::new</span>(<span class="ident">guard</span>),
+            <span class="ident">attributes</span>: <span class="ident">ir::Attributes::default</span>(),
         }
     }
 
