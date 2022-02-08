@@ -207,7 +207,63 @@
 <span id="206">206</span>
 <span id="207">207</span>
 <span id="208">208</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
+
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>, <span class="ident">WithPos</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
     <span class="self">self</span>, <span class="ident">CloneName</span>, <span class="ident">Component</span>, <span class="ident">LibrarySignatures</span>, <span class="ident">RESERVED_NAMES</span>,
@@ -250,6 +306,39 @@
     <span class="kw">fn</span> <span class="ident">description</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="string">&quot;Check if the structure and control are well formed.&quot;</span>
     }
+}
+
+<span class="doccomment">/// Returns an error if the assignments are obviously conflicting. This happens when two</span>
+<span class="doccomment">/// assignments assign to the same port unconditionally.</span>
+<span class="kw">fn</span> <span class="ident">obvious_conflicts</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">assigns</span>: <span class="ident">I</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ir::Assignment</span><span class="op">&gt;</span>,
+{
+    <span class="kw">let</span> <span class="ident">dst_grps</span> <span class="op">=</span> <span class="ident">assigns</span>
+        .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">guard</span>.<span class="ident">is_true</span>())
+        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> (<span class="ident">a</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>(), <span class="ident">a</span>))
+        .<span class="ident">sorted_by</span>(<span class="op">|</span>(<span class="ident">dst1</span>, <span class="kw">_</span>), (<span class="ident">dst2</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">ir::Canonical::cmp</span>(<span class="ident">dst1</span>, <span class="ident">dst2</span>))
+        .<span class="ident">group_by</span>(<span class="op">|</span>(<span class="ident">dst</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">dst</span>.<span class="ident">clone</span>());
+
+    <span class="kw">for</span> (<span class="kw">_</span>, <span class="ident">group</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">dst_grps</span> {
+        <span class="kw">let</span> <span class="ident">assigns</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">a</span>)<span class="op">|</span> <span class="ident">a</span>).<span class="ident">collect_vec</span>();
+        <span class="kw">if</span> <span class="ident">assigns</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">1</span> {
+            <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="ident">assigns</span>
+                .<span class="ident">into_iter</span>()
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> {
+                    <span class="ident">a</span>.<span class="ident">attributes</span>
+                        .<span class="ident">copy_span</span>()
+                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">show</span>())
+                        .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">ir::Printer::assignment_to_str</span>(<span class="ident">a</span>))
+                })
+                .<span class="ident">join</span>(<span class="string">&quot;&quot;</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(
+                <span class="string">&quot;Obviously conflicting assignments found:\n{}&quot;</span>,
+                <span class="ident">msg</span>
+            )));
+        }
+    }
+    <span class="prelude-val">Ok</span>(())
 }
 
 <span class="kw">impl</span> <span class="ident">Visitor</span> <span class="kw">for</span> <span class="ident">WellFormed</span> {
@@ -297,6 +386,25 @@
                 <span class="prelude-val">Ok</span>(())
             }
         })<span class="question-mark">?</span>;
+
+        <span class="comment">// Check for obvious conflicting assignments</span>
+        <span class="kw">for</span> <span class="ident">gr</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>() {
+            <span class="ident">obvious_conflicts</span>(
+                <span class="ident">gr</span>.<span class="ident">borrow</span>()
+                    .<span class="ident">assignments</span>
+                    .<span class="ident">iter</span>()
+                    .<span class="ident">chain</span>(<span class="ident">comp</span>.<span class="ident">continuous_assignments</span>.<span class="ident">iter</span>()),
+            )<span class="question-mark">?</span>;
+        }
+        <span class="kw">for</span> <span class="ident">cgr</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">comb_groups</span>.<span class="ident">iter</span>() {
+            <span class="ident">obvious_conflicts</span>(
+                <span class="ident">cgr</span>.<span class="ident">borrow</span>()
+                    .<span class="ident">assignments</span>
+                    .<span class="ident">iter</span>()
+                    .<span class="ident">chain</span>(<span class="ident">comp</span>.<span class="ident">continuous_assignments</span>.<span class="ident">iter</span>()),
+            )<span class="question-mark">?</span>;
+        }
+        <span class="ident">obvious_conflicts</span>(<span class="ident">comp</span>.<span class="ident">continuous_assignments</span>.<span class="ident">iter</span>())<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
     }
@@ -404,7 +512,7 @@
             .<span class="ident">into_iter</span>()
             .<span class="ident">next</span>()
         {
-            <span class="kw">let</span> <span class="ident">cgr</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">find_group</span>(<span class="kw-2">&amp;</span><span class="ident">comb_group</span>).<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">cgr</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">find_comb_group</span>(<span class="kw-2">&amp;</span><span class="ident">comb_group</span>).<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">cgr</span> <span class="op">=</span> <span class="ident">cgr</span>.<span class="ident">borrow</span>();
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::unused</span>(
                 <span class="ident">comb_group</span>.<span class="ident">clone</span>(),
