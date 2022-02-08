@@ -199,11 +199,11 @@
 
 <span class="doccomment">/// Map to rewrite cell uses. Maps name of the old cell to the new [ir::Cell]</span>
 <span class="doccomment">/// instance.</span>
-<span class="kw">type</span> <span class="ident">CellRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CellRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Map to rewrite port uses. Maps the canonical name of an old port (generated using</span>
 <span class="doccomment">/// [ir::Port::canonical]) to the new [ir::Port] instance.</span>
-<span class="kw">type</span> <span class="ident">PortRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>), <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">PortRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Canonical</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Map name of old group to new group</span>
 <span class="kw">type</span> <span class="ident">GroupRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span><span class="op">&gt;</span>;

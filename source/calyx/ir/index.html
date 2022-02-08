@@ -7,9 +7,10 @@ The key differences between the frontend AST and the IR are:</p>
 <a href="struct.Group.html" title="Group"><code>Group</code></a>.</li>
 <li>The IR attempts to represent similar concepts in a homogeneous manner.</li>
 </ol>
-</div></details><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2>
+</div></details><h2 id="reexports" class="small-section-header"><a href="#reexports">Re-exports</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left import-item"><code>pub use rewriter::<a class="struct" href="rewriter/struct.Rewriter.html" title="struct calyx::ir::rewriter::Rewriter">Rewriter</a>;</code></div><div class="item-right docblock-short"></div></div></div><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="from_ast/index.html" title="calyx::ir::from_ast mod">from_ast</a></div><div class="item-right docblock-short"><p>Module to transform AST programs into IR.</p>
-</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="traversal/index.html" title="calyx::ir::traversal mod">traversal</a></div><div class="item-right docblock-short"><p>Visitor to traverse a control program.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="rewriter/index.html" title="calyx::ir::rewriter mod">rewriter</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="traversal/index.html" title="calyx::ir::traversal mod">traversal</a></div><div class="item-right docblock-short"><p>Visitor to traverse a control program.</p>
 </div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Assignment.html" title="calyx::ir::Assignment struct">Assignment</a></div><div class="item-right docblock-short"><p>Represents a guarded assignment in the program</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Attributes.html" title="calyx::ir::Attributes struct">Attributes</a></div><div class="item-right docblock-short"><p>Attributes associated with a specific IR structure.</p>
@@ -19,6 +20,7 @@ Uses internal references to the component to construct and validate
 constructs when needed.
 By default, assumes that the cells are being added by a pass and marks
 them with the <code>@generated</code> attribute.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Canonical.html" title="calyx::ir::Canonical struct">Canonical</a></div><div class="item-right docblock-short"><p>Canonical name of a Port</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Cell.html" title="calyx::ir::Cell struct">Cell</a></div><div class="item-right docblock-short"><p>Represents an instantiated cell.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.CombGroup.html" title="calyx::ir::CombGroup struct">CombGroup</a></div><div class="item-right docblock-short"><p>A combinational group.
 A combinational group does not have any holes and should only contain assignments that should
@@ -44,9 +46,6 @@ the root program.</p>
 different ways.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Primitive.html" title="calyx::ir::Primitive struct">Primitive</a></div><div class="item-right docblock-short"><p>Representation of a external primitive definition.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Printer.html" title="calyx::ir::Printer struct">Printer</a></div><div class="item-right docblock-short"><p>Printer for the IR.</p>
-</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Rewriter.html" title="calyx::ir::Rewriter struct">Rewriter</a></div><div class="item-right docblock-short"><p>A structure to track rewrite maps for ports. Stores both cell rewrites and direct port
-rewrites. Attempts to apply port rewrites first before trying the cell
-rewrite.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Seq.html" title="calyx::ir::Seq struct">Seq</a></div><div class="item-right docblock-short"><p>Data for the <code>seq</code> control statement.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.WRC.html" title="calyx::ir::WRC struct">WRC</a></div><div class="item-right docblock-short"><p>A Wrapper for a weak RefCell pointer.
 Used by parent pointers in the internal representation.</p>

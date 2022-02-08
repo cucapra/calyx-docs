@@ -220,7 +220,7 @@
     <span class="ident">GroupOrInvoke</span>, <span class="ident">ReachingDefinitionAnalysis</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">Builder</span>, <span class="ident">Cell</span>, <span class="ident">CloneName</span>, <span class="ident">LibrarySignatures</span>, <span class="ident">RRC</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">Builder</span>, <span class="ident">CloneName</span>, <span class="ident">LibrarySignatures</span>};
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 
 <span class="doccomment">/// Unsharing registers reduces the amount of multiplexers used in the final design, trading them</span>
@@ -265,7 +265,7 @@
     }
 }
 
-<span class="kw">type</span> <span class="ident">RewriteMap</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Cell</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">RewriteMap</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">ir::rewriter::CellRewriteMap</span><span class="op">&gt;</span>;
 
 <span class="comment">// A struct for managing the overlapping analysis and rewrite information</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>

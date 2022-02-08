@@ -488,6 +488,10 @@
 <span id="487">487</span>
 <span id="488">488</span>
 <span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.</span>
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
 <span class="kw">use</span> <span class="ident">smallvec</span>::{<span class="ident">smallvec</span>, <span class="ident">SmallVec</span>};
@@ -538,6 +542,10 @@
     <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">Attributes</span>,
 }
 
+<span class="doccomment">/// Canonical name of a Port</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Hash</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Canonical</span>(<span class="kw">pub</span> <span class="ident">Id</span>, <span class="kw">pub</span> <span class="ident">Id</span>);
+
 <span class="kw">impl</span> <span class="ident">Port</span> {
     <span class="doccomment">/// Checks if this port is a hole</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_hole</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
@@ -576,8 +584,8 @@
     }
 
     <span class="doccomment">/// Get the canonical representation for this Port.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">canonical</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">Id</span>, <span class="ident">Id</span>) {
-        (<span class="self">self</span>.<span class="ident">get_parent_name</span>(), <span class="self">self</span>.<span class="ident">name</span>.<span class="ident">clone</span>())
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">canonical</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Canonical</span> {
+        <span class="ident">Canonical</span>(<span class="self">self</span>.<span class="ident">get_parent_name</span>(), <span class="self">self</span>.<span class="ident">name</span>.<span class="ident">clone</span>())
     }
 }
 

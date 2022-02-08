@@ -256,7 +256,7 @@
     }
 }
 
-<span class="kw">type</span> <span class="ident">Store</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>), (<span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>, <span class="ident">ir::Guard</span>)<span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">Store</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Canonical</span>, (<span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>, <span class="ident">ir::Guard</span>)<span class="op">&gt;</span>;
 
 <span class="doccomment">/// Finds the &#39;fixed_point&#39; of a map from Hole names to guards under the</span>
 <span class="doccomment">/// inlining operation. The map contains entries like:</span>

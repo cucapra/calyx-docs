@@ -426,6 +426,8 @@
 <span id="425">425</span>
 <span id="426">426</span>
 <span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
@@ -436,14 +438,10 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">CloneName</span>, <span class="ident">LibrarySignatures</span>, <span class="ident">RRC</span>};
 
-<span class="doccomment">/// Map name of old cell to the new cell</span>
-<span class="kw">type</span> <span class="ident">CellMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 <span class="doccomment">/// Map name of old group to new group</span>
 <span class="kw">type</span> <span class="ident">GroupMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 <span class="doccomment">/// Map name of old combination group to new combinational group</span>
 <span class="kw">type</span> <span class="ident">CombGroupMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::CombGroup</span><span class="op">&gt;</span><span class="op">&gt;</span>;
-<span class="doccomment">/// Map canonical name of old port to new port</span>
-<span class="kw">type</span> <span class="ident">PortMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>), <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Inlines all sub-components marked with the `@inline` attribute.</span>
 <span class="doccomment">/// Cannot inline components when they:</span>
@@ -461,7 +459,7 @@
     <span class="doccomment">/// Map from the name of an instance to its associated control program.</span>
     <span class="ident">control_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">ir::Control</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Mapping for ports on cells that have been inlined.</span>
-    <span class="ident">interface_rewrites</span>: <span class="ident">PortMap</span>,
+    <span class="ident">interface_rewrites</span>: <span class="ident">ir::rewriter::PortRewriteMap</span>,
     <span class="doccomment">/// Cells that have been inlined. We retain these so that references within</span>
     <span class="doccomment">/// the control program of the parent are valid.</span>
     <span class="ident">inlined_cells</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span>,
@@ -563,7 +561,7 @@
         <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Builder</span>,
         <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Component</span>,
         <span class="ident">name</span>: <span class="ident">ir::Id</span>,
-    ) -&gt; <span class="ident">PortMap</span> {
+    ) -&gt; <span class="ident">ir::rewriter::PortRewriteMap</span> {
         <span class="comment">// For each output port, generate a wire that will store its value</span>
         <span class="ident">comp</span>.<span class="ident">signature</span>
             .<span class="ident">borrow</span>()
@@ -597,11 +595,11 @@
         <span class="ident">name</span>: <span class="ident">ir::Id</span>,
     ) -&gt; (
         <span class="ident">ir::Control</span>,
-        <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> ((<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>), <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
+        <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">ir::Canonical</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
     ) {
         <span class="comment">// For each cell in the component, create a new cell in the parent</span>
         <span class="comment">// of the same type and build a rewrite map using it.</span>
-        <span class="kw">let</span> <span class="ident">cell_map</span>: <span class="ident">CellMap</span> <span class="op">=</span> <span class="ident">comp</span>
+        <span class="kw">let</span> <span class="ident">cell_map</span>: <span class="ident">ir::rewriter::CellRewriteMap</span> <span class="op">=</span> <span class="ident">comp</span>
             .<span class="ident">cells</span>
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell_ref</span><span class="op">|</span> <span class="ident"><span class="self">Self</span>::inline_cell</span>(<span class="ident">builder</span>, <span class="ident">cell_ref</span>))
@@ -638,14 +636,18 @@
         <span class="comment">// Generate interface map for use in the parent cell.</span>
         <span class="comment">// Return as an iterator because it&#39;s immediately merged into the global rewrite map.</span>
         <span class="kw">let</span> <span class="ident">rev_interface_map</span> <span class="op">=</span>
-            <span class="ident">interface_map</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>((<span class="kw">_</span>, <span class="ident">p</span>), <span class="ident">pr</span>)<span class="op">|</span> {
+            <span class="ident">interface_map</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">cp</span>, <span class="ident">pr</span>)<span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">ir::Canonical</span>(<span class="kw">_</span>, <span class="ident">p</span>) <span class="op">=</span> <span class="ident">cp</span>;
                 <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">pr</span>.<span class="ident">borrow</span>();
                 <span class="kw">let</span> <span class="ident">np</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">port</span>.<span class="ident">name</span>.<span class="ident">id</span>.<span class="ident">as_str</span>() {
                     <span class="string">&quot;in&quot;</span> =&gt; <span class="string">&quot;out&quot;</span>,
                     <span class="string">&quot;out&quot;</span> =&gt; <span class="string">&quot;in&quot;</span>,
                     <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
                 };
-                ((<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">p</span>), <span class="ident">port</span>.<span class="ident">cell_parent</span>().<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="ident">np</span>))
+                (
+                    <span class="ident">ir::Canonical</span>(<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">p</span>),
+                    <span class="ident">port</span>.<span class="ident">cell_parent</span>().<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="ident">np</span>),
+                )
             });
 
         (<span class="ident">con</span>, <span class="ident">rev_interface_map</span>)
@@ -694,7 +696,8 @@
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
         <span class="comment">// Rewrites for the interface ports of inlined cells.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">interface_rewrites</span>: <span class="ident">PortMap</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">interface_rewrites</span>: <span class="ident">ir::rewriter::PortRewriteMap</span> <span class="op">=</span>
+            <span class="ident">HashMap::new</span>();
         <span class="comment">// Track names of cells that were inlined.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inlined_cells</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ir::Builder::new</span>(<span class="ident">comp</span>, <span class="ident">sigs</span>);
@@ -769,7 +772,8 @@
                 .<span class="ident">into_iter</span>()
                 .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="ident">param</span>)<span class="op">|</span> {
                     <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(
-                        <span class="kw-2">&amp;</span><span class="ident">interface_rewrites</span>[<span class="kw-2">&amp;</span>(<span class="ident">instance</span>.<span class="ident">clone</span>(), <span class="ident">name</span>)],
+                        <span class="kw-2">&amp;</span><span class="ident">interface_rewrites</span>
+                            [<span class="kw-2">&amp;</span><span class="ident">ir::Canonical</span>(<span class="ident">instance</span>.<span class="ident">clone</span>(), <span class="ident">name</span>)],
                     );
                     <span class="comment">// The parameter can refer to port on a cell that has been</span>
                     <span class="comment">// inlined.</span>

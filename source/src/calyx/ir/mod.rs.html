@@ -68,7 +68,7 @@
 <span class="kw">mod</span> <span class="ident">primitives</span>;
 <span class="kw">mod</span> <span class="ident">printer</span>;
 <span class="kw">mod</span> <span class="ident">reserved_names</span>;
-<span class="kw">mod</span> <span class="ident">rewriter</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">rewriter</span>;
 <span class="kw">mod</span> <span class="ident">structure</span>;
 
 <span class="comment">// Re-export types at the module level.</span>
@@ -85,8 +85,8 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">reserved_names::RESERVED_NAMES</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rewriter::Rewriter</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">structure</span>::{
-    <span class="ident">Assignment</span>, <span class="ident">Binding</span>, <span class="ident">Cell</span>, <span class="ident">CellType</span>, <span class="ident">CloneName</span>, <span class="ident">CombGroup</span>, <span class="ident">Direction</span>,
-    <span class="ident">GetName</span>, <span class="ident">Group</span>, <span class="ident">Port</span>, <span class="ident">PortIterator</span>, <span class="ident">PortParent</span>,
+    <span class="ident">Assignment</span>, <span class="ident">Binding</span>, <span class="ident">Canonical</span>, <span class="ident">Cell</span>, <span class="ident">CellType</span>, <span class="ident">CloneName</span>, <span class="ident">CombGroup</span>,
+    <span class="ident">Direction</span>, <span class="ident">GetName</span>, <span class="ident">Group</span>, <span class="ident">Port</span>, <span class="ident">PortIterator</span>, <span class="ident">PortParent</span>,
 };
 
 <span class="doccomment">/// Visitor to traverse a control program.</span>
