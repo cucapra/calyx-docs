@@ -776,20 +776,6 @@
 <span id="775">775</span>
 <span id="776">776</span>
 <span id="777">777</span>
-<span id="778">778</span>
-<span id="779">779</span>
-<span id="780">780</span>
-<span id="781">781</span>
-<span id="782">782</span>
-<span id="783">783</span>
-<span id="784">784</span>
-<span id="785">785</span>
-<span id="786">786</span>
-<span id="787">787</span>
-<span id="788">788</span>
-<span id="789">789</span>
-<span id="790">790</span>
-<span id="791">791</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::math_utilities::get_bit_width_from</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::CalyxResult</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal::ConstructVisitor</span>;
@@ -1393,25 +1379,11 @@
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span> <span class="op">+</span> <span class="ident">Named</span>,
     {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dump_fsm</span> <span class="op">=</span> <span class="bool-val">false</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">early_transitions</span> <span class="op">=</span> <span class="bool-val">false</span>;
-        <span class="ident">ctx</span>.<span class="ident">extra_opts</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">opt</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">splits</span> <span class="op">=</span> <span class="ident">opt</span>.<span class="ident">split</span>(<span class="string">&#39;:&#39;</span>);
-            <span class="kw">if</span> <span class="ident">splits</span>.<span class="ident">next</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident"><span class="self">Self</span>::name</span>()) {
-                <span class="kw">match</span> <span class="ident">splits</span>.<span class="ident">next</span>() {
-                    <span class="prelude-val">Some</span>(<span class="string">&quot;dump-fsm&quot;</span>) =&gt; {
-                        <span class="ident">dump_fsm</span> <span class="op">=</span> <span class="bool-val">true</span>;
-                    }
-                    <span class="prelude-val">Some</span>(<span class="string">&quot;early-transitions&quot;</span>) =&gt; {
-                        <span class="ident">early_transitions</span> <span class="op">=</span> <span class="bool-val">true</span>;
-                    }
-                    <span class="kw">_</span> =&gt; (),
-                }
-            }
-        });
+        <span class="kw">let</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_opts</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;dump-fsm&quot;</span>, <span class="string">&quot;early-transitions&quot;</span>], <span class="ident">ctx</span>);
+
         <span class="prelude-val">Ok</span>(<span class="ident">TopDownCompileControl</span> {
-            <span class="ident">dump_fsm</span>,
-            <span class="ident">early_transitions</span>,
+            <span class="ident">dump_fsm</span>: <span class="ident">opts</span>[<span class="number">0</span>],
+            <span class="ident">early_transitions</span>: <span class="ident">opts</span>[<span class="number">1</span>],
         })
     }
 
