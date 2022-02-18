@@ -517,6 +517,13 @@
 <span id="516">516</span>
 <span id="517">517</span>
 <span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a formatter for the in-memory representation of Components.</span>
 <span class="doccomment">//! The printing operation clones inner nodes and doesn&#39;t perform any mutation</span>
 <span class="doccomment">//! to the Component.</span>
@@ -791,6 +798,13 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">assignment_to_str</span>(<span class="ident">assign</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Assignment</span>) -&gt; <span class="ident">String</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="ident"><span class="self">Self</span>::write_assignment</span>(<span class="ident">assign</span>, <span class="number">0</span>, <span class="kw-2">&amp;mut</span> <span class="ident">buf</span>).<span class="ident">ok</span>();
+        <span class="ident">String::from_utf8_lossy</span>(<span class="ident">buf</span>.<span class="ident">as_slice</span>()).<span class="ident">to_string</span>()
+    }
+
+    <span class="doccomment">/// Convinience method to get string representation of [ir::Control].</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">control_to_str</span>(<span class="ident">assign</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>) -&gt; <span class="ident">String</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="ident"><span class="self">Self</span>::write_control</span>(<span class="ident">assign</span>, <span class="number">0</span>, <span class="kw-2">&amp;mut</span> <span class="ident">buf</span>).<span class="ident">ok</span>();
         <span class="ident">String::from_utf8_lossy</span>(<span class="ident">buf</span>.<span class="ident">as_slice</span>()).<span class="ident">to_string</span>()
     }
 

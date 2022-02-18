@@ -44,12 +44,20 @@
 <span id="43">43</span>
 <span id="44">44</span>
 <span id="45">45</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">LibrarySignatures</span>};
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="doccomment">/// Transforms all `par` into `seq`.</span>
-<span class="doccomment">/// Useful for debugging problems with `par`.</span>
+<span class="doccomment">/// Transforms all `par` into `seq`. Uses [analysis::ControlOrder] to get a</span>
+<span class="doccomment">/// sequentialization of `par` such that the program still computes the same</span>
+<span class="doccomment">/// value. When there is no such sequentialization, errors out.</span>
+<span class="doccomment">///</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">/// ```</span>
@@ -85,7 +93,9 @@
         <span class="ident">_c</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
         <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">let</span> <span class="ident">par</span> <span class="op">=</span> <span class="ident">ir::Control::seq</span>(<span class="ident">s</span>.<span class="ident">stmts</span>.<span class="ident">drain</span>(..).<span class="ident">collect</span>());
+        <span class="kw">let</span> <span class="ident">total_order</span> <span class="op">=</span>
+            <span class="ident">analysis::ControlOrder</span>::<span class="op">&lt;</span><span class="bool-val">true</span><span class="op">&gt;</span><span class="ident">::get_total_order</span>(<span class="ident">s</span>.<span class="ident">stmts</span>.<span class="ident">drain</span>(..))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">par</span> <span class="op">=</span> <span class="ident">ir::Control::seq</span>(<span class="ident">total_order</span>);
         <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">par</span>))
     }
 }

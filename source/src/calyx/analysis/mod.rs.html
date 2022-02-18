@@ -24,11 +24,14 @@
 <span id="23">23</span>
 <span id="24">24</span>
 <span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Analysis for Calyx programs.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The analyses construct data-structures that make answering certain queries</span>
 <span class="doccomment">//! about Calyx programs easier.</span>
 
+<span class="kw">mod</span> <span class="ident">control_order</span>;
 <span class="kw">mod</span> <span class="ident">control_ports</span>;
 <span class="kw">mod</span> <span class="ident">dataflow_order</span>;
 <span class="kw">mod</span> <span class="ident">graph</span>;
@@ -40,6 +43,7 @@
 <span class="kw">mod</span> <span class="ident">schedule_conflicts</span>;
 <span class="kw">mod</span> <span class="ident">variable_detection</span>;
 
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">control_order::ControlOrder</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">control_ports::ControlPorts</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">dataflow_order::DataflowOrder</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">graph::GraphAnalysis</span>;

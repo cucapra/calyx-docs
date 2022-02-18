@@ -36,8 +36,9 @@ all guards are guaranteed to be either <a href="../ir/enum.Guard.html#variant.Tr
 group, minimize the registers used for each component.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Papercut.html" title="calyx::passes::Papercut struct">Papercut</a></div><div class="item-right docblock-short"><p>Pass to check for common errors such as missing assignments to <code>done</code> holes
 of groups.</p>
-</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ParToSeq.html" title="calyx::passes::ParToSeq struct">ParToSeq</a></div><div class="item-right docblock-short"><p>Transforms all <code>par</code> into <code>seq</code>.
-Useful for debugging problems with <code>par</code>.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ParToSeq.html" title="calyx::passes::ParToSeq struct">ParToSeq</a></div><div class="item-right docblock-short"><p>Transforms all <code>par</code> into <code>seq</code>. Uses <a href="../analysis/struct.ControlOrder.html" title="analysis::ControlOrder">analysis::ControlOrder</a> to get a
+sequentialization of <code>par</code> such that the program still computes the same
+value. When there is no such sequentialization, errors out.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.RegisterUnsharing.html" title="calyx::passes::RegisterUnsharing struct">RegisterUnsharing</a></div><div class="item-right docblock-short"><p>Unsharing registers reduces the amount of multiplexers used in the final design, trading them
 off for more memory.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.RemoveCombGroups.html" title="calyx::passes::RemoveCombGroups struct">RemoveCombGroups</a></div><div class="item-right docblock-short"><p>Transforms combinational groups, which have a constant done condition,
