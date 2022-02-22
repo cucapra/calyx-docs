@@ -2756,6 +2756,23 @@ found.</p>
 <p>Runt (Run Tests) is the expectation testing framework for Calyx. It organizes
 collections of tests into test suites and specifies configuration for them.</p>
 <p>Runt uses <code>runt.toml</code> to define the test suites and configure them.</p>
+<h2 id="cheatsheet"><a class="header" href="#cheatsheet">Cheatsheet</a></h2>
+<p>Runt workflow involves two things:</p>
+<ol>
+<li>Running tests and comparing differences</li>
+<li>Saving new or changed golden files</li>
+</ol>
+<p>To run all the tests in a directory, run <code>runt</code> with a folder containing <code>runt.toml</code>.</p>
+<p>The following commands help focus on specific tests to run:</p>
+<ul>
+<li><code>-i</code>: Include files that match the given pattern. The pattern is matched against <code>&lt;suite name&gt;:&lt;file path&gt;</code> so it can be used to filter both test suites or specific paths. General regex patterns are supported.</li>
+<li><code>-x</code>: Exclude files that match the pattern</li>
+<li><code>-o</code>: Filter out reported test results based on test status. Running with <code>miss</code> will only show the tests that don't have an <code>.expect</code> file.</li>
+</ul>
+<p><strong>Differences</strong>. <code>-d</code> or <code>--diff</code> shows differences between the expected test output and the generated output. Use this in conjunction with <code>-i</code> to focus on particular failing tests.</p>
+<p><strong>Saving Files</strong>. <code>-s</code> is used to save test outputs when the have expected changes. In the case of <code>miss</code> tests, i.e. tests that currently don't any expected output file, this saves a completely new <code>.expect</code> file.</p>
+<p><strong>Dry run</strong>. <code>-n</code> flag shows the commands that <code>runt</code> will run for each test. Use this when you directly want to run the command for the test directly.</p>
+<p>For other options, look at <code>runt --help</code> which documents other features in <code>runt</code>.</p>
 <p>For instruction on using runt, see the <a href="https://github.com/rachitnigam/runt#run-test-runt--">official documentation</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="exp-generator"><a class="header" href="#exp-generator"><code>exp</code> Generator</a></h1>
 <p>The <code>exp</code> generator uses a Taylor series approximation to calculate the fixed point value of the natural
