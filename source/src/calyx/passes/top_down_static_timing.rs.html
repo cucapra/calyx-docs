@@ -548,6 +548,72 @@
 <span id="547">547</span>
 <span id="548">548</span>
 <span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::math_utilities::get_bit_width_from</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal::ConstructVisitor</span>;
@@ -587,11 +653,15 @@
     }
 
     <span class="kw">fn</span> <span class="ident">last_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">transitions</span>.<span class="ident">is_empty</span>(), <span class="string">&quot;Transitions are empty&quot;</span>);
         <span class="self">self</span>.<span class="ident">transitions</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">e</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">e</span>).<span class="ident">max</span>().<span class="ident">unwrap</span>()
     }
 
     <span class="kw">fn</span> <span class="ident">display</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">let</span> <span class="ident">out</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">std::io::stdout</span>();
+        <span class="kw">let</span> (<span class="ident">uncond</span>, <span class="ident">cond</span>) <span class="op">=</span>
+            <span class="ident"><span class="self">Self</span>::calculate_runs</span>(<span class="self">self</span>.<span class="ident">transitions</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>());
+
         <span class="macro">println!</span>(<span class="string">&quot;enables:&quot;</span>);
         <span class="self">self</span>.<span class="ident">enables</span>
             .<span class="ident">iter</span>()
@@ -606,19 +676,79 @@
                 })
             });
         <span class="macro">println!</span>(<span class="string">&quot;transitions:&quot;</span>);
-        <span class="self">self</span>.<span class="ident">transitions</span>
-            .<span class="ident">iter</span>()
+        <span class="ident">cond</span>.<span class="ident">iter</span>()
             .<span class="ident">sorted_by</span>(<span class="op">|</span>(<span class="ident">k1</span>, <span class="ident">k2</span>, <span class="ident">g1</span>), (<span class="ident">k3</span>, <span class="ident">k4</span>, <span class="ident">g2</span>)<span class="op">|</span> {
                 <span class="ident">k1</span>.<span class="ident">cmp</span>(<span class="ident">k3</span>).<span class="ident">then_with</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">k2</span>.<span class="ident">cmp</span>(<span class="ident">k4</span>)).<span class="ident">then_with</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">g1</span>.<span class="ident">cmp</span>(<span class="ident">g2</span>))
             })
             .<span class="ident">for_each</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>, <span class="ident">g</span>)<span class="op">|</span> {
                 <span class="macro">println!</span>(<span class="string">&quot;({})-&gt;({})\n  {}&quot;</span>, <span class="ident">i</span>, <span class="ident">f</span>, <span class="ident">Printer::guard_str</span>(<span class="ident">g</span>));
-            })
+            });
+
+        <span class="comment">// Unconditional +1 transitions</span>
+        <span class="kw">let</span> <span class="ident">uncond_trans</span> <span class="op">=</span> <span class="ident">uncond</span>
+            .<span class="ident">into_iter</span>()
+            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">s</span>, <span class="ident">e</span>)<span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;({}, {})&quot;</span>, <span class="ident">s</span>, <span class="ident">e</span>))
+            .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>);
+        <span class="macro">println!</span>(<span class="string">&quot;unconditional:\n{}&quot;</span>, <span class="ident">uncond_trans</span>);
+    }
+
+    <span class="doccomment">/// Returns &quot;runs&quot; of FSM states where transitions happen unconditionally</span>
+    <span class="kw">fn</span> <span class="ident">calculate_runs</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(
+        <span class="ident">transitions</span>: <span class="ident">I</span>,
+    ) -&gt; (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Range</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">u64</span>, <span class="ident">ir::Guard</span>)<span class="op">&gt;</span>)
+    <span class="kw">where</span>
+        <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">u64</span>, <span class="ident">u64</span>, <span class="ident">ir::Guard</span>)<span class="op">&gt;</span>,
+    {
+        <span class="comment">// XXX(rachit): This only works for &quot;true&quot; guards and fails to compress if there is any</span>
+        <span class="comment">// other guard. For example, if there is a sequence under a conditional branch, this will</span>
+        <span class="comment">// fail to compress that sequence.</span>
+        <span class="kw">let</span> (<span class="ident">unconditional</span>, <span class="ident">conditional</span>): (<span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>) <span class="op">=</span> <span class="ident">transitions</span>
+            .<span class="ident">partition</span>(<span class="op">|</span>(<span class="ident">s</span>, <span class="ident">e</span>, <span class="ident">guard</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">e</span> <span class="op">==</span> <span class="ident">s</span> <span class="op">+</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">guard</span>.<span class="ident">is_true</span>());
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unconditional</span> <span class="op">=</span>
+            <span class="ident">unconditional</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">s</span>, <span class="kw">_</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">s</span>).<span class="ident">sorted</span>();
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ranges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Range</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">cur_s</span>) <span class="op">=</span> <span class="ident">unconditional</span>.<span class="ident">next</span>() {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">start_s</span> <span class="op">=</span> <span class="ident">cur_s</span>;
+
+            <span class="comment">// Extract the next state</span>
+            <span class="kw">for</span> <span class="ident">nxt_s</span> <span class="kw">in</span> <span class="ident">unconditional</span> {
+                <span class="kw">if</span> <span class="ident">nxt_s</span> <span class="op">!</span><span class="op">=</span> <span class="ident">cur_s</span> <span class="op">+</span> <span class="number">1</span> {
+                    <span class="ident">ranges</span>.<span class="ident">push</span>((<span class="ident">start_s</span>, <span class="ident">cur_s</span> <span class="op">+</span> <span class="number">1</span>));
+                    <span class="ident">start_s</span> <span class="op">=</span> <span class="ident">cur_s</span>;
+                }
+                <span class="ident">cur_s</span> <span class="op">=</span> <span class="ident">nxt_s</span>
+            }
+            <span class="ident">ranges</span>.<span class="ident">push</span>((<span class="ident">start_s</span>, <span class="ident">cur_s</span> <span class="op">+</span> <span class="number">1</span>));
+        }
+
+        (<span class="ident">ranges</span>, <span class="ident">conditional</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">range_guard</span>(
+        <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Builder</span>,
+        <span class="ident">s</span>: <span class="ident">u64</span>,
+        <span class="ident">e</span>: <span class="ident">u64</span>,
+        <span class="ident">fsm_size</span>: <span class="ident">u64</span>,
+        <span class="ident">fsm</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="ident">ir::Guard</span> {
+        <span class="kw">let</span> <span class="ident">lb_const</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_constant</span>(<span class="ident">s</span>, <span class="ident">fsm_size</span>);
+        <span class="kw">let</span> <span class="ident">ub_const</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_constant</span>(<span class="ident">e</span>, <span class="ident">fsm_size</span>);
+        <span class="kw">if</span> <span class="ident">s</span> <span class="op">==</span> <span class="number">0</span> {
+            <span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>]).<span class="ident">lt</span>(<span class="macro">guard!</span>(<span class="ident">ub_const</span>[<span class="string">&quot;out&quot;</span>]))
+        } <span class="kw">else</span> {
+            <span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>])
+                .<span class="ident">ge</span>(<span class="macro">guard!</span>(<span class="ident">lb_const</span>[<span class="string">&quot;out&quot;</span>]))
+                .<span class="ident">and</span>(<span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>]).<span class="ident">lt</span>(<span class="macro">guard!</span>(<span class="ident">ub_const</span>[<span class="string">&quot;out&quot;</span>])))
+        }
     }
 
     <span class="kw">fn</span> <span class="ident">realize_schedule</span>(<span class="self">self</span>) -&gt; <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">final_state</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">last_state</span>();
         <span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">builder</span>;
+        <span class="kw">let</span> (<span class="ident">unconditional</span>, <span class="ident">conditional</span>) <span class="op">=</span>
+            <span class="ident"><span class="self">Self</span>::calculate_runs</span>(<span class="self">self</span>.<span class="ident">transitions</span>.<span class="ident">into_iter</span>());
         <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_group</span>(<span class="string">&quot;tdst&quot;</span>);
         <span class="kw">let</span> <span class="ident">fsm_size</span> <span class="op">=</span> <span class="ident">get_bit_width_from</span>(<span class="ident">final_state</span> <span class="op">+</span> <span class="number">1</span>);
 
@@ -635,18 +765,8 @@
                 .<span class="ident">into_iter</span>()
                 .<span class="ident">sorted_by</span>(<span class="op">|</span>(<span class="ident">k1</span>, <span class="kw">_</span>), (<span class="ident">k2</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">k1</span>.<span class="ident">cmp</span>(<span class="ident">k2</span>))
                 .<span class="ident">flat_map</span>(<span class="op">|</span>((<span class="ident">lb</span>, <span class="ident">ub</span>), <span class="kw-2">mut</span> <span class="ident">assigns</span>)<span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">lb_const</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_constant</span>(<span class="ident">lb</span>, <span class="ident">fsm_size</span>);
-                    <span class="kw">let</span> <span class="ident">ub_const</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_constant</span>(<span class="ident">ub</span>, <span class="ident">fsm_size</span>);
-                    <span class="kw">let</span> <span class="ident">state_guard</span>;
-                    <span class="kw">if</span> <span class="ident">lb</span> <span class="op">==</span> <span class="number">0</span> {
-                        <span class="ident">state_guard</span> <span class="op">=</span>
-                            <span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>]).<span class="ident">lt</span>(<span class="macro">guard!</span>(<span class="ident">ub_const</span>[<span class="string">&quot;out&quot;</span>]));
-                    } <span class="kw">else</span> {
-                        <span class="ident">state_guard</span> <span class="op">=</span>
-                            <span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>]).<span class="ident">ge</span>(<span class="macro">guard!</span>(<span class="ident">lb_const</span>[<span class="string">&quot;out&quot;</span>])).<span class="ident">and</span>(
-                                <span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>]).<span class="ident">lt</span>(<span class="macro">guard!</span>(<span class="ident">ub_const</span>[<span class="string">&quot;out&quot;</span>])),
-                            );
-                    };
+                    <span class="kw">let</span> <span class="ident">state_guard</span> <span class="op">=</span>
+                        <span class="ident"><span class="self">Self</span>::range_guard</span>(<span class="ident">builder</span>, <span class="ident">lb</span>, <span class="ident">ub</span>, <span class="ident">fsm_size</span>, <span class="kw-2">&amp;</span><span class="ident">fsm</span>);
                     <span class="ident">assigns</span>.<span class="ident">iter_mut</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
                         <span class="ident">assign</span>.<span class="ident">guard</span>.<span class="ident">update</span>(<span class="op">|</span><span class="ident">g</span><span class="op">|</span> <span class="ident">g</span>.<span class="ident">and</span>(<span class="ident">state_guard</span>.<span class="ident">clone</span>()))
                     });
@@ -654,9 +774,9 @@
                 }),
         );
 
-        <span class="comment">// Transition assignments.</span>
+        <span class="comment">// Conditional Transition assignments.</span>
         <span class="ident">group</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span>.<span class="ident">extend</span>(
-            <span class="self">self</span>.<span class="ident">transitions</span>
+            <span class="ident">conditional</span>
                 .<span class="ident">into_iter</span>()
                 .<span class="ident">sorted_by_key</span>(<span class="op">|</span>(<span class="ident">start</span>, <span class="kw">_</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">start</span>)
                 .<span class="ident">flat_map</span>(<span class="op">|</span>(<span class="ident">start</span>, <span class="ident">end</span>, <span class="ident">guard</span>)<span class="op">|</span> {
@@ -665,34 +785,46 @@
                         <span class="kw">let</span> <span class="ident">end_const</span> <span class="op">=</span> <span class="ident">constant</span>(<span class="ident">end</span>, <span class="ident">fsm_size</span>);
                     );
 
-                    <span class="kw">let</span> <span class="ident">end_borrow</span> <span class="op">=</span> <span class="ident">end_const</span>.<span class="ident">borrow</span>();
                     <span class="kw">let</span> <span class="ident">transition_guard</span> <span class="op">=</span> <span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>])
                         .<span class="ident">eq</span>(<span class="macro">guard!</span>(<span class="ident">start_const</span>[<span class="string">&quot;out&quot;</span>]))
                         .<span class="ident">and</span>(<span class="ident">guard</span>);
 
-                    <span class="macro">vec!</span>[
-                        <span class="ident">builder</span>.<span class="ident">build_assignment</span>(
-                            <span class="ident">fsm</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="string">&quot;in&quot;</span>),
-                            <span class="ident">end_borrow</span>.<span class="ident">get</span>(<span class="string">&quot;out&quot;</span>),
-                            <span class="ident">transition_guard</span>.<span class="ident">clone</span>(),
-                        ),
-                        <span class="ident">builder</span>.<span class="ident">build_assignment</span>(
-                            <span class="ident">fsm</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="string">&quot;write_en&quot;</span>),
-                            <span class="ident">signal_on</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="string">&quot;out&quot;</span>),
-                            <span class="ident">transition_guard</span>,
-                        ),
-                    ]
+                    <span class="kw">let</span> <span class="ident">assigns</span> <span class="op">=</span> <span class="macro">build_assignments!</span>(<span class="ident">builder</span>;
+                        <span class="ident">fsm</span>[<span class="string">&quot;in&quot;</span>] <span class="op">=</span> <span class="ident">transition_guard</span> <span class="question-mark">?</span> <span class="ident">end_const</span>[<span class="string">&quot;out&quot;</span>];
+                        <span class="ident">fsm</span>[<span class="string">&quot;write_en&quot;</span>] <span class="op">=</span> <span class="ident">transition_guard</span> <span class="question-mark">?</span> <span class="ident">signal_on</span>[<span class="string">&quot;out&quot;</span>];
+                    );
+                    <span class="ident">assigns</span>
                 }),
         );
+        <span class="comment">// Unconditional Transitions</span>
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">unconditional</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">let</span> <span class="ident">uncond_guard</span>: <span class="ident">ir::Guard</span> <span class="op">=</span> <span class="ident">unconditional</span>.<span class="ident">into_iter</span>().<span class="ident">fold</span>(
+                <span class="ident">ir::Guard::True</span>.<span class="ident">not</span>(),
+                <span class="op">|</span><span class="ident">g</span>, (<span class="ident">s</span>, <span class="ident">e</span>)<span class="op">|</span> {
+                    <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span>
+                        <span class="ident"><span class="self">Self</span>::range_guard</span>(<span class="ident">builder</span>, <span class="ident">s</span>, <span class="ident">e</span>, <span class="ident">fsm_size</span>, <span class="kw-2">&amp;</span><span class="ident">fsm</span>);
+                    <span class="ident">g</span>.<span class="ident">or</span>(<span class="ident">range</span>)
+                },
+            );
+            <span class="macro">structure!</span>(<span class="ident">builder</span>;
+                <span class="kw">let</span> <span class="ident">fsm_incr</span> <span class="op">=</span> <span class="ident">prim</span> <span class="ident">std_add</span>(<span class="ident">fsm_size</span>);
+                <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="ident">constant</span>(<span class="number">1</span>, <span class="ident">fsm_size</span>);
+            );
+            <span class="kw">let</span> <span class="ident">uncond_incr</span> <span class="op">=</span> <span class="macro">build_assignments!</span>(<span class="ident">builder</span>;
+                <span class="ident">fsm_incr</span>[<span class="string">&quot;left&quot;</span>] <span class="op">=</span> <span class="question-mark">?</span> <span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>];
+                <span class="ident">fsm_incr</span>[<span class="string">&quot;right&quot;</span>] <span class="op">=</span> <span class="question-mark">?</span> <span class="ident">one</span>[<span class="string">&quot;out&quot;</span>];
+                <span class="ident">fsm</span>[<span class="string">&quot;in&quot;</span>] <span class="op">=</span> <span class="ident">uncond_guard</span> <span class="question-mark">?</span> <span class="ident">fsm_incr</span>[<span class="string">&quot;out&quot;</span>];
+                <span class="ident">fsm</span>[<span class="string">&quot;write_en&quot;</span>] <span class="op">=</span> <span class="ident">uncond_guard</span> <span class="question-mark">?</span> <span class="ident">signal_on</span>[<span class="string">&quot;out&quot;</span>];
+            );
+            <span class="ident">group</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span>.<span class="ident">extend</span>(<span class="ident">uncond_incr</span>);
+        }
 
         <span class="comment">// Done condition for group.</span>
         <span class="kw">let</span> <span class="ident">last_guard</span> <span class="op">=</span> <span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>]).<span class="ident">eq</span>(<span class="macro">guard!</span>(<span class="ident">last_state</span>[<span class="string">&quot;out&quot;</span>]));
-        <span class="kw">let</span> <span class="ident">done_assign</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build_assignment</span>(
-            <span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="string">&quot;done&quot;</span>),
-            <span class="ident">signal_on</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="string">&quot;out&quot;</span>),
-            <span class="ident">last_guard</span>.<span class="ident">clone</span>(),
+        <span class="kw">let</span> <span class="ident">done_assign</span> <span class="op">=</span> <span class="macro">build_assignments!</span>(<span class="ident">builder</span>;
+            <span class="ident">group</span>[<span class="string">&quot;done&quot;</span>] <span class="op">=</span> <span class="ident">last_guard</span> <span class="question-mark">?</span> <span class="ident">signal_on</span>[<span class="string">&quot;out&quot;</span>];
         );
-        <span class="ident">group</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span>.<span class="ident">push</span>(<span class="ident">done_assign</span>);
+        <span class="ident">group</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span>.<span class="ident">extend</span>(<span class="ident">done_assign</span>);
 
         <span class="comment">// Cleanup: Add a transition from last state to the first state.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reset_fsm</span> <span class="op">=</span> <span class="macro">build_assignments!</span>(<span class="ident">builder</span>;

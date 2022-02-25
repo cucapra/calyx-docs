@@ -425,6 +425,16 @@
 <span id="424">424</span>
 <span id="425">425</span>
 <span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Port</span>, <span class="ident">RRC</span>};
 <span class="kw">use</span> <span class="ident">std::mem</span>;
 <span class="kw">use</span> <span class="ident">std::ops</span>::{<span class="ident">BitAnd</span>, <span class="ident">BitAndAssign</span>, <span class="ident">BitOr</span>, <span class="ident">BitOrAssign</span>, <span class="ident">Not</span>};
@@ -614,12 +624,22 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">or</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">Guard</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">if</span> <span class="ident">rhs</span> <span class="op">==</span> <span class="ident">Guard::True</span> <span class="op">|</span><span class="op">|</span> <span class="self">self</span> <span class="op">==</span> <span class="ident">Guard::True</span> {
-            <span class="ident">Guard::True</span>
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span> <span class="op">==</span> <span class="ident">rhs</span> {
-            <span class="self">self</span>
-        } <span class="kw">else</span> {
-            <span class="ident">Guard::Or</span>(<span class="ident">Box::new</span>(<span class="self">self</span>), <span class="ident">Box::new</span>(<span class="ident">rhs</span>))
+        <span class="kw">match</span> (<span class="self">self</span>, <span class="ident">rhs</span>) {
+            (<span class="ident">Guard::True</span>, <span class="kw">_</span>) <span class="op">|</span> (<span class="kw">_</span>, <span class="ident">Guard::True</span>) =&gt; <span class="ident">Guard::True</span>,
+            (<span class="ident">Guard::Not</span>(<span class="ident">n</span>), <span class="ident">g</span>) <span class="op">|</span> (<span class="ident">g</span>, <span class="ident">Guard::Not</span>(<span class="ident">n</span>)) =&gt; {
+                <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">n</span> <span class="op">==</span> <span class="ident">Guard::True</span> {
+                    <span class="ident">g</span>
+                } <span class="kw">else</span> {
+                    <span class="ident">Guard::Or</span>(<span class="ident">Box::new</span>(<span class="ident">Guard::Not</span>(<span class="ident">n</span>)), <span class="ident">Box::new</span>(<span class="ident">g</span>))
+                }
+            }
+            (<span class="ident">l</span>, <span class="ident">r</span>) =&gt; {
+                <span class="kw">if</span> <span class="ident">l</span> <span class="op">==</span> <span class="ident">r</span> {
+                    <span class="ident">l</span>
+                } <span class="kw">else</span> {
+                    <span class="ident">Guard::Or</span>(<span class="ident">Box::new</span>(<span class="ident">l</span>), <span class="ident">Box::new</span>(<span class="ident">r</span>))
+                }
+            }
         }
     }
 
