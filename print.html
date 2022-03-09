@@ -1215,7 +1215,7 @@ xrt_location: /opt/xilinx/xrt
 <h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
 <p>The first step in the Xilinx toolchain is to generate <a href="https://xilinx.github.io/XRT/2021.2/html/formats.html#xclbin">an <code>xclbin</code> executable file</a>.
 Here's an example of going all the way from a Calyx program to that:</p>
-<pre><code>fud e examples/futil/dot-product.futil -o foo.xclbin
+<pre><code>fud e examples/futil/dot-product.futil -o foo.xclbin --to xclbin
 </code></pre>
 <p>On our machines, compiling even a simple example like the above for simulation takes about 5 minutes, end to end.
 A failed run takes about 2 minutes to produce an error.</p>
