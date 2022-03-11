@@ -120,15 +120,6 @@
 <span id="119">119</span>
 <span id="120">120</span>
 <span id="121">121</span>
-<span id="122">122</span>
-<span id="123">123</span>
-<span id="124">124</span>
-<span id="125">125</span>
-<span id="126">126</span>
-<span id="127">127</span>
-<span id="128">128</span>
-<span id="129">129</span>
-<span id="130">130</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::passes</span>::{
     <span class="ident">Canonicalize</span>, <span class="ident">ClkInsertion</span>, <span class="ident">CollapseControl</span>, <span class="ident">CombProp</span>, <span class="ident">CompileEmpty</span>,
@@ -205,16 +196,7 @@
                 <span class="ident">MinimizeRegs</span>,
             ]
         );
-        <span class="macro">register_alias!</span>(
-            <span class="ident">pm</span>,
-            <span class="string">&quot;compile&quot;</span>,
-            [
-                <span class="ident">CompileInvoke</span>,
-                <span class="ident">CompileEmpty</span>,
-                <span class="comment">// TopDownStaticTiming,</span>
-                <span class="ident">TopDownCompileControl</span>
-            ]
-        );
+        <span class="macro">register_alias!</span>(<span class="ident">pm</span>, <span class="string">&quot;compile&quot;</span>, [<span class="ident">CompileInvoke</span>, <span class="ident">TopDownCompileControl</span>]);
         <span class="macro">register_alias!</span>(
             <span class="ident">pm</span>,
             <span class="string">&quot;post-opt&quot;</span>,
