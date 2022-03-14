@@ -625,9 +625,6 @@
 <span id="624">624</span>
 <span id="625">625</span>
 <span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{
     <span class="ident">Assignment</span>, <span class="ident">Attributes</span>, <span class="ident">BackendConf</span>, <span class="ident">Builder</span>, <span class="ident">Canonical</span>, <span class="ident">CellType</span>,
     <span class="ident">Component</span>, <span class="ident">Context</span>, <span class="ident">Control</span>, <span class="ident">Direction</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">Invoke</span>,
@@ -720,10 +717,7 @@
 }
 
 <span class="doccomment">/// Construct an IR representation using a parsed AST and command line options.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ast_to_ir</span>(
-    <span class="kw-2">mut</span> <span class="ident">workspace</span>: <span class="ident">frontend::Workspace</span>,
-    <span class="ident">bc</span>: <span class="ident">BackendConf</span>,
-) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ast_to_ir</span>(<span class="kw-2">mut</span> <span class="ident">workspace</span>: <span class="ident">frontend::Workspace</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">all_names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Id</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashSet::with_capacity</span>(
         <span class="ident">workspace</span>.<span class="ident">components</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="ident">workspace</span>.<span class="ident">externs</span>.<span class="ident">len</span>(),
     );
@@ -786,7 +780,7 @@
     <span class="prelude-val">Ok</span>(<span class="ident">Context</span> {
         <span class="ident">components</span>: <span class="ident">comps</span>,
         <span class="ident">lib</span>: <span class="ident">sig_ctx</span>.<span class="ident">lib</span>,
-        <span class="ident">bc</span>,
+        <span class="ident">bc</span>: <span class="ident">BackendConf::default</span>(),
         <span class="ident">entrypoint</span>,
         <span class="ident">extra_opts</span>: <span class="macro">vec!</span>[],
     })

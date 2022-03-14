@@ -143,6 +143,16 @@
 <span id="142">142</span>
 <span id="143">143</span>
 <span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::CloneName</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
     <span class="self">self</span>,
@@ -150,6 +160,9 @@
 };
 <span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
 <span class="kw">use</span> <span class="ident">std::iter</span>;
+
+<span class="doccomment">/// Warn if dead cell removal loops more than this number of times</span>
+<span class="kw">const</span> <span class="ident">LOOP_THRESHOLD</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">5</span>;
 
 <span class="doccomment">/// Removes unused cells from components.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
@@ -228,6 +241,7 @@
         <span class="self">self</span>.<span class="ident">all_reads</span>.<span class="ident">insert</span>(<span class="ident">comp</span>.<span class="ident">signature</span>.<span class="ident">clone_name</span>());
 
         <span class="comment">// Add all cells that have at least one output read.</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">count</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">loop</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wire_reads</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
             <span class="ident">comp</span>.<span class="ident">for_each_assignment</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
@@ -282,6 +296,12 @@
             <span class="kw">if</span> <span class="ident">removed</span> <span class="op">==</span> <span class="number">0</span> {
                 <span class="kw">break</span>;
             }
+
+            <span class="ident">count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        }
+
+        <span class="kw">if</span> <span class="ident">count</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">LOOP_THRESHOLD</span> {
+            <span class="macro">log::warn!</span>(<span class="string">&quot;{} looped {count} times&quot;</span>, <span class="ident"><span class="self">Self</span>::name</span>());
         }
 
         <span class="prelude-val">Ok</span>(<span class="ident">Action::Stop</span>)
