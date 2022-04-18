@@ -64,6 +64,8 @@
 <span id="63">63</span>
 <span id="64">64</span>
 <span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.</span>
 <span class="kw">mod</span> <span class="ident">canonical</span>;
 <span class="kw">mod</span> <span class="ident">clk_insertion</span>;
@@ -95,6 +97,7 @@
 <span class="kw">mod</span> <span class="ident">synthesis_papercut</span>;
 <span class="kw">mod</span> <span class="ident">top_down_compile_control</span>;
 <span class="kw">mod</span> <span class="ident">top_down_static_timing</span>;
+<span class="kw">mod</span> <span class="ident">unroll_bound</span>;
 <span class="kw">mod</span> <span class="ident">well_formed</span>;
 <span class="kw">mod</span> <span class="ident">wire_inliner</span>;
 
@@ -127,6 +130,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">synthesis_papercut::SynthesisPapercut</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">top_down_compile_control::TopDownCompileControl</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">top_down_static_timing::TopDownStaticTiming</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">unroll_bound::UnrollBounded</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">well_formed::WellFormed</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wire_inliner::WireInliner</span>;
 </code></pre></div>
