@@ -336,6 +336,9 @@ Executing this program should print:</p>
 }
 </code></pre>
 <p>Meaning that, after the program finished, the final value in our memory was 42.</p>
+<blockquote>
+<p><strong>Note</strong>: Icarus Verilog may report a different cycle count compared to the one above. As long as the final value in memory is correct, this does not matter.</p>
+</blockquote>
 <h2 id="add-control"><a class="header" href="#add-control">Add Control</a></h2>
 <p>Let's change our program to use an execution schedule.
 First, we're going to wrap all the assignments in the <code>wires</code> section into a
