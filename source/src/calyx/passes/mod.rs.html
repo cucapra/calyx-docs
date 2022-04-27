@@ -70,6 +70,8 @@
 <span id="65">65</span>
 <span id="66">66</span>
 <span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.</span>
 <span class="kw">mod</span> <span class="ident">canonical</span>;
 <span class="kw">mod</span> <span class="ident">clk_insertion</span>;
@@ -89,6 +91,7 @@
 <span class="kw">mod</span> <span class="ident">lower_guards</span>;
 <span class="kw">mod</span> <span class="ident">math_utilities</span>;
 <span class="kw">mod</span> <span class="ident">merge_assign</span>;
+<span class="kw">mod</span> <span class="ident">merge_static_par</span>;
 <span class="kw">mod</span> <span class="ident">minimize_regs</span>;
 <span class="kw">mod</span> <span class="ident">papercut</span>;
 <span class="kw">mod</span> <span class="ident">par_to_seq</span>;
@@ -122,6 +125,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">infer_static_timing::InferStaticTiming</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">lower_guards::LowerGuards</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">merge_assign::MergeAssign</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">merge_static_par::MergeStaticPar</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">minimize_regs::MinimizeRegs</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">papercut::Papercut</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">par_to_seq::ParToSeq</span>;

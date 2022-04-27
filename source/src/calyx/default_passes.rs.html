@@ -124,13 +124,16 @@
 <span id="119">119</span>
 <span id="120">120</span>
 <span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::passes</span>::{
     <span class="ident">Canonicalize</span>, <span class="ident">ClkInsertion</span>, <span class="ident">CollapseControl</span>, <span class="ident">CombProp</span>, <span class="ident">CompileEmpty</span>,
     <span class="ident">CompileInvoke</span>, <span class="ident">ComponentInliner</span>, <span class="ident">ComponentInterface</span>, <span class="ident">DeadCellRemoval</span>,
     <span class="ident">DeadGroupRemoval</span>, <span class="ident">Externalize</span>, <span class="ident">GoInsertion</span>, <span class="ident">GroupToInvoke</span>, <span class="ident">HoleInliner</span>,
-    <span class="ident">InferStaticTiming</span>, <span class="ident">LowerGuards</span>, <span class="ident">MergeAssign</span>, <span class="ident">MinimizeRegs</span>, <span class="ident">Papercut</span>,
-    <span class="ident">ParToSeq</span>, <span class="ident">RegisterUnsharing</span>, <span class="ident">RemoveCombGroups</span>, <span class="ident">ResetInsertion</span>,
+    <span class="ident">InferStaticTiming</span>, <span class="ident">LowerGuards</span>, <span class="ident">MergeAssign</span>, <span class="ident">MergeStaticPar</span>, <span class="ident">MinimizeRegs</span>,
+    <span class="ident">Papercut</span>, <span class="ident">ParToSeq</span>, <span class="ident">RegisterUnsharing</span>, <span class="ident">RemoveCombGroups</span>, <span class="ident">ResetInsertion</span>,
     <span class="ident">ResourceSharing</span>, <span class="ident">SimplifyGuards</span>, <span class="ident">SynthesisPapercut</span>, <span class="ident">TopDownCompileControl</span>,
     <span class="ident">TopDownStaticTiming</span>, <span class="ident">UnrollBounded</span>, <span class="ident">WellFormed</span>, <span class="ident">WireInliner</span>,
 };
@@ -159,6 +162,7 @@
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">DeadGroupRemoval</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">MinimizeRegs</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">InferStaticTiming</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">MergeStaticPar</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
 
         <span class="comment">// Compilation passes</span>
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">CompileInvoke</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
@@ -196,6 +200,8 @@
                 <span class="ident">CombProp</span>,
                 <span class="ident">RemoveCombGroups</span>, <span class="comment">// Must run before `infer-static-timing`.</span>
                 <span class="ident">InferStaticTiming</span>,
+                <span class="ident">MergeStaticPar</span>,
+                <span class="ident">DeadGroupRemoval</span>,
                 <span class="ident">CollapseControl</span>,
                 <span class="ident">ResourceSharing</span>,
                 <span class="ident">MinimizeRegs</span>,
