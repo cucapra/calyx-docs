@@ -629,6 +629,7 @@
 <span id="624">624</span>
 <span id="625">625</span>
 <span id="626">626</span>
+<span id="627">627</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{
     <span class="ident">Assignment</span>, <span class="ident">Attributes</span>, <span class="ident">BackendConf</span>, <span class="ident">Builder</span>, <span class="ident">Canonical</span>, <span class="ident">CellType</span>,
     <span class="ident">Component</span>, <span class="ident">Context</span>, <span class="ident">Control</span>, <span class="ident">Direction</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">Invoke</span>,
@@ -787,6 +788,7 @@
         <span class="ident">bc</span>: <span class="ident">BackendConf::default</span>(),
         <span class="ident">entrypoint</span>,
         <span class="ident">extra_opts</span>: <span class="macro">vec!</span>[],
+        <span class="ident">metadata</span>: <span class="ident">workspace</span>.<span class="ident">metadata</span>,
     })
 }
 

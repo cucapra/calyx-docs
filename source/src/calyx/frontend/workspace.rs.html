@@ -230,6 +230,12 @@
 <span id="225">225</span>
 <span id="226">226</span>
 <span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">collections::HashSet</span>,
     <span class="ident">path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>},
@@ -279,6 +285,8 @@
     <span class="kw">pub</span> <span class="ident">externs</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Primitive</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
     <span class="doccomment">/// Original import statements present in the top-level file.</span>
     <span class="kw">pub</span> <span class="ident">original_imports</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Optional opaque metadata attached to the top-level file</span>
+    <span class="kw">pub</span> <span class="ident">metadata</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Workspace</span> {
@@ -393,6 +401,10 @@
 
         <span class="comment">// Add original imports to workspace</span>
         <span class="ident">workspace</span>.<span class="ident">original_imports</span> <span class="op">=</span> <span class="ident">namespace</span>.<span class="ident">imports</span>.<span class="ident">clone</span>();
+
+        <span class="comment">// TODO (griffin): Probably not a great idea to clone the metadata</span>
+        <span class="comment">// string but it works for now</span>
+        <span class="ident">workspace</span>.<span class="ident">metadata</span> <span class="op">=</span> <span class="ident">namespace</span>.<span class="ident">metadata</span>.<span class="ident">clone</span>();
 
         <span class="comment">// Function to merge contents of a namespace into the workspace and</span>
         <span class="comment">// return the dependencies that need to be parsed next.</span>

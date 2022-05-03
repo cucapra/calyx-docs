@@ -107,6 +107,8 @@
 <span id="102">102</span>
 <span id="103">103</span>
 <span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An IR context. This is the top-level object for an IR and contains all information</span>
 <span class="doccomment">//! need to transform, lower, an emit a program.</span>
 <span class="doccomment">//! Passes usually have transform/analyze the components in the IR.</span>
@@ -203,13 +205,15 @@
     <span class="kw">pub</span> <span class="ident">components</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Component</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Library definitions imported by the program.</span>
     <span class="kw">pub</span> <span class="ident">lib</span>: <span class="ident">LibrarySignatures</span>,
-    <span class="comment">// Entrypoint for the program</span>
+    <span class="doccomment">/// Entrypoint for the program</span>
     <span class="kw">pub</span> <span class="ident">entrypoint</span>: <span class="ident">Id</span>,
     <span class="doccomment">/// Configuration flags for backends.</span>
     <span class="kw">pub</span> <span class="ident">bc</span>: <span class="ident">BackendConf</span>,
     <span class="doccomment">/// Extra options provided to the command line.</span>
-    <span class="doccomment">/// Interperted by individual passes</span>
+    <span class="doccomment">/// Interpreted by individual passes</span>
     <span class="kw">pub</span> <span class="ident">extra_opts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// An optional opaque metadata string which is used by Cider</span>
+    <span class="kw">pub</span> <span class="ident">metadata</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
