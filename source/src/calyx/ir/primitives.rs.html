@@ -287,7 +287,7 @@
 <span class="kw">impl</span> <span class="ident">PortDef</span> {
     <span class="doccomment">/// Given a map from names of parameters to their values, attempt to</span>
     <span class="doccomment">/// resolve this definition.</span>
-    <span class="doccomment">/// Returns [Error::ParamBindingMissing] if there is no binding for a required parameter binding.</span>
+    <span class="doccomment">/// Errors if there is no binding for a required parameter binding.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">resolve</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">binding</span>: <span class="kw-2">&amp;</span><span class="ident">LinkedHashMap</span><span class="op">&lt;</span><span class="ident">Id</span>, <span class="ident">u64</span><span class="op">&gt;</span>,

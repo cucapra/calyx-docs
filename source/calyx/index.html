@@ -4,20 +4,37 @@
     </nav>
     <nav class="sidebar"><a class="sidebar-logo" href="../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
         </a><h2 class="location"><a href="#">Crate calyx</a></h2><div class="sidebar-elems"><div class="block"><ul><li class="version">Version 0.1.1</li><li><a id="all-types" href="all.html">All Items</a></li></div></ul><section><div class="block"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li></ul></div></section><div id="sidebar-vars" data-name="calyx" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../calyx/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
-    <h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">calyx</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/calyx/lib.rs.html#1-36">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="the-calyx-intermediate-language"><a href="#the-calyx-intermediate-language">The Calyx Intermediate Language</a></h2>
+    <h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">calyx</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/calyx/lib.rs.html#1-52">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="the-calyx-intermediate-language"><a href="#the-calyx-intermediate-language">The Calyx Intermediate Language</a></h2>
 <p>Calyx is an intermediate language for transforming high-level programs
 into synthesizable hardware designs.
 Calyx’s key novelty is a split representation that captures the control-flow
-and the structural detail of a hardware design.</p>
-<p>The control sub-language provides several high-level constructs: <code>while</code> (loops),
-<code>if</code> (conditionals), <code>seq</code> (sequencing), <code>par</code> (parallel execution),
-<code>invoke</code> (function calls).
-These contructs simplify the process of encoding the control-flow of a
-high-level program.</p>
-<p>Calyx’s structural sub-language precisely capture details of the underlying
-hardware. Structural programs specify guarded assignments <sup id="fnref1"><a href="#fn1">1</a></sup> using ports
-in structural components.</p>
-<p>Take a look at the <a href="https://docs.calyxir.org/tutorial/language-tut.html">language tutorial</a> for a complete overview.</p>
+and the structural detail of a hardware design.
+Take a look at the <a href="https://docs.calyxir.org/tutorial/language-tut.html">language tutorial</a> for a complete overview for the Calyx
+intermediate langauge.</p>
+<p>This library defines the intermediate representation, i.e., the data structures used by the
+compiler to analyze and transform programs.
+The following example shows how to parse a Calyx program and generate the core data structure,
+<a href="ir/struct.Context.html" title="ir::Context">ir::Context</a> which provides access to all the information in a program.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">std::io::Write</span>;
+<span class="kw">use</span> <span class="ident">calyx</span>::{<span class="ident">frontend</span>, <span class="ident">ir</span>, <span class="ident">errors::CalyxResult</span>};
+<span class="kw">fn</span> <span class="ident">main</span>() -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+  <span class="comment">// File to parse</span>
+  <span class="kw">let</span> <span class="ident">file</span>: <span class="ident">std::path::PathBuf</span> <span class="op">=</span> <span class="string">&quot;../tests/correctness/seq.futil&quot;</span>.<span class="ident">into</span>();
+  <span class="comment">// Location of the calyx repository</span>
+  <span class="kw">let</span> <span class="ident">lib_path</span>: <span class="ident">std::path::PathBuf</span> <span class="op">=</span> <span class="string">&quot;../&quot;</span>.<span class="ident">into</span>();
+  <span class="comment">// Parse the calyx program</span>
+  <span class="kw">let</span> <span class="ident">ws</span> <span class="op">=</span> <span class="ident">frontend::Workspace::construct</span>(<span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="ident">file</span>), <span class="kw-2">&amp;</span><span class="ident">lib_path</span>)<span class="question-mark">?</span>;
+  <span class="comment">// Convert it into an ir::Context</span>
+  <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ctx</span> <span class="op">=</span> <span class="ident">ir::from_ast::ast_to_ir</span>(<span class="ident">ws</span>)<span class="question-mark">?</span>;
+  <span class="comment">// Print out the components in the program</span>
+  <span class="kw">let</span> <span class="ident">out</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">std::io::stdout</span>();
+  <span class="kw">for</span> <span class="ident">comp</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">components</span> {
+      <span class="ident">ir::Printer::write_component</span>(<span class="ident">comp</span>, <span class="ident">out</span>)<span class="question-mark">?</span>;
+      <span class="macro">writeln!</span>(<span class="ident">out</span>)<span class="question-mark">?</span>
+  }
+  <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
 <div class="footnotes"><hr><ol><li id="fn1"><p>Calyx’s guarded assignments are different from <a href="http://wiki.bluespec.com/Home/Rules">Bluespec’s rules</a>.
 Rules can be dynamically aborted if there are conflicts at runtime and the
 Bluespec compiler generates scheduling logic to detect such cases.

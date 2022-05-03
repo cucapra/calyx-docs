@@ -39,25 +39,57 @@
 <span id="34">34</span>
 <span id="35">35</span>
 <span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # The Calyx Intermediate Language</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Calyx is an intermediate language for transforming high-level programs</span>
 <span class="doccomment">//! into synthesizable hardware designs.</span>
 <span class="doccomment">//! Calyx&#39;s key novelty is a split representation that captures the control-flow</span>
 <span class="doccomment">//! and the structural detail of a hardware design.</span>
+<span class="doccomment">//! Take a look at the [language tutorial][lang-tut] for a complete overview for the Calyx</span>
+<span class="doccomment">//! intermediate langauge.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! The control sub-language provides several high-level constructs: `while` (loops),</span>
-<span class="doccomment">//! `if` (conditionals), `seq` (sequencing), `par` (parallel execution),</span>
-<span class="doccomment">//! `invoke` (function calls).</span>
-<span class="doccomment">//! These contructs simplify the process of encoding the control-flow of a</span>
-<span class="doccomment">//! high-level program.</span>
+<span class="doccomment">//! This library defines the intermediate representation, i.e., the data structures used by the</span>
+<span class="doccomment">//! compiler to analyze and transform programs.</span>
+<span class="doccomment">//! The following example shows how to parse a Calyx program and generate the core data structure,</span>
+<span class="doccomment">//! [ir::Context] which provides access to all the information in a program.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Calyx&#39;s structural sub-language precisely capture details of the underlying</span>
-<span class="doccomment">//! hardware. Structural programs specify guarded assignments [^1] using ports</span>
-<span class="doccomment">//! in structural components.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Take a look at the [language tutorial][lang-tut] for a complete overview.</span>
-<span class="doccomment">//!</span>
+<span class="doccomment">//! ```rust</span>
+<span class="doccomment">//! use std::io::Write;</span>
+<span class="doccomment">//! use calyx::{frontend, ir, errors::CalyxResult};</span>
+<span class="doccomment">//! fn main() -&gt; CalyxResult&lt;()&gt; {</span>
+<span class="doccomment">//!   // File to parse</span>
+<span class="doccomment">//!   let file: std::path::PathBuf = &quot;../tests/correctness/seq.futil&quot;.into();</span>
+<span class="doccomment">//!   // Location of the calyx repository</span>
+<span class="doccomment">//!   let lib_path: std::path::PathBuf = &quot;../&quot;.into();</span>
+<span class="doccomment">//!   // Parse the calyx program</span>
+<span class="doccomment">//!   let ws = frontend::Workspace::construct(&amp;Some(file), &amp;lib_path)?;</span>
+<span class="doccomment">//!   // Convert it into an ir::Context</span>
+<span class="doccomment">//!   let mut ctx = ir::from_ast::ast_to_ir(ws)?;</span>
+<span class="doccomment">//!   // Print out the components in the program</span>
+<span class="doccomment">//!   let out = &amp;mut std::io::stdout();</span>
+<span class="doccomment">//!   for comp in &amp;ctx.components {</span>
+<span class="doccomment">//!       ir::Printer::write_component(comp, out)?;</span>
+<span class="doccomment">//!       writeln!(out)?</span>
+<span class="doccomment">//!   }</span>
+<span class="doccomment">//!   Ok(())</span>
+<span class="doccomment">//! }</span>
+<span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [^1]: Calyx&#39;s guarded assignments are different from [Bluespec&#39;s rules][bsv-rules].</span>
 <span class="doccomment">//! Rules can be dynamically aborted if there are conflicts at runtime and the</span>

@@ -97,7 +97,7 @@
 <span class="doccomment">/// A greedy graph coloring algorithm on the interference graph</span>
 <span class="doccomment">/// is used to assign each register a name.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// This pass only renames uses of registers. [DeadCellRemoval] should be run after this</span>
+<span class="doccomment">/// This pass only renames uses of registers. [crate::passes::DeadCellRemoval] should be run after this</span>
 <span class="doccomment">/// to actually remove the register definitions.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MinimizeRegs</span> {

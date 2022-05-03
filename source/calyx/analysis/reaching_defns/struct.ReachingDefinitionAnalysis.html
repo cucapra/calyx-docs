@@ -16,7 +16,7 @@ set as we cannot be certain that they have been killed.</p>
 <p>Note that this analysis assumes that groups do not appear more than once
 within the control structure and will provide inaccurate results if this
 expectation is violated.</p>
-<p>Like [LiveRangeAnalysis] par blocks are treated via a parallel CFG approach.
+<p>Like <a href="../struct.LiveRangeAnalysis.html" title="super::LiveRangeAnalysis">super::LiveRangeAnalysis</a> par blocks are treated via a parallel CFG approach.
 Concretely this means that after a par block executes any id that is killed
 by one arm is killed and all defs introduced (but not killed) by any arm are
 defined. Note that this assumes separate arms are not writing the same

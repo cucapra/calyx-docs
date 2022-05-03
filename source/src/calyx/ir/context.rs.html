@@ -106,6 +106,7 @@
 <span id="101">101</span>
 <span id="102">102</span>
 <span id="103">103</span>
+<span id="104">104</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An IR context. This is the top-level object for an IR and contains all information</span>
 <span class="doccomment">//! need to transform, lower, an emit a program.</span>
 <span class="doccomment">//! Passes usually have transform/analyze the components in the IR.</span>
@@ -195,7 +196,8 @@
     <span class="kw">pub</span> <span class="ident">initialize_inputs</span>: <span class="ident">bool</span>,
 }
 
-<span class="doccomment">/// The IR Context</span>
+<span class="doccomment">/// The IR Context that represents an entire Calyx program with all of its</span>
+<span class="doccomment">/// imports and dependencies resolved.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Context</span> {
     <span class="doccomment">/// The components for this program.</span>
     <span class="kw">pub</span> <span class="ident">components</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Component</span><span class="op">&gt;</span>,

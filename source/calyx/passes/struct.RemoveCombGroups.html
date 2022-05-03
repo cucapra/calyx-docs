@@ -7,7 +7,7 @@
     <h1 class="fqn"><span class="in-band">Struct <a href="../index.html">calyx</a>::<wbr><a href="index.html">passes</a>::<wbr><a class="struct" href="#">RemoveCombGroups</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/calyx/passes/remove_comb_groups.rs.html#76-79">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="docblock item-decl"><pre class="rust struct"><code>pub struct RemoveCombGroups { /* private fields */ }</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Transforms combinational groups, which have a constant done condition,
 into proper groups by registering the values read from the ports of cells
 used within the combinational group.</p>
-<p>It also transforms [invoke,if,while]-with into semantically equivalent control programs that
+<p>It also transforms (invoke,if,while)-with into semantically equivalent control programs that
 first enable a group that calculates and registers the ports defined by the combinational group
 execute the respective cond group and then execute the control operator.</p>
 <h2 id="example"><a href="#example">Example</a></h2>
