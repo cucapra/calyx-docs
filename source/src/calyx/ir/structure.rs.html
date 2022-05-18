@@ -522,6 +522,14 @@
 <span id="517">517</span>
 <span id="518">518</span>
 <span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.</span>
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
 <span class="kw">use</span> <span class="ident">smallvec</span>::{<span class="ident">smallvec</span>, <span class="ident">SmallVec</span>};
@@ -693,6 +701,8 @@
     <span class="kw">pub</span> <span class="ident">prototype</span>: <span class="ident">CellType</span>,
     <span class="doccomment">/// Attributes for this group.</span>
     <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">Attributes</span>,
+    <span class="doccomment">/// Whether the cell is external</span>
+    <span class="ident">external</span>: <span class="ident">bool</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">GetAttributes</span> <span class="kw">for</span> <span class="ident">Cell</span> {
@@ -713,7 +723,13 @@
             <span class="ident">ports</span>: <span class="macro">smallvec!</span>[],
             <span class="ident">prototype</span>,
             <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
+            <span class="ident">external</span>: <span class="bool-val">false</span>,
         }
+    }
+
+    <span class="doccomment">///Get a boolean describing whether the cell is external.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_external</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">external</span>
     }
 
     <span class="doccomment">/// Get a reference to the named port if it exists.</span>
