@@ -530,6 +530,12 @@
 <span id="525">525</span>
 <span id="526">526</span>
 <span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.</span>
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
 <span class="kw">use</span> <span class="ident">smallvec</span>::{<span class="ident">smallvec</span>, <span class="ident">SmallVec</span>};
@@ -729,6 +735,12 @@
 
     <span class="doccomment">///Get a boolean describing whether the cell is external.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_external</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">external</span>
+    }
+
+    <span class="doccomment">///Set the external field</span>
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">set_external</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">external</span>: <span class="ident">bool</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">external</span> <span class="op">=</span> <span class="ident">external</span>;
         <span class="self">self</span>.<span class="ident">external</span>
     }
 

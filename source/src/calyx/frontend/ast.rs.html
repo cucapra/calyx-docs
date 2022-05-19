@@ -276,6 +276,10 @@
 <span id="271">271</span>
 <span id="272">272</span>
 <span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx</span>
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 
@@ -434,6 +438,8 @@
     <span class="kw">pub</span> <span class="ident">prototype</span>: <span class="ident">Proto</span>,
     <span class="doccomment">/// Attributes attached to this cell definition</span>
     <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">ir::Attributes</span>,
+    <span class="doccomment">/// Whether this cell is external</span>
+    <span class="kw">pub</span> <span class="ident">external</span>: <span class="ident">bool</span>,
 }
 
 <span class="doccomment">/// Methods for constructing the structure AST nodes.</span>
@@ -444,6 +450,7 @@
         <span class="ident">proto</span>: <span class="ident">ir::Id</span>,
         <span class="ident">params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
         <span class="ident">attributes</span>: <span class="ident">ir::Attributes</span>,
+        <span class="ident">external</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="ident">Cell</span> {
         <span class="ident">Cell</span> {
             <span class="ident">name</span>,
@@ -452,6 +459,7 @@
                 <span class="ident">params</span>,
             },
             <span class="ident">attributes</span>,
+            <span class="ident">external</span>,
         }
     }
 }

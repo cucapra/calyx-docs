@@ -538,6 +538,9 @@
 <span id="533">533</span>
 <span id="534">534</span>
 <span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a formatter for the in-memory representation of Components.</span>
 <span class="doccomment">//! The printing operation clones inner nodes and doesn&#39;t perform any mutation</span>
 <span class="doccomment">//! to the Component.</span>
@@ -762,6 +765,9 @@
                         <span class="string">&quot;{} &quot;</span>,
                         <span class="ident"><span class="self">Self</span>::format_at_attributes</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">attributes</span>)
                     )<span class="question-mark">?</span>
+                }
+                <span class="kw">if</span> <span class="ident">cell</span>.<span class="ident">is_external</span>() {
+                    <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;external &quot;</span>)<span class="question-mark">?</span>
                 }
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{} = &quot;</span>, <span class="ident">cell</span>.<span class="ident">name</span>().<span class="ident">id</span>)<span class="question-mark">?</span>;
                 <span class="macro">writeln!</span>(
