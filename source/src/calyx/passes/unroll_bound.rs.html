@@ -81,7 +81,7 @@
                     .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ir::Control::clone</span>(<span class="kw-2">&amp;</span><span class="ident">body</span>))
                     .<span class="ident">collect</span>(),
             );
-            <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">nb</span>))
+            <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">nb</span>))
         } <span class="kw">else</span> {
             <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
         }

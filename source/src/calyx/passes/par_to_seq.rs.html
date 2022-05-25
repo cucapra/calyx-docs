@@ -100,7 +100,7 @@
         <span class="kw">let</span> <span class="ident">total_order</span> <span class="op">=</span>
             <span class="ident">analysis::ControlOrder</span>::<span class="op">&lt;</span><span class="bool-val">true</span><span class="op">&gt;</span><span class="ident">::get_total_order</span>(<span class="ident">s</span>.<span class="ident">stmts</span>.<span class="ident">drain</span>(..))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">par</span> <span class="op">=</span> <span class="ident">ir::Control::seq</span>(<span class="ident">total_order</span>);
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">par</span>))
+        <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">par</span>))
     }
 }
 </code></pre></div>

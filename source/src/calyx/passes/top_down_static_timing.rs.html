@@ -1139,7 +1139,7 @@
         <span class="comment">// Realize the schedule in a replacement control group.</span>
         <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">schedule</span>.<span class="ident">realize_schedule</span>();
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
+        <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
     }
 
     <span class="kw">fn</span> <span class="ident">start_par</span>(
@@ -1169,7 +1169,7 @@
         <span class="comment">// Realize the schedule in a replacement control group.</span>
         <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">schedule</span>.<span class="ident">realize_schedule</span>();
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
+        <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
     }
 
     <span class="kw">fn</span> <span class="ident">start_while</span>(
@@ -1200,7 +1200,7 @@
         <span class="comment">// Realize the schedule in a replacement control group.</span>
         <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">schedule</span>.<span class="ident">realize_schedule</span>();
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
+        <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
     }
 
     <span class="kw">fn</span> <span class="ident">start_if</span>(
@@ -1230,7 +1230,7 @@
         <span class="comment">// Realize the schedule in a replacement control group.</span>
         <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">schedule</span>.<span class="ident">realize_schedule</span>();
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
+        <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
     }
 }
 </code></pre></div>

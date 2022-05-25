@@ -1542,7 +1542,7 @@
         <span class="kw">let</span> <span class="ident">node_id</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="ident">NODE_ID</span>).<span class="ident">unwrap</span>();
         <span class="ident">en</span>.<span class="ident">get_mut_attributes</span>().<span class="ident">unwrap</span>().<span class="ident">insert</span>(<span class="ident">NODE_ID</span>, <span class="kw-2">*</span><span class="ident">node_id</span>);
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">en</span>))
+        <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">en</span>))
     }
 
     <span class="kw">fn</span> <span class="ident">finish</span>(
@@ -1570,7 +1570,7 @@
         }
         <span class="kw">let</span> <span class="ident">comp_group</span> <span class="op">=</span> <span class="ident">schedule</span>.<span class="ident">realize_schedule</span>(<span class="ident">group</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>);
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">comp_group</span>)))
+        <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">comp_group</span>)))
     }
 }
 </code></pre></div>
