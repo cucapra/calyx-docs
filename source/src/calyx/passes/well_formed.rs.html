@@ -292,6 +292,15 @@
 <span id="287">287</span>
 <span id="288">288</span>
 <span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>, <span class="ident">WithPos</span>};
@@ -390,33 +399,42 @@
 
         <span class="comment">// For each non-combinational group, check if there is at least one write to the done</span>
         <span class="comment">// signal of that group and that the write is to the group&#39;s done signal.</span>
-        <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>().<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">group_ref</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">group_ref</span>.<span class="ident">borrow</span>();
+        <span class="kw">for</span> <span class="ident">gr</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>() {
+            <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">gr</span>.<span class="ident">borrow</span>();
             <span class="kw">let</span> <span class="ident">gname</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">name</span>();
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">has_done</span> <span class="op">=</span> <span class="bool-val">false</span>;
             <span class="comment">// Find an assignment writing to this group&#39;s done condition.</span>
-            <span class="kw">let</span> <span class="ident">done</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">iter</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
+            <span class="kw">for</span> <span class="ident">assign</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">assignments</span> {
                 <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">assign</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>();
-                <span class="ident">dst</span>.<span class="ident">is_hole</span>()
-                    <span class="op">&amp;&amp;</span> <span class="ident">dst</span>.<span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;done&quot;</span>
-            }).<span class="ident">map</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">assign</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>();
-                <span class="kw">if</span> <span class="ident">gname</span> <span class="op">!</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">get_parent_name</span>() {
-                    <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(
+                <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">is_hole</span>() <span class="op">&amp;&amp;</span> <span class="ident">dst</span>.<span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;done&quot;</span> {
+                    <span class="comment">// Group has multiple done conditions</span>
+                    <span class="kw">if</span> <span class="ident">has_done</span> {
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(
+                            <span class="string">&quot;Group `{}` has multiple done conditions&quot;</span>,
+                            <span class="ident">gname</span>
+                        ))
+                        .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">assign</span>.<span class="ident">attributes</span>));
+                    } <span class="kw">else</span> {
+                        <span class="ident">has_done</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                    }
+                    <span class="comment">// Group uses another group&#39;s done condition</span>
+                    <span class="kw">if</span> <span class="ident">gname</span> <span class="op">!</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">get_parent_name</span>() {
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(
                             <span class="macro">format!</span>(<span class="string">&quot;Group `{}` refers to the done condition of another group (`{}`).&quot;</span>,
-                            <span class="ident">group</span>.<span class="ident">name</span>(),
-                            <span class="ident">dst</span>.<span class="ident">get_parent_name</span>())).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">attributes</span>))
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">Ok</span>(())
+                            <span class="ident">gname</span>,
+                            <span class="ident">dst</span>.<span class="ident">get_parent_name</span>())).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">attributes</span>));
+                    }
                 }
-            }).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-            <span class="kw">if</span> <span class="ident">done</span>.<span class="ident">is_empty</span>() {
-                <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(
-                    <span class="string">&quot;No writes to the `done&#39; hole for group `{gname}&#39;&quot;</span>,
-                )).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">attributes</span>))
-            } <span class="kw">else</span> {
-                <span class="prelude-val">Ok</span>(())
             }
-        })<span class="question-mark">?</span>;
+
+            <span class="comment">// Group does not have a done condition</span>
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">has_done</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(
+                    <span class="string">&quot;No writes to the `done&#39; hole for group `{gname}&#39;&quot;</span>,
+                ))
+                .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">attributes</span>));
+            }
+        }
 
         <span class="comment">// Check for obvious conflicting assignments</span>
         <span class="kw">for</span> <span class="ident">gr</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>() {
