@@ -1326,8 +1326,28 @@ A failed run takes about 2 minutes to produce an error.</p>
 <p>By default, the Xilinx tools run in a temporary directory that is deleted when <code>fud</code> finishes.
 To instead keep the sandbox directory, use <code>-s xclbin.save_temps true</code>.
 You can then find the results in a directory named <code>fud-out-N</code> for some number <code>N</code>.</p>
+<h3 id="execute"><a class="header" href="#execute">Execute</a></h3>
+<p>Now that you have an <code>xclbin</code>, the next step is to run it.
+Roughly speaking, the command you need is just a <code>fud</code> invocation that goes from the <code>xclbin</code> stage to the <code>fpga</code> stage:</p>
+<pre><code>fud e foo.xclbin --from xclbin --to fpga -s fpga.data examples/dahlia/dot-product.fuse.data
+</code></pre>
+<p>Contrary to the name, the <code>fpga</code> stage works for both emulation and on-FPGA execution---fud's <code>mode</code> config option for this stage chooses which to use.
+The <code>fpga.data</code> config option provides a normal fud-style JSON data input file for the run.</p>
+<p>Currently, you will need to have a bunch of environment variables set up to point to the Xilinx tools <em>before running this fud command</em>.
+For example, on our group's havarti server, you can do this:</p>
+<pre><code>source /scratch/opt/Xilinx/Vitis/2020.2/settings64.sh
+source /opt/xilinx/xrt/setup.sh
+export EMCONFIG_PATH=`pwd`
+export XCL_EMULATION_MODE=hw_emu
+</code></pre>
+<p>That is, you'll source the setup scripts for both <a href="https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html">Vitis</a> and <a href="https://xilinx.github.io/XRT/">XRT</a>;
+you need to set a special <code>EMCONFIG_PATH</code> to your current directory so that fud can generate a <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/emconfigutil-Utility">special JSON configuration file for Xilinx emulation</a>;
+and you need to tell XRT whether you want <code>hw_emu</code> (emulation) or <code>hw</code> (actual on-device execution) mode.
+Of course, it would be better if all this could come from fud's configuration itself instead of requiring you to set it up ahead of time;
+<a href="https://github.com/cucapra/calyx/issues/872">issue #872</a> covers this work.</p>
 <h3 id="emulate"><a class="header" href="#emulate">Emulate</a></h3>
-<p>You can also execute compiled designs through Xilinx hardware emulation.
+<p>There is also a separate, vestigial path just for doing hardware emulation (i.e., like the <code>hw_emu</code> mode referenced above).
+It is probably a bad idea to use this when the <code>fpga</code> stage exists, but it is still available.
 Use the <code>wdb</code> state as your <code>fud</code> target:</p>
 <pre><code>fud e -vv foo.xclbin -s wdb.save_temps true -o out.wdb
 </code></pre>
