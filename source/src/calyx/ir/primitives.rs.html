@@ -172,6 +172,8 @@
 <span id="167">167</span>
 <span id="168">168</span>
 <span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">Direction</span>, <span class="ident">Id</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
 <span class="kw">use</span> <span class="ident">linked_hash_map::LinkedHashMap</span>;
@@ -250,15 +252,17 @@
     }
 }
 
-<span class="doccomment">/// Definition of a port.</span>
+<span class="doccomment">/// Definition of a port parameterized by a width type.</span>
+<span class="doccomment">/// Ports on Primitives can be parameteris and use [Width].</span>
+<span class="doccomment">/// Ports on Components cannot be parameterized and therefore use `u64`.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The name of the port.</span>
     <span class="kw">pub</span> <span class="ident">name</span>: <span class="ident">Id</span>,
     <span class="doccomment">/// The width of the port. .</span>
     <span class="kw">pub</span> <span class="ident">width</span>: <span class="ident">W</span>,
-    <span class="doccomment">/// The direction of the port. Only allowed to be [`Direction::Input`]</span>
-    <span class="doccomment">/// or [`Direction::Output`].</span>
+    <span class="doccomment">/// The direction of the port. Only allowed to be [Direction::Input]</span>
+    <span class="doccomment">/// or [Direction::Output].</span>
     <span class="kw">pub</span> <span class="ident">direction</span>: <span class="ident">Direction</span>,
     <span class="doccomment">/// Attributes attached to this port definition</span>
     <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">Attributes</span>,

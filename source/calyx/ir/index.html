@@ -47,7 +47,9 @@ so will introduce incorrect results for look-ups.</p>
 the root program.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Par.html" title="calyx::ir::Par struct">Par</a></div><div class="item-right docblock-short"><p>Data for the <code>par</code> control statement.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Port.html" title="calyx::ir::Port struct">Port</a></div><div class="item-right docblock-short"><p>Represents a port on a cell.</p>
-</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.PortDef.html" title="calyx::ir::PortDef struct">PortDef</a></div><div class="item-right docblock-short"><p>Definition of a port.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.PortDef.html" title="calyx::ir::PortDef struct">PortDef</a></div><div class="item-right docblock-short"><p>Definition of a port parameterized by a width type.
+Ports on Primitives can be parameteris and use <a href="enum.Width.html" title="Width">Width</a>.
+Ports on Components cannot be parameterized and therefore use <code>u64</code>.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.PortIterator.html" title="calyx::ir::PortIterator struct">PortIterator</a></div><div class="item-right docblock-short"><p>Wraps generic iterators over ports to allow functions to build and return port iterators in
 different ways.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Primitive.html" title="calyx::ir::Primitive struct">Primitive</a></div><div class="item-right docblock-short"><p>Representation of a external primitive definition.</p>
