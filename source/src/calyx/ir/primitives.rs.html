@@ -156,6 +156,22 @@
 <span id="151">151</span>
 <span id="152">152</span>
 <span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">Direction</span>, <span class="ident">Id</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
 <span class="kw">use</span> <span class="ident">linked_hash_map::LinkedHashMap</span>;
@@ -181,7 +197,7 @@
     <span class="doccomment">/// Paramters for this primitive.</span>
     <span class="kw">pub</span> <span class="ident">params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span>,
     <span class="doccomment">/// The input/output signature for this primitive.</span>
-    <span class="kw">pub</span> <span class="ident">signature</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PortDef</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">signature</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">Width</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Key-value attributes for this primitive.</span>
     <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">Attributes</span>,
     <span class="doccomment">/// True iff this is a combinational primitive</span>
@@ -195,10 +211,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">resolve</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">parameters</span>: <span class="kw-2">&amp;</span>[<span class="ident">u64</span>],
-    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>(
-        <span class="ident">SmallVec</span><span class="op">&lt;</span>[(<span class="ident">Id</span>, <span class="ident">u64</span>); <span class="number">5</span>]<span class="op">&gt;</span>,
-        <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Id</span>, <span class="ident">u64</span>, <span class="ident">Direction</span>, <span class="ident">Attributes</span>)<span class="op">&gt;</span>,
-    )<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>(<span class="ident">SmallVec</span><span class="op">&lt;</span>[(<span class="ident">Id</span>, <span class="ident">u64</span>); <span class="number">5</span>]<span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">params</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">parameters</span>.<span class="ident">len</span>() {
             <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(
                <span class="string">&quot;Invalid parameter binding for primitive `{}`. Requires {} parameters but provided with {}.&quot;</span>,
@@ -219,17 +232,14 @@
             .<span class="ident">signature</span>
             .<span class="ident">iter</span>()
             .<span class="ident">cloned</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> {
-                <span class="ident">pd</span>.<span class="ident">resolve</span>(<span class="kw-2">&amp;</span><span class="ident">bindings</span>)
-                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">n</span>, <span class="ident">w</span>, <span class="ident">attrs</span>)<span class="op">|</span> (<span class="ident">n</span>, <span class="ident">w</span>, <span class="ident">pd</span>.<span class="ident">direction</span>, <span class="ident">attrs</span>))
-            })
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> <span class="ident">pd</span>.<span class="ident">resolve</span>(<span class="kw-2">&amp;</span><span class="ident">bindings</span>))
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>((<span class="ident">bindings</span>.<span class="ident">into_iter</span>().<span class="ident">collect</span>(), <span class="ident">ports</span>))
     }
 
     <span class="doccomment">/// Return all ports that have the attribute `attr`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_all_with_attr</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attr</span>: <span class="ident">S</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PortDef</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_all_with_attr</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attr</span>: <span class="ident">S</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">Width</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
     {
@@ -242,12 +252,11 @@
 
 <span class="doccomment">/// Definition of a port.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PortDef</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The name of the port.</span>
     <span class="kw">pub</span> <span class="ident">name</span>: <span class="ident">Id</span>,
-    <span class="doccomment">/// The width of the port. Can be either a number ([`Width::Const`]) or</span>
-    <span class="doccomment">/// a parameter ([`Width::Param`]).</span>
-    <span class="kw">pub</span> <span class="ident">width</span>: <span class="ident">Width</span>,
+    <span class="doccomment">/// The width of the port. .</span>
+    <span class="kw">pub</span> <span class="ident">width</span>: <span class="ident">W</span>,
     <span class="doccomment">/// The direction of the port. Only allowed to be [`Direction::Input`]</span>
     <span class="doccomment">/// or [`Direction::Output`].</span>
     <span class="kw">pub</span> <span class="ident">direction</span>: <span class="ident">Direction</span>,
@@ -255,11 +264,28 @@
     <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">Attributes</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">Id</span>, <span class="ident">u64</span>, <span class="ident">Direction</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PortDef</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">port</span>: (<span class="ident">Id</span>, <span class="ident">u64</span>, <span class="ident">Direction</span>)) -&gt; <span class="self">Self</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">I</span>, <span class="ident">u64</span>, <span class="ident">Direction</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">Width</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">I</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span>,
+{
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">port</span>: (<span class="ident">I</span>, <span class="ident">u64</span>, <span class="ident">Direction</span>)) -&gt; <span class="self">Self</span> {
         <span class="ident">PortDef</span> {
-            <span class="ident">name</span>: <span class="ident">port</span>.<span class="number">0</span>,
+            <span class="ident">name</span>: <span class="ident">port</span>.<span class="number">0</span>.<span class="ident">into</span>(),
             <span class="ident">width</span>: <span class="ident">Width::Const</span> { <span class="ident">value</span>: <span class="ident">port</span>.<span class="number">1</span> },
+            <span class="ident">direction</span>: <span class="ident">port</span>.<span class="number">2</span>,
+            <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
+        }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">I</span>, <span class="ident">u64</span>, <span class="ident">Direction</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">I</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span>,
+{
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">port</span>: (<span class="ident">I</span>, <span class="ident">u64</span>, <span class="ident">Direction</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident">PortDef</span> {
+            <span class="ident">name</span>: <span class="ident">port</span>.<span class="number">0</span>.<span class="ident">into</span>(),
+            <span class="ident">width</span>: <span class="ident">port</span>.<span class="number">1</span>,
             <span class="ident">direction</span>: <span class="ident">port</span>.<span class="number">2</span>,
             <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
         }
@@ -284,22 +310,28 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">PortDef</span> {
+<span class="kw">impl</span> <span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">Width</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Given a map from names of parameters to their values, attempt to</span>
     <span class="doccomment">/// resolve this definition.</span>
     <span class="doccomment">/// Errors if there is no binding for a required parameter binding.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">resolve</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="self">self</span>,
         <span class="ident">binding</span>: <span class="kw-2">&amp;</span><span class="ident">LinkedHashMap</span><span class="op">&lt;</span><span class="ident">Id</span>, <span class="ident">u64</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>(<span class="ident">Id</span>, <span class="ident">u64</span>, <span class="ident">Attributes</span>)<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">width</span> {
-            <span class="ident">Width::Const</span> { <span class="ident">value</span> } =&gt; {
-                <span class="prelude-val">Ok</span>((<span class="self">self</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="kw-2">*</span><span class="ident">value</span>, <span class="self">self</span>.<span class="ident">attributes</span>.<span class="ident">clone</span>()))
-            }
+            <span class="ident">Width::Const</span> { <span class="ident">value</span> } =&gt; <span class="prelude-val">Ok</span>(<span class="ident">PortDef</span> {
+                <span class="ident">name</span>: <span class="self">self</span>.<span class="ident">name</span>,
+                <span class="ident">width</span>: <span class="kw-2">*</span><span class="ident">value</span>,
+                <span class="ident">attributes</span>: <span class="self">self</span>.<span class="ident">attributes</span>,
+                <span class="ident">direction</span>: <span class="self">self</span>.<span class="ident">direction</span>,
+            }),
             <span class="ident">Width::Param</span> { <span class="ident">value</span> } =&gt; <span class="kw">match</span> <span class="ident">binding</span>.<span class="ident">get</span>(<span class="ident">value</span>) {
-                <span class="prelude-val">Some</span>(<span class="ident">width</span>) =&gt; {
-                    <span class="prelude-val">Ok</span>((<span class="self">self</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="kw-2">*</span><span class="ident">width</span>, <span class="self">self</span>.<span class="ident">attributes</span>.<span class="ident">clone</span>()))
-                }
+                <span class="prelude-val">Some</span>(<span class="ident">width</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">PortDef</span> {
+                    <span class="ident">name</span>: <span class="self">self</span>.<span class="ident">name</span>,
+                    <span class="ident">width</span>: <span class="kw-2">*</span><span class="ident">width</span>,
+                    <span class="ident">attributes</span>: <span class="self">self</span>.<span class="ident">attributes</span>,
+                    <span class="ident">direction</span>: <span class="self">self</span>.<span class="ident">direction</span>,
+                }),
                 <span class="prelude-val">None</span> =&gt; {
                     <span class="kw">let</span> <span class="ident">param_name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">name</span>;
                     <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Failed to resolve: {param_name}&quot;</span>);

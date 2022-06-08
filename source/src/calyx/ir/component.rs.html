@@ -251,12 +251,9 @@
 <span id="246">246</span>
 <span id="247">247</span>
 <span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{
     <span class="ident">Assignment</span>, <span class="ident">Attributes</span>, <span class="ident">Builder</span>, <span class="ident">Cell</span>, <span class="ident">CellType</span>, <span class="ident">CloneName</span>, <span class="ident">CombGroup</span>,
-    <span class="ident">Control</span>, <span class="ident">Direction</span>, <span class="ident">GetName</span>, <span class="ident">Group</span>, <span class="ident">Id</span>, <span class="ident">RRC</span>,
+    <span class="ident">Control</span>, <span class="ident">GetName</span>, <span class="ident">Group</span>, <span class="ident">Id</span>, <span class="ident">PortDef</span>, <span class="ident">RRC</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>;
 <span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
@@ -303,17 +300,13 @@
 <span class="doccomment">///   name.</span>
 <span class="kw">impl</span> <span class="ident">Component</span> {
     <span class="doccomment">/// Construct a new Component with the given `name` and signature fields.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span><span class="op">&gt;</span>(
-        <span class="ident">name</span>: <span class="ident">S</span>,
-        <span class="ident">ports</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">N</span>, <span class="ident">u64</span>, <span class="ident">Direction</span>, <span class="ident">Attributes</span>)<span class="op">&gt;</span>,
-    ) -&gt; <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="ident">name</span>: <span class="ident">S</span>, <span class="ident">ports</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
-        <span class="ident">N</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
     {
         <span class="kw">let</span> <span class="ident">prev_names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ports</span>
             .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">name</span>.<span class="ident">as_ref</span>().<span class="ident">to_string</span>())
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> <span class="ident">pd</span>.<span class="ident">name</span>.<span class="ident">as_ref</span>().<span class="ident">to_string</span>())
             .<span class="ident">collect</span>();
 
         <span class="kw">let</span> <span class="ident">this_sig</span> <span class="op">=</span> <span class="ident">Builder::cell_from_signature</span>(
@@ -322,8 +315,9 @@
             <span class="ident">ports</span>
                 .<span class="ident">into_iter</span>()
                 <span class="comment">// Reverse the port directions inside the component.</span>
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="ident">w</span>, <span class="ident">d</span>, <span class="ident">attrs</span>)<span class="op">|</span> {
-                    (<span class="ident">name</span>.<span class="ident">as_ref</span>().<span class="ident">into</span>(), <span class="ident">w</span>, <span class="ident">d</span>.<span class="ident">reverse</span>(), <span class="ident">attrs</span>)
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> <span class="ident">PortDef</span> {
+                    <span class="ident">direction</span>: <span class="ident">pd</span>.<span class="ident">direction</span>.<span class="ident">reverse</span>(),
+                    ..<span class="ident">pd</span>
                 })
                 .<span class="ident">collect</span>(),
         );
