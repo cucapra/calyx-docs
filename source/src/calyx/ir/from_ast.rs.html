@@ -626,6 +626,8 @@
 <span id="621">621</span>
 <span id="622">622</span>
 <span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{
     <span class="ident">Assignment</span>, <span class="ident">Attributes</span>, <span class="ident">BackendConf</span>, <span class="ident">Builder</span>, <span class="ident">Canonical</span>, <span class="ident">CellType</span>,
     <span class="ident">Component</span>, <span class="ident">Context</span>, <span class="ident">Control</span>, <span class="ident">Direction</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">Invoke</span>,
@@ -755,8 +757,10 @@
     {
         <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">comp</span>.<span class="ident">signature</span>;
         <span class="ident">check_signature</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">sig</span>)<span class="question-mark">?</span>;
-        <span class="comment">// extend the signature</span>
-        <span class="ident">extend_signature</span>(<span class="ident">sig</span>);
+        <span class="comment">// extend the signature if the component does not have the @nointerface attribute.</span>
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">comp</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;nointerface&quot;</span>) {
+            <span class="ident">extend_signature</span>(<span class="ident">sig</span>);
+        }
         <span class="ident">sig_ctx</span>.<span class="ident">comp_sigs</span>.<span class="ident">insert</span>(<span class="ident">comp</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">sig</span>.<span class="ident">clone</span>());
     }
 

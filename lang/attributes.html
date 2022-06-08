@@ -173,6 +173,13 @@ Because it's common to have a &quot;Boolean&quot; attribute that always maps to 
 <p>The entrypoint for the Calyx program. If no component has this attribute, then
 the compiler looks for a component named <code>main</code>. If neither is found, the
 compiler errors out.</p>
+<h3 id="go-done-clk-and-reset"><a class="header" href="#go-done-clk-and-reset"><code>go</code>, <code>done</code>, <code>clk</code> and <code>reset</code></a></h3>
+<p>These four ports are part of the interface to Calyx components.
+<code>go</code> and <code>done</code> provide the mechanism for how an &quot;outer&quot; component invokes an &quot;inner&quot; cell that it contains.
+<code>clk</code> and <code>reset</code> thread through the global clock and resetting signal in a design.</p>
+<h3 id="nointerface"><a class="header" href="#nointerface"><code>nointerface</code></a></h3>
+<p>By default, interface ports are automatically added to a component if they are missing.
+Adding this attribute disables this behavior.</p>
 <h3 id="external"><a class="header" href="#external"><code>external</code></a></h3>
 <p>The <code>external</code> attribute has meaning when it is attached to a cell.
 It has two meanings:</p>
@@ -187,9 +194,6 @@ See <a href="https://docs.calyxir.org/source/calyx/passes/struct.Externalize.htm
 <p>Can be attached to components, groups, and control statements. They indicate how
 many cycles a component, group, or control statement will take to run and are used
 by <code>-p static-timing</code> to generate more efficient control FSMs.</p>
-<h3 id="go-done-and-reset"><a class="header" href="#go-done-and-reset"><code>go</code>, <code>done</code>, and <code>reset</code></a></h3>
-<p>These three ports are part of the interface to Calyx components.
-They are the mechanism for how an &quot;outer&quot; component invokes an &quot;inner&quot; cell that it contains.</p>
 <p>The <code>go</code> and <code>done</code> attributes are, in particular, used by the <code>infer-static-timing</code> pass to configure which ports are used like
 <code>go</code> and <code>done</code> signals.
 Along with the <code>static(n)</code> attribute, this allows the pass to calculate when
