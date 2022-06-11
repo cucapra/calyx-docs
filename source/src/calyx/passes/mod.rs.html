@@ -72,6 +72,8 @@
 <span id="67">67</span>
 <span id="68">68</span>
 <span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.</span>
 <span class="kw">mod</span> <span class="ident">canonical</span>;
 <span class="kw">mod</span> <span class="ident">clk_insertion</span>;
@@ -101,6 +103,7 @@
 <span class="kw">mod</span> <span class="ident">resource_sharing</span>;
 <span class="kw">mod</span> <span class="ident">sharing_components</span>;
 <span class="kw">mod</span> <span class="ident">simplify_guards</span>;
+<span class="kw">mod</span> <span class="ident">static_par_conv</span>;
 <span class="kw">mod</span> <span class="ident">synthesis_papercut</span>;
 <span class="kw">mod</span> <span class="ident">top_down_compile_control</span>;
 <span class="kw">mod</span> <span class="ident">top_down_static_timing</span>;
@@ -135,6 +138,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">resource_sharing::ResourceSharing</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sharing_components::ShareComponents</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">simplify_guards::SimplifyGuards</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">static_par_conv::StaticParConv</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">synthesis_papercut::SynthesisPapercut</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">top_down_compile_control::TopDownCompileControl</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">top_down_static_timing::TopDownStaticTiming</span>;
