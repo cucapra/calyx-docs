@@ -179,38 +179,115 @@
 <span id="174">174</span>
 <span id="175">175</span>
 <span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::GetAttributes</span>;
+<span class="kw">use</span> <span class="ident">std::cmp::Ordering</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="doccomment">/// Transforms a par of seq blocks into a seq of par blocks. For the</span>
-<span class="doccomment">/// transformation to occur, each seq block must have the same number of statements,</span>
-<span class="doccomment">/// and the nth statement of each seq block in the par block</span>
-<span class="doccomment">/// must all have the same number of clock cycles. (Subject to change)</span>
+<span class="doccomment">/// Transforms a par of seq blocks into a seq of par blocks. It will sometimes only</span>
+<span class="doccomment">/// apply this transformation to a subset of seq blocks in the par block.</span>
+<span class="doccomment">/// Regardless, this transformation should never increase the number of cycles the par</span>
+<span class="doccomment">/// block takes to execute.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// #Example</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
 <span class="doccomment">/// par {</span>
 <span class="doccomment">///    seq { @static(M) A0; @static(N) B0; @static(P) C0; }</span>
 <span class="doccomment">///    seq { @static(M) A1; @static(N) B1; @static(P) C1; }</span>
 <span class="doccomment">///    seq { @static(M) A2; @static(N) B2; @static(P) C2; }</span>
 <span class="doccomment">///}</span>
+<span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// into</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
 <span class="doccomment">/// @static(M + N + P) seq {</span>
 <span class="doccomment">///     @static(M) par{ @static(M) A0; @static(M) A1; @static(M) A2;}</span>
 <span class="doccomment">///     @static(N) par{ @static(N) B0; @static(N) B1; @static(N) B2;}</span>
 <span class="doccomment">///     @static(P) par{ @static(P) C0; @static(P) C1; @static(P) C2;}</span>
 <span class="doccomment">/// }</span>
+<span class="doccomment">/// ```</span>
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StaticParConv</span>;
-
-<span class="kw">enum</span> <span class="ident">StaticAttr</span> {
-    <span class="ident">NoAttr</span>,
-    <span class="ident">NoStmt</span>,
-    <span class="ident">StaticVal</span>(<span class="ident">u64</span>),
-}
 
 <span class="kw">impl</span> <span class="ident">Named</span> <span class="kw">for</span> <span class="ident">StaticParConv</span> {
     <span class="kw">fn</span> <span class="ident">name</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
@@ -222,45 +299,70 @@
     }
 }
 
-<span class="comment">// Given a Control statement, returns the Some(length), where length</span>
-<span class="comment">// is the length of stmts if the Control statement</span>
-<span class="comment">// is a Seq. None if Control statement is not a Seq.</span>
-<span class="kw">fn</span> <span class="ident">len_if_seq</span>(<span class="ident">stmt</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-    <span class="kw">match</span> <span class="ident">stmt</span> {
-        <span class="ident">ir::Control::Seq</span>(<span class="ident">seq</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">seq</span>.<span class="ident">stmts</span>.<span class="ident">len</span>()),
-        <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
-    }
+<span class="comment">// given a stmt, returns Some(&amp;val) where val is the value of the &quot;static&quot;</span>
+<span class="comment">// attribute of stmt. Returns None if no &quot;static&quot; attribute exists.</span>
+<span class="kw">fn</span> <span class="ident">get_static_attr</span>(<span class="ident">stmt</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="ident">stmt</span>.<span class="ident">get_attributes</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">atts</span><span class="op">|</span> <span class="ident">atts</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>))
 }
 
-<span class="comment">// Given a Control statement and an index n.</span>
-<span class="comment">// If the Control statement is not a Seq, then unreachable!</span>
-<span class="comment">// Otherwise, returns a StaticAttr. It returns NoStmt if there</span>
-<span class="comment">// exists no nth statement in the Seq. It returns NoAttr if</span>
-<span class="comment">// the nth statement exists, but does not have a &quot;static&quot; attribute.</span>
-<span class="comment">// It returns StaticVal(static_val), where static_val is the</span>
-<span class="comment">// value of the &quot;static&quot; attribute of the nth statement.</span>
-<span class="kw">fn</span> <span class="ident">cycles_if_seq</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="ident">StaticAttr</span> {
-    <span class="kw">match</span> <span class="ident">s</span> {
-        <span class="ident">ir::Control::Seq</span>(<span class="ident">seq</span>) =&gt; {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">stmt</span>) <span class="op">=</span> <span class="ident">seq</span>.<span class="ident">stmts</span>.<span class="ident">get</span>(<span class="ident">index</span>) {
-                <span class="kw">match</span> <span class="ident">stmt</span>.<span class="ident">get_attributes</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">atts</span><span class="op">|</span> <span class="ident">atts</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>))
-                {
-                    <span class="prelude-val">None</span> =&gt; <span class="ident">StaticAttr::NoAttr</span>,
-                    <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">static_val</span>) =&gt; <span class="ident">StaticAttr::StaticVal</span>(<span class="ident">static_val</span>),
+<span class="comment">// Takes two seqs, longer and shorter. longer should be at least as long as</span>
+<span class="comment">// shorter. Returns Some(vec) if there exists arrangement of shorter and longer</span>
+<span class="comment">// such that each statement in shorter can be paired with a statement in longer,</span>
+<span class="comment">// such that executing these pairs as a seq of pars will respect dependencies and</span>
+<span class="comment">// the number of cycles it takes will remain the same. If no such vec exists, returns None.</span>
+<span class="comment">// The vec it returns contains which indices of longer each element in shorter</span>
+<span class="comment">// should be paired with. So, if we represent the vecs by the static attribute of their</span>
+<span class="comment">// statements, and longer = [4,1,5] and shorter = [4,5] then vec would be</span>
+<span class="comment">// [0,2], since the 4 in shorter can be paired with the 4 in longer (@ index 0)</span>
+<span class="comment">// and the 5 in shorter can be paired with the 5 in longer (@ index 2).</span>
+<span class="comment">// A consequence of this is that vec should always be the same length as shorter.</span>
+<span class="kw">fn</span> <span class="ident">is_compatible</span>(<span class="ident">longer</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Seq</span>, <span class="ident">shorter</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Seq</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">long_iter</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">longer</span>).<span class="ident">stmts</span>.<span class="ident">iter</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">short_iter</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">shorter</span>).<span class="ident">stmts</span>.<span class="ident">iter</span>();
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">long_val</span> <span class="op">=</span> <span class="ident">long_iter</span>.<span class="ident">next</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">short_val</span> <span class="op">=</span> <span class="ident">short_iter</span>.<span class="ident">next</span>();
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">index_counter</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter</span> <span class="op">=</span> <span class="number">0</span>;
+
+    <span class="kw">while</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">c1</span>), <span class="prelude-val">Some</span>(<span class="ident">c2</span>)) <span class="op">=</span> (<span class="ident">long_val</span>, <span class="ident">short_val</span>) {
+        <span class="kw">match</span> (<span class="ident">get_static_attr</span>(<span class="ident">c1</span>), <span class="ident">get_static_attr</span>(<span class="ident">c2</span>)) {
+            (<span class="prelude-val">Some</span>(<span class="ident">x1</span>), <span class="prelude-val">Some</span>(<span class="ident">x2</span>)) =&gt; {
+                <span class="kw">if</span> <span class="ident">x2</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">x1</span> {
+                    <span class="ident">short_val</span> <span class="op">=</span> <span class="ident">short_iter</span>.<span class="ident">next</span>();
+                    <span class="ident">index_counter</span>.<span class="ident">push</span>(<span class="ident">counter</span>);
                 }
-            } <span class="kw">else</span> {
-                <span class="ident">StaticAttr::NoStmt</span>
+                <span class="ident">long_val</span> <span class="op">=</span> <span class="ident">long_iter</span>.<span class="ident">next</span>();
             }
+            <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
         }
-        <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;Not a sequence&quot;</span>),
+        <span class="ident">counter</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+    }
+
+    <span class="kw">match</span> <span class="ident">short_val</span> {
+        <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">index_counter</span>),
+        <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
     }
 }
 
-<span class="comment">// returns a default Attribute with &quot;static&quot; set to v</span>
+<span class="comment">// Returns a default Attribute with &quot;static&quot; set to v</span>
 <span class="kw">fn</span> <span class="ident">attribute_with_static</span>(<span class="ident">v</span>: <span class="ident">u64</span>) -&gt; <span class="ident">ir::Attributes</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">atts</span> <span class="op">=</span> <span class="ident">ir::Attributes::default</span>();
     <span class="ident">atts</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="ident">v</span>);
     <span class="ident">atts</span>
+}
+
+<span class="comment">// Returns the Some(sum), where sum is the sum of the static attribute for each</span>
+<span class="comment">// stmt in seq. Returns None if there is at least one statement in seq</span>
+<span class="comment">// that does not have a static attribute</span>
+<span class="kw">fn</span> <span class="ident">get_static_sum</span>(<span class="ident">seq</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Seq</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">static_vals</span> <span class="op">=</span> <span class="ident">seq</span>
+        .<span class="ident">stmts</span>
+        .<span class="ident">iter</span>()
+        .<span class="ident">map</span>(<span class="ident">get_static_attr</span>)
+        .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+    <span class="ident">static_vals</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">into_iter</span>().<span class="ident">sum</span>())
 }
 
 <span class="kw">impl</span> <span class="ident">Visitor</span> <span class="kw">for</span> <span class="ident">StaticParConv</span> {
@@ -276,83 +378,135 @@
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
         }
 
-        <span class="comment">//make sure there are only seqs, and if so, get the length of the longest seq</span>
-        <span class="kw">let</span> <span class="ident">lens_vec</span> <span class="op">=</span> <span class="ident">s</span>
-            .<span class="ident">stmts</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="ident">len_if_seq</span>)
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-        <span class="kw">let</span> <span class="ident">max_seq_len</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">lens</span>) <span class="op">=</span> <span class="ident">lens_vec</span> {
-            <span class="ident">lens</span>.<span class="ident">into_iter</span>()
-                .<span class="ident">max</span>()
-                .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">unreachable!</span>(<span class="string">&quot;empty par block&quot;</span>))
-        } <span class="kw">else</span> {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
-        };
-
-        <span class="comment">//vec to hold the @static vals for each par block in the seq we will create</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new_pars_static</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-
-        <span class="comment">//make sure nth statement in each seq (if it exists) takes same number of cycles</span>
-        <span class="kw">for</span> <span class="ident">n</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">max_seq_len</span> {
-            <span class="kw">let</span> <span class="ident">cycles_vec</span> <span class="op">=</span> <span class="ident">s</span>
-                .<span class="ident">stmts</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">stmt</span><span class="op">|</span> <span class="ident">cycles_if_seq</span>(<span class="ident">stmt</span>, <span class="ident">n</span>))
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">StaticAttr</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-            <span class="comment">// There is an uglier way to do this doing just 1 iteration</span>
-            <span class="kw">let</span> <span class="ident">cycles_val</span> <span class="op">=</span> <span class="ident">cycles_vec</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="macro">matches!</span>(<span class="ident">x</span>, <span class="ident">StaticAttr::StaticVal</span>(<span class="ident">_v</span>)));
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">StaticAttr::StaticVal</span>(<span class="ident">v</span>)) <span class="op">=</span> <span class="ident">cycles_val</span> {
-                <span class="kw">if</span> <span class="ident">cycles_vec</span>.<span class="ident">into_iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">static_attr</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">static_attr</span> {
-                    <span class="ident">StaticAttr::StaticVal</span>(<span class="ident">x</span>) =&gt; <span class="ident">x</span> <span class="op">==</span> <span class="ident">v</span>,
-                    <span class="ident">StaticAttr::NoStmt</span> =&gt; <span class="bool-val">true</span>,
-                    <span class="ident">StaticAttr::NoAttr</span> =&gt; <span class="bool-val">false</span>,
-                }) {
-                    <span class="ident">new_pars_static</span>.<span class="ident">push</span>(<span class="ident">v</span>);
-                } <span class="kw">else</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
-                }
-            } <span class="kw">else</span> {
-                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
-            }
-        }
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new_pars_stmts</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-        <span class="kw">for</span> <span class="ident">_n</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">max_seq_len</span> {
-            <span class="ident">new_pars_stmts</span>.<span class="ident">push</span>(<span class="ident">Vec::new</span>());
-        }
-
+        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">to_be_partitioned</span>, <span class="kw-2">mut</span> <span class="ident">has_been_partitioned</span>) <span class="op">=</span>
+            (<span class="ident">Vec::new</span>(), <span class="ident">Vec::new</span>());
         <span class="kw">for</span> <span class="ident">con</span> <span class="kw">in</span> <span class="ident">s</span>.<span class="ident">stmts</span>.<span class="ident">drain</span>(..) {
             <span class="kw">match</span> <span class="ident">con</span> {
-                <span class="ident">ir::Control::Seq</span>(<span class="kw-2">mut</span> <span class="ident">seq</span>) =&gt; {
-                    <span class="kw">for</span> (<span class="ident">counter</span>, <span class="ident">stmt</span>) <span class="kw">in</span> <span class="ident">seq</span>.<span class="ident">stmts</span>.<span class="ident">drain</span>(..).<span class="ident">enumerate</span>() {
-                        <span class="ident">new_pars_stmts</span>[<span class="ident">counter</span>].<span class="ident">push</span>(<span class="ident">stmt</span>);
-                    }
-                }
-                <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;encountered non sequence&quot;</span>),
+                <span class="ident">ir::Control::Seq</span>(<span class="ident">seq</span>) =&gt; <span class="ident">to_be_partitioned</span>.<span class="ident">push</span>(<span class="ident">seq</span>),
+                <span class="ident">x</span> =&gt; <span class="ident">has_been_partitioned</span>.<span class="ident">push</span>(<span class="ident">x</span>),
             }
         }
 
-        <span class="comment">//the @static attribute for the entire seq block I will create</span>
-        <span class="kw">let</span> <span class="ident">new_seq_static</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">new_pars_static</span>.<span class="ident">iter</span>().<span class="ident">sum</span>();
+        <span class="comment">//sort from longest seq to shortest</span>
+        <span class="ident">to_be_partitioned</span>.<span class="ident">sort_by</span>(<span class="op">|</span><span class="ident">s1</span>, <span class="ident">s2</span><span class="op">|</span> {
+            <span class="kw">let</span> <span class="ident">len1</span> <span class="op">=</span> <span class="ident">s1</span>.<span class="ident">stmts</span>.<span class="ident">len</span>();
+            <span class="kw">let</span> <span class="ident">static1</span> <span class="op">=</span> <span class="ident">get_static_sum</span>(<span class="ident">s1</span>);
+            <span class="kw">let</span> <span class="ident">len2</span> <span class="op">=</span> <span class="ident">s2</span>.<span class="ident">stmts</span>.<span class="ident">len</span>();
+            <span class="kw">let</span> <span class="ident">static2</span> <span class="op">=</span> <span class="ident">get_static_sum</span>(<span class="ident">s2</span>);
+            <span class="kw">match</span> <span class="ident">len2</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">len1</span>) {
+                <span class="ident">Ordering::Equal</span> =&gt; <span class="ident">static2</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">static1</span>),
+                <span class="ident">x</span> =&gt; <span class="ident">x</span>,
+            }
+        });
 
-        <span class="kw">let</span> <span class="ident">pars_vec</span> <span class="op">=</span> <span class="ident">new_pars_stmts</span>
-            .<span class="ident">into_iter</span>()
-            .<span class="ident">zip</span>(<span class="ident">new_pars_static</span>.<span class="ident">into_iter</span>())
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">s</span>, <span class="ident">v</span>)<span class="op">|</span> {
-                <span class="ident">ir::Control::Par</span>(<span class="ident">ir::Par</span> {
-                    <span class="ident">stmts</span>: <span class="ident">s</span>,
-                    <span class="ident">attributes</span>: <span class="ident">attribute_with_static</span>(<span class="ident">v</span>),
+        <span class="kw">while</span> <span class="op">!</span><span class="ident">to_be_partitioned</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">let</span> <span class="ident">longest_seq</span> <span class="op">=</span> <span class="ident">to_be_partitioned</span>.<span class="ident">remove</span>(<span class="number">0</span>);
+            <span class="kw">let</span> <span class="ident">max_seq_len</span> <span class="op">=</span> <span class="ident">longest_seq</span>.<span class="ident">stmts</span>.<span class="ident">len</span>();
+
+            <span class="comment">//if we just have a bunch of empty seqs</span>
+            <span class="kw">if</span> <span class="ident">max_seq_len</span> <span class="op">==</span> <span class="number">0</span> {
+                <span class="kw">break</span>;
+            }
+
+            <span class="comment">//the stmts in this vec of vecs will eventually be transformed into a</span>
+            <span class="comment">//seq of pars. The usize is used to determine which par block</span>
+            <span class="comment">//the respective statement will eventually be put in.</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">partition_group</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Control</span>, <span class="ident">usize</span>)<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[];
+
+            <span class="comment">//looking for seqs that are compatible with longest_seq</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
+            <span class="kw">while</span> <span class="ident">i</span> <span class="op">!</span><span class="op">=</span> <span class="ident">to_be_partitioned</span>.<span class="ident">len</span>() {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index_vec</span>) <span class="op">=</span>
+                    <span class="ident">is_compatible</span>(<span class="kw-2">&amp;</span><span class="ident">longest_seq</span>, <span class="kw-2">&amp;</span><span class="ident">to_be_partitioned</span>[<span class="ident">i</span>])
+                {
+                    <span class="kw">let</span> <span class="ident">seq</span> <span class="op">=</span> <span class="ident">to_be_partitioned</span>.<span class="ident">remove</span>(<span class="ident">i</span>);
+                    <span class="kw">if</span> <span class="ident">seq</span>.<span class="ident">stmts</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">index_vec</span>.<span class="ident">len</span>() {
+                        <span class="macro">unreachable!</span>(<span class="string">&quot;seq should be same len as indices&quot;</span>)
+                    }
+                    <span class="kw">let</span> <span class="ident">indexed_stmts</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Control</span>, <span class="ident">usize</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">seq</span>
+                        .<span class="ident">stmts</span>
+                        .<span class="ident">into_iter</span>()
+                        .<span class="ident">zip</span>(<span class="ident">index_vec</span>.<span class="ident">into_iter</span>())
+                        .<span class="ident">collect</span>();
+                    <span class="ident">partition_group</span>.<span class="ident">push</span>(<span class="ident">indexed_stmts</span>);
+                } <span class="kw">else</span> {
+                    <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                }
+            }
+
+            <span class="comment">//if there are no seqs compatible w/ longest_seq, then</span>
+            <span class="comment">//there is no point in making a seq of pars since we just</span>
+            <span class="comment">//have a single seq (namely longest_seq)</span>
+            <span class="kw">if</span> <span class="ident">partition_group</span>.<span class="ident">is_empty</span>() {
+                <span class="ident">has_been_partitioned</span>.<span class="ident">push</span>(<span class="ident">ir::Control::Seq</span>(<span class="ident">longest_seq</span>));
+                <span class="kw">continue</span>;
+            };
+
+            <span class="comment">//adding longest_seq to partition_group</span>
+            <span class="kw">let</span> <span class="ident">longest_seq_indexed</span> <span class="op">=</span>
+                <span class="ident">longest_seq</span>.<span class="ident">stmts</span>.<span class="ident">into_iter</span>().<span class="ident">zip</span>(<span class="number">0</span>..<span class="ident">max_seq_len</span>).<span class="ident">collect</span>();
+            <span class="ident">partition_group</span>.<span class="ident">push</span>(<span class="ident">longest_seq_indexed</span>);
+
+            <span class="comment">//now we start the process of creating a seq of pars</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new_pars_stmts</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+            <span class="kw">for</span> <span class="ident">_n</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">max_seq_len</span> {
+                <span class="ident">new_pars_stmts</span>.<span class="ident">push</span>(<span class="ident">Vec::new</span>());
+            }
+
+            <span class="kw">for</span> <span class="kw-2">mut</span> <span class="ident">v</span> <span class="kw">in</span> <span class="ident">partition_group</span>.<span class="ident">drain</span>(..) {
+                <span class="kw">for</span> (<span class="ident">stmt</span>, <span class="ident">index</span>) <span class="kw">in</span> <span class="ident">v</span>.<span class="ident">drain</span>(..) {
+                    <span class="ident">new_pars_stmts</span>[<span class="ident">index</span>].<span class="ident">push</span>(<span class="ident">stmt</span>);
+                }
+            }
+
+            <span class="comment">//getting the static attribute for each of the par blocks we will build</span>
+            <span class="kw">let</span> <span class="ident">new_pars_static</span> <span class="op">=</span> <span class="ident">new_pars_stmts</span>
+                .<span class="ident">iter</span>()
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">stmts</span><span class="op">|</span> {
+                    <span class="ident">stmts</span>
+                        .<span class="ident">iter</span>()
+                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">stmt</span><span class="op">|</span> {
+                            <span class="kw">match</span> <span class="ident">get_static_attr</span>(<span class="ident">stmt</span>)
+                            {
+                                <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">x1</span>) =&gt; <span class="ident">x1</span>,
+                                <span class="prelude-val">None</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;every statement in the new par blocks should have a static attribute&quot;</span>),
+                            }
+                        })
+                        .<span class="ident">max</span>()
                 })
-            })
-            .<span class="ident">collect</span>();
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">unreachable!</span>(<span class="string">&quot;none of the par blocks should be empty&quot;</span>));
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">Box::new</span>(<span class="ident">ir::Control::Seq</span>(<span class="ident">ir::Seq</span> {
-            <span class="ident">stmts</span>: <span class="ident">pars_vec</span>,
-            <span class="ident">attributes</span>: <span class="ident">attribute_with_static</span>(<span class="ident">new_seq_static</span>),
-        }))))
+            <span class="kw">let</span> <span class="ident">new_seq_static</span> <span class="op">=</span> <span class="ident">new_pars_static</span>.<span class="ident">iter</span>().<span class="ident">sum</span>();
+
+            <span class="kw">let</span> <span class="ident">new_pars</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Control</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">new_pars_stmts</span>
+                .<span class="ident">into_iter</span>()
+                .<span class="ident">zip</span>(<span class="ident">new_pars_static</span>.<span class="ident">into_iter</span>())
+                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">stmts_vec</span>, <span class="ident">static_attr</span>)<span class="op">|</span> {
+                    <span class="ident">ir::Control::Par</span>(<span class="ident">ir::Par</span> {
+                        <span class="ident">stmts</span>: <span class="ident">stmts_vec</span>,
+                        <span class="ident">attributes</span>: <span class="ident">attribute_with_static</span>(<span class="ident">static_attr</span>),
+                    })
+                })
+                .<span class="ident">collect</span>();
+
+            <span class="kw">let</span> <span class="ident">new_seq</span> <span class="op">=</span> <span class="ident">ir::Control::Seq</span>(<span class="ident">ir::Seq</span> {
+                <span class="ident">stmts</span>: <span class="ident">new_pars</span>,
+                <span class="ident">attributes</span>: <span class="ident">attribute_with_static</span>(<span class="ident">new_seq_static</span>),
+            });
+
+            <span class="ident">has_been_partitioned</span>.<span class="ident">push</span>(<span class="ident">new_seq</span>);
+        }
+
+        <span class="comment">//no need for a par block if the par block will only contain one control statement</span>
+        <span class="kw">if</span> <span class="ident">has_been_partitioned</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">Box::new</span>(
+                <span class="ident">has_been_partitioned</span>.<span class="ident">remove</span>(<span class="number">0</span>),
+            )));
+        }
+
+        <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">Box::new</span>(<span class="ident">ir::Control::par</span>(
+            <span class="ident">has_been_partitioned</span>,
+        ))))
     }
 }
 </code></pre></div>
