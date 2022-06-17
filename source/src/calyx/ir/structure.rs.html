@@ -717,7 +717,7 @@
     <span class="doccomment">/// Attributes for this group.</span>
     <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">Attributes</span>,
     <span class="doccomment">/// Whether the cell is external</span>
-    <span class="ident">external</span>: <span class="ident">bool</span>,
+    <span class="ident">reference</span>: <span class="ident">bool</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">GetAttributes</span> <span class="kw">for</span> <span class="ident">Cell</span> {
@@ -738,19 +738,19 @@
             <span class="ident">ports</span>: <span class="macro">smallvec!</span>[],
             <span class="ident">prototype</span>,
             <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
-            <span class="ident">external</span>: <span class="bool-val">false</span>,
+            <span class="ident">reference</span>: <span class="bool-val">false</span>,
         }
     }
 
     <span class="doccomment">///Get a boolean describing whether the cell is external.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_external</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">external</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_reference</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">reference</span>
     }
 
     <span class="doccomment">///Set the external field</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">set_external</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">external</span>: <span class="ident">bool</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">external</span> <span class="op">=</span> <span class="ident">external</span>;
-        <span class="self">self</span>.<span class="ident">external</span>
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">set_reference</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">reference</span>: <span class="ident">bool</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">reference</span> <span class="op">=</span> <span class="ident">reference</span>;
+        <span class="self">self</span>.<span class="ident">reference</span>
     }
 
     <span class="doccomment">/// Get a reference to the named port if it exists.</span>

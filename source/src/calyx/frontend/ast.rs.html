@@ -475,7 +475,7 @@
     <span class="doccomment">/// Attributes attached to this cell definition</span>
     <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">ir::Attributes</span>,
     <span class="doccomment">/// Whether this cell is external</span>
-    <span class="kw">pub</span> <span class="ident">external</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">reference</span>: <span class="ident">bool</span>,
 }
 
 <span class="doccomment">/// Methods for constructing the structure AST nodes.</span>
@@ -486,7 +486,7 @@
         <span class="ident">proto</span>: <span class="ident">ir::Id</span>,
         <span class="ident">params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
         <span class="ident">attributes</span>: <span class="ident">ir::Attributes</span>,
-        <span class="ident">external</span>: <span class="ident">bool</span>,
+        <span class="ident">reference</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="ident">Cell</span> {
         <span class="ident">Cell</span> {
             <span class="ident">name</span>,
@@ -495,7 +495,7 @@
                 <span class="ident">params</span>,
             },
             <span class="ident">attributes</span>,
-            <span class="ident">external</span>,
+            <span class="ident">reference</span>,
         }
     }
 }
@@ -590,7 +590,7 @@
         <span class="doccomment">/// Combinational group that may execute with this invoke.</span>
         <span class="ident">comb_group</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
         <span class="doccomment">/// External cells that may execute with this invoke.</span>
-        <span class="ident">external_cells</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span>,
+        <span class="ident">ref_cells</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span>,
     },
     <span class="doccomment">/// Control statement that does nothing.</span>
     <span class="ident">Empty</span> {},

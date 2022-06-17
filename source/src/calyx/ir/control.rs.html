@@ -368,7 +368,7 @@
     <span class="doccomment">/// Optional combinational group that is active when the invoke is active.</span>
     <span class="kw">pub</span> <span class="ident">comb_group</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">CombGroup</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Mapping from name of external cell in &#39;comp&#39; to the cell connected to it.</span>
-    <span class="kw">pub</span> <span class="ident">external_cells</span>: <span class="ident">CellMap</span>,
+    <span class="kw">pub</span> <span class="ident">ref_cells</span>: <span class="ident">CellMap</span>,
 }
 
 <span class="doccomment">/// Data for the `empty` control statement.</span>
@@ -459,7 +459,7 @@
             <span class="ident">outputs</span>,
             <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
             <span class="ident">comb_group</span>: <span class="prelude-val">None</span>,
-            <span class="ident">external_cells</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">ref_cells</span>: <span class="ident">Vec::new</span>(),
         })
     }
 
@@ -539,7 +539,7 @@
                 <span class="ident">outputs</span>,
                 <span class="ident">attributes</span>,
                 <span class="ident">comb_group</span>,
-                <span class="ident">external_cells</span>,
+                <span class="ident">ref_cells</span>,
             }) =&gt; <span class="ident">Control::Invoke</span>(<span class="ident">Invoke</span> {
                 <span class="ident">comp</span>: <span class="ident">Rc::clone</span>(<span class="ident">comp</span>),
                 <span class="ident">inputs</span>: <span class="ident">inputs</span>
@@ -552,7 +552,7 @@
                     .<span class="ident">collect</span>(),
                 <span class="ident">comb_group</span>: <span class="ident">comb_group</span>.<span class="ident">clone</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">cg</span><span class="op">|</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">cg</span>)),
                 <span class="ident">attributes</span>: <span class="ident">attributes</span>.<span class="ident">clone</span>(),
-                <span class="ident">external_cells</span>: <span class="ident">external_cells</span>
+                <span class="ident">ref_cells</span>: <span class="ident">ref_cells</span>
                     .<span class="ident">iter</span>()
                     .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">outcell</span>, <span class="ident">incell</span>)<span class="op">|</span> {
                         (<span class="ident">outcell</span>.<span class="ident">clone</span>(), <span class="ident">Rc::clone</span>(<span class="ident">incell</span>))
