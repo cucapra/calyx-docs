@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Tips - Calyx Documentation</title>
+        <title>Compilation Bugs - Calyx Documentation</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Getting Started</a></li><li class="chapter-item expanded affix "><li class="part-title">Calyx Language</li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">1.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">1.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">1.2.</strong> Passing Memories by Reference</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/sync.html"><strong aria-hidden="true">2.</strong> Experimental: Synchronization</a></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">3.</strong> Attributes</a></li><li class="chapter-item expanded "><a href="../lang/undefined.html"><strong aria-hidden="true">4.</strong> Undefined Behaviors</a></li><li class="chapter-item expanded affix "><li class="part-title">Running Calyx Programs</li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">5.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">5.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/xilinx.html"><strong aria-hidden="true">5.2.</strong> Xilinx Tools</a></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">5.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">5.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">5.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">6.</strong> The Calyx Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../debug/cider.html"><strong aria-hidden="true">6.1.</strong> Interactive Debugger</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">The Calyx Compiler</li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">7.</strong> The Calyx Compiler</a></li><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">8.</strong> Primitive Library</a></li><li class="chapter-item expanded "><a href="../compiler-as-library.html"><strong aria-hidden="true">9.</strong> The calyx Library</a></li><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">10.</strong> Dataflow Analysis</a></li><li class="chapter-item expanded "><a href="../debug/index.html"><strong aria-hidden="true">11.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../debug/debug.html" class="active"><strong aria-hidden="true">11.1.</strong> Tips</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Generating Calyx</li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">12.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">13.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">14.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">14.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">14.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">14.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">14.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">14.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">15.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">16.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">17.</strong> Editor Highlighting</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Getting Started</a></li><li class="chapter-item expanded affix "><li class="part-title">Calyx Language</li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">1.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">1.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">1.2.</strong> Passing Memories by Reference</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/sync.html"><strong aria-hidden="true">2.</strong> Experimental: Synchronization</a></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">3.</strong> Attributes</a></li><li class="chapter-item expanded "><a href="../lang/undefined.html"><strong aria-hidden="true">4.</strong> Undefined Behaviors</a></li><li class="chapter-item expanded affix "><li class="part-title">Running Calyx Programs</li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">5.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">5.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/xilinx.html"><strong aria-hidden="true">5.2.</strong> Xilinx Tools</a></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">5.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">5.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">5.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">6.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded affix "><li class="part-title">The Calyx Compiler</li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">7.</strong> The Calyx Compiler</a></li><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">8.</strong> Primitive Library</a></li><li class="chapter-item expanded "><a href="../compiler-as-library.html"><strong aria-hidden="true">9.</strong> The calyx Library</a></li><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">10.</strong> Dataflow Analysis</a></li><li class="chapter-item expanded "><a href="../debug/index.html"><strong aria-hidden="true">11.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../debug/cider.html"><strong aria-hidden="true">11.1.</strong> Logical Bugs</a></li><li class="chapter-item expanded "><a href="../debug/debug.html" class="active"><strong aria-hidden="true">11.2.</strong> Compilation Bugs</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Generating Calyx</li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">12.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">13.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">14.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">14.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">14.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">14.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">14.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">14.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">15.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">16.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">17.</strong> Editor Highlighting</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -134,32 +134,30 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="debugging-tips"><a class="header" href="#debugging-tips">Debugging Tips</a></h1>
-<p>Debugging Calyx programs that run to completion and generate the wrong value
-can be challenging.
-We can first try to eliminate some common causes of problems.</p>
+                        <h1 id="debugging-compilation-bugs"><a class="header" href="#debugging-compilation-bugs">Debugging Compilation Bugs</a></h1>
+<p>These tips are directed towards <em>compilation bugs</em>. Before trying these, make sure your program
+produces the correct values with the <a href="../interpreter.html">Calyx Interpreter</a></p>
 <h2 id="disabling-optimizations"><a class="header" href="#disabling-optimizations">Disabling Optimizations</a></h2>
-<p>The first step is disabling optimization passes.
-The Calyx compiler refers to bundles of optimizations using two <em>aliases</em>:
-<code>pre-opt</code> and <code>post-opt</code>.
-<code>pre-opt</code> passes run before the main compilation passes that remove the control
-program while <code>post-opt</code> passes run after.</p>
-<p>To disable the passes, add the flag <code>-d pre-opt -d post-opt</code> to compiler invocation:</p>
+<p>The first step is disabling optimization passes and running the bare bones compilation pipeline.</p>
+<p>To disable the passes, add the flag <code>-p no-opt</code> to compiler invocation:</p>
 <ol>
-<li>For the compiler: <code>futil &lt;filename&gt; -d pre-opt -d post-opt</code>.</li>
-<li>For <code>fud</code>: <code>fud ... -s futil.flags &quot;-d pre-opt -d post-opt&quot;</code>.</li>
+<li>For the compiler: <code>futil &lt;filename&gt; -p no-opt</code>.</li>
+<li>For <code>fud</code>: <code>fud ... -s futil.flags &quot; -p no-opt&quot;</code>.</li>
 </ol>
+<p>If the output is still incorrect then one of the core compilation passes is incorrect.
+Our best bet at this point is to reduce the test file such that the output from the
+interpreter and the Calyx compiler still disagree and <a href="https://github.com/cucapra/calyx/issues/new">report the
+bug</a>. We can use the <a href="#waveform-debugging">waveform
+debugging</a> to figure out which part of the compilation pipeline generates the
+incorrect result.</p>
 <p>If the execution generates the right result, then one of the optimizations
 passes is incorrect.
 To identify which optimization pass is wrong, add back individual passes and see
 when the execution fails.
-To do so, first run <code>futil --list-passes</code> to see the names of the passes that make
-up the <code>pre-opt</code> and <code>post-opt</code> aliases.
-Next, re-enable each pass by doing: <code>-d pre-opt -d post-opt -p &lt;pass1&gt; -p &lt;pass2&gt;</code> and so on.</p>
-<h2 id="disabling-static-timing"><a class="header" href="#disabling-static-timing">Disabling Static Timing</a></h2>
-<p><code>static-timing</code> is one of the two control compilation passes.
-It uses the latency information on groups to generate faster hardware.
-Disable it using the flag <code>-d static-timing</code>.</p>
+The <code>calyx/src/default_passes.rs</code> file defines the compilation pipeline. Start by incrementally
+adding passes to this flag invocation:</p>
+<pre><code>-p validate -p remove-comb-groups -p &lt;PASS 1&gt; ... -p &lt;PASS N&gt; -p compile -p lower
+</code></pre>
 <h2 id="reducing-test-files"><a class="header" href="#reducing-test-files">Reducing Test Files</a></h2>
 <p>It is often possible to reduce the size of the example program that is
 generating incorrect results.
@@ -278,7 +276,7 @@ the <code>fsm</code> register has the value 1 and check to see if the assignment
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../debug/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../debug/cider.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                             <a rel="next" href="../calyx-py.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
@@ -290,7 +288,7 @@ the <code>fsm</code> register has the value 1 and check to see if the assignment
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../debug/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../debug/cider.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                     <a rel="next" href="../calyx-py.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
