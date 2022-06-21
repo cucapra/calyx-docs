@@ -239,6 +239,9 @@ you need to set a special <code>EMCONFIG_PATH</code> to your current directory s
 and you need to tell XRT whether you want <code>hw_emu</code> (emulation) or <code>hw</code> (actual on-device execution) mode.
 Of course, it would be better if all this could come from fud's configuration itself instead of requiring you to set it up ahead of time;
 <a href="https://github.com/cucapra/calyx/issues/872">issue #872</a> covers this work.</p>
+<p>In emulation mode, this stage can produce a waveform trace in Xilinx's proprietary <a href="https://support.xilinx.com/s/article/64000?language=en_US">WDB</a> file format.
+Use <code>-s fpga.waveform true -s fpga.save_temps true</code> to collect a WDB.
+The first option instructs XRT to use <a href="https://xilinx.github.io/Vitis_Accel_Examples/2021.1/html/debug_profile.html">the <code>batch</code> debug mode</a>, and the second asks fud not to delete the directory where the WDB file will appear.</p>
 <h3 id="emulate"><a class="header" href="#emulate">Emulate</a></h3>
 <p>There is also a separate, vestigial path just for doing hardware emulation (i.e., like the <code>hw_emu</code> mode referenced above).
 It is probably a bad idea to use this when the <code>fpga</code> stage exists, but it is still available.
