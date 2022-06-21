@@ -573,7 +573,7 @@ The component executes the two groups in-order.</p>
 <pre><code>fud e examples/futil/multi-component.futil --to vcd_json
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="passing-memories-by-reference"><a class="header" href="#passing-memories-by-reference">Passing Memories by Reference</a></h1>
-<p>One question that may arise when using Calyx as a backend is how to 
+<p>One question that may arise when using Calyx as a backend is how to
 pass a memory &quot;by reference&quot; between components. In C++, this might look like:</p>
 <pre><code>#include &lt;array&gt;
 #include &lt;cstdint&gt;
@@ -588,10 +588,46 @@ int main() {
   add_one(x); // The value at x[0] is now 1.
 }
 </code></pre>
-<p>In the code above, we've constructed an &quot;l-value reference&quot; to the array,
-which essentially means we can both read and write from <code>x</code> in the
-function <code>add_one</code>.</p>
-<p>Now, let's allow similar functionality at the Calyx IR level. 
+<p>There are two steps to passing a memory by reference in Calyx:</p>
+<ol>
+<li>Define the component in a manner such that it can accept a memory by reference.</li>
+<li>Pass the desired memory by reference.</li>
+</ol>
+<p>The language provides two ways to doing this.</p>
+<h2 id="the-easy-way"><a class="header" href="#the-easy-way">The Easy Way</a></h2>
+<p>Calyx uses the <code>ref</code> keyword to describe cells that are passed in by-reference:</p>
+<pre><code>component add_one() -&gt; () {
+  cells {
+    ref mem = std_mem_d1(32, 4, 3); // A memory passed in by refernece.
+    ...
+  }
+  ...
+}
+</code></pre>
+<p>This component define <code>mem</code> as a memory that is passed in by reference to the component.
+Inside the component we can use the cell like any other cell in the program.</p>
+<p>Next, to pass the memory to the component, we can use the <code>invoke</code> syntax:</p>
+<pre><code>component add_one() -&gt; () { ... }
+component main() -&gt; () {
+  cells {
+    A = std_mem_d1(32, 4, 3); // A memory passed in by refernece.
+    one = add_one();
+    ...
+  }
+  wires { ... }
+  control {
+    invoke one[mem = A]()(); // pass A as the `mem` for this invocation
+  }
+}
+</code></pre>
+<p>The Calyx compiler will correctly lower the <code>add_one</code> component and the <code>invoke</code> call such that the memory is passed in by-reference.
+In fact, any cell can be passed in by-reference in a Calyx program.
+Read the next section if you're curious about how this process is implemented.</p>
+<h2 id="the-hard-way"><a class="header" href="#the-hard-way">The Hard Way</a></h2>
+<p>In the C++ code above, we've constructed an &quot;l-value reference&quot; to the array,
+which essentially means we can both read and write from <code>x</code> in the function
+<code>add_one</code>.</p>
+<p>Now, let's allow similar functionality at the Calyx IR level.
 We define a new component named <code>add_one</code> which represents the function
 above. However, we also need to include the correct ports to both read
 and write to <code>x</code>:</p>
@@ -601,7 +637,7 @@ and write to <code>x</code>:</p>
 <tr><td></td><td>write_en</td></tr>
 <tr><td></td><td>address ports</td></tr>
 </tbody></table>
-<p>Since we're both reading and writing from <code>x</code>, we'll 
+<p>Since we're both reading and writing from <code>x</code>, we'll
 include the union of the columns above:</p>
 <pre><code>component add_one(x_done: 1, x_read_data: 32) -&gt;
                  (x_write_data: 32, x_write_en: 1, x_addr0: 1) {
@@ -615,7 +651,7 @@ so those are used as output ports.</p>
 <p>We then simply use the given ports to both read and write to the memory passed
 by reference. Note that we've split up the read and write to memory <code>x</code> in separate groups,
 to ensure we can schedule them sequentially in the execution flow.
-We're also using the exposed ports of the memory through the component interface rather than, 
+We're also using the exposed ports of the memory through the component interface rather than,
 say, <code>x.write_data</code>.</p>
 <pre><code>    group read_from_x {
       x_addr0 = 1'd0;            // Set address port to zero.
