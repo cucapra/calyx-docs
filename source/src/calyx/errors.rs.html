@@ -491,9 +491,9 @@
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pass_assumption</span>(<span class="ident">pass</span>: <span class="ident">String</span>, <span class="ident">msg</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pass_assumption</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">ToString</span><span class="op">&gt;</span>(<span class="ident">pass</span>: <span class="ident">S</span>, <span class="ident">msg</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::PassAssumption</span>(<span class="ident">pass</span>, <span class="ident">msg</span>),
+            <span class="ident">kind</span>: <span class="ident">ErrorKind::PassAssumption</span>(<span class="ident">pass</span>.<span class="ident">to_string</span>(), <span class="ident">msg</span>),
             <span class="ident">pos</span>: <span class="prelude-val">None</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
