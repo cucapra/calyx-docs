@@ -75,10 +75,9 @@
 <span id="70">70</span>
 <span id="71">71</span>
 <span id="72">72</span>
-<span id="73">73</span>
-<span id="74">74</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.</span>
 <span class="kw">mod</span> <span class="ident">canonical</span>;
+<span class="kw">mod</span> <span class="ident">cell_share</span>;
 <span class="kw">mod</span> <span class="ident">clk_insertion</span>;
 <span class="kw">mod</span> <span class="ident">collapse_control</span>;
 <span class="kw">mod</span> <span class="ident">comb_prop</span>;
@@ -99,13 +98,11 @@
 <span class="kw">mod</span> <span class="ident">math_utilities</span>;
 <span class="kw">mod</span> <span class="ident">merge_assign</span>;
 <span class="kw">mod</span> <span class="ident">merge_static_par</span>;
-<span class="kw">mod</span> <span class="ident">minimize_regs</span>;
 <span class="kw">mod</span> <span class="ident">papercut</span>;
 <span class="kw">mod</span> <span class="ident">par_to_seq</span>;
 <span class="kw">mod</span> <span class="ident">register_unsharing</span>;
 <span class="kw">mod</span> <span class="ident">remove_comb_groups</span>;
 <span class="kw">mod</span> <span class="ident">reset_insertion</span>;
-<span class="kw">mod</span> <span class="ident">resource_sharing</span>;
 <span class="kw">mod</span> <span class="ident">sharing_components</span>;
 <span class="kw">mod</span> <span class="ident">simplify_guards</span>;
 <span class="kw">mod</span> <span class="ident">static_par_conv</span>;
@@ -117,6 +114,7 @@
 <span class="kw">mod</span> <span class="ident">wire_inliner</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">canonical::Canonicalize</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">cell_share::CellShare</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">clk_insertion::ClkInsertion</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">collapse_control::CollapseControl</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">comb_prop::CombProp</span>;
@@ -135,13 +133,11 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">lower_guards::LowerGuards</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">merge_assign::MergeAssign</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">merge_static_par::MergeStaticPar</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">minimize_regs::MinimizeRegs</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">papercut::Papercut</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">par_to_seq::ParToSeq</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">register_unsharing::RegisterUnsharing</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">remove_comb_groups::RemoveCombGroups</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">reset_insertion::ResetInsertion</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">resource_sharing::ResourceSharing</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sharing_components::ShareComponents</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">simplify_guards::SimplifyGuards</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">static_par_conv::StaticParConv</span>;

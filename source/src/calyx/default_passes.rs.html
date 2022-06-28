@@ -137,16 +137,14 @@
 <span id="132">132</span>
 <span id="133">133</span>
 <span id="134">134</span>
-<span id="135">135</span>
-<span id="136">136</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::passes</span>::{
-    <span class="ident">Canonicalize</span>, <span class="ident">ClkInsertion</span>, <span class="ident">CollapseControl</span>, <span class="ident">CombProp</span>, <span class="ident">CompileEmpty</span>,
-    <span class="ident">CompileInvoke</span>, <span class="ident">CompileRef</span>, <span class="ident">ComponentInliner</span>, <span class="ident">ComponentInterface</span>,
-    <span class="ident">DeadCellRemoval</span>, <span class="ident">DeadGroupRemoval</span>, <span class="ident">Externalize</span>, <span class="ident">GoInsertion</span>, <span class="ident">GroupToInvoke</span>,
-    <span class="ident">HoleInliner</span>, <span class="ident">InferStaticTiming</span>, <span class="ident">LowerGuards</span>, <span class="ident">MergeAssign</span>, <span class="ident">MergeStaticPar</span>,
-    <span class="ident">MinimizeRegs</span>, <span class="ident">Papercut</span>, <span class="ident">ParToSeq</span>, <span class="ident">RegisterUnsharing</span>, <span class="ident">RemoveCombGroups</span>,
-    <span class="ident">ResetInsertion</span>, <span class="ident">ResourceSharing</span>, <span class="ident">SimplifyGuards</span>, <span class="ident">StaticParConv</span>,
+    <span class="ident">Canonicalize</span>, <span class="ident">CellShare</span>, <span class="ident">ClkInsertion</span>, <span class="ident">CollapseControl</span>, <span class="ident">CombProp</span>,
+    <span class="ident">CompileEmpty</span>, <span class="ident">CompileInvoke</span>, <span class="ident">CompileRef</span>, <span class="ident">ComponentInliner</span>,
+    <span class="ident">ComponentInterface</span>, <span class="ident">DeadCellRemoval</span>, <span class="ident">DeadGroupRemoval</span>, <span class="ident">Externalize</span>,
+    <span class="ident">GoInsertion</span>, <span class="ident">GroupToInvoke</span>, <span class="ident">HoleInliner</span>, <span class="ident">InferStaticTiming</span>, <span class="ident">LowerGuards</span>,
+    <span class="ident">MergeAssign</span>, <span class="ident">MergeStaticPar</span>, <span class="ident">Papercut</span>, <span class="ident">ParToSeq</span>, <span class="ident">RegisterUnsharing</span>,
+    <span class="ident">RemoveCombGroups</span>, <span class="ident">ResetInsertion</span>, <span class="ident">SimplifyGuards</span>, <span class="ident">StaticParConv</span>,
     <span class="ident">SynthesisPapercut</span>, <span class="ident">TopDownCompileControl</span>, <span class="ident">TopDownStaticTiming</span>,
     <span class="ident">UnrollBounded</span>, <span class="ident">WellFormed</span>, <span class="ident">WireInliner</span>,
 };
@@ -170,10 +168,9 @@
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ComponentInliner</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">CollapseControl</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">CompileEmpty</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">ResourceSharing</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">DeadCellRemoval</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">DeadGroupRemoval</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">MinimizeRegs</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">CellShare</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">InferStaticTiming</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">MergeStaticPar</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">StaticParConv</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
@@ -220,8 +217,7 @@
                 <span class="ident">StaticParConv</span>, <span class="comment">// Must be before `collapse-control`</span>
                 <span class="ident">CollapseControl</span>,
                 <span class="ident">CompileRef</span>, <span class="comment">//Must run before &#39;resource-sharing&#39;.</span>
-                <span class="ident">ResourceSharing</span>,
-                <span class="ident">MinimizeRegs</span>,
+                <span class="ident">CellShare</span>,
             ]
         );
         <span class="macro">register_alias!</span>(<span class="ident">pm</span>, <span class="string">&quot;compile&quot;</span>, [<span class="ident">CompileInvoke</span>, <span class="ident">TopDownCompileControl</span>]);
