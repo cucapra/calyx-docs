@@ -1386,9 +1386,13 @@ you need to set a special <code>EMCONFIG_PATH</code> to your current directory s
 and you need to tell XRT whether you want <code>hw_emu</code> (emulation) or <code>hw</code> (actual on-device execution) mode.
 Of course, it would be better if all this could come from fud's configuration itself instead of requiring you to set it up ahead of time;
 <a href="https://github.com/cucapra/calyx/issues/872">issue #872</a> covers this work.</p>
-<p>In emulation mode, this stage can produce a waveform trace in Xilinx's proprietary <a href="https://support.xilinx.com/s/article/64000?language=en_US">WDB</a> file format.
-Use <code>-s fpga.waveform true -s fpga.save_temps true</code> to collect a WDB.
-The first option instructs XRT to use <a href="https://xilinx.github.io/Vitis_Accel_Examples/2021.1/html/debug_profile.html">the <code>batch</code> debug mode</a>, and the second asks fud not to delete the directory where the WDB file will appear.</p>
+<h4 id="waveform-debugging"><a class="header" href="#waveform-debugging">Waveform Debugging</a></h4>
+<p>In emulation mode, this stage can produce a waveform trace in Xilinx's proprietary <a href="https://support.xilinx.com/s/article/64000?language=en_US">WDB</a> file format as well as a standard <a href="https://en.wikipedia.org/wiki/Value_change_dump">VCD</a> file.</p>
+<p>Use the fud options <code>-s fpga.waveform true -s fpga.save_temps true</code> when emulating your program.
+The first option instructs XRT to use <a href="https://xilinx.github.io/Vitis_Accel_Examples/2021.1/html/debug_profile.html">the <code>batch</code> debug mode</a> and to dump a VCD, and the second asks fud not to delete the directory where the waveform files will appear.</p>
+<p>Then, look in the resulting directory, which will be named <code>fud-out-*</code> for some <code>*</code>.
+In there, the Xilinx trace files you want are named <code>*.wdb</code> and <code>*.wcfg</code>.
+The VCD file is at <code>.run/*/hw_em/device0/binary_0/behav_waveform/xsim/dump.vcd</code> or similar.</p>
 <h3 id="emulate"><a class="header" href="#emulate">Emulate</a></h3>
 <p>There is also a separate, vestigial path just for doing hardware emulation (i.e., like the <code>hw_emu</code> mode referenced above).
 It is probably a bad idea to use this when the <code>fpga</code> stage exists, but it is still available.
@@ -2455,7 +2459,7 @@ program with the script since it simply uses <code>fud</code> to run the program
 simulator.
 As with Calyx reduction, try deleting parts of the program and seeing if the
 flag configurations for the Calyx program still generate different outputs.</p>
-<h2 id="waveform-debugging"><a class="header" href="#waveform-debugging">Waveform Debugging</a></h2>
+<h2 id="waveform-debugging-1"><a class="header" href="#waveform-debugging-1">Waveform Debugging</a></h2>
 <p>Waveform debugging is the final way of debugging Calyx programs.
 A waveform captures the value of every port at every clock cycle and can be
 viewed using a wave viewer program like <a href="http://gtkwave.sourceforge.net/">GTKWave</a> or
