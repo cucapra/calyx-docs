@@ -113,6 +113,7 @@
 <span id="108">108</span>
 <span id="109">109</span>
 <span id="110">110</span>
+<span id="111">111</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::dump_ports</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::CalyxResult</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{
@@ -176,6 +177,7 @@
         <span class="ident">dump_ports::dump_ports_to_signature</span>(
             <span class="ident">comp</span>,
             <span class="ident">is_external_cell</span>,
+            <span class="bool-val">true</span>,
             <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">port_names</span>,
         );
         <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
