@@ -1,0 +1,432 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Language Reference - Calyx Documentation</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Getting Started</a></li><li class="chapter-item expanded affix "><li class="part-title">Calyx Language</li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">1.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">1.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">1.2.</strong> Passing Memories by Reference</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/ref.html" class="active"><strong aria-hidden="true">2.</strong> Language Reference</a></li><li class="chapter-item expanded "><a href="../lang/sync.html"><strong aria-hidden="true">3.</strong> Experimental: Synchronization</a></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">4.</strong> Attributes</a></li><li class="chapter-item expanded "><a href="../lang/undefined.html"><strong aria-hidden="true">5.</strong> Undefined Behaviors</a></li><li class="chapter-item expanded affix "><li class="part-title">Running Calyx Programs</li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">6.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">6.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/xilinx.html"><strong aria-hidden="true">6.2.</strong> Xilinx Tools</a></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">6.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">6.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">6.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">7.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded affix "><li class="part-title">The Calyx Compiler</li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">8.</strong> The Calyx Compiler</a></li><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">9.</strong> Primitive Library</a></li><li class="chapter-item expanded "><a href="../compiler-as-library.html"><strong aria-hidden="true">10.</strong> The calyx Library</a></li><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">11.</strong> Dataflow Analysis</a></li><li class="chapter-item expanded "><a href="../debug/index.html"><strong aria-hidden="true">12.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../debug/cider.html"><strong aria-hidden="true">12.1.</strong> Logical Bugs</a></li><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">12.2.</strong> Compilation Bugs</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Generating Calyx</li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">13.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">14.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">15.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">15.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">15.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">15.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">15.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">15.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">16.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">17.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">18.</strong> Editor Highlighting</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Calyx Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="calyx-language-reference"><a class="header" href="#calyx-language-reference">Calyx Language Reference</a></h1>
+<h2 id="top-level-constructs"><a class="header" href="#top-level-constructs">Top-Level Constructs</a></h2>
+<p>Calyx programs are a sequence of <code>import</code> statements followed by a sequence of
+<code>extern</code> statements or <code>component</code> definitions.</p>
+<h3 id="import-statements"><a class="header" href="#import-statements"><code>import</code> statements</a></h3>
+<p><code>import &quot;&lt;path&gt;&quot;</code> has almost exactly the same semantics to that of <code>include</code> in
+C-style programming languages; it copies the code <code>path</code> into the current file.</p>
+<h3 id="extern-definitions"><a class="header" href="#extern-definitions"><code>extern</code> definitions</a></h3>
+<p><code>extern</code> definitions allow Calyx programs to link against arbitrary RTL code.
+An <code>extern</code> definition looks like this:</p>
+<pre><code>extern &quot;&lt;path&gt;&quot; {
+  &lt;primitives&gt;...
+}
+</code></pre>
+<p><code>&lt;path&gt;</code> should be a valid file system path that points to a Verilog module that
+defines the same names as the <em>primitives</em> defined in the <code>extern</code> block.
+When run with the <code>-b verilog</code> flag, the calyx compiler will copy the text contained
+in every such verilog file into the generated output.</p>
+<h3 id="primitive-definitions"><a class="header" href="#primitive-definitions"><code>primitive</code> definitions</a></h3>
+<p>The <code>primitive</code> construct allows specification of the signature of an external
+Verilog module that the Calyx program uses.
+It has the following syntax:</p>
+<pre><code>[comb] primitive name&lt;attributes&gt;[PARAMETERS](ports) -&gt; (ports);
+</code></pre>
+<ul>
+<li>The <code>comb</code> primitive is used to signal that the primitive definition wraps purely
+combinational RTL code. This is useful for certain optimizations.</li>
+<li>The <em>attributes</em> syntax allows specification of useful optimization metadata in
+form of <a href="./attributes.html">attributes</a>.</li>
+<li><em>PARAMETERS</em> defines the parameters passed to the RTL code.</li>
+<li>The <em>ports</em> section contain sized port definitions that can either be positive number
+or one of the parameters.</li>
+</ul>
+<p>For example, the following is the signature of the <code>std_reg</code> primitive from the
+Calyx standard library:</p>
+<pre><code>  primitive std_reg&lt;&quot;state_share&quot;=1,&quot;static&quot;=1&gt;[WIDTH](
+    @write_together(1) in: WIDTH,
+    @write_together(1) @go write_en: 1,
+    @clk clk: 1,
+    @reset reset: 1
+  ) -&gt; (
+    @stable out: WIDTH,
+    @done done: 1
+  );
+</code></pre>
+<p>The primitive defines one parameter called <code>WIDTH</code> which describes the sizes for
+the <code>in</code> and the <code>out</code> port.</p>
+<h2 id="calyx-components"><a class="header" href="#calyx-components">Calyx Components</a></h2>
+<p><code>components</code> are the primary encapsulation unit of a Calyx program.
+They look like this:</p>
+<pre><code>component name&lt;attributes&gt;(ports) -&gt; (ports) {
+  cells { .. }
+  wires { .. }
+  control { .. }
+}
+</code></pre>
+<p>Unlike <code>primitive</code> definitions, <code>component</code> definitions cannot be parameterized and
+must provide exact port width for all ports.
+A component encapsulates the control and the hardware structure needed to implement
+a hardware module.</p>
+<h3 id="ports"><a class="header" href="#ports"><code>ports</code></a></h3>
+<p>Ports defined in Calyx only specify their bitwidth and are otherwise untyped:</p>
+<pre><code>component counter(left: 32, right: 32) -&gt; (@stable out0: 32, out1: 32) { .. }
+</code></pre>
+<p>The component defines two input ports <code>left</code> and <code>right</code> and two output ports
+<code>out0</code> and <code>out1</code>.
+Additionally, the <code>out0</code> port has the <a href="./attributes.html">attribute</a> <code>@stable</code>.</p>
+<h3 id="cells"><a class="header" href="#cells"><code>cells</code></a></h3>
+<p>The <code>cells</code> section of the Calyx program instantiates all the sub-component used
+by this component.
+For example, the following definition of the <code>counter</code> component instantiates a
+<code>std_add</code> and <code>std_reg</code> primitive as well as a <code>foo</code> calyx component</p>
+<pre><code>component foo() -&gt; () { .. }
+component counter() -&gt; () {
+  cells {
+    r = std_reg(32);
+    a = std_add(32);
+    f = foo();
+  }
+  wires { .. }
+  control { .. }
+}
+</code></pre>
+<p>When instantiating a <code>primitive</code> definition, the parameter are passed within the
+parenthesis.
+For example, we pass <code>32</code> for the <code>WIDTH</code> parameter of the <code>std_reg</code> in the above
+instantiation.
+Since an instantiation of a calyx component does not take any parameters, the parameters
+are always empty.</p>
+<h2 id="the-wires-section"><a class="header" href="#the-wires-section">The <code>wires</code> Section</a></h2>
+<p>A component's <code>wires</code> section is a sequence of guarded assignments, <code>group</code> definitions, or <code>comb group</code> definitions.</p>
+<h3 id="continuous-assignments"><a class="header" href="#continuous-assignments">Continuous assignments</a></h3>
+<p>Assignments connect ports between two cells together:</p>
+<pre><code>r.in = add.out;
+</code></pre>
+<p>The above assignment <em>continuously</em> transfer the value in <code>add.out</code> to <code>r.in</code>.</p>
+<p>Because assignments are <em>continuous</em>, their order does not matter:</p>
+<pre><code>r.in = add.out;
+add.left = y.out;
+</code></pre>
+<p>Assignments can additionally be guarded using a 1-bit value:</p>
+<pre><code>r.in = cond.out ? add.out;
+r.in = !cond.out ? 32'd0;
+</code></pre>
+<p>Guards allow specification of multiple different values to a port.</p>
+<blockquote>
+<p><strong>Well-formedness</strong>: For each input port on the LHS, only one guard should be active in any given cycle during the execution of a Calyx program.</p>
+</blockquote>
+<p>When an assignment is directly placed into a component's <code>wires</code> section, it
+is called a &quot;continuous assignment&quot; and is permanently active, even when the
+<a href="#the-control-operators">control program</a> of the component is inactive.</p>
+<h3 id="group-definitions"><a class="header" href="#group-definitions"><code>group</code> definitions</a></h3>
+<p>A <code>group</code> is a way to name a set of assignments that together represent some
+meaningful action:</p>
+<pre><code>group name&lt;attributes&gt; {
+  assignments...
+  name[done] = done_cond;
+}
+</code></pre>
+<p>Assignments within a group can be reasoned about in isolation from assignments
+in other groups.
+These means that seemingly conflicting writes to the same ports are allowed:</p>
+<pre><code>group foo {
+  r.in = 32'd10; ..
+  foo[done] = ..
+}
+group bar {
+  r.in = 32'd22; ..
+  bar[done] = ..
+}
+</code></pre>
+<p>This is because group only execute when they are mentioned in the <a href="#the-control-operators">control program</a>.</p>
+<p>However, group assignments are not allowed to conflict with <a href="#continuous-assignments">continuous assignments</a> defined in the component:</p>
+<pre><code>group foo {
+  r.in = 32'd10; .. // This is malformed because it conflicts with the write below
+  foo[done] = ..
+}
+r.in = 32'd50;
+</code></pre>
+<p>The <code>done</code> condition of a group is any 1-bit port that, when set to 1, represents the completion of a group's execution.
+This is because groups can take any number of cycles and therefore need a way
+to specify to the external world when their execution has completed.</p>
+<p>The attributes syntax specifies the attributes for the group.</p>
+<blockquote>
+<p><strong>Well-formedness</strong>: All groups are required to run for at least one cycle.</p>
+</blockquote>
+<h3 id="comb-group-definitions"><a class="header" href="#comb-group-definitions"><code>comb group</code> definitions</a></h3>
+<p>Combinational groups are a restricted version of groups which perform their
+computation purely combinationally and therefore run for &quot;less than one cycle&quot;:</p>
+<pre><code>comb group name&lt;attributes&gt; {
+  assignments..
+}
+</code></pre>
+<p>Because their computation is required to run for less than a cycle, <code>comb group</code>
+definitions do not specify a <code>done</code> condition.</p>
+<p>Combinational groups cannot be used within normal <a href="#the-control-operators">control
+operators</a>.
+Instead, they only occur after the <code>with</code> keyword in a control program.</p>
+<h2 id="the-control-operators"><a class="header" href="#the-control-operators">The Control Operators</a></h2>
+<p>The <code>control</code> section of a component contains a control program built-up using
+the following operators:</p>
+<h3 id="group-enable"><a class="header" href="#group-enable">Group enable</a></h3>
+<p>Simply naming a group in a control statement, called a group enable, executes
+the group to completion.
+This is a leaf node in the control program.</p>
+<h3 id="invoke"><a class="header" href="#invoke"><code>invoke</code></a></h3>
+<p><code>invoke</code> acts like the function call operator for Calyx and has the following
+syntax:</p>
+<pre><code>invoke instance[ref cells](inputs)(outputs) [with comb_group];
+</code></pre>
+<ul>
+<li><code>instance</code> is the name of the cell instance that needs to be invoked.</li>
+<li><code>inputs</code> and <code>outputs</code> define connections for a subset of input and output
+ports of the instance.</li>
+<li>The <code>with comb_group</code> section is optional and names a <a href="#comb-group">combinational
+group</a> that is active during the execution of the <code>invoke</code>
+statement.</li>
+<li>The <a href="#ref-cells"><code>ref cells</code></a> syntax is described in detail</li>
+</ul>
+<p>Invoking a instance runs its control program to completion before returning.
+Any Calyx component or primitive that implements the <a href="#the-go-done-interface">go-done interface</a> can be invoked.</p>
+<h3 id="seq"><a class="header" href="#seq"><code>seq</code></a></h3>
+<p>The syntax is:</p>
+<pre><code>seq { c1; .. cn; }
+</code></pre>
+<p>Sequences run the control programs, <code>c1</code>..<code>cn</code> in sequence, guaranteeing that
+each program runs fully before the next one starts executing.
+<code>seq</code> <strong>does not</strong> provide any cycle-level guarantees on when a succeeding
+group starts executing.</p>
+<h3 id="par"><a class="header" href="#par"><code>par</code></a></h3>
+<p>The syntax is:</p>
+<pre><code>par { c1; .. cn; }
+</code></pre>
+<p>Parallel runs the control programs, <code>c1</code>..<code>cn</code> in parallel, guaranteeing that
+each program only runs once.
+<code>par</code> <strong>does not</strong> provide any guarantees on how the execution of child programs
+is scheduled.
+It is therefore not safe to assume that all children begin execution at the
+same time.</p>
+<blockquote>
+<p><strong>Well-formedness</strong>: The assignments in the children <code>c1</code>..<code>cn</code> should never conflict with each other.</p>
+</blockquote>
+<h3 id="if"><a class="header" href="#if"><code>if</code></a></h3>
+<p>The syntax is:</p>
+<pre><code>if &lt;port&gt; [with comb_group] {
+  true_c
+} else {
+  false_c
+}
+</code></pre>
+<p>The conditional execution runs either <code>true_c</code> or <code>false_c</code> using the value of
+<code>&lt;port&gt;</code>.
+The optional <code>with comb_group</code> syntax allows running a combinational group
+that computes the value of the port.</p>
+<blockquote>
+<p><strong>Well-formedness</strong>: The combinational group is considered to be running during the entire execution
+of the control program and therefore should not have conflicting assignments
+with either <code>true_c</code> or <code>false_c</code>.</p>
+</blockquote>
+<h3 id="while"><a class="header" href="#while"><code>while</code></a></h3>
+<p>The syntax is:</p>
+<pre><code>while &lt;port&gt; [with comb_group] {
+  body_c
+}
+</code></pre>
+<p>Repeatedly executes <code>body_c</code> while the value on <code>port</code> is non-zero.
+The optional <code>with comb_group</code> enables a combinational group that computes the
+value of <code>port</code>.</p>
+<blockquote>
+<p><strong>Well-formedness</strong>: The combinational group is considered active during the execution of the while
+loop and therefore should not have conflicting assignments with <code>body_c</code>.</p>
+</blockquote>
+<h2 id="the-go-done-interface"><a class="header" href="#the-go-done-interface">The <code>go</code>-<code>done</code> Interface</a></h2>
+<p>By default, calyx components implement a one-sided ready-valid interface called
+the <code>go</code>-<code>done</code> interface.
+During compilation, the Calyx compiler will add an input port marked with the attribute <code>@go</code> and an output port marked with the attribute <code>@done</code> to the interface of the component:</p>
+<pre><code>component counter(left: 32, right: 32, @go go: 1) -&gt; (out: 32, @done done: 1) ..
+</code></pre>
+<p>The interface provides a way to trigger the control program of the counter using
+assignments.
+When the <code>go</code> signal of the component is set to 1, the control program starts
+executing.
+When the component sets the <code>done</code> signal to 1, its control program has finished
+executing.</p>
+<blockquote>
+<p><strong>Well-formedness</strong>: The <code>go</code> signal to the component must remain set to 1 while the done signal is not 1. Lowering the <code>go</code> signal before the <code>done</code> signal is set to 1 will lead to undefined behavior.</p>
+</blockquote>
+<h2 id="the-clk-and-reset-ports"><a class="header" href="#the-clk-and-reset-ports">The <code>clk</code> and <code>reset</code> Ports</a></h2>
+<p>The compiler also adds special input ports marked with <code>@clk</code> and <code>@reset</code> to the
+interface.
+By default, the Calyx components are not allowed to look at, or use these signal.
+They are automatically threaded to any primitive that defines <code>@clk</code> or
+<code>@reset</code> ports.</p>
+<h2 id="advanced-concepts"><a class="header" href="#advanced-concepts">Advanced Concepts</a></h2>
+<h3 id="ref-cells"><a class="header" href="#ref-cells"><code>ref</code> cells</a></h3>
+<p><strong>TK</strong></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../lang/memories-by-reference.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../lang/sync.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../lang/memories-by-reference.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../lang/sync.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>
