@@ -1076,16 +1076,18 @@ executed using:</p>
 <p>The synchronizing register interface is non-standard: it provides two go signals and
 two done signals to initiate parallel reads and writes.</p>
 <pre><code>  primitive std_sync_reg[WIDTH](
-    @write_together(1) in: WIDTH,
+    @write_together(1) in_0: WIDTH,
+    @write_together(2) in_1: WIDTH,
     read_en: 1,
-    @write_together(1) write_en: 1,
+    @write_together(1) write_en_0: 1,
+    @write_together(2) write_en_1: 1,
     @clk clk: 1,
     @reset reset: 1
   ) -&gt; (
     out: WIDTH,
-    write_done: 1,
-    read_done: 1,
-    blocked: 1
+    write_done_0: 1,
+    write_done_1: 1,
+    read_done: 1
   );
 </code></pre>
 <p>The signal <code>read_en</code> is used by a program to initiate a read operation while
@@ -1100,10 +1102,10 @@ similar to a <code>write_done</code> signal.</p>
 from the memory <code>in</code>:</p>
 <pre><code>    // Write value from `in[idx]` to sync intermediate.
     group write_imm {
-      imm.write_en = 1'd1;
-      imm.in = in.read_data;
+      imm.write_en_0 = 1'd1;
+      imm.in_0 = in.read_data;
       in.addr0 = idx.out;
-      write_imm[done] = imm.write_done;
+      write_imm[done] = imm.write_done_0;
     }
 </code></pre>
 <p>The group waits for the <code>imm.write_done</code> signal to be high before continuing
