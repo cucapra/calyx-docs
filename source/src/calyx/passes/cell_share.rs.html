@@ -160,10 +160,25 @@
 <span id="155">155</span>
 <span id="156">156</span>
 <span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::sharing_components::ShareComponents</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::CalyxResult</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">analysis</span>::{<span class="ident">LiveRangeAnalysis</span>, <span class="ident">ReadWriteSet</span>},
+    <span class="ident">analysis</span>::{<span class="ident">LiveRangeAnalysis</span>, <span class="ident">ReadWriteSet</span>, <span class="ident">ShareSet</span>},
     <span class="ident">ir</span>::{<span class="self">self</span>, <span class="ident">traversal::ConstructVisitor</span>, <span class="ident">traversal::Named</span>, <span class="ident">CloneName</span>},
 };
 <span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
@@ -185,10 +200,10 @@
     <span class="ident">live</span>: <span class="ident">LiveRangeAnalysis</span>,
     <span class="ident">rewrites</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">ir::RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Set of state shareable components (as type names)</span>
-    <span class="ident">state_shareable</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
+    <span class="ident">state_shareable</span>: <span class="ident">ShareSet</span>,
 
     <span class="doccomment">/// Set of shareable components (as type names)</span>
-    <span class="ident">shareable</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
+    <span class="ident">shareable</span>: <span class="ident">ShareSet</span>,
 
     <span class="doccomment">/// Cell active in continuous assignments, or ref cells (we want to ignore both)</span>
     <span class="ident">cont_ref_cells</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
@@ -205,24 +220,8 @@
 
 <span class="kw">impl</span> <span class="ident">ConstructVisitor</span> <span class="kw">for</span> <span class="ident">CellShare</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Context</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state_shareable</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shareable</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
-        <span class="comment">// add state_share=1 primitives to the state_shareable set</span>
-        <span class="kw">for</span> <span class="ident">prim</span> <span class="kw">in</span> <span class="ident">ctx</span>.<span class="ident">lib</span>.<span class="ident">signatures</span>() {
-            <span class="kw">if</span> <span class="ident">prim</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;share&quot;</span>) {
-                <span class="ident">shareable</span>.<span class="ident">insert</span>(<span class="ident">prim</span>.<span class="ident">name</span>.<span class="ident">clone</span>());
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">prim</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;state_share&quot;</span>) {
-                <span class="ident">state_shareable</span>.<span class="ident">insert</span>(<span class="ident">prim</span>.<span class="ident">name</span>.<span class="ident">clone</span>());
-            }
-        }
-
-        <span class="comment">// add state_share=1 user defined components to the state_shareable set</span>
-        <span class="kw">for</span> <span class="ident">comp</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">components</span> {
-            <span class="kw">if</span> <span class="ident">comp</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;state_share&quot;</span>) {
-                <span class="ident">state_shareable</span>.<span class="ident">insert</span>(<span class="ident">comp</span>.<span class="ident">name</span>.<span class="ident">clone</span>());
-            }
-            <span class="comment">//it seems like we never want to have a &quot;share&quot; user-defined components</span>
-        }
+        <span class="kw">let</span> <span class="ident">state_shareable</span> <span class="op">=</span> <span class="ident">ShareSet::from_context</span>::<span class="op">&lt;</span><span class="bool-val">true</span><span class="op">&gt;</span>(<span class="ident">ctx</span>);
+        <span class="kw">let</span> <span class="ident">shareable</span> <span class="op">=</span> <span class="ident">ShareSet::from_context</span>::<span class="op">&lt;</span><span class="bool-val">false</span><span class="op">&gt;</span>(<span class="ident">ctx</span>);
 
         <span class="prelude-val">Ok</span>(<span class="ident">CellShare</span> {
             <span class="ident">live</span>: <span class="ident">LiveRangeAnalysis::default</span>(),
@@ -269,9 +268,9 @@
         );
     }
 
-    <span class="kw">fn</span> <span class="ident">lookup_group_conflicts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">group_name</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">lookup_node_conflicts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">node_name</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">live</span>
-            .<span class="ident">get</span>(<span class="ident">group_name</span>)
+            .<span class="ident">get</span>(<span class="ident">node_name</span>)
             .<span class="ident">iter</span>()
             <span class="comment">// TODO(rachit): Once we make the above change and LiveRangeAnalysis ignores</span>
             <span class="comment">// cont_ref_cells during construction, we do not need this filter call.</span>
@@ -295,8 +294,10 @@
     <span class="kw">where</span>
         <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>),
     {
-        <span class="kw">for</span> <span class="ident">group</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>() {
-            <span class="kw">let</span> <span class="ident">conflicts</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">live</span>.<span class="ident">get</span>(<span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">name</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">invokes_enables</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
+        <span class="ident">get_invokes_enables</span>(<span class="kw-2">&amp;</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>(), <span class="kw-2">&amp;mut</span> <span class="ident">invokes_enables</span>);
+        <span class="kw">for</span> <span class="ident">invoke_enable</span> <span class="kw">in</span> <span class="ident">invokes_enables</span>.<span class="ident">iter</span>() {
+            <span class="kw">let</span> <span class="ident">conflicts</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">live</span>.<span class="ident">get</span>(<span class="ident">invoke_enable</span>);
             <span class="ident">add_conflicts</span>(
                 <span class="ident">conflicts</span>
                     .<span class="ident">iter</span>()
@@ -315,6 +316,35 @@
 
     <span class="kw">fn</span> <span class="ident">get_rewrites</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">ir::RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">rewrites</span>
+    }
+}
+
+<span class="comment">//Gets the names of all the cells invoked (using an invoke control statement)</span>
+<span class="comment">//in control c, and adds them to hs.</span>
+<span class="kw">fn</span> <span class="ident">get_invokes_enables</span>(<span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>, <span class="ident">hs</span>: <span class="kw-2">&amp;mut</span> <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>) {
+    <span class="kw">match</span> <span class="ident">c</span> {
+        <span class="ident">ir::Control::Empty</span>(<span class="kw">_</span>) =&gt; (),
+        <span class="ident">ir::Control::Enable</span>(<span class="ident">ir::Enable</span> { <span class="ident">group</span>, .. }) =&gt; {
+            <span class="ident">hs</span>.<span class="ident">insert</span>(<span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>());
+        }
+        <span class="ident">ir::Control::Invoke</span>(<span class="ident">ir::Invoke</span> { <span class="ident">comp</span>, .. }) =&gt; {
+            <span class="ident">hs</span>.<span class="ident">insert</span>(<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>());
+        }
+        <span class="ident">ir::Control::Par</span>(<span class="ident">ir::Par</span> { <span class="ident">stmts</span>, .. })
+        <span class="op">|</span> <span class="ident">ir::Control::Seq</span>(<span class="ident">ir::Seq</span> { <span class="ident">stmts</span>, .. }) =&gt; {
+            <span class="kw">for</span> <span class="ident">stmt</span> <span class="kw">in</span> <span class="ident">stmts</span> {
+                <span class="ident">get_invokes_enables</span>(<span class="ident">stmt</span>, <span class="ident">hs</span>);
+            }
+        }
+        <span class="ident">ir::Control::If</span>(<span class="ident">ir::If</span> {
+            <span class="ident">tbranch</span>, <span class="ident">fbranch</span>, ..
+        }) =&gt; {
+            <span class="ident">get_invokes_enables</span>(<span class="ident">tbranch</span>, <span class="ident">hs</span>);
+            <span class="ident">get_invokes_enables</span>(<span class="ident">fbranch</span>, <span class="ident">hs</span>);
+        }
+        <span class="ident">ir::Control::While</span>(<span class="ident">ir::While</span> { <span class="ident">body</span>, .. }) =&gt; {
+            <span class="ident">get_invokes_enables</span>(<span class="ident">body</span>, <span class="ident">hs</span>);
+        }
     }
 }
 </code></pre></div>

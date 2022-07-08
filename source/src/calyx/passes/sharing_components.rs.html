@@ -206,7 +206,7 @@
 <span class="doccomment">/// to minimize the number of used components.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// You must implement the functions:</span>
-<span class="doccomment">///  - [ShareComponents::lookup_group_conflicts]</span>
+<span class="doccomment">///  - [ShareComponents::lookup_node_conflicts]</span>
 <span class="doccomment">///  - [ShareComponents::cell_filter]</span>
 <span class="doccomment">///  - [ShareComponents::set_rewrites]</span>
 <span class="doccomment">///  - [ShareComponents::get_rewrites]</span>
@@ -216,9 +216,9 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// The algorithm that runs is:</span>
 <span class="doccomment">///  - instantiate conflict graph using all component cells that satisfy `cell_filter`</span>
-<span class="doccomment">///  - use [ScheduleConflicts] to find groups that run in parallel with each other</span>
-<span class="doccomment">///  - for each group, `G` that runs in parallel with another group `H`, add edges between each</span>
-<span class="doccomment">///  cell in the sets `lookup_group_conflicts(G)` and `lookup_group_conflicts(H)`.</span>
+<span class="doccomment">///  - use [ScheduleConflicts] to find groups/invokes that run in parallel with each other</span>
+<span class="doccomment">///  - for each group/invoke, `G` that runs in parallel with another group/invoke `H`, add edges between each</span>
+<span class="doccomment">///  cell in the sets `lookup_node_conflicts(G)` and `lookup_node_conflicts(H)`.</span>
 <span class="doccomment">///  - add conflicts between cells where for `c0 != c1`</span>
 <span class="doccomment">///  - call `custom_conflicts` to insert pass specific conflict edges</span>
 <span class="doccomment">///  - perform graph coloring using `self.ordering` to define the order of the greedy coloring</span>
@@ -237,7 +237,7 @@
     <span class="doccomment">/// Return a vector of conflicting cell names for a the group `group_name`.</span>
     <span class="doccomment">/// These are the names of the cells that conflict if their groups are</span>
     <span class="doccomment">/// run in parallel.</span>
-    <span class="kw">fn</span> <span class="ident">lookup_group_conflicts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">group_name</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">lookup_node_conflicts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">node_name</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Given a cell and the library signatures, this function decides if</span>
     <span class="doccomment">/// this cell is relevant to the current sharing pass or not. This</span>
@@ -301,7 +301,7 @@
                 .<span class="ident">collect</span>();
 
         <span class="kw">let</span> <span class="ident">par_conflicts</span> <span class="op">=</span> <span class="ident">ScheduleConflicts::from</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>());
-        <span class="kw">let</span> <span class="ident">group_conflicts</span> <span class="op">=</span> <span class="ident">par_conflicts</span>
+        <span class="kw">let</span> <span class="ident">node_conflicts</span> <span class="op">=</span> <span class="ident">par_conflicts</span>
             .<span class="ident">all_conflicts</span>()
             .<span class="ident">into_grouping_map_by</span>(<span class="op">|</span>(<span class="ident">g1</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">g1</span>.<span class="ident">clone</span>())
             .<span class="ident">fold</span>(
@@ -310,7 +310,7 @@
                  <span class="kw">_</span>,
                  (<span class="kw">_</span>, <span class="ident">conflicted_group</span>)<span class="op">|</span> {
                     <span class="kw">for</span> <span class="ident">conflict</span> <span class="kw">in</span>
-                        <span class="self">self</span>.<span class="ident">lookup_group_conflicts</span>(<span class="kw-2">&amp;</span><span class="ident">conflicted_group</span>)
+                        <span class="self">self</span>.<span class="ident">lookup_node_conflicts</span>(<span class="kw-2">&amp;</span><span class="ident">conflicted_group</span>)
                     {
                         <span class="ident">acc</span>.<span class="ident">entry</span>(<span class="ident">id_to_type</span>[<span class="ident">conflict</span>].<span class="ident">clone</span>())
                             .<span class="ident">or_default</span>()
@@ -320,10 +320,10 @@
                 },
             );
 
-        <span class="ident">group_conflicts</span>
+        <span class="ident">node_conflicts</span>
             .<span class="ident">into_iter</span>()
-            .<span class="ident">for_each</span>(<span class="op">|</span>(<span class="ident">group</span>, <span class="ident">conflict_group_b</span>)<span class="op">|</span> {
-                <span class="kw">for</span> <span class="ident">a</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">lookup_group_conflicts</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>) {
+            .<span class="ident">for_each</span>(<span class="op">|</span>(<span class="ident">node</span>, <span class="ident">conflict_group_b</span>)<span class="op">|</span> {
+                <span class="kw">for</span> <span class="ident">a</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">lookup_node_conflicts</span>(<span class="kw-2">&amp;</span><span class="ident">node</span>) {
                     <span class="kw">let</span> <span class="ident">g</span> <span class="op">=</span> <span class="ident">graphs_by_type</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">id_to_type</span>[<span class="ident">a</span>]).<span class="ident">unwrap</span>();
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">confs</span>) <span class="op">=</span> <span class="ident">conflict_group_b</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id_to_type</span>[<span class="ident">a</span>]) {
                         <span class="kw">for</span> <span class="ident">b</span> <span class="kw">in</span> <span class="ident">confs</span> {

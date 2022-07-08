@@ -228,6 +228,22 @@ frontend.</p>
 <p>Can be attached to a component and indicates that a component can be shared
 across groups. This is used by the <code>-p resource-sharing</code> to decide which components
 can be shared.</p>
+<h3 id="state_share"><a class="header" href="#state_share"><code>state_share</code></a></h3>
+<p>Can be attached to a component and indicates that a component can be shared
+across groups. Different than <code>share</code> since <code>state_share</code> components can have
+internal state.<br />
+This is used by <code>-p cell-share</code> to decide which components can be shared.
+Specifically, a component is state shareable if each write to 
+that component makes any previous writes to the component irrelevant. 
+The definition of a &quot;write to a component&quot; is an activiation of 
+the component's &quot;go&quot; port, followed by a read of the component's &quot;done&quot; port (in 
+other words, the read of a &quot;done&quot; port still counts as part of a &quot;write&quot; to the 
+component).
+For <code>c1</code> and <code>c2</code>, instances of a state_shareable component:
+instantiate <code>c1</code>                        instantiate <code>c2</code>
+<em>any write to <code>c1</code></em>                     <em>any write to <code>c2</code></em><br />
+<em>write value <code>v</code> to port <code>p</code> in <code>c1</code></em>   <em>write value <code>v</code> to port <code>p</code> in <code>c2</code></em><br />
+<code>c1</code> and <code>c2</code> should be equal.</p>
 <h3 id="boundn"><a class="header" href="#boundn"><code>bound(n)</code></a></h3>
 <p>Used in <code>infer-static-timing</code> and <code>static-timing</code> when the number of iterations
 of a <code>While</code> control is known statically, as indicated by <code>n</code>.</p>

@@ -573,8 +573,18 @@
 <span id="568">568</span>
 <span id="569">569</span>
 <span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">analysis</span>::{<span class="ident">ReadWriteSet</span>, <span class="ident">VariableDetection</span>},
+    <span class="ident">analysis</span>::{<span class="ident">ReadWriteSet</span>, <span class="ident">ShareSet</span>, <span class="ident">VariableDetection</span>},
     <span class="ident">ir</span>::{<span class="self">self</span>, <span class="ident">CloneName</span>, <span class="ident">RRC</span>},
 };
 <span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
@@ -642,8 +652,10 @@
 }
 
 <span class="doccomment">/// This analysis implements a parallel version of a classic liveness analysis.</span>
-<span class="doccomment">/// For each group, it returns a list of the registers that are &quot;alive&quot; during</span>
-<span class="doccomment">/// an execution of a group.</span>
+<span class="doccomment">/// For each group or invoke, it returns a list of the state shareable cells</span>
+<span class="doccomment">/// that are &quot;alive&quot; during an execution of a group or invoke statement (we</span>
+<span class="doccomment">/// identify an invoke statement by the cell that is being invoked, and groups</span>
+<span class="doccomment">/// by the name of the group).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ## Parallel Analog to a CFG</span>
 <span class="doccomment">/// The `par` statement introduces a new kind of control branching that can</span>
@@ -767,7 +779,7 @@
 <span class="doccomment">/// ## Definition of Liveness</span>
 <span class="doccomment">/// Now we finally come to the definition of &quot;liveness&quot; and how we use the pCFG to compute this.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// We say a register `x` is &quot;live&quot; at a node `p` in the CFG if there is a write to `x` ordered before</span>
+<span class="doccomment">/// We say a cell `x` is &quot;live&quot; at a node `p` in the CFG if there is a write to `x` ordered before</span>
 <span class="doccomment">/// `p` (such that there are no more writes to `x` at a point between that and `p`) and if there is a read</span>
 <span class="doccomment">/// of `x` ordered after `p` (such that there are no writes between that and `p`).</span>
 <span class="doccomment">///</span>
@@ -792,13 +804,16 @@
 <span class="doccomment">/// information of the threads.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LiveRangeAnalysis</span> {
-    <span class="doccomment">/// Map from group names to the components live inside them.</span>
+    <span class="doccomment">/// Map from node (i.e., group enables or invokes) names</span>
+    <span class="doccomment">///  to the components live inside them.</span>
     <span class="ident">live</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">Prop</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Groups that have been identified as variable-like.</span>
     <span class="doccomment">/// Mapping from group name to the name of the register.</span>
     <span class="ident">variable_like</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Set of state shareable components (as type names)</span>
     <span class="ident">state_share</span>: <span class="ident">ShareSet</span>,
+    <span class="doccomment">///Set of shareable components (as type names)</span>
+    <span class="ident">share</span>: <span class="ident">ShareSet</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">LiveRangeAnalysis</span> {
@@ -811,37 +826,17 @@
     }
 }
 
-<span class="doccomment">/// The type names of all components and primitives marked with &quot;state_share&quot;.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ShareSet</span> {
-    <span class="ident">shareable</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">ShareSet</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">set</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>) -&gt; <span class="ident">ShareSet</span> {
-        <span class="ident">ShareSet</span> { <span class="ident">shareable</span>: <span class="ident">set</span> }
-    }
-    <span class="comment">//given a set of shareable and a cell, determines whether cell&#39;s</span>
-    <span class="comment">//type is shareable or not</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_shareable_component</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cell</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">type_name</span>) <span class="op">=</span> <span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">type_name</span>() {
-            <span class="self">self</span>.<span class="ident">shareable</span>.<span class="ident">contains</span>(<span class="ident">type_name</span>)
-        } <span class="kw">else</span> {
-            <span class="bool-val">false</span>
-        }
-    }
-}
-
 <span class="kw">impl</span> <span class="ident">LiveRangeAnalysis</span> {
     <span class="doccomment">/// Construct a live range analysis.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Component</span>,
         <span class="ident">control</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>,
-        <span class="ident">state_share</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
-        <span class="ident">shareable</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
+        <span class="ident">state_share</span>: <span class="ident">ShareSet</span>,
+        <span class="ident">share</span>: <span class="ident">ShareSet</span>,
     ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ranges</span> <span class="op">=</span> <span class="ident">LiveRangeAnalysis</span> {
-            <span class="ident">state_share</span>: <span class="ident">ShareSet::new</span>(<span class="ident">state_share</span>),
+            <span class="ident">state_share</span>,
+            <span class="ident">share</span>,
             ..<span class="ident">Default::default</span>()
         };
 
@@ -853,20 +848,18 @@
             <span class="kw-2">&amp;mut</span> <span class="ident">ranges</span>,
         );
 
-        <span class="kw">let</span> <span class="ident">share_set</span> <span class="op">=</span> <span class="ident">ShareSet::new</span>(<span class="ident">shareable</span>);
-
         <span class="comment">//adds (non-state) shareable cells as live in the group they&#39;re contained in</span>
+        <span class="comment">//we already added (non-state) shareable cells as live in the invoke</span>
+        <span class="comment">//they&#39;re contained in in build_live_ranges().</span>
         <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">group</span><span class="op">|</span> {
             <span class="ident">ranges</span>.<span class="ident">add_shareable_ranges</span>(
                 <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">assignments</span>,
-                <span class="kw-2">&amp;</span><span class="ident">share_set</span>,
                 <span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">name</span>(),
             )
         });
         <span class="ident">comp</span>.<span class="ident">comb_groups</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">group</span><span class="op">|</span> {
             <span class="ident">ranges</span>.<span class="ident">add_shareable_ranges</span>(
                 <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">assignments</span>,
-                <span class="kw-2">&amp;</span><span class="ident">share_set</span>,
                 <span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">name</span>(),
             )
         });
@@ -878,11 +871,10 @@
     <span class="kw">fn</span> <span class="ident">add_shareable_ranges</span>(
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">assignments</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Assignment</span>],
-        <span class="ident">shareable</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
         <span class="ident">group_name</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>,
     ) {
         <span class="kw">let</span> <span class="ident">group_uses</span>: <span class="ident">Prop</span> <span class="op">=</span> <span class="ident">ReadWriteSet::uses</span>(<span class="ident">assignments</span>.<span class="ident">iter</span>())
-            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">shareable</span>.<span class="ident">is_shareable_component</span>(<span class="ident">cell</span>))
+            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">share</span>.<span class="ident">is_shareable_component</span>(<span class="ident">cell</span>))
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">cell</span>.<span class="ident">clone_name</span>())
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
             .<span class="ident">into</span>();
@@ -894,16 +886,16 @@
         }
     }
 
-    <span class="doccomment">/// Look up the set of things live at a group definition.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">group</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Look up the set of things live at a node (i.e. group or invoke) definition.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">node</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>
             .<span class="ident">live</span>
-            .<span class="ident">get</span>(<span class="ident">group</span>)
-            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">panic!</span>(<span class="string">&quot;Live set missing for {}&quot;</span>, <span class="ident">group</span>))
+            .<span class="ident">get</span>(<span class="ident">node</span>)
+            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">panic!</span>(<span class="string">&quot;Live set missing for {}&quot;</span>, <span class="ident">node</span>))
             .<span class="ident">set</span>
     }
 
-    <span class="doccomment">/// Get a unique list of all live registers in `component`.</span>
+    <span class="doccomment">/// Get a unique list of all live cells in `component`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_all</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ir::Id</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
         <span class="self">self</span>.<span class="ident">live</span>
             .<span class="ident">iter</span>()
@@ -1015,23 +1007,37 @@
         <span class="ident">invoke</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Invoke</span>,
         <span class="ident">shareable_components</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
     ) -&gt; (<span class="ident">Prop</span>, <span class="ident">Prop</span>) {
-        <span class="kw">let</span> <span class="ident">reads</span>: <span class="ident">Prop</span> <span class="op">=</span> <span class="ident">invoke</span>
+        <span class="comment">//The reads of the invoke include its inputs plus the cell itself, if the</span>
+        <span class="comment">//outputs are not empty.</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">read_set</span> <span class="op">=</span> <span class="ident">invoke</span>
             .<span class="ident">inputs</span>
             .<span class="ident">iter</span>()
             .<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">src</span>)<span class="op">|</span> {
                 <span class="ident"><span class="self">Self</span>::port_to_cell_name</span>(<span class="ident">src</span>, <span class="ident">shareable_components</span>)
             })
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-            .<span class="ident">into</span>();
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">invoke</span>.<span class="ident">outputs</span>.<span class="ident">is_empty</span>()
+            <span class="op">&amp;&amp;</span> <span class="ident">shareable_components</span>.<span class="ident">is_shareable_component</span>(<span class="kw-2">&amp;</span><span class="ident">invoke</span>.<span class="ident">comp</span>)
+        {
+            <span class="ident">read_set</span>.<span class="ident">insert</span>(<span class="ident">invoke</span>.<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>());
+        }
+        <span class="kw">let</span> <span class="ident">reads</span>: <span class="ident">Prop</span> <span class="op">=</span> <span class="ident">read_set</span>.<span class="ident">into</span>();
 
-        <span class="kw">let</span> <span class="ident">writes</span>: <span class="ident">Prop</span> <span class="op">=</span> <span class="ident">invoke</span>
+        <span class="comment">//The writes of the invoke include its outpus plus the cell itself, if the</span>
+        <span class="comment">//inputs are not empty.</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">write_set</span> <span class="op">=</span> <span class="ident">invoke</span>
             .<span class="ident">outputs</span>
             .<span class="ident">iter</span>()
             .<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">src</span>)<span class="op">|</span> {
                 <span class="ident"><span class="self">Self</span>::port_to_cell_name</span>(<span class="ident">src</span>, <span class="ident">shareable_components</span>)
             })
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-            .<span class="ident">into</span>();
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">invoke</span>.<span class="ident">inputs</span>.<span class="ident">is_empty</span>()
+            <span class="op">&amp;&amp;</span> <span class="ident">shareable_components</span>.<span class="ident">is_shareable_component</span>(<span class="kw-2">&amp;</span><span class="ident">invoke</span>.<span class="ident">comp</span>)
+        {
+            <span class="ident">write_set</span>.<span class="ident">insert</span>(<span class="ident">invoke</span>.<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>());
+        }
+        <span class="kw">let</span> <span class="ident">writes</span>: <span class="ident">Prop</span> <span class="op">=</span> <span class="ident">write_set</span>.<span class="ident">into</span>();
 
         (<span class="ident">reads</span>, <span class="ident">writes</span>)
     }
@@ -1054,6 +1060,20 @@
                 <span class="kw-2">&amp;</span><span class="ident">lr</span>.<span class="ident">state_share</span>,
             );
             <span class="kw">let</span> <span class="ident">alive</span> <span class="op">=</span> <span class="ident">alive</span>.<span class="ident">transfer</span>(<span class="kw-2">&amp;</span><span class="ident">reads</span>, <span class="kw-2">&amp;</span><span class="ident">writes</span>);
+            <span class="comment">// set the live set of this node to be the things live on the</span>
+            <span class="comment">// output of this node plus the things written to in this invoke</span>
+            <span class="comment">// plus all shareable components used</span>
+
+            <span class="comment">//get the shareable components used in the invoke stmt</span>
+            <span class="kw">let</span> (<span class="ident">reads_share</span>, <span class="ident">writes_share</span>) <span class="op">=</span>
+                <span class="ident">LiveRangeAnalysis::find_gen_kill_invoke</span>(<span class="ident">invoke</span>, <span class="kw-2">&amp;</span><span class="ident">lr</span>.<span class="ident">share</span>);
+            <span class="kw">let</span> <span class="ident">uses_share</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">reads_share</span> <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">writes_share</span>;
+
+            <span class="kw">let</span> <span class="ident">alive_writes</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">alive</span> <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">writes</span>;
+            <span class="ident">lr</span>.<span class="ident">live</span>.<span class="ident">insert</span>(
+                <span class="ident">invoke</span>.<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>(),
+                <span class="kw-2">&amp;</span><span class="ident">alive_writes</span> <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">uses_share</span>,
+            );
             (<span class="ident">alive</span>, <span class="kw-2">&amp;</span><span class="ident">gens</span> <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">reads</span>, <span class="kw-2">&amp;</span><span class="ident">kills</span> <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">writes</span>)
         }
         <span class="ident">ir::Control::Enable</span>(<span class="ident">ir::Enable</span> { <span class="ident">group</span>, .. }) =&gt; {
