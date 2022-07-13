@@ -235,19 +235,18 @@
 <span id="230">230</span>
 <span id="231">231</span>
 <span id="232">232</span>
-<span id="233">233</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std</span>::{
-    <span class="ident">collections::HashSet</span>,
-    <span class="ident">path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>},
-};
-
-<span class="kw">use</span> <span class="kw">super</span>::{
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{
     <span class="ident">ast</span>::{<span class="ident">ComponentDef</span>, <span class="ident">NamespaceDef</span>},
     <span class="ident">parser</span>,
 };
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>},
     <span class="ident">ir</span>,
+};
+<span class="kw">use</span> <span class="ident">linked_hash_map::LinkedHashMap</span>;
+<span class="kw">use</span> <span class="ident">std</span>::{
+    <span class="ident">collections::HashSet</span>,
+    <span class="ident">path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>},
 };
 
 <span class="doccomment">/// A Workspace represents all Calyx files transitively discovered while trying to compile a</span>
@@ -282,7 +281,7 @@
     <span class="doccomment">/// compilation mode.</span>
     <span class="kw">pub</span> <span class="ident">declarations</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ComponentDef</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Absolute path to extern definitions and primitives defined by them.</span>
-    <span class="kw">pub</span> <span class="ident">externs</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Primitive</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">externs</span>: <span class="ident">LinkedHashMap</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Primitive</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Original import statements present in the top-level file.</span>
     <span class="kw">pub</span> <span class="ident">original_imports</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Optional opaque metadata attached to the top-level file</span>
@@ -413,15 +412,14 @@
                                  <span class="ident">shallow</span>: <span class="ident">bool</span><span class="op">|</span>
          -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span> {
             <span class="comment">// Canonicalize the extern paths and add them</span>
-            <span class="ident">workspace</span>.<span class="ident">externs</span>.<span class="ident">append</span>(
-                <span class="kw-2">&amp;mut</span> <span class="ident">ns</span>
+            <span class="kw">for</span> (<span class="ident">path</span>, <span class="kw-2">mut</span> <span class="ident">exts</span>) <span class="kw">in</span> <span class="ident">ns</span>.<span class="ident">externs</span> {
+                <span class="kw">let</span> <span class="ident">abs_path</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::canonicalize_extern</span>(<span class="ident">path</span>, <span class="ident">parent</span>)<span class="question-mark">?</span>;
+                <span class="ident">workspace</span>
                     .<span class="ident">externs</span>
-                    .<span class="ident">into_iter</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">p</span>, <span class="ident">e</span>)<span class="op">|</span> {
-                        <span class="ident"><span class="self">Self</span>::canonicalize_extern</span>(<span class="ident">p</span>, <span class="ident">parent</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> (<span class="ident">p</span>, <span class="ident">e</span>))
-                    })
-                    .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>,
-            );
+                    .<span class="ident">entry</span>(<span class="ident">abs_path</span>)
+                    .<span class="ident">or_default</span>()
+                    .<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">exts</span>);
+            }
 
             <span class="comment">// Add components defined by this namespace to either components or</span>
             <span class="comment">// declarations</span>

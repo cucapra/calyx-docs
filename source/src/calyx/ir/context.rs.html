@@ -109,6 +109,9 @@
 <span id="104">104</span>
 <span id="105">105</span>
 <span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An IR context. This is the top-level object for an IR and contains all information</span>
 <span class="doccomment">//! need to transform, lower, an emit a program.</span>
 <span class="doccomment">//! Passes usually have transform/analyze the components in the IR.</span>
@@ -175,8 +178,11 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Primitive</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LibrarySignatures</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">externs</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Primitive</span><span class="op">&gt;</span>)<span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LibrarySignatures</span>
+<span class="kw">where</span>
+    <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">PathBuf</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Primitive</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
+{
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">externs</span>: <span class="ident">I</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lib</span> <span class="op">=</span> <span class="ident">LibrarySignatures::default</span>();
         <span class="kw">for</span> (<span class="ident">path</span>, <span class="ident">prims</span>) <span class="kw">in</span> <span class="ident">externs</span> {
             <span class="kw">let</span> <span class="ident">map</span>: <span class="ident">LinkedHashMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span>
