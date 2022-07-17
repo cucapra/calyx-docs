@@ -32,6 +32,8 @@
 <span id="27">27</span>
 <span id="28">28</span>
 <span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Analysis for Calyx programs.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The analyses construct data-structures that make answering certain queries</span>
@@ -40,6 +42,7 @@
 <span class="kw">mod</span> <span class="ident">control_order</span>;
 <span class="kw">mod</span> <span class="ident">control_ports</span>;
 <span class="kw">mod</span> <span class="ident">dataflow_order</span>;
+<span class="kw">mod</span> <span class="ident">domination_analysis</span>;
 <span class="kw">mod</span> <span class="ident">graph</span>;
 <span class="kw">mod</span> <span class="ident">graph_coloring</span>;
 <span class="kw">mod</span> <span class="ident">live_range_analysis</span>;
@@ -53,6 +56,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">control_order::ControlOrder</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">control_ports::ControlPorts</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">dataflow_order::DataflowOrder</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">domination_analysis::DominatorMap</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">graph::GraphAnalysis</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">graph_coloring::GraphColoring</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">live_range_analysis::LiveRangeAnalysis</span>;

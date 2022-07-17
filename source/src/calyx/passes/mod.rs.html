@@ -75,6 +75,8 @@
 <span id="70">70</span>
 <span id="71">71</span>
 <span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.</span>
 <span class="kw">mod</span> <span class="ident">canonical</span>;
 <span class="kw">mod</span> <span class="ident">cell_share</span>;
@@ -93,6 +95,7 @@
 <span class="kw">mod</span> <span class="ident">go_insertion</span>;
 <span class="kw">mod</span> <span class="ident">group_to_invoke</span>;
 <span class="kw">mod</span> <span class="ident">hole_inliner</span>;
+<span class="kw">mod</span> <span class="ident">infer_share</span>;
 <span class="kw">mod</span> <span class="ident">infer_static_timing</span>;
 <span class="kw">mod</span> <span class="ident">lower_guards</span>;
 <span class="kw">mod</span> <span class="ident">math_utilities</span>;
@@ -129,6 +132,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">go_insertion::GoInsertion</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">group_to_invoke::GroupToInvoke</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hole_inliner::HoleInliner</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">infer_share::InferShare</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">infer_static_timing::InferStaticTiming</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">lower_guards::LowerGuards</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">merge_assign::MergeAssign</span>;
