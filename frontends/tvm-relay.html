@@ -168,6 +168,9 @@ intermediate representation.</p>
 <pre><code> cd ../python &amp;&amp; python3 setup.py bdist_wheel
  pip3 install --user dist/tvm-*.whl
 </code></pre>
+<blockquote>
+<p>If you get an error with <code>shutil</code>, try deleting the <code>python/</code> directory, restoring it, and rerunning the above command: <code>cd .. &amp;&amp; rm -rf python &amp;&amp; git checkout -- python</code></p>
+</blockquote>
 </li>
 <li>
 <p>Install the accompanying <code>topi</code> Python package:</p>
@@ -208,24 +211,24 @@ for ONNX simulation and image pre-processing:</p>
 <pre><code>pip3 install opencv-python Pillow mxnet onnx simplejson
 </code></pre>
 <p>For example, we can simulate the LeNet ONNX model found <a href="https://github.com/ekut-es/pico-cnn/blob/master/data/lenet/lenet.onnx">here</a> using the following command:</p>
-<pre><code>python3 frontends/relay/onnx_to_calyx.py \ 
--n &quot;lenet&quot; \ 
--d &quot;MNIST&quot; \ 
+<pre><code>python3 frontends/relay/onnx_to_calyx.py \
+-n &quot;lenet&quot; \
+-d &quot;MNIST&quot; \
 -i &quot;/path/to/image.png&quot; \
--onnx &quot;/path/to/model.onnx&quot; \ 
+-onnx &quot;/path/to/model.onnx&quot; \
 -o calyx
 </code></pre>
 <ul>
 <li><code>-n</code>: The name of the input net. This is mostly used for naming the output files.</li>
-<li><code>-d</code>: The dataset for which the input will be classified against. This is necessary to 
+<li><code>-d</code>: The dataset for which the input will be classified against. This is necessary to
 determine what preprocessing should be done on the image. e.g. <code>&quot;mnist&quot;</code> or <code>&quot;imagenet&quot;</code>.</li>
 <li><code>-i</code>: The file path to the input image which you want classified.</li>
 <li><code>-onnx</code>: The file path to the ONNX model.</li>
-<li><code>-o</code>: The type of output. 
+<li><code>-o</code>: The type of output.
 <ol>
-<li><code>tvm</code>: Executes the ONNX model using the TVM executor. Prints the final softmax value 
+<li><code>tvm</code>: Executes the ONNX model using the TVM executor. Prints the final softmax value
 to console. No postprocessing is conducted.</li>
-<li><code>relay</code>: Output a file with the corresponding Relay program. <code>&lt;net_name&gt;.relay</code> </li>
+<li><code>relay</code>: Output a file with the corresponding Relay program. <code>&lt;net_name&gt;.relay</code></li>
 <li><code>calyx</code>: Output a <code>.data</code> file and Calyx program for simulation. <code>&lt;net_name&gt;.futil</code>, <code>&lt;net_name&gt;.data</code></li>
 <li><code>all</code>: All the above.</li>
 </ol>
