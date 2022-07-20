@@ -139,8 +139,9 @@
 <p>Calyx programs are a sequence of <code>import</code> statements followed by a sequence of
 <code>extern</code> statements or <code>component</code> definitions.</p>
 <h3 id="import-statements"><a class="header" href="#import-statements"><code>import</code> statements</a></h3>
-<p><code>import &quot;&lt;path&gt;&quot;</code> has almost exactly the same semantics to that of <code>include</code> in
-C-style programming languages; it copies the code <code>path</code> into the current file.</p>
+<p><code>import &quot;&lt;path&gt;&quot;</code> has almost exactly the same semantics to that of <code>#include</code> in
+the C preprocessor: it copies the code from the file at <code>path</code> into
+the current file.</p>
 <h3 id="extern-definitions"><a class="header" href="#extern-definitions"><code>extern</code> definitions</a></h3>
 <p><code>extern</code> definitions allow Calyx programs to link against arbitrary RTL code.
 An <code>extern</code> definition looks like this:</p>
@@ -150,22 +151,27 @@ An <code>extern</code> definition looks like this:</p>
 </code></pre>
 <p><code>&lt;path&gt;</code> should be a valid file system path that points to a Verilog module that
 defines the same names as the <em>primitives</em> defined in the <code>extern</code> block.
-When run with the <code>-b verilog</code> flag, the calyx compiler will copy the text contained
-in every such verilog file into the generated output.</p>
+When run with the <code>-b verilog</code> flag, the Calyx compiler will copy the contents
+of every such Verilog file into the generated output.</p>
 <h3 id="primitive-definitions"><a class="header" href="#primitive-definitions"><code>primitive</code> definitions</a></h3>
 <p>The <code>primitive</code> construct allows specification of the signature of an external
 Verilog module that the Calyx program uses.
 It has the following syntax:</p>
 <pre><code>[comb] primitive name&lt;attributes&gt;[PARAMETERS](ports) -&gt; (ports);
 </code></pre>
+<p>The syntax for primitives resembles that for <a href="#calyx-components">components</a>,
+with some additional pieces:</p>
 <ul>
-<li>The <code>comb</code> primitive is used to signal that the primitive definition wraps purely
+<li>The <code>comb</code> keyword signals that the primitive definition wraps purely
 combinational RTL code. This is useful for certain optimizations.</li>
-<li>The <em>attributes</em> syntax allows specification of useful optimization metadata in
-form of <a href="./attributes.html">attributes</a>.</li>
-<li><em>PARAMETERS</em> defines the parameters passed to the RTL code.</li>
+<li><em><a href="./attributes.html">Attributes</a></em> specify useful metadata for optimization.</li>
+<li><em>PARAMETERS</em> are named compile-time (metaprogramming) parameters to pass to
+the Verilog module definition. The primitive definition lists the names of
+integer-valued parameters; the corresponding Verilog module definition should
+have identical <code>parameter</code> declarations. Calyx code provides values for these
+parameters when instantiating a primitive as a <a href="#cells">cell</a>.</li>
 <li>The <em>ports</em> section contain sized port definitions that can either be positive number
-or one of the parameters.</li>
+or one of the parameter names.</li>
 </ul>
 <p>For example, the following is the signature of the <code>std_reg</code> primitive from the
 Calyx standard library:</p>
@@ -179,71 +185,102 @@ Calyx standard library:</p>
     @done done: 1
   );
 </code></pre>
-<p>The primitive defines one parameter called <code>WIDTH</code> which describes the sizes for
-the <code>in</code> and the <code>out</code> port.</p>
+<p>The primitive defines one parameter called <code>WIDTH</code>, which describes the sizes for
+the <code>in</code> and the <code>out</code> ports.</p>
 <h2 id="calyx-components"><a class="header" href="#calyx-components">Calyx Components</a></h2>
-<p><code>components</code> are the primary encapsulation unit of a Calyx program.
+<p><code>component</code>s are the primary encapsulation unit of a Calyx program.
 They look like this:</p>
 <pre><code>component name&lt;attributes&gt;(ports) -&gt; (ports) {
-  cells { .. }
-  wires { .. }
-  control { .. }
+  cells { ... }
+  wires { ... }
+  control { ... }
 }
 </code></pre>
-<p>Unlike <code>primitive</code> definitions, <code>component</code> definitions cannot be parameterized and
-must provide exact port width for all ports.
-A component encapsulates the control and the hardware structure needed to implement
+<p>Like <a href="#primitive-definitions"><code>primitive</code> definitions</a>, <code>component</code> signatures consist of a name, an optional list of attributes, and input/output ports.
+Unlike <code>primitive</code>s, <code>component</code> definitions do not have parameters; ports must have a concrete (integer) width.
+A component encapsulates the control and the hardware structure that implements
 a hardware module.</p>
-<h3 id="ports"><a class="header" href="#ports"><code>ports</code></a></h3>
-<p>Ports defined in Calyx only specify their bitwidth and are otherwise untyped:</p>
+<h3 id="ports"><a class="header" href="#ports">Ports</a></h3>
+<p>A port definition looks like this:</p>
+<pre><code>[@&lt;attr&gt;...] &lt;name&gt;: &lt;width&gt;
+</code></pre>
+<p>Ports have a bit width but are otherwise untyped.
+They can also include optional <a href="./attributes.html">attributes</a>.
+For example, this component definition:</p>
 <pre><code>component counter(left: 32, right: 32) -&gt; (@stable out0: 32, out1: 32) { .. }
 </code></pre>
-<p>The component defines two input ports <code>left</code> and <code>right</code> and two output ports
+<p>defines two input ports, <code>left</code> and <code>right</code>, and two output ports,
 <code>out0</code> and <code>out1</code>.
+All four ports are 32-bit signals.
 Additionally, the <code>out0</code> port has the <a href="./attributes.html">attribute</a> <code>@stable</code>.</p>
 <h3 id="cells"><a class="header" href="#cells"><code>cells</code></a></h3>
-<p>The <code>cells</code> section of the Calyx program instantiates all the sub-component used
-by this component.
-For example, the following definition of the <code>counter</code> component instantiates a
-<code>std_add</code> and <code>std_reg</code> primitive as well as a <code>foo</code> calyx component</p>
-<pre><code>component foo() -&gt; () { .. }
+<p>A component's <code>cells</code> section instantiates a set of sub-components.
+It contains a list of declarations with this syntax:</p>
+<pre><code>&lt;name&gt; = &lt;comp&gt;(&lt;param...&gt;);
+</code></pre>
+<p>Here, <code>&lt;comp&gt;</code> is the name of an existing <a href="#primitive-definitions">primitive</a> or <a href="#calyx-components">component definition</a>, and
+<code>&lt;name&gt;</code> is the fresh, local name of the instance.
+Parameters are only allowed when instantiating primitives, not Calyx-defined components.</p>
+<p>For example, the following definition of the <code>counter</code> component instantiates a
+<code>std_add</code> and <code>std_reg</code> primitive as well as a <code>foo</code> Calyx component</p>
+<pre><code>component foo() -&gt; () { ... }
 component counter() -&gt; () {
   cells {
     r = std_reg(32);
     a = std_add(32);
     f = foo();
   }
-  wires { .. }
-  control { .. }
+  wires { ... }
+  control { ... }
 }
 </code></pre>
-<p>When instantiating a <code>primitive</code> definition, the parameter are passed within the
+<p>When instantiating a <a href="#primitive-definitions"><code>primitive</code> definition</a>, the parameters are passed within the
 parenthesis.
 For example, we pass <code>32</code> for the <code>WIDTH</code> parameter of the <code>std_reg</code> in the above
 instantiation.
-Since an instantiation of a calyx component does not take any parameters, the parameters
+Since an instantiation of a Calyx component does not take any parameters, the parameters
 are always empty.</p>
 <h2 id="the-wires-section"><a class="header" href="#the-wires-section">The <code>wires</code> Section</a></h2>
-<p>A component's <code>wires</code> section is a sequence of guarded assignments, <code>group</code> definitions, or <code>comb group</code> definitions.</p>
-<h3 id="continuous-assignments"><a class="header" href="#continuous-assignments">Continuous assignments</a></h3>
-<p>Assignments connect ports between two cells together:</p>
+<p>A component's <code>wires</code> section contains <em>guarded assignments</em> that connect ports
+together. The assignments can either appear at the top level, making them
+<em><a href="#continuous-assignments">continuous assignments</a></em>, or be organized into named
+<a href="#group-definitions"><code>group</code></a> and <a href="#comb-group-definitions"><code>comb group</code> definitions</a>.</p>
+<h3 id="guarded-assignments"><a class="header" href="#guarded-assignments">Guarded Assignments</a></h3>
+<p>Assignments connect ports between two cells together, with this syntax:</p>
+<pre><code>&lt;cell&gt;.&lt;port&gt; = [&lt;guard&gt; ?] &lt;cell&gt;.&lt;port&gt;;
+</code></pre>
+<p>The left-hand and right-hand side are both <em>port references</em>, which name a
+specific input or output port within a <a href="#cells">cell</a> declared within the same
+component. The optional <em>guard condition</em> is a logical expression that
+determines whether the connection is active.</p>
+<p>For example, this assignment:</p>
 <pre><code>r.in = add.out;
 </code></pre>
-<p>The above assignment <em>continuously</em> transfer the value in <code>add.out</code> to <code>r.in</code>.</p>
-<p>Because assignments are <em>continuous</em>, their order does not matter:</p>
+<p>unconditionally transfers the value from a port named <code>out</code> in the <code>add</code> cell to <code>r</code>'s <code>in</code> port.</p>
+<p>Assignments are <em>simultaneous</em> and <em>non-blocking</em>. When a block of assignments
+runs, they all first read their right-hand sides and then write into their
+left-hand sides; they are not processed in order. The result is that the order
+of assignments does not matter. For example, this block of assignments:</p>
 <pre><code>r.in = add.out;
 add.left = y.out;
+add.right = z.out;
 </code></pre>
-<p>Assignments can additionally be guarded using a 1-bit value:</p>
+<p>is a valid way to take the values from registers <code>y</code> and <code>z</code> and put the sum into <code>r</code>. Any permutation of these assignments is equivalent.</p>
+<h3 id="guards"><a class="header" href="#guards">Guards</a></h3>
+<p>An assignment's optional <em>guard</em> expression is a logical expression that produces a 1-bit value, as in these examples:</p>
 <pre><code>r.in = cond.out ? add.out;
 r.in = !cond.out ? 32'd0;
 </code></pre>
-<p>Guards allow specification of multiple different values to a port.</p>
+<p>Using guards, Calyx programs can assign multiple different values to the same
+port. Omitting a guard expression is equivalent to using <code>1'd1</code> (a constant
+&quot;true&quot;) as the guard.</p>
+<p><strong>TK:</strong> Document the &quot;mini-language&quot; of logical operators that go into guards.</p>
 <blockquote>
 <p><strong>Well-formedness</strong>: For each input port on the LHS, only one guard should be active in any given cycle during the execution of a Calyx program.</p>
 </blockquote>
-<p>When an assignment is directly placed into a component's <code>wires</code> section, it
-is called a &quot;continuous assignment&quot; and is permanently active, even when the
+<h3 id="continuous-assignments"><a class="header" href="#continuous-assignments">Continuous Assignments</a></h3>
+<p>When an assignment is appears directly inside a component's <code>wires</code> section, it
+is called a <em>continuous assignment</em> and is permanently active, even when the
 <a href="#the-control-operators">control program</a> of the component is inactive.</p>
 <h3 id="group-definitions"><a class="header" href="#group-definitions"><code>group</code> definitions</a></h3>
 <p>A <code>group</code> is a way to name a set of assignments that together represent some
@@ -255,36 +292,38 @@ meaningful action:</p>
 </code></pre>
 <p>Assignments within a group can be reasoned about in isolation from assignments
 in other groups.
+Unlike <a href="#continuous-assignments">continuous assignments</a>, a group's encapsulated assignments
+only execute as dictated by the <a href="#the-control-operators">control program</a>.
 These means that seemingly conflicting writes to the same ports are allowed:</p>
 <pre><code>group foo {
-  r.in = 32'd10; ..
-  foo[done] = ..
+  r.in = 32'd10;
+  foo[done] = ...;
 }
 group bar {
-  r.in = 32'd22; ..
-  bar[done] = ..
+  r.in = 32'd22;
+  bar[done] = ...;
 }
 </code></pre>
-<p>This is because group only execute when they are mentioned in the <a href="#the-control-operators">control program</a>.</p>
-<p>However, group assignments are not allowed to conflict with <a href="#continuous-assignments">continuous assignments</a> defined in the component:</p>
+<p>However, group assignments must not conflict with <a href="#continuous-assignments">continuous assignments</a> defined in the component:</p>
 <pre><code>group foo {
-  r.in = 32'd10; .. // This is malformed because it conflicts with the write below
-  foo[done] = ..
+  r.in = 32'd10; ... // Malformed because it conflicts with the write below.
+  foo[done] = ...
 }
 r.in = 32'd50;
 </code></pre>
-<p>The <code>done</code> condition of a group is any 1-bit port that, when set to 1, represents the completion of a group's execution.
-This is because groups can take any number of cycles and therefore need a way
-to specify to the external world when their execution has completed.</p>
-<p>The attributes syntax specifies the attributes for the group.</p>
+<p>Groups can take any (nonzero) number of cycles to complete. To indicate to the
+outside world when their execution has completed, every group has a special
+<em>done signal</em>, which is a special port written as <code>&lt;group&gt;[done]</code>. The group
+should assign 1 to this port to indicate that its execution is complete.</p>
+<p>Groups can have an optional list of <a href="./attributes.html">attributes</a>.</p>
 <blockquote>
-<p><strong>Well-formedness</strong>: All groups are required to run for at least one cycle.</p>
+<p><strong>Well-formedness</strong>: All groups are required to run for at least one cycle. (Sub-cycle logic should use <code>comb group</code> instead.)</p>
 </blockquote>
 <h3 id="comb-group-definitions"><a class="header" href="#comb-group-definitions"><code>comb group</code> definitions</a></h3>
 <p>Combinational groups are a restricted version of groups which perform their
 computation purely combinationally and therefore run for &quot;less than one cycle&quot;:</p>
 <pre><code>comb group name&lt;attributes&gt; {
-  assignments..
+  assignments...
 }
 </code></pre>
 <p>Because their computation is required to run for less than a cycle, <code>comb group</code>
@@ -293,9 +332,10 @@ definitions do not specify a <code>done</code> condition.</p>
 operators</a>.
 Instead, they only occur after the <code>with</code> keyword in a control program.</p>
 <h2 id="the-control-operators"><a class="header" href="#the-control-operators">The Control Operators</a></h2>
-<p>The <code>control</code> section of a component contains a control program built-up using
-the following operators:</p>
-<h3 id="group-enable"><a class="header" href="#group-enable">Group enable</a></h3>
+<p>The <code>control</code> section of a component contains an imperative program that
+describes the component's behavior. The statements in the control program
+consist of the following operators:</p>
+<h3 id="group-enable"><a class="header" href="#group-enable">Group Enable</a></h3>
 <p>Simply naming a group in a control statement, called a group enable, executes
 the group to completion.
 This is a leaf node in the control program.</p>
@@ -308,33 +348,37 @@ syntax:</p>
 <li><code>instance</code> is the name of the cell instance that needs to be invoked.</li>
 <li><code>inputs</code> and <code>outputs</code> define connections for a subset of input and output
 ports of the instance.</li>
-<li>The <code>with comb_group</code> section is optional and names a <a href="#comb-group">combinational
+<li>The <code>with comb_group</code> section is optional and names a <a href="#comb-group-definitions">combinational
 group</a> that is active during the execution of the <code>invoke</code>
 statement.</li>
-<li>The <a href="#ref-cells"><code>ref cells</code></a> syntax is described in detail</li>
+<li><code>ref cells</code> is a list of cell names to pass to the invoked component's
+required <a href="#ref-cells"><em>cell reference</em></a>. (It can be omitted if the invoked component
+contains no cell references.)</li>
 </ul>
 <p>Invoking a instance runs its control program to completion before returning.
-Any Calyx component or primitive that implements the <a href="#the-go-done-interface">go-done interface</a> can be invoked.</p>
+Any Calyx component or primitive that implements the <a href="#the-go-done-interface">go-done interface</a> can be invoked.
+Like the <a href="#group-enable">group enable</a> statement, <code>invoke</code> is a leaf node in the control program.</p>
 <h3 id="seq"><a class="header" href="#seq"><code>seq</code></a></h3>
-<p>The syntax is:</p>
-<pre><code>seq { c1; .. cn; }
+<p>The syntax for sequential composition is:</p>
+<pre><code>seq { c1; ...; cn; }
 </code></pre>
-<p>Sequences run the control programs, <code>c1</code>..<code>cn</code> in sequence, guaranteeing that
+<p>where each <code>ci</code> is a nested control statement.
+Sequences run the control programs <code>c1</code>...<code>cn</code> in sequence, guaranteeing that
 each program runs fully before the next one starts executing.
 <code>seq</code> <strong>does not</strong> provide any cycle-level guarantees on when a succeeding
-group starts executing.</p>
+group starts executing after the previous one finishes.</p>
 <h3 id="par"><a class="header" href="#par"><code>par</code></a></h3>
-<p>The syntax is:</p>
-<pre><code>par { c1; .. cn; }
+<p>The syntax for parallel composition is:</p>
+<pre><code>par { c1; ...; cn; }
 </code></pre>
-<p>Parallel runs the control programs, <code>c1</code>..<code>cn</code> in parallel, guaranteeing that
+<p>The statement runs the nested control programs <code>c1</code>...<code>cn</code> in parallel, guaranteeing that
 each program only runs once.
 <code>par</code> <strong>does not</strong> provide any guarantees on how the execution of child programs
 is scheduled.
 It is therefore not safe to assume that all children begin execution at the
 same time.</p>
 <blockquote>
-<p><strong>Well-formedness</strong>: The assignments in the children <code>c1</code>..<code>cn</code> should never conflict with each other.</p>
+<p><strong>Well-formedness</strong>: The assignments in the children <code>c1</code>...<code>cn</code> should never conflict with each other.</p>
 </blockquote>
 <h3 id="if"><a class="header" href="#if"><code>if</code></a></h3>
 <p>The syntax is:</p>
@@ -346,7 +390,7 @@ same time.</p>
 </code></pre>
 <p>The conditional execution runs either <code>true_c</code> or <code>false_c</code> using the value of
 <code>&lt;port&gt;</code>.
-The optional <code>with comb_group</code> syntax allows running a combinational group
+The optional <code>with comb_group</code> syntax allows running a <a href="#comb-group-definitions">combinational group</a>
 that computes the value of the port.</p>
 <blockquote>
 <p><strong>Well-formedness</strong>: The combinational group is considered to be running during the entire execution
@@ -360,7 +404,7 @@ with either <code>true_c</code> or <code>false_c</code>.</p>
 }
 </code></pre>
 <p>Repeatedly executes <code>body_c</code> while the value on <code>port</code> is non-zero.
-The optional <code>with comb_group</code> enables a combinational group that computes the
+The optional <code>with comb_group</code> enables a <a href="#comb-group-definitions">combinational group</a> that computes the
 value of <code>port</code>.</p>
 <blockquote>
 <p><strong>Well-formedness</strong>: The combinational group is considered active during the execution of the while
@@ -368,9 +412,9 @@ loop and therefore should not have conflicting assignments with <code>body_c</co
 </blockquote>
 <h2 id="the-go-done-interface"><a class="header" href="#the-go-done-interface">The <code>go</code>-<code>done</code> Interface</a></h2>
 <p>By default, calyx components implement a one-sided ready-valid interface called
-the <code>go</code>-<code>done</code> interface.
-During compilation, the Calyx compiler will add an input port marked with the attribute <code>@go</code> and an output port marked with the attribute <code>@done</code> to the interface of the component:</p>
-<pre><code>component counter(left: 32, right: 32, @go go: 1) -&gt; (out: 32, @done done: 1) ..
+<em>the <code>go</code>-<code>done</code> interface</em>.
+During compilation, the Calyx compiler will add an input port marked with the attribute <a href="./attributes.html#go-done-clk-and-reset"><code>@go</code></a> and an output port marked with the attribute <a href="./attributes.html#go-done-clk-and-reset"><code>@done</code></a> to the interface of the component:</p>
+<pre><code>component counter(left: 32, right: 32, @go go: 1) -&gt; (out: 32, @done done: 1)
 </code></pre>
 <p>The interface provides a way to trigger the control program of the counter using
 assignments.
@@ -382,9 +426,9 @@ executing.</p>
 <p><strong>Well-formedness</strong>: The <code>go</code> signal to the component must remain set to 1 while the done signal is not 1. Lowering the <code>go</code> signal before the <code>done</code> signal is set to 1 will lead to undefined behavior.</p>
 </blockquote>
 <h2 id="the-clk-and-reset-ports"><a class="header" href="#the-clk-and-reset-ports">The <code>clk</code> and <code>reset</code> Ports</a></h2>
-<p>The compiler also adds special input ports marked with <code>@clk</code> and <code>@reset</code> to the
+<p>The compiler also adds special input ports marked with <a href="./attributes.html#go-done-clk-and-reset"><code>@clk</code> and <code>@reset</code></a> to the
 interface.
-By default, the Calyx components are not allowed to look at, or use these signal.
+By default, Calyx components are not allowed to look at or use these signals.
 They are automatically threaded to any primitive that defines <code>@clk</code> or
 <code>@reset</code> ports.</p>
 <h2 id="advanced-concepts"><a class="header" href="#advanced-concepts">Advanced Concepts</a></h2>
