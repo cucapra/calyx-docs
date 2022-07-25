@@ -583,6 +583,10 @@
 <span id="578">578</span>
 <span id="579">579</span>
 <span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">analysis</span>::{<span class="ident">ReadWriteSet</span>, <span class="ident">ShareSet</span>, <span class="ident">VariableDetection</span>},
     <span class="ident">ir</span>::{<span class="self">self</span>, <span class="ident">CloneName</span>, <span class="ident">RRC</span>},
@@ -805,7 +809,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LiveRangeAnalysis</span> {
     <span class="doccomment">/// Map from node (i.e., group enables or invokes) names</span>
-    <span class="doccomment">///  to the components live inside them.</span>
+    <span class="doccomment">/// to the components live inside them.</span>
     <span class="ident">live</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">Prop</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Groups that have been identified as variable-like.</span>
     <span class="doccomment">/// Mapping from group name to the name of the register.</span>
@@ -855,8 +859,12 @@
             <span class="ident">ranges</span>.<span class="ident">add_shareable_ranges</span>(
                 <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">assignments</span>,
                 <span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">name</span>(),
-            )
+            );
         });
+
+        <span class="comment">// Caleb: Right now we run remove-comb-groups before this is used so this code</span>
+        <span class="comment">// doesn&#39;t do anything. Eventually, though, we want to be able to make</span>
+        <span class="comment">// remove-comb-groups optional so I will keep this code.</span>
         <span class="ident">comp</span>.<span class="ident">comb_groups</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">group</span><span class="op">|</span> {
             <span class="ident">ranges</span>.<span class="ident">add_shareable_ranges</span>(
                 <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">assignments</span>,
@@ -1043,7 +1051,7 @@
     }
 }
 
-<span class="doccomment">/// Implements the parallel dataflow analysis that computes the liveness of every register</span>
+<span class="doccomment">/// Implements the parallel dataflow analysis that computes the liveness of every state shareable component</span>
 <span class="doccomment">/// at every point in the program.</span>
 <span class="kw">fn</span> <span class="ident">build_live_ranges</span>(
     <span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>,
