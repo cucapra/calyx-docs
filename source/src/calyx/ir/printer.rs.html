@@ -963,7 +963,7 @@
                     <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;\n{})&quot;</span>, <span class="string">&quot; &quot;</span>.<span class="ident">repeat</span>(<span class="ident">indent_level</span>))<span class="question-mark">?</span>;
                 }
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">group</span>) <span class="op">=</span> <span class="ident">comb_group</span> {
-                    <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;with {};&quot;</span>, <span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">name</span>)
+                    <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot; with {};&quot;</span>, <span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">name</span>)
                 } <span class="kw">else</span> {
                     <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;;&quot;</span>)
                 }

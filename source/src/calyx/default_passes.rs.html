@@ -141,6 +141,7 @@
 <span id="136">136</span>
 <span id="137">137</span>
 <span id="138">138</span>
+<span id="139">139</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::passes</span>::{
     <span class="ident">Canonicalize</span>, <span class="ident">CellShare</span>, <span class="ident">ClkInsertion</span>, <span class="ident">CollapseControl</span>, <span class="ident">CombProp</span>,
@@ -215,6 +216,7 @@
             <span class="string">&quot;pre-opt&quot;</span>,
             [
                 <span class="ident">GroupToSeq</span>,
+                <span class="ident">GroupToInvoke</span>, <span class="comment">// Creates Dead Groups potentially</span>
                 <span class="ident">ComponentInliner</span>,
                 <span class="ident">CombProp</span>,
                 <span class="ident">RemoveCombGroups</span>, <span class="comment">// Must run before `infer-static-timing` and `cell-share`.</span>
