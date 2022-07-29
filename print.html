@@ -832,9 +832,9 @@ or one of the parameter names.</li>
 </ul>
 <p>For example, the following is the signature of the <code>std_reg</code> primitive from the
 Calyx standard library:</p>
-<pre><code>  primitive std_reg&lt;&quot;state_share&quot;=1,&quot;static&quot;=1&gt;[WIDTH](
+<pre><code>  primitive std_reg&lt;&quot;state_share&quot;=1&gt;[WIDTH](
     @write_together(1) in: WIDTH,
-    @write_together(1) @go write_en: 1,
+    @write_together(1) @static(1) @go write_en: 1,
     @clk clk: 1,
     @reset reset: 1
   ) -&gt; (
