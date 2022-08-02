@@ -1673,13 +1673,6 @@ device = &quot;xilinx_u50_gen3x16_xdma_201920_3&quot;
 </code></pre>
 <p>The options for <code>mode</code> are <code>hw_emu</code> (simulation) and <code>hw</code> (on-FPGA execution).
 The device string above is for the <a href="https://www.xilinx.com/products/boards-and-kits/alveo/u50.html">Alveo U50</a> card, which we have at Cornell. The installed Xilinx card would typically be found under the directory <code>/opt/xilinx/platforms</code>, where one would be able to find a device name of interest.</p>
-<p>To use hardware emulation, you will also need to configure the <code>wdb</code> stage.
-It has similar <code>ssh_host</code>, <code>ssh_username</code>, and <code>remote</code> options to the <code>xclbin</code> stage.
-You will also need to configure the stage to point to your installations of <a href="https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html">Vitis</a> and <a href="https://xilinx.github.io/XRT/">XRT</a>, like this:</p>
-<pre><code>[stages.wdb]
-xilinx_location: /scratch/opt/Xilinx/Vitis/2020.2
-xrt_location: /opt/xilinx/xrt
-</code></pre>
 <h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
 <p>The first step in the Xilinx toolchain is to generate <a href="https://xilinx.github.io/XRT/2021.2/html/formats.html#xclbin">an <code>xclbin</code> executable file</a>.
 Here's an example of going all the way from a Calyx program to that:</p>
@@ -1706,7 +1699,7 @@ export EMCONFIG_PATH=`pwd`
 <p>To prepare for hardware emulation of an xclbin compiled appropriately, run:</p>
 <pre><code>export XCL_EMULATION_MODE=hw_emu
 </code></pre>
-<p>If preparing for actual hardware execution, ensure the <code>XCL_EMULATION_MODE</code> environment variable must be unset:</p>
+<p>If preparing for actual hardware execution, ensure the <code>XCL_EMULATION_MODE</code> environment variable is unset:</p>
 <pre><code>unset XCL_EMULATION_MODE
 </code></pre>
 <p>These steps source the setup scripts for both <a href="https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html">Vitis</a> and <a href="https://xilinx.github.io/XRT/">XRT</a>,
@@ -1721,17 +1714,6 @@ The first option instructs XRT to use <a href="https://xilinx.github.io/Vitis_Ac
 <p>Then, look in the resulting directory, which will be named <code>fud-out-*</code> for some <code>*</code>.
 In there, the Xilinx trace files you want are named <code>*.wdb</code> and <code>*.wcfg</code>.
 The VCD file is at <code>.run/*/hw_em/device0/binary_0/behav_waveform/xsim/dump.vcd</code> or similar.</p>
-<h3 id="emulate"><a class="header" href="#emulate">Emulate</a></h3>
-<p>There is also a separate, vestigial path just for doing hardware emulation (i.e., like the <code>hw_emu</code> mode referenced above).
-It is probably a bad idea to use this when the <code>fpga</code> stage exists, but it is still available.
-Use the <code>wdb</code> state as your <code>fud</code> target:</p>
-<pre><code>fud e -vv foo.xclbin -s wdb.save_temps true -o out.wdb
-</code></pre>
-<p>This stage produces a Vivado <a href="https://support.xilinx.com/s/article/64000?language=en_US">waveform database (WDB) file</a>
-Through the magic of <code>fud</code>, you can also go all the way from a Calyx program to a <code>wdb</code> file in the same way.
-There is also a <code>wdb.save_temps</code> option, as with the <code>xclbin</code> stage.</p>
-<p>You also need to provide a host C++ program via the <code>wdb.host</code> parameter, but I don't know much about that yet, so documentation about that will have to wait.
-Similarly, I don't yet know what you're supposed to <em>do</em> with a WDB file; maybe we should figure out how to produce a VCD instead.</p>
 <h3 id="how-it-works"><a class="header" href="#how-it-works">How it Works</a></h3>
 <p>The first step is to generate input files.
 We need to generate:</p>
