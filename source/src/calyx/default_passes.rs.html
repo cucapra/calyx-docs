@@ -142,10 +142,12 @@
 <span id="137">137</span>
 <span id="138">138</span>
 <span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::passes</span>::{
     <span class="ident">Canonicalize</span>, <span class="ident">CellShare</span>, <span class="ident">ClkInsertion</span>, <span class="ident">CollapseControl</span>, <span class="ident">CombProp</span>,
-    <span class="ident">CompileEmpty</span>, <span class="ident">CompileInvoke</span>, <span class="ident">CompileRef</span>, <span class="ident">ComponentInliner</span>,
+    <span class="ident">CompileEmpty</span>, <span class="ident">CompileInvoke</span>, <span class="ident">CompileRef</span>, <span class="ident">CompileSync</span>, <span class="ident">ComponentInliner</span>,
     <span class="ident">ComponentInterface</span>, <span class="ident">DeadCellRemoval</span>, <span class="ident">DeadGroupRemoval</span>, <span class="ident">Externalize</span>,
     <span class="ident">GoInsertion</span>, <span class="ident">GroupToInvoke</span>, <span class="ident">GroupToSeq</span>, <span class="ident">HoleInliner</span>, <span class="ident">InferShare</span>,
     <span class="ident">InferStaticTiming</span>, <span class="ident">LowerGuards</span>, <span class="ident">MergeAssign</span>, <span class="ident">MergeStaticPar</span>, <span class="ident">Papercut</span>,
@@ -187,6 +189,7 @@
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">TopDownStaticTiming</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">TopDownCompileControl</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">CompileRef</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">CompileSync</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
 
         <span class="comment">// Lowering passes</span>
         <span class="ident">pm</span>.<span class="ident">register_pass</span>::<span class="op">&lt;</span><span class="ident">GoInsertion</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
@@ -215,6 +218,7 @@
             <span class="ident">pm</span>,
             <span class="string">&quot;pre-opt&quot;</span>,
             [
+                <span class="ident">CompileSync</span>,
                 <span class="ident">GroupToSeq</span>,
                 <span class="ident">GroupToInvoke</span>, <span class="comment">// Creates Dead Groups potentially</span>
                 <span class="ident">ComponentInliner</span>,

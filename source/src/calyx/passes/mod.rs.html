@@ -79,6 +79,8 @@
 <span id="74">74</span>
 <span id="75">75</span>
 <span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.</span>
 <span class="kw">mod</span> <span class="ident">canonical</span>;
 <span class="kw">mod</span> <span class="ident">cell_share</span>;
@@ -88,6 +90,7 @@
 <span class="kw">mod</span> <span class="ident">compile_empty</span>;
 <span class="kw">mod</span> <span class="ident">compile_invoke</span>;
 <span class="kw">mod</span> <span class="ident">compile_ref</span>;
+<span class="kw">mod</span> <span class="ident">compile_sync</span>;
 <span class="kw">mod</span> <span class="ident">component_iniliner</span>;
 <span class="kw">mod</span> <span class="ident">component_interface</span>;
 <span class="kw">mod</span> <span class="ident">dead_cell_removal</span>;
@@ -127,6 +130,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">compile_empty::CompileEmpty</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">compile_invoke::CompileInvoke</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">compile_ref::CompileRef</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">compile_sync::CompileSync</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">component_iniliner::ComponentInliner</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">component_interface::ComponentInterface</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">dead_cell_removal::DeadCellRemoval</span>;
