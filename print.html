@@ -1625,25 +1625,35 @@ This route will not produce actual, runnable executables; see the next section f
 Run the following command to install all required dependencies:</p>
 <pre><code>cd fud &amp;&amp; flit install -s --deps all
 </code></pre>
-<h3 id="set-up"><a class="header" href="#set-up">Set Up</a></h3>
-<p>To set up to <strong>invoke the Xilinx tools over SSH</strong>, first tell <code>fud</code> your username and hostname for the server:</p>
-<pre><code># Vivado
-fud config stages.synth-verilog.ssh_host &lt;hostname&gt;
-fud config stages.synth-verilog.ssh_username &lt;username&gt;
-fud config stages.synth-verilog.remote true
-
-# Vivado HLS
-fud config stages.vivado-hls.ssh_host &lt;hostname&gt;
-fud config stages.vivado-hls.ssh_username &lt;username&gt;
-fud config stages.vivado-hls.remote true
-</code></pre>
-<p>The server must have <code>vivado</code> and <code>vivado_hls</code> available on the remote machine's path. (If you need the executable names to be something else, please file an issue.)</p>
+<h3 id="seting-up-local-tools"><a class="header" href="#seting-up-local-tools">Seting up Local Tools</a></h3>
 <p>To instead <strong>invoke the Xilinx tools locally</strong>, just let <code>fud</code> run the <code>vivado</code> and <code>vivado_hls</code> commands.
 You can optionally tell <code>fud</code> where these commands exist on your machine:</p>
 <pre><code>fud config stages.synth-verilog.exec &lt;path&gt; # update vivado path
 fud config stages.vivado-hls.exec &lt;path&gt; # update vivado_hls path
 </code></pre>
-<p>Leave the <code>remote</code> option unset to use local execution and these <code>exec</code> paths (which are ignored for remote execution).</p>
+<p>Setting the <code>remote</code> option for the stages to <code>0</code> ensure that <code>fud</code> will always try to run the commands locally.</p>
+<pre><code>fud config stages.synth-verilog.remote 0
+fud config stages.vivado-hls.remote 0
+</code></pre>
+<h3 id="setting-up-remote-tools"><a class="header" href="#setting-up-remote-tools">Setting up Remote Tools</a></h3>
+<blockquote>
+<p>Follow these instructions if you're attempting to run <code>vivado</code> or <code>vivado-hls</code> on a server from your local machine. If you are working directly on a server with these tools, skip to the <a href="fud/xilinx.html#run">run instructions</a>.</p>
+</blockquote>
+<p>To set up to <strong>invoke the Xilinx tools over SSH</strong>, first tell <code>fud</code> your username and hostname for the server:</p>
+<pre><code># Vivado
+fud config stages.synth-verilog.ssh_host &lt;hostname&gt;
+fud config stages.synth-verilog.ssh_username &lt;username&gt;
+
+# Vivado HLS
+fud config stages.vivado-hls.ssh_host &lt;hostname&gt;
+fud config stages.vivado-hls.ssh_username &lt;username&gt;
+</code></pre>
+<p>The following commands enable remote usage of <code>vivado</code> and <code>vivado-hls</code> by default:</p>
+<pre><code>fud config stages.synth-verilog.remote 1
+fud config stages.vivado-hls.remote 1
+</code></pre>
+<p>The server must have <code>vivado</code> and <code>vivado_hls</code> available on the remote machine's path. (If you need the executable names to be something else, please file an issue.)</p>
+<p>If you'd like to switch back to local usage, override the <code>remote</code> option by passing <code>fud e ... -s stages.synth-verilog.remote 0</code></p>
 <h3 id="run"><a class="header" href="#run">Run</a></h3>
 <p>To run the entire toolchain and extract statistics from RTL synthesis, use the <code>resource-estimate</code> target state.
 For example:</p>
@@ -1657,13 +1667,13 @@ For example:</p>
 <h2 id="emulation-and-execution"><a class="header" href="#emulation-and-execution">Emulation and Execution</a></h2>
 <p><code>fud</code> can also compile Calyx programs for actual execution, either in the Xilinx toolchain's emulation modes or for running on a physical FPGA.
 This route involves generating an <a href="https://en.wikipedia.org/wiki/Advanced_eXtensible_Interface">AXI</a> interface wrapper for the Calyx program and invoking it using Xilinx's <a href="https://github.com/Xilinx/PYNQ">PYNQ</a> interface.</p>
-<h3 id="set-up-1"><a class="header" href="#set-up-1">Set Up</a></h3>
+<h3 id="set-up"><a class="header" href="#set-up">Set Up</a></h3>
 <p>As above, you can invoke the Xilinx toolchain locally or remotely, via SSH.
 To set up SSH execution, you can edit your <code>config.toml</code> to add settings like this:</p>
 <pre><code>[stages.xclbin]
 ssh_host = &quot;havarti&quot;
 ssh_username = &quot;als485&quot;
-remote = true
+remote = 1
 </code></pre>
 <p>To use local execution, just leave off the <code>remote = true</code> line.</p>
 <p>You can also set the Xilinx mode and target device:</p>
