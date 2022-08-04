@@ -74,15 +74,15 @@
 
 <span class="kw">impl</span> <span class="ident">VariableDetection</span> {
     <span class="doccomment">/// A group is variable like if it:</span>
-    <span class="doccomment">///  - only writes to a single cell that has type state_share</span>
+    <span class="doccomment">///  - among write to state_shareable components, there is only one write</span>
     <span class="doccomment">///  - has `@go` port equal to `1&#39;d1`</span>
     <span class="doccomment">///  - has `g[done] = cell.done`</span>
-    <span class="doccomment">/// Returns the name of the register if such a group is detected,</span>
+    <span class="doccomment">/// Returns the name of the cell if such a group is detected,</span>
     <span class="doccomment">/// otherwise returns `None`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">variable_like</span>(
         <span class="ident">group_ref</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span>,
         <span class="ident">state_share</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
-    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ir::CellType</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">group_ref</span>.<span class="ident">borrow</span>();
 
         <span class="kw">let</span> <span class="ident">writes</span> <span class="op">=</span> <span class="ident">ReadWriteSet::write_set</span>(<span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">iter</span>())
@@ -122,7 +122,7 @@
             <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
 
-        <span class="prelude-val">Some</span>(<span class="ident">cell</span>.<span class="ident">clone_name</span>())
+        <span class="prelude-val">Some</span>((<span class="ident">cell</span>.<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">cell</span>.<span class="ident">clone_name</span>()))
     }
 }
 </code></pre></div>

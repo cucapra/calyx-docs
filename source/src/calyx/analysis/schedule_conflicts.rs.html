@@ -168,7 +168,7 @@
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">CloneName</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>::{<span class="ident">Idx</span>, <span class="ident">WeightGraph</span>};
 <span class="kw">use</span> <span class="ident">petgraph::visit::IntoEdgeReferences</span>;
-<span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
+<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
 <span class="doccomment">/// A conflict graph that describes which nodes (i.e. groups/invokes) are being run in parallel</span>
@@ -187,7 +187,7 @@
 
 <span class="kw">impl</span> <span class="ident">ScheduleConflicts</span> {
     <span class="doccomment">/// Return a vector of all nodes that conflict with this nodes.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">conflicts_with</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">node</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">conflicts_with</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">node</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">graph</span>
             .<span class="ident">graph</span>
             .<span class="ident">neighbors</span>(<span class="self">self</span>.<span class="ident">graph</span>.<span class="ident">index_map</span>[<span class="ident">node</span>])

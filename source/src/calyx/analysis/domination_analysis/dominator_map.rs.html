@@ -428,95 +428,10 @@
 <span id="423">423</span>
 <span id="424">424</span>
 <span id="425">425</span>
-<span id="426">426</span>
-<span id="427">427</span>
-<span id="428">428</span>
-<span id="429">429</span>
-<span id="430">430</span>
-<span id="431">431</span>
-<span id="432">432</span>
-<span id="433">433</span>
-<span id="434">434</span>
-<span id="435">435</span>
-<span id="436">436</span>
-<span id="437">437</span>
-<span id="438">438</span>
-<span id="439">439</span>
-<span id="440">440</span>
-<span id="441">441</span>
-<span id="442">442</span>
-<span id="443">443</span>
-<span id="444">444</span>
-<span id="445">445</span>
-<span id="446">446</span>
-<span id="447">447</span>
-<span id="448">448</span>
-<span id="449">449</span>
-<span id="450">450</span>
-<span id="451">451</span>
-<span id="452">452</span>
-<span id="453">453</span>
-<span id="454">454</span>
-<span id="455">455</span>
-<span id="456">456</span>
-<span id="457">457</span>
-<span id="458">458</span>
-<span id="459">459</span>
-<span id="460">460</span>
-<span id="461">461</span>
-<span id="462">462</span>
-<span id="463">463</span>
-<span id="464">464</span>
-<span id="465">465</span>
-<span id="466">466</span>
-<span id="467">467</span>
-<span id="468">468</span>
-<span id="469">469</span>
-<span id="470">470</span>
-<span id="471">471</span>
-<span id="472">472</span>
-<span id="473">473</span>
-<span id="474">474</span>
-<span id="475">475</span>
-<span id="476">476</span>
-<span id="477">477</span>
-<span id="478">478</span>
-<span id="479">479</span>
-<span id="480">480</span>
-<span id="481">481</span>
-<span id="482">482</span>
-<span id="483">483</span>
-<span id="484">484</span>
-<span id="485">485</span>
-<span id="486">486</span>
-<span id="487">487</span>
-<span id="488">488</span>
-<span id="489">489</span>
-<span id="490">490</span>
-<span id="491">491</span>
-<span id="492">492</span>
-<span id="493">493</span>
-<span id="494">494</span>
-<span id="495">495</span>
-<span id="496">496</span>
-<span id="497">497</span>
-<span id="498">498</span>
-<span id="499">499</span>
-<span id="500">500</span>
-<span id="501">501</span>
-<span id="502">502</span>
-<span id="503">503</span>
-<span id="504">504</span>
-<span id="505">505</span>
-<span id="506">506</span>
-<span id="507">507</span>
-<span id="508">508</span>
-<span id="509">509</span>
-<span id="510">510</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis::domination_analysis::node_analysis</span>::{
-    <span class="ident">NodeReads</span>, <span class="ident">NodeSearch</span>,
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis</span>::{
+    <span class="ident">domination_analysis::node_analysis</span>::{<span class="ident">NodeReads</span>, <span class="ident">NodeSearch</span>},
+    <span class="ident">ControlId</span>, <span class="ident">ShareSet</span>,
 };
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis::ShareSet</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>};
 <span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
 <span class="kw">use</span> <span class="ident">std::fmt::Debug</span>;
@@ -637,82 +552,6 @@
     }
 }
 
-<span class="doccomment">/// Caleb Note: This is a copy+ paste from the tdcc pass that I edited slightly.</span>
-<span class="doccomment">/// We should unify at some point.</span>
-<span class="doccomment">/// Adds the @NODE_ID attribute to all control stmts except emtpy ones.</span>
-<span class="doccomment">/// Also, for If stmts, instead of an @NODE_ID, it gets a beginning and end</span>
-<span class="doccomment">/// id.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## Example:</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// seq { A; if cond {X} else{Y}; par { C; D; }; E }</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// gets the labels:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// @NODE_ID(0)seq {</span>
-<span class="doccomment">///   @NODE_ID(1) A;</span>
-<span class="doccomment">///   @BEGIN_ID(2) @END_ID(5) if cond {</span>
-<span class="doccomment">///     @NODE_ID(3) X</span>
-<span class="doccomment">///   }</span>
-<span class="doccomment">///   else{</span>
-<span class="doccomment">///     @NODE_ID(4) Y</span>
-<span class="doccomment">///   }</span>
-<span class="doccomment">///   @NODE_ID(6) par {</span>
-<span class="doccomment">///     @NODE_ID(7) C;</span>
-<span class="doccomment">///     @NODE_ID(8) D;</span>
-<span class="doccomment">///   }</span>
-<span class="doccomment">///   @NODE_ID(9) E;</span>
-<span class="doccomment">/// }</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// These identifiers are used by the compilation methods [calculate_states_recur]</span>
-<span class="doccomment">/// and [control_exits]</span>
-<span class="kw">fn</span> <span class="ident">compute_unique_ids</span>(<span class="ident">con</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Control</span>, <span class="kw-2">mut</span> <span class="ident">cur_state</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-    <span class="kw">match</span> <span class="ident">con</span> {
-        <span class="ident">ir::Control::Enable</span>(<span class="ident">ir::Enable</span> { <span class="ident">attributes</span>, .. })
-        <span class="op">|</span> <span class="ident">ir::Control::Invoke</span>(<span class="ident">ir::Invoke</span> { <span class="ident">attributes</span>, .. }) =&gt; {
-            <span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="ident">NODE_ID</span>, <span class="ident">cur_state</span>);
-            <span class="ident">cur_state</span> <span class="op">+</span> <span class="number">1</span>
-        }
-        <span class="ident">ir::Control::Par</span>(<span class="ident">ir::Par</span> {
-            <span class="ident">stmts</span>, <span class="ident">attributes</span>, ..
-        })
-        <span class="op">|</span> <span class="ident">ir::Control::Seq</span>(<span class="ident">ir::Seq</span> {
-            <span class="ident">stmts</span>, <span class="ident">attributes</span>, ..
-        }) =&gt; {
-            <span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="ident">NODE_ID</span>, <span class="ident">cur_state</span>);
-            <span class="ident">cur_state</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="ident">stmts</span>.<span class="ident">iter_mut</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">stmt</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">new_state</span> <span class="op">=</span> <span class="ident">compute_unique_ids</span>(<span class="ident">stmt</span>, <span class="ident">cur_state</span>);
-                <span class="ident">cur_state</span> <span class="op">=</span> <span class="ident">new_state</span>;
-            });
-            <span class="ident">cur_state</span>
-        }
-        <span class="ident">ir::Control::If</span>(<span class="ident">ir::If</span> {
-            <span class="ident">tbranch</span>,
-            <span class="ident">fbranch</span>,
-            <span class="ident">attributes</span>,
-            ..
-        }) =&gt; {
-            <span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="ident">BEGIN_ID</span>, <span class="ident">cur_state</span>);
-            <span class="ident">cur_state</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="ident">cur_state</span> <span class="op">=</span> <span class="ident">compute_unique_ids</span>(<span class="ident">tbranch</span>, <span class="ident">cur_state</span>);
-            <span class="ident">cur_state</span> <span class="op">=</span> <span class="ident">compute_unique_ids</span>(<span class="ident">fbranch</span>, <span class="ident">cur_state</span>);
-            <span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="ident">END_ID</span>, <span class="ident">cur_state</span>);
-            <span class="ident">cur_state</span> <span class="op">+</span> <span class="number">1</span>
-        }
-        <span class="ident">ir::Control::While</span>(<span class="ident">ir::While</span> {
-            <span class="ident">body</span>, <span class="ident">attributes</span>, ..
-        }) =&gt; {
-            <span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="ident">NODE_ID</span>, <span class="ident">cur_state</span>);
-            <span class="ident">cur_state</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="ident">compute_unique_ids</span>(<span class="ident">body</span>, <span class="ident">cur_state</span>)
-        }
-        <span class="ident">ir::Control::Empty</span>(<span class="kw">_</span>) =&gt; <span class="ident">cur_state</span>,
-    }
-}
-
 <span class="comment">// Given a control, gets its associated id. For if statments, gets the</span>
 <span class="comment">// beginning id if begin_id is true and end_id if begin_id is false.</span>
 <span class="comment">// Should not be called on empty control</span>
@@ -747,15 +586,6 @@
         <span class="bool-val">false</span>
     }
 }
-
-<span class="comment">// Gets attribute s from c, panics otherwise. Should be used when you know</span>
-<span class="comment">// that c has attribute s.</span>
-<span class="kw">fn</span> <span class="ident">get_guaranteed_attribute</span>(<span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">u64</span> {
-    <span class="kw-2">*</span><span class="ident">c</span>.<span class="ident">get_attribute</span>(<span class="ident">s</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span><span class="macro">unreachable!</span>(
-            <span class="string">&quot;called get_guaranteed_attribute, meaning we had to be sure it had the id&quot;</span>
-        ))
-}
-
 <span class="comment">// Gets the &quot;final&quot; nodes in control c. Used to build exits_map.</span>
 <span class="kw">fn</span> <span class="ident">get_final</span>(<span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>) -&gt; <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hs</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
@@ -764,10 +594,10 @@
         <span class="ident">ir::Control::Invoke</span>(<span class="kw">_</span>)
         <span class="op">|</span> <span class="ident">ir::Control::Enable</span>(<span class="kw">_</span>)
         <span class="op">|</span> <span class="ident">ir::Control::While</span>(<span class="kw">_</span>) =&gt; {
-            <span class="ident">hs</span>.<span class="ident">insert</span>(<span class="ident">get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">NODE_ID</span>));
+            <span class="ident">hs</span>.<span class="ident">insert</span>(<span class="ident">ControlId::get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">NODE_ID</span>));
         }
         <span class="ident">ir::Control::If</span>(<span class="kw">_</span>) =&gt; {
-            <span class="ident">hs</span>.<span class="ident">insert</span>(<span class="ident">get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">END_ID</span>));
+            <span class="ident">hs</span>.<span class="ident">insert</span>(<span class="ident">ControlId::get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">END_ID</span>));
         }
         <span class="ident">ir::Control::Seq</span>(<span class="ident">ir::Seq</span> { <span class="ident">stmts</span>, .. }) =&gt; {
             <span class="ident">get_final</span>((<span class="kw-2">&amp;</span><span class="ident">stmts</span>[..]).<span class="ident">last</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
@@ -787,7 +617,7 @@
 <span class="kw">impl</span> <span class="ident">DominatorMap</span> {
     <span class="doccomment">/// Construct a domination map.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">control</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Control</span>, <span class="ident">component_name</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">compute_unique_ids</span>(<span class="ident">control</span>, <span class="number">0</span>);
+        <span class="ident">ControlId::compute_unique_ids</span>(<span class="ident">control</span>, <span class="number">0</span>, <span class="bool-val">true</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">DominatorMap</span> {
             <span class="ident">map</span>: <span class="ident">HashMap::new</span>(),
             <span class="ident">exits_map</span>: <span class="ident">HashMap::new</span>(),
@@ -804,19 +634,19 @@
         <span class="kw">match</span> <span class="ident">c</span> {
             <span class="ident">ir::Control::Empty</span>(<span class="kw">_</span>) =&gt; (),
             <span class="ident">ir::Control::Invoke</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">ir::Control::Enable</span>(<span class="kw">_</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">NODE_ID</span>);
+                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">NODE_ID</span>);
                 <span class="self">self</span>.<span class="ident">exits_map</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">HashSet::from</span>([<span class="ident">id</span>]));
             }
             <span class="ident">ir::Control::While</span>(<span class="ident">ir::While</span> { <span class="ident">body</span>, .. }) =&gt; {
-                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">NODE_ID</span>);
+                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">NODE_ID</span>);
                 <span class="self">self</span>.<span class="ident">exits_map</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">HashSet::from</span>([<span class="ident">id</span>]));
                 <span class="self">self</span>.<span class="ident">build_exit_map</span>(<span class="ident">body</span>);
             }
             <span class="ident">ir::Control::If</span>(<span class="ident">ir::If</span> {
                 <span class="ident">tbranch</span>, <span class="ident">fbranch</span>, ..
             }) =&gt; {
-                <span class="kw">let</span> <span class="ident">begin_id</span> <span class="op">=</span> <span class="ident">get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">BEGIN_ID</span>);
-                <span class="kw">let</span> <span class="ident">end_id</span> <span class="op">=</span> <span class="ident">get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">END_ID</span>);
+                <span class="kw">let</span> <span class="ident">begin_id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">BEGIN_ID</span>);
+                <span class="kw">let</span> <span class="ident">end_id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">END_ID</span>);
                 <span class="self">self</span>.<span class="ident">exits_map</span>.<span class="ident">insert</span>(<span class="ident">begin_id</span>, <span class="ident">HashSet::from</span>([<span class="ident">end_id</span>]));
                 <span class="self">self</span>.<span class="ident">exits_map</span>.<span class="ident">insert</span>(<span class="ident">end_id</span>, <span class="ident">HashSet::from</span>([<span class="ident">end_id</span>]));
                 <span class="self">self</span>.<span class="ident">build_exit_map</span>(<span class="ident">tbranch</span>);
@@ -827,7 +657,7 @@
                 <span class="kw">for</span> <span class="ident">stmt</span> <span class="kw">in</span> <span class="ident">stmts</span> {
                     <span class="self">self</span>.<span class="ident">build_exit_map</span>(<span class="ident">stmt</span>);
                 }
-                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">NODE_ID</span>);
+                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">NODE_ID</span>);
                 <span class="self">self</span>.<span class="ident">exits_map</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">get_final</span>(<span class="ident">c</span>));
             }
         }
@@ -933,7 +763,7 @@
                     <span class="self">self</span>.<span class="ident">update_map</span>(<span class="ident">main_c</span>, <span class="ident">f_id</span>, <span class="kw-2">&amp;</span><span class="ident">if_guard_set</span>);
                 }
 
-                <span class="kw">let</span> <span class="ident">end_id</span> <span class="op">=</span> <span class="ident">get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">END_ID</span>);
+                <span class="kw">let</span> <span class="ident">end_id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">END_ID</span>);
                 <span class="self">self</span>.<span class="ident">update_node</span>(<span class="kw-2">&amp;</span><span class="ident">if_guard_set</span>, <span class="ident">end_id</span>)
             }
         };
