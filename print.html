@@ -3134,7 +3134,8 @@ intermediate representation.</p>
  pip3 install --user dist/tvm-*.whl
 </code></pre>
 <blockquote>
-<p>If you get an error with <code>shutil</code>, try deleting the <code>python/</code> directory, restoring it, and rerunning the above command: <code>cd .. &amp;&amp; rm -rf python &amp;&amp; git checkout -- python</code></p>
+<p>If you get an error with <code>shutil</code>, try deleting the <code>python/</code> directory, restoring it, and rerunning the above command: <code>cd .. &amp;&amp; rm -rf python &amp;&amp; git checkout -- python</code>
+If you are on MacOS - Big Sur and are getting an error similar to &quot;(wheel).whl is not a supported wheel on this platform&quot;, try changing part of the wheel's filename from 11_0 to 10_9. See https://github.com/apple/tensorflow_macos/issues/46 for more information. </p>
 </blockquote>
 </li>
 <li>
