@@ -809,6 +809,119 @@
 <span id="804">804</span>
 <span id="805">805</span>
 <span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
+<span id="899">899</span>
+<span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
+<span id="904">904</span>
+<span id="905">905</span>
+<span id="906">906</span>
+<span id="907">907</span>
+<span id="908">908</span>
+<span id="909">909</span>
+<span id="910">910</span>
+<span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
+<span id="915">915</span>
+<span id="916">916</span>
+<span id="917">917</span>
+<span id="918">918</span>
+<span id="919">919</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">analysis</span>::{<span class="ident">ControlId</span>, <span class="ident">ReadWriteSet</span>, <span class="ident">ShareSet</span>, <span class="ident">VariableDetection</span>},
     <span class="ident">ir</span>::{<span class="self">self</span>, <span class="ident">CloneName</span>, <span class="ident">RRC</span>},
@@ -855,11 +968,6 @@
     <span class="kw">fn</span> <span class="ident">transfer_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">gen</span>: <span class="ident">TypeNameSet</span>, <span class="ident">kill</span>: <span class="ident">TypeNameSet</span>) {
         <span class="self">self</span>.<span class="ident">sub_set</span>(<span class="ident">kill</span>);
         <span class="self">self</span>.<span class="ident">or_set</span>(<span class="ident">gen</span>);
-    }
-
-    <span class="doccomment">/// Add an element to Prop.</span>
-    <span class="kw">fn</span> <span class="ident">insert</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, (<span class="ident">cell_type</span>, <span class="ident">cell_name</span>): (<span class="ident">ir::CellType</span>, <span class="ident">ir::Id</span>)) {
-        <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">entry</span>(<span class="ident">cell_type</span>).<span class="ident">or_default</span>().<span class="ident">insert</span>(<span class="ident">cell_name</span>);
     }
 
     <span class="comment">// The or operation, but when the self is a map and rhs is a set of tuples.</span>
@@ -1058,10 +1166,13 @@
     <span class="ident">variable_like</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ir::CellType</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Set of state shareable components (as type names)</span>
     <span class="ident">state_share</span>: <span class="ident">ShareSet</span>,
-    <span class="doccomment">///Set of shareable components (as type names)</span>
+    <span class="doccomment">/// Set of shareable components (as type names)</span>
     <span class="ident">share</span>: <span class="ident">ShareSet</span>,
-    <span class="doccomment">///maps invokes/enable ids to the cell types/names live in them</span>
+    <span class="doccomment">/// maps invokes/enable ids to the shareable cell types/names live in them</span>
     <span class="ident">invokes_enables_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">TypeNameSet</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// maps comb groups of if/while statements to the cell types/</span>
+    <span class="doccomment">/// names used in them</span>
+    <span class="ident">cgroup_uses_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">TypeNameSet</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">LiveRangeAnalysis</span> {
@@ -1159,10 +1270,7 @@
                 }
             }
             <span class="ident">ir::Control::If</span>(<span class="ident">ir::If</span> {
-                <span class="ident">tbranch</span>,
-                <span class="ident">fbranch</span>,
-                <span class="ident">port</span>,
-                ..
+                <span class="ident">tbranch</span>, <span class="ident">fbranch</span>, ..
             }) =&gt; {
                 <span class="self">self</span>.<span class="ident">get_live_control_data</span>(
                     <span class="ident">live_once_map</span>,
@@ -1178,24 +1286,33 @@
                     <span class="ident">parents</span>,
                     <span class="ident">fbranch</span>,
                 );
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">parents</span>.<span class="ident">is_empty</span>() {
-                    <span class="comment">// potentially adding the port cell as live</span>
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">cell_type</span>, <span class="ident">cell_name</span>)) <span class="op">=</span>
-                        <span class="ident">LiveRangeAnalysis::port_to_cell_name</span>(
-                            <span class="ident">port</span>,
-                            <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
-                        )
-                    {
-                        <span class="ident">live_once_map</span>
-                            .<span class="ident">entry</span>(<span class="ident">cell_type</span>)
+                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>);
+                <span class="comment">// Examining all the cells used at the comb group of the if stmt</span>
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group_uses</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">cgroup_uses_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+                    <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">cell_name</span>) <span class="kw">in</span> <span class="ident">comb_group_uses</span> {
+                        <span class="comment">// add cells as live within whichever direct children of</span>
+                        <span class="comment">// par blocks they&#39;re located within</span>
+                        <span class="kw">if</span> <span class="op">!</span><span class="ident">parents</span>.<span class="ident">is_empty</span>() {
+                            <span class="ident">live_once_map</span>
+                                .<span class="ident">entry</span>(<span class="ident">cell_type</span>.<span class="ident">clone</span>())
+                                .<span class="ident">or_default</span>()
+                                .<span class="ident">entry</span>(<span class="ident">cell_name</span>.<span class="ident">clone</span>())
+                                .<span class="ident">or_default</span>()
+                                .<span class="ident">extend</span>(<span class="ident">parents</span>);
+                        }
+                        <span class="comment">// mark cell as live in the control id of the if statement.</span>
+                        <span class="comment">// What this really means, though, is that the cell is live</span>
+                        <span class="comment">// at the comb group/port guard of the if statement</span>
+                        <span class="ident">live_cell_map</span>
+                            .<span class="ident">entry</span>(<span class="ident">cell_type</span>.<span class="ident">clone</span>())
                             .<span class="ident">or_default</span>()
-                            .<span class="ident">entry</span>(<span class="ident">cell_name</span>)
+                            .<span class="ident">entry</span>(<span class="ident">cell_name</span>.<span class="ident">clone</span>())
                             .<span class="ident">or_default</span>()
-                            .<span class="ident">extend</span>(<span class="ident">parents</span>);
+                            .<span class="ident">insert</span>(<span class="ident">id</span>);
                     }
                 }
             }
-            <span class="ident">ir::Control::While</span>(<span class="ident">ir::While</span> { <span class="ident">body</span>, <span class="ident">port</span>, .. }) =&gt; {
+            <span class="ident">ir::Control::While</span>(<span class="ident">ir::While</span> { <span class="ident">body</span>, .. }) =&gt; {
                 <span class="self">self</span>.<span class="ident">get_live_control_data</span>(
                     <span class="ident">live_once_map</span>,
                     <span class="ident">par_thread_map</span>,
@@ -1203,20 +1320,23 @@
                     <span class="ident">parents</span>,
                     <span class="ident">body</span>,
                 );
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">parents</span>.<span class="ident">is_empty</span>() {
-                    <span class="comment">// potentially adding the port cell as live</span>
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">cell_type</span>, <span class="ident">cell_name</span>)) <span class="op">=</span>
-                        <span class="ident">LiveRangeAnalysis::port_to_cell_name</span>(
-                            <span class="ident">port</span>,
-                            <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
-                        )
-                    {
-                        <span class="ident">live_once_map</span>
-                            .<span class="ident">entry</span>(<span class="ident">cell_type</span>)
+                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>);
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group_uses</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">cgroup_uses_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+                    <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">cell_name</span>) <span class="kw">in</span> <span class="ident">comb_group_uses</span> {
+                        <span class="kw">if</span> <span class="op">!</span><span class="ident">parents</span>.<span class="ident">is_empty</span>() {
+                            <span class="ident">live_once_map</span>
+                                .<span class="ident">entry</span>(<span class="ident">cell_type</span>.<span class="ident">clone</span>())
+                                .<span class="ident">or_default</span>()
+                                .<span class="ident">entry</span>(<span class="ident">cell_name</span>.<span class="ident">clone</span>())
+                                .<span class="ident">or_default</span>()
+                                .<span class="ident">extend</span>(<span class="ident">parents</span>);
+                        }
+                        <span class="ident">live_cell_map</span>
+                            .<span class="ident">entry</span>(<span class="ident">cell_type</span>.<span class="ident">clone</span>())
                             .<span class="ident">or_default</span>()
-                            .<span class="ident">entry</span>(<span class="ident">cell_name</span>)
+                            .<span class="ident">entry</span>(<span class="ident">cell_name</span>.<span class="ident">clone</span>())
                             .<span class="ident">or_default</span>()
-                            .<span class="ident">extend</span>(<span class="ident">parents</span>);
+                            .<span class="ident">insert</span>(<span class="ident">id</span>);
                     }
                 }
             }
@@ -1365,6 +1485,25 @@
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
     }
 
+    <span class="comment">// returns (share_uses, state_reads), which are the uses of shareable components</span>
+    <span class="comment">// and reads of state shareable components</span>
+    <span class="kw">fn</span> <span class="ident">uses_reads_cgroup</span>(
+        <span class="ident">group_ref</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::CombGroup</span><span class="op">&gt;</span>,
+        <span class="ident">shareable</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
+        <span class="ident">state_shareable</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
+    ) -&gt; (<span class="ident">TypeNameSet</span>, <span class="ident">TypeNameSet</span>) {
+        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">group_ref</span>.<span class="ident">borrow</span>();
+        <span class="kw">let</span> <span class="ident">share_uses</span> <span class="op">=</span> <span class="ident">ReadWriteSet::uses</span>(<span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">iter</span>())
+            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">shareable</span>.<span class="ident">is_shareable_component</span>(<span class="ident">cell</span>))
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> (<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">cell</span>.<span class="ident">clone_name</span>()))
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+        <span class="kw">let</span> <span class="ident">state_reads</span> <span class="op">=</span> <span class="ident">ReadWriteSet::read_set</span>(<span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">iter</span>())
+            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">state_shareable</span>.<span class="ident">is_shareable_component</span>(<span class="ident">cell</span>))
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> (<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">cell</span>.<span class="ident">clone_name</span>()))
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+        (<span class="ident">share_uses</span>, <span class="ident">state_reads</span>)
+    }
+
     <span class="kw">fn</span> <span class="ident">port_to_cell_name</span>(
         <span class="ident">port</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>,
         <span class="ident">shareable_components</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
@@ -1404,6 +1543,18 @@
             ));
         }
 
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">invoke</span>.<span class="ident">comb_group</span> {
+            <span class="ident">read_set</span>.<span class="ident">extend</span>(
+                <span class="ident">ReadWriteSet::read_set</span>(<span class="ident">comb_group</span>.<span class="ident">borrow</span>().<span class="ident">assignments</span>.<span class="ident">iter</span>())
+                    .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> {
+                        <span class="ident">shareable_components</span>.<span class="ident">is_shareable_component</span>(<span class="ident">cell</span>)
+                    })
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> {
+                        (<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">cell</span>.<span class="ident">clone_name</span>())
+                    }),
+            );
+        }
+
         <span class="comment">//The writes of the invoke include its outpus plus the cell itself, if the</span>
         <span class="comment">//inputs are not empty.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">write_set</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">invoke</span>
@@ -1429,14 +1580,28 @@
         <span class="ident">invoke</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Invoke</span>,
         <span class="ident">shareable_components</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
     ) -&gt; <span class="ident">TypeNameSet</span> {
-        <span class="ident">invoke</span>
+        <span class="comment">// uses of shareable components in the invoke statement</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">invoke_uses</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">invoke</span>
             .<span class="ident">inputs</span>
             .<span class="ident">iter</span>()
             .<span class="ident">chain</span>(<span class="ident">invoke</span>.<span class="ident">outputs</span>.<span class="ident">iter</span>())
             .<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">src</span>)<span class="op">|</span> {
                 <span class="ident"><span class="self">Self</span>::port_to_cell_name</span>(<span class="ident">src</span>, <span class="ident">shareable_components</span>)
             })
-            .<span class="ident">collect</span>()
+            .<span class="ident">collect</span>();
+        <span class="comment">// uses of shareable components in the comb group (if it exists)</span>
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">invoke</span>.<span class="ident">comb_group</span> {
+            <span class="ident">invoke_uses</span>.<span class="ident">extend</span>(
+                <span class="ident">ReadWriteSet::uses</span>(<span class="ident">comb_group</span>.<span class="ident">borrow</span>().<span class="ident">assignments</span>.<span class="ident">iter</span>())
+                    .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> {
+                        <span class="ident">shareable_components</span>.<span class="ident">is_shareable_component</span>(<span class="ident">cell</span>)
+                    })
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> {
+                        (<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">cell</span>.<span class="ident">clone_name</span>())
+                    }),
+            );
+        }
+        <span class="ident">invoke_uses</span>
     }
 
     <span class="doccomment">/// Implements the parallel dataflow analysis that computes the liveness of every state shareable component</span>
@@ -1528,6 +1693,7 @@
                 <span class="ident">tbranch</span>,
                 <span class="ident">fbranch</span>,
                 <span class="ident">port</span>,
+                <span class="ident">cond</span>,
                 ..
             }) =&gt; {
                 <span class="comment">// compute each branch</span>
@@ -1546,13 +1712,43 @@
                 <span class="ident">t_gens</span>.<span class="ident">or</span>(<span class="ident">f_gens</span>);
                 <span class="ident">t_kills</span>.<span class="ident">or</span>(<span class="ident">f_kills</span>);
 
-                <span class="comment">// feed to condition to compute</span>
+                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>);
+
+                <span class="comment">// reads from state shareable components in the comb group</span>
+                <span class="comment">// These should get &quot;passed on&quot; as live/gens as we go up the</span>
+                <span class="comment">// control flow of the program</span>
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cgroup_reads</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
+                <span class="comment">// Any uses of any shareable components in the comb group.</span>
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shareable_uses</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
+
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group</span>) <span class="op">=</span> <span class="ident">cond</span> {
+                    <span class="kw">let</span> (<span class="ident">share_uses</span>, <span class="ident">state_reads</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::uses_reads_cgroup</span>(
+                        <span class="ident">comb_group</span>,
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">share</span>,
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
+                    );
+                    <span class="ident">shareable_uses</span> <span class="op">=</span> <span class="ident">share_uses</span>;
+                    <span class="ident">cgroup_reads</span> <span class="op">=</span> <span class="ident">state_reads</span>;
+                }
+
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cell_info</span>) <span class="op">=</span> <span class="ident">LiveRangeAnalysis::port_to_cell_name</span>(
                     <span class="ident">port</span>,
                     <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
                 ) {
-                    <span class="ident">t_alive</span>.<span class="ident">insert</span>(<span class="ident">cell_info</span>);
+                    <span class="comment">// If we read from a state shareable component (like a register)</span>
+                    <span class="comment">// in the port, then we add it to cgroup_reads.</span>
+                    <span class="ident">cgroup_reads</span>.<span class="ident">insert</span>(<span class="ident">cell_info</span>);
                 }
+                <span class="kw">if</span> <span class="op">!</span><span class="ident">cgroup_reads</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">shareable_uses</span>.<span class="ident">is_empty</span>() {
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">all_uses</span> <span class="op">=</span> <span class="ident">cgroup_reads</span>.<span class="ident">clone</span>();
+                    <span class="ident">all_uses</span>.<span class="ident">extend</span>(<span class="ident">shareable_uses</span>);
+                    <span class="comment">// add all uses of both shareable and state-shareable components</span>
+                    <span class="comment">// in the cgroup_uses_map.</span>
+                    <span class="self">self</span>.<span class="ident">cgroup_uses_map</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">all_uses</span>);
+                }
+                <span class="comment">// adding cgroup_reads as live on output of if stmt</span>
+                <span class="ident">t_alive</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>.<span class="ident">clone</span>());
+                <span class="ident">t_gens</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>);
                 (<span class="ident">t_alive</span>, <span class="ident">t_gens</span>, <span class="ident">t_kills</span>)
             }
             <span class="ident">ir::Control::Par</span>(<span class="ident">ir::Par</span> { <span class="ident">stmts</span>, .. }) =&gt; {
@@ -1591,25 +1787,55 @@
                 <span class="ident">alive</span>.<span class="ident">transfer</span>(<span class="ident">gens</span>.<span class="ident">clone</span>(), <span class="ident">kills</span>.<span class="ident">clone</span>());
                 (<span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>)
             }
-            <span class="ident">ir::Control::While</span>(<span class="ident">ir::While</span> { <span class="ident">body</span>, <span class="ident">port</span>, .. }) =&gt; {
+            <span class="ident">ir::Control::While</span>(<span class="ident">ir::While</span> {
+                <span class="ident">body</span>, <span class="ident">port</span>, <span class="ident">cond</span>, ..
+            }) =&gt; {
+                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>);
+                <span class="comment">// need this info twice, so just pre-calculate whether port is</span>
+                <span class="comment">// a state shareable component.</span>
+                <span class="kw">let</span> <span class="ident">port_if_shareable</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ir::CellType</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span> <span class="op">=</span>
+                    <span class="ident">LiveRangeAnalysis::port_to_cell_name</span>(
+                        <span class="ident">port</span>,
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
+                    );
+                <span class="comment">// all reads from state shareable components in the comb group or port</span>
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cgroup_reads</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
+                <span class="comment">// all uses of shareable components in the comb group or port</span>
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shareable_uses</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
+                <span class="comment">// Go through while body and while port + comb group once</span>
                 <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">alive</span>, <span class="kw-2">mut</span> <span class="ident">gens</span>, <span class="ident">kills</span>) <span class="op">=</span>
                     <span class="self">self</span>.<span class="ident">build_live_ranges</span>(<span class="ident">body</span>, <span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>);
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cell</span>) <span class="op">=</span> <span class="ident">LiveRangeAnalysis::port_to_cell_name</span>(
-                    <span class="ident">port</span>,
-                    <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
-                ) {
-                    <span class="ident">alive</span>.<span class="ident">insert</span>(<span class="ident">cell</span>.<span class="ident">clone</span>());
-                    <span class="ident">gens</span>.<span class="ident">insert</span>(<span class="ident">cell</span>);
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cell_info</span>) <span class="op">=</span> <span class="ident">port_if_shareable</span> {
+                    <span class="comment">// adds port to cgroup_reads if state_shareable.</span>
+                    <span class="ident">cgroup_reads</span>.<span class="ident">insert</span>(<span class="ident">cell_info</span>);
                 }
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group</span>) <span class="op">=</span> <span class="ident">cond</span> {
+                    <span class="kw">let</span> (<span class="ident">share_uses</span>, <span class="ident">state_reads</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::uses_reads_cgroup</span>(
+                        <span class="ident">comb_group</span>,
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">share</span>,
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
+                    );
+                    <span class="ident">shareable_uses</span> <span class="op">=</span> <span class="ident">share_uses</span>;
+                    <span class="ident">cgroup_reads</span>.<span class="ident">extend</span>(<span class="ident">state_reads</span>);
+                }
+                <span class="comment">// setting alive and gens appropriately based on the updated info</span>
+                <span class="comment">// from the comb group + port.</span>
+                <span class="ident">alive</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>.<span class="ident">clone</span>());
+                <span class="ident">gens</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>.<span class="ident">clone</span>());
+
+                <span class="kw">if</span> <span class="op">!</span><span class="ident">cgroup_reads</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">shareable_uses</span>.<span class="ident">is_empty</span>() {
+                    <span class="comment">// add all uses of shareable and non-shareable components into</span>
+                    <span class="comment">// cgroup_uses_map</span>
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">all_uses</span> <span class="op">=</span> <span class="ident">cgroup_reads</span>.<span class="ident">clone</span>();
+                    <span class="ident">all_uses</span>.<span class="ident">extend</span>(<span class="ident">shareable_uses</span>);
+                    <span class="self">self</span>.<span class="ident">cgroup_uses_map</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">all_uses</span>);
+                }
+
+                <span class="comment">// Going through the while body and guard + port once again</span>
                 <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">alive</span>, <span class="kw-2">mut</span> <span class="ident">gens</span>, <span class="ident">kills</span>) <span class="op">=</span>
                     <span class="self">self</span>.<span class="ident">build_live_ranges</span>(<span class="ident">body</span>, <span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>);
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cell</span>) <span class="op">=</span> <span class="ident">LiveRangeAnalysis::port_to_cell_name</span>(
-                    <span class="ident">port</span>,
-                    <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
-                ) {
-                    <span class="ident">alive</span>.<span class="ident">insert</span>(<span class="ident">cell</span>.<span class="ident">clone</span>());
-                    <span class="ident">gens</span>.<span class="ident">insert</span>(<span class="ident">cell</span>);
-                }
+                <span class="ident">alive</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>.<span class="ident">clone</span>());
+                <span class="ident">gens</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>);
                 (<span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>)
             }
         }

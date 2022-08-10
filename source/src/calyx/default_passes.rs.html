@@ -145,6 +145,7 @@
 <span id="140">140</span>
 <span id="141">141</span>
 <span id="142">142</span>
+<span id="143">143</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::passes</span>::{
     <span class="ident">Canonicalize</span>, <span class="ident">CellShare</span>, <span class="ident">ClkInsertion</span>, <span class="ident">CollapseControl</span>, <span class="ident">CombProp</span>,
@@ -225,18 +226,19 @@
                 <span class="ident">GroupToInvoke</span>, <span class="comment">// Creates Dead Groups potentially</span>
                 <span class="ident">ComponentInliner</span>,
                 <span class="ident">CombProp</span>,
-                <span class="ident">RemoveCombGroups</span>, <span class="comment">// Must run before `infer-static-timing` and `cell-share`.</span>
-                <span class="ident">InferStaticTiming</span>,
-                <span class="ident">MergeStaticPar</span>,
-                <span class="ident">DeadGroupRemoval</span>, <span class="comment">// Since MergeStaticPar potentialy creates dead groups</span>
-                <span class="ident">StaticParConv</span>,    <span class="comment">// Must be before `collapse-control`</span>
-                <span class="ident">CollapseControl</span>,
-                <span class="ident">CompileRef</span>, <span class="comment">//Must run before &#39;resource-sharing&#39;.</span>
+                <span class="ident">CompileRef</span>, <span class="comment">//Must run before cell-share.</span>
                 <span class="ident">InferShare</span>,
-                <span class="ident">CellShare</span>,
+                <span class="ident">CellShare</span>, <span class="comment">// LiveRangeAnalaysis should handle comb groups</span>
+                <span class="ident">RemoveCombGroups</span>, <span class="comment">// Must run before infer-static-timing</span>
+                <span class="ident">InferStaticTiming</span>,
+                <span class="ident">CompileInvoke</span>,    <span class="comment">// creates dead comb groups</span>
+                <span class="ident">MergeStaticPar</span>,   <span class="comment">// creates dead groups potentially</span>
+                <span class="ident">StaticParConv</span>,    <span class="comment">// Must be before collapse-control</span>
+                <span class="ident">DeadGroupRemoval</span>, <span class="comment">// Since previous passes potentially create dead groups</span>
+                <span class="ident">CollapseControl</span>,
             ]
         );
-        <span class="macro">register_alias!</span>(<span class="ident">pm</span>, <span class="string">&quot;compile&quot;</span>, [<span class="ident">CompileInvoke</span>, <span class="ident">TopDownCompileControl</span>]);
+        <span class="macro">register_alias!</span>(<span class="ident">pm</span>, <span class="string">&quot;compile&quot;</span>, [<span class="ident">TopDownCompileControl</span>]);
         <span class="macro">register_alias!</span>(
             <span class="ident">pm</span>,
             <span class="string">&quot;post-opt&quot;</span>,
