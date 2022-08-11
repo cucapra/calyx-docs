@@ -254,6 +254,113 @@
 <span id="249">249</span>
 <span id="250">250</span>
 <span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::CalyxResult</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">analysis</span>::{<span class="ident">GraphColoring</span>, <span class="ident">LiveRangeAnalysis</span>, <span class="ident">ReadWriteSet</span>, <span class="ident">ShareSet</span>},
@@ -278,6 +385,26 @@
 <span class="doccomment">/// A greedy graph coloring algorithm on the interference graph</span>
 <span class="doccomment">/// is used to assign each cell a name.</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// By default, this pass will share a given cell as many times as possible. However,</span>
+<span class="doccomment">/// by passing a command line argument, we can limit the number of times a given</span>
+<span class="doccomment">/// cell is reused. The rationale behind this option is that, in certain cases,</span>
+<span class="doccomment">/// if you share a given component too much, the logic to determine when that</span>
+<span class="doccomment">/// component should be activated ends up being more expensive than just using</span>
+<span class="doccomment">/// a separate component. To pass this command line argument, you give three numbers:</span>
+<span class="doccomment">/// 1) the number of times a given combinational component can be shared, 2) the number</span>
+<span class="doccomment">/// of times a given register can be shared, and 3) the number of times all other</span>
+<span class="doccomment">/// components can be shared. Generally we would want settings such that 1 &lt; 2 &lt; 3,</span>
+<span class="doccomment">/// since a given share of a 3) would save more hardware than a share of a 2), and</span>
+<span class="doccomment">/// a share of a 2) would save more hardware than a share of a 1).</span>
+<span class="doccomment">/// The exact command line syntax to use: if we had a file, &quot;x.futil&quot; and ran:</span>
+<span class="doccomment">/// `cargo run x.futil -x cell-share:bounds=2,4,8&quot;, then we would only share a</span>
+<span class="doccomment">/// given combinational component at most twice, a given register at most 4 times,</span>
+<span class="doccomment">/// and all other components at most 8 times. If you wanted to do somethign with</span>
+<span class="doccomment">/// fud then run `fud e ... -s futil.flags &quot; -x cell-share:bounds=2,3,4&quot;`.</span>
+<span class="doccomment">/// Note: *The no spaces are important.*</span>
+<span class="doccomment">/// Passing &quot;-x cell-share:always-share&quot; will always share a given cell and</span>
+<span class="doccomment">/// override any &quot; -x cell-share:bounds=...&quot; argument you pass.</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// This pass only renames uses of cells. [crate::passes::DeadCellRemoval] should be run after this</span>
 <span class="doccomment">/// to actually remove the definitions.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CellShare</span> {
@@ -291,6 +418,10 @@
 
     <span class="doccomment">/// Cell active in continuous assignments, or ref cells (we want to ignore both)</span>
     <span class="ident">cont_ref_cells</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
+
+    <span class="doccomment">/// The number of times a given class of cell can be shared. bounds should be</span>
+    <span class="doccomment">/// length 3 to hold the 3 classes: comb cells, registers, and everything else</span>
+    <span class="ident">bounds</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Named</span> <span class="kw">for</span> <span class="ident">CellShare</span> {
@@ -306,6 +437,7 @@
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Context</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">state_shareable</span> <span class="op">=</span> <span class="ident">ShareSet::from_context</span>::<span class="op">&lt;</span><span class="bool-val">true</span><span class="op">&gt;</span>(<span class="ident">ctx</span>);
         <span class="kw">let</span> <span class="ident">shareable</span> <span class="op">=</span> <span class="ident">ShareSet::from_context</span>::<span class="op">&lt;</span><span class="bool-val">false</span><span class="op">&gt;</span>(<span class="ident">ctx</span>);
+        <span class="kw">let</span> <span class="ident">bounds</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_bounds</span>(<span class="ident">ctx</span>);
 
         <span class="prelude-val">Ok</span>(<span class="ident">CellShare</span> {
             <span class="ident">live</span>: <span class="ident">LiveRangeAnalysis::default</span>(),
@@ -313,6 +445,7 @@
             <span class="ident">cont_ref_cells</span>: <span class="ident">HashSet::new</span>(),
             <span class="ident">state_shareable</span>,
             <span class="ident">shareable</span>,
+            <span class="ident">bounds</span>,
         })
     }
 
@@ -360,6 +493,68 @@
             <span class="self">self</span>.<span class="ident">state_shareable</span>.<span class="ident">contains</span>(<span class="ident">name</span>) <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">shareable</span>.<span class="ident">contains</span>(<span class="ident">name</span>)
         } <span class="kw">else</span> {
             <span class="bool-val">false</span>
+        }
+    }
+
+    <span class="comment">// given a ctx, gets the bounds. For example, if &quot;-x cell-share:bounds=2,3,4&quot;</span>
+    <span class="comment">// is passed in the cmd line, we should return [2,3,4]. If no such argument</span>
+    <span class="comment">// is given, return the default, which is currently set rather</span>
+    <span class="comment">// arbitrarily at [4,6,18].</span>
+    <span class="kw">fn</span> <span class="ident">get_bounds</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Context</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="self">Self</span>: <span class="ident">Named</span>,
+    {
+        <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::name</span>();
+        <span class="comment">// getting the givne opts for -x cell-share:__</span>
+        <span class="kw">let</span> <span class="ident">given_opts</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ctx</span>
+            .<span class="ident">extra_opts</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">opt</span><span class="op">|</span> {
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">splits</span> <span class="op">=</span> <span class="ident">opt</span>.<span class="ident">split</span>(<span class="string">&#39;:&#39;</span>);
+                <span class="kw">if</span> <span class="ident">splits</span>.<span class="ident">next</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">n</span>) {
+                    <span class="ident">splits</span>.<span class="ident">next</span>()
+                } <span class="kw">else</span> {
+                    <span class="prelude-val">None</span>
+                }
+            })
+            .<span class="ident">collect</span>();
+
+        <span class="kw">if</span> <span class="ident">given_opts</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">arg</span><span class="op">|</span> <span class="ident">arg</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="string">&quot;always-share&quot;</span>) {
+            <span class="kw">return</span> <span class="prelude-val">None</span>;
+        }
+
+        <span class="comment">// searching for -x cell-share:bounds=x,y,z and getting back &quot;x,y,z&quot;</span>
+        <span class="kw">let</span> <span class="ident">bounds_arg</span> <span class="op">=</span> <span class="ident">given_opts</span>.<span class="ident">into_iter</span>().<span class="ident">find_map</span>(<span class="op">|</span><span class="ident">arg</span><span class="op">|</span> {
+            <span class="kw">let</span> <span class="ident">split</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">arg</span>.<span class="ident">split</span>(<span class="string">&#39;=&#39;</span>).<span class="ident">collect</span>();
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">str</span>) <span class="op">=</span> <span class="ident">split</span>.<span class="ident">get</span>(<span class="number">0</span>) {
+                <span class="kw">if</span> <span class="ident">str</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="string">&quot;bounds&quot;</span> <span class="op">&amp;&amp;</span> <span class="ident">split</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">2</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">split</span>[<span class="number">1</span>]);
+                }
+            }
+            <span class="prelude-val">None</span>
+        });
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bounds</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">set_default</span> <span class="op">=</span> <span class="bool-val">false</span>;
+
+        <span class="comment">// if bounds_arg = &quot;x,y,z&quot;, set bounds to [x,y,z]</span>
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">bounds_arg</span> {
+            <span class="ident">bounds</span> <span class="op">=</span> <span class="ident">s</span>
+                .<span class="ident">split</span>(<span class="string">&#39;,&#39;</span>)
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>().<span class="ident">unwrap_or</span>(<span class="number">0</span>))
+                .<span class="ident">collect</span>();
+        } <span class="kw">else</span> {
+            <span class="ident">set_default</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        }
+        <span class="kw">if</span> <span class="ident">bounds</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">3</span> <span class="op">|</span><span class="op">|</span> <span class="ident">bounds</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="number">0</span>) {
+            <span class="ident">set_default</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        }
+
+        <span class="kw">if</span> <span class="ident">set_default</span> {
+            <span class="comment">// could possibly put vec![x,y,z] here as default instead</span>
+            <span class="prelude-val">None</span>
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">bounds</span>)
         }
     }
 }
@@ -477,11 +672,30 @@
 
         <span class="comment">// perform graph coloring to rename the cells</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">coloring</span>: <span class="ident">ir::rewriter::CellRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-        <span class="kw">for</span> <span class="ident">graph</span> <span class="kw">in</span> <span class="ident">graphs_by_type</span>.<span class="ident">values</span>() {
+        <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">graph</span>) <span class="kw">in</span> <span class="ident">graphs_by_type</span> {
+            <span class="comment">// getting bound, based on self.bounds and cell_type</span>
+            <span class="kw">let</span> <span class="ident">bound</span> <span class="op">=</span> {
+                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">bounds</span>.<span class="ident">is_none</span>() {
+                    <span class="prelude-val">None</span>
+                } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span> <span class="ident">cell_type</span>.<span class="ident">get_name</span>() {
+                    <span class="kw">let</span> <span class="ident">comb_bound</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bounds</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">get</span>(<span class="number">0</span>);
+                    <span class="kw">let</span> <span class="ident">reg_bound</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bounds</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">get</span>(<span class="number">1</span>);
+                    <span class="kw">let</span> <span class="ident">other_bound</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bounds</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">get</span>(<span class="number">2</span>);
+                    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">shareable</span>.<span class="ident">contains</span>(<span class="ident">name</span>) {
+                        <span class="ident">comb_bound</span>
+                    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;std_reg&quot;</span> {
+                        <span class="ident">reg_bound</span>
+                    } <span class="kw">else</span> {
+                        <span class="ident">other_bound</span>
+                    }
+                } <span class="kw">else</span> {
+                    <span class="prelude-val">None</span>
+                }
+            };
             <span class="kw">if</span> <span class="ident">graph</span>.<span class="ident">has_nodes</span>() {
                 <span class="ident">coloring</span>.<span class="ident">extend</span>(
                     <span class="ident">graph</span>
-                        .<span class="ident">color_greedy</span>()
+                        .<span class="ident">color_greedy</span>(<span class="ident">bound</span>)
                         .<span class="ident">iter</span>()
                         .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">a</span>, <span class="ident">b</span>)<span class="op">|</span> (<span class="ident">a</span>.<span class="ident">clone</span>(), <span class="ident">comp</span>.<span class="ident">find_cell</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>).<span class="ident">unwrap</span>())),
                 );
