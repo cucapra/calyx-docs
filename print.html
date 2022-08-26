@@ -598,7 +598,7 @@ int main() {
 <p>Calyx uses the <code>ref</code> keyword to describe cells that are passed in by-reference:</p>
 <pre><code>component add_one() -&gt; () {
   cells {
-    ref mem = std_mem_d1(32, 4, 3); // A memory passed in by refernece.
+    ref mem = std_mem_d1(32, 4, 3); // A memory passed in by reference.
     ...
   }
   ...
@@ -610,7 +610,7 @@ Inside the component we can use the cell like any other cell in the program.</p>
 <pre><code>component add_one() -&gt; () { ... }
 component main() -&gt; () {
   cells {
-    A = std_mem_d1(32, 4, 3); // A memory passed in by refernece.
+    A = std_mem_d1(32, 4, 3); // A memory passed in by reference.
     one = add_one();
     ...
   }
