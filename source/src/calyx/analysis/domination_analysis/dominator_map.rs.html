@@ -427,7 +427,6 @@
 <span id="422">422</span>
 <span id="423">423</span>
 <span id="424">424</span>
-<span id="425">425</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis</span>::{
     <span class="ident">domination_analysis::node_analysis</span>::{<span class="ident">NodeReads</span>, <span class="ident">NodeSearch</span>},
     <span class="ident">ControlId</span>, <span class="ident">ShareSet</span>,
@@ -600,7 +599,7 @@
             <span class="ident">hs</span>.<span class="ident">insert</span>(<span class="ident">ControlId::get_guaranteed_attribute</span>(<span class="ident">c</span>, <span class="ident">END_ID</span>));
         }
         <span class="ident">ir::Control::Seq</span>(<span class="ident">ir::Seq</span> { <span class="ident">stmts</span>, .. }) =&gt; {
-            <span class="ident">get_final</span>((<span class="kw-2">&amp;</span><span class="ident">stmts</span>[..]).<span class="ident">last</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+            <span class="kw">return</span> <span class="ident">get_final</span>((<span class="kw-2">&amp;</span><span class="ident">stmts</span>[..]).<span class="ident">last</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
                 <span class="macro">panic!</span>(<span class="string">&quot;error: empty Seq block. Run collapse-control pass.&quot;</span>)
             }));
         }
@@ -709,7 +708,6 @@
                 <span class="self">self</span>.<span class="ident">update_node</span>(<span class="ident">pred</span>, <span class="ident">cur_id</span>);
             }
             <span class="ident">ir::Control::Seq</span>(<span class="ident">ir::Seq</span> { <span class="ident">stmts</span>, .. }) =&gt; {
-                <span class="comment">//Could try to think a way of doing it w/o this first stuff</span>
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">pred</span>;
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nxt</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>;
                 <span class="kw">for</span> <span class="ident">stmt</span> <span class="kw">in</span> <span class="ident">stmts</span> {
