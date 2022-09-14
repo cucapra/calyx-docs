@@ -155,16 +155,6 @@ This route will not produce actual, runnable executables; see the next section f
 Run the following command to install all required dependencies:</p>
 <pre><code>cd fud &amp;&amp; flit install -s --deps all
 </code></pre>
-<h3 id="seting-up-local-tools"><a class="header" href="#seting-up-local-tools">Seting up Local Tools</a></h3>
-<p>To instead <strong>invoke the Xilinx tools locally</strong>, just let <code>fud</code> run the <code>vivado</code> and <code>vivado_hls</code> commands.
-You can optionally tell <code>fud</code> where these commands exist on your machine:</p>
-<pre><code>fud config stages.synth-verilog.exec &lt;path&gt; # update vivado path
-fud config stages.vivado-hls.exec &lt;path&gt; # update vivado_hls path
-</code></pre>
-<p>Setting the <code>remote</code> option for the stages to <code>0</code> ensure that <code>fud</code> will always try to run the commands locally.</p>
-<pre><code>fud config stages.synth-verilog.remote 0
-fud config stages.vivado-hls.remote 0
-</code></pre>
 <h3 id="setting-up-remote-tools"><a class="header" href="#setting-up-remote-tools">Setting up Remote Tools</a></h3>
 <blockquote>
 <p>Follow these instructions if you're attempting to run <code>vivado</code> or <code>vivado-hls</code> on a server from your local machine. If you are working directly on a server with these tools, skip to the <a href="#run">run instructions</a>.</p>
@@ -183,7 +173,16 @@ fud config stages.vivado-hls.ssh_username &lt;username&gt;
 fud config stages.vivado-hls.remote 1
 </code></pre>
 <p>The server must have <code>vivado</code> and <code>vivado_hls</code> available on the remote machine's path. (If you need the executable names to be something else, please file an issue.)</p>
-<p>If you'd like to switch back to local usage, override the <code>remote</code> option by passing <code>fud e ... -s stages.synth-verilog.remote 0</code></p>
+<h3 id="setting-up-local-tools"><a class="header" href="#setting-up-local-tools">Setting up Local Tools</a></h3>
+<p>To instead <strong>invoke the Xilinx tools locally</strong>, just let <code>fud</code> run the <code>vivado</code> and <code>vivado_hls</code> commands.
+You can optionally tell <code>fud</code> where these commands exist on your machine:</p>
+<pre><code>fud config stages.synth-verilog.exec &lt;path&gt; # update vivado path
+fud config stages.vivado-hls.exec &lt;path&gt; # update vivado_hls path
+</code></pre>
+<p>Setting the <code>remote</code> option for the stages to <code>0</code> ensure that <code>fud</code> will always try to run the commands locally.</p>
+<pre><code>fud config stages.synth-verilog.remote 0
+fud config stages.vivado-hls.remote 0
+</code></pre>
 <h3 id="run"><a class="header" href="#run">Run</a></h3>
 <p>To run the entire toolchain and extract statistics from RTL synthesis, use the <code>resource-estimate</code> target state.
 For example:</p>
