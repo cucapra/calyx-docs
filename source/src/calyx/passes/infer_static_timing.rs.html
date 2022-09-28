@@ -702,7 +702,7 @@
                 ) {
                     <span class="kw">let</span> <span class="ident">data_dst</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">dst_cell_prim_type</span>);
                     <span class="kw">let</span> <span class="ident">data_src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">src_cell_prim_type</span>);
-                    <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">src_ports</span>), <span class="prelude-val">Some</span>(<span class="ident">dst_ports</span>)) <span class="op">=</span>
+                    <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">dst_ports</span>), <span class="prelude-val">Some</span>(<span class="ident">src_ports</span>)) <span class="op">=</span>
                         (<span class="ident">data_dst</span>, <span class="ident">data_src</span>)
                     {
                         <span class="kw">return</span> <span class="ident">src_ports</span>.<span class="ident">is_done</span>(<span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">name</span>)
