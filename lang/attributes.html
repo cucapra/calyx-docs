@@ -231,18 +231,18 @@ can be shared.</p>
 <h3 id="state_share"><a class="header" href="#state_share"><code>state_share</code></a></h3>
 <p>Can be attached to a component and indicates that a component can be shared
 across groups. Different than <code>share</code> since <code>state_share</code> components can have
-internal state.<br />
+internal state.
 This is used by <code>-p cell-share</code> to decide which components can be shared.
-Specifically, a component is state shareable if each write to 
-that component makes any previous writes to the component irrelevant. 
-The definition of a &quot;write to a component&quot; is an activiation of 
-the component's &quot;go&quot; port, followed by a read of the component's &quot;done&quot; port (in 
-other words, the read of a &quot;done&quot; port still counts as part of a &quot;write&quot; to the 
+Specifically, a component is state shareable if each write to
+that component makes any previous writes to the component irrelevant.
+The definition of a &quot;write to a component&quot; is an activiation of
+the component's &quot;go&quot; port, followed by a read of the component's &quot;done&quot; port (in
+other words, the read of a &quot;done&quot; port still counts as part of a &quot;write&quot; to the
 component).
 For <code>c1</code> and <code>c2</code>, instances of a state_shareable component:
 instantiate <code>c1</code>                        instantiate <code>c2</code>
-<em>any write to <code>c1</code></em>                     <em>any write to <code>c2</code></em><br />
-<em>write value <code>v</code> to port <code>p</code> in <code>c1</code></em>   <em>write value <code>v</code> to port <code>p</code> in <code>c2</code></em><br />
+<em>any write to <code>c1</code></em>                     <em>any write to <code>c2</code></em>
+<em>write value <code>v</code> to port <code>p</code> in <code>c1</code></em>   <em>write value <code>v</code> to port <code>p</code> in <code>c2</code></em>
 <code>c1</code> and <code>c2</code> should be equal.</p>
 <h3 id="boundn"><a class="header" href="#boundn"><code>bound(n)</code></a></h3>
 <p>Used in <code>infer-static-timing</code> and <code>static-timing</code> when the number of iterations
@@ -279,6 +279,21 @@ port.</p>
 </code></pre>
 <p>This requires that when <code>read_data</code> is used then <code>addr0</code> must be driven.
 Note that each group must have exactly one output port in it.</p>
+<h3 id="data"><a class="header" href="#data"><code>@data</code></a></h3>
+<p>Marks a cell or a port as a <em>purely datapath</em> component, i.e., the output does not propagate into a guard or another control signal. See <a href="https://github.com/cucapra/calyx/issues/1169">this issue</a> for the full set of constraints.</p>
+<p>When we have following two conditions:</p>
+<ol>
+<li>An input port is marked with <code>@data</code> in the component definitions, and</li>
+<li>The cell instance is marked as <code>@data</code></li>
+</ol>
+<p>The backend generate <code>'x</code> as the default value for the assignment to the port instead of <code>'0</code>. Additionally, if the port has exactly one assignment, the backend removes the guard entirely and produces a continuous assignment.</p>
+<p>This represents the optimization:</p>
+<pre><code>in = g ? out : 'x
+</code></pre>
+<p>into:</p>
+<pre><code>in = out;
+</code></pre>
+<p>Since the value <code>'x</code> can be replaced with anything.</p>
 
                     </main>
 
