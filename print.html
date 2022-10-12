@@ -1181,6 +1181,9 @@ having the same <code>@sync</code> value in only one branch would likely lead to
 situation: if thread A is running in the unlocked branch while the thread B 
 has a &quot;barrier&quot; that is expecting two threads, thread B may never proceed because
 thread A never arrives at the &quot;barrier&quot;.</p>
+<h2 id="more-complex-example"><a class="header" href="#more-complex-example">More Complex Example</a></h2>
+<p>If you want to see a more complex design using <code>@sync</code>, see 
+<a href="https://github.com/cucapra/calyx/blob/master/tests/correctness/sync/sync-dot-product.futil">sync-dot-product</a></p>
 <h2 id="limitations"><a class="header" href="#limitations">Limitations</a></h2>
 <p>Currently we only support two threads sharing the same &quot;barrier&quot;, i.e., only two threads can have control with the <code>@sync</code> attribute marked with the same value. </p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="attributes"><a class="header" href="#attributes">Attributes</a></h1>
