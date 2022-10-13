@@ -356,7 +356,7 @@
     ) -&gt; <span class="ident">VisResult</span> {
         <span class="comment">// If the component isn&#39;t marked &quot;nointerface&quot;, it should have an invokable</span>
         <span class="comment">// interface.</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">comp</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;nointerface&quot;</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">comp</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;nointerface&quot;</span>) <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">comp</span>.<span class="ident">is_comb</span> {
             <span class="comment">// If the control program is empty, check that the `done` signal has been assigned to.</span>
             <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::Control::Empty</span>(..) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>() {
                 <span class="kw">let</span> <span class="ident">done_use</span> <span class="op">=</span>

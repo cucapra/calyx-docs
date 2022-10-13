@@ -420,6 +420,44 @@
 <span id="415">415</span>
 <span id="416">416</span>
 <span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>, <span class="ident">WithPos</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal::ConstructVisitor</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
@@ -582,7 +620,7 @@
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Component</span>,
         <span class="ident">_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
+        <span class="ident">comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">for</span> <span class="ident">cell_ref</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">cells</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cell_ref</span>.<span class="ident">borrow</span>();
@@ -603,6 +641,44 @@
                     <span class="macro">unreachable!</span>(
                         <span class="string">&quot;the current component not allowed for ref cells&quot;</span>
                     );
+                }
+            }
+        }
+
+        <span class="comment">// If the component is combinational, make sure all cells are also combinational,</span>
+        <span class="comment">// there are no group or comb group definitions, and the control program is empty</span>
+        <span class="kw">if</span> <span class="ident">comp</span>.<span class="ident">is_comb</span> {
+            <span class="kw">if</span> <span class="op">!</span><span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>(), <span class="ident">ir::Control::Empty</span>(..)) {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but has a non-empty control program&quot;</span>, <span class="ident">comp</span>.<span class="ident">name</span>)));
+            }
+
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">is_empty</span>() {
+                <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>();
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains a group `{}`&quot;</span>, <span class="ident">comp</span>.<span class="ident">name</span>, <span class="ident">group</span>.<span class="ident">clone_name</span>())).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">attributes</span>));
+            }
+
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">comp</span>.<span class="ident">comb_groups</span>.<span class="ident">is_empty</span>() {
+                <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">comb_groups</span>.<span class="ident">iter</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>();
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains a group `{}`&quot;</span>, <span class="ident">comp</span>.<span class="ident">name</span>, <span class="ident">group</span>.<span class="ident">clone_name</span>())).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">attributes</span>));
+            }
+
+            <span class="kw">for</span> <span class="ident">cell_ref</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">cells</span>.<span class="ident">iter</span>() {
+                <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cell_ref</span>.<span class="ident">borrow</span>();
+                <span class="kw">let</span> <span class="ident">is_comb</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">prototype</span> {
+                    <span class="ident">CellType::Primitive</span> { <span class="ident">is_comb</span>, .. } =&gt; <span class="ident">is_comb</span>.<span class="ident">to_owned</span>(),
+                    <span class="ident">CellType::Constant</span> { .. } =&gt; <span class="bool-val">true</span>,
+                    <span class="ident">CellType::Component</span> { <span class="ident">name</span> } =&gt; {
+                        <span class="kw">let</span> <span class="ident">comp_idx</span> <span class="op">=</span>
+                            <span class="ident">comps</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">name</span> <span class="op">==</span> <span class="ident">name</span>).<span class="ident">unwrap</span>();
+                        <span class="kw">let</span> <span class="ident">comp</span> <span class="op">=</span> <span class="ident">comps</span>
+                            .<span class="ident">get</span>(<span class="ident">comp_idx</span>)
+                            .<span class="ident">expect</span>(<span class="string">&quot;Found cell that does not exist&quot;</span>);
+                        <span class="ident">comp</span>.<span class="ident">is_comb</span>
+                    }
+                    <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
+                };
+                <span class="kw">if</span> <span class="op">!</span><span class="ident">is_comb</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains non-combinational cell `{}`&quot;</span>, <span class="ident">comp</span>.<span class="ident">name</span>, <span class="ident">cell</span>.<span class="ident">name</span>())).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">attributes</span>));
                 }
             }
         }

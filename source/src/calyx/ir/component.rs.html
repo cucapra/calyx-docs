@@ -251,6 +251,9 @@
 <span id="246">246</span>
 <span id="247">247</span>
 <span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{
     <span class="ident">Assignment</span>, <span class="ident">Attributes</span>, <span class="ident">Builder</span>, <span class="ident">Cell</span>, <span class="ident">CellType</span>, <span class="ident">CloneName</span>, <span class="ident">CombGroup</span>,
     <span class="ident">Control</span>, <span class="ident">GetName</span>, <span class="ident">Group</span>, <span class="ident">Id</span>, <span class="ident">PortDef</span>, <span class="ident">RRC</span>,
@@ -287,6 +290,8 @@
     <span class="kw">pub</span> <span class="ident">control</span>: <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Attributes for this component</span>
     <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">Attributes</span>,
+    <span class="doccomment">/// True iff component is combinational</span>
+    <span class="kw">pub</span> <span class="ident">is_comb</span>: <span class="ident">bool</span>,
 
     <span class="comment">///// Internal structures</span>
     <span class="doccomment">/// Namegenerator that contains the names currently defined in this</span>
@@ -300,7 +305,7 @@
 <span class="doccomment">///   name.</span>
 <span class="kw">impl</span> <span class="ident">Component</span> {
     <span class="doccomment">/// Construct a new Component with the given `name` and signature fields.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="ident">name</span>: <span class="ident">S</span>, <span class="ident">ports</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="ident">name</span>: <span class="ident">S</span>, <span class="ident">ports</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">is_comb</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
     {
@@ -332,6 +337,7 @@
             <span class="ident">control</span>: <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">Control::empty</span>())),
             <span class="ident">namegen</span>: <span class="ident">utils::NameGenerator::with_prev_defined_names</span>(<span class="ident">prev_names</span>),
             <span class="ident">attributes</span>: <span class="ident">Attributes::default</span>(),
+            <span class="ident">is_comb</span>,
         }
     }
 

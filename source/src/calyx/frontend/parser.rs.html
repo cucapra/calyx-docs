@@ -874,10 +874,42 @@
 <span id="869">869</span>
 <span id="870">870</span>
 <span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
+<span id="899">899</span>
+<span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
 </pre><pre class="rust"><code><span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy::upper_case_acronyms</span>)]</span>
 
 <span class="doccomment">//! Parser for Calyx programs.</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::ast</span>::{<span class="self">self</span>, <span class="ident">BitNum</span>, <span class="ident">GuardComp</span> <span class="kw">as</span> <span class="ident">GC</span>, <span class="ident">GuardExpr</span>, <span class="ident">NumType</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::ast</span>::{<span class="self">self</span>, <span class="ident">BitNum</span>, <span class="ident">Control</span>, <span class="ident">GuardComp</span> <span class="kw">as</span> <span class="ident">GC</span>, <span class="ident">GuardExpr</span>, <span class="ident">NumType</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="self">self</span>, <span class="ident">CalyxResult</span>, <span class="ident">Span</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>;
 <span class="kw">use</span> <span class="ident">pest::prec_climber</span>::{<span class="ident">Assoc</span>, <span class="ident">Operator</span>, <span class="ident">PrecClimber</span>};
@@ -1625,36 +1657,68 @@
     <span class="kw">fn</span> <span class="ident">component</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ComponentDef</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_span</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
         <span class="macro">match_nodes!</span>(
-            <span class="ident">input</span>.<span class="ident">clone</span>().<span class="ident">into_children</span>();
-            [
-                <span class="ident">name_with_attribute</span>((<span class="ident">name</span>, <span class="ident">attributes</span>)),
-                <span class="ident">signature</span>(<span class="ident">sig</span>),
-                <span class="ident">cells</span>(<span class="ident">cells</span>),
-                <span class="ident">connections</span>(<span class="ident">connections</span>),
-                <span class="ident">control</span>(<span class="ident">control</span>)
-            ] =&gt; {
-                <span class="kw">let</span> (<span class="ident">continuous_assignments</span>, <span class="ident">groups</span>) <span class="op">=</span> <span class="ident">connections</span>;
-                <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">sig</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">ir::PortDef</span> { <span class="ident">name</span>, <span class="ident">width</span>, <span class="ident">direction</span>, <span class="ident">attributes</span> }<span class="op">|</span> {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::Width::Const</span> { <span class="ident">value</span> } <span class="op">=</span> <span class="ident">width</span> {
-                        <span class="prelude-val">Ok</span>(<span class="ident">ir::PortDef</span> {
-                            <span class="ident">name</span>,
-                            <span class="ident">width</span>: <span class="ident">value</span>,
-                            <span class="ident">direction</span>,
-                            <span class="ident">attributes</span>
-                        })
-                    } <span class="kw">else</span> {
-                        <span class="prelude-val">Err</span>(<span class="ident">input</span>.<span class="ident">error</span>(<span class="string">&quot;Components cannot use parameters&quot;</span>))
-                    }
-                }).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(<span class="ident">ComponentDef</span> {
-                    <span class="ident">name</span>,
-                    <span class="ident">signature</span>: <span class="ident">sig</span>,
-                    <span class="ident">cells</span>,
-                    <span class="ident">groups</span>,
-                    <span class="ident">continuous_assignments</span>,
-                    <span class="ident">control</span>,
-                    <span class="ident">attributes</span>: <span class="ident">attributes</span>.<span class="ident">add_span</span>(<span class="ident">span</span>),
-                })
+        <span class="ident">input</span>.<span class="ident">clone</span>().<span class="ident">into_children</span>();
+        [
+            <span class="ident">comb</span>(<span class="kw">_</span>),
+            <span class="ident">name_with_attribute</span>((<span class="ident">name</span>, <span class="ident">attributes</span>)),
+            <span class="ident">signature</span>(<span class="ident">sig</span>),
+            <span class="ident">cells</span>(<span class="ident">cells</span>),
+            <span class="ident">connections</span>(<span class="ident">connections</span>)
+        ] =&gt; {
+            <span class="kw">let</span> (<span class="ident">continuous_assignments</span>, <span class="ident">groups</span>) <span class="op">=</span> <span class="ident">connections</span>;
+            <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">sig</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">ir::PortDef</span> { <span class="ident">name</span>, <span class="ident">width</span>, <span class="ident">direction</span>, <span class="ident">attributes</span> }<span class="op">|</span> {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::Width::Const</span> { <span class="ident">value</span> } <span class="op">=</span> <span class="ident">width</span> {
+                    <span class="prelude-val">Ok</span>(<span class="ident">ir::PortDef</span> {
+                        <span class="ident">name</span>,
+                        <span class="ident">width</span>: <span class="ident">value</span>,
+                        <span class="ident">direction</span>,
+                        <span class="ident">attributes</span>
+                    })
+                } <span class="kw">else</span> {
+                    <span class="prelude-val">Err</span>(<span class="ident">input</span>.<span class="ident">error</span>(<span class="string">&quot;Components cannot use parameters&quot;</span>))
+                }
+            }).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(<span class="ident">ComponentDef</span> {
+                <span class="ident">name</span>,
+                <span class="ident">signature</span>: <span class="ident">sig</span>,
+                <span class="ident">cells</span>,
+                <span class="ident">groups</span>,
+                <span class="ident">continuous_assignments</span>,
+                <span class="ident">control</span>: <span class="ident">Control::Empty</span> {},
+                <span class="ident">attributes</span>: <span class="ident">attributes</span>.<span class="ident">add_span</span>(<span class="ident">span</span>),
+                <span class="ident">is_comb</span>: <span class="bool-val">true</span>,
+            })
+        },
+        [
+            <span class="ident">name_with_attribute</span>((<span class="ident">name</span>, <span class="ident">attributes</span>)),
+            <span class="ident">signature</span>(<span class="ident">sig</span>),
+            <span class="ident">cells</span>(<span class="ident">cells</span>),
+            <span class="ident">connections</span>(<span class="ident">connections</span>),
+            <span class="ident">control</span>(<span class="ident">control</span>)
+        ] =&gt; {
+            <span class="kw">let</span> (<span class="ident">continuous_assignments</span>, <span class="ident">groups</span>) <span class="op">=</span> <span class="ident">connections</span>;
+            <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">sig</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">ir::PortDef</span> { <span class="ident">name</span>, <span class="ident">width</span>, <span class="ident">direction</span>, <span class="ident">attributes</span> }<span class="op">|</span> {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::Width::Const</span> { <span class="ident">value</span> } <span class="op">=</span> <span class="ident">width</span> {
+                    <span class="prelude-val">Ok</span>(<span class="ident">ir::PortDef</span> {
+                        <span class="ident">name</span>,
+                        <span class="ident">width</span>: <span class="ident">value</span>,
+                        <span class="ident">direction</span>,
+                        <span class="ident">attributes</span>
+                    })
+                } <span class="kw">else</span> {
+                    <span class="prelude-val">Err</span>(<span class="ident">input</span>.<span class="ident">error</span>(<span class="string">&quot;Components cannot use parameters&quot;</span>))
+                }
+            }).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(<span class="ident">ComponentDef</span> {
+                <span class="ident">name</span>,
+                <span class="ident">signature</span>: <span class="ident">sig</span>,
+                <span class="ident">cells</span>,
+                <span class="ident">groups</span>,
+                <span class="ident">continuous_assignments</span>,
+                <span class="ident">control</span>,
+                <span class="ident">attributes</span>: <span class="ident">attributes</span>.<span class="ident">add_span</span>(<span class="ident">span</span>),
+                <span class="ident">is_comb</span>: <span class="bool-val">false</span>,
+            })
         })
     }
 

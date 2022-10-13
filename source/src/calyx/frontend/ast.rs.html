@@ -299,6 +299,13 @@
 <span id="294">294</span>
 <span id="295">295</span>
 <span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx</span>
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 
@@ -356,10 +363,16 @@
     <span class="kw">pub</span> <span class="ident">control</span>: <span class="ident">Control</span>,
     <span class="doccomment">/// Attributes attached to this component</span>
     <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">ir::Attributes</span>,
+    <span class="doccomment">/// True iff this is a combinational component</span>
+    <span class="kw">pub</span> <span class="ident">is_comb</span>: <span class="ident">bool</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">ComponentDef</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="ident">name</span>: <span class="ident">S</span>, <span class="ident">signature</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::PortDef</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(
+        <span class="ident">name</span>: <span class="ident">S</span>,
+        <span class="ident">is_comb</span>: <span class="ident">bool</span>,
+        <span class="ident">signature</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::PortDef</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
     {
@@ -371,6 +384,7 @@
             <span class="ident">continuous_assignments</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">control</span>: <span class="ident">Control::Empty</span> {},
             <span class="ident">attributes</span>: <span class="ident">ir::Attributes::default</span>(),
+            <span class="ident">is_comb</span>,
         }
     }
 }

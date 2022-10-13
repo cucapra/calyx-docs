@@ -560,6 +560,11 @@
 <span id="555">555</span>
 <span id="556">556</span>
 <span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a formatter for the in-memory representation of Components.</span>
 <span class="doccomment">//! The printing operation clones inner nodes and doesn&#39;t perform any mutation</span>
 <span class="doccomment">//! to the Component.</span>
@@ -722,9 +727,12 @@
                 <span class="macro">matches!</span>(<span class="ident">p</span>.<span class="ident">borrow</span>().<span class="ident">direction</span>, <span class="ident">ir::Direction::Output</span>)
             });
 
+        <span class="kw">let</span> <span class="ident">pre</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">comp</span>.<span class="ident">is_comb</span> { <span class="string">&quot;comb &quot;</span> } <span class="kw">else</span> { <span class="string">&quot;&quot;</span> };
+
         <span class="macro">writeln!</span>(
             <span class="ident">f</span>,
-            <span class="string">&quot;component {}{}({}) -&gt; ({}) {{&quot;</span>,
+            <span class="string">&quot;{}component {}{}({}) -&gt; ({}) {{&quot;</span>,
+            <span class="ident">pre</span>,
             <span class="ident">comp</span>.<span class="ident">name</span>.<span class="ident">id</span>,
             <span class="ident"><span class="self">Self</span>::format_attributes</span>(<span class="kw-2">&amp;</span><span class="ident">comp</span>.<span class="ident">attributes</span>),
             <span class="ident"><span class="self">Self</span>::format_ports</span>(<span class="kw-2">&amp;</span><span class="ident">inputs</span>),
@@ -753,13 +761,15 @@
             <span class="ident"><span class="self">Self</span>::write_assignment</span>(<span class="ident">assign</span>, <span class="number">4</span>, <span class="ident">f</span>)<span class="question-mark">?</span>;
             <span class="macro">writeln!</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
         }
-        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;  }}\n&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;  }}&quot;</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// Add the control program</span>
         <span class="kw">if</span> <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>(), <span class="ident">ir::Control::Empty</span>(..)) {
-            <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;  control {{}}&quot;</span>)<span class="question-mark">?</span>;
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">comp</span>.<span class="ident">is_comb</span> {
+                <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;\n  control {{}}&quot;</span>)<span class="question-mark">?</span>;
+            }
         } <span class="kw">else</span> {
-            <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;  control {{&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;\n  control {{&quot;</span>)<span class="question-mark">?</span>;
             <span class="ident"><span class="self">Self</span>::write_control</span>(<span class="kw-2">&amp;</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>(), <span class="number">4</span>, <span class="ident">f</span>)<span class="question-mark">?</span>;
             <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;  }}&quot;</span>)<span class="question-mark">?</span>;
         }
@@ -802,7 +812,7 @@
                         .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>)
                 )
             }
-            <span class="ident">ir::CellType::Component</span> { <span class="ident">name</span> } =&gt; {
+            <span class="ident">ir::CellType::Component</span> { <span class="ident">name</span>, .. } =&gt; {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="string">&quot; &quot;</span>.<span class="ident">repeat</span>(<span class="ident">indent_level</span>))<span class="question-mark">?</span>;
                 <span class="kw">if</span> <span class="op">!</span><span class="ident">cell</span>.<span class="ident">attributes</span>.<span class="ident">is_empty</span>() {
                     <span class="macro">write!</span>(
