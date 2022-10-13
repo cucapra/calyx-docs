@@ -146,6 +146,12 @@
 <span id="141">141</span>
 <span id="142">142</span>
 <span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::passes</span>::{
     <span class="ident">Canonicalize</span>, <span class="ident">CellShare</span>, <span class="ident">ClkInsertion</span>, <span class="ident">CollapseControl</span>, <span class="ident">CombProp</span>,
@@ -267,7 +273,13 @@
         <span class="macro">register_alias!</span>(
             <span class="ident">pm</span>,
             <span class="string">&quot;no-opt&quot;</span>,
-            [<span class="string">&quot;validate&quot;</span>, <span class="ident">RemoveCombGroups</span>, <span class="string">&quot;compile&quot;</span>, <span class="string">&quot;lower&quot;</span>]
+            [
+                <span class="string">&quot;validate&quot;</span>,
+                <span class="ident">RemoveCombGroups</span>,
+                <span class="ident">CompileInvoke</span>,
+                <span class="string">&quot;compile&quot;</span>,
+                <span class="string">&quot;lower&quot;</span>
+            ]
         );
 
         <span class="macro">register_alias!</span>(
