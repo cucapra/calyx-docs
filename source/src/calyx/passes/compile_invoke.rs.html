@@ -106,6 +106,13 @@
 <span id="101">101</span>
 <span id="102">102</span>
 <span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">Attributes</span>, <span class="ident">LibrarySignatures</span>};
@@ -138,6 +145,13 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ir::Builder::new</span>(<span class="ident">comp</span>, <span class="ident">ctx</span>);
 
         <span class="kw">let</span> <span class="ident">invoke_group</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_group</span>(<span class="string">&quot;invoke&quot;</span>);
+
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">s</span>.<span class="ident">ref_cells</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(
+                <span class="string">&quot;Invoke statement contains ref cell. Run {} before this pass&quot;</span>,
+                <span class="ident"><span class="kw">super</span>::CompileRef::name</span>()
+            )));
+        }
 
         <span class="comment">// comp.go = 1&#39;d1;</span>
         <span class="comment">// invoke[done] = comp.done;</span>
