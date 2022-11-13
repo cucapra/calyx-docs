@@ -304,6 +304,18 @@
 <span id="299">299</span>
 <span id="300">300</span>
 <span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">Cell</span>, <span class="ident">CombGroup</span>, <span class="ident">GetAttributes</span>, <span class="ident">Group</span>, <span class="ident">Id</span>, <span class="ident">Port</span>, <span class="ident">RRC</span>};
@@ -410,6 +422,18 @@
     <span class="ident">Enable</span>(<span class="ident">Enable</span>),
     <span class="doccomment">/// Control statement that does nothing.</span>
     <span class="ident">Empty</span>(<span class="ident">Empty</span>),
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Invoke</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Control</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">inv</span>: <span class="ident">Invoke</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">Control::Invoke</span>(<span class="ident">inv</span>)
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Enable</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Control</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">en</span>: <span class="ident">Enable</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">Control::Enable</span>(<span class="ident">en</span>)
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">GetAttributes</span> <span class="kw">for</span> <span class="ident">Control</span> {
