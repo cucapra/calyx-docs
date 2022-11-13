@@ -276,6 +276,31 @@
 <span id="271">271</span>
 <span id="272">272</span>
 <span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis::ReadWriteSet</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::CalyxResult</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal::ConstructVisitor</span>;
@@ -341,7 +366,7 @@
 
 <span class="doccomment">/// Construct an [ir::Invoke] from an [ir::Group] that has been validated by this pass.</span>
 <span class="kw">fn</span> <span class="ident">construct_invoke</span>(
-    <span class="ident">assigns</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Assignment</span>],
+    <span class="ident">group</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Group</span>,
     <span class="ident">comp</span>: <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>,
     <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Builder</span>,
 ) -&gt; <span class="ident">ir::Control</span> {
@@ -370,7 +395,7 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inputs</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">comb_assigns</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
-    <span class="kw">for</span> <span class="ident">assign</span> <span class="kw">in</span> <span class="ident">assigns</span> {
+    <span class="kw">for</span> <span class="ident">assign</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">assignments</span> {
         <span class="comment">// We know that all assignments in this group should write to either a)</span>
         <span class="comment">// a combinational component or b) comp or c) the group&#39;s done port-- we</span>
         <span class="comment">// should have checked for this condition before calling this function</span>
@@ -440,8 +465,9 @@
     ) -&gt; <span class="ident">VisResult</span> {
         <span class="kw">let</span> <span class="ident">groups</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">drain</span>().<span class="ident">collect_vec</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ir::Builder::new</span>(<span class="ident">comp</span>, <span class="ident">sigs</span>);
-        <span class="kw">for</span> <span class="ident">g</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">groups</span> {
+        <span class="lifetime">&#39;groups</span>: <span class="kw">for</span> <span class="ident">g</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">groups</span> {
             <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">borrow</span>();
+
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writes</span> <span class="op">=</span> <span class="ident">ReadWriteSet::write_set</span>(<span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">iter</span>())
                 .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span> {
                     <span class="ident">ir::CellType::Primitive</span> { <span class="ident">is_comb</span>, .. } =&gt; <span class="op">!</span><span class="ident">is_comb</span>,
@@ -485,48 +511,72 @@
             }
 
             <span class="kw">let</span> <span class="ident">go_port</span> <span class="op">=</span> <span class="ident">maybe_go_port</span>.<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">go_multi_write</span> <span class="op">=</span> <span class="bool-val">false</span>;
             <span class="kw">let</span> <span class="ident">done_port</span> <span class="op">=</span> <span class="ident">maybe_done_port</span>.<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">done_multi_write</span> <span class="op">=</span> <span class="bool-val">false</span>;
-            <span class="kw">for</span> <span class="ident">assign</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">assignments</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">go_wr_cnt</span> <span class="op">=</span> <span class="number">0</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">done_wr_cnt</span> <span class="op">=</span> <span class="number">0</span>;
+
+            <span class="lifetime">&#39;assigns</span>: <span class="kw">for</span> <span class="ident">assign</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">assignments</span> {
                 <span class="comment">// @go port should have exactly one write and the src should be 1.</span>
                 <span class="kw">if</span> <span class="ident">assign</span>.<span class="ident">dst</span> <span class="op">==</span> <span class="ident">go_port</span> {
-                    <span class="kw">if</span> <span class="ident">go_multi_write</span> {
-                        <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
-                    }
-                    <span class="kw">if</span> <span class="op">!</span><span class="ident">go_multi_write</span>
-                        <span class="op">&amp;&amp;</span> <span class="ident">assign</span>.<span class="ident">src</span>.<span class="ident">borrow</span>().<span class="ident">is_constant</span>(<span class="number">1</span>, <span class="number">1</span>)
-                        <span class="op">&amp;&amp;</span> <span class="ident">assign</span>.<span class="ident">guard</span>.<span class="ident">is_true</span>()
-                    {
-                        <span class="ident">go_multi_write</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                    <span class="kw">if</span> <span class="ident">go_wr_cnt</span> <span class="op">&gt;</span> <span class="number">0</span> {
+                        <span class="macro">log::info!</span>(
+                            <span class="string">&quot;Cannot transform `{}` due to multiple writes to @go port&quot;</span>,
+                            <span class="ident">group</span>.<span class="ident">name</span>(),
+                        );
+                        <span class="kw">continue</span> <span class="lifetime">&#39;groups</span>;
+                    } <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">assign</span>.<span class="ident">guard</span>.<span class="ident">is_true</span>() {
+                        <span class="macro">log::info!</span>(
+                            <span class="string">&quot;Cannot transform `{}` due to guarded write to @go port: {}&quot;</span>,
+                            <span class="ident">group</span>.<span class="ident">name</span>(),
+                            <span class="ident">ir::Printer::assignment_to_str</span>(<span class="ident">assign</span>)
+                        );
+                        <span class="kw">continue</span> <span class="lifetime">&#39;groups</span>;
+                    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">assign</span>.<span class="ident">src</span>.<span class="ident">borrow</span>().<span class="ident">is_constant</span>(<span class="number">1</span>, <span class="number">1</span>) {
+                        <span class="ident">go_wr_cnt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
                     } <span class="kw">else</span> {
                         <span class="comment">// if go port&#39;s guard is not true, src is not (1,1), then</span>
                         <span class="comment">// Continue</span>
-                        <span class="kw">continue</span>;
+                        <span class="kw">continue</span> <span class="lifetime">&#39;assigns</span>;
                     }
                 }
                 <span class="comment">// @done port should have exactly one read and the dst should be</span>
                 <span class="comment">// group&#39;s done signal.</span>
                 <span class="kw">if</span> <span class="ident">assign</span>.<span class="ident">src</span> <span class="op">==</span> <span class="ident">done_port</span> {
-                    <span class="kw">if</span> <span class="ident">done_multi_write</span> {
-                        <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
-                    }
-                    <span class="kw">if</span> <span class="op">!</span><span class="ident">done_multi_write</span>
-                        <span class="op">&amp;&amp;</span> <span class="ident">assign</span>.<span class="ident">dst</span> <span class="op">==</span> <span class="ident">group</span>.<span class="ident">get</span>(<span class="string">&quot;done&quot;</span>)
-                        <span class="op">&amp;&amp;</span> <span class="ident">assign</span>.<span class="ident">guard</span>.<span class="ident">is_true</span>()
-                    {
-                        <span class="ident">done_multi_write</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                    <span class="kw">if</span> <span class="ident">done_wr_cnt</span> <span class="op">&gt;</span> <span class="number">0</span> {
+                        <span class="macro">log::info!</span>(
+                            <span class="string">&quot;Cannot transform `{}` due to multiple writes to @done port&quot;</span>,
+                            <span class="ident">group</span>.<span class="ident">name</span>(),
+                        );
+                        <span class="kw">continue</span> <span class="lifetime">&#39;groups</span>;
+                    } <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">assign</span>.<span class="ident">guard</span>.<span class="ident">is_true</span>() {
+                        <span class="macro">log::info!</span>(
+                            <span class="string">&quot;Cannot transform `{}` due to guarded write to @done port: {}&quot;</span>,
+                            <span class="ident">group</span>.<span class="ident">name</span>(),
+                            <span class="ident">ir::Printer::assignment_to_str</span>(<span class="ident">assign</span>)
+                        );
+                        <span class="kw">continue</span> <span class="lifetime">&#39;groups</span>;
+                    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">assign</span>.<span class="ident">dst</span> <span class="op">==</span> <span class="ident">group</span>.<span class="ident">get</span>(<span class="string">&quot;done&quot;</span>) {
+                        <span class="ident">done_wr_cnt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
                     } <span class="kw">else</span> {
                         <span class="comment">// If done port&#39;s guard is not true and does not write to group&#39;s done</span>
                         <span class="comment">// then Continue</span>
-                        <span class="kw">continue</span>;
+                        <span class="kw">continue</span> <span class="lifetime">&#39;assigns</span>;
                     }
                 }
             }
             <span class="ident">drop</span>(<span class="ident">cell</span>);
+
+            <span class="kw">if</span> <span class="ident">go_wr_cnt</span> <span class="op">!</span><span class="op">=</span> <span class="number">1</span> {
+                <span class="macro">log::info!</span>(<span class="string">&quot;Cannot transform `{}` because there are no writes to @go port&quot;</span>, <span class="ident">group</span>.<span class="ident">name</span>());
+                <span class="kw">continue</span> <span class="lifetime">&#39;groups</span>;
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">done_wr_cnt</span> <span class="op">!</span><span class="op">=</span> <span class="number">1</span> {
+                <span class="macro">log::info!</span>(<span class="string">&quot;Cannot transform `{}` because there are no writes to @done port&quot;</span>, <span class="ident">group</span>.<span class="ident">name</span>());
+                <span class="kw">continue</span> <span class="lifetime">&#39;groups</span>;
+            }
+
             <span class="self">self</span>.<span class="ident">group_invoke_map</span>.<span class="ident">insert</span>(
                 <span class="ident">g</span>.<span class="ident">clone_name</span>(),
-                <span class="ident">construct_invoke</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">assignments</span>, <span class="ident">cr</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>),
+                <span class="ident">construct_invoke</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>, <span class="ident">cr</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>),
             );
         }
         <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">append</span>(<span class="ident">groups</span>.<span class="ident">into_iter</span>());

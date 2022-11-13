@@ -193,13 +193,13 @@ language.</p>
         if eq.out with st_0 {
           seq {
             @sync(1) prod_0;
-            switch_to_st_1;
+            @sync(2) switch_to_st_1;
           }
         }
         else {
           seq {
             @sync(1) prod_1;
-            switch_to_st_0;
+            @sync(2) switch_to_st_0;
           }
         }
       }
@@ -209,7 +209,7 @@ language.</p>
         seq {
           @sync(1) no_op;
           reg_to_mem;
-          incr_idx;
+          @sync(2) incr_idx;
         }
       }
     }

@@ -153,6 +153,7 @@
 <span id="148">148</span>
 <span id="149">149</span>
 <span id="150">150</span>
+<span id="151">151</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::passes</span>::{
     <span class="ident">Canonicalize</span>, <span class="ident">CellShare</span>, <span class="ident">ClkInsertion</span>, <span class="ident">CollapseControl</span>, <span class="ident">CombProp</span>,
@@ -276,8 +277,9 @@
             <span class="string">&quot;no-opt&quot;</span>,
             [
                 <span class="string">&quot;validate&quot;</span>,
-                <span class="ident">RemoveCombGroups</span>,
+                <span class="ident">CompileSync</span>,
                 <span class="ident">CompileRef</span>,
+                <span class="ident">RemoveCombGroups</span>,
                 <span class="ident">CompileInvoke</span>,
                 <span class="string">&quot;compile&quot;</span>,
                 <span class="string">&quot;lower&quot;</span>
