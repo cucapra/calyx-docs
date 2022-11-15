@@ -127,7 +127,7 @@
 <span id="122">122</span>
 <span id="123">123</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">linked_hash_map::LinkedHashMap</span>;
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">convert::TryFrom</span>, <span class="ident">ops::Index</span>};
+<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">convert::TryFrom</span>, <span class="ident">ops::Index</span>, <span class="ident">rc::Rc</span>};
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Span</span>, <span class="ident">WithPos</span>};
 
@@ -137,7 +137,7 @@
     <span class="doccomment">/// Mapping from the name of the attribute to its value.</span>
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">attrs</span>: <span class="ident">LinkedHashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">u64</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Source location information for the item</span>
-    <span class="ident">span</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span>,
+    <span class="ident">span</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Attributes</span> {
@@ -168,7 +168,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">WithPos</span> <span class="kw">for</span> <span class="ident">Attributes</span> {
-    <span class="kw">fn</span> <span class="ident">copy_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">copy_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">span</span>.<span class="ident">clone</span>()
     }
 }
@@ -226,14 +226,14 @@
     }
 
     <span class="doccomment">/// Set the span information</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_span</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">span</span>: <span class="ident">Span</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_span</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">span</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">span</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">span</span>);
         <span class="self">self</span>
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">GetAttributes</span><span class="op">&gt;</span> <span class="ident">WithPos</span> <span class="kw">for</span> <span class="ident">T</span> {
-    <span class="kw">fn</span> <span class="ident">copy_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">copy_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_attributes</span>().<span class="ident">copy_span</span>()
     }
 }

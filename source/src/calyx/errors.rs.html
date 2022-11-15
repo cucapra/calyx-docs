@@ -344,7 +344,7 @@
 
 <span class="doccomment">/// A span of the input program.</span>
 <span class="doccomment">/// Used for reporting location-based errors.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Hash</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Span</span> {
     <span class="doccomment">/// Reference to input program source.</span>
     <span class="ident">input</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
@@ -431,12 +431,12 @@
 <span class="doccomment">/// An IR node that may contain position information.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">WithPos</span> {
     <span class="doccomment">/// Copy the span associated with this node.</span>
-    <span class="kw">fn</span> <span class="ident">copy_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">copy_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Error</span> {
-    <span class="ident">kind</span>: <span class="ident">ErrorKind</span>,
-    <span class="ident">pos</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span>,
+    <span class="ident">kind</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ErrorKind</span><span class="op">&gt;</span>,
+    <span class="ident">pos</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">post_msg</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
 
@@ -466,7 +466,7 @@
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_error</span>(<span class="ident">err</span>: <span class="ident">pest_consume::Error</span><span class="op">&lt;</span><span class="ident">parser::Rule</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::ParseError</span>(<span class="ident">err</span>),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::ParseError</span>(<span class="ident">err</span>)),
             <span class="ident">pos</span>: <span class="prelude-val">None</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
@@ -474,28 +474,28 @@
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reserved_name</span>(<span class="ident">name</span>: <span class="ident">ir::Id</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::ReservedName</span>(<span class="ident">name</span>),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::ReservedName</span>(<span class="ident">name</span>)),
             <span class="ident">pos</span>: <span class="prelude-val">None</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
     }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">malformed_control</span>(<span class="ident">msg</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::MalformedControl</span>(<span class="ident">msg</span>),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::MalformedControl</span>(<span class="ident">msg</span>)),
             <span class="ident">pos</span>: <span class="prelude-val">None</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
     }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">malformed_structure</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">ToString</span><span class="op">&gt;</span>(<span class="ident">msg</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::MalformedStructure</span>(<span class="ident">msg</span>.<span class="ident">to_string</span>()),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::MalformedStructure</span>(<span class="ident">msg</span>.<span class="ident">to_string</span>())),
             <span class="ident">pos</span>: <span class="prelude-val">None</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
     }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pass_assumption</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">ToString</span><span class="op">&gt;</span>(<span class="ident">pass</span>: <span class="ident">S</span>, <span class="ident">msg</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::PassAssumption</span>(<span class="ident">pass</span>.<span class="ident">to_string</span>(), <span class="ident">msg</span>),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::PassAssumption</span>(<span class="ident">pass</span>.<span class="ident">to_string</span>(), <span class="ident">msg</span>)),
             <span class="ident">pos</span>: <span class="prelude-val">None</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
@@ -503,7 +503,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">undefined</span>(<span class="ident">name</span>: <span class="ident">ir::Id</span>, <span class="ident">typ</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">name</span>.<span class="ident">copy_span</span>();
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::Undefined</span>(<span class="ident">name</span>, <span class="ident">typ</span>),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::Undefined</span>(<span class="ident">name</span>, <span class="ident">typ</span>)),
             <span class="ident">pos</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
@@ -511,42 +511,42 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">already_bound</span>(<span class="ident">name</span>: <span class="ident">ir::Id</span>, <span class="ident">typ</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">name</span>.<span class="ident">copy_span</span>();
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::AlreadyBound</span>(<span class="ident">name</span>, <span class="ident">typ</span>),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::AlreadyBound</span>(<span class="ident">name</span>, <span class="ident">typ</span>)),
             <span class="ident">pos</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
     }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unused</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">ToString</span><span class="op">&gt;</span>(<span class="ident">group</span>: <span class="ident">ir::Id</span>, <span class="ident">typ</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::Unused</span>(<span class="ident">group</span>, <span class="ident">typ</span>.<span class="ident">to_string</span>()),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::Unused</span>(<span class="ident">group</span>, <span class="ident">typ</span>.<span class="ident">to_string</span>())),
             <span class="ident">pos</span>: <span class="prelude-val">None</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
     }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">papercut</span>(<span class="ident">msg</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::Papercut</span>(<span class="ident">msg</span>),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::Papercut</span>(<span class="ident">msg</span>)),
             <span class="ident">pos</span>: <span class="prelude-val">None</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
     }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">misc</span>(<span class="ident">msg</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::Misc</span>(<span class="ident">msg</span>),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::Misc</span>(<span class="ident">msg</span>)),
             <span class="ident">pos</span>: <span class="prelude-val">None</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
     }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">invalid_file</span>(<span class="ident">msg</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::InvalidFile</span>(<span class="ident">msg</span>),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::InvalidFile</span>(<span class="ident">msg</span>)),
             <span class="ident">pos</span>: <span class="prelude-val">None</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
     }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_error</span>(<span class="ident">msg</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">kind</span>: <span class="ident">ErrorKind::WriteError</span>(<span class="ident">msg</span>),
+            <span class="ident">kind</span>: <span class="ident">Box::new</span>(<span class="ident">ErrorKind::WriteError</span>(<span class="ident">msg</span>)),
             <span class="ident">pos</span>: <span class="prelude-val">None</span>,
             <span class="ident">post_msg</span>: <span class="prelude-val">None</span>,
         }
