@@ -581,6 +581,11 @@
 <span id="576">576</span>
 <span id="577">577</span>
 <span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.</span>
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">PortDef</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
 <span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
@@ -876,6 +881,11 @@
     <span class="doccomment">/// Returns true iff this cell is an instance of a Calyx-defined component.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_component</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">prototype</span>, <span class="ident">CellType::Component</span> { .. })
+    }
+
+    <span class="doccomment">/// Returns true iff this cell is the signature of the current component</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_this</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">prototype</span>, <span class="ident">CellType::ThisComponent</span>)
     }
 
     <span class="doccomment">/// Returns true if this is an instance of a primitive. If the optional name is provided then</span>
