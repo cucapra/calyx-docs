@@ -306,6 +306,17 @@
 <span id="301">301</span>
 <span id="302">302</span>
 <span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx</span>
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 
@@ -382,7 +393,7 @@
             <span class="ident">cells</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">groups</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">continuous_assignments</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">control</span>: <span class="ident">Control::Empty</span> {},
+            <span class="ident">control</span>: <span class="ident">Control::empty</span>(),
             <span class="ident">attributes</span>: <span class="ident">ir::Attributes::default</span>(),
             <span class="ident">is_comb</span>,
         }
@@ -607,7 +618,18 @@
         <span class="ident">ref_cells</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span>,
     },
     <span class="doccomment">/// Control statement that does nothing.</span>
-    <span class="ident">Empty</span> {},
+    <span class="ident">Empty</span> {
+        <span class="doccomment">/// Attributes</span>
+        <span class="ident">attributes</span>: <span class="ident">ir::Attributes</span>,
+    },
+}
+
+<span class="kw">impl</span> <span class="ident">Control</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="ident">Control</span> {
+        <span class="ident">Control::Empty</span> {
+            <span class="ident">attributes</span>: <span class="ident">ir::Attributes::default</span>(),
+        }
+    }
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>

@@ -1540,7 +1540,7 @@
         <span class="comment">// Add NODE_ID to compiled group.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">en</span> <span class="op">=</span> <span class="ident">ir::Control::enable</span>(<span class="ident">par_group</span>);
         <span class="kw">let</span> <span class="ident">node_id</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="ident">NODE_ID</span>).<span class="ident">unwrap</span>();
-        <span class="ident">en</span>.<span class="ident">get_mut_attributes</span>().<span class="ident">unwrap</span>().<span class="ident">insert</span>(<span class="ident">NODE_ID</span>, <span class="kw-2">*</span><span class="ident">node_id</span>);
+        <span class="ident">en</span>.<span class="ident">get_mut_attributes</span>().<span class="ident">insert</span>(<span class="ident">NODE_ID</span>, <span class="kw-2">*</span><span class="ident">node_id</span>);
 
         <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">en</span>))
     }

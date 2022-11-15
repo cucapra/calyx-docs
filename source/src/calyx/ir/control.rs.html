@@ -402,8 +402,10 @@
 }
 
 <span class="doccomment">/// Data for the `empty` control statement.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Empty</span> {}
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Empty</span> {
+    <span class="kw">pub</span> <span class="ident">attributes</span>: <span class="ident">Attributes</span>,
+}
 
 <span class="doccomment">/// Control AST nodes.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
@@ -437,27 +439,27 @@
 }
 
 <span class="kw">impl</span> <span class="ident">GetAttributes</span> <span class="kw">for</span> <span class="ident">Control</span> {
-    <span class="kw">fn</span> <span class="ident">get_mut_attributes</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;mut</span> <span class="ident">Attributes</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_mut_attributes</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">Attributes</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Seq</span>(<span class="ident">Seq</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Par</span>(<span class="ident">Par</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::If</span>(<span class="ident">If</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::While</span>(<span class="ident">While</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Invoke</span>(<span class="ident">Invoke</span> { <span class="ident">attributes</span>, .. })
-            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Enable</span>(<span class="ident">Enable</span> { <span class="ident">attributes</span>, .. }) =&gt; <span class="prelude-val">Some</span>(<span class="ident">attributes</span>),
-            <span class="ident"><span class="self">Self</span>::Empty</span>(..) =&gt; <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Enable</span>(<span class="ident">Enable</span> { <span class="ident">attributes</span>, .. })
+            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Empty</span>(<span class="ident">Empty</span> { <span class="ident">attributes</span> }) =&gt; <span class="ident">attributes</span>,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">get_attributes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Attributes</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_attributes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Attributes</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Seq</span>(<span class="ident">Seq</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Par</span>(<span class="ident">Par</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::If</span>(<span class="ident">If</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::While</span>(<span class="ident">While</span> { <span class="ident">attributes</span>, .. })
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Invoke</span>(<span class="ident">Invoke</span> { <span class="ident">attributes</span>, .. })
-            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Enable</span>(<span class="ident">Enable</span> { <span class="ident">attributes</span>, .. }) =&gt; <span class="prelude-val">Some</span>(<span class="ident">attributes</span>),
-            <span class="ident"><span class="self">Self</span>::Empty</span>(..) =&gt; <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Enable</span>(<span class="ident">Enable</span> { <span class="ident">attributes</span>, .. })
+            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Empty</span>(<span class="ident">Empty</span> { <span class="ident">attributes</span> }) =&gt; <span class="ident">attributes</span>,
         }
     }
 }
@@ -466,7 +468,7 @@
     <span class="comment">// ================ Constructor methods ================</span>
     <span class="doccomment">/// Convience constructor for empty.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident">Control::Empty</span>(<span class="ident">Empty</span> {})
+        <span class="ident">Control::Empty</span>(<span class="ident">Empty::default</span>())
     }
 
     <span class="doccomment">/// Convience constructor for seq.</span>
@@ -540,7 +542,7 @@
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
     {
-        <span class="self">self</span>.<span class="ident">get_attributes</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">attrs</span><span class="op">|</span> <span class="ident">attrs</span>.<span class="ident">get</span>(<span class="ident">attr</span>))
+        <span class="self">self</span>.<span class="ident">get_attributes</span>().<span class="ident">get</span>(<span class="ident">attr</span>)
     }
 
     <span class="doccomment">/// Returns true if the node has a specific attribute</span>
@@ -548,9 +550,7 @@
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
     {
-        <span class="self">self</span>.<span class="ident">get_attributes</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">attrs</span><span class="op">|</span> <span class="ident">attrs</span>.<span class="ident">has</span>(<span class="ident">attr</span>))
-            .<span class="ident">unwrap_or</span>(<span class="bool-val">false</span>)
+        <span class="self">self</span>.<span class="ident">get_attributes</span>().<span class="ident">has</span>(<span class="ident">attr</span>)
     }
 }
 

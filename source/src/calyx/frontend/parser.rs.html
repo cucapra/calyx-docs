@@ -906,6 +906,17 @@
 <span id="901">901</span>
 <span id="902">902</span>
 <span id="903">903</span>
+<span id="904">904</span>
+<span id="905">905</span>
+<span id="906">906</span>
+<span id="907">907</span>
+<span id="908">908</span>
+<span id="909">909</span>
+<span id="910">910</span>
+<span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
 </pre><pre class="rust"><code><span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy::upper_case_acronyms</span>)]</span>
 
 <span class="doccomment">//! Parser for Calyx programs.</span>
@@ -1533,6 +1544,16 @@
         ))
     }
 
+    <span class="kw">fn</span> <span class="ident">empty</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_span</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
+        <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
+            <span class="ident">input</span>.<span class="ident">into_children</span>();
+            [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>)] =&gt; <span class="ident">ast::Control::Empty</span> {
+                <span class="ident">attributes</span>: <span class="ident">attrs</span>.<span class="ident">add_span</span>(<span class="ident">span</span>)
+            }
+        ))
+    }
+
     <span class="kw">fn</span> <span class="ident">enable</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Control</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_span</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
@@ -1582,7 +1603,7 @@
                 <span class="ident">port</span>,
                 <span class="ident">cond</span>,
                 <span class="ident">tbranch</span>: <span class="ident">Box::new</span>(<span class="ident">stmt</span>),
-                <span class="ident">fbranch</span>: <span class="ident">Box::new</span>(<span class="ident">ast::Control::Empty</span>{}),
+                <span class="ident">fbranch</span>: <span class="ident">Box::new</span>(<span class="ident">ast::Control::Empty</span> { <span class="ident">attributes</span>: <span class="ident">ir::Attributes::default</span>() }),
                 <span class="ident">attributes</span>: <span class="ident">attrs</span>.<span class="ident">add_span</span>(<span class="ident">span</span>),
             },
             [<span class="ident">at_attributes</span>(<span class="ident">attrs</span>), <span class="ident">port_with</span>((<span class="ident">port</span>, <span class="ident">cond</span>)), <span class="ident">block</span>(<span class="ident">tbranch</span>), <span class="ident">block</span>(<span class="ident">fbranch</span>)] =&gt;
@@ -1622,6 +1643,7 @@
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
             [<span class="ident">enable</span>(<span class="ident">data</span>)] =&gt; <span class="ident">data</span>,
+            [<span class="ident">empty</span>(<span class="ident">data</span>)] =&gt; <span class="ident">data</span>,
             [<span class="ident">invoke</span>(<span class="ident">data</span>)] =&gt; <span class="ident">data</span>,
             [<span class="ident">seq</span>(<span class="ident">data</span>)] =&gt; <span class="ident">data</span>,
             [<span class="ident">par</span>(<span class="ident">data</span>)] =&gt; <span class="ident">data</span>,
@@ -1650,7 +1672,7 @@
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
             [<span class="ident">block</span>(<span class="ident">stmt</span>)] =&gt; <span class="ident">stmt</span>,
-            [] =&gt; <span class="ident">ast::Control::Empty</span>{}
+            [] =&gt; <span class="ident">ast::Control::empty</span>()
         ))
     }
 
@@ -1684,7 +1706,7 @@
                 <span class="ident">cells</span>,
                 <span class="ident">groups</span>,
                 <span class="ident">continuous_assignments</span>,
-                <span class="ident">control</span>: <span class="ident">Control::Empty</span> {},
+                <span class="ident">control</span>: <span class="ident">Control::empty</span>(),
                 <span class="ident">attributes</span>: <span class="ident">attributes</span>.<span class="ident">add_span</span>(<span class="ident">span</span>),
                 <span class="ident">is_comb</span>: <span class="bool-val">true</span>,
             })
