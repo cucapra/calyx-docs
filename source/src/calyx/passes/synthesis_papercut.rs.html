@@ -176,7 +176,7 @@
         <span class="kw">for</span> <span class="ident">mem</span> <span class="kw">in</span> <span class="ident">memory_cells</span> {
             <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">find_cell</span>(<span class="kw-2">&amp;</span><span class="ident">mem</span>).<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">read_port</span> <span class="op">=</span> <span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="ident">READ_PORT</span>);
-            <span class="kw">if</span> <span class="ident">analysis</span>.<span class="ident">reads_from</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">read_port</span>.<span class="ident">borrow</span>()).<span class="ident">next</span>().<span class="ident">is_none</span>() {
+            <span class="kw">if</span> <span class="ident">analysis</span>.<span class="ident">reads_from</span>(<span class="kw-2">&amp;</span><span class="ident">read_port</span>.<span class="ident">borrow</span>()).<span class="ident">next</span>().<span class="ident">is_none</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::papercut</span>(
                     <span class="macro">format!</span>(
                         <span class="string">&quot;Only writes performed on memory `{mem}&#39;. Synthesis tools will remove this memory. Add @external(1) to cell to turn this into an interface memory.&quot;</span>,
@@ -184,7 +184,7 @@
                 ).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">mem</span>));
             }
             <span class="kw">let</span> <span class="ident">write_port</span> <span class="op">=</span> <span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="ident">WRITE_PORT</span>);
-            <span class="kw">if</span> <span class="ident">analysis</span>.<span class="ident">writes_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">write_port</span>.<span class="ident">borrow</span>()).<span class="ident">next</span>().<span class="ident">is_none</span>() {
+            <span class="kw">if</span> <span class="ident">analysis</span>.<span class="ident">writes_to</span>(<span class="kw-2">&amp;</span><span class="ident">write_port</span>.<span class="ident">borrow</span>()).<span class="ident">next</span>().<span class="ident">is_none</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::papercut</span>(
                     <span class="macro">format!</span>(
                         <span class="string">&quot;Only reads performed on memory `{mem}&#39;. Synthesis tools will remove this memory. Add @external(1) to cell to turn this into an interface memory.&quot;</span>,

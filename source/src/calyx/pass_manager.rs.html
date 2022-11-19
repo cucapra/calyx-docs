@@ -213,6 +213,12 @@
 <span id="208">208</span>
 <span id="209">209</span>
 <span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Define the PassManager structure that is used to construct and run pass</span>
 <span class="doccomment">//! passes.</span>
 <span class="kw">use</span> <span class="kw">crate</span>::{
@@ -386,7 +392,13 @@
                 <span class="kw">if</span> <span class="op">!</span><span class="ident">excl_set</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>) {
                     <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">Instant::now</span>();
                     <span class="ident">pass</span>(<span class="ident">ctx</span>)<span class="question-mark">?</span>;
-                    <span class="macro">log::info!</span>(<span class="string">&quot;{name}: {}ms&quot;</span>, <span class="ident">start</span>.<span class="ident">elapsed</span>().<span class="ident">as_millis</span>());
+                    <span class="kw">let</span> <span class="ident">elapsed</span> <span class="op">=</span> <span class="ident">start</span>.<span class="ident">elapsed</span>();
+                    <span class="comment">// Warn if pass takes more than 3 seconds.</span>
+                    <span class="kw">if</span> <span class="ident">elapsed</span>.<span class="ident">as_secs</span>() <span class="op">&gt;</span> <span class="number">5</span> {
+                        <span class="macro">log::warn!</span>(<span class="string">&quot;{name}: {}ms&quot;</span>, <span class="ident">elapsed</span>.<span class="ident">as_millis</span>());
+                    } <span class="kw">else</span> {
+                        <span class="macro">log::info!</span>(<span class="string">&quot;{name}: {}ms&quot;</span>, <span class="ident">start</span>.<span class="ident">elapsed</span>().<span class="ident">as_millis</span>());
+                    }
                 } <span class="kw">else</span> {
                     <span class="macro">log::info!</span>(<span class="string">&quot;{name}: Ignored&quot;</span>)
                 }

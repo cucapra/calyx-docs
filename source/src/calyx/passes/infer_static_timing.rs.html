@@ -541,6 +541,76 @@
 <span id="536">536</span>
 <span id="537">537</span>
 <span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis</span>::{<span class="ident">GraphAnalysis</span>, <span class="ident">ReadWriteSet</span>};
@@ -553,7 +623,7 @@
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">cmp</span>, <span class="ident">ops::Add</span>};
 
 <span class="doccomment">/// Struct to store information about the go-done interfaces defined by a primitive.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">struct</span> <span class="ident">GoDone</span> {
     <span class="ident">ports</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>, <span class="ident">u64</span>)<span class="op">&gt;</span>,
 }
@@ -561,6 +631,16 @@
 <span class="kw">impl</span> <span class="ident">GoDone</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">ports</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>, <span class="ident">u64</span>)<span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> { <span class="ident">ports</span> }
+    }
+
+    <span class="comment">// Returns the latency associated with invoking this primitive.</span>
+    <span class="comment">// The component is not invokable if it has multiple go-done ports.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">invoke_latency</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">ports</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">ports</span>[<span class="number">0</span>].<span class="number">2</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">None</span>
+        }
     }
 
     <span class="doccomment">/// Returns true if this is @go port</span>
@@ -590,6 +670,52 @@
     }
 }
 
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Primitive</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">GoDone</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">prim</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Primitive</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">done_ports</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">prim</span>
+            .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;done&quot;</span>)
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> (<span class="ident">pd</span>.<span class="ident">attributes</span>[<span class="kw-2">&amp;</span><span class="string">&quot;done&quot;</span>], <span class="ident">pd</span>.<span class="ident">name</span>.<span class="ident">clone</span>()))
+            .<span class="ident">collect</span>();
+
+        <span class="kw">let</span> <span class="ident">go_ports</span> <span class="op">=</span> <span class="ident">prim</span>
+            .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;go&quot;</span>)
+            .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> {
+                <span class="ident">pd</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">st</span><span class="op">|</span> {
+                    <span class="ident">done_ports</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">pd</span>.<span class="ident">attributes</span>[<span class="kw-2">&amp;</span><span class="string">&quot;go&quot;</span>]).<span class="ident">map</span>(<span class="op">|</span><span class="ident">done_port</span><span class="op">|</span> {
+                        (<span class="ident">pd</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">done_port</span>.<span class="ident">clone</span>(), <span class="kw-2">*</span><span class="ident">st</span>)
+                    })
+                })
+            })
+            .<span class="ident">collect_vec</span>();
+        <span class="ident">GoDone::new</span>(<span class="ident">go_ports</span>)
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">GoDone</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">cell</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Cell</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">done_ports</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">cell</span>
+            .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;done&quot;</span>)
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pr</span><span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">pr</span>.<span class="ident">borrow</span>();
+                (<span class="ident">port</span>.<span class="ident">attributes</span>[<span class="kw-2">&amp;</span><span class="string">&quot;done&quot;</span>], <span class="ident">port</span>.<span class="ident">name</span>.<span class="ident">clone</span>())
+            })
+            .<span class="ident">collect</span>();
+
+        <span class="kw">let</span> <span class="ident">go_ports</span> <span class="op">=</span> <span class="ident">cell</span>
+            .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;go&quot;</span>)
+            .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">pr</span><span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">pr</span>.<span class="ident">borrow</span>();
+                <span class="ident">port</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">st</span><span class="op">|</span> {
+                    <span class="ident">done_ports</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">attributes</span>[<span class="kw-2">&amp;</span><span class="string">&quot;go&quot;</span>]).<span class="ident">map</span>(<span class="op">|</span><span class="ident">done_port</span><span class="op">|</span> {
+                        (<span class="ident">port</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">done_port</span>.<span class="ident">clone</span>(), <span class="kw-2">*</span><span class="ident">st</span>)
+                    })
+                })
+            })
+            .<span class="ident">collect_vec</span>();
+        <span class="ident">GoDone::new</span>(<span class="ident">go_ports</span>)
+    }
+}
+
 <span class="doccomment">/// Infer &quot;static&quot; annotation for groups and add &quot;@static&quot; annotation when</span>
 <span class="doccomment">/// (conservatively) possible.</span>
 <span class="doccomment">///</span>
@@ -600,10 +726,8 @@
 <span class="doccomment">/// pass will throw an error. If a group&#39;s `done` signal relies on signals</span>
 <span class="doccomment">/// that are not only `done` signals, this pass will ignore that group.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">InferStaticTiming</span> {
-    <span class="doccomment">/// primitive name -&gt; vec&lt;(go signal, done signal, latency)&gt;</span>
+    <span class="doccomment">/// component name -&gt; vec&lt;(go signal, done signal, latency)&gt;</span>
     <span class="ident">latency_data</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">GoDone</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// static timing information for invokable components and primitives</span>
-    <span class="ident">invoke_latency</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">u64</span><span class="op">&gt;</span>,
 }
 
 <span class="comment">// Override constructor to build latency_data information from the primitives</span>
@@ -637,10 +761,7 @@
             }
             <span class="ident">latency_data</span>.<span class="ident">insert</span>(<span class="ident">prim</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">GoDone::new</span>(<span class="ident">go_ports</span>));
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">InferStaticTiming</span> {
-            <span class="ident">latency_data</span>,
-            <span class="ident">invoke_latency</span>: <span class="ident">comp_latency</span>,
-        })
+        <span class="prelude-val">Ok</span>(<span class="ident">InferStaticTiming</span> { <span class="ident">latency_data</span> })
     }
 
     <span class="comment">// This pass shared information between components</span>
@@ -684,24 +805,18 @@
     <span class="kw">fn</span> <span class="ident">mem_wrt_dep_graph</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Port</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Port</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">parent</span>, <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">parent</span>) {
             (
-                <span class="ident">ir::PortParent::Cell</span>(<span class="ident">src_cell</span>),
-                <span class="ident">ir::PortParent::Cell</span>(<span class="ident">dst_cell</span>),
+                <span class="ident">ir::PortParent::Cell</span>(<span class="ident">src_cell_wrf</span>),
+                <span class="ident">ir::PortParent::Cell</span>(<span class="ident">dst_cell_wrf</span>),
             ) =&gt; {
-                <span class="kw">if</span> <span class="kw">let</span> (
-                    <span class="ident">ir::CellType::Primitive</span> {
-                        <span class="ident">name</span>: <span class="ident">dst_cell_prim_type</span>,
-                        ..
-                    },
-                    <span class="ident">ir::CellType::Primitive</span> {
-                        <span class="ident">name</span>: <span class="ident">src_cell_prim_type</span>,
-                        ..
-                    },
-                ) <span class="op">=</span> (
-                    <span class="kw-2">&amp;</span><span class="ident">dst_cell</span>.<span class="ident">upgrade</span>().<span class="ident">borrow</span>().<span class="ident">prototype</span>,
-                    <span class="kw-2">&amp;</span><span class="ident">src_cell</span>.<span class="ident">upgrade</span>().<span class="ident">borrow</span>().<span class="ident">prototype</span>,
-                ) {
-                    <span class="kw">let</span> <span class="ident">data_dst</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">dst_cell_prim_type</span>);
-                    <span class="kw">let</span> <span class="ident">data_src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">src_cell_prim_type</span>);
+                <span class="kw">let</span> <span class="ident">src_rf</span> <span class="op">=</span> <span class="ident">src_cell_wrf</span>.<span class="ident">upgrade</span>();
+                <span class="kw">let</span> <span class="ident">src_cell</span> <span class="op">=</span> <span class="ident">src_rf</span>.<span class="ident">borrow</span>();
+                <span class="kw">let</span> <span class="ident">dst_rf</span> <span class="op">=</span> <span class="ident">dst_cell_wrf</span>.<span class="ident">upgrade</span>();
+                <span class="kw">let</span> <span class="ident">dst_cell</span> <span class="op">=</span> <span class="ident">dst_rf</span>.<span class="ident">borrow</span>();
+                <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">s_name</span>), <span class="prelude-val">Some</span>(<span class="ident">d_name</span>)) <span class="op">=</span>
+                    (<span class="ident">src_cell</span>.<span class="ident">type_name</span>(), <span class="ident">dst_cell</span>.<span class="ident">type_name</span>())
+                {
+                    <span class="kw">let</span> <span class="ident">data_src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">s_name</span>);
+                    <span class="kw">let</span> <span class="ident">data_dst</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">d_name</span>);
                     <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">dst_ports</span>), <span class="prelude-val">Some</span>(<span class="ident">src_ports</span>)) <span class="op">=</span>
                         (<span class="ident">data_dst</span>, <span class="ident">data_src</span>)
                     {
@@ -711,19 +826,10 @@
                 }
 
                 <span class="comment">// A constant writes to a cell: to be added to the graph, the cell needs to be a &quot;done&quot; port.</span>
-                <span class="kw">if</span> <span class="kw">let</span> (
-                    <span class="ident">ir::CellType::Primitive</span> {
-                        <span class="ident">name</span>: <span class="ident">dst_cell_prim_type</span>,
-                        ..
-                    },
-                    <span class="ident">ir::CellType::Constant</span> { .. },
-                ) <span class="op">=</span> (
-                    <span class="kw-2">&amp;</span><span class="ident">dst_cell</span>.<span class="ident">upgrade</span>().<span class="ident">borrow</span>().<span class="ident">prototype</span>,
-                    <span class="kw-2">&amp;</span><span class="ident">src_cell</span>.<span class="ident">upgrade</span>().<span class="ident">borrow</span>().<span class="ident">prototype</span>,
-                ) {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span>
-                        <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">dst_cell_prim_type</span>)
-                    {
+                <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">d_name</span>), <span class="ident">ir::CellType::Constant</span> { .. }) <span class="op">=</span>
+                    (<span class="ident">dst_cell</span>.<span class="ident">type_name</span>(), <span class="kw-2">&amp;</span><span class="ident">src_cell</span>.<span class="ident">prototype</span>)
+                {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">d_name</span>) {
                         <span class="kw">return</span> <span class="ident">ports</span>.<span class="ident">is_go</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">name</span>);
                     }
                 }
@@ -750,17 +856,14 @@
 
         <span class="kw">for</span> <span class="ident">cell_ref</span> <span class="kw">in</span> <span class="ident">rw_set</span> {
             <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cell_ref</span>.<span class="ident">borrow</span>();
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::CellType::Primitive</span> {
-                <span class="ident">name</span>: <span class="ident">cell_type</span>, ..
-            } <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">prototype</span>
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span>
+                <span class="ident">cell</span>.<span class="ident">type_name</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">c</span>))
             {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">cell_type</span>) {
-                    <span class="ident">go_done_edges</span>.<span class="ident">extend</span>(
-                        <span class="ident">ports</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">go</span>, <span class="ident">done</span>, <span class="kw">_</span>)<span class="op">|</span> {
-                            (<span class="ident">cell</span>.<span class="ident">get</span>(<span class="ident">go</span>), <span class="ident">cell</span>.<span class="ident">get</span>(<span class="ident">done</span>))
-                        }),
-                    )
-                }
+                <span class="ident">go_done_edges</span>.<span class="ident">extend</span>(
+                    <span class="ident">ports</span>
+                        .<span class="ident">iter</span>()
+                        .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">go</span>, <span class="ident">done</span>, <span class="kw">_</span>)<span class="op">|</span> (<span class="ident">cell</span>.<span class="ident">get</span>(<span class="ident">go</span>), <span class="ident">cell</span>.<span class="ident">get</span>(<span class="ident">done</span>))),
+                )
             }
         }
         <span class="ident">go_done_edges</span>
@@ -769,22 +872,17 @@
     <span class="doccomment">/// Returns true if `port` is a &quot;done&quot; port, and we know the latency data</span>
     <span class="doccomment">/// about `port`, or is a constant.</span>
     <span class="kw">fn</span> <span class="ident">is_done_port_or_const</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">port</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Port</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">parent</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::CellType::Primitive</span> {
-                <span class="ident">name</span>: <span class="ident">cell_type</span>, ..
-            } <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">upgrade</span>().<span class="ident">borrow</span>().<span class="ident">prototype</span>
-            {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">cell_type</span>) {
-                    <span class="kw">return</span> <span class="ident">ports</span>.<span class="ident">is_done</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">name</span>);
-                }
-            }
-
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::CellType::Constant</span> { <span class="ident">val</span>, .. } <span class="op">=</span>
-                <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">upgrade</span>().<span class="ident">borrow</span>().<span class="ident">prototype</span>
-            {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cwrf</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">parent</span> {
+            <span class="kw">let</span> <span class="ident">cr</span> <span class="op">=</span> <span class="ident">cwrf</span>.<span class="ident">upgrade</span>();
+            <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cr</span>.<span class="ident">borrow</span>();
+            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::CellType::Constant</span> { <span class="ident">val</span>, .. } <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">prototype</span> {
                 <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">val</span> <span class="op">&gt;</span> <span class="number">0</span> {
                     <span class="kw">return</span> <span class="bool-val">true</span>;
                 }
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span>
+                <span class="ident">cell</span>.<span class="ident">type_name</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">c</span>))
+            {
+                <span class="kw">return</span> <span class="ident">ports</span>.<span class="ident">is_done</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">name</span>);
             }
         }
         <span class="bool-val">false</span>
@@ -795,22 +893,23 @@
     <span class="kw">fn</span> <span class="ident">contains_dyn_writes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">graph</span>: <span class="kw-2">&amp;</span><span class="ident">GraphAnalysis</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">for</span> <span class="ident">port</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">graph</span>.<span class="ident">ports</span>() {
             <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">parent</span> {
-                <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell</span>) =&gt; {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::CellType::Primitive</span> {
-                        <span class="ident">name</span>: <span class="ident">cell_type</span>, ..
-                    } <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">upgrade</span>().<span class="ident">borrow</span>().<span class="ident">prototype</span>
+                <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell_wrf</span>) =&gt; {
+                    <span class="kw">let</span> <span class="ident">cr</span> <span class="op">=</span> <span class="ident">cell_wrf</span>.<span class="ident">upgrade</span>();
+                    <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cr</span>.<span class="ident">borrow</span>();
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span>
+                        <span class="ident">cell</span>.<span class="ident">type_name</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">c</span>))
                     {
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">cell_type</span>) {
-                            <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">name</span>;
-                            <span class="kw">if</span> <span class="ident">ports</span>.<span class="ident">is_go</span>(<span class="ident">name</span>) {
-                                <span class="kw">for</span> <span class="ident">write_port</span> <span class="kw">in</span>
-                                    <span class="ident">graph</span>.<span class="ident">writes_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">port</span>.<span class="ident">borrow</span>())
+                        <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">name</span>;
+                        <span class="kw">if</span> <span class="ident">ports</span>.<span class="ident">is_go</span>(<span class="ident">name</span>) {
+                            <span class="kw">for</span> <span class="ident">write_port</span> <span class="kw">in</span> <span class="ident">graph</span>.<span class="ident">writes_to</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>()) {
+                                <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>
+                                    .<span class="ident">is_done_port_or_const</span>(<span class="kw-2">&amp;</span><span class="ident">write_port</span>.<span class="ident">borrow</span>())
                                 {
-                                    <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_done_port_or_const</span>(
-                                        <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">write_port</span>.<span class="ident">borrow</span>(),
-                                    ) {
-                                        <span class="kw">return</span> <span class="bool-val">true</span>;
-                                    }
+                                    <span class="macro">log::debug!</span>(
+                                        <span class="string">&quot;`{}` is not a done port&quot;</span>,
+                                        <span class="ident">write_port</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>(),
+                                    );
+                                    <span class="kw">return</span> <span class="bool-val">true</span>;
                                 }
                             }
                         }
@@ -819,10 +918,13 @@
 
                 <span class="ident">ir::PortParent::Group</span>(<span class="kw">_</span>) =&gt; {
                     <span class="kw">if</span> <span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;done&quot;</span> {
-                        <span class="kw">for</span> <span class="ident">write_port</span> <span class="kw">in</span> <span class="ident">graph</span>.<span class="ident">writes_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">port</span>.<span class="ident">borrow</span>()) {
-                            <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>
-                                .<span class="ident">is_done_port_or_const</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">write_port</span>.<span class="ident">borrow</span>())
+                        <span class="kw">for</span> <span class="ident">write_port</span> <span class="kw">in</span> <span class="ident">graph</span>.<span class="ident">writes_to</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>()) {
+                            <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_done_port_or_const</span>(<span class="kw-2">&amp;</span><span class="ident">write_port</span>.<span class="ident">borrow</span>())
                             {
+                                <span class="macro">log::debug!</span>(
+                                    <span class="string">&quot;`{}` is not a done port&quot;</span>,
+                                    <span class="ident">write_port</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>(),
+                                );
                                 <span class="kw">return</span> <span class="bool-val">true</span>;
                             }
                         }
@@ -836,7 +938,7 @@
     <span class="doccomment">/// Returns true if `graph` contains any nodes with degree &gt; 1.</span>
     <span class="kw">fn</span> <span class="ident">contains_node_deg_gt_one</span>(<span class="ident">graph</span>: <span class="kw-2">&amp;</span><span class="ident">GraphAnalysis</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">for</span> <span class="ident">port</span> <span class="kw">in</span> <span class="ident">graph</span>.<span class="ident">ports</span>() {
-            <span class="kw">if</span> <span class="ident">graph</span>.<span class="ident">writes_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">port</span>.<span class="ident">borrow</span>()).<span class="ident">count</span>() <span class="op">&gt;</span> <span class="number">1</span> {
+            <span class="kw">if</span> <span class="ident">graph</span>.<span class="ident">writes_to</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>()).<span class="ident">count</span>() <span class="op">&gt;</span> <span class="number">1</span> {
                 <span class="kw">return</span> <span class="bool-val">true</span>;
             }
         }
@@ -868,8 +970,10 @@
         <span class="comment">// a.write_en -&gt; a.done</span>
         <span class="comment">// a.done -&gt; g1[done]</span>
         <span class="comment">// ```</span>
+        <span class="macro">log::debug!</span>(<span class="string">&quot;Checking group `{}`&quot;</span>, <span class="ident">group</span>.<span class="ident">name</span>());
         <span class="kw">let</span> <span class="ident">graph_unprocessed</span> <span class="op">=</span> <span class="ident">GraphAnalysis::from</span>(<span class="ident">group</span>);
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">contains_dyn_writes</span>(<span class="kw-2">&amp;</span><span class="ident">graph_unprocessed</span>) {
+            <span class="macro">log::debug!</span>(<span class="string">&quot;FAIL: contains dynamic writes&quot;</span>);
             <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
 
@@ -881,6 +985,7 @@
 
         <span class="comment">// Give up if a port has multiple writes to it.</span>
         <span class="kw">if</span> <span class="ident"><span class="self">Self</span>::contains_node_deg_gt_one</span>(<span class="kw-2">&amp;</span><span class="ident">graph</span>) {
+            <span class="macro">log::debug!</span>(<span class="string">&quot;FAIL: Group contains multiple writes&quot;</span>);
             <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
 
@@ -888,9 +993,10 @@
         <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">tsort</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">finish</span> <span class="op">=</span> <span class="ident">tsort</span>.<span class="ident">last</span>().<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="ident">paths</span> <span class="op">=</span> <span class="ident">graph</span>.<span class="ident">paths</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">start</span>.<span class="ident">borrow</span>(), <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">finish</span>.<span class="ident">borrow</span>());
+        <span class="kw">let</span> <span class="ident">paths</span> <span class="op">=</span> <span class="ident">graph</span>.<span class="ident">paths</span>(<span class="kw-2">&amp;</span><span class="ident">start</span>.<span class="ident">borrow</span>(), <span class="kw-2">&amp;</span><span class="ident">finish</span>.<span class="ident">borrow</span>());
         <span class="comment">// If there are no paths, give up.</span>
         <span class="kw">if</span> <span class="ident">paths</span>.<span class="ident">is_empty</span>() {
+            <span class="macro">log::debug!</span>(<span class="string">&quot;FAIL: No path between @go and @done port&quot;</span>);
             <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
         <span class="kw">let</span> <span class="ident">first_path</span> <span class="op">=</span> <span class="ident">paths</span>.<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
@@ -898,21 +1004,22 @@
         <span class="comment">// Sum the latencies of each primitive along the path.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">latency_sum</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">for</span> <span class="ident">port</span> <span class="kw">in</span> <span class="ident">first_path</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">parent</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::CellType::Primitive</span> { <span class="ident">name</span>, .. } <span class="op">=</span>
-                    <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">upgrade</span>().<span class="ident">borrow</span>().<span class="ident">prototype</span>
+            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cwrf</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">parent</span> {
+                <span class="kw">let</span> <span class="ident">cr</span> <span class="op">=</span> <span class="ident">cwrf</span>.<span class="ident">upgrade</span>();
+                <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cr</span>.<span class="ident">borrow</span>();
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span>
+                    <span class="ident">cell</span>.<span class="ident">type_name</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">c</span>))
                 {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">name</span>) {
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">latency</span>) <span class="op">=</span>
-                            <span class="ident">ports</span>.<span class="ident">get_latency</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">name</span>)
-                        {
-                            <span class="ident">latency_sum</span> <span class="op">+</span><span class="op">=</span> <span class="ident">latency</span>;
-                        }
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">latency</span>) <span class="op">=</span>
+                        <span class="ident">ports</span>.<span class="ident">get_latency</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">name</span>)
+                    {
+                        <span class="ident">latency_sum</span> <span class="op">+</span><span class="op">=</span> <span class="ident">latency</span>;
                     }
                 }
             }
         }
 
+        <span class="macro">log::debug!</span>(<span class="string">&quot;SUCCESS: Latency = {}&quot;</span>, <span class="ident">latency_sum</span>);
         <span class="prelude-val">Some</span>(<span class="ident">latency_sum</span>)
     }
 }
@@ -940,7 +1047,7 @@
                         <span class="kw">let</span> <span class="ident">msg1</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Annotated latency: {}&quot;</span>, <span class="ident">curr_lat</span>);
                         <span class="kw">let</span> <span class="ident">msg2</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Inferred latency: {}&quot;</span>, <span class="ident">latency</span>);
                         <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(
-                            <span class="string">&quot;Impossible \&quot;static\&quot; latency annotation for group {}.\n{}\n{}&quot;</span>,
+                            <span class="string">&quot;Invalid \&quot;static\&quot; latency annotation for group {}.\n{}\n{}&quot;</span>,
                             <span class="ident">grp</span>.<span class="ident">name</span>(),
                             <span class="ident">msg1</span>,
                             <span class="ident">msg2</span>
@@ -1050,9 +1157,10 @@
             .<span class="ident">comp</span>
             .<span class="ident">borrow</span>()
             .<span class="ident">type_name</span>()
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">name</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">invoke_latency</span>.<span class="ident">get</span>(<span class="ident">name</span>))
+            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">name</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="ident">name</span>))
+            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">ports</span><span class="op">|</span> <span class="ident">ports</span>.<span class="ident">invoke_latency</span>())
         {
-            <span class="ident">s</span>.<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">time</span>);
+            <span class="ident">s</span>.<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="kw-2">*</span><span class="ident">time</span>);
         }
         <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
     }
@@ -1063,19 +1171,51 @@
         <span class="ident">_lib</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
         <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
     ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">time</span>) <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>().<span class="ident">get_attribute</span>(<span class="string">&quot;static&quot;</span>) {
-            <span class="kw">let</span> <span class="ident">go_port</span> <span class="op">=</span>
-                <span class="ident">comp</span>.<span class="ident">signature</span>.<span class="ident">borrow</span>().<span class="ident">find_with_attr</span>(<span class="string">&quot;go&quot;</span>).<span class="ident">ok_or_else</span>(
-                    <span class="op">|</span><span class="op">|</span> {
-                        <span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(
-                            <span class="string">&quot;Component {} does not have a @go port&quot;</span>,
-                            <span class="ident">comp</span>.<span class="ident">name</span>
-                        ))
-                    },
-                )<span class="question-mark">?</span>;
-            <span class="ident">go_port</span>.<span class="ident">borrow_mut</span>().<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="kw-2">*</span><span class="ident">time</span>);
-            <span class="self">self</span>.<span class="ident">invoke_latency</span>.<span class="ident">insert</span>(<span class="ident">comp</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="kw-2">*</span><span class="ident">time</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">go_ports</span> <span class="op">=</span> <span class="ident">comp</span>
+            .<span class="ident">signature</span>
+            .<span class="ident">borrow</span>()
+            .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;go&quot;</span>)
+            .<span class="ident">collect_vec</span>();
+
+        <span class="comment">// There is exactly one go port.</span>
+        <span class="kw">if</span> <span class="ident">go_ports</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
+            <span class="kw">let</span> <span class="ident">go_port</span> <span class="op">=</span> <span class="ident">go_ports</span>.<span class="ident">pop</span>().<span class="ident">unwrap</span>();
+            <span class="comment">// If the control program has a static time, make sure the go port&#39;s static annotation matches it</span>
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">time</span>) <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>().<span class="ident">get_attribute</span>(<span class="string">&quot;static&quot;</span>) {
+                <span class="kw">let</span> <span class="ident">maybe_go_time</span> <span class="op">=</span> {
+                    <span class="kw">let</span> <span class="ident">gp</span> <span class="op">=</span> <span class="ident">go_port</span>.<span class="ident">borrow</span>();
+                    <span class="ident">gp</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>).<span class="ident">copied</span>()
+                };
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">go_time</span>) <span class="op">=</span> <span class="ident">maybe_go_time</span> {
+                    <span class="kw">if</span> <span class="ident">go_time</span> <span class="op">!</span><span class="op">=</span> <span class="ident">time</span> {
+                        <span class="kw">let</span> <span class="ident">msg1</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Annotated latency: {}&quot;</span>, <span class="ident">go_time</span>);
+                        <span class="kw">let</span> <span class="ident">msg2</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Inferred latency: {}&quot;</span>, <span class="ident">time</span>);
+                        <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(
+                        <span class="string">&quot;Impossible \&quot;static\&quot; latency annotation for component {}.\n{}\n{}&quot;</span>,
+                        <span class="ident">comp</span>.<span class="ident">name</span>,
+                        <span class="ident">msg1</span>,
+                        <span class="ident">msg2</span>
+                    );
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="ident">msg</span>)
+                            .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">go_port</span>.<span class="ident">borrow</span>().<span class="ident">attributes</span>));
+                    }
+                } <span class="kw">else</span> {
+                    <span class="ident">go_port</span>.<span class="ident">borrow_mut</span>().<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="ident">time</span>);
+                }
+                <span class="macro">log::info!</span>(
+                    <span class="string">&quot;Component `{}` has static time {}&quot;</span>,
+                    <span class="ident">comp</span>.<span class="ident">name</span>,
+                    <span class="ident">time</span>
+                );
+            }
         }
+
+        <span class="comment">// Add all go-done latencies to the context</span>
+        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">comp</span>.<span class="ident">signature</span>.<span class="ident">borrow</span>();
+        <span class="kw">let</span> <span class="ident">ports</span>: <span class="ident">GoDone</span> <span class="op">=</span> <span class="ident">sig</span>.<span class="ident">into</span>();
+
+        <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">insert</span>(<span class="ident">comp</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">ports</span>);
+
         <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
     }
 }
