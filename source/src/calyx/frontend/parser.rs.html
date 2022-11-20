@@ -921,22 +921,13 @@
 <span id="916">916</span>
 <span id="917">917</span>
 <span id="918">918</span>
-<span id="919">919</span>
-<span id="920">920</span>
-<span id="921">921</span>
-<span id="922">922</span>
-<span id="923">923</span>
-<span id="924">924</span>
-<span id="925">925</span>
-<span id="926">926</span>
-<span id="927">927</span>
 </pre><pre class="rust"><code><span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy::upper_case_acronyms</span>)]</span>
 
 <span class="doccomment">//! Parser for Calyx programs.</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::ast</span>::{<span class="self">self</span>, <span class="ident">BitNum</span>, <span class="ident">Control</span>, <span class="ident">GuardComp</span> <span class="kw">as</span> <span class="ident">GC</span>, <span class="ident">GuardExpr</span>, <span class="ident">NumType</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="self">self</span>, <span class="ident">CalyxResult</span>, <span class="ident">Span</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>;
-<span class="kw">use</span> <span class="ident">pest::pratt_parser</span>::{<span class="ident">Assoc</span>, <span class="ident">Op</span>, <span class="ident">PrattParser</span>};
+<span class="kw">use</span> <span class="ident">pest::prec_climber</span>::{<span class="ident">Assoc</span>, <span class="ident">Operator</span>, <span class="ident">PrecClimber</span>};
 <span class="kw">use</span> <span class="ident">pest_consume</span>::{<span class="ident">match_nodes</span>, <span class="ident">Error</span>, <span class="ident">Parser</span>};
 <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
 <span class="kw">use</span> <span class="ident">std::fs</span>;
@@ -967,10 +958,14 @@
 <span class="comment">// Define the precedence of binary operations. We use `lazy_static` so that</span>
 <span class="comment">// this is only ever constructed once.</span>
 <span class="macro">lazy_static::lazy_static!</span> {
-    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">PRATT</span>: <span class="ident">PrattParser</span><span class="op">&lt;</span><span class="ident">Rule</span><span class="op">&gt;</span> <span class="op">=</span>
-    <span class="ident">PrattParser::new</span>()
-        .<span class="ident">op</span>(<span class="ident">Op::infix</span>(<span class="ident">Rule::guard_or</span>, <span class="ident">Assoc::Left</span>))
-        .<span class="ident">op</span>(<span class="ident">Op::infix</span>(<span class="ident">Rule::guard_and</span>, <span class="ident">Assoc::Left</span>));
+    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">PRECCLIMBER</span>: <span class="ident">PrecClimber</span><span class="op">&lt;</span><span class="ident">Rule</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">PrecClimber::new</span>(
+        <span class="macro">vec!</span>[
+            <span class="comment">// loosest binding</span>
+            <span class="ident">Operator::new</span>(<span class="ident">Rule::guard_or</span>, <span class="ident">Assoc::Left</span>),
+            <span class="ident">Operator::new</span>(<span class="ident">Rule::guard_and</span>, <span class="ident">Assoc::Left</span>),
+            <span class="comment">// tighest binding</span>
+        ]
+    );
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Parser</span>)]</span>
@@ -1025,29 +1020,6 @@
             <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">ud</span>.<span class="ident">file</span>),
             <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">ud</span>.<span class="ident">input</span>),
         ))
-    }
-
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::result_large_err</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">guard_expr_helper</span>(
-        <span class="ident">ud</span>: <span class="ident">UserData</span>,
-        <span class="ident">pairs</span>: <span class="ident">pest::iterators::Pairs</span><span class="op">&lt;</span><span class="ident">Rule</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">GuardExpr</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="ident">PRATT</span>
-            .<span class="ident">map_primary</span>(<span class="op">|</span><span class="ident">primary</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">primary</span>.<span class="ident">as_rule</span>() {
-                <span class="ident">Rule::term</span> =&gt; {
-                    <span class="ident"><span class="self">Self</span>::term</span>(<span class="ident">Node::new_with_user_data</span>(<span class="ident">primary</span>, <span class="ident">ud</span>.<span class="ident">clone</span>()))
-                        .<span class="ident">map</span>(<span class="ident">Box::new</span>)
-                }
-                <span class="ident">x</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;Unexpected rule {:?} for guard_expr&quot;</span>, <span class="ident">x</span>),
-            })
-            .<span class="ident">map_infix</span>(<span class="op">|</span><span class="ident">lhs</span>, <span class="ident">op</span>, <span class="ident">rhs</span><span class="op">|</span> {
-                <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">op</span>.<span class="ident">as_rule</span>() {
-                    <span class="ident">Rule::guard_or</span> =&gt; <span class="ident">Box::new</span>(<span class="ident">GuardExpr::Or</span>(<span class="ident">lhs</span><span class="question-mark">?</span>, <span class="ident">rhs</span><span class="question-mark">?</span>)),
-                    <span class="ident">Rule::guard_and</span> =&gt; <span class="ident">Box::new</span>(<span class="ident">GuardExpr::And</span>(<span class="ident">lhs</span><span class="question-mark">?</span>, <span class="ident">rhs</span><span class="question-mark">?</span>)),
-                    <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
-                })
-            })
-            .<span class="ident">parse</span>(<span class="ident">pairs</span>)
     }
 }
 
@@ -1429,15 +1401,25 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">guard_expr</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">GuardExpr</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">ud</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">user_data</span>().<span class="ident">clone</span>();
-        <span class="ident"><span class="self">Self</span>::guard_expr_helper</span>(<span class="ident">ud</span>, <span class="ident">input</span>.<span class="ident">into_pair</span>().<span class="ident">into_inner</span>())
+    <span class="attribute">#[<span class="ident">prec_climb</span>(<span class="ident">term</span>, <span class="ident">PRECCLIMBER</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">guard_expr</span>(
+        <span class="ident">l</span>: <span class="ident">ast::GuardExpr</span>,
+        <span class="ident">op</span>: <span class="ident">Node</span>,
+        <span class="ident">r</span>: <span class="ident">ast::GuardExpr</span>,
+    ) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::GuardExpr</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="ident">op</span>.<span class="ident">as_rule</span>() {
+            <span class="ident">Rule::guard_or</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ast::GuardExpr::Or</span>(<span class="ident">Box::new</span>(<span class="ident">l</span>), <span class="ident">Box::new</span>(<span class="ident">r</span>))),
+            <span class="ident">Rule::guard_and</span> =&gt; {
+                <span class="prelude-val">Ok</span>(<span class="ident">ast::GuardExpr::And</span>(<span class="ident">Box::new</span>(<span class="ident">l</span>), <span class="ident">Box::new</span>(<span class="ident">r</span>)))
+            }
+            <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
+        }
     }
 
     <span class="kw">fn</span> <span class="ident">term</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::GuardExpr</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">guard_expr</span>(<span class="ident">guard</span>)] =&gt; <span class="kw-2">*</span><span class="ident">guard</span>,
+            [<span class="ident">guard_expr</span>(<span class="ident">guard</span>)] =&gt; <span class="ident">guard</span>,
             [<span class="ident">cmp_expr</span>(<span class="ident">e</span>)] =&gt; <span class="ident">e</span>,
             [<span class="ident">expr</span>(<span class="ident">e</span>)] =&gt; <span class="ident">ast::GuardExpr::Atom</span>(<span class="ident">e</span>),
             [<span class="ident">guard_not</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">e</span>)] =&gt; {
@@ -1447,7 +1429,7 @@
                 <span class="ident">ast::GuardExpr::Not</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>))
             },
             [<span class="ident">guard_not</span>(<span class="kw">_</span>), <span class="ident">guard_expr</span>(<span class="ident">e</span>)] =&gt; {
-                <span class="ident">ast::GuardExpr::Not</span>(<span class="ident">e</span>)
+                <span class="ident">ast::GuardExpr::Not</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>))
             },
             [<span class="ident">guard_not</span>(<span class="kw">_</span>), <span class="ident">expr</span>(<span class="ident">e</span>)] =&gt;
                 <span class="ident">ast::GuardExpr::Not</span>(<span class="ident">Box::new</span>(<span class="ident">ast::GuardExpr::Atom</span>(<span class="ident">e</span>)))
@@ -1457,7 +1439,7 @@
     <span class="kw">fn</span> <span class="ident">switch_stmt</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span><span class="ident">ast::Guard</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">guard_expr</span>(<span class="ident">guard</span>), <span class="ident">expr</span>(<span class="ident">expr</span>)] =&gt; <span class="ident">ast::Guard</span> { <span class="ident">guard</span>: <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">guard</span>), <span class="ident">expr</span> },
+            [<span class="ident">guard_expr</span>(<span class="ident">guard</span>), <span class="ident">expr</span>(<span class="ident">expr</span>)] =&gt; <span class="ident">ast::Guard</span> { <span class="ident">guard</span>: <span class="prelude-val">Some</span>(<span class="ident">guard</span>), <span class="ident">expr</span> },
         ))
     }
 
