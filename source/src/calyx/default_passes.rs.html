@@ -232,9 +232,9 @@
                 <span class="ident">CompileSync</span>,
                 <span class="ident">GroupToSeq</span>,
                 <span class="ident">GroupToInvoke</span>, <span class="comment">// Creates Dead Groups potentially</span>
+                <span class="ident">CompileRef</span>, <span class="comment">//Must run before cell-share, and before componnt-inliner</span>
                 <span class="ident">ComponentInliner</span>,
                 <span class="ident">CombProp</span>,
-                <span class="ident">CompileRef</span>, <span class="comment">//Must run before cell-share.</span>
                 <span class="ident">InferShare</span>,
                 <span class="ident">CellShare</span>, <span class="comment">// LiveRangeAnalaysis should handle comb groups</span>
                 <span class="ident">RemoveCombGroups</span>, <span class="comment">// Must run before infer-static-timing</span>
