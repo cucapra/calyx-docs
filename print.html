@@ -6,7 +6,6 @@
         <title>Calyx Documentation</title>
         <meta name="robots" content="noindex" />
         <!-- Custom HTML head -->
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
@@ -29,13 +28,13 @@
     </head>
     <body>
         <!-- Provide site root to javascript -->
-        <script type="text/javascript">
+        <script>
             var path_to_root = "";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
-        <script type="text/javascript">
+        <script>
             try {
                 var theme = localStorage.getItem('mdbook-theme');
                 var sidebar = localStorage.getItem('mdbook-sidebar');
@@ -51,7 +50,7 @@
         </script>
 
         <!-- Set the theme before any content is loaded, prevents flash -->
-        <script type="text/javascript">
+        <script>
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
@@ -63,7 +62,7 @@
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
-        <script type="text/javascript">
+        <script>
             var html = document.querySelector('html');
             var sidebar = 'hidden';
             if (document.body.clientWidth >= 1080) {
@@ -76,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">Getting Started</a></li><li class="chapter-item expanded affix "><li class="part-title">Calyx Language</li><li class="chapter-item expanded "><a href="tutorial/language-tut.html"><strong aria-hidden="true">1.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lang/multi-component.html"><strong aria-hidden="true">1.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="lang/memories-by-reference.html"><strong aria-hidden="true">1.2.</strong> Passing Memories by Reference</a></li></ol></li><li class="chapter-item expanded "><a href="lang/ref.html"><strong aria-hidden="true">2.</strong> Language Reference</a></li><li class="chapter-item expanded "><a href="lang/sync.html"><strong aria-hidden="true">3.</strong> Experimental: Synchronization</a></li><li class="chapter-item expanded "><a href="lang/attributes.html"><strong aria-hidden="true">4.</strong> Attributes</a></li><li class="chapter-item expanded "><a href="lang/undefined.html"><strong aria-hidden="true">5.</strong> Undefined Behaviors</a></li><li class="chapter-item expanded affix "><li class="part-title">Running Calyx Programs</li><li class="chapter-item expanded "><a href="fud/index.html"><strong aria-hidden="true">6.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="fud/examples.html"><strong aria-hidden="true">6.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="fud/xilinx.html"><strong aria-hidden="true">6.2.</strong> Xilinx Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="fud/axi-gen.html"><strong aria-hidden="true">6.2.1.</strong> AXI Generation</a></li></ol></li><li class="chapter-item expanded "><a href="fud/external.html"><strong aria-hidden="true">6.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="fud/multiple-paths.html"><strong aria-hidden="true">6.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="fud/circt.html"><strong aria-hidden="true">6.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="interpreter.html"><strong aria-hidden="true">7.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded affix "><li class="part-title">The Calyx Compiler</li><li class="chapter-item expanded "><a href="compiler.html"><strong aria-hidden="true">8.</strong> The Calyx Compiler</a></li><li class="chapter-item expanded "><a href="libraries/core.html"><strong aria-hidden="true">9.</strong> Primitive Library</a></li><li class="chapter-item expanded "><a href="compiler-as-library.html"><strong aria-hidden="true">10.</strong> The calyx Library</a></li><li class="chapter-item expanded "><a href="optimizations/dataflow.html"><strong aria-hidden="true">11.</strong> Dataflow Analysis</a></li><li class="chapter-item expanded "><a href="debug/index.html"><strong aria-hidden="true">12.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="debug/cider.html"><strong aria-hidden="true">12.1.</strong> Logical Bugs</a></li><li class="chapter-item expanded "><a href="debug/debug.html"><strong aria-hidden="true">12.2.</strong> Compilation Bugs</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Generating Calyx</li><li class="chapter-item expanded "><a href="calyx-py.html"><strong aria-hidden="true">13.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="tutorial/frontend-tut.html"><strong aria-hidden="true">14.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="frontends/index.html"><strong aria-hidden="true">15.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="frontends/dahlia.html"><strong aria-hidden="true">15.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="frontends/systolic-array.html"><strong aria-hidden="true">15.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="frontends/tvm-relay.html"><strong aria-hidden="true">15.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="frontends/ntt.html"><strong aria-hidden="true">15.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="frontends/mrxl.html"><strong aria-hidden="true">15.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="tools/runt.html"><strong aria-hidden="true">16.</strong> Runt</a></li><li class="chapter-item expanded "><a href="tools/data-gen.html"><strong aria-hidden="true">17.</strong> Data Gen</a></li><li class="chapter-item expanded "><a href="tools/exp-generator.html"><strong aria-hidden="true">18.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="tools/editor-highlighting.html"><strong aria-hidden="true">19.</strong> Editor Highlighting</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="contributors.html">Contributors</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">Getting Started</a></li><li class="chapter-item expanded affix "><li class="part-title">Calyx Language</li><li class="chapter-item expanded "><a href="tutorial/language-tut.html"><strong aria-hidden="true">1.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lang/multi-component.html"><strong aria-hidden="true">1.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="lang/memories-by-reference.html"><strong aria-hidden="true">1.2.</strong> Passing Memories by Reference</a></li></ol></li><li class="chapter-item expanded "><a href="lang/ref.html"><strong aria-hidden="true">2.</strong> Language Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lang/data-format.html"><strong aria-hidden="true">2.1.</strong> Data Format</a></li><li class="chapter-item expanded "><a href="lang/sync.html"><strong aria-hidden="true">2.2.</strong> Experimental: Synchronization</a></li><li class="chapter-item expanded "><a href="lang/undefined.html"><strong aria-hidden="true">2.3.</strong> Undefined Behaviors</a></li></ol></li><li class="chapter-item expanded "><a href="lang/attributes.html"><strong aria-hidden="true">3.</strong> Attributes</a></li><li class="chapter-item expanded affix "><li class="part-title">Running Calyx Programs</li><li class="chapter-item expanded "><a href="fud/index.html"><strong aria-hidden="true">4.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="fud/examples.html"><strong aria-hidden="true">4.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="fud/xilinx.html"><strong aria-hidden="true">4.2.</strong> Xilinx Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="fud/axi-gen.html"><strong aria-hidden="true">4.2.1.</strong> AXI Generation</a></li></ol></li><li class="chapter-item expanded "><a href="fud/external.html"><strong aria-hidden="true">4.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="fud/multiple-paths.html"><strong aria-hidden="true">4.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="fud/circt.html"><strong aria-hidden="true">4.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="interpreter.html"><strong aria-hidden="true">5.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded affix "><li class="part-title">The Calyx Compiler</li><li class="chapter-item expanded "><a href="compiler.html"><strong aria-hidden="true">6.</strong> The Calyx Compiler</a></li><li class="chapter-item expanded "><a href="libraries/core.html"><strong aria-hidden="true">7.</strong> Primitive Library</a></li><li class="chapter-item expanded "><a href="compiler-as-library.html"><strong aria-hidden="true">8.</strong> The calyx Library</a></li><li class="chapter-item expanded "><a href="optimizations/dataflow.html"><strong aria-hidden="true">9.</strong> Dataflow Analysis</a></li><li class="chapter-item expanded "><a href="debug/index.html"><strong aria-hidden="true">10.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="debug/cider.html"><strong aria-hidden="true">10.1.</strong> Logical Bugs</a></li><li class="chapter-item expanded "><a href="debug/debug.html"><strong aria-hidden="true">10.2.</strong> Compilation Bugs</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Generating Calyx</li><li class="chapter-item expanded "><a href="calyx-py.html"><strong aria-hidden="true">11.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="tutorial/frontend-tut.html"><strong aria-hidden="true">12.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="frontends/index.html"><strong aria-hidden="true">13.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="frontends/dahlia.html"><strong aria-hidden="true">13.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="frontends/systolic-array.html"><strong aria-hidden="true">13.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="frontends/tvm-relay.html"><strong aria-hidden="true">13.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="frontends/ntt.html"><strong aria-hidden="true">13.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="frontends/mrxl.html"><strong aria-hidden="true">13.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="tools/runt.html"><strong aria-hidden="true">14.</strong> Runt</a></li><li class="chapter-item expanded "><a href="tools/data-gen.html"><strong aria-hidden="true">15.</strong> Data Gen</a></li><li class="chapter-item expanded "><a href="tools/exp-generator.html"><strong aria-hidden="true">16.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="tools/editor-highlighting.html"><strong aria-hidden="true">17.</strong> Editor Highlighting</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="contributors.html">Contributors</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -94,7 +93,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
@@ -125,7 +124,7 @@
                     </div>
                 </div>
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
-                <script type="text/javascript">
+                <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
                     document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
                     Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
@@ -239,14 +238,9 @@ statement to import the standard library:</p>
 <pre><code>import &quot;primitives/core.futil&quot;;
 
 component main(go: 1) -&gt; (done: 1) {
-  cells {
-  }
-
-  wires {
-  }
-
-  control {
-  }
+  cells {}
+  wires {}
+  control {}
 }
 </code></pre>
 <p>Put this in a file—you can call it <code>language-tutorial-mem.futil</code>, for example.
@@ -263,7 +257,7 @@ Every component definition has three sections:</p>
 <p>Let's turn our skeleton into a tiny, nearly no-op Calyx program.
 We'll start by adding a memory component to the cells:</p>
 <pre><code>  cells {
-    @external(1) mem = std_mem_d1(32, 1, 1);
+    @external mem = std_mem_d1(32, 1, 1);
   }
 </code></pre>
 <p>This new line declares a new cell called <code>mem</code> and the primitive component <code>std_mem_d1</code> represents a 1D memory.
@@ -272,7 +266,7 @@ You can see the definition of <code>std_mem_d1</code>, and all the other standar
 the data width (here, 32 bits),
 the number of elements (just one),
 and the width of the address port (one bit).</p>
-<p>The <code>@external(1)</code> syntax is an <a href="tutorial/../lang/attributes.html#external1">extra bit of magic</a> that allows us
+<p>The <code>@external</code> syntax is an <a href="tutorial/../lang/attributes.html#external1">extra bit of magic</a> that allows us
 to read and write to the memory.</p>
 <p>Next, we'll add some assignments to the <code>wires</code> section to update the value in
 the memory.
@@ -299,7 +293,7 @@ We'll see later how to organize assignments into groups.</p>
 <h2 id="compile--run"><a class="header" href="#compile--run">Compile &amp; Run</a></h2>
 <p>We can almost run this program!
 But first, we need to provide it with data.
-The Calyx infrastructure can provide data to programs from <a href="https://www.json.org/">JSON</a> files.
+The Calyx infrastructure can <a href="tutorial/../lang/data-format.html">provide data to programs</a> from <a href="https://www.json.org/">JSON</a> files.
 So make a file called something like <code>data.json</code> containing something along these lines:</p>
 <pre><code>{
   &quot;mem&quot;: {
@@ -337,7 +331,7 @@ Executing this program should print:</p>
 </code></pre>
 <p>Meaning that, after the program finished, the final value in our memory was 42.</p>
 <blockquote>
-<p><strong>Note</strong>: Icarus Verilog may report a different cycle count compared to the one above. As long as the final value in memory is correct, this does not matter.</p>
+<p><strong>Note</strong>: Verilator may report a different cycle count compared to the one above. As long as the final value in memory is correct, this does not matter.</p>
 </blockquote>
 <h2 id="add-control"><a class="header" href="#add-control">Add Control</a></h2>
 <p>Let's change our program to use an execution schedule.
@@ -496,6 +490,7 @@ The output should be the result of adding 4 to the initial value 8 times, so 10 
 <blockquote>
 <p>The complete program for this section is available under <a href="https://github.com/cucapra/calyx/blob/master/examples/tutorial/language-tutorial-iterate.futil">examples/tutorial/language-tutorial-iterate.futil</a>.</p>
 </blockquote>
+<p>Take a look at the <a href="tutorial/../lang/ref.html">full language reference</a> for details on the complete language.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="multi-component-designs"><a class="header" href="#multi-component-designs">Multi-Component Designs</a></h1>
 <p>Calyx designs can define and instantiate other Calyx components that themselves
 encode complex <code>control</code> programs.</p>
@@ -572,7 +567,7 @@ The component executes the two groups in-order.</p>
 <p>To see the output from running this component, run the command:</p>
 <pre><code>fud e examples/futil/multi-component.futil --to vcd_json
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="passing-memories-by-reference"><a class="header" href="#passing-memories-by-reference">Passing Memories by Reference</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="passing-cells-by-reference"><a class="header" href="#passing-cells-by-reference">Passing Cells by Reference</a></h1>
 <p>One question that may arise when using Calyx as a backend is how to
 pass a memory &quot;by reference&quot; between components. In C++, this might look like:</p>
 <pre><code>#include &lt;array&gt;
@@ -624,6 +619,9 @@ component main() -&gt; () {
 In fact, any cell can be passed in by-reference in a Calyx program.
 Read the next section if you're curious about how this process is implemented.</p>
 <h2 id="the-hard-way"><a class="header" href="#the-hard-way">The Hard Way</a></h2>
+<blockquote>
+<p>We recommend using the <code>ref</code> syntax is almost all cases since it enables the compiler to perform more optimizations.</p>
+</blockquote>
 <p>In the C++ code above, we've constructed an &quot;l-value reference&quot; to the array,
 which essentially means we can both read and write from <code>x</code> in the function
 <code>add_one</code>.</p>
@@ -873,10 +871,11 @@ Additionally, the <code>out0</code> port has the <a href="lang/./attributes.html
 <h3 id="cells"><a class="header" href="#cells"><code>cells</code></a></h3>
 <p>A component's <code>cells</code> section instantiates a set of sub-components.
 It contains a list of declarations with this syntax:</p>
-<pre><code>&lt;name&gt; = &lt;comp&gt;(&lt;param...&gt;);
+<pre><code>[ref]? &lt;name&gt; = &lt;comp&gt;(&lt;param...&gt;);
 </code></pre>
 <p>Here, <code>&lt;comp&gt;</code> is the name of an existing <a href="lang/ref.html#primitive-definitions">primitive</a> or <a href="lang/ref.html#calyx-components">component definition</a>, and
 <code>&lt;name&gt;</code> is the fresh, local name of the instance.
+The optional <code>ref</code> parameter turns the cell into a <a href="lang/ref.html#ref-cells">by-reference cell</a>.
 Parameters are only allowed when instantiating primitives, not Calyx-defined components.</p>
 <p>For example, the following definition of the <code>counter</code> component instantiates a
 <code>std_add</code> and <code>std_reg</code> primitive as well as a <code>foo</code> Calyx component</p>
@@ -931,7 +930,14 @@ r.in = !cond.out ? 32'd0;
 <p>Using guards, Calyx programs can assign multiple different values to the same
 port. Omitting a guard expression is equivalent to using <code>1'd1</code> (a constant
 &quot;true&quot;) as the guard.</p>
-<p><strong>TK:</strong> Document the &quot;mini-language&quot; of logical operators that go into guards.</p>
+<p>Guards can use the following constructs:</p>
+<ul>
+<li><code>port</code>: A port access on a defined cell</li>
+<li><code>port op port</code>: A comparison between values on two ports. Valid <code>op</code> are: <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>==</code></li>
+<li><code>!guard</code>: Logical negation of a guard value</li>
+<li><code>guard || guard</code>: Disjunction between two guards</li>
+<li><code>guard &amp;&amp; guard</code>: Conjunction of two guards</li>
+</ul>
 <blockquote>
 <p><strong>Well-formedness</strong>: For each input port on the LHS, only one guard should be active in any given cycle during the execution of a Calyx program.</p>
 </blockquote>
@@ -1090,7 +1096,101 @@ They are automatically threaded to any primitive that defines <code>@clk</code> 
 <code>@reset</code> ports.</p>
 <h2 id="advanced-concepts"><a class="header" href="#advanced-concepts">Advanced Concepts</a></h2>
 <h3 id="ref-cells"><a class="header" href="#ref-cells"><code>ref</code> cells</a></h3>
-<p><strong>TK</strong></p>
+<p>Calyx components can specify that a cell needs to be passed in &quot;by-reference&quot;:</p>
+<pre><code>// Component that performs mem[0] += 1;
+component update_memory() -&gt; () {
+  cells {
+    ref mem = std_mem_d1(...)
+  }
+  wires { ... }
+  control { ... }
+}
+</code></pre>
+<p>When invoking such a component, the calling component must provide a binding for each defined cell:</p>
+<pre><code>component main() -&gt; () {
+  cells {
+    upd = update_memory();
+    m1 = std_mem_d1(...);
+    m2 = std_mem_d2(...);
+  }
+  wires { ... }
+  control {
+    seq {
+      invoke upd[mem=m1]()(); // Pass `m1` by reference
+      invoke upd[mem=m2]()(); // Pass `m2` by reference
+    }
+  }
+}
+</code></pre>
+<p>As the example shows, each invocation can take different bindings for each <code>ref</code> cell.
+See <a href="lang/./memories-by-reference.html">the tutorial</a> for longer example on how to use this feature.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="data-format"><a class="header" href="#data-format">Data Format</a></h1>
+<p>Calyx's <a href="lang/../fud/index.html"><code>fud</code></a>-based workflows specifies a JSON-based data format which can be used with software simulators.</p>
+<h2 id="external-memories"><a class="header" href="#external-memories">External memories</a></h2>
+<p>First, a Calyx program must mark memories using the <a href="lang/attributed.html#external"><code>@external</code> attribute</a> to tell the compiler that the memory is used as either an input or an ouput.</p>
+<pre><code>component main() {
+    cells {
+        @external ext = std_mem_d1(...);
+        internal = std_mem_d1(...);
+    }
+}
+</code></pre>
+<p>In the above program, the memory <code>ext</code> will be assumed to be an input-output memory by the compiler while <code>internal</code> is considered to be an internal memory.
+For all external memories, the compiler will generate code to read initial values and dump out final values.
+The external attribute is recognized for all the <code>std_mem</code> and <code>seq_mem</code> primitives.
+The <code>@external</code> attribute can <strong>only be used</strong> on the <a href="lang/attributes.html#toplevel">top-level component</a>.</p>
+<blockquote>
+<p>When the <code>--synthesis</code> flag is passed to the compiler, this behavior is disabled and instead the memories are turned into ports on the top-level component.</p>
+</blockquote>
+<h2 id="the-data-format"><a class="header" href="#the-data-format">The Data Format</a></h2>
+<p>The JSON-based data format allows us to provide inputs for a memory and specify how the values should be interpreted:</p>
+<pre><code class="language-json">{
+  &quot;mem&quot;: {
+    &quot;data&quot;: [10],
+    &quot;format&quot;: {
+      &quot;numeric_type&quot;: &quot;bitnum&quot;,
+      &quot;is_signed&quot;: false,
+      &quot;width&quot;: 32
+    }
+  }
+}
+</code></pre>
+<p>The <code>data</code> field represents the initial data for the memory and can use mutlidimensional arrays to describe it. For example, the following is the initial data for a two-dimensional (<code>std_mem_d2</code>) memory:</p>
+<pre><code class="language-json">{
+    &quot;data&quot;: [ [1, 2], [3, 4] ],
+    &quot;format&quot;: {...}
+}
+</code></pre>
+<p>The <code>format</code> specifier tells <code>fud</code> how to interpret the values in the data field. The original program specifies that all values should be treated as 32-bit, unsigned values.</p>
+<p>In order to specify fixed-point values, we must specify both the total width and fraction widths:</p>
+<pre><code class="language-json">&quot;root&quot;: {
+  &quot;data&quot;: [
+      0.0
+  ],
+  &quot;format&quot;: {
+      &quot;numeric_type&quot;: &quot;fixed_point&quot;,
+      &quot;is_signed&quot;: false,
+      &quot;width&quot;: 32,
+      &quot;frac_width&quot;: 16
+  }
+}
+</code></pre>
+<p>The format states that all values have a fractional width of 16-bits while the remainder is used for the integral part.</p>
+<blockquote>
+<p><strong>Note:</strong> <code>fud</code> requires that for each memory marked with the <code>@external</code> attribute in the program.</p>
+</blockquote>
+<h2 id="using-fud"><a class="header" href="#using-fud">Using <code>fud</code></a></h2>
+<p>All software simulators supported by <code>fud</code>, including <a href="lang/../fud/index.html#verilator">Verilator</a> and <a href="lang/../fud/index.html#icarus-verilog">Icarus Verilog</a>, as well as the <a href="lang/../interpreter.html">Calyx interpreter</a> can use this data format.
+To pass a JSON file with initial values, use the <code>-s verilog.data</code> flag:</p>
+<pre><code class="language-bash"># Use Icarus Verilog
+fud e --to dat --through icarus-verilog &lt;CALYX FILE&gt; -s verilog.data &lt;JSON&gt;
+# Use Verilator
+fud e --to dat --through verilog &lt;CALYX FILE&gt; -s verilog.data &lt;JSON&gt;
+# Use the Calyx Interpreter
+fud e --to interpreter-out &lt;CALYX FILE&gt; -s verilog.data &lt;JSON&gt;
+</code></pre>
+<h2 id="generating-random-values"><a class="header" href="#generating-random-values">Generating Random Values</a></h2>
+<p>Often times, it can be useful to automatically generate random values for a large memory. The <a href="lang/../tools/data-gen.html">data-gen</a> tool takes a Calyx program as an input and automatically generates random values for each memory marked with <code>@external</code> in the above data format.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="experimental-synchronization"><a class="header" href="#experimental-synchronization">Experimental: Synchronization</a></h1>
 <p>Calyx's default semantics <a href="lang/./undefined.html#semantics-of-par">do not admit</a> any predictable form of language-level
 synchronization in presence of parallelism.
@@ -1186,6 +1286,33 @@ thread A never arrives at the &quot;barrier&quot;.</p>
 <a href="https://github.com/cucapra/calyx/blob/master/tests/correctness/sync/sync-dot-product.futil">sync-dot-product</a></p>
 <h2 id="limitations"><a class="header" href="#limitations">Limitations</a></h2>
 <p>Currently we only support two threads sharing the same &quot;barrier&quot;, i.e., only two threads can have control with the <code>@sync</code> attribute marked with the same value. </p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="undefined-behaviors"><a class="header" href="#undefined-behaviors">Undefined Behaviors</a></h1>
+<p>Undefined behavior in Calyx is either intentional or unintentional. This page tracks the various issues discussing the undefined behaviors that are known to currently exist in Calyx.</p>
+<h2 id="interface-signals"><a class="header" href="#interface-signals">Interface Signals</a></h2>
+<p>The <code>go</code> and <code>done</code> signals form the two core interface signals in Calyx. Their semantics are baked into the compiler and pervasively used to define the meaning of programs.</p>
+<ul>
+<li><a href="https://github.com/cucapra/calyx/discussions/651">Isolation and stateful &quot;doneness&quot; (#651)</a></li>
+<li><a href="https://github.com/cucapra/calyx/discussions/788">Well-formedness of <code>done</code> signals (#788)</a></li>
+</ul>
+<h2 id="undriven-ports"><a class="header" href="#undriven-ports">Undriven Ports</a></h2>
+<p>Calyx's continuous assignments do not make any static guarantees about which ports need to be driven when. Current efforts attempt to codify <em>when</em> reading from an undriven port is incorrect.</p>
+<ul>
+<li><a href="https://github.com/cucapra/calyx/discussions/588">Port validity as a first class concept (#588)</a></li>
+<li><a href="https://github.com/cucapra/calyx/discussions/922">A few notes on undefinedness (#922)</a></li>
+</ul>
+<h2 id="semantics-of-par"><a class="header" href="#semantics-of-par">Semantics of <code>par</code></a></h2>
+<p><code>par</code> blocks in Calyx represent parallel execution of groups. Currently, there is no clear semantics for interactions between groups executing in parallel. The interpreter implements a form of lockstep semantics that disallows certain forms of concurrent reads and writes while the code generated by the compiler allows for arbitrary communication.</p>
+<ul>
+<li><a href="https://github.com/cucapra/calyx/discussions/921">On the semantics of <code>par</code> (#921)</a></li>
+<li><a href="https://github.com/cucapra/calyx/discussions/932">Formalizing the semantics of <code>par</code> (#932)</a></li>
+</ul>
+<h2 id="isolation-guarantees"><a class="header" href="#isolation-guarantees">Isolation Guarantees</a></h2>
+<p>Calyx groups have a strong isolation guarantee---they must execute for at least one cycle and guarantee that signals inside are not visible after they are done executing.
+However, the isolation guarantees for combinational groups, continuous assignments, and <code>with</code> blocks is not clear.</p>
+<ul>
+<li><a href="https://github.com/cucapra/calyx/discussions/927">Isolation guarantees of combinational groups</a></li>
+<li><a href="https://github.com/cucapra/calyx/discussions/934">The <code>with</code> operator</a></li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="attributes"><a class="header" href="#attributes">Attributes</a></h1>
 <p>Calyx has an attribute system that allows information to be associated with
 every basic Calyx construct. This information can then be used to optimize the program
@@ -1346,33 +1473,6 @@ Note that each group must have exactly one output port in it.</p>
 <pre><code>in = out;
 </code></pre>
 <p>Since the value <code>'x</code> can be replaced with anything.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="undefined-behaviors"><a class="header" href="#undefined-behaviors">Undefined Behaviors</a></h1>
-<p>Undefined behavior in Calyx is either intentional or unintentional. This page tracks the various issues discussing the undefined behaviors that are known to currently exist in Calyx.</p>
-<h2 id="interface-signals"><a class="header" href="#interface-signals">Interface Signals</a></h2>
-<p>The <code>go</code> and <code>done</code> signals form the two core interface signals in Calyx. Their semantics are baked into the compiler and pervasively used to define the meaning of programs.</p>
-<ul>
-<li><a href="https://github.com/cucapra/calyx/discussions/651">Isolation and stateful &quot;doneness&quot; (#651)</a></li>
-<li><a href="https://github.com/cucapra/calyx/discussions/788">Well-formedness of <code>done</code> signals (#788)</a></li>
-</ul>
-<h2 id="undriven-ports"><a class="header" href="#undriven-ports">Undriven Ports</a></h2>
-<p>Calyx's continuous assignments do not make any static guarantees about which ports need to be driven when. Current efforts attempt to codify <em>when</em> reading from an undriven port is incorrect.</p>
-<ul>
-<li><a href="https://github.com/cucapra/calyx/discussions/588">Port validity as a first class concept (#588)</a></li>
-<li><a href="https://github.com/cucapra/calyx/discussions/922">A few notes on undefinedness (#922)</a></li>
-</ul>
-<h2 id="semantics-of-par"><a class="header" href="#semantics-of-par">Semantics of <code>par</code></a></h2>
-<p><code>par</code> blocks in Calyx represent parallel execution of groups. Currently, there is no clear semantics for interactions between groups executing in parallel. The interpreter implements a form of lockstep semantics that disallows certain forms of concurrent reads and writes while the code generated by the compiler allows for arbitrary communication.</p>
-<ul>
-<li><a href="https://github.com/cucapra/calyx/discussions/921">On the semantics of <code>par</code> (#921)</a></li>
-<li><a href="https://github.com/cucapra/calyx/discussions/932">Formalizing the semantics of <code>par</code> (#932)</a></li>
-</ul>
-<h2 id="isolation-guarantees"><a class="header" href="#isolation-guarantees">Isolation Guarantees</a></h2>
-<p>Calyx groups have a strong isolation guarantee---they must execute for at least one cycle and guarantee that signals inside are not visible after they are done executing.
-However, the isolation guarantees for combinational groups, continuous assignments, and <code>with</code> blocks is not clear.</p>
-<ul>
-<li><a href="https://github.com/cucapra/calyx/discussions/927">Isolation guarantees of combinational groups</a></li>
-<li><a href="https://github.com/cucapra/calyx/discussions/934">The <code>with</code> operator</a></li>
-</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fud-the-calyx-driver"><a class="header" href="#fud-the-calyx-driver"><code>fud</code>: The Calyx Driver</a></h1>
 <p>Working with Calyx involves a lot of command-line tools. For example, an
 incomplete yet daunting list of CLI tools used by Calyx is:</p>
@@ -1382,10 +1482,12 @@ incomplete yet daunting list of CLI tools used by Calyx is:</p>
 <li>Verilator, the Verilog simulation framework used to test Calyx-generated designs.</li>
 <li>Waveform viewers to see the results of simulation</li>
 </ul>
-<p><code>fud</code> aims to provide a simple interface for using these toolchains and
-executing them in a pipeline. The source for fud is
-<a href="https://github.com/cucapra/futil/tree/master/fud">here</a>.</p>
+<p><code>fud</code> aims to provide a simple interface for using these toolchains and executing them in a pipeline.
+The source for fud is <a href="https://github.com/cucapra/futil/tree/master/fud">here</a>.</p>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<blockquote>
+<p>Fud requires Python 3.9 or higher to work correctly.</p>
+</blockquote>
 <p>You need <a href="https://flit.readthedocs.io/en/latest/">Flit</a> to install <code>fud</code>. Install it with <code>pip3 install flit</code>.</p>
 <p>You can then install <code>fud</code> with</p>
 <pre><code class="language-bash">flit install
@@ -1437,7 +1539,7 @@ autoconf
 make
 sudo make install
 </code></pre>
-<p>Run <code>fud check</code> to make sure you have the right version.</p>
+<p>Run <code>fud check</code> to make sure you have the right version. We currently require &gt;=v5.002 of Verilator with fud.</p>
 <p>By default, <code>fud</code> will use the <code>verilator</code> executable to run Verilator.
 To use a different binary, configure the path by:</p>
 <pre><code>fud config stages.verilog.exec &lt;binary&gt;
@@ -1516,7 +1618,7 @@ manually set the stages using <code>--to</code> and <code>--from</code>.</p>
 <h2 id="profiling"><a class="header" href="#profiling">Profiling</a></h2>
 <p>Fud provides some very basic profiling tools through the use of the <code>--dump_prof</code> (or <code>-pr</code>) flag.
 You can get overall stage durations for a <code>fud</code> run by simply using <code>-pr</code>.
-For example, </p>
+For example,</p>
 <pre><code class="language-bash">  fud e examples/dahlia/dot-product.fuse --to dat \
   -s verilog.data examples/dahlia/dot-product.fuse.data \
   -pr
@@ -2807,7 +2909,23 @@ generating incorrect results.
 In order to perform a reduction, we need to run the program twice, once with
 a &quot;golden workflow&quot; that we trust to generate the right result and once with
 the buggy workflow.</p>
-<p>For example, if we've identified the problem to be in one of the Calyx passes,
+<h3 id="inlining-optional"><a class="header" href="#inlining-optional">Inlining (Optional)</a></h3>
+<p>It is useful to inline all the code into the <code>main</code> component so that we can focus our energy on reducing one control program. This can be done by passing the following flags to the compiler:</p>
+<pre><code>-p well-formed -p inline -x inline:always -p post-opt
+</code></pre>
+<p>The <code>-x inline:always</code> flag tells the inlining pass to attempt to inline all components into one. If this command fails, we can just work with the original program and reduce control programs for each component.</p>
+<h3 id="reducing"><a class="header" href="#reducing">Reducing</a></h3>
+<p>At a high-level, we want to do the following:</p>
+<ol>
+<li>Delete some part of the control program</li>
+<li>See if the error still occurs</li>
+<li>If it doesn't, delete a smaller part of the control program</li>
+<li>Otherwise, continue deleting more parts of the control program</li>
+</ol>
+<blockquote>
+<p>When deleting parts of the control program, the compiler may complain that certain groups are no longer being used. In this case, run the <code>-p dead-group-removal</code> pass before any other pass runs.</p>
+</blockquote>
+<p>Next, if we've identified the problem to be in one of the Calyx passes,
 the &quot;golden workflow&quot; is running the program without the pass while the buggy
 workflow is running the program with the pass enabled.
 This case is so common that we've written <a href="https://github.com/cucapra/calyx/blob/master/tools/flag-compare.sh">a script</a> that can run
@@ -3499,18 +3617,18 @@ ln -s &lt;calyx root directory/tools/vscode calyx.calyx-0.0.1
 
         </div>
 
-        <script type="text/javascript">
+        <script>
             window.playground_copyable = true;
         </script>
-        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
-        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
-        <script type="text/javascript">
+        <script>
         window.addEventListener('load', function() {
             window.setTimeout(window.print, 100);
         });

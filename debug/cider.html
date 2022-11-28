@@ -5,7 +5,6 @@
         <meta charset="UTF-8">
         <title>Logical Bugs - Calyx Documentation</title>
         <!-- Custom HTML head -->
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
@@ -28,13 +27,13 @@
     </head>
     <body>
         <!-- Provide site root to javascript -->
-        <script type="text/javascript">
+        <script>
             var path_to_root = "../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
-        <script type="text/javascript">
+        <script>
             try {
                 var theme = localStorage.getItem('mdbook-theme');
                 var sidebar = localStorage.getItem('mdbook-sidebar');
@@ -50,7 +49,7 @@
         </script>
 
         <!-- Set the theme before any content is loaded, prevents flash -->
-        <script type="text/javascript">
+        <script>
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
@@ -62,7 +61,7 @@
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
-        <script type="text/javascript">
+        <script>
             var html = document.querySelector('html');
             var sidebar = 'hidden';
             if (document.body.clientWidth >= 1080) {
@@ -75,7 +74,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Getting Started</a></li><li class="chapter-item expanded affix "><li class="part-title">Calyx Language</li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">1.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">1.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">1.2.</strong> Passing Memories by Reference</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/ref.html"><strong aria-hidden="true">2.</strong> Language Reference</a></li><li class="chapter-item expanded "><a href="../lang/sync.html"><strong aria-hidden="true">3.</strong> Experimental: Synchronization</a></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">4.</strong> Attributes</a></li><li class="chapter-item expanded "><a href="../lang/undefined.html"><strong aria-hidden="true">5.</strong> Undefined Behaviors</a></li><li class="chapter-item expanded affix "><li class="part-title">Running Calyx Programs</li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">6.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">6.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/xilinx.html"><strong aria-hidden="true">6.2.</strong> Xilinx Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/axi-gen.html"><strong aria-hidden="true">6.2.1.</strong> AXI Generation</a></li></ol></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">6.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">6.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">6.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">7.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded affix "><li class="part-title">The Calyx Compiler</li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">8.</strong> The Calyx Compiler</a></li><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">9.</strong> Primitive Library</a></li><li class="chapter-item expanded "><a href="../compiler-as-library.html"><strong aria-hidden="true">10.</strong> The calyx Library</a></li><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">11.</strong> Dataflow Analysis</a></li><li class="chapter-item expanded "><a href="../debug/index.html"><strong aria-hidden="true">12.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../debug/cider.html" class="active"><strong aria-hidden="true">12.1.</strong> Logical Bugs</a></li><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">12.2.</strong> Compilation Bugs</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Generating Calyx</li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">13.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">14.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">15.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">15.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">15.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">15.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">15.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">15.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">16.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/data-gen.html"><strong aria-hidden="true">17.</strong> Data Gen</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">18.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">19.</strong> Editor Highlighting</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Getting Started</a></li><li class="chapter-item expanded affix "><li class="part-title">Calyx Language</li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">1.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">1.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">1.2.</strong> Passing Memories by Reference</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/ref.html"><strong aria-hidden="true">2.</strong> Language Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/data-format.html"><strong aria-hidden="true">2.1.</strong> Data Format</a></li><li class="chapter-item expanded "><a href="../lang/sync.html"><strong aria-hidden="true">2.2.</strong> Experimental: Synchronization</a></li><li class="chapter-item expanded "><a href="../lang/undefined.html"><strong aria-hidden="true">2.3.</strong> Undefined Behaviors</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">3.</strong> Attributes</a></li><li class="chapter-item expanded affix "><li class="part-title">Running Calyx Programs</li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">4.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">4.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/xilinx.html"><strong aria-hidden="true">4.2.</strong> Xilinx Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/axi-gen.html"><strong aria-hidden="true">4.2.1.</strong> AXI Generation</a></li></ol></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">4.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">4.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">4.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">5.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded affix "><li class="part-title">The Calyx Compiler</li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">6.</strong> The Calyx Compiler</a></li><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">7.</strong> Primitive Library</a></li><li class="chapter-item expanded "><a href="../compiler-as-library.html"><strong aria-hidden="true">8.</strong> The calyx Library</a></li><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">9.</strong> Dataflow Analysis</a></li><li class="chapter-item expanded "><a href="../debug/index.html"><strong aria-hidden="true">10.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../debug/cider.html" class="active"><strong aria-hidden="true">10.1.</strong> Logical Bugs</a></li><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">10.2.</strong> Compilation Bugs</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Generating Calyx</li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">11.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">12.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">13.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">13.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">13.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">13.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">13.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">13.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">14.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/data-gen.html"><strong aria-hidden="true">15.</strong> Data Gen</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">16.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">17.</strong> Editor Highlighting</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -93,7 +92,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
@@ -124,7 +123,7 @@
                     </div>
                 </div>
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
-                <script type="text/javascript">
+                <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
                     document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
                     Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
@@ -340,15 +339,15 @@ much of the execution is occurring in parallel at any given point.</p>
 
         </div>
 
-        <script type="text/javascript">
+        <script>
             window.playground_copyable = true;
         </script>
-        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
     </body>
