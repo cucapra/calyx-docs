@@ -3057,23 +3057,29 @@ generate their code.</p>
 <p>MrXL provides constructs to create arrays, and perform <code>map</code> and <code>reduce</code> operations on those arrays. Here's an example of a dot product implementation in MrXL:</p>
 <pre><code>input avec: int[4]
 input bvec: int[4]
-output dot: int
+output dot: int[4]
 prodvec := map 1 (a &lt;- avec, b &lt;- bvec) { a * b }
 dot := reduce 1 (a, b &lt;- prodvec) 0 { a + b }
 </code></pre>
-<p>A <code>map</code> expressions produces a new vector, each element an evaluated expression that can use elements of other vectors. In the above example, the <code>map</code> expression multiplies the values of <code>avec</code> and <code>bvec</code>. These expressions also have <em>parallelism factors</em>: in the above code snippet, the <code>map</code> expression has a parallelism factor of 16, which means we stamp out 16 multipliers to speed up the computation.</p>
-<p><code>reduce</code> expressions walk over memories and accumulate a result into a register. In the above code snippet, we add together all of the elements of <code>prodvec</code> and place them in a register named <code>dot</code>.</p>
-<p>Arrays can be <code>input</code> arrays, which we populate with some input data, or <code>output</code> arrays, which the program will populate for us.</p>
+<p>We define the interface of program by specifying <code>input</code> and <code>output</code> arrays.
+Input arrays have their values populated by an external harness while the output arrays must be computed using the program.</p>
+<p>A <code>map</code> expression iterates over multiple arrays of the same element and produces a new vector using the function provided in the body.
+In the above example, the <code>map</code> expression multiplies the values of <code>avec</code> and <code>bvec</code>.
+<code>map 1</code> states that the operation has a <em>parallelism factor</em> of 1 which means that the loop iterations are performed sequentially.</p>
+<p><code>reduce</code> expressions walk over memories and accumulate a result into a register.
+In the above code snippet, we add together all the elements of <code>prodvec</code> and place them in a register named <code>dot</code>.
+Since the <code>reduce</code> parallelism factor is also 1, the reduction is performed sequentially.</p>
 <h2 id="run-a-mrxl-program"><a class="header" href="#run-a-mrxl-program">Run a MrXL Program</a></h2>
-<p>First, you'll need to have the MrXL stage installed for <code>fud</code>. See the <a href="https://github.com/cucapra/futil/tree/master/frontends/mrxl">MrXL docs</a>.</p>
-<p>MrXL programs need to be fed data in the form of JSON files. Let's try to run this program, which has a parallelism factor of two:</p>
+<p>Once we have <a href="https://github.com/cucapra/futil/tree/master/frontends/mrxl">installed the mrxl command line tool</a>, we can run MrXL programs using <a href="tutorial/../fud/index.html"><code>fud</code></a>.</p>
+<p>To provide MrXL program with input values, we use fud's <a href="https://www.json.org/json-en.html">JSON</a>-based <a href="tutorial/../lang/data-format.html">data format</a>.
+Let's try to run this program, which has a parallelism factor of two:</p>
 <pre><code>input foo: int[4]
 output baz: int[4]
 baz := map 2 (a &lt;- foo) { a + 5 }
 </code></pre>
-<p>with this data file, containing banked memories to allow for the parallelism:</p>
-<pre><code>{
-  &quot;foo_b0&quot;: {
+<p>In order to take advantage of the parallelism in the program, the MrXL compiler automatically partitions the input memory <code>foo</code> into two different <em>physical banks</em>: <code>foo_b0</code> and <code>foo_b1</code>.
+Therefore, we split up our logical <code>foo</code> input of <code>[1, 2, 3, 4]</code> into <code>[1,2]</code> and <code>[3,4]</code>:</p>
+<pre><code class="language-json">  &quot;foo_b0&quot;: {
     &quot;data&quot;: [
       1,
       2
@@ -3095,35 +3101,18 @@ baz := map 2 (a &lt;- foo) { a + 5 }
       &quot;width&quot;: 32
     }
   },
-  &quot;baz_b0&quot;: {
-    &quot;data&quot;: [
-      0,
-      0
-    ],
-    &quot;format&quot;: {
-      &quot;numeric_type&quot;: &quot;bitnum&quot;,
-      &quot;is_signed&quot;: false,
-      &quot;width&quot;: 32
-    }
-  },
-  &quot;baz_b1&quot;: {
-    &quot;data&quot;: [
-      0,
-      0
-    ],
-    &quot;format&quot;: {
-      &quot;numeric_type&quot;: &quot;bitnum&quot;,
-      &quot;is_signed&quot;: false,
-      &quot;width&quot;: 32
-    }
-  }
-}
 </code></pre>
-<p>Run the program with the supplied data by typing:</p>
-<pre><code>fud exec frontends/mrxl/test/add.mrxl --from mrxl --to vcd -s verilog.data frontends/mrxl/test/add.mrxl.data
+<p>Our complete data file similarly splits up the input for <code>baz</code>.</p>
+<p>Run the program with the complete data by typing:</p>
+<pre><code>fud exec frontends/mrxl/test/add.mrxl \
+    --from mrxl \
+    --to vcd -s verilog.data frontends/mrxl/test/add.mrxl.data
 </code></pre>
-<h2 id="build-a-compiler-for-mrxl"><a class="header" href="#build-a-compiler-for-mrxl">Build a Compiler for MrXL</a></h2>
-<p>This guide will walk you through the steps to build a Python program that compiles MrXL programs to Calyx code. To simplify things, we'll make a few assumptions:</p>
+<h2 id="compiling-mrxl-to-calyx"><a class="header" href="#compiling-mrxl-to-calyx">Compiling MrXL to Calyx</a></h2>
+<p>This guide will walk you through the steps to build a Python program that compiles MrXL programs to Calyx code.
+The guide assumes some basic familiarity with Calyx.
+Take a look at <a href="tutorial/./language-tut.html">Calyx tutorial</a> if you need a refresher.</p>
+<p>To simplify things, we'll make a few assumptions about MrXL programs:</p>
 <ul>
 <li>Every array in a MrXL program has the same length.</li>
 <li>Every integer in our generated hardware will be 32 bits.</li>
@@ -3134,81 +3123,170 @@ baz := map 2 (a &lt;- foo) { a + 5 }
 <li>Parse MrXL into a representation we can process with Python</li>
 <li>Generate Calyx code</li>
 </ol>
+<blockquote>
+<p>You can find our <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_futil.py">complete implementation</a> in the Calyx repository.</p>
+</blockquote>
 <h3 id="parse-mrxl-into-an-ast"><a class="header" href="#parse-mrxl-into-an-ast">Parse MrXL into an AST</a></h3>
-<p>To start, we'll parse this MrXL program into a Python AST representation. We chose to represent <a href="https://github.com/cucapra/futil/blob/mrxl/mrxl/mrxl/ast.py">AST</a> nodes with Python <code>dataclass</code>s. Our toplevel AST node looks like this:</p>
-<pre><code>@dataclass
+<p>To start, we'll parse this MrXL program into a Python AST representation. We chose to represent <a href="https://github.com/cucapra/futil/blob/mrxl/mrxl/mrxl/ast.py">AST</a> nodes with Python <code>dataclass</code>.
+A program is a sequence of array declarations followed by computation statements:</p>
+<pre><code class="language-python">@dataclass
 class Prog:
-    decls: List[Decl]
-    stmts: List[Stmt]
+    decls: List[Decl] # Memory declarations
+    stmts: List[Stmt] # Map and reduce statements
 </code></pre>
 <p><code>Decl</code> nodes correspond to array declarations like <code>input avec: int[1024]</code>, and carry data about whether they're an <code>input</code> or <code>output</code> array, their name, and their type:</p>
-<pre><code>@dataclass
+<pre><code class="language-python">@dataclass
 class Decl:
     input: bool  # Otherwise, output.
     name: str
     type: Type
 </code></pre>
 <p><code>Stmt</code> nodes represent statements such as <code>dot := reduce 4 (a, b &lt;- prodvec) 0 { a + b }</code>, and contain more nested nodes representing their function header and body, and type of operation.</p>
-<p>Now we can decide on rules for generating code depending on which AST node we're working on. Depending on the AST node, we might need to add code to <code>cells</code>, <code>wires</code> or <code>control</code>.</p>
+<pre><code class="language-python">@dataclass
+class Stmt:
+    dest: str
+    op: Union[Map, Reduce]
+</code></pre>
+<p><a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/ast.py">The complete AST</a> defines the remaining AST nodes required to represent a MrXL program.</p>
 <h3 id="generate-calyx-code"><a class="header" href="#generate-calyx-code">Generate Calyx Code</a></h3>
 <p>The skeleton of a Calyx program has three sections, and looks like this:</p>
 <pre><code>component main() -&gt; {
-  cells { }
-  wires { }
-  control { }
+  cells {}
+  wires {}
+  control {}
 }
 </code></pre>
-<p><code>cells</code> contains declarations for logical hardware units like adders, memories and registers. <code>wires</code> contains <code>group</code>s that connect together the units declared in <code>cell</code>s and form the structure of the hardware. <code>control</code> contains the logic specifying when the <code>group</code>s will perform their computation. Walking the nodes of the AST we defined earlier, we'll generate strings that we'll insert into each of these sections. The next few sections will discuss the different node types.</p>
+<p>The <a href="tutorial/../lang/ref.html#cells">cells section</a> instantiates hardware units like adders, memories and registers.
+The <a href="tutorial/../lang/ref.html#the-wires-section">wires section</a> contains <a href="tutorial/../lang/ref.html#group-definitions">groups</a> that connect
+together hardware instances to perform some logical task such as incrementing a specific register.
+Finally, the <a href="tutorial/../lang/ref.html#the-control-operators">control section</a> <em>schedules</em> the execution of groups using control operators such as <code>seq</code>, <code>par</code>, and <code>while</code>.</p>
+<p>We perform syntax-directed compilation by walking over nodes in the above AST and generating <code>cells</code>, <code>wires</code>, and <code>control</code> operations.</p>
+<h4 id="calyx-embedded-dsl"><a class="header" href="#calyx-embedded-dsl">Calyx Embedded DSL</a></h4>
+<p>To make it easy to generate the hardware, we'll use Calyx's <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/builder_example.py"><code>builder</code> module</a> in Python:</p>
+<pre><code class="language-python">import calyx.builder as cb
+
+prog = cb.Builder() # A Calyx program
+main = prog.component(&quot;main&quot;) # Create a component named &quot;main&quot;
+</code></pre>
 <h4 id="decl-nodes"><a class="header" href="#decl-nodes"><code>Decl</code> nodes</a></h4>
-<p><code>Decl</code> nodes instantiate new memories and registers. We need these to be instantiated in the <code>cells</code> section of our Calyx output. Here's Calyx code that creates a new memory <code>foo</code>, with 4 32-bit elements and a 32-bit indexor:</p>
-<pre><code>foo = std_mem_d1(32, 4, 32);
-</code></pre>
-<p>For each <code>Decl</code> node, we need to determine if we're instantiating a memory or a register, and then translate that to a corresponding Calyx declaration and place that inside the <code>cells</code> section of our generated program. Here's some code from our compiler that walks through each register and memory declaration, and generates a Calyx program with those registers:</p>
-<p>def emit(prog):
-&quot;&quot;&quot;
-Returns a string containing a Calyx program, compiled from <code>prog</code>, a MrXL
-program.
-&quot;&quot;&quot;
-cells, wires, control = [], [], []</p>
-<p>(<code>emit_mem_decl</code> emits a string of the form <code>&quot;mem_name = std_mem_d1(&lt;element_width&gt;, &lt;num_elements&gt;, &lt;index_width&gt;)&quot;</code>.)</p>
-<h4 id="map-and-reduce-nodes"><a class="header" href="#map-and-reduce-nodes"><code>Map</code> and <code>Reduce</code> nodes</a></h4>
-<p>For every map or reduce node, we need to generate Calyx code that iterates over an array, performs some kind of computation, and then stores the result of that computation. For <code>map</code> operations, we'll perform a computation on an element of an input array, and then store the result in a result array. For <code>reduce</code> operations, we'll also use an element of an input array, but we'll also use an <em>accumulator</em> register that we'll use in each computation, and we'll also store to. For example, if we were writing a <code>reduce</code> that summed up the elements of an input array, we'd use an accumulator register that was initialized to hold the value 0, and add to the value of this register each element of an input array.</p>
-<p>We can implement these behaviors using Calyx groups:</p>
-<ul>
-<li><code>incr_idx</code>: Increments an <code>idx</code> register using an adder. This group is done when the <code>idx</code> register is written to.</li>
-<li><code>cond</code>: Applies a &quot;less than&quot; operator to <code>idx</code>, and the length of our input arrays, using the <code>le</code> hardware unit.</li>
-<li><code>eval_body</code>: Reads from an array, performs some kind of computation, and writes the result of the computation to an accumulator register or another array.</li>
-</ul>
-<p>We'll make these groups for each <code>Map</code> and <code>Reduce</code> node, so to avoid naming collisions, we'll suffix each group with an integer starting at 0, incrementing each time we need to add a new set of  groups. These groups will be added to the <code>wires</code> section. We'll also need to add logic to the <code>control</code> section as well that uses these groups to process arrays:</p>
-<pre><code>while le0.out with cond0 {
-  seq { eval_body0; incr_idx0; }
+<p><code>Decl</code> nodes instantiate new memories and registers.
+We need these to be instantiated in the <code>cells</code> section of our Calyx output.
+We use Calyx's <code>std_reg</code> and <code>std_mem_d1</code> primitives to represent registers and memories:</p>
+<pre><code class="language-C">import &quot;primitives/core.futil&quot;; // Import standard library
+
+component main() -&gt; () {
+  cells {
+    // A memory with 4 32-bit elements. Indexed using a 6-bit value.
+    foo = std_mem_d1(32, 4, 6);
+    // A register that contains a 32-bit value
+    r = std_reg(32);
+  }
+  ...
 }
 </code></pre>
-<p>This logic orchestrates our groups, basically representing iterating over our array and evaluating some computation on each element of the array. On each iteration we signal for the <code>eval_body0</code> group to do its work, followed sequentially by <code>incr_idx0</code> to advance our index register so that we can work on the next element of the array.</p>
+<p>For each <code>Decl</code> node, we need to determine if we're instantiating a memory or a register, and then translate that to a corresponding Calyx declaration and place that inside the <code>cells</code> section of our generated program.</p>
+<p>If a memory is used in a parallel <code>map</code> or <code>reduce</code>, we might need to create different physical banks for it.
+We define a function to walk over the AST and compute the parallelism factor for each memory:</p>
+<pre><code class="language-python">    # Collect banking factors.
+    par_factor = compute_par_factors(prog.stmts)
+</code></pre>
+<p>Using this information, we can instantiate registers and memories for our inputs and outputs:</p>
+<pre><code class="language-python">            for i in range(par):
+                main.mem_d1(f&quot;{name}_b{i}&quot;, 32, arr_size // par, 32, is_external=True)
+</code></pre>
+<p>The <code>main.mem_d1</code> call is a function defined by the Calyx builder module to instantiate memories for a component.
+By setting <code>is_external=True</code>, we're indicating that a memory declaration is a part of the program's input-output interface.</p>
+<h3 id="compiling-map-operations"><a class="header" href="#compiling-map-operations">Compiling <code>Map</code> Operations</a></h3>
+<p>For every map or reduce node, we need to generate Calyx code that iterates over an array, performs some kind of computation, and then stores the result of that computation.
+For <code>map</code> operations, we'll perform a computation on an element of an input array, and then store the result in a result array.
+We can use Calyx's <a href="tutorial/../lang/ref.html#while">while loops</a> to iterate over an input array, perform the map's computation, and store the final value.
+At a high level, we want to generate the following pieces of hardware:</p>
+<ol>
+<li>A register to store the current value of the loop index.</li>
+<li>A comparator to check of the loop index is less than the array size.</li>
+<li>An adder to increment the value of the index.</li>
+<li>Hardware needed to implement the loop body computation.</li>
+</ol>
+<h4 id="loop-condition"><a class="header" href="#loop-condition">Loop Condition</a></h4>
+<p>We define a <a href="tutorial/../lang/ref.html#comb-group-definitions">combinational group</a> to perform the comparison <code>idx &lt; arr_size</code> that uses an <code>lt</code> cell.</p>
+<pre><code class="language-python">    group_name = f&quot;cond_{suffix}&quot;
+    stdlib = Stdlib()
+    cell = f&quot;lt_{suffix}&quot;
+    lt = comp.cell(cell, stdlib.op(&quot;lt&quot;, 32, signed=False))
+    with comp.comb_group(group_name):
+        lt.left = idx.out
+        lt.right = cb.const(32, arr_size)
+</code></pre>
+<h4 id="index-increment"><a class="header" href="#index-increment">Index Increment</a></h4>
+<pre><code class="language-python">    group_name = f&quot;incr_idx_{suffix}&quot;
+    adder = comp.add(f&quot;incr_{suffix}&quot;, 32)
+    with comp.group(group_name) as incr:
+        adder.left = idx.out
+        adder.right = 1
+        idx.in_ = adder.out
+        idx.write_en = 1
+        incr.done = idx.done
+</code></pre>
+<p>The loop index increment is implemented using a [group][lf-group] and an adder (<code>adder</code>).
+We provide the index's previous value and the constant 1 to the adder and write the adder's output into the register.
+Because we're performing a stateful update of the register, we must wait for the register to state that it's committed the write by setting the group's done condition to the register's <code>done</code> signal.</p>
+<h4 id="body-computation"><a class="header" href="#body-computation">Body Computation</a></h4>
+<p>The final piece of the puzzle is the body's computation.
+The corresponding group indexes into the input memories:</p>
+<pre><code class="language-python">        with comp.group(f&quot;eval_body_{suffix}&quot;) as ev:
+            # Index each array
+            for bind in stmt.bind:
+                # Map bindings have exactly one dest
+                mem = comp.get_cell(f&quot;{name2arr[bind.dest[0]]}&quot;)
+                mem.addr0 = idx.out
+</code></pre>
+<p>Because the builder module is an embedded DSL, we can simply use Python's <code>for</code> loop to generate all the required assignments for indexing.</p>
+<p>This code instantiates an adder or a multiplier depending on the computation needed using the <code>expr_to_port</code> helper function:</p>
+<pre><code class="language-python">            # Provide inputs to the op
+            op.left = expr_to_port(body.lhs)
+            op.right = expr_to_port(body.rhs)
+</code></pre>
+<p>And writes the value from the operation into the output memory:</p>
+<pre><code class="language-py">            out_mem = comp.get_cell(f&quot;{dest}_b{bank}&quot;)
+            out_mem.addr0 = idx.out
+            out_mem.write_data = op.out
+            # Multipliers are sequential so we need to manipulate go/done signals
+            if body.op == &quot;mul&quot;:
+                op.go = 1
+                out_mem.write_en = op.done
+            else:
+                out_mem.write_en = 1
+            ev.done = out_mem.done
+</code></pre>
+<p>This final operation is complex because we must account for whether we're using an adder or a multiplier.
+Adders are <em>combinational</em>–they produce their output immediately–while multipliers are <em>sequential</em> and require multiple cycles to produce its output.</p>
+<p>When using a mutliplier, we need to explicitly set its <code>go</code> signal to one and only write the output from the multiplier into the memory when its <code>done</code> signal is asserted.
+We do this by assigning the memory's <code>write_en</code> (write enable) signal to the multiplier's done signal.
+Finally, the group's computation is done when the memory write is committed.</p>
+<h4 id="generating-control"><a class="header" href="#generating-control">Generating Control</a></h4>
+<p>Once we have generated the hardware needed for our computation, we can schedule its computation using <a href="tutorial/../lang/ref.html#the-control-operators">control operators</a>:</p>
+<pre><code class="language-py">            While(
+                CompPort(CompVar(port), &quot;out&quot;),
+                CompVar(cond),
+                SeqComp(
+                    [
+                        Enable(f&quot;eval_body_{suffix}&quot;),
+                        Enable(incr),
+                    ]
+                ),
+            )
+</code></pre>
+<p>We generate a while loop that checks that the index is less than the array size.
+Then, it sequentially executes the computation for the body and increments the loop index.</p>
 <h3 id="add-parallelization"><a class="header" href="#add-parallelization">Add Parallelization</a></h3>
 <p>MrXL allows you to parallelize your <code>map</code> and <code>reduce</code> operations. Let's revisit the <code>map</code> example from earlier:</p>
 <pre><code>input foo: int[4]
 output baz: int[4]
 baz := map 4 (a &lt;- foo) { a + 5 }
 </code></pre>
-<p>The number 4 after the <code>map</code> specifies the number of adders we can use at once to parallelize this computation. There are a few ways we could parallelize this program, and one of them is to split the memories used in the <code>map</code> operation into 4 separate memory <em>banks</em>, and then we can read from each bank of <code>foo</code> and write into each bank of <code>baz</code> simultaneously. In general, we can break memories of size <code>m</code> into <code>b</code> banks (each with size <code>m/b</code>), and then simultaneously process those <code>b</code> banks. Realizing this in Calyx means creating separate memories for each bank, and creating <code>group</code>s to process each bank. Here's a section of the compiler that generates banked memories:</p>
-<pre><code>    Group,
-    CompVar,
-    Stdlib,
-    Cell,
-    Program,
-    Component,
-    Import,
-    SeqComp,
-    ConstantPort,
-    HolePort,
-    CompPort,
-    Enable,
-    While,
-    ParComp,
-    CombGroup,
-</code></pre>
-<p>In the <code>Map</code> and <code>Reduce</code> code generation section we described <code>group</code>s that could be orchestrated to iterate over a memory and process it. We'll now have to do that for each memory bank, and then parallelize these operations in the generated Calyx's <code>control</code> section. We can accomplish this with Calyx's <code>par</code> keyword, signalling to execute groups in parallel. Here's an example of executing four while loops in parallel:</p>
+<p>The number 4 specifies that four copies of the loop bodies should be executed in parallel.
+Our implementation already creates <a href="tutorial/frontend-tut.html#decl-nodes">memory banks</a> to allow for parallel accesses.
+At a high-level, we can change the compilation for the <code>map</code> operation to produce <code>n</code> copies of the hardware we generate above and generate a control program that looks like this:</p>
 <pre><code>par {
   while le_b0.out with cond_b0 { seq { eval_body_b0; incr_idx_b0; } }
   while le_b1.out with cond_b1 { seq { eval_body_b1; incr_idx_b1; } }
@@ -3216,12 +3294,15 @@ baz := map 4 (a &lt;- foo) { a + 5 }
   while le_b3.out with cond_b3 { seq { eval_body_b3; incr_idx_b3; } }
 }
 </code></pre>
+<p>The <a href="tutorial/../lang/ref.html#par"><code>par</code> operator</a> executes all the loops in parallel.
+The <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_futil.py">full implementation</a> shows the necessary code to accomplish this which simply creates an outer loop to generate distinct hardware for each copy of the loop.</p>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>Hopefully this should be enough to get you started with writing your own MrXL compiler. Some more follow up tasks you could try if you're interested:</p>
+<p>Hopefully this should be enough to get you started with writing your own MrXL compiler. Some more follow-up tasks you could try if you're interested:</p>
 <ul>
-<li>Implement code generation to implement <code>reduce</code> statements, which we do not include in our compiler.</li>
+<li>Read the code for compiling <code>reduce</code> statements and extend to support parallel reductions using <a href="http://www.cs.ucr.edu/%7Enael/217-f15/lectures/217-lec10.pdf">reduction trees</a>.</li>
 <li>Implement code generation that allows memories that differ from one another in size.</li>
-<li>Implement complex function body expressions. We only support binary operations with simple operands, like <code>a + 5</code>. Different hardware components take multiple cycles to execute: for example, a register takes 1 cycle to write data to, but a memory might take more. This complicates hardware design, as you need to account for differing latencies among hardware components.</li>
+<li>Implement complex function body expressions. We only support binary operations with two operands, like <code>a + 5</code>.</li>
+<li>Add a new <code>filter</code> operation to MrXL.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="frontend-compilers"><a class="header" href="#frontend-compilers">Frontend Compilers</a></h1>
 <p>Several compiler generate Calyx programs from other high-level languages.</p>
