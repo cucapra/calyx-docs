@@ -292,9 +292,8 @@ At a high level, we want to generate the following pieces of hardware:</p>
 <h4 id="loop-condition"><a class="header" href="#loop-condition">Loop Condition</a></h4>
 <p>We define a <a href="../lang/ref.html#comb-group-definitions">combinational group</a> to perform the comparison <code>idx &lt; arr_size</code> that uses an <code>lt</code> cell.</p>
 <pre><code class="language-python">    group_name = f&quot;cond_{suffix}&quot;
-    stdlib = Stdlib()
     cell = f&quot;lt_{suffix}&quot;
-    lt = comp.cell(cell, stdlib.op(&quot;lt&quot;, 32, signed=False))
+    lt = comp.cell(cell, Stdlib.op(&quot;lt&quot;, 32, signed=False))
     with comp.comb_group(group_name):
         lt.left = idx.out
         lt.right = cb.const(32, arr_size)
