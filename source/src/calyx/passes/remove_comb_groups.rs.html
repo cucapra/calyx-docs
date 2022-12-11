@@ -337,6 +337,7 @@
 <span id="332">332</span>
 <span id="333">333</span>
 <span id="334">334</span>
+<span id="335">335</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
@@ -626,7 +627,6 @@
         <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">is_none</span>() {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
         }
-
         <span class="comment">// Construct a new `if` statement</span>
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> (
             <span class="ident">s</span>.<span class="ident">cond</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>(),
@@ -646,12 +646,14 @@
             <span class="ident">std::mem::replace</span>(<span class="ident">s</span>.<span class="ident">tbranch</span>.<span class="ident">as_mut</span>(), <span class="ident">ir::Control::empty</span>());
         <span class="kw">let</span> <span class="ident">fbranch</span> <span class="op">=</span>
             <span class="ident">std::mem::replace</span>(<span class="ident">s</span>.<span class="ident">fbranch</span>.<span class="ident">as_mut</span>(), <span class="ident">ir::Control::empty</span>());
-        <span class="kw">let</span> <span class="ident">if_</span> <span class="op">=</span> <span class="ident">ir::Control::if_</span>(
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">if_</span> <span class="op">=</span> <span class="ident">ir::Control::if_</span>(
             <span class="ident">Rc::clone</span>(<span class="ident">port_ref</span>),
             <span class="prelude-val">None</span>,
             <span class="ident">Box::new</span>(<span class="ident">tbranch</span>),
             <span class="ident">Box::new</span>(<span class="ident">fbranch</span>),
         );
+        <span class="kw">let</span> <span class="ident">attrs</span> <span class="op">=</span> <span class="ident">if_</span>.<span class="ident">get_mut_attributes</span>();
+        <span class="kw-2">*</span><span class="ident">attrs</span> <span class="op">=</span> <span class="ident">std::mem::take</span>(<span class="kw-2">&amp;mut</span> <span class="ident">s</span>.<span class="ident">attributes</span>);
         <span class="kw">let</span> <span class="ident">cond</span> <span class="op">=</span> <span class="ident">ir::Control::enable</span>(<span class="ident">Rc::clone</span>(<span class="ident">cond_ref</span>));
         <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">ir::Control::seq</span>(<span class="macro">vec!</span>[<span class="ident">cond</span>, <span class="ident">if_</span>])))
     }

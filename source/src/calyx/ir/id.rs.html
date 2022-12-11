@@ -95,7 +95,7 @@
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
 <span class="doccomment">/// Represents an identifier in a Calyx program</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Derivative</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Derivative</span>, <span class="ident">Clone</span>, <span class="ident">Deserialize</span>, <span class="ident">Default</span>)]</span>
 <span class="attribute">#[<span class="ident">derivative</span>(<span class="ident">Hash</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">transparent</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Id</span> {
