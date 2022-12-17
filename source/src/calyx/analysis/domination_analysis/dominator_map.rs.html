@@ -523,7 +523,7 @@
     <span class="doccomment">/// and for if statements it will be the &quot;if&quot; nods. For pars in seqs, you</span>
     <span class="doccomment">/// have to look inside the children to see what their &quot;last&quot; nodes are.</span>
     <span class="kw">pub</span> <span class="ident">exits_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">component_name</span>: <span class="ident">String</span>,
+    <span class="kw">pub</span> <span class="ident">component_name</span>: <span class="ident">ir::Id</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">DominatorMap</span> {
@@ -615,7 +615,7 @@
 
 <span class="kw">impl</span> <span class="ident">DominatorMap</span> {
     <span class="doccomment">/// Construct a domination map.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">control</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Control</span>, <span class="ident">component_name</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">control</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Control</span>, <span class="ident">component_name</span>: <span class="ident">ir::Id</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ControlId::compute_unique_ids</span>(<span class="ident">control</span>, <span class="number">0</span>, <span class="bool-val">true</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">DominatorMap</span> {
             <span class="ident">map</span>: <span class="ident">HashMap::new</span>(),

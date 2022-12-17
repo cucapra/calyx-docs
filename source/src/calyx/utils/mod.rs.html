@@ -13,13 +13,17 @@
 <span id="8"> 8</span>
 <span id="9"> 9</span>
 <span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Shared utilities.</span>
+<span class="kw">mod</span> <span class="ident">global_sym</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">math</span>;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">measure_time</span>;
 <span class="kw">mod</span> <span class="ident">namegenerator</span>;
 <span class="kw">mod</span> <span class="ident">out_file</span>;
 <span class="kw">mod</span> <span class="ident">weight_graph</span>;
 
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">global_sym::GSym</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">namegenerator::NameGenerator</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">out_file::OutputFile</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">weight_graph</span>::{<span class="ident">BoolIdx</span>, <span class="ident">Idx</span>, <span class="ident">WeightGraph</span>};

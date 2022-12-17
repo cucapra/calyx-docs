@@ -1238,8 +1238,8 @@
     <span class="kw">fn</span> <span class="ident">at_attribute</span>(<span class="ident">input</span>: <span class="ident">Node</span>) -&gt; <span class="ident">ParseResult</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">u64</span>)<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             <span class="ident">input</span>.<span class="ident">into_children</span>();
-            [<span class="ident">identifier</span>(<span class="ident">key</span>), <span class="ident">attr_val</span>(<span class="ident">num</span>)] =&gt; (<span class="ident">key</span>.<span class="ident">id</span>, <span class="ident">num</span>),
-            [<span class="ident">identifier</span>(<span class="ident">key</span>)] =&gt; (<span class="ident">key</span>.<span class="ident">id</span>, <span class="number">1</span>)
+            [<span class="ident">identifier</span>(<span class="ident">key</span>), <span class="ident">attr_val</span>(<span class="ident">num</span>)] =&gt; (<span class="ident">key</span>.<span class="ident">id</span>.<span class="ident">as_str</span>().<span class="ident">to_owned</span>(), <span class="ident">num</span>),
+            [<span class="ident">identifier</span>(<span class="ident">key</span>)] =&gt; (<span class="ident">key</span>.<span class="ident">id</span>.<span class="ident">as_str</span>().<span class="ident">to_owned</span>(), <span class="number">1</span>)
         ))
     }
 
