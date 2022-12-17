@@ -107,10 +107,15 @@
 <span id="102">102</span>
 <span id="103">103</span>
 <span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines a global symbol type and its associated interning pool</span>
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">mem</span>, <span class="ident">sync</span>};
 
-<span class="kw">use</span> <span class="ident">string_interner</span>::{<span class="ident">symbol::SymbolU32</span>, <span class="ident">StringInterner</span>};
+<span class="kw">use</span> <span class="ident">string_interner</span>::{
+    <span class="ident">backend::BucketBackend</span>, <span class="ident">symbol::SymbolU32</span>, <span class="ident">StringInterner</span>,
+};
 
 <span class="attribute">#[<span class="ident">derive</span>(
     <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Hash</span>, <span class="ident">serde::Serialize</span>,
@@ -118,9 +123,10 @@
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">into</span> <span class="op">=</span> <span class="string">&quot;&amp;&#39;static str&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GSym</span>(<span class="ident">SymbolU32</span>);
 
-<span class="kw">fn</span> <span class="ident">singleton</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">StringInterner</span> {
-    <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">SINGLETON</span>: <span class="ident">mem::MaybeUninit</span><span class="op">&lt;</span><span class="ident">StringInterner</span><span class="op">&gt;</span> <span class="op">=</span>
-        <span class="ident">mem::MaybeUninit::uninit</span>();
+<span class="kw">type</span> <span class="ident">Pool</span> <span class="op">=</span> <span class="ident">StringInterner</span><span class="op">&lt;</span><span class="ident">BucketBackend</span><span class="op">&gt;</span>;
+
+<span class="kw">fn</span> <span class="ident">singleton</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">Pool</span> {
+    <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">SINGLETON</span>: <span class="ident">mem::MaybeUninit</span><span class="op">&lt;</span><span class="ident">Pool</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">mem::MaybeUninit::uninit</span>();
     <span class="kw">static</span> <span class="ident">ONCE</span>: <span class="ident">sync::Once</span> <span class="op">=</span> <span class="ident">sync::Once::new</span>();
 
     <span class="comment">// SAFETY:</span>
@@ -128,7 +134,7 @@
     <span class="comment">// - the ONCE guarantees that SINGLETON is init&#39;ed before assume_init_ref</span>
     <span class="kw">unsafe</span> {
         <span class="ident">ONCE</span>.<span class="ident">call_once</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="ident">SINGLETON</span>.<span class="ident">write</span>(<span class="ident">StringInterner::default</span>());
+            <span class="ident">SINGLETON</span>.<span class="ident">write</span>(<span class="ident">Pool::new</span>());
         });
         <span class="ident">SINGLETON</span>.<span class="ident">assume_init_mut</span>()
     }

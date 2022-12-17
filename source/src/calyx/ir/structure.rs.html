@@ -592,7 +592,13 @@
 <span id="587">587</span>
 <span id="588">588</span>
 <span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.</span>
+
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Attributes</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">PortDef</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
 <span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
 <span class="kw">use</span> <span class="ident">smallvec</span>::{<span class="ident">smallvec</span>, <span class="ident">SmallVec</span>};
@@ -839,7 +845,8 @@
     <span class="doccomment">/// Get a reference to the named port if it exists.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="ident">S</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">Clone</span>,
+        <span class="ident">Id</span>: <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     {
         <span class="self">self</span>.<span class="ident">ports</span>
             .<span class="ident">iter</span>()
@@ -876,9 +883,10 @@
     <span class="doccomment">/// exist.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="ident">S</span>) -&gt; <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">Clone</span>,
+        <span class="ident">Id</span>: <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     {
-        <span class="self">self</span>.<span class="ident">find</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+        <span class="self">self</span>.<span class="ident">find</span>(<span class="ident">name</span>.<span class="ident">clone</span>()).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
             <span class="macro">panic!</span>(
                 <span class="string">&quot;Port `{name}&#39; not found on cell `{}&#39;. Known ports are: {}&quot;</span>,
                 <span class="self">self</span>.<span class="ident">name</span>,
@@ -904,11 +912,11 @@
     <span class="doccomment">/// only returns true if the primitive has the given name.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_primitive</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">prim</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">Id</span>: <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     {
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">prototype</span> {
             <span class="ident">CellType::Primitive</span> { <span class="ident">name</span>, .. } =&gt; {
-                <span class="ident">prim</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">name</span>.<span class="ident">eq</span>(<span class="ident">p</span>)).<span class="ident">unwrap_or</span>(<span class="bool-val">true</span>)
+                <span class="ident">prim</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">name</span> <span class="op">==</span> <span class="ident">p</span>).<span class="ident">unwrap_or</span>(<span class="bool-val">true</span>)
             }
             <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
         }
@@ -937,7 +945,7 @@
     <span class="doccomment">/// Get parameter binding from the prototype used to build this cell.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_parameter</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">param</span>: <span class="ident">S</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">Id</span>: <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     {
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">prototype</span> {
             <span class="ident">CellType::Primitive</span> { <span class="ident">param_binding</span>, .. } =&gt; <span class="ident">param_binding</span>
@@ -1058,9 +1066,10 @@
     }
 
     <span class="doccomment">/// Get a reference to the named hole if it exists.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">S</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="ident">S</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">S</span>: <span class="ident">std::fmt::Display</span>,
+        <span class="ident">Id</span>: <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     {
         <span class="self">self</span>.<span class="ident">holes</span>
             .<span class="ident">iter</span>()
@@ -1071,9 +1080,10 @@
     <span class="doccomment">/// Get a reference to the named hole or panic.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="ident">S</span>) -&gt; <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">Clone</span>,
+        <span class="ident">Id</span>: <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     {
-        <span class="self">self</span>.<span class="ident">find</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+        <span class="self">self</span>.<span class="ident">find</span>(<span class="ident">name</span>.<span class="ident">clone</span>()).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
             <span class="macro">panic!</span>(<span class="string">&quot;Hole `{name}&#39; not found on group `{}&#39;&quot;</span>, <span class="self">self</span>.<span class="ident">name</span>)
         })
     }

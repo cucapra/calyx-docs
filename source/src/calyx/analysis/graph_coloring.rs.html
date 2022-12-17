@@ -209,9 +209,6 @@
 <span id="204">204</span>
 <span id="205">205</span>
 <span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>::{<span class="ident">Idx</span>, <span class="ident">WeightGraph</span>};
 <span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
 <span class="kw">use</span> <span class="ident">petgraph::algo</span>;
@@ -306,11 +303,8 @@
             <span class="comment">// if graph is complete, then every node needs a new color. so there&#39;s no reason to</span>
             <span class="comment">// check neighbors</span>
             <span class="kw">if</span> <span class="ident">is_complete</span> {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">available_colors</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">all_colors</span>
-                    .<span class="ident">iter</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">idx</span>, <span class="ident">_num_used</span>)<span class="op">|</span> <span class="ident">idx</span>)
-                    .<span class="ident">cloned</span>()
-                    .<span class="ident">collect_vec</span>();
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">available_colors</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span>
+                    <span class="ident">all_colors</span>.<span class="ident">keys</span>().<span class="ident">cloned</span>().<span class="ident">collect_vec</span>();
 
                 <span class="comment">// every node will need a different color</span>
                 <span class="kw">for</span> <span class="ident">nidx</span> <span class="kw">in</span> <span class="ident">scc</span>.<span class="ident">into_iter</span>().<span class="ident">sorted</span>() {
