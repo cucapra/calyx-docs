@@ -167,7 +167,7 @@
                         });
                     <span class="comment">// There should only be one port in the read_together specification.</span>
                     <span class="kw">if</span> <span class="ident">outputs</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">1</span> {
-                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::papercut</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid @read_together specification for primitive `{}`. Each specification group is only allowed to have one output port specified.&quot;</span>, <span class="ident">prim</span>.<span class="ident">name</span>)).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">prim</span>.<span class="ident">name</span>))
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::papercut</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid @read_together specification for primitive `{}`. Each specification group is only allowed to have one output port specified.&quot;</span>, <span class="ident">prim</span>.<span class="ident">name</span>)))
                     }
                     <span class="macro">assert!</span>(<span class="ident">outputs</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span>);
                     <span class="prelude-val">Ok</span>((

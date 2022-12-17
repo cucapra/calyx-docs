@@ -462,7 +462,8 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal::ConstructVisitor</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
-    <span class="self">self</span>, <span class="ident">CellType</span>, <span class="ident">CloneName</span>, <span class="ident">Component</span>, <span class="ident">LibrarySignatures</span>, <span class="ident">RESERVED_NAMES</span>,
+    <span class="self">self</span>, <span class="ident">CellType</span>, <span class="ident">CloneName</span>, <span class="ident">Component</span>, <span class="ident">GetAttributes</span>, <span class="ident">LibrarySignatures</span>,
+    <span class="ident">RESERVED_NAMES</span>,
 };
 <span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
 <span class="kw">use</span> <span class="ident">linked_hash_map::LinkedHashMap</span>;
@@ -481,7 +482,7 @@
 <span class="doccomment">/// 7. Invoking components with impatible fed-in cell type for ref cells.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WellFormed</span> {
     <span class="doccomment">/// Reserved names</span>
-    <span class="ident">reserved_names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="ident">reserved_names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Names of the groups that have been used in the control.</span>
     <span class="ident">used_groups</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Names of combinational groups used in the control.</span>
@@ -496,7 +497,7 @@
         <span class="self">Self</span>: <span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">reserved_names</span> <span class="op">=</span>
-            <span class="ident">RESERVED_NAMES</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_string</span>()).<span class="ident">collect</span>();
+            <span class="ident">RESERVED_NAMES</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">ir::Id::from</span>(<span class="kw-2">*</span><span class="ident">s</span>)).<span class="ident">collect</span>();
 
         <span class="kw">for</span> <span class="ident">prim</span> <span class="kw">in</span> <span class="ident">ctx</span>.<span class="ident">lib</span>.<span class="ident">signatures</span>() {
             <span class="kw">if</span> <span class="ident">prim</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;static&quot;</span>) {
@@ -518,7 +519,7 @@
                         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(
                             <span class="string">&quot;ref cells are not allowed for main component&quot;</span>,
                         )
-                        .<span class="ident">with_pos</span>(<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">name</span>()));
+                        .<span class="ident">with_pos</span>(<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">get_attributes</span>()));
                     }
                 }
             }
@@ -625,9 +626,9 @@
         <span class="kw">for</span> <span class="ident">cell_ref</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">cells</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cell_ref</span>.<span class="ident">borrow</span>();
             <span class="comment">// Check if any of the cells use a reserved name.</span>
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">reserved_names</span>.<span class="ident">contains</span>(<span class="ident">cell</span>.<span class="ident">name</span>().<span class="ident">id</span>.<span class="ident">as_str</span>()) {
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">reserved_names</span>.<span class="ident">contains</span>(<span class="ident">cell</span>.<span class="ident">name</span>()) {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::reserved_name</span>(<span class="ident">cell</span>.<span class="ident">clone_name</span>())
-                    .<span class="ident">with_pos</span>(<span class="ident">cell</span>.<span class="ident">name</span>()));
+                    .<span class="ident">with_pos</span>(<span class="ident">cell</span>.<span class="ident">get_attributes</span>()));
             }
             <span class="comment">// Check if a `ref` cell is invalid</span>
             <span class="kw">if</span> <span class="ident">cell</span>.<span class="ident">is_reference</span>() {
@@ -635,7 +636,7 @@
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(
                         <span class="string">&quot;constant not allowed for ref cells&quot;</span>.<span class="ident">to_string</span>(),
                     )
-                    .<span class="ident">with_pos</span>(<span class="ident">cell</span>.<span class="ident">name</span>()));
+                    .<span class="ident">with_pos</span>(<span class="ident">cell</span>.<span class="ident">get_attributes</span>()));
                 }
                 <span class="kw">if</span> <span class="macro">matches!</span>(<span class="ident">cell</span>.<span class="ident">prototype</span>, <span class="ident">CellType::ThisComponent</span>) {
                     <span class="macro">unreachable!</span>(
@@ -819,8 +820,7 @@
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_control</span>(<span class="macro">format!</span>(
                         <span class="string">&quot;{} does not have ref cell named {}&quot;</span>,
                         <span class="ident">id</span>, <span class="ident">outcell</span>
-                    ))
-                    .<span class="ident">with_pos</span>(<span class="ident">outcell</span>));
+                    )));
                 }
             }
             <span class="kw">for</span> <span class="ident">id</span> <span class="kw">in</span> <span class="ident">cellmap</span>.<span class="ident">keys</span>() {

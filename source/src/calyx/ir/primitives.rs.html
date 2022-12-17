@@ -355,7 +355,7 @@
                 <span class="prelude-val">None</span> =&gt; {
                     <span class="kw">let</span> <span class="ident">param_name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">name</span>;
                     <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Failed to resolve: {param_name}&quot;</span>);
-                    <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="ident">msg</span>).<span class="ident">with_pos</span>(<span class="ident">value</span>))
+                    <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="ident">msg</span>))
                 }
             },
         }
