@@ -96,9 +96,6 @@
 <span id="91">91</span>
 <span id="92">92</span>
 <span id="93">93</span>
-<span id="94">94</span>
-<span id="95">95</span>
-<span id="96">96</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
@@ -130,17 +127,14 @@
             <span class="kw">let</span> <span class="ident">writes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">prim</span>
                 .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;write_together&quot;</span>)
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> {
-                    (
-                        <span class="ident">pd</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;write_together&quot;</span>).<span class="ident">unwrap</span>(),
-                        <span class="ident">pd</span>.<span class="ident">name</span>.<span class="ident">clone</span>(),
-                    )
+                    (<span class="ident">pd</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;write_together&quot;</span>).<span class="ident">unwrap</span>(), <span class="ident">pd</span>.<span class="ident">name</span>)
                 })
                 .<span class="ident">into_group_map</span>()
                 .<span class="ident">into_values</span>()
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">writes</span><span class="op">|</span> <span class="ident">writes</span>.<span class="ident">into_iter</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>())
                 .<span class="ident">collect</span>();
             <span class="kw">if</span> <span class="op">!</span><span class="ident">writes</span>.<span class="ident">is_empty</span>() {
-                <span class="ident">write_together</span>.<span class="ident">insert</span>(<span class="ident">prim</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">writes</span>);
+                <span class="ident">write_together</span>.<span class="ident">insert</span>(<span class="ident">prim</span>.<span class="ident">name</span>, <span class="ident">writes</span>);
             }
         }
         <span class="ident">write_together</span>
@@ -171,10 +165,10 @@
                     }
                     <span class="macro">assert!</span>(<span class="ident">outputs</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span>);
                     <span class="prelude-val">Ok</span>((
-                        <span class="ident">outputs</span>[<span class="number">0</span>].<span class="ident">name</span>.<span class="ident">clone</span>(),
+                        <span class="ident">outputs</span>[<span class="number">0</span>].<span class="ident">name</span>,
                         <span class="ident">inputs</span>
                             .<span class="ident">into_iter</span>()
-                            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">port</span><span class="op">|</span> <span class="ident">port</span>.<span class="ident">name</span>.<span class="ident">clone</span>())
+                            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">port</span><span class="op">|</span> <span class="ident">port</span>.<span class="ident">name</span>)
                             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
                     ))
                 })
@@ -189,7 +183,7 @@
         <span class="kw">for</span> <span class="ident">prim</span> <span class="kw">in</span> <span class="ident">primitives</span> {
             <span class="kw">let</span> <span class="ident">reads</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::comb_path_spec</span>(<span class="ident">prim</span>)<span class="question-mark">?</span>;
             <span class="kw">if</span> <span class="op">!</span><span class="ident">reads</span>.<span class="ident">is_empty</span>() {
-                <span class="ident">read_together</span>.<span class="ident">insert</span>(<span class="ident">prim</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">reads</span>);
+                <span class="ident">read_together</span>.<span class="ident">insert</span>(<span class="ident">prim</span>.<span class="ident">name</span>, <span class="ident">reads</span>);
             }
         }
         <span class="prelude-val">Ok</span>(<span class="ident">read_together</span>)

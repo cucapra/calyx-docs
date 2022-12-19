@@ -259,7 +259,7 @@
         <span class="kw">let</span> <span class="ident">new_cell</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell_wref</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">parent</span> {
             <span class="kw">let</span> <span class="ident">cell_ref</span> <span class="op">=</span> <span class="ident">cell_wref</span>.<span class="ident">upgrade</span>();
             <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cell_ref</span>.<span class="ident">borrow</span>();
-            <span class="self">self</span>.<span class="ident">cell_map</span>.<span class="ident">get</span>(<span class="ident">cell</span>.<span class="ident">name</span>())
+            <span class="self">self</span>.<span class="ident">cell_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">name</span>())
         } <span class="kw">else</span> {
             <span class="prelude-val">None</span>
         };

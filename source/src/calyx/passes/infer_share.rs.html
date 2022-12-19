@@ -122,8 +122,6 @@
 <span id="117">117</span>
 <span id="118">118</span>
 <span id="119">119</span>
-<span id="120">120</span>
-<span id="121">121</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis</span>::{<span class="ident">DominatorMap</span>, <span class="ident">ShareSet</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::CalyxResult</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>;
@@ -168,7 +166,7 @@
             <span class="ident">print_dmap</span>: <span class="ident">opts</span>[<span class="number">0</span>],
             <span class="ident">state_shareable</span>,
             <span class="ident">shareable</span>,
-            <span class="ident">main</span>: <span class="ident">ctx</span>.<span class="ident">entrypoint</span>.<span class="ident">clone</span>(),
+            <span class="ident">main</span>: <span class="ident">ctx</span>.<span class="ident">entrypoint</span>,
         })
     }
 
@@ -214,10 +212,8 @@
         }
 
         <span class="comment">// build the domination map</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dmap</span> <span class="op">=</span> <span class="ident">DominatorMap::new</span>(
-            <span class="kw-2">&amp;mut</span> <span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow_mut</span>(),
-            <span class="ident">comp</span>.<span class="ident">name</span>.<span class="ident">clone</span>(),
-        );
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dmap</span> <span class="op">=</span>
+            <span class="ident">DominatorMap::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow_mut</span>(), <span class="ident">comp</span>.<span class="ident">name</span>);
 
         <span class="comment">// print the domination map if command line argument says so</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">print_dmap</span> {
@@ -241,7 +237,7 @@
             }
         }
         <span class="ident">comp</span>.<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;state_share&quot;</span>, <span class="number">1</span>);
-        <span class="self">self</span>.<span class="ident">state_shareable</span>.<span class="ident">add</span>(<span class="ident">comp</span>.<span class="ident">name</span>.<span class="ident">clone</span>());
+        <span class="self">self</span>.<span class="ident">state_shareable</span>.<span class="ident">add</span>(<span class="ident">comp</span>.<span class="ident">name</span>);
         <span class="prelude-val">Ok</span>(<span class="ident">Action::Stop</span>)
     }
 }

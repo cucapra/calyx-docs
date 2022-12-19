@@ -186,7 +186,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lib</span> <span class="op">=</span> <span class="ident">LibrarySignatures::default</span>();
         <span class="kw">for</span> (<span class="ident">path</span>, <span class="ident">prims</span>) <span class="kw">in</span> <span class="ident">externs</span> {
             <span class="kw">let</span> <span class="ident">map</span>: <span class="ident">LinkedHashMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span>
-                <span class="ident">prims</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> (<span class="ident">p</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">p</span>)).<span class="ident">collect</span>();
+                <span class="ident">prims</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> (<span class="ident">p</span>.<span class="ident">name</span>, <span class="ident">p</span>)).<span class="ident">collect</span>();
             <span class="ident">lib</span>.<span class="ident">primitive_definitions</span>.<span class="ident">push</span>((<span class="ident">path</span>, <span class="ident">map</span>));
         }
         <span class="ident">lib</span>

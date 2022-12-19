@@ -251,7 +251,6 @@
 <span id="246">246</span>
 <span id="247">247</span>
 <span id="248">248</span>
-<span id="249">249</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{
     <span class="ident">Assignment</span>, <span class="ident">Attributes</span>, <span class="ident">Builder</span>, <span class="ident">Cell</span>, <span class="ident">CellType</span>, <span class="ident">CloneName</span>, <span class="ident">CombGroup</span>,
     <span class="ident">Control</span>, <span class="ident">GetName</span>, <span class="ident">Group</span>, <span class="ident">Id</span>, <span class="ident">PortDef</span>, <span class="ident">RRC</span>,
@@ -307,8 +306,7 @@
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
     {
-        <span class="kw">let</span> <span class="ident">prev_names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">ports</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> <span class="ident">pd</span>.<span class="ident">name</span>.<span class="ident">clone</span>()).<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="ident">prev_names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ports</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> <span class="ident">pd</span>.<span class="ident">name</span>).<span class="ident">collect</span>();
 
         <span class="kw">let</span> <span class="ident">this_sig</span> <span class="op">=</span> <span class="ident">Builder::cell_from_signature</span>(
             <span class="ident">THIS_ID</span>.<span class="ident">into</span>(),
@@ -416,7 +414,7 @@
         <span class="ident">IdList</span>(
             <span class="ident">list</span>.<span class="ident">into_iter</span>()
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">item</span>.<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>();
+                    <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">item</span>.<span class="ident">borrow</span>().<span class="ident">name</span>();
                     (<span class="ident">name</span>, <span class="ident">item</span>)
                 })
                 .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">LinkedHashMap</span><span class="op">&lt;</span><span class="ident">Id</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(),

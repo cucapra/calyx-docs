@@ -163,8 +163,6 @@
 <span id="158">158</span>
 <span id="159">159</span>
 <span id="160">160</span>
-<span id="161">161</span>
-<span id="162">162</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">CloneName</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>::{<span class="ident">Idx</span>, <span class="ident">WeightGraph</span>};
 <span class="kw">use</span> <span class="ident">petgraph::visit::IntoEdgeReferences</span>;
@@ -202,16 +200,14 @@
         <span class="self">self</span>.<span class="ident">graph</span>
             .<span class="ident">graph</span>
             .<span class="ident">edge_references</span>()
-            .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="kw">_</span>)<span class="op">|</span> {
-                (<span class="self">self</span>.<span class="ident">rev_map</span>[<span class="kw-2">&amp;</span><span class="ident">src</span>].<span class="ident">clone</span>(), <span class="self">self</span>.<span class="ident">rev_map</span>[<span class="kw-2">&amp;</span><span class="ident">dst</span>].<span class="ident">clone</span>())
-            })
+            .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="kw">_</span>)<span class="op">|</span> (<span class="self">self</span>.<span class="ident">rev_map</span>[<span class="kw-2">&amp;</span><span class="ident">src</span>], <span class="self">self</span>.<span class="ident">rev_map</span>[<span class="kw-2">&amp;</span><span class="ident">dst</span>]))
     }
 
     <span class="comment">/////////////// Internal Methods //////////////////</span>
     <span class="doccomment">/// Adds a node to the CurrentConflict set.</span>
-    <span class="kw">fn</span> <span class="ident">add_node</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">node</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) {
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">graph</span>.<span class="ident">contains_node</span>(<span class="ident">node</span>) {
-            <span class="self">self</span>.<span class="ident">graph</span>.<span class="ident">add_node</span>(<span class="ident">node</span>.<span class="ident">clone</span>())
+    <span class="kw">fn</span> <span class="ident">add_node</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">node</span>: <span class="ident">ir::Id</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">graph</span>.<span class="ident">contains_node</span>(<span class="kw-2">&amp;</span><span class="ident">node</span>) {
+            <span class="self">self</span>.<span class="ident">graph</span>.<span class="ident">add_node</span>(<span class="ident">node</span>)
         }
     }
 
@@ -262,7 +258,7 @@
         <span class="ident">ir::Control::Empty</span>(<span class="kw">_</span>) =&gt; (),
         <span class="ident">ir::Control::Invoke</span>(<span class="ident">ir::Invoke</span> { <span class="ident">comp</span>, .. }) =&gt; {
             <span class="ident">confs</span>.<span class="ident">add_node</span>(<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">name</span>());
-            <span class="ident">all_nodes</span>.<span class="ident">push</span>(<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">name</span>().<span class="ident">clone</span>());
+            <span class="ident">all_nodes</span>.<span class="ident">push</span>(<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">name</span>());
         }
         <span class="ident">ir::Control::Enable</span>(<span class="ident">ir::Enable</span> { <span class="ident">group</span>, .. }) =&gt; {
             <span class="ident">confs</span>.<span class="ident">add_node</span>(<span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">name</span>());
