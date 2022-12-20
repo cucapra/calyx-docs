@@ -453,13 +453,16 @@
 <span id="448">448</span>
 <span id="449">449</span>
 <span id="450">450</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>, <span class="ident">WithPos</span>};
+<span id="451">451</span>
+<span id="452">452</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal::ConstructVisitor</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
     <span class="self">self</span>, <span class="ident">CellType</span>, <span class="ident">CloneName</span>, <span class="ident">Component</span>, <span class="ident">GetAttributes</span>, <span class="ident">LibrarySignatures</span>,
     <span class="ident">RESERVED_NAMES</span>,
 };
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils::WithPos</span>;
 <span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
 <span class="kw">use</span> <span class="ident">linked_hash_map::LinkedHashMap</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
@@ -586,6 +589,7 @@
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> {
                     <span class="ident">a</span>.<span class="ident">attributes</span>
                         .<span class="ident">copy_span</span>()
+                        .<span class="ident">into_option</span>()
                         .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">show</span>())
                         .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">ir::Printer::assignment_to_str</span>(<span class="ident">a</span>))
                 })

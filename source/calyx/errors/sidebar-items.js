@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ErrorKind","Standard error type for Calyx errors."]],"struct":[["Error",""],["Span","A span of the input program. Used for reporting location-based errors."]],"trait":[["WithPos","An IR node that may contain position information."]],"type":[["CalyxResult","Convience wrapper to represent success or meaningul compiler error."]]});
+initSidebarItems({"enum":[["ErrorKind","Standard error type for Calyx errors."]],"struct":[["Error",""]],"type":[["CalyxResult","Convience wrapper to represent success or meaningul compiler error."]]});
