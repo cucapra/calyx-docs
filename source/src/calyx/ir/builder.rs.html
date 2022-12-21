@@ -307,6 +307,7 @@
 <span id="302">302</span>
 <span id="303">303</span>
 <span id="304">304</span>
+<span id="305">305</span>
 </pre><pre class="rust"><code><span class="doccomment">//! IR Builder. Provides convience methods to build various parts of the internal</span>
 <span class="doccomment">//! representation.</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">LibrarySignatures</span>, <span class="ident">RRC</span>, <span class="ident">WRC</span>};
@@ -366,10 +367,11 @@
     <span class="doccomment">/// Returns a reference to the group.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_group</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">prefix</span>: <span class="ident">S</span>) -&gt; <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ToString</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
     {
+        <span class="kw">let</span> <span class="ident">prefix</span>: <span class="ident">ir::Id</span> <span class="op">=</span> <span class="ident">prefix</span>.<span class="ident">into</span>();
         <span class="macro">assert!</span>(
-            <span class="ident">prefix</span>.<span class="ident">as_ref</span>() <span class="op">!</span><span class="op">=</span> <span class="string">&quot;&quot;</span>,
+            <span class="ident">prefix</span> <span class="op">!</span><span class="op">=</span> <span class="string">&quot;&quot;</span>,
             <span class="string">&quot;Cannot construct group with empty name prefix&quot;</span>
         );
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">component</span>.<span class="ident">generate_name</span>(<span class="ident">prefix</span>);
@@ -422,7 +424,7 @@
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">ir::Cell::constant_name</span>(<span class="ident">val</span>, <span class="ident">width</span>);
         <span class="comment">// If this constant has already been instantiated, return the relevant</span>
         <span class="comment">// cell.</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cell</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">component</span>.<span class="ident">cells</span>.<span class="ident">find</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cell</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">component</span>.<span class="ident">cells</span>.<span class="ident">find</span>(<span class="ident">name</span>) {
             <span class="kw">return</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>);
         }
 
@@ -462,9 +464,9 @@
     ) -&gt; <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">Pre</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ToString</span> <span class="op">+</span> <span class="ident">Clone</span>,
-        <span class="ident">Prim</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">Prim</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
     {
-        <span class="kw">let</span> <span class="ident">prim_id</span> <span class="op">=</span> <span class="ident">ir::Id::from</span>(<span class="ident">primitive</span>.<span class="ident">as_ref</span>());
+        <span class="kw">let</span> <span class="ident">prim_id</span> <span class="op">=</span> <span class="ident">primitive</span>.<span class="ident">into</span>();
         <span class="kw">let</span> <span class="ident">prim</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lib</span>.<span class="ident">get_primitive</span>(<span class="ident">prim_id</span>);
         <span class="kw">let</span> (<span class="ident">param_binding</span>, <span class="ident">ports</span>) <span class="op">=</span> <span class="ident">prim</span>
             .<span class="ident">resolve</span>(<span class="ident">param_values</span>)
@@ -573,13 +575,13 @@
                 <span class="kw">let</span> <span class="ident">cell_ref</span> <span class="op">=</span> <span class="ident">cell_wref</span>.<span class="ident">internal</span>.<span class="ident">upgrade</span>().<span class="ident">expect</span>(<span class="string">&quot;Weak reference to port&#39;s parent cell points to nothing. This usually means that the Component did not retain a pointer to the Cell.&quot;</span>);
 
                 <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">cell_ref</span>.<span class="ident">borrow</span>();
-                <span class="self">self</span>.<span class="ident">component</span>.<span class="ident">find_cell</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">name</span>()).<span class="ident">expect</span>(<span class="string">&quot;Port&#39;s parent cell not present in the component. Add the cell to the component before using the Port.&quot;</span>);
+                <span class="self">self</span>.<span class="ident">component</span>.<span class="ident">find_cell</span>(<span class="ident">cell</span>.<span class="ident">name</span>()).<span class="ident">expect</span>(<span class="string">&quot;Port&#39;s parent cell not present in the component. Add the cell to the component before using the Port.&quot;</span>);
             }
             <span class="ident">ir::PortParent::Group</span>(<span class="ident">group_wref</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">group_ref</span> <span class="op">=</span> <span class="ident">group_wref</span>.<span class="ident">internal</span>.<span class="ident">upgrade</span>().<span class="ident">expect</span>(<span class="string">&quot;Weak reference to hole&#39;s parent group points to nothing. This usually means that the Component did not retain a pointer to the Group.&quot;</span>);
 
                 <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">group_ref</span>.<span class="ident">borrow</span>();
-                <span class="self">self</span>.<span class="ident">component</span>.<span class="ident">find_group</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">name</span>()).<span class="ident">expect</span>(<span class="string">&quot;Hole&#39;s parent cell not present in the component. Add the group to the component before using the Hole.&quot;</span>);
+                <span class="self">self</span>.<span class="ident">component</span>.<span class="ident">find_group</span>(<span class="ident">group</span>.<span class="ident">name</span>()).<span class="ident">expect</span>(<span class="string">&quot;Hole&#39;s parent cell not present in the component. Add the group to the component before using the Hole.&quot;</span>);
             }
         };
     }

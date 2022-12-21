@@ -99,7 +99,7 @@
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_name</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">prefix</span>: <span class="ident">S</span>) -&gt; <span class="ident">ir::Id</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+        <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
     {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cur_prefix</span>: <span class="ident">ir::Id</span> <span class="op">=</span> <span class="ident">prefix</span>.<span class="ident">into</span>();
         <span class="kw">loop</span> {

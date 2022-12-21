@@ -538,7 +538,7 @@
     <span class="doccomment">/// Returns the value of an attribute if present</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_attribute</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attr</span>: <span class="ident">S</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">u64</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span>,
     {
         <span class="self">self</span>.<span class="ident">get_attributes</span>().<span class="ident">get</span>(<span class="ident">attr</span>)
     }
@@ -546,7 +546,7 @@
     <span class="doccomment">/// Returns true if the node has a specific attribute</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_attribute</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attr</span>: <span class="ident">S</span>) -&gt; <span class="ident">bool</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">std::fmt::Display</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span>,
     {
         <span class="self">self</span>.<span class="ident">get_attributes</span>().<span class="ident">has</span>(<span class="ident">attr</span>)
     }

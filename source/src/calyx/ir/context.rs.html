@@ -110,8 +110,6 @@
 <span id="105">105</span>
 <span id="106">106</span>
 <span id="107">107</span>
-<span id="108">108</span>
-<span id="109">109</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An IR context. This is the top-level object for an IR and contains all information</span>
 <span class="doccomment">//! need to transform, lower, an emit a program.</span>
 <span class="doccomment">//! Passes usually have transform/analyze the components in the IR.</span>
@@ -133,9 +131,9 @@
     <span class="doccomment">/// Return the [Primitive] associated with the given name if defined, otherwise return None.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_primitive</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="ident">S</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Primitive</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span>,
     {
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">Id::from</span>(<span class="ident">name</span>.<span class="ident">as_ref</span>());
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">name</span>.<span class="ident">into</span>();
         <span class="kw">for</span> (<span class="kw">_</span>, <span class="ident">sig</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">primitive_definitions</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span> <span class="ident">sig</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
                 <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>);
@@ -147,13 +145,11 @@
     <span class="doccomment">/// Return the [Primitive] associated to this Id.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_primitive</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="ident">S</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Primitive</span>
     <span class="kw">where</span>
-        <span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span>,
     {
-        <span class="self">self</span>.<span class="ident">find_primitive</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="macro">panic!</span>(
-                <span class="string">&quot;Primitive `{}` is not defined in the context.&quot;</span>,
-                <span class="ident">name</span>.<span class="ident">as_ref</span>()
-            )
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">name</span>.<span class="ident">into</span>();
+        <span class="self">self</span>.<span class="ident">find_primitive</span>(<span class="ident">key</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+            <span class="macro">panic!</span>(<span class="string">&quot;Primitive `{}` is not defined in the context.&quot;</span>, <span class="ident">key</span>)
         })
     }
 
