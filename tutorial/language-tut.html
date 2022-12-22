@@ -226,7 +226,7 @@ So make a file called something like <code>data.json</code> containing something
 </code></pre>
 <p>The <code>mem</code> key means we're providing the initial value for our memory called <code>mem</code>.
 We have one (unsigned integer) data element, and we indicate the bit width (32 bits).</p>
-<p>If you want to see how this Calyx program compiles to Verilog, here's the <a href="./fud/index.html">fud</a> incantation you need:</p>
+<p>If you want to see how this Calyx program compiles to Verilog, here's the <a href="../fud/index.html">fud</a> incantation you need:</p>
 <pre><code>fud exec language-tutorial-mem.futil --to verilog
 </code></pre>
 <p>Not terribly interesting!
@@ -236,7 +236,7 @@ However, one nice thing you can do with programs is execute them.</p>
     -s verilog.data data.json
 </code></pre>
 <p>Using <code>--to dat</code> asks fud to run the program, and the extra <code>-s verilog.data &lt;filename&gt;</code> argument tells it where to find the input data.
-The <code>--through icarus-verilog</code> option tells fud which Verilog simulator to use (see <a href="./fud/index.html">the chapter about fud</a> for alternatives such as <a href="https://www.veripool.org/wiki/verilator">Verilator</a>).
+The <code>--through icarus-verilog</code> option tells fud which Verilog simulator to use (see <a href="../fud/index.html">the chapter about fud</a> for alternatives such as <a href="https://www.veripool.org/wiki/verilator">Verilator</a>).
 Executing this program should print:</p>
 <pre><code>{
   &quot;cycles&quot;: 1,
@@ -265,7 +265,7 @@ name <em>group</em>:</p>
   }
 </code></pre>
 <p>We also need one extra line in the group: that assignment to <code>the_answer[done]</code>.
-Here, we say that <code>the_answer</code>'s work is one once the update to <code>mem</code> has finished.
+Here, we say that <code>the_answer</code>'s work is done once the update to <code>mem</code> has finished.
 Calyx groups have <em>compilation holes</em> called <code>go</code> and <code>done</code> that the control program will use to orchestrate their execution.</p>
 <p>The last thing we need is a control program.
 Add one line to activate <code>the_answer</code> and then finish:</p>

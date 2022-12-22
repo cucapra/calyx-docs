@@ -316,7 +316,7 @@ So make a file called something like <code>data.json</code> containing something
 </code></pre>
 <p>The <code>mem</code> key means we're providing the initial value for our memory called <code>mem</code>.
 We have one (unsigned integer) data element, and we indicate the bit width (32 bits).</p>
-<p>If you want to see how this Calyx program compiles to Verilog, here's the <a href="tutorial/./fud/index.html">fud</a> incantation you need:</p>
+<p>If you want to see how this Calyx program compiles to Verilog, here's the <a href="tutorial/../fud/index.html">fud</a> incantation you need:</p>
 <pre><code>fud exec language-tutorial-mem.futil --to verilog
 </code></pre>
 <p>Not terribly interesting!
@@ -326,7 +326,7 @@ However, one nice thing you can do with programs is execute them.</p>
     -s verilog.data data.json
 </code></pre>
 <p>Using <code>--to dat</code> asks fud to run the program, and the extra <code>-s verilog.data &lt;filename&gt;</code> argument tells it where to find the input data.
-The <code>--through icarus-verilog</code> option tells fud which Verilog simulator to use (see <a href="tutorial/./fud/index.html">the chapter about fud</a> for alternatives such as <a href="https://www.veripool.org/wiki/verilator">Verilator</a>).
+The <code>--through icarus-verilog</code> option tells fud which Verilog simulator to use (see <a href="tutorial/../fud/index.html">the chapter about fud</a> for alternatives such as <a href="https://www.veripool.org/wiki/verilator">Verilator</a>).
 Executing this program should print:</p>
 <pre><code>{
   &quot;cycles&quot;: 1,
@@ -355,7 +355,7 @@ name <em>group</em>:</p>
   }
 </code></pre>
 <p>We also need one extra line in the group: that assignment to <code>the_answer[done]</code>.
-Here, we say that <code>the_answer</code>'s work is one once the update to <code>mem</code> has finished.
+Here, we say that <code>the_answer</code>'s work is done once the update to <code>mem</code> has finished.
 Calyx groups have <em>compilation holes</em> called <code>go</code> and <code>done</code> that the control program will use to orchestrate their execution.</p>
 <p>The last thing we need is a control program.
 Add one line to activate <code>the_answer</code> and then finish:</p>
@@ -1507,11 +1507,11 @@ The source for fud is <a href="https://github.com/cucapra/futil/tree/master/fud"
 </blockquote>
 <p>You need <a href="https://flit.readthedocs.io/en/latest/">Flit</a> to install <code>fud</code>. Install it with <code>pip3 install flit</code>.</p>
 <p>You can then install <code>fud</code> with</p>
-<pre><code class="language-bash">flit install
+<pre><code class="language-bash">cd fud &amp;&amp; flit install
 </code></pre>
 <p>(If using this method to install <code>fud</code>, <code>pip3</code> should be version &gt;= 20)</p>
 <p>If you are working on <code>fud</code> itself, you can install it with a symlink with:</p>
-<pre><code class="language-bash">flit install --symlink
+<pre><code class="language-bash">cd fud &amp;&amp; flit install --symlink
 </code></pre>
 <p>You can also install <code>fud</code> with</p>
 <pre><code class="language-bash">flit build
@@ -1618,7 +1618,7 @@ Once Dahlia is compiled, point <code>fud</code> to the Dahlia compiler binary:</
 <h2 id="adding-synthesis-backends"><a class="header" href="#adding-synthesis-backends">Adding Synthesis Backends</a></h2>
 <p><code>fud</code> supports wraps the Vivado (<code>synth-verilog</code>) and Vivado HLS (<code>vivado-hls</code>)
 tools to generate area and resource estimates for Calyx designs.
-See <a href="fud/./synthesis.html">the instructions</a> to configure them.</p>
+See <a href="fud/./xilinx.html">the instructions</a> to configure them.</p>
 <h2 id="working-with-stages"><a class="header" href="#working-with-stages">Working with Stages</a></h2>
 <p>Fud is structured as a sequence of stages that transform inputs of one form
 to outputs.</p>
@@ -3332,7 +3332,7 @@ hardware accelerators.</p>
 <p>Then, clone the repository and build the Dahlia compiler:</p>
 <pre><code>git clone https://github.com/cucapra/dahlia.git
 cd dahlia
-sbt install
+sbt compile
 sbt assembly
 chmod +x ./fuse
 </code></pre>
