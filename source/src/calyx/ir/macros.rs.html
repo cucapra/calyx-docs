@@ -1,17 +1,12 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/ir/macros.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>macros.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1"> 1</span>
-<span id="2"> 2</span>
-<span id="3"> 3</span>
-<span id="4"> 4</span>
-<span id="5"> 5</span>
-<span id="6"> 6</span>
-<span id="7"> 7</span>
-<span id="8"> 8</span>
-<span id="9"> 9</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/ir/macros.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>macros.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
 <span id="10">10</span>
 <span id="11">11</span>
 <span id="12">12</span>
@@ -93,96 +88,95 @@
 <span id="88">88</span>
 <span id="89">89</span>
 <span id="90">90</span>
-</pre><pre class="rust"><code><span class="doccomment">/// Convinience macro to get a port and turn it into an [`ir::Guard`](crate::ir::Guard).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The identifier should either be a [`ir::Group`](crate::ir::Group) or an</span>
-<span class="doccomment">/// [`ir::Cell`](crate::ir::Cell).</span>
-<span class="doccomment">/// Example:</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// let fsm_out = guard!(fsm[&quot;out&quot;]);</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules!</span> <span class="ident">guard</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">node</span>:<span class="ident">ident</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">port</span>:<span class="ident">expr</span>]) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ir::Guard::from</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">node</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">port</span>))
+</pre><pre class="rust"><code><span class="doccomment">/// Convinience macro to get a port and turn it into an [`ir::Guard`](crate::ir::Guard).
+///
+/// The identifier should either be a [`ir::Group`](crate::ir::Group) or an
+/// [`ir::Cell`](crate::ir::Cell).
+/// Example:
+/// ```
+/// let fsm_out = guard!(fsm[&quot;out&quot;]);
+/// ```
+</span><span class="attribute">#[macro_export]
+</span><span class="macro">macro_rules! </span>guard {
+    (<span class="macro-nonterminal">$node</span>:ident[<span class="macro-nonterminal">$port</span>:expr]) =&gt; {
+        <span class="macro-nonterminal">$crate::ir::Guard::from</span>(<span class="macro-nonterminal">$node</span>.borrow().get(<span class="macro-nonterminal">$port</span>))
     };
 }
 
-<span class="doccomment">/// Add primitives and constants to the component and `let`-bind the</span>
-<span class="doccomment">/// references.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Example:</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// let builder = ir::Builder::from(&amp;mut component, &amp;sigs, validate);</span>
-<span class="doccomment">/// structure!(builder;</span>
-<span class="doccomment">///     let signal_on = constant(1, 32); // Define 32-bit constant 1.</span>
-<span class="doccomment">///     let fsm_reg = prim std_reg(32);  // Define 32-bit register.</span>
-<span class="doccomment">/// )</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules!</span> <span class="ident">structure</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>:<span class="ident">expr</span>;) =&gt; { };
+<span class="doccomment">/// Add primitives and constants to the component and `let`-bind the
+/// references.
+///
+/// Example:
+/// ```
+/// let builder = ir::Builder::from(&amp;mut component, &amp;sigs, validate);
+/// structure!(builder;
+///     let signal_on = constant(1, 32); // Define 32-bit constant 1.
+///     let fsm_reg = prim std_reg(32);  // Define 32-bit register.
+/// )
+/// ```
+</span><span class="attribute">#[macro_export]
+</span><span class="macro">macro_rules! </span>structure {
+    (<span class="macro-nonterminal">$builder</span>:expr;) =&gt; { };
 
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>:<span class="ident">expr</span>;
-     <span class="kw">let</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">var</span>:<span class="ident">ident</span> <span class="op">=</span> <span class="ident">prim</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">comp</span>:<span class="ident">ident</span>( $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">expr</span>),<span class="op">*</span> ); $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tail</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) =&gt; {
-        <span class="kw">let</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">var</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>.<span class="ident">add_primitive</span>(
-            <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">var</span>),
-            <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">comp</span>),
-            <span class="kw-2">&amp;</span>[$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>),<span class="kw-2">*</span>]
+    (<span class="macro-nonterminal">$builder</span>:expr;
+     <span class="kw">let </span><span class="macro-nonterminal">$var</span>:ident = prim <span class="macro-nonterminal">$comp</span>:ident( $(<span class="macro-nonterminal">$n</span>:expr),* ); $(<span class="macro-nonterminal">$tail</span>:tt)<span class="kw-2">*</span>) =&gt; {
+        <span class="kw">let </span><span class="macro-nonterminal">$var </span>= <span class="macro-nonterminal">$builder</span>.add_primitive(
+            <span class="macro">stringify!</span>(<span class="macro-nonterminal">$var</span>),
+            <span class="macro">stringify!</span>(<span class="macro-nonterminal">$comp</span>),
+            <span class="kw-2">&amp;</span>[$(<span class="macro-nonterminal">$n</span>),<span class="kw-2">*</span>]
         );
-        <span class="macro">structure!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tail</span>)<span class="kw-2">*</span>)
+        <span class="macro">structure!</span>(<span class="macro-nonterminal">$builder</span>; $(<span class="macro-nonterminal">$tail</span>)<span class="kw-2">*</span>)
     };
 
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>:<span class="ident">expr</span>;
-     <span class="kw">let</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">var</span>:<span class="ident">pat</span> <span class="op">=</span> <span class="ident">constant</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">w</span>:<span class="ident">expr</span>); $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tail</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) =&gt; {
-        <span class="kw">let</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">var</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>.<span class="ident">add_constant</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">w</span>);
-        <span class="macro">structure!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tail</span>)<span class="kw-2">*</span>)
+    (<span class="macro-nonterminal">$builder</span>:expr;
+     <span class="kw">let </span><span class="macro-nonterminal">$var</span>:pat = constant(<span class="macro-nonterminal">$v</span>:expr, <span class="macro-nonterminal">$w</span>:expr); $(<span class="macro-nonterminal">$tail</span>:tt)<span class="kw-2">*</span>) =&gt; {
+        <span class="kw">let </span><span class="macro-nonterminal">$var </span>= <span class="macro-nonterminal">$builder</span>.add_constant(<span class="macro-nonterminal">$v</span>, <span class="macro-nonterminal">$w</span>);
+        <span class="macro">structure!</span>(<span class="macro-nonterminal">$builder</span>; $(<span class="macro-nonterminal">$tail</span>)<span class="kw-2">*</span>)
     }
 }
 
-<span class="doccomment">/// Build guarded assignment statements and return a vector containing them.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The macro accepts two forms:</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// build_assignments!(builder;</span>
-<span class="doccomment">///     group[&quot;go&quot;] = ? signal_on[&quot;out&quot;]; // no guard</span>
-<span class="doccomment">///     fsm[&quot;in&quot;] = guard ? add[&quot;out&quot;];</span>
-<span class="doccomment">/// )</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// **Note**: Guards used in the assignments are `cloned`.</span>
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules!</span> <span class="ident">build_assignments</span> {
-    <span class="comment">// Unguarded assignment.</span>
-    (@<span class="ident">base</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>:<span class="ident">expr</span>;
-     <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_node</span>:<span class="ident">ident</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_port</span>:<span class="ident">expr</span>] <span class="op">=</span> <span class="question-mark">?</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_node</span>:<span class="ident">ident</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_port</span>:<span class="ident">expr</span>]) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>.<span class="ident">build_assignment</span>(
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_node</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_port</span>),
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_node</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_port</span>),
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ir::Guard::True</span>)
+<span class="doccomment">/// Build guarded assignment statements and return a vector containing them.
+///
+/// The macro accepts two forms:
+/// ```
+/// build_assignments!(builder;
+///     group[&quot;go&quot;] = ? signal_on[&quot;out&quot;]; // no guard
+///     fsm[&quot;in&quot;] = guard ? add[&quot;out&quot;];
+/// )
+/// ```
+/// **Note**: Guards used in the assignments are `cloned`.
+</span><span class="attribute">#[macro_export]
+</span><span class="macro">macro_rules! </span>build_assignments {
+    <span class="comment">// Unguarded assignment.
+    </span>(@base <span class="macro-nonterminal">$builder</span>:expr;
+     <span class="macro-nonterminal">$dst_node</span>:ident[<span class="macro-nonterminal">$dst_port</span>:expr] = <span class="question-mark">? </span><span class="macro-nonterminal">$src_node</span>:ident[<span class="macro-nonterminal">$src_port</span>:expr]) =&gt; {
+        <span class="macro-nonterminal">$builder</span>.build_assignment(
+            <span class="macro-nonterminal">$dst_node</span>.borrow().get(<span class="macro-nonterminal">$dst_port</span>),
+            <span class="macro-nonterminal">$src_node</span>.borrow().get(<span class="macro-nonterminal">$src_port</span>),
+            <span class="macro-nonterminal">$crate::ir::Guard::True</span>)
     };
 
-    <span class="comment">// Guarded assignment.</span>
-    (@<span class="ident">base</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>:<span class="ident">expr</span>;
-     <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_node</span>:<span class="ident">ident</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_port</span>:<span class="ident">expr</span>] <span class="op">=</span>
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>:<span class="ident">ident</span> <span class="question-mark">?</span>
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_node</span>:<span class="ident">ident</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_port</span>:<span class="ident">expr</span>]) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>.<span class="ident">build_assignment</span>(
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_node</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_port</span>),
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_node</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_port</span>),
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>.<span class="ident">clone</span>())
+    <span class="comment">// Guarded assignment.
+    </span>(@base <span class="macro-nonterminal">$builder</span>:expr;
+     <span class="macro-nonterminal">$dst_node</span>:ident[<span class="macro-nonterminal">$dst_port</span>:expr] =
+        <span class="macro-nonterminal">$guard</span>:ident <span class="question-mark">?
+        </span><span class="macro-nonterminal">$src_node</span>:ident[<span class="macro-nonterminal">$src_port</span>:expr]) =&gt; {
+        <span class="macro-nonterminal">$builder</span>.build_assignment(
+            <span class="macro-nonterminal">$dst_node</span>.borrow().get(<span class="macro-nonterminal">$dst_port</span>),
+            <span class="macro-nonterminal">$src_node</span>.borrow().get(<span class="macro-nonterminal">$src_port</span>),
+            <span class="macro-nonterminal">$guard</span>.clone())
     };
 
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>:<span class="ident">expr</span>;
-     $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_node</span>:<span class="ident">ident</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_port</span>:<span class="ident">expr</span>] <span class="op">=</span>
-         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>:<span class="ident">ident</span>)<span class="question-mark">?</span> <span class="question-mark">?</span>
-         <span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_node</span>:<span class="ident">ident</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_port</span>:<span class="ident">expr</span>];)<span class="kw-2">*</span>)  =&gt; {
+    (<span class="macro-nonterminal">$builder</span>:expr;
+     $(<span class="macro-nonterminal">$dst_node</span>:ident[<span class="macro-nonterminal">$dst_port</span>:expr] =
+         $(<span class="macro-nonterminal">$guard</span>:ident)<span class="question-mark">? ?
+         </span><span class="macro-nonterminal">$src_node</span>:ident[<span class="macro-nonterminal">$src_port</span>:expr];)<span class="kw-2">*</span>)  =&gt; {
         <span class="macro">vec!</span>[$(
-            <span class="macro">build_assignments!</span>(@<span class="ident">base</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">builder</span>;
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_node</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dst_port</span>] <span class="op">=</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>)<span class="question-mark">?</span> <span class="question-mark">?</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_node</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">src_port</span>])
+            <span class="macro">build_assignments!</span>(@base <span class="macro-nonterminal">$builder</span>;
+                <span class="macro-nonterminal">$dst_node</span>[<span class="macro-nonterminal">$dst_port</span>] = $(<span class="macro-nonterminal">$guard</span>)<span class="question-mark">? ? </span><span class="macro-nonterminal">$src_node</span>[<span class="macro-nonterminal">$src_port</span>])
         ),<span class="kw-2">*</span>]
 
     };
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

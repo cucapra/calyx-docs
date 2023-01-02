@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["bits_needed_for",""]]});
+window.SIDEBAR_ITEMS = {"fn":[["bits_needed_for",""]]};

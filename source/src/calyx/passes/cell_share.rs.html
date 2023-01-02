@@ -1,107 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/passes/cell_share.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cell_share.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/passes/cell_share.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cell_share.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -480,413 +475,415 @@
 <span id="475">475</span>
 <span id="476">476</span>
 <span id="477">477</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::CalyxResult</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">analysis</span>::{<span class="ident">GraphColoring</span>, <span class="ident">LiveRangeAnalysis</span>, <span class="ident">ReadWriteSet</span>, <span class="ident">ShareSet</span>},
-    <span class="ident">ir</span>::{
+<span id="478">478</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::errors::CalyxResult;
+<span class="kw">use </span><span class="kw">crate</span>::ir::rewriter;
+<span class="kw">use crate</span>::{
+    analysis::{GraphColoring, LiveRangeAnalysis, ReadWriteSet, ShareSet},
+    ir::{
         <span class="self">self</span>,
-        <span class="ident">traversal::Named</span>,
-        <span class="ident">traversal</span>::{<span class="ident">Action</span>, <span class="ident">ConstructVisitor</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>},
-        <span class="ident">CloneName</span>,
+        traversal::Named,
+        traversal::{Action, ConstructVisitor, VisResult, Visitor},
+        CloneName,
     },
 };
-<span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
-<span class="kw">use</span> <span class="ident">serde_json</span>::{<span class="ident">json</span>, <span class="ident">Value</span>};
-<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
-<span class="kw">use</span> <span class="ident">std::fs</span>;
+<span class="kw">use </span>itertools::Itertools;
+<span class="kw">use </span>serde_json::{json, Value};
+<span class="kw">use </span>std::collections::{HashMap, HashSet};
+<span class="kw">use </span>std::fs;
 
-<span class="comment">// function to turn cell types to string when we are building hte json for</span>
-<span class="comment">// share_freqs</span>
-<span class="kw">fn</span> <span class="ident">cell_type_to_string</span>(<span class="ident">cell_type</span>: <span class="kw-2">&amp;</span><span class="ident">ir::CellType</span>) -&gt; <span class="ident">String</span> {
-    <span class="kw">match</span> <span class="ident">cell_type</span> {
-        <span class="ident">ir::CellType::Primitive</span> {
-            <span class="ident">name</span>,
-            <span class="ident">param_binding</span>,
+<span class="comment">// function to turn cell types to string when we are building hte json for
+// share_freqs
+</span><span class="kw">fn </span>cell_type_to_string(cell_type: <span class="kw-2">&amp;</span>ir::CellType) -&gt; String {
+    <span class="kw">match </span>cell_type {
+        ir::CellType::Primitive {
+            name,
+            param_binding,
             ..
         } =&gt; {
-            <span class="kw">let</span> <span class="ident">param_str</span> <span class="op">=</span> <span class="ident">param_binding</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">id</span>, <span class="ident">val</span>)<span class="op">|</span> {
-                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">id_str</span> <span class="op">=</span> <span class="ident">id</span>.<span class="ident">to_string</span>();
-                    <span class="ident">id_str</span>.<span class="ident">push</span>(<span class="string">&#39;_&#39;</span>);
-                    <span class="ident">id_str</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">val</span>.<span class="ident">to_string</span>());
-                    <span class="ident">id_str</span>
+            <span class="kw">let </span>param_str = param_binding
+                .iter()
+                .map(|(id, val)| {
+                    <span class="kw">let </span><span class="kw-2">mut </span>id_str = id.to_string();
+                    id_str.push(<span class="string">&#39;_&#39;</span>);
+                    id_str.push_str(<span class="kw-2">&amp;</span>val.to_string());
+                    id_str
                 })
-                .<span class="ident">join</span>(<span class="string">&quot;_&quot;</span>);
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">name_str</span> <span class="op">=</span> <span class="ident">name</span>.<span class="ident">to_string</span>();
-            <span class="ident">name_str</span>.<span class="ident">push</span>(<span class="string">&#39;_&#39;</span>);
-            <span class="ident">name_str</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">param_str</span>);
-            <span class="ident">name_str</span>
+                .join(<span class="string">&quot;_&quot;</span>);
+            <span class="kw">let </span><span class="kw-2">mut </span>name_str = name.to_string();
+            name_str.push(<span class="string">&#39;_&#39;</span>);
+            name_str.push_str(<span class="kw-2">&amp;</span>param_str);
+            name_str
         }
-        <span class="ident">ir::CellType::Component</span> { <span class="ident">name</span> } =&gt; <span class="ident">name</span>.<span class="ident">to_string</span>(),
-        <span class="ident">ir::CellType::ThisComponent</span> =&gt; <span class="string">&quot;ThisComponent&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">ir::CellType::Constant</span> { <span class="ident">val</span>, <span class="ident">width</span> } =&gt; {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="string">&quot;Const_&quot;</span>.<span class="ident">to_string</span>();
-            <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">val</span>.<span class="ident">to_string</span>());
-            <span class="ident">s</span>.<span class="ident">push</span>(<span class="string">&#39;_&#39;</span>);
-            <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">width</span>.<span class="ident">to_string</span>());
-            <span class="ident">s</span>
+        ir::CellType::Component { name } =&gt; name.to_string(),
+        ir::CellType::ThisComponent =&gt; <span class="string">&quot;ThisComponent&quot;</span>.to_string(),
+        ir::CellType::Constant { val, width } =&gt; {
+            <span class="kw">let </span><span class="kw-2">mut </span>s = <span class="string">&quot;Const_&quot;</span>.to_string();
+            s.push_str(<span class="kw-2">&amp;</span>val.to_string());
+            s.push(<span class="string">&#39;_&#39;</span>);
+            s.push_str(<span class="kw-2">&amp;</span>width.to_string());
+            s
         }
     }
 }
 
-<span class="doccomment">/// Given a [LiveRangeAnalysis] that specifies the &quot;share&quot; and &quot;state_share&quot; cells</span>
-<span class="doccomment">/// alive at each group, minimizes the cells used for each component.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This works by constructing an interference graph for each alive &quot;state_share&quot; cell.</span>
-<span class="doccomment">/// If two cells are ever alive at the same time, then there is an edge</span>
-<span class="doccomment">/// between them in the interference graph. Additionally, if two cells</span>
-<span class="doccomment">/// are different prototypes, then there is an edge between them.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// A greedy graph coloring algorithm on the interference graph</span>
-<span class="doccomment">/// is used to assign each cell a name.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// By default, this pass will share a given cell as many times as possible. However,</span>
-<span class="doccomment">/// by passing a command line argument, we can limit the number of times a given</span>
-<span class="doccomment">/// cell is reused. The rationale behind this option is that, in certain cases,</span>
-<span class="doccomment">/// if you share a given component too much, the logic to determine when that</span>
-<span class="doccomment">/// component should be activated ends up being more expensive than just using</span>
-<span class="doccomment">/// a separate component. To pass this command line argument, you give three numbers:</span>
-<span class="doccomment">/// The number of times a given combinational component can be shared, the number</span>
-<span class="doccomment">/// of times a given register can be shared, and the number of times all other</span>
-<span class="doccomment">/// components can be shared. Generally we would want settings such that 1 &lt; 2 &lt; 3,</span>
-<span class="doccomment">/// since a given share of a 3) would save more hardware than a share of a 2), and</span>
-<span class="doccomment">/// a share of a 2) would save more hardware than a share of a 1).</span>
-<span class="doccomment">/// The exact command line syntax to use: if we had a file, &quot;x.futil&quot; and ran:</span>
-<span class="doccomment">/// `cargo run x.futil -x cell-share:bounds=2,4,8`, then we would only share a</span>
-<span class="doccomment">/// given combinational component at most twice, a given register at most 4 times,</span>
-<span class="doccomment">/// and all other components at most 8 times. If you wanted to do something with</span>
-<span class="doccomment">/// fud then run `fud e ... -s futil.flags &quot; -x cell-share:bounds=2,4,8&quot;`. Finally</span>
-<span class="doccomment">/// if you do not want to bound the sharing for a particular cell type,</span>
-<span class="doccomment">/// you can pass -1 as a bound. So for example if you passed</span>
-<span class="doccomment">/// `-x cell-share:bounds=2,-1,3` this means that you will always share registers.</span>
-<span class="doccomment">/// Note: *The no spaces are important.*</span>
-<span class="doccomment">/// Also, if you pass the following flag: `-x cell-share:print-share-freqs=file-name`</span>
-<span class="doccomment">/// this pass will write a json to `file-name`. If want to print into stdout</span>
-<span class="doccomment">/// then just set the file-name to be &quot;stdout&quot; (you don&#39;t need the quotes</span>
-<span class="doccomment">/// when you actually pass in the argument, so run `-x cell-share:print-share-freqs=stdout`),</span>
-<span class="doccomment">/// and if you want to print to stderr then just set the file-name to be &quot;stderr&quot;.</span>
-<span class="doccomment">/// The json will map an integer (say n) to the number of cells in the new design (i.e.,</span>
-<span class="doccomment">/// the design after sharing has been performed) that were shared</span>
-<span class="doccomment">/// exactly n times. So the key n = 2 will be mapped to the number of cells in the</span>
-<span class="doccomment">/// new design that are shared exactly twice.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This pass only renames uses of cells. [crate::passes::DeadCellRemoval] should be run after this</span>
-<span class="doccomment">/// to actually remove the definitions.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CellShare</span> {
-    <span class="ident">live</span>: <span class="ident">LiveRangeAnalysis</span>,
-    <span class="ident">rewrites</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">ir::RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Set of state shareable components (as type names)</span>
-    <span class="ident">state_shareable</span>: <span class="ident">ShareSet</span>,
+<span class="doccomment">/// Given a [LiveRangeAnalysis] that specifies the &quot;share&quot; and &quot;state_share&quot; cells
+/// alive at each group, minimizes the cells used for each component.
+///
+/// This works by constructing an interference graph for each alive &quot;state_share&quot; cell.
+/// If two cells are ever alive at the same time, then there is an edge
+/// between them in the interference graph. Additionally, if two cells
+/// are different prototypes, then there is an edge between them.
+///
+/// A greedy graph coloring algorithm on the interference graph
+/// is used to assign each cell a name.
+///
+/// By default, this pass will share a given cell as many times as possible. However,
+/// by passing a command line argument, we can limit the number of times a given
+/// cell is reused. The rationale behind this option is that, in certain cases,
+/// if you share a given component too much, the logic to determine when that
+/// component should be activated ends up being more expensive than just using
+/// a separate component. To pass this command line argument, you give three numbers:
+/// The number of times a given combinational component can be shared, the number
+/// of times a given register can be shared, and the number of times all other
+/// components can be shared. Generally we would want settings such that 1 &lt; 2 &lt; 3,
+/// since a given share of a 3) would save more hardware than a share of a 2), and
+/// a share of a 2) would save more hardware than a share of a 1).
+/// The exact command line syntax to use: if we had a file, &quot;x.futil&quot; and ran:
+/// `cargo run x.futil -x cell-share:bounds=2,4,8`, then we would only share a
+/// given combinational component at most twice, a given register at most 4 times,
+/// and all other components at most 8 times. If you wanted to do something with
+/// fud then run `fud e ... -s futil.flags &quot; -x cell-share:bounds=2,4,8&quot;`. Finally
+/// if you do not want to bound the sharing for a particular cell type,
+/// you can pass -1 as a bound. So for example if you passed
+/// `-x cell-share:bounds=2,-1,3` this means that you will always share registers.
+/// Note: *The no spaces are important.*
+/// Also, if you pass the following flag: `-x cell-share:print-share-freqs=file-name`
+/// this pass will write a json to `file-name`. If want to print into stdout
+/// then just set the file-name to be &quot;stdout&quot; (you don&#39;t need the quotes
+/// when you actually pass in the argument, so run `-x cell-share:print-share-freqs=stdout`),
+/// and if you want to print to stderr then just set the file-name to be &quot;stderr&quot;.
+/// The json will map an integer (say n) to the number of cells in the new design (i.e.,
+/// the design after sharing has been performed) that were shared
+/// exactly n times. So the key n = 2 will be mapped to the number of cells in the
+/// new design that are shared exactly twice.
+///
+/// This pass only renames uses of cells. [crate::passes::DeadCellRemoval] should be run after this
+/// to actually remove the definitions.
+</span><span class="kw">pub struct </span>CellShare {
+    live: LiveRangeAnalysis,
+    rewrites: HashMap&lt;ir::Id, ir::RRC&lt;ir::Cell&gt;&gt;,
+    <span class="doccomment">/// Set of state shareable components (as type names)
+    </span>state_shareable: ShareSet,
 
-    <span class="doccomment">/// Set of shareable components (as type names)</span>
-    <span class="ident">shareable</span>: <span class="ident">ShareSet</span>,
+    <span class="doccomment">/// Set of shareable components (as type names)
+    </span>shareable: ShareSet,
 
-    <span class="doccomment">/// Cell active in continuous assignments, or ref cells (we want to ignore both)</span>
-    <span class="ident">cont_ref_cells</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Cell active in continuous assignments, or ref cells (we want to ignore both)
+    </span>cont_ref_cells: HashSet&lt;ir::Id&gt;,
 
-    <span class="doccomment">/// The number of times a given class of cell can be shared. bounds should be</span>
-    <span class="doccomment">/// length 3 to hold the 3 classes: comb cells, registers, and everything else</span>
-    <span class="ident">bounds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// The number of times a given class of cell can be shared. bounds should be
+    /// length 3 to hold the 3 classes: comb cells, registers, and everything else
+    </span>bounds: Vec&lt;<span class="prelude-ty">Option</span>&lt;i64&gt;&gt;,
 
-    <span class="doccomment">/// Maps cell types to the corresponding pdf. Each pdf is a hashmap which maps</span>
-    <span class="doccomment">/// the number of times a given cell name reused (i.e., shared) to the</span>
-    <span class="doccomment">/// number of cells that have been shared that many times times.</span>
-    <span class="ident">share_freqs</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::CellType</span>, <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">i64</span>, <span class="ident">i64</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// whether or not to print the share_freqs</span>
-    <span class="ident">print_share_freqs</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Maps cell types to the corresponding pdf. Each pdf is a hashmap which maps
+    /// the number of times a given cell name reused (i.e., shared) to the
+    /// number of cells that have been shared that many times times.
+    </span>share_freqs: HashMap&lt;ir::Id, HashMap&lt;ir::CellType, HashMap&lt;i64, i64&gt;&gt;&gt;,
+    <span class="doccomment">/// whether or not to print the share_freqs
+    </span>print_share_freqs: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
-<span class="kw">impl</span> <span class="ident">Named</span> <span class="kw">for</span> <span class="ident">CellShare</span> {
-    <span class="kw">fn</span> <span class="ident">name</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="string">&quot;cell-share&quot;</span>
-    }
-    <span class="kw">fn</span> <span class="ident">description</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="string">&quot;use the fewest possible cells&quot;</span>
-    }
+<span class="kw">impl </span>Named <span class="kw">for </span>CellShare {
+    <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;cell-share&quot;
+    </span>}
+    <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;use the fewest possible cells&quot;
+    </span>}
 }
 
-<span class="kw">impl</span> <span class="ident">ConstructVisitor</span> <span class="kw">for</span> <span class="ident">CellShare</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Context</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">state_shareable</span> <span class="op">=</span> <span class="ident">ShareSet::from_context</span>::<span class="op">&lt;</span><span class="bool-val">true</span><span class="op">&gt;</span>(<span class="ident">ctx</span>);
-        <span class="kw">let</span> <span class="ident">shareable</span> <span class="op">=</span> <span class="ident">ShareSet::from_context</span>::<span class="op">&lt;</span><span class="bool-val">false</span><span class="op">&gt;</span>(<span class="ident">ctx</span>);
-        <span class="kw">let</span> (<span class="ident">print_share_freqs</span>, <span class="ident">bounds</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::parse_args</span>(<span class="ident">ctx</span>);
+<span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>CellShare {
+    <span class="kw">fn </span>from(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>state_shareable = ShareSet::from_context::&lt;<span class="bool-val">true</span>&gt;(ctx);
+        <span class="kw">let </span>shareable = ShareSet::from_context::&lt;<span class="bool-val">false</span>&gt;(ctx);
+        <span class="kw">let </span>(print_share_freqs, bounds) = <span class="self">Self</span>::parse_args(ctx);
 
-        <span class="prelude-val">Ok</span>(<span class="ident">CellShare</span> {
-            <span class="ident">live</span>: <span class="ident">LiveRangeAnalysis::default</span>(),
-            <span class="ident">rewrites</span>: <span class="ident">HashMap::new</span>(),
-            <span class="ident">cont_ref_cells</span>: <span class="ident">HashSet::new</span>(),
-            <span class="ident">state_shareable</span>,
-            <span class="ident">shareable</span>,
-            <span class="ident">bounds</span>,
-            <span class="ident">share_freqs</span>: <span class="ident">HashMap::new</span>(),
-            <span class="ident">print_share_freqs</span>,
+        <span class="prelude-val">Ok</span>(CellShare {
+            live: LiveRangeAnalysis::default(),
+            rewrites: HashMap::new(),
+            cont_ref_cells: HashSet::new(),
+            state_shareable,
+            shareable,
+            bounds,
+            share_freqs: HashMap::new(),
+            print_share_freqs,
         })
     }
 
-    <span class="kw">fn</span> <span class="ident">clear_data</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">rewrites</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-        <span class="self">self</span>.<span class="ident">live</span> <span class="op">=</span> <span class="ident">LiveRangeAnalysis::default</span>();
-        <span class="self">self</span>.<span class="ident">cont_ref_cells</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
+    <span class="kw">fn </span>clear_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.rewrites = HashMap::new();
+        <span class="self">self</span>.live = LiveRangeAnalysis::default();
+        <span class="self">self</span>.cont_ref_cells = HashSet::new();
     }
 }
 
-<span class="kw">impl</span> <span class="ident">CellShare</span> {
-    <span class="kw">fn</span> <span class="ident">initialize</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Component</span>,
-        <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">ir::LibrarySignatures</span>,
+<span class="kw">impl </span>CellShare {
+    <span class="kw">fn </span>initialize(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        comp: <span class="kw-2">&amp;</span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
     ) {
-        <span class="comment">//add cont cells</span>
-        <span class="self">self</span>.<span class="ident">cont_ref_cells</span> <span class="op">=</span>
-            <span class="ident">ReadWriteSet::uses</span>(<span class="ident">comp</span>.<span class="ident">continuous_assignments</span>.<span class="ident">iter</span>())
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cr</span><span class="op">|</span> <span class="ident">cr</span>.<span class="ident">borrow</span>().<span class="ident">clone_name</span>())
-                .<span class="ident">collect</span>();
-        <span class="comment">//add ref cells</span>
-        <span class="self">self</span>.<span class="ident">cont_ref_cells</span>.<span class="ident">extend</span>(
-            <span class="ident">comp</span>.<span class="ident">cells</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">is_reference</span>())
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">clone_name</span>()),
+        <span class="comment">//add cont cells
+        </span><span class="self">self</span>.cont_ref_cells =
+            ReadWriteSet::uses(comp.continuous_assignments.iter())
+                .map(|cr| cr.borrow().clone_name())
+                .collect();
+        <span class="comment">//add ref cells
+        </span><span class="self">self</span>.cont_ref_cells.extend(
+            comp.cells
+                .iter()
+                .filter(|cell| cell.borrow().is_reference())
+                .map(|cell| cell.borrow().clone_name()),
         );
 
-        <span class="comment">// TODO(rachit): Pass cont_ref_cells to LiveRangeAnalysis so that it ignores unneccessary</span>
-        <span class="comment">// cells.</span>
-        <span class="self">self</span>.<span class="ident">live</span> <span class="op">=</span> <span class="ident">LiveRangeAnalysis::new</span>(
-            <span class="kw-2">&amp;mut</span> <span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow_mut</span>(),
-            <span class="self">self</span>.<span class="ident">state_shareable</span>.<span class="ident">clone</span>(),
-            <span class="self">self</span>.<span class="ident">shareable</span>.<span class="ident">clone</span>(),
+        <span class="comment">// TODO(rachit): Pass cont_ref_cells to LiveRangeAnalysis so that it ignores unneccessary
+        // cells.
+        </span><span class="self">self</span>.live = LiveRangeAnalysis::new(
+            <span class="kw-2">&amp;mut </span>comp.control.borrow_mut(),
+            <span class="self">self</span>.state_shareable.clone(),
+            <span class="self">self</span>.shareable.clone(),
         );
     }
 
-    <span class="kw">fn</span> <span class="ident">cell_filter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cell</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Cell</span>) -&gt; <span class="ident">bool</span> {
-        <span class="comment">// Cells used in continuous assignments cannot be shared, nor can ref cells.</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">cont_ref_cells</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">name</span>()) {
-            <span class="kw">return</span> <span class="bool-val">false</span>;
+    <span class="kw">fn </span>cell_filter(<span class="kw-2">&amp;</span><span class="self">self</span>, cell: <span class="kw-2">&amp;</span>ir::Cell) -&gt; bool {
+        <span class="comment">// Cells used in continuous assignments cannot be shared, nor can ref cells.
+        </span><span class="kw">if </span><span class="self">self</span>.cont_ref_cells.contains(<span class="kw-2">&amp;</span>cell.name()) {
+            <span class="kw">return </span><span class="bool-val">false</span>;
         }
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">name</span>) <span class="op">=</span> <span class="ident">cell</span>.<span class="ident">type_name</span>() {
-            <span class="self">self</span>.<span class="ident">state_shareable</span>.<span class="ident">contains</span>(<span class="ident">name</span>) <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">shareable</span>.<span class="ident">contains</span>(<span class="ident">name</span>)
-        } <span class="kw">else</span> {
-            <span class="bool-val">false</span>
-        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>name) = cell.type_name() {
+            <span class="self">self</span>.state_shareable.contains(name) || <span class="self">self</span>.shareable.contains(name)
+        } <span class="kw">else </span>{
+            <span class="bool-val">false
+        </span>}
     }
 
-    <span class="comment">// given a ctx, gets the bounds and the file to write the sharing frequencies</span>
-    <span class="comment">// to. For example, if &quot;-x cell-share:bounds=2,3,4&quot;</span>
-    <span class="comment">// is passed in the cmd line, we should return [2,3,4]. If no such argument</span>
-    <span class="comment">// is given, return the default, which is currently set rather</span>
-    <span class="comment">// arbitrarily at [4,6,18].</span>
-    <span class="kw">fn</span> <span class="ident">parse_args</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Context</span>) -&gt; (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span><span class="op">&gt;</span>)
-    <span class="kw">where</span>
-        <span class="self">Self</span>: <span class="ident">Named</span>,
+    <span class="comment">// given a ctx, gets the bounds and the file to write the sharing frequencies
+    // to. For example, if &quot;-x cell-share:bounds=2,3,4&quot;
+    // is passed in the cmd line, we should return [2,3,4]. If no such argument
+    // is given, return the default, which is currently set rather
+    // arbitrarily at [4,6,18].
+    </span><span class="kw">fn </span>parse_args(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; (<span class="prelude-ty">Option</span>&lt;String&gt;, Vec&lt;<span class="prelude-ty">Option</span>&lt;i64&gt;&gt;)
+    <span class="kw">where
+        </span><span class="self">Self</span>: Named,
     {
-        <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::name</span>();
+        <span class="kw">let </span>n = <span class="self">Self</span>::name();
 
-        <span class="comment">// getting the given opts for -x cell-share:__</span>
-        <span class="kw">let</span> <span class="ident">given_opts</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ctx</span>
-            .<span class="ident">extra_opts</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">opt</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">splits</span> <span class="op">=</span> <span class="ident">opt</span>.<span class="ident">split</span>(<span class="string">&#39;:&#39;</span>);
-                <span class="kw">if</span> <span class="ident">splits</span>.<span class="ident">next</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">n</span>) {
-                    <span class="ident">splits</span>.<span class="ident">next</span>()
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">None</span>
-                }
+        <span class="comment">// getting the given opts for -x cell-share:__
+        </span><span class="kw">let </span>given_opts: HashSet&lt;<span class="kw">_</span>&gt; = ctx
+            .extra_opts
+            .iter()
+            .filter_map(|opt| {
+                <span class="kw">let </span><span class="kw-2">mut </span>splits = opt.split(<span class="string">&#39;:&#39;</span>);
+                <span class="kw">if </span>splits.next() == <span class="prelude-val">Some</span>(n) {
+                    splits.next()
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">None
+                </span>}
             })
-            .<span class="ident">collect</span>();
+            .collect();
 
-        <span class="comment">// searching for &quot;-x cell-share:bounds=x,y,z&quot; and getting back &quot;x,y,z&quot;</span>
-        <span class="kw">let</span> <span class="ident">bounds_arg</span> <span class="op">=</span> <span class="ident">given_opts</span>.<span class="ident">iter</span>().<span class="ident">find_map</span>(<span class="op">|</span><span class="ident">arg</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">split</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">arg</span>.<span class="ident">split</span>(<span class="string">&#39;=&#39;</span>).<span class="ident">collect</span>();
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">str</span>) <span class="op">=</span> <span class="ident">split</span>.<span class="ident">first</span>() {
-                <span class="kw">if</span> <span class="ident">str</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="string">&quot;bounds&quot;</span> <span class="op">&amp;&amp;</span> <span class="ident">split</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">2</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">split</span>[<span class="number">1</span>]);
+        <span class="comment">// searching for &quot;-x cell-share:bounds=x,y,z&quot; and getting back &quot;x,y,z&quot;
+        </span><span class="kw">let </span>bounds_arg = given_opts.iter().find_map(|arg| {
+            <span class="kw">let </span>split: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = arg.split(<span class="string">&#39;=&#39;</span>).collect();
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(str) = split.first() {
+                <span class="kw">if </span>str == <span class="kw-2">&amp;</span><span class="string">&quot;bounds&quot; </span>&amp;&amp; split.len() == <span class="number">2 </span>{
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(split[<span class="number">1</span>]);
                 }
             }
-            <span class="prelude-val">None</span>
-        });
+            <span class="prelude-val">None
+        </span>});
 
-        <span class="comment">// searching for &quot;-x cell-share:print-share-freqs=file_name&quot; and getting Some(file_name) back</span>
-        <span class="kw">let</span> <span class="ident">print_pdf_arg</span> <span class="op">=</span> <span class="ident">given_opts</span>.<span class="ident">iter</span>().<span class="ident">find_map</span>(<span class="op">|</span><span class="ident">arg</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">split</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">arg</span>.<span class="ident">split</span>(<span class="string">&#39;=&#39;</span>).<span class="ident">collect</span>();
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">str</span>) <span class="op">=</span> <span class="ident">split</span>.<span class="ident">first</span>() {
-                <span class="kw">if</span> <span class="ident">str</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="string">&quot;print-share-freqs&quot;</span> <span class="op">&amp;&amp;</span> <span class="ident">split</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">2</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">split</span>[<span class="number">1</span>].<span class="ident">to_string</span>());
+        <span class="comment">// searching for &quot;-x cell-share:print-share-freqs=file_name&quot; and getting Some(file_name) back
+        </span><span class="kw">let </span>print_pdf_arg = given_opts.iter().find_map(|arg| {
+            <span class="kw">let </span>split: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = arg.split(<span class="string">&#39;=&#39;</span>).collect();
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(str) = split.first() {
+                <span class="kw">if </span>str == <span class="kw-2">&amp;</span><span class="string">&quot;print-share-freqs&quot; </span>&amp;&amp; split.len() == <span class="number">2 </span>{
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(split[<span class="number">1</span>].to_string());
                 }
             }
-            <span class="prelude-val">None</span>
-        });
+            <span class="prelude-val">None
+        </span>});
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bounds</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">set_default</span> <span class="op">=</span> <span class="bool-val">false</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>bounds = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>set_default = <span class="bool-val">false</span>;
 
-        <span class="comment">// if bounds_arg = &quot;x,y,z&quot;, set bounds to [Some(x),Some(y),Some(z)]</span>
-        <span class="comment">// a -1 argument means no bound since that means we always want to share</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">bounds_arg</span> {
-            <span class="ident">bounds</span> <span class="op">=</span> <span class="ident">s</span>
-                .<span class="ident">split</span>(<span class="string">&#39;,&#39;</span>)
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>().<span class="ident">unwrap_or</span>(<span class="op">-</span><span class="number">2</span>);
-                    <span class="kw">if</span> <span class="ident">val</span> <span class="op">==</span> <span class="op">-</span><span class="number">1</span> {
-                        <span class="prelude-val">None</span>
-                    } <span class="kw">else</span> {
-                        <span class="prelude-val">Some</span>(<span class="ident">val</span>)
+        <span class="comment">// if bounds_arg = &quot;x,y,z&quot;, set bounds to [Some(x),Some(y),Some(z)]
+        // a -1 argument means no bound since that means we always want to share
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(s) = bounds_arg {
+            bounds = s
+                .split(<span class="string">&#39;,&#39;</span>)
+                .map(|s| {
+                    <span class="kw">let </span>val = s.parse::&lt;i64&gt;().unwrap_or(-<span class="number">2</span>);
+                    <span class="kw">if </span>val == -<span class="number">1 </span>{
+                        <span class="prelude-val">None
+                    </span>} <span class="kw">else </span>{
+                        <span class="prelude-val">Some</span>(val)
                     }
                 })
-                .<span class="ident">collect</span>();
-        } <span class="kw">else</span> {
-            <span class="ident">set_default</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                .collect();
+        } <span class="kw">else </span>{
+            set_default = <span class="bool-val">true</span>;
         }
 
-        <span class="kw">if</span> <span class="ident">bounds</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">3</span> <span class="op">|</span><span class="op">|</span> <span class="ident">bounds</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="op">-</span><span class="number">2</span>)) {
-            <span class="ident">set_default</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        <span class="kw">if </span>bounds.len() != <span class="number">3 </span>|| bounds.contains(<span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(-<span class="number">2</span>)) {
+            set_default = <span class="bool-val">true</span>;
         }
 
-        <span class="kw">if</span> <span class="ident">set_default</span> {
-            <span class="comment">// could possibly put vec![x,y,z] where x,y, and z are deliberately</span>
-            <span class="comment">// chosen numbers here instead</span>
-            (<span class="ident">print_pdf_arg</span>, <span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>])
-        } <span class="kw">else</span> {
-            (<span class="ident">print_pdf_arg</span>, <span class="ident">bounds</span>)
+        <span class="kw">if </span>set_default {
+            <span class="comment">// could possibly put vec![x,y,z] where x,y, and z are deliberately
+            // chosen numbers here instead
+            </span>(print_pdf_arg, <span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>])
+        } <span class="kw">else </span>{
+            (print_pdf_arg, bounds)
         }
     }
 
-    <span class="comment">// prints the json if self.print_share_freqs is not None</span>
-    <span class="kw">fn</span> <span class="ident">print_share_json</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">file</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">print_share_freqs</span> {
-            <span class="kw">let</span> <span class="ident">printable_share_freqs</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-                <span class="self">self</span>.<span class="ident">share_freqs</span>
-                    .<span class="ident">iter</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">id</span>, <span class="ident">freq_map</span>)<span class="op">|</span> {
+    <span class="comment">// prints the json if self.print_share_freqs is not None
+    </span><span class="kw">fn </span>print_share_json(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(file) = <span class="kw-2">&amp;</span><span class="self">self</span>.print_share_freqs {
+            <span class="kw">let </span>printable_share_freqs: HashMap&lt;String, HashMap&lt;String, <span class="kw">_</span>&gt;&gt; =
+                <span class="self">self</span>.share_freqs
+                    .iter()
+                    .map(|(id, freq_map)| {
                         (
-                            <span class="ident">id</span>.<span class="ident">to_string</span>(),
-                            <span class="ident">freq_map</span>
-                                .<span class="ident">iter</span>()
-                                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">cell_type</span>, <span class="ident">pdf</span>)<span class="op">|</span> {
-                                    (<span class="ident">cell_type_to_string</span>(<span class="ident">cell_type</span>), <span class="ident">pdf</span>)
+                            id.to_string(),
+                            freq_map
+                                .iter()
+                                .map(|(cell_type, pdf)| {
+                                    (cell_type_to_string(cell_type), pdf)
                                 })
-                                .<span class="ident">collect</span>(),
+                                .collect(),
                         )
                     })
-                    .<span class="ident">collect</span>();
-            <span class="kw">let</span> <span class="ident">json_share_freqs</span>: <span class="ident">Value</span> <span class="op">=</span> <span class="macro">json!</span>(<span class="ident">printable_share_freqs</span>);
-            <span class="kw">if</span> <span class="ident">file</span> <span class="op">==</span> <span class="string">&quot;stdout&quot;</span> {
+                    .collect();
+            <span class="kw">let </span>json_share_freqs: Value = <span class="macro">json!</span>(printable_share_freqs);
+            <span class="kw">if </span>file == <span class="string">&quot;stdout&quot; </span>{
                 <span class="macro">println!</span>(<span class="string">&quot;{json_share_freqs}&quot;</span>);
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">file</span> <span class="op">==</span> <span class="string">&quot;stderr&quot;</span> {
+            } <span class="kw">else if </span>file == <span class="string">&quot;stderr&quot; </span>{
                 <span class="macro">eprintln!</span>(<span class="string">&quot;{json_share_freqs}&quot;</span>);
-                <span class="ident">std::process::exit</span>(<span class="number">1</span>);
-            } <span class="kw">else</span> {
-                <span class="ident">fs::write</span>(<span class="ident">file</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">json_share_freqs</span>))
-                    .<span class="ident">expect</span>(<span class="string">&quot;unable to write file&quot;</span>);
+                std::process::exit(<span class="number">1</span>);
+            } <span class="kw">else </span>{
+                fs::write(file, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, json_share_freqs))
+                    .expect(<span class="string">&quot;unable to write file&quot;</span>);
             }
         }
     }
 }
 
-<span class="doccomment">/// The algorithm that runs is:</span>
-<span class="doccomment">///  - instantiate conflict graph using all component cells that satisfy `cell_filter`</span>
-<span class="doccomment">///  - use [ScheduleConflicts] to find groups/invokes that run in parallel with each other</span>
-<span class="doccomment">///  - for each tuple combination of cells that return true on cell_filter(), c1 and c2</span>
-<span class="doccomment">///  - first determine if their live ranges overlap. If so, then insert a conflict between</span>
-<span class="doccomment">///  c1 and c2</span>
-<span class="doccomment">///  - if c1 and c2 don&#39;t have overlapping live ranges, check if c1 and c2 are ever</span>
-<span class="doccomment">///  live at within the same par block, and they are live at different children</span>
-<span class="doccomment">///  of the par block, then add a conflict.</span>
-<span class="doccomment">///  - perform graph coloring using `self.ordering` to define the order of the greedy coloring</span>
-<span class="doccomment">///  - use coloring to rewrite group assignments, continuous assignments, and conditional ports.</span>
-<span class="kw">impl</span> <span class="ident">Visitor</span> <span class="kw">for</span> <span class="ident">CellShare</span> {
-    <span class="kw">fn</span> <span class="ident">start</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">sigs</span>: <span class="kw-2">&amp;</span><span class="ident">ir::LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="self">self</span>.<span class="ident">initialize</span>(<span class="ident">comp</span>, <span class="ident">sigs</span>);
+<span class="doccomment">/// The algorithm that runs is:
+///  - instantiate conflict graph using all component cells that satisfy `cell_filter`
+///  - use [ScheduleConflicts] to find groups/invokes that run in parallel with each other
+///  - for each tuple combination of cells that return true on cell_filter(), c1 and c2
+///  - first determine if their live ranges overlap. If so, then insert a conflict between
+///  c1 and c2
+///  - if c1 and c2 don&#39;t have overlapping live ranges, check if c1 and c2 are ever
+///  live at within the same par block, and they are live at different children
+///  of the par block, then add a conflict.
+///  - perform graph coloring using `self.ordering` to define the order of the greedy coloring
+///  - use coloring to rewrite group assignments, continuous assignments, and conditional ports.
+</span><span class="kw">impl </span>Visitor <span class="kw">for </span>CellShare {
+    <span class="kw">fn </span>start(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="self">self</span>.initialize(comp, sigs);
 
-        <span class="kw">let</span> <span class="ident">cells</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">cells</span>.<span class="ident">iter</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">cell_filter</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>.<span class="ident">borrow</span>()));
+        <span class="kw">let </span>cells = comp.cells.iter().filter(|c| <span class="self">self</span>.cell_filter(<span class="kw-2">&amp;</span>c.borrow()));
 
-        <span class="comment">// Mapping from cell type to names of all cells of that type.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cells_by_type</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::CellType</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">HashMap::new</span>();
-        <span class="kw">for</span> <span class="ident">cell</span> <span class="kw">in</span> <span class="ident">cells</span> {
-            <span class="ident">cells_by_type</span>
-                .<span class="ident">entry</span>(<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>())
-                .<span class="ident">or_default</span>()
-                .<span class="ident">push</span>(<span class="ident">cell</span>.<span class="ident">clone_name</span>());
+        <span class="comment">// Mapping from cell type to names of all cells of that type.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>cells_by_type: HashMap&lt;ir::CellType, Vec&lt;ir::Id&gt;&gt; =
+            HashMap::new();
+        <span class="kw">for </span>cell <span class="kw">in </span>cells {
+            cells_by_type
+                .entry(cell.borrow().prototype.clone())
+                .or_default()
+                .push(cell.clone_name());
         }
 
-        <span class="comment">// Maps cell type to conflict graph (will be used to perform coloring)</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">graphs_by_type</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::CellType</span>, <span class="ident">GraphColoring</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">cells_by_type</span>
-                .<span class="ident">clone</span>()
-                .<span class="ident">into_iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">key</span>, <span class="ident">cell_names</span>)<span class="op">|</span> {
-                    (<span class="ident">key</span>, <span class="ident">GraphColoring::from</span>(<span class="ident">cell_names</span>.<span class="ident">into_iter</span>()))
+        <span class="comment">// Maps cell type to conflict graph (will be used to perform coloring)
+        </span><span class="kw">let </span><span class="kw-2">mut </span>graphs_by_type: HashMap&lt;ir::CellType, GraphColoring&lt;ir::Id&gt;&gt; =
+            cells_by_type
+                .clone()
+                .into_iter()
+                .map(|(key, cell_names)| {
+                    (key, GraphColoring::from(cell_names.into_iter()))
                 })
-                .<span class="ident">collect</span>();
+                .collect();
 
-        <span class="comment">// We assume unique ids have already been computed by LiveRangeAnalysis</span>
+        <span class="comment">// We assume unique ids have already been computed by LiveRangeAnalysis
 
-        <span class="comment">// live_once_map maps celltypes to maps that map cells to control statements</span>
-        <span class="comment">// in which the cell was live for at least one group/invoke. Furthermore,</span>
-        <span class="comment">// only control statements that are direct children of par blocks</span>
-        <span class="comment">// are included in this map.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">live_once_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-        <span class="comment">// Maps every control statement that is a direct child of a par block to</span>
-        <span class="comment">// its parent par block. (maps id number to id number)</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">par_thread_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-        <span class="comment">// Maps celltype to map that maps cells to groups/invokes in which the cell is live.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">live_cell_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-        <span class="comment">// build live_once_map and par_thread_map</span>
-        <span class="self">self</span>.<span class="ident">live</span>.<span class="ident">get_live_control_data</span>(
-            <span class="kw-2">&amp;mut</span> <span class="ident">live_once_map</span>,
-            <span class="kw-2">&amp;mut</span> <span class="ident">par_thread_map</span>,
-            <span class="kw-2">&amp;mut</span> <span class="ident">live_cell_map</span>,
-            <span class="kw-2">&amp;</span><span class="ident">HashSet::new</span>(),
-            <span class="kw-2">&amp;</span><span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>(),
+        // live_once_map maps celltypes to maps that map cells to control statements
+        // in which the cell was live for at least one group/invoke. Furthermore,
+        // only control statements that are direct children of par blocks
+        // are included in this map.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>live_once_map = HashMap::new();
+        <span class="comment">// Maps every control statement that is a direct child of a par block to
+        // its parent par block. (maps id number to id number)
+        </span><span class="kw">let </span><span class="kw-2">mut </span>par_thread_map = HashMap::new();
+        <span class="comment">// Maps celltype to map that maps cells to groups/invokes in which the cell is live.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>live_cell_map = HashMap::new();
+        <span class="comment">// build live_once_map and par_thread_map
+        </span><span class="self">self</span>.live.get_live_control_data(
+            <span class="kw-2">&amp;mut </span>live_once_map,
+            <span class="kw-2">&amp;mut </span>par_thread_map,
+            <span class="kw-2">&amp;mut </span>live_cell_map,
+            <span class="kw-2">&amp;</span>HashSet::new(),
+            <span class="kw-2">&amp;</span>comp.control.borrow(),
         );
 
-        <span class="comment">// Adding the conflicts</span>
-        <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">cells</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">cells_by_type</span> {
-            <span class="comment">// Run remove_dead_cells before this cell-share pass.</span>
-            <span class="kw">let</span> <span class="ident">g</span> <span class="op">=</span> <span class="ident">graphs_by_type</span>.<span class="ident">get_mut</span>(<span class="ident">cell_type</span>).<span class="ident">unwrap</span>();
+        <span class="comment">// Adding the conflicts
+        </span><span class="kw">for </span>(cell_type, cells) <span class="kw">in </span><span class="kw-2">&amp;</span>cells_by_type {
+            <span class="comment">// Run remove_dead_cells before this cell-share pass.
+            </span><span class="kw">let </span>g = graphs_by_type.get_mut(cell_type).unwrap();
 
-            <span class="comment">// mapping from cell names to the enables/invokes in which it is live</span>
-            <span class="kw">let</span> <span class="ident">cell_to_nodes</span> <span class="op">=</span>
-                <span class="ident">live_cell_map</span>.<span class="ident">entry</span>(<span class="ident">cell_type</span>.<span class="ident">clone</span>()).<span class="ident">or_default</span>();
-            <span class="comment">// mapping of cell names to the control statements in which it is live</span>
-            <span class="comment">// at least once. Only control statements that are direct children of</span>
-            <span class="comment">// par blocks are included</span>
-            <span class="kw">let</span> <span class="ident">cell_to_control</span> <span class="op">=</span>
-                <span class="ident">live_once_map</span>.<span class="ident">entry</span>(<span class="ident">cell_type</span>.<span class="ident">clone</span>()).<span class="ident">or_default</span>();
-            <span class="kw">for</span> (<span class="ident">a</span>, <span class="ident">b</span>) <span class="kw">in</span> <span class="ident">cells</span>.<span class="ident">iter</span>().<span class="ident">tuple_combinations</span>() {
-                <span class="comment">// checking if live ranges overlap</span>
-                <span class="comment">// nodes (groups/invokes) in which a is live</span>
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">live_a</span>) <span class="op">=</span> <span class="ident">cell_to_nodes</span>.<span class="ident">get</span>(<span class="ident">a</span>) {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">live_b</span>) <span class="op">=</span> <span class="ident">cell_to_nodes</span>.<span class="ident">get</span>(<span class="ident">b</span>) {
-                        <span class="kw">if</span> <span class="op">!</span><span class="ident">live_a</span>.<span class="ident">is_disjoint</span>(<span class="ident">live_b</span>) {
-                            <span class="ident">g</span>.<span class="ident">insert_conflict</span>(<span class="ident">a</span>, <span class="ident">b</span>);
+            <span class="comment">// mapping from cell names to the enables/invokes in which it is live
+            </span><span class="kw">let </span>cell_to_nodes =
+                live_cell_map.entry(cell_type.clone()).or_default();
+            <span class="comment">// mapping of cell names to the control statements in which it is live
+            // at least once. Only control statements that are direct children of
+            // par blocks are included
+            </span><span class="kw">let </span>cell_to_control =
+                live_once_map.entry(cell_type.clone()).or_default();
+            <span class="kw">for </span>(a, b) <span class="kw">in </span>cells.iter().tuple_combinations() {
+                <span class="comment">// checking if live ranges overlap
+                // nodes (groups/invokes) in which a is live
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(live_a) = cell_to_nodes.get(a) {
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(live_b) = cell_to_nodes.get(b) {
+                        <span class="kw">if </span>!live_a.is_disjoint(live_b) {
+                            g.insert_conflict(a, b);
                             <span class="kw">continue</span>;
                         }
                     }
                 }
-                <span class="comment">// checking if b is live at any groups/invokes running in parallel</span>
-                <span class="comment">// to groups/invokes live at a</span>
-                <span class="comment">// get the children of pars in which a was alive &quot;at least once&quot;</span>
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">live_once_a</span>) <span class="op">=</span> <span class="ident">cell_to_control</span>.<span class="ident">get</span>(<span class="ident">a</span>) {
-                    <span class="comment">// get the children of pars in which b was alive &quot;at least once&quot;</span>
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">live_once_b</span>) <span class="op">=</span> <span class="ident">cell_to_control</span>.<span class="ident">get</span>(<span class="ident">b</span>) {
-                        <span class="lifetime">&#39;outer</span>: <span class="kw">for</span> <span class="ident">live_a</span> <span class="kw">in</span> <span class="ident">live_once_a</span> {
-                            <span class="kw">for</span> <span class="ident">live_b</span> <span class="kw">in</span> <span class="ident">live_once_b</span> {
-                                <span class="comment">// a and b are live within the same par block but not within</span>
-                                <span class="comment">// the same child thread, then insert conflict.</span>
-                                <span class="kw">if</span> <span class="ident">live_a</span> <span class="op">!</span><span class="op">=</span> <span class="ident">live_b</span>
-                                    <span class="op">&amp;&amp;</span> <span class="ident">par_thread_map</span>.<span class="ident">get</span>(<span class="ident">live_a</span>).<span class="ident">unwrap</span>()
-                                        <span class="op">==</span> <span class="ident">par_thread_map</span>.<span class="ident">get</span>(<span class="ident">live_b</span>).<span class="ident">unwrap</span>()
+                <span class="comment">// checking if b is live at any groups/invokes running in parallel
+                // to groups/invokes live at a
+                // get the children of pars in which a was alive &quot;at least once&quot;
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(live_once_a) = cell_to_control.get(a) {
+                    <span class="comment">// get the children of pars in which b was alive &quot;at least once&quot;
+                    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(live_once_b) = cell_to_control.get(b) {
+                        <span class="lifetime">&#39;outer</span>: <span class="kw">for </span>live_a <span class="kw">in </span>live_once_a {
+                            <span class="kw">for </span>live_b <span class="kw">in </span>live_once_b {
+                                <span class="comment">// a and b are live within the same par block but not within
+                                // the same child thread, then insert conflict.
+                                </span><span class="kw">if </span>live_a != live_b
+                                    &amp;&amp; par_thread_map.get(live_a).unwrap()
+                                        == par_thread_map.get(live_b).unwrap()
                                 {
-                                    <span class="ident">g</span>.<span class="ident">insert_conflict</span>(<span class="ident">a</span>, <span class="ident">b</span>);
-                                    <span class="kw">break</span> <span class="lifetime">&#39;outer</span>;
+                                    g.insert_conflict(a, b);
+                                    <span class="kw">break </span><span class="lifetime">&#39;outer</span>;
                                 }
                             }
                         }
@@ -895,68 +892,67 @@
             }
         }
 
-        <span class="comment">// perform graph coloring to rename the cells</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">coloring</span>: <span class="ident">ir::rewriter::CellRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">comp_share_freqs</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::CellType</span>, <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">i64</span>, <span class="ident">i64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">HashMap::new</span>();
-        <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="kw-2">mut</span> <span class="ident">graph</span>) <span class="kw">in</span> <span class="ident">graphs_by_type</span> {
-            <span class="comment">// getting bound, based on self.bounds and cell_type</span>
-            <span class="kw">let</span> <span class="ident">bound</span> <span class="op">=</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">name</span>) <span class="op">=</span> <span class="ident">cell_type</span>.<span class="ident">get_name</span>() {
-                    <span class="kw">let</span> <span class="ident">comb_bound</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bounds</span>.<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
-                    <span class="kw">let</span> <span class="ident">reg_bound</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bounds</span>.<span class="ident">get</span>(<span class="number">1</span>).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
-                    <span class="kw">let</span> <span class="ident">other_bound</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bounds</span>.<span class="ident">get</span>(<span class="number">2</span>).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
-                    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">shareable</span>.<span class="ident">contains</span>(<span class="ident">name</span>) {
-                        <span class="ident">comb_bound</span>
-                    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;std_reg&quot;</span> {
-                        <span class="ident">reg_bound</span>
-                    } <span class="kw">else</span> {
-                        <span class="ident">other_bound</span>
+        <span class="comment">// perform graph coloring to rename the cells
+        </span><span class="kw">let </span><span class="kw-2">mut </span>coloring: rewriter::RewriteMap&lt;ir::Cell&gt; = HashMap::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>comp_share_freqs: HashMap&lt;ir::CellType, HashMap&lt;i64, i64&gt;&gt; =
+            HashMap::new();
+        <span class="kw">for </span>(cell_type, <span class="kw-2">mut </span>graph) <span class="kw">in </span>graphs_by_type {
+            <span class="comment">// getting bound, based on self.bounds and cell_type
+            </span><span class="kw">let </span>bound = {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>name) = cell_type.get_name() {
+                    <span class="kw">let </span>comb_bound = <span class="self">self</span>.bounds.get(<span class="number">0</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
+                    <span class="kw">let </span>reg_bound = <span class="self">self</span>.bounds.get(<span class="number">1</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
+                    <span class="kw">let </span>other_bound = <span class="self">self</span>.bounds.get(<span class="number">2</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
+                    <span class="kw">if </span><span class="self">self</span>.shareable.contains(name) {
+                        comb_bound
+                    } <span class="kw">else if </span>name == <span class="string">&quot;std_reg&quot; </span>{
+                        reg_bound
+                    } <span class="kw">else </span>{
+                        other_bound
                     }
-                } <span class="kw">else</span> {
-                    <span class="kw-2">&amp;</span><span class="prelude-val">None</span>
-                }
+                } <span class="kw">else </span>{
+                    <span class="kw-2">&amp;</span><span class="prelude-val">None
+                </span>}
             };
-            <span class="kw">if</span> <span class="ident">graph</span>.<span class="ident">has_nodes</span>() {
-                <span class="ident">coloring</span>.<span class="ident">extend</span>(
-                    <span class="ident">graph</span>
-                        .<span class="ident">color_greedy</span>(<span class="kw-2">*</span><span class="ident">bound</span>)
-                        .<span class="ident">iter</span>()
-                        .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">a</span>, <span class="ident">b</span>)<span class="op">|</span> (<span class="kw-2">*</span><span class="ident">a</span>, <span class="ident">comp</span>.<span class="ident">find_cell</span>(<span class="kw-2">*</span><span class="ident">b</span>).<span class="ident">unwrap</span>())),
+            <span class="kw">if </span>graph.has_nodes() {
+                coloring.extend(
+                    graph
+                        .color_greedy(<span class="kw-2">*</span>bound)
+                        .iter()
+                        .map(|(a, b)| (<span class="kw-2">*</span>a, comp.find_cell(<span class="kw-2">*</span>b).unwrap())),
                 );
-                <span class="comment">// only generate share-freqs if we&#39;re going to use them.</span>
-                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">print_share_freqs</span>.<span class="ident">is_some</span>() {
-                    <span class="comment">// must accumulate sharing numbers for share_freqs</span>
-                    <span class="ident">comp_share_freqs</span>.<span class="ident">insert</span>(<span class="ident">cell_type</span>, <span class="ident">graph</span>.<span class="ident">get_share_freqs</span>());
+                <span class="comment">// only generate share-freqs if we&#39;re going to use them.
+                </span><span class="kw">if </span><span class="self">self</span>.print_share_freqs.is_some() {
+                    <span class="comment">// must accumulate sharing numbers for share_freqs
+                    </span>comp_share_freqs.insert(cell_type, graph.get_share_freqs());
                 }
             }
         }
 
-        <span class="comment">// add the sharing freqs for the component we just analyzed</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">print_share_freqs</span>.<span class="ident">is_some</span>() {
-            <span class="comment">// must accumulate sharing numbers for share_freqs</span>
-            <span class="self">self</span>.<span class="ident">share_freqs</span>.<span class="ident">insert</span>(<span class="ident">comp</span>.<span class="ident">name</span>, <span class="ident">comp_share_freqs</span>);
-            <span class="comment">// print share freqs json if self.print_share_freqs is not none</span>
-            <span class="self">self</span>.<span class="ident">print_share_json</span>();
+        <span class="comment">// add the sharing freqs for the component we just analyzed
+        </span><span class="kw">if </span><span class="self">self</span>.print_share_freqs.is_some() {
+            <span class="comment">// must accumulate sharing numbers for share_freqs
+            </span><span class="self">self</span>.share_freqs.insert(comp.name, comp_share_freqs);
+            <span class="comment">// print share freqs json if self.print_share_freqs is not none
+            </span><span class="self">self</span>.print_share_json();
         }
 
-        <span class="comment">// Rewrite assignments using the coloring generated.</span>
-        <span class="kw">let</span> <span class="ident">empty_map</span>: <span class="ident">ir::rewriter::PortRewriteMap</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-        <span class="kw">let</span> <span class="ident">rewriter</span> <span class="op">=</span> <span class="ident">ir::Rewriter::new</span>(<span class="kw-2">&amp;</span><span class="ident">coloring</span>, <span class="kw-2">&amp;</span><span class="ident">empty_map</span>);
-        <span class="ident">comp</span>.<span class="ident">for_each_assignment</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
-            <span class="ident">assign</span>.<span class="ident">for_each_port</span>(<span class="op">|</span><span class="ident">port</span><span class="op">|</span> <span class="ident">rewriter</span>.<span class="ident">get</span>(<span class="ident">port</span>));
+        <span class="comment">// Rewrite assignments using the coloring generated.
+        </span><span class="kw">let </span>empty_map: ir::rewriter::PortRewriteMap = HashMap::new();
+        <span class="kw">let </span>rewriter = ir::Rewriter::new(<span class="kw-2">&amp;</span>coloring, <span class="kw-2">&amp;</span>empty_map);
+        comp.for_each_assignment(|assign| {
+            assign.for_each_port(|port| rewriter.get(port));
         });
 
-        <span class="comment">// Rewrite control uses of ports</span>
-        <span class="ident">rewriter</span>.<span class="ident">rewrite_control</span>(
-            <span class="kw-2">&amp;mut</span> <span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow_mut</span>(),
-            <span class="kw-2">&amp;</span><span class="ident">HashMap::new</span>(),
-            <span class="kw-2">&amp;</span><span class="ident">HashMap::new</span>(),
+        <span class="comment">// Rewrite control uses of ports
+        </span>rewriter.rewrite_control(
+            <span class="kw-2">&amp;mut </span>comp.control.borrow_mut(),
+            <span class="kw-2">&amp;</span>HashMap::new(),
+            <span class="kw-2">&amp;</span>HashMap::new(),
         );
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Stop</span>)
+        <span class="prelude-val">Ok</span>(Action::Stop)
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

@@ -1,107 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/passes/group_to_seq.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>group_to_seq.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/passes/group_to_seq.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>group_to_seq.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -363,366 +358,365 @@
 <span id="358">358</span>
 <span id="359">359</span>
 <span id="360">360</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis::ReadWriteSet</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">CloneName</span>};
-<span class="kw">use</span> <span class="ident">std::cell::RefMut</span>;
-<span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ReadWriteSet;
+<span class="kw">use </span><span class="kw">crate</span>::ir::traversal::{Action, Named, VisResult, Visitor};
+<span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, CloneName};
+<span class="kw">use </span>std::cell::RefMut;
+<span class="kw">use </span>std::collections::BTreeMap;
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="doccomment">/// Transforms a group into a seq of 2 smaller groups, if possible.</span>
-<span class="doccomment">/// Currently, in order for a group to be transformed must</span>
-<span class="doccomment">/// 1) Group must write to exactly 2 cells -- let&#39;s call them cell1 and cell2</span>
-<span class="doccomment">/// 2) cell1 and cell2 must be either non-combinational primitives or components</span>
-<span class="doccomment">/// 3) Must have group[done] = cell2.done and cell2.go = cell1.done;</span>
-<span class="doccomment">/// 4) All reads of cell1 must be a stable port or cell1.done.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GroupToSeq</span> {
-    <span class="doccomment">///Maps names of group to the sequences that will replace them</span>
-    <span class="ident">group_seq_map</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">ir::Control</span><span class="op">&gt;</span>,
+<span class="attribute">#[derive(Default)]
+</span><span class="doccomment">/// Transforms a group into a seq of 2 smaller groups, if possible.
+/// Currently, in order for a group to be transformed must
+/// 1) Group must write to exactly 2 cells -- let&#39;s call them cell1 and cell2
+/// 2) cell1 and cell2 must be either non-combinational primitives or components
+/// 3) Must have group[done] = cell2.done and cell2.go = cell1.done;
+/// 4) All reads of cell1 must be a stable port or cell1.done.
+</span><span class="kw">pub struct </span>GroupToSeq {
+    <span class="doccomment">///Maps names of group to the sequences that will replace them
+    </span>group_seq_map: BTreeMap&lt;ir::Id, ir::Control&gt;,
 }
 
-<span class="kw">impl</span> <span class="ident">Named</span> <span class="kw">for</span> <span class="ident">GroupToSeq</span> {
-    <span class="kw">fn</span> <span class="ident">name</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="string">&quot;group2seq&quot;</span>
-    }
+<span class="kw">impl </span>Named <span class="kw">for </span>GroupToSeq {
+    <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;group2seq&quot;
+    </span>}
 
-    <span class="kw">fn</span> <span class="ident">description</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="string">&quot;split groups under correct conditions&quot;</span>
-    }
+    <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;split groups under correct conditions&quot;
+    </span>}
 }
 
-<span class="kw">impl</span> <span class="ident">Visitor</span> <span class="kw">for</span> <span class="ident">GroupToSeq</span> {
-    <span class="kw">fn</span> <span class="ident">start</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">sigs</span>: <span class="kw-2">&amp;</span><span class="ident">ir::LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">let</span> <span class="ident">groups</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">drain</span>().<span class="ident">collect</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ir::Builder::new</span>(<span class="ident">comp</span>, <span class="ident">sigs</span>);
-        <span class="kw">for</span> <span class="ident">g</span> <span class="kw">in</span> <span class="ident">groups</span>.<span class="ident">iter</span>() {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">group1</span>, <span class="ident">group2</span>)) <span class="op">=</span>
-                <span class="ident">SplitAnalysis::get_split</span>(<span class="ident">g</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>)
+<span class="kw">impl </span>Visitor <span class="kw">for </span>GroupToSeq {
+    <span class="kw">fn </span>start(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">let </span>groups: Vec&lt;ir::RRC&lt;ir::Group&gt;&gt; = comp.groups.drain().collect();
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+        <span class="kw">for </span>g <span class="kw">in </span>groups.iter() {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>((group1, group2)) =
+                SplitAnalysis::get_split(g, <span class="kw-2">&amp;mut </span>builder)
             {
-                <span class="kw">let</span> <span class="ident">seq</span> <span class="op">=</span> <span class="ident">ir::Control::seq</span>(<span class="macro">vec!</span>[
-                    <span class="ident">ir::Control::enable</span>(<span class="ident">group1</span>),
-                    <span class="ident">ir::Control::enable</span>(<span class="ident">group2</span>),
+                <span class="kw">let </span>seq = ir::Control::seq(<span class="macro">vec!</span>[
+                    ir::Control::enable(group1),
+                    ir::Control::enable(group2),
                 ]);
-                <span class="self">self</span>.<span class="ident">group_seq_map</span>.<span class="ident">insert</span>(<span class="ident">g</span>.<span class="ident">clone_name</span>(), <span class="ident">seq</span>);
+                <span class="self">self</span>.group_seq_map.insert(g.clone_name(), seq);
             }
         }
 
-        <span class="comment">// Add back the groups we drained at the beginning of this method, but</span>
-        <span class="comment">// filter out the empty groups that were split into smaller groups</span>
-        <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">append</span>(
-            <span class="ident">groups</span>
-                .<span class="ident">into_iter</span>()
-                .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">group</span><span class="op">|</span> <span class="op">!</span><span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">assignments</span>.<span class="ident">is_empty</span>()),
+        <span class="comment">// Add back the groups we drained at the beginning of this method, but
+        // filter out the empty groups that were split into smaller groups
+        </span>comp.groups.append(
+            groups
+                .into_iter()
+                .filter(|group| !group.borrow().assignments.is_empty()),
         );
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
-    <span class="kw">fn</span> <span class="ident">enable</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">s</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Enable</span>,
-        <span class="ident">_comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">ir::LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">let</span> <span class="ident">group_name</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">clone_name</span>();
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">group_seq_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">group_name</span>) {
-            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>),
-            <span class="prelude-val">Some</span>(<span class="ident">seq</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Action::Change</span>(<span class="ident">Box::new</span>(<span class="ident">ir::Control::clone</span>(<span class="ident">seq</span>)))),
+    <span class="kw">fn </span>enable(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::Enable,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">let </span>group_name = s.group.borrow().clone_name();
+        <span class="kw">match </span><span class="self">self</span>.group_seq_map.get(<span class="kw-2">&amp;</span>group_name) {
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(Action::Continue),
+            <span class="prelude-val">Some</span>(seq) =&gt; <span class="prelude-val">Ok</span>(Action::Change(Box::new(ir::Control::clone(seq)))),
         }
     }
 }
 
-<span class="comment">// For all port reads from name in assignment, returns whether all ports are either stable</span>
-<span class="comment">// or done.</span>
-<span class="kw">fn</span> <span class="ident">if_name_stable_or_done</span>(<span class="ident">assign</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Assignment</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="ident">bool</span> {
-    <span class="kw">let</span> <span class="ident">reads</span> <span class="op">=</span> <span class="ident">ReadWriteSet::port_reads</span>(<span class="ident">assign</span>);
-    <span class="ident">reads</span>
-        .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">port_ref</span><span class="op">|</span> <span class="ident">port_ref</span>.<span class="ident">borrow</span>().<span class="ident">get_parent_name</span>() <span class="op">==</span> <span class="ident">name</span>)
-        .<span class="ident">all</span>(<span class="op">|</span><span class="ident">port_ref</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">atts</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port_ref</span>.<span class="ident">borrow</span>().<span class="ident">attributes</span>;
-            <span class="ident">atts</span>.<span class="ident">has</span>(<span class="string">&quot;stable&quot;</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">atts</span>.<span class="ident">has</span>(<span class="string">&quot;done&quot;</span>)
+<span class="comment">// For all port reads from name in assignment, returns whether all ports are either stable
+// or done.
+</span><span class="kw">fn </span>if_name_stable_or_done(assign: <span class="kw-2">&amp;</span>ir::Assignment, name: <span class="kw-2">&amp;</span>ir::Id) -&gt; bool {
+    <span class="kw">let </span>reads = ReadWriteSet::port_reads(assign);
+    reads
+        .filter(|port_ref| port_ref.borrow().get_parent_name() == name)
+        .all(|port_ref| {
+            <span class="kw">let </span>atts = <span class="kw-2">&amp;</span>port_ref.borrow().attributes;
+            atts.has(<span class="string">&quot;stable&quot;</span>) || atts.has(<span class="string">&quot;done&quot;</span>)
         })
 }
 
-<span class="comment">// Returns true if the cell is a component or a non-combinational primitive</span>
-<span class="kw">fn</span> <span class="ident">comp_or_non_comb</span>(<span class="ident">cell</span>: <span class="kw-2">&amp;</span><span class="ident">ir::RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
-    <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span> {
-        <span class="ident">ir::CellType::Primitive</span> { <span class="ident">is_comb</span>, .. } =&gt; <span class="op">!</span><span class="kw-2">*</span><span class="ident">is_comb</span>,
-        <span class="ident">ir::CellType::Component</span> { .. } =&gt; <span class="bool-val">true</span>,
-        <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
+<span class="comment">// Returns true if the cell is a component or a non-combinational primitive
+</span><span class="kw">fn </span>comp_or_non_comb(cell: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::Cell&gt;) -&gt; bool {
+    <span class="kw">match </span><span class="kw-2">&amp;</span>cell.borrow().prototype {
+        ir::CellType::Primitive { is_comb, .. } =&gt; !<span class="kw-2">*</span>is_comb,
+        ir::CellType::Component { .. } =&gt; <span class="bool-val">true</span>,
+        <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
     }
 }
 
-<span class="comment">//If asmt is a write to a cell named name returns Some(name).</span>
-<span class="comment">//If asmt is a write to a group port, returns None.</span>
-<span class="kw">fn</span> <span class="ident">writes_to_cell</span>(<span class="ident">asmt</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Assignment</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
-    <span class="ident">ReadWriteSet::write_set</span>(<span class="ident">std::iter::once</span>(<span class="ident">asmt</span>))
-        .<span class="ident">next</span>()
-        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">cell</span>.<span class="ident">clone_name</span>())
+<span class="comment">//If asmt is a write to a cell named name returns Some(name).
+//If asmt is a write to a group port, returns None.
+</span><span class="kw">fn </span>writes_to_cell(asmt: <span class="kw-2">&amp;</span>ir::Assignment) -&gt; <span class="prelude-ty">Option</span>&lt;ir::Id&gt; {
+    ReadWriteSet::write_set(std::iter::once(asmt))
+        .next()
+        .map(|cell| cell.clone_name())
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="doccomment">///Primarily used to help determine the order cells are executed within</span>
-<span class="doccomment">///the group, and if possible, to transform a group into a seq of two smaller groups</span>
-<span class="kw">struct</span> <span class="ident">SplitAnalysis</span> {
-    <span class="doccomment">/// Holds the go-done assignment, i.e. a.go = b.done</span>
-    <span class="ident">go_done_asmt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span>,
+<span class="attribute">#[derive(Default)]
+</span><span class="doccomment">///Primarily used to help determine the order cells are executed within
+///the group, and if possible, to transform a group into a seq of two smaller groups
+</span><span class="kw">struct </span>SplitAnalysis {
+    <span class="doccomment">/// Holds the go-done assignment, i.e. a.go = b.done
+    </span>go_done_asmt: <span class="prelude-ty">Option</span>&lt;ir::Assignment&gt;,
 
-    <span class="doccomment">/// Holds the first &quot;go&quot; assignment, *if* it is in the form a.go = !a.done ? 1&#39;d1</span>
-    <span class="ident">first_go_asmt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Holds the first &quot;go&quot; assignment, *if* it is in the form a.go = !a.done ? 1&#39;d1
+    </span>first_go_asmt: <span class="prelude-ty">Option</span>&lt;ir::Assignment&gt;,
 
-    <span class="doccomment">/// Holds the group[done] = done assignment;</span>
-    <span class="ident">group_done_asmt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Holds the group[done] = done assignment;
+    </span>group_done_asmt: <span class="prelude-ty">Option</span>&lt;ir::Assignment&gt;,
 
-    <span class="doccomment">/// Assignments that write to first cell, unless the assignment is already accounted by a different field</span>
-    <span class="ident">fst_asmts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Assignments that write to first cell, unless the assignment is already accounted by a different field
+    </span>fst_asmts: Vec&lt;ir::Assignment&gt;,
 
-    <span class="doccomment">/// Assignments that write to second cell, unless the assignment is already accounted by a different field</span>
-    <span class="ident">snd_asmts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Assignments that write to second cell, unless the assignment is already accounted by a different field
+    </span>snd_asmts: Vec&lt;ir::Assignment&gt;,
 }
 
-<span class="kw">impl</span> <span class="ident">SplitAnalysis</span> {
-    <span class="doccomment">/// Based on assigns, returns Ok(group1, group2), where (group1,group2) are</span>
-    <span class="doccomment">/// the groups that can be made by splitting assigns. If it is not possible to split</span>
-    <span class="doccomment">/// assigns into two groups, then just regurn Err(assigns).</span>
-    <span class="doccomment">/// Criteria for being able to split assigns into two groups (this criteria</span>
-    <span class="doccomment">/// is already specified in group2seq&#39;s description as well):</span>
-    <span class="doccomment">/// 1) Group must write to exactly 2 cells -- let&#39;s call them cell1 and cell2</span>
-    <span class="doccomment">/// 2) cell1 and cell2 must be either non-combinational primitives or components</span>
-    <span class="doccomment">/// 3) Must have group[done] = cell2.done and cell2.go = cell1.done;</span>
-    <span class="doccomment">/// 4) All reads of cell1 must be a stable port or cell1.done.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_split</span>(
-        <span class="ident">group_ref</span>: <span class="kw-2">&amp;</span><span class="ident">ir::RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span>,
-        <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Builder</span>,
-    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ir::RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span>, <span class="ident">ir::RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">group_ref</span>.<span class="ident">borrow_mut</span>();
-        <span class="kw">let</span> <span class="ident">group_name</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">clone_name</span>();
-        <span class="kw">let</span> <span class="ident">signal_on</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_constant</span>(<span class="number">1</span>, <span class="number">1</span>);
+<span class="kw">impl </span>SplitAnalysis {
+    <span class="doccomment">/// Based on assigns, returns Ok(group1, group2), where (group1,group2) are
+    /// the groups that can be made by splitting assigns. If it is not possible to split
+    /// assigns into two groups, then just regurn Err(assigns).
+    /// Criteria for being able to split assigns into two groups (this criteria
+    /// is already specified in group2seq&#39;s description as well):
+    /// 1) Group must write to exactly 2 cells -- let&#39;s call them cell1 and cell2
+    /// 2) cell1 and cell2 must be either non-combinational primitives or components
+    /// 3) Must have group[done] = cell2.done and cell2.go = cell1.done;
+    /// 4) All reads of cell1 must be a stable port or cell1.done.
+    </span><span class="kw">pub fn </span>get_split(
+        group_ref: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::Group&gt;,
+        builder: <span class="kw-2">&amp;mut </span>ir::Builder,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;(ir::RRC&lt;ir::Group&gt;, ir::RRC&lt;ir::Group&gt;)&gt; {
+        <span class="kw">let </span>group = group_ref.borrow_mut();
+        <span class="kw">let </span>group_name = group.clone_name();
+        <span class="kw">let </span>signal_on = builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
 
-        <span class="comment">// Builds ordering. If it cannot build a valid linear ordering of length 2,</span>
-        <span class="comment">// then returns None, and we stop.</span>
-        <span class="kw">let</span> (<span class="ident">first</span>, <span class="ident">second</span>) <span class="op">=</span>
-            <span class="ident">SplitAnalysis::possible_split</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">assignments</span>)<span class="question-mark">?</span>;
+        <span class="comment">// Builds ordering. If it cannot build a valid linear ordering of length 2,
+        // then returns None, and we stop.
+        </span><span class="kw">let </span>(first, second) =
+            SplitAnalysis::possible_split(<span class="kw-2">&amp;</span>group.assignments)<span class="question-mark">?</span>;
 
-        <span class="comment">// Sets the first_go_asmt, fst_asmts, snd_asmts group_done_asmt, go_done_asmt</span>
-        <span class="comment">// fields for split_analysis</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">split_analysis</span> <span class="op">=</span> <span class="ident">SplitAnalysis::default</span>();
-        <span class="ident">split_analysis</span>.<span class="ident">organize_assignments</span>(<span class="ident">group</span>, <span class="kw-2">&amp;</span><span class="ident">first</span>, <span class="kw-2">&amp;</span><span class="ident">second</span>);
+        <span class="comment">// Sets the first_go_asmt, fst_asmts, snd_asmts group_done_asmt, go_done_asmt
+        // fields for split_analysis
+        </span><span class="kw">let </span><span class="kw-2">mut </span>split_analysis = SplitAnalysis::default();
+        split_analysis.organize_assignments(group, <span class="kw-2">&amp;</span>first, <span class="kw-2">&amp;</span>second);
 
-        <span class="comment">// If there is assignment in the form first.go = !first.done ? 1&#39;d1,</span>
-        <span class="comment">// turn this into first.go = 1&#39;d1.</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">go_asmt</span>) <span class="op">=</span> <span class="ident">split_analysis</span>.<span class="ident">first_go_asmt</span> {
-            <span class="kw">let</span> <span class="ident">new_go_asmt</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build_assignment</span>(
-                <span class="ident">go_asmt</span>.<span class="ident">dst</span>,
-                <span class="ident">signal_on</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="string">&quot;out&quot;</span>),
-                <span class="ident">ir::Guard::True</span>,
+        <span class="comment">// If there is assignment in the form first.go = !first.done ? 1&#39;d1,
+        // turn this into first.go = 1&#39;d1.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(go_asmt) = split_analysis.first_go_asmt {
+            <span class="kw">let </span>new_go_asmt = builder.build_assignment(
+                go_asmt.dst,
+                signal_on.borrow().get(<span class="string">&quot;out&quot;</span>),
+                ir::Guard::True,
             );
-            <span class="ident">split_analysis</span>.<span class="ident">fst_asmts</span>.<span class="ident">push</span>(<span class="ident">new_go_asmt</span>);
+            split_analysis.fst_asmts.push(new_go_asmt);
         }
 
-        <span class="kw">let</span> <span class="ident">go_done</span> <span class="op">=</span> <span class="ident">split_analysis</span>.<span class="ident">go_done_asmt</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="macro">unreachable!</span>(<span class="string">&quot;couldn&#39;t find a go-done assignment in {}&quot;</span>, <span class="ident">group_name</span>)
+        <span class="kw">let </span>go_done = split_analysis.go_done_asmt.unwrap_or_else(|| {
+            <span class="macro">unreachable!</span>(<span class="string">&quot;couldn&#39;t find a go-done assignment in {}&quot;</span>, group_name)
         });
 
-        <span class="kw">let</span> <span class="ident">first_group</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::make_group</span>(
-            <span class="ident">go_done</span>.<span class="ident">src</span>,
-            <span class="ident">ir::Guard::True</span>,
-            <span class="ident">split_analysis</span>.<span class="ident">fst_asmts</span>,
-            <span class="ident">builder</span>,
-            <span class="macro">format!</span>(<span class="string">&quot;beg_spl_{}&quot;</span>, <span class="ident">group_name</span>.<span class="ident">id</span>),
+        <span class="kw">let </span>first_group = <span class="self">Self</span>::make_group(
+            go_done.src,
+            ir::Guard::True,
+            split_analysis.fst_asmts,
+            builder,
+            <span class="macro">format!</span>(<span class="string">&quot;beg_spl_{}&quot;</span>, group_name.id),
         );
 
-        <span class="comment">// Pushing second.go = 1&#39;d1 onto snd_asmts</span>
-        <span class="kw">let</span> <span class="ident">cell_go</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build_assignment</span>(
-            <span class="ident">go_done</span>.<span class="ident">dst</span>,
-            <span class="ident">signal_on</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="string">&quot;out&quot;</span>),
-            <span class="ident">ir::Guard::True</span>,
+        <span class="comment">// Pushing second.go = 1&#39;d1 onto snd_asmts
+        </span><span class="kw">let </span>cell_go = builder.build_assignment(
+            go_done.dst,
+            signal_on.borrow().get(<span class="string">&quot;out&quot;</span>),
+            ir::Guard::True,
         );
-        <span class="ident">split_analysis</span>.<span class="ident">snd_asmts</span>.<span class="ident">push</span>(<span class="ident">cell_go</span>);
+        split_analysis.snd_asmts.push(cell_go);
 
-        <span class="kw">let</span> <span class="ident">group_done</span> <span class="op">=</span> <span class="ident">split_analysis</span>.<span class="ident">group_done_asmt</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+        <span class="kw">let </span>group_done = split_analysis.group_done_asmt.unwrap_or_else(|| {
             <span class="macro">unreachable!</span>(
                 <span class="string">&quot;Couldn&#39;t find a group[done] = _.done assignment in {}&quot;</span>,
-                <span class="ident">group_name</span>
+                group_name
             )
         });
 
-        <span class="kw">let</span> <span class="ident">second_group</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::make_group</span>(
-            <span class="ident">group_done</span>.<span class="ident">src</span>,
-            <span class="kw-2">*</span><span class="ident">group_done</span>.<span class="ident">guard</span>,
-            <span class="ident">split_analysis</span>.<span class="ident">snd_asmts</span>,
-            <span class="ident">builder</span>,
-            <span class="macro">format!</span>(<span class="string">&quot;end_spl_{}&quot;</span>, <span class="ident">group_name</span>.<span class="ident">id</span>),
+        <span class="kw">let </span>second_group = <span class="self">Self</span>::make_group(
+            group_done.src,
+            <span class="kw-2">*</span>group_done.guard,
+            split_analysis.snd_asmts,
+            builder,
+            <span class="macro">format!</span>(<span class="string">&quot;end_spl_{}&quot;</span>, group_name.id),
         );
 
-        <span class="prelude-val">Some</span>((<span class="ident">first_group</span>, <span class="ident">second_group</span>))
+        <span class="prelude-val">Some</span>((first_group, second_group))
     }
 
-    <span class="comment">// Goes through assignments, and properly fills in the fields go_done_asmt,</span>
-    <span class="comment">// first_go_asmt, fst_asmts, snd_asmts, and group_done_asmt.</span>
-    <span class="kw">fn</span> <span class="ident">organize_assignments</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="kw-2">mut</span> <span class="ident">group</span>: <span class="ident">RefMut</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span>,
-        <span class="ident">first_cell_name</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>,
-        <span class="ident">second_cell_name</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>,
+    <span class="comment">// Goes through assignments, and properly fills in the fields go_done_asmt,
+    // first_go_asmt, fst_asmts, snd_asmts, and group_done_asmt.
+    </span><span class="kw">fn </span>organize_assignments(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        <span class="kw-2">mut </span>group: RefMut&lt;ir::Group&gt;,
+        first_cell_name: <span class="kw-2">&amp;</span>ir::Id,
+        second_cell_name: <span class="kw-2">&amp;</span>ir::Id,
     ) {
-        <span class="kw">for</span> <span class="ident">asmt</span> <span class="kw">in</span> <span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">drain</span>(..) {
-            <span class="kw">match</span> <span class="ident">writes_to_cell</span>(<span class="kw-2">&amp;</span><span class="ident">asmt</span>) {
-                <span class="prelude-val">Some</span>(<span class="ident">cell_name</span>) =&gt; {
-                    <span class="kw">if</span> <span class="ident"><span class="self">Self</span>::is_go_done</span>(<span class="kw-2">&amp;</span><span class="ident">asmt</span>) {
-                        <span class="self">self</span>.<span class="ident">go_done_asmt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">asmt</span>);
-                    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident"><span class="self">Self</span>::is_specific_go</span>(<span class="kw-2">&amp;</span><span class="ident">asmt</span>, <span class="ident">first_cell_name</span>) {
-                        <span class="self">self</span>.<span class="ident">first_go_asmt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">asmt</span>);
-                    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">cell_name</span> <span class="op">==</span> <span class="ident">first_cell_name</span> {
-                        <span class="self">self</span>.<span class="ident">fst_asmts</span>.<span class="ident">push</span>(<span class="ident">asmt</span>);
-                    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">cell_name</span> <span class="op">==</span> <span class="ident">second_cell_name</span> {
-                        <span class="self">self</span>.<span class="ident">snd_asmts</span>.<span class="ident">push</span>(<span class="ident">asmt</span>);
-                    } <span class="kw">else</span> {
+        <span class="kw">for </span>asmt <span class="kw">in </span>group.assignments.drain(..) {
+            <span class="kw">match </span>writes_to_cell(<span class="kw-2">&amp;</span>asmt) {
+                <span class="prelude-val">Some</span>(cell_name) =&gt; {
+                    <span class="kw">if </span><span class="self">Self</span>::is_go_done(<span class="kw-2">&amp;</span>asmt) {
+                        <span class="self">self</span>.go_done_asmt = <span class="prelude-val">Some</span>(asmt);
+                    } <span class="kw">else if </span><span class="self">Self</span>::is_specific_go(<span class="kw-2">&amp;</span>asmt, first_cell_name) {
+                        <span class="self">self</span>.first_go_asmt = <span class="prelude-val">Some</span>(asmt);
+                    } <span class="kw">else if </span>cell_name == first_cell_name {
+                        <span class="self">self</span>.fst_asmts.push(asmt);
+                    } <span class="kw">else if </span>cell_name == second_cell_name {
+                        <span class="self">self</span>.snd_asmts.push(asmt);
+                    } <span class="kw">else </span>{
                         <span class="macro">unreachable!</span>(
-                            <span class="string">&quot;Does not write to one of the two \&quot;stateful\&quot; cells&quot;</span>
-                            )
+                            <span class="string">&quot;Does not write to one of the two \&quot;stateful\&quot; cells&quot;
+                            </span>)
                     }
                 }
-                <span class="prelude-val">None</span> =&gt; <span class="self">self</span>.<span class="ident">group_done_asmt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">asmt</span>),
+                <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.group_done_asmt = <span class="prelude-val">Some</span>(asmt),
             }
         }
     }
 
-    <span class="comment">// Builds ordering for self. If there is a possible ordering of asmts that</span>
-    <span class="comment">// satisfy group2seq&#39;s criteria, then return the ordering in the form of</span>
-    <span class="comment">// Some(cell1, cell2). Otherwise return None.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">possible_split</span>(
-        <span class="ident">asmts</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Assignment</span>],
-    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">ReadWriteSet::write_set</span>(<span class="ident">asmts</span>.<span class="ident">iter</span>())
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">cell</span>.<span class="ident">clone_name</span>())
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+    <span class="comment">// Builds ordering for self. If there is a possible ordering of asmts that
+    // satisfy group2seq&#39;s criteria, then return the ordering in the form of
+    // Some(cell1, cell2). Otherwise return None.
+    </span><span class="kw">pub fn </span>possible_split(
+        asmts: <span class="kw-2">&amp;</span>[ir::Assignment],
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;(ir::Id, ir::Id)&gt; {
+        <span class="kw">let </span>v = ReadWriteSet::write_set(asmts.iter())
+            .map(|cell| cell.clone_name())
+            .collect::&lt;Vec&lt;ir::Id&gt;&gt;();
 
-        <span class="kw">if</span> <span class="ident">v</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">2</span> {
-            <span class="kw">let</span> (<span class="ident">maybe_first</span>, <span class="ident">maybe_last</span>, <span class="ident">last</span>) <span class="op">=</span>
-                <span class="ident"><span class="self">Self</span>::look_for_assigns</span>(<span class="ident">asmts</span>)<span class="question-mark">?</span>;
-            <span class="kw">if</span> <span class="ident">maybe_last</span> <span class="op">==</span> <span class="ident">last</span>
-                <span class="comment">// making sure maybe_first and maybe_last are the only 2 cells written to</span>
-                <span class="op">&amp;&amp;</span> <span class="ident">v</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">maybe_first</span>)
-                <span class="op">&amp;&amp;</span> <span class="ident">v</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">maybe_last</span>)
-                <span class="comment">// making sure that all reads of the first cell are from stable ports</span>
-                <span class="op">&amp;&amp;</span> <span class="ident">asmts</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
-                    <span class="ident">if_name_stable_or_done</span>(<span class="ident">assign</span>, <span class="kw-2">&amp;</span><span class="ident">maybe_first</span>)
+        <span class="kw">if </span>v.len() == <span class="number">2 </span>{
+            <span class="kw">let </span>(maybe_first, maybe_last, last) =
+                <span class="self">Self</span>::look_for_assigns(asmts)<span class="question-mark">?</span>;
+            <span class="kw">if </span>maybe_last == last
+                <span class="comment">// making sure maybe_first and maybe_last are the only 2 cells written to
+                </span>&amp;&amp; v.contains(<span class="kw-2">&amp;</span>maybe_first)
+                &amp;&amp; v.contains(<span class="kw-2">&amp;</span>maybe_last)
+                <span class="comment">// making sure that all reads of the first cell are from stable ports
+                </span>&amp;&amp; asmts.iter().all(|assign| {
+                    if_name_stable_or_done(assign, <span class="kw-2">&amp;</span>maybe_first)
                 })
             {
-                <span class="kw">return</span> <span class="prelude-val">Some</span>((<span class="ident">maybe_first</span>, <span class="ident">maybe_last</span>));
+                <span class="kw">return </span><span class="prelude-val">Some</span>((maybe_first, maybe_last));
             }
         }
-        <span class="prelude-val">None</span>
-    }
+        <span class="prelude-val">None
+    </span>}
 
-    <span class="comment">// Searches thru asmts for an a.go = b.done, or a group[done] = c.done assignment.</span>
-    <span class="comment">// If we can find examples of such assignments, returns Some(b,a,c).</span>
-    <span class="comment">// Otherwise returns None.</span>
-    <span class="kw">fn</span> <span class="ident">look_for_assigns</span>(
-        <span class="ident">asmts</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Assignment</span>],
-    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">done_go</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">last</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-        <span class="kw">for</span> <span class="ident">asmt</span> <span class="kw">in</span> <span class="ident">asmts</span> {
-            <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">asmt</span>.<span class="ident">src</span>.<span class="ident">borrow</span>();
-            <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">asmt</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>();
-            <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">parent</span>, <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">parent</span>) {
+    <span class="comment">// Searches thru asmts for an a.go = b.done, or a group[done] = c.done assignment.
+    // If we can find examples of such assignments, returns Some(b,a,c).
+    // Otherwise returns None.
+    </span><span class="kw">fn </span>look_for_assigns(
+        asmts: <span class="kw-2">&amp;</span>[ir::Assignment],
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;(ir::Id, ir::Id, ir::Id)&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>done_go: <span class="prelude-ty">Option</span>&lt;(ir::Id, ir::Id)&gt; = <span class="prelude-val">None</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>last: <span class="prelude-ty">Option</span>&lt;ir::Id&gt; = <span class="prelude-val">None</span>;
+        <span class="kw">for </span>asmt <span class="kw">in </span>asmts {
+            <span class="kw">let </span>src = asmt.src.borrow();
+            <span class="kw">let </span>dst = asmt.dst.borrow();
+            <span class="kw">match </span>(<span class="kw-2">&amp;</span>src.parent, <span class="kw-2">&amp;</span>dst.parent) {
                 (
-                    <span class="ident">ir::PortParent::Cell</span>(<span class="ident">src_cell</span>),
-                    <span class="ident">ir::PortParent::Cell</span>(<span class="ident">dst_cell</span>),
+                    ir::PortParent::Cell(src_cell),
+                    ir::PortParent::Cell(dst_cell),
                 ) =&gt; {
-                    <span class="comment">// a.go = b.done case</span>
-                    <span class="kw">if</span> <span class="ident">src</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;done&quot;</span>)
-                        <span class="op">&amp;&amp;</span> <span class="ident">dst</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;go&quot;</span>)
-                        <span class="op">&amp;&amp;</span> <span class="ident">comp_or_non_comb</span>(<span class="kw-2">&amp;</span><span class="ident">src_cell</span>.<span class="ident">upgrade</span>())
-                        <span class="op">&amp;&amp;</span> <span class="ident">comp_or_non_comb</span>(<span class="kw-2">&amp;</span><span class="ident">dst_cell</span>.<span class="ident">upgrade</span>())
+                    <span class="comment">// a.go = b.done case
+                    </span><span class="kw">if </span>src.attributes.has(<span class="string">&quot;done&quot;</span>)
+                        &amp;&amp; dst.attributes.has(<span class="string">&quot;go&quot;</span>)
+                        &amp;&amp; comp_or_non_comb(<span class="kw-2">&amp;</span>src_cell.upgrade())
+                        &amp;&amp; comp_or_non_comb(<span class="kw-2">&amp;</span>dst_cell.upgrade())
                     {
-                        <span class="ident">done_go</span> <span class="op">=</span> <span class="prelude-val">Some</span>((
-                            <span class="ident">src_cell</span>.<span class="ident">upgrade</span>().<span class="ident">clone_name</span>(),
-                            <span class="ident">dst_cell</span>.<span class="ident">upgrade</span>().<span class="ident">clone_name</span>(),
+                        done_go = <span class="prelude-val">Some</span>((
+                            src_cell.upgrade().clone_name(),
+                            dst_cell.upgrade().clone_name(),
                         ));
                     }
                 }
-                (<span class="ident">ir::PortParent::Cell</span>(<span class="ident">src_cell</span>), <span class="ident">ir::PortParent::Group</span>(<span class="kw">_</span>)) =&gt; {
-                    <span class="comment">// group[done] = c.done case</span>
-                    <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;done&quot;</span>
-                        <span class="op">&amp;&amp;</span> <span class="ident">src</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;done&quot;</span>)
-                        <span class="op">&amp;&amp;</span> <span class="ident">comp_or_non_comb</span>(<span class="kw-2">&amp;</span><span class="ident">src_cell</span>.<span class="ident">upgrade</span>())
+                (ir::PortParent::Cell(src_cell), ir::PortParent::Group(<span class="kw">_</span>)) =&gt; {
+                    <span class="comment">// group[done] = c.done case
+                    </span><span class="kw">if </span>dst.name == <span class="string">&quot;done&quot;
+                        </span>&amp;&amp; src.attributes.has(<span class="string">&quot;done&quot;</span>)
+                        &amp;&amp; comp_or_non_comb(<span class="kw-2">&amp;</span>src_cell.upgrade())
                     {
-                        <span class="ident">last</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">src_cell</span>.<span class="ident">upgrade</span>().<span class="ident">borrow</span>().<span class="ident">clone_name</span>())
+                        last = <span class="prelude-val">Some</span>(src_cell.upgrade().borrow().clone_name())
                     }
                 }
-                <span class="comment">// If we encounter anything else, then not of interest to us</span>
-                <span class="kw">_</span> =&gt; (),
+                <span class="comment">// If we encounter anything else, then not of interest to us
+                </span><span class="kw">_ </span>=&gt; (),
             }
         }
-        <span class="kw">let</span> (<span class="ident">done</span>, <span class="ident">go</span>) <span class="op">=</span> <span class="ident">done_go</span><span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">last_val</span> <span class="op">=</span> <span class="ident">last</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Some</span>((<span class="ident">done</span>, <span class="ident">go</span>, <span class="ident">last_val</span>))
+        <span class="kw">let </span>(done, go) = done_go<span class="question-mark">?</span>;
+        <span class="kw">let </span>last_val = last<span class="question-mark">?</span>;
+        <span class="prelude-val">Some</span>((done, go, last_val))
     }
-    <span class="comment">//Returns whether the given assignment is a go-done assignment</span>
-    <span class="comment">//i.e. cell1.go = cell2.done.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_go_done</span>(<span class="ident">asmt</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Assignment</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">asmt</span>.<span class="ident">src</span>.<span class="ident">borrow</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">asmt</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>();
-        <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">parent</span>, <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">parent</span>) {
-            (<span class="ident">ir::PortParent::Cell</span>(<span class="kw">_</span>), <span class="ident">ir::PortParent::Cell</span>(<span class="kw">_</span>)) =&gt; {
-                <span class="ident">src</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;done&quot;</span>) <span class="op">&amp;&amp;</span> <span class="ident">dst</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;go&quot;</span>)
+    <span class="comment">//Returns whether the given assignment is a go-done assignment
+    //i.e. cell1.go = cell2.done.
+    </span><span class="kw">pub fn </span>is_go_done(asmt: <span class="kw-2">&amp;</span>ir::Assignment) -&gt; bool {
+        <span class="kw">let </span>src = asmt.src.borrow();
+        <span class="kw">let </span>dst = asmt.dst.borrow();
+        <span class="kw">match </span>(<span class="kw-2">&amp;</span>src.parent, <span class="kw-2">&amp;</span>dst.parent) {
+            (ir::PortParent::Cell(<span class="kw">_</span>), ir::PortParent::Cell(<span class="kw">_</span>)) =&gt; {
+                src.attributes.has(<span class="string">&quot;done&quot;</span>) &amp;&amp; dst.attributes.has(<span class="string">&quot;go&quot;</span>)
             }
-            <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
+            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         }
     }
 
-    <span class="comment">//Returns whether the given assignment writes to the go assignment of cell</span>
-    <span class="comment">//in the form cell.go = !cell.done? 1&#39;d1.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_specific_go</span>(<span class="ident">asmt</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Assignment</span>, <span class="ident">cell</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="ident">bool</span> {
-        <span class="comment">//checks whether guard is !cell.done</span>
-        <span class="kw">let</span> <span class="ident">guard_not_done</span> <span class="op">=</span> <span class="op">|</span><span class="ident">guard</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Guard</span><span class="op">|</span> -&gt; <span class="ident">bool</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::Guard::Not</span>(<span class="ident">g</span>) <span class="op">=</span> <span class="ident">guard</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::Guard::Port</span>(<span class="ident">port</span>) <span class="op">=</span> <span class="kw-2">&amp;</span>(<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">g</span>) {
-                    <span class="kw">return</span> <span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;done&quot;</span>)
-                        <span class="op">&amp;&amp;</span> <span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">get_parent_name</span>() <span class="op">==</span> <span class="ident">cell</span>;
+    <span class="comment">//Returns whether the given assignment writes to the go assignment of cell
+    //in the form cell.go = !cell.done? 1&#39;d1.
+    </span><span class="kw">pub fn </span>is_specific_go(asmt: <span class="kw-2">&amp;</span>ir::Assignment, cell: <span class="kw-2">&amp;</span>ir::Id) -&gt; bool {
+        <span class="comment">//checks whether guard is !cell.done
+        </span><span class="kw">let </span>guard_not_done = |guard: <span class="kw-2">&amp;</span>ir::Guard| -&gt; bool {
+            <span class="kw">if let </span>ir::Guard::Not(g) = guard {
+                <span class="kw">if let </span>ir::Guard::Port(port) = <span class="kw-2">&amp;</span>(<span class="kw-2">**</span>g) {
+                    <span class="kw">return </span>port.borrow().attributes.has(<span class="string">&quot;done&quot;</span>)
+                        &amp;&amp; port.borrow().get_parent_name() == cell;
                 }
             }
-            <span class="bool-val">false</span>
-        };
+            <span class="bool-val">false
+        </span>};
 
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">asmt</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>();
-        <span class="comment">// checks cell.go =</span>
-        <span class="ident">dst</span>.<span class="ident">get_parent_name</span>() <span class="op">==</span> <span class="ident">cell</span>  <span class="op">&amp;&amp;</span> <span class="ident">dst</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;go&quot;</span>)
-        <span class="comment">// checks !cell.done ?</span>
-        <span class="op">&amp;&amp;</span> <span class="ident">guard_not_done</span>(<span class="kw-2">&amp;</span><span class="ident">asmt</span>.<span class="ident">guard</span>)
-        <span class="comment">// checks 1&#39;d1</span>
-        <span class="op">&amp;&amp;</span> <span class="ident">asmt</span>.<span class="ident">src</span>.<span class="ident">borrow</span>().<span class="ident">is_constant</span>(<span class="number">1</span>, <span class="number">1</span>)
+        <span class="kw">let </span>dst = asmt.dst.borrow();
+        <span class="comment">// checks cell.go =
+        </span>dst.get_parent_name() == cell  &amp;&amp; dst.attributes.has(<span class="string">&quot;go&quot;</span>)
+        <span class="comment">// checks !cell.done ?
+        </span>&amp;&amp; guard_not_done(<span class="kw-2">&amp;</span>asmt.guard)
+        <span class="comment">// checks 1&#39;d1
+        </span>&amp;&amp; asmt.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>)
     }
 
-    <span class="doccomment">/// Returns group with made using builder with prefix. The assignments are</span>
-    <span class="doccomment">/// asmts, plus a write to groups&#39;s done, based on done_src and done_guard.</span>
-    <span class="kw">fn</span> <span class="ident">make_group</span>(
-        <span class="ident">done_src</span>: <span class="ident">ir::RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>,
-        <span class="ident">done_guard</span>: <span class="ident">ir::Guard</span>,
-        <span class="ident">asmts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span>,
-        <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Builder</span>,
-        <span class="ident">prefix</span>: <span class="ident">String</span>,
-    ) -&gt; <span class="ident">ir::RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_group</span>(<span class="ident">prefix</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">group_asmts</span> <span class="op">=</span> <span class="ident">asmts</span>;
-        <span class="kw">let</span> <span class="ident">done_asmt</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build_assignment</span>(
-            <span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="string">&quot;done&quot;</span>),
-            <span class="ident">done_src</span>,
-            <span class="ident">done_guard</span>,
+    <span class="doccomment">/// Returns group with made using builder with prefix. The assignments are
+    /// asmts, plus a write to groups&#39;s done, based on done_src and done_guard.
+    </span><span class="kw">fn </span>make_group(
+        done_src: ir::RRC&lt;ir::Port&gt;,
+        done_guard: ir::Guard,
+        asmts: Vec&lt;ir::Assignment&gt;,
+        builder: <span class="kw-2">&amp;mut </span>ir::Builder,
+        prefix: String,
+    ) -&gt; ir::RRC&lt;ir::Group&gt; {
+        <span class="kw">let </span>group = builder.add_group(prefix);
+        <span class="kw">let </span><span class="kw-2">mut </span>group_asmts = asmts;
+        <span class="kw">let </span>done_asmt = builder.build_assignment(
+            group.borrow().get(<span class="string">&quot;done&quot;</span>),
+            done_src,
+            done_guard,
         );
-        <span class="ident">group_asmts</span>.<span class="ident">push</span>(<span class="ident">done_asmt</span>);
-        <span class="ident">group</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span>.<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">group_asmts</span>);
-        <span class="ident">group</span>
+        group_asmts.push(done_asmt);
+        group.borrow_mut().assignments.append(<span class="kw-2">&amp;mut </span>group_asmts);
+        group
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

@@ -1,107 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/passes/infer_static_timing.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>infer_static_timing.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/passes/infer_static_timing.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>infer_static_timing.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -611,614 +606,613 @@
 <span id="606">606</span>
 <span id="607">607</span>
 <span id="608">608</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
+</pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis</span>::{<span class="ident">GraphAnalysis</span>, <span class="ident">ReadWriteSet</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal</span>::{
-    <span class="ident">Action</span>, <span class="ident">ConstructVisitor</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>,
+<span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphAnalysis, ReadWriteSet};
+<span class="kw">use </span><span class="kw">crate</span>::errors::{CalyxResult, Error};
+<span class="kw">use </span><span class="kw">crate</span>::ir::traversal::{
+    Action, ConstructVisitor, Named, VisResult, Visitor,
 };
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">LibrarySignatures</span>, <span class="ident">RRC</span>};
-<span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">cmp</span>, <span class="ident">ops::Add</span>};
+<span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, LibrarySignatures, RRC};
+<span class="kw">use </span>itertools::Itertools;
+<span class="kw">use </span>std::{cmp, ops::Add};
 
-<span class="doccomment">/// Struct to store information about the go-done interfaces defined by a primitive.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">struct</span> <span class="ident">GoDone</span> {
-    <span class="ident">ports</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>, <span class="ident">u64</span>)<span class="op">&gt;</span>,
+<span class="doccomment">/// Struct to store information about the go-done interfaces defined by a primitive.
+</span><span class="attribute">#[derive(Default, Debug)]
+</span><span class="kw">struct </span>GoDone {
+    ports: Vec&lt;(ir::Id, ir::Id, u64)&gt;,
 }
 
-<span class="kw">impl</span> <span class="ident">GoDone</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">ports</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>, <span class="ident">u64</span>)<span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">ports</span> }
+<span class="kw">impl </span>GoDone {
+    <span class="kw">pub fn </span>new(ports: Vec&lt;(ir::Id, ir::Id, u64)&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ ports }
     }
 
-    <span class="comment">// Returns the latency associated with invoking this primitive.</span>
-    <span class="comment">// The component is not invokable if it has multiple go-done ports.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">invoke_latency</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">ports</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">ports</span>[<span class="number">0</span>].<span class="number">2</span>)
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
+    <span class="comment">// Returns the latency associated with invoking this primitive.
+    // The component is not invokable if it has multiple go-done ports.
+    </span><span class="kw">pub fn </span>invoke_latency(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="kw">if </span><span class="self">self</span>.ports.len() == <span class="number">1 </span>{
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.ports[<span class="number">0</span>].<span class="number">2</span>)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
     }
 
-    <span class="doccomment">/// Returns true if this is @go port</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_go</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">ports</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span>(<span class="ident">go</span>, <span class="kw">_</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">name</span> <span class="op">==</span> <span class="ident">go</span>)
+    <span class="doccomment">/// Returns true if this is @go port
+    </span><span class="kw">pub fn </span>is_go(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>ir::Id) -&gt; bool {
+        <span class="self">self</span>.ports.iter().any(|(go, <span class="kw">_</span>, <span class="kw">_</span>)| name == go)
     }
 
-    <span class="doccomment">/// Returns true if this is a @done port</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_done</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">ports</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">done</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">name</span> <span class="op">==</span> <span class="ident">done</span>)
+    <span class="doccomment">/// Returns true if this is a @done port
+    </span><span class="kw">pub fn </span>is_done(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>ir::Id) -&gt; bool {
+        <span class="self">self</span>.ports.iter().any(|(<span class="kw">_</span>, done, <span class="kw">_</span>)| name == done)
     }
 
-    <span class="doccomment">/// Returns the latency associated with the provided @go port if present</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_latency</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">go_port</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">ports</span>.<span class="ident">iter</span>().<span class="ident">find_map</span>(<span class="op">|</span>(<span class="ident">go</span>, <span class="kw">_</span>, <span class="ident">lat</span>)<span class="op">|</span> {
-            <span class="kw">if</span> <span class="ident">go</span> <span class="op">==</span> <span class="ident">go_port</span> {
-                <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">lat</span>)
-            } <span class="kw">else</span> {
-                <span class="prelude-val">None</span>
-            }
+    <span class="doccomment">/// Returns the latency associated with the provided @go port if present
+    </span><span class="kw">pub fn </span>get_latency(<span class="kw-2">&amp;</span><span class="self">self</span>, go_port: <span class="kw-2">&amp;</span>ir::Id) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="self">self</span>.ports.iter().find_map(|(go, <span class="kw">_</span>, lat)| {
+            <span class="kw">if </span>go == go_port {
+                <span class="prelude-val">Some</span>(<span class="kw-2">*</span>lat)
+            } <span class="kw">else </span>{
+                <span class="prelude-val">None
+            </span>}
         })
     }
 
-    <span class="doccomment">/// Iterate over the defined ports</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span>(<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>, <span class="ident">u64</span>)<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">ports</span>.<span class="ident">iter</span>()
+    <span class="doccomment">/// Iterate over the defined ports
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span>(ir::Id, ir::Id, u64)&gt; {
+        <span class="self">self</span>.ports.iter()
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Primitive</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">GoDone</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">prim</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Primitive</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">done_ports</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">prim</span>
-            .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;done&quot;</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> (<span class="ident">pd</span>.<span class="ident">attributes</span>[<span class="string">&quot;done&quot;</span>], <span class="ident">pd</span>.<span class="ident">name</span>))
-            .<span class="ident">collect</span>();
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>ir::Primitive&gt; <span class="kw">for </span>GoDone {
+    <span class="kw">fn </span>from(prim: <span class="kw-2">&amp;</span>ir::Primitive) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>done_ports: HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; = prim
+            .find_all_with_attr(<span class="string">&quot;done&quot;</span>)
+            .map(|pd| (pd.attributes[<span class="string">&quot;done&quot;</span>], pd.name))
+            .collect();
 
-        <span class="kw">let</span> <span class="ident">go_ports</span> <span class="op">=</span> <span class="ident">prim</span>
-            .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;go&quot;</span>)
-            .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> {
-                <span class="ident">pd</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">st</span><span class="op">|</span> {
-                    <span class="ident">done_ports</span>
-                        .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">pd</span>.<span class="ident">attributes</span>[<span class="string">&quot;go&quot;</span>])
-                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">done_port</span><span class="op">|</span> (<span class="ident">pd</span>.<span class="ident">name</span>, <span class="kw-2">*</span><span class="ident">done_port</span>, <span class="kw-2">*</span><span class="ident">st</span>))
+        <span class="kw">let </span>go_ports = prim
+            .find_all_with_attr(<span class="string">&quot;go&quot;</span>)
+            .filter_map(|pd| {
+                pd.attributes.get(<span class="string">&quot;static&quot;</span>).and_then(|st| {
+                    done_ports
+                        .get(<span class="kw-2">&amp;</span>pd.attributes[<span class="string">&quot;go&quot;</span>])
+                        .map(|done_port| (pd.name, <span class="kw-2">*</span>done_port, <span class="kw-2">*</span>st))
                 })
             })
-            .<span class="ident">collect_vec</span>();
-        <span class="ident">GoDone::new</span>(<span class="ident">go_ports</span>)
+            .collect_vec();
+        GoDone::new(go_ports)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">GoDone</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">cell</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Cell</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">done_ports</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">cell</span>
-            .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;done&quot;</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pr</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">pr</span>.<span class="ident">borrow</span>();
-                (<span class="ident">port</span>.<span class="ident">attributes</span>[<span class="string">&quot;done&quot;</span>], <span class="ident">port</span>.<span class="ident">name</span>)
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>ir::Cell&gt; <span class="kw">for </span>GoDone {
+    <span class="kw">fn </span>from(cell: <span class="kw-2">&amp;</span>ir::Cell) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>done_ports: HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; = cell
+            .find_all_with_attr(<span class="string">&quot;done&quot;</span>)
+            .map(|pr| {
+                <span class="kw">let </span>port = pr.borrow();
+                (port.attributes[<span class="string">&quot;done&quot;</span>], port.name)
             })
-            .<span class="ident">collect</span>();
+            .collect();
 
-        <span class="kw">let</span> <span class="ident">go_ports</span> <span class="op">=</span> <span class="ident">cell</span>
-            .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;go&quot;</span>)
-            .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">pr</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">pr</span>.<span class="ident">borrow</span>();
-                <span class="ident">port</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">st</span><span class="op">|</span> {
-                    <span class="ident">done_ports</span>
-                        .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">attributes</span>[<span class="string">&quot;go&quot;</span>])
-                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">done_port</span><span class="op">|</span> (<span class="ident">port</span>.<span class="ident">name</span>, <span class="kw-2">*</span><span class="ident">done_port</span>, <span class="kw-2">*</span><span class="ident">st</span>))
+        <span class="kw">let </span>go_ports = cell
+            .find_all_with_attr(<span class="string">&quot;go&quot;</span>)
+            .filter_map(|pr| {
+                <span class="kw">let </span>port = pr.borrow();
+                port.attributes.get(<span class="string">&quot;static&quot;</span>).and_then(|st| {
+                    done_ports
+                        .get(<span class="kw-2">&amp;</span>port.attributes[<span class="string">&quot;go&quot;</span>])
+                        .map(|done_port| (port.name, <span class="kw-2">*</span>done_port, <span class="kw-2">*</span>st))
                 })
             })
-            .<span class="ident">collect_vec</span>();
-        <span class="ident">GoDone::new</span>(<span class="ident">go_ports</span>)
+            .collect_vec();
+        GoDone::new(go_ports)
     }
 }
 
-<span class="doccomment">/// Infer &quot;static&quot; annotation for groups and add &quot;@static&quot; annotation when</span>
-<span class="doccomment">/// (conservatively) possible.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Infers the number of cycles for groups where the `done`</span>
-<span class="doccomment">/// signal relies only on other `done` signals, and then inserts &quot;static&quot;</span>
-<span class="doccomment">/// annotations with those inferred values. If there is an existing</span>
-<span class="doccomment">/// annotation in a group that differs from an inferred value, this</span>
-<span class="doccomment">/// pass will throw an error. If a group&#39;s `done` signal relies on signals</span>
-<span class="doccomment">/// that are not only `done` signals, this pass will ignore that group.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">InferStaticTiming</span> {
-    <span class="doccomment">/// component name -&gt; vec&lt;(go signal, done signal, latency)&gt;</span>
-    <span class="ident">latency_data</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">GoDone</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Infer &quot;static&quot; annotation for groups and add &quot;@static&quot; annotation when
+/// (conservatively) possible.
+///
+/// Infers the number of cycles for groups where the `done`
+/// signal relies only on other `done` signals, and then inserts &quot;static&quot;
+/// annotations with those inferred values. If there is an existing
+/// annotation in a group that differs from an inferred value, this
+/// pass will throw an error. If a group&#39;s `done` signal relies on signals
+/// that are not only `done` signals, this pass will ignore that group.
+</span><span class="kw">pub struct </span>InferStaticTiming {
+    <span class="doccomment">/// component name -&gt; vec&lt;(go signal, done signal, latency)&gt;
+    </span>latency_data: HashMap&lt;ir::Id, GoDone&gt;,
 }
 
-<span class="comment">// Override constructor to build latency_data information from the primitives</span>
-<span class="comment">// library.</span>
-<span class="kw">impl</span> <span class="ident">ConstructVisitor</span> <span class="kw">for</span> <span class="ident">InferStaticTiming</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Context</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">latency_data</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">comp_latency</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-        <span class="comment">// Construct latency_data for each primitive</span>
-        <span class="kw">for</span> <span class="ident">prim</span> <span class="kw">in</span> <span class="ident">ctx</span>.<span class="ident">lib</span>.<span class="ident">signatures</span>() {
-            <span class="kw">let</span> <span class="ident">done_ports</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">prim</span>
-                .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;done&quot;</span>)
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> (<span class="ident">pd</span>.<span class="ident">attributes</span>[<span class="string">&quot;done&quot;</span>], <span class="ident">pd</span>.<span class="ident">name</span>))
-                .<span class="ident">collect</span>();
+<span class="comment">// Override constructor to build latency_data information from the primitives
+// library.
+</span><span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>InferStaticTiming {
+    <span class="kw">fn </span>from(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>latency_data = HashMap::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>comp_latency = HashMap::new();
+        <span class="comment">// Construct latency_data for each primitive
+        </span><span class="kw">for </span>prim <span class="kw">in </span>ctx.lib.signatures() {
+            <span class="kw">let </span>done_ports: HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; = prim
+                .find_all_with_attr(<span class="string">&quot;done&quot;</span>)
+                .map(|pd| (pd.attributes[<span class="string">&quot;done&quot;</span>], pd.name))
+                .collect();
 
-            <span class="kw">let</span> <span class="ident">go_ports</span> <span class="op">=</span> <span class="ident">prim</span>
-                .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;go&quot;</span>)
-                .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> {
-                    <span class="ident">pd</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">st</span><span class="op">|</span> {
-                        <span class="ident">done_ports</span>
-                            .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">pd</span>.<span class="ident">attributes</span>[<span class="string">&quot;go&quot;</span>])
-                            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">done_port</span><span class="op">|</span> (<span class="ident">pd</span>.<span class="ident">name</span>, <span class="kw-2">*</span><span class="ident">done_port</span>, <span class="kw-2">*</span><span class="ident">st</span>))
+            <span class="kw">let </span>go_ports = prim
+                .find_all_with_attr(<span class="string">&quot;go&quot;</span>)
+                .filter_map(|pd| {
+                    pd.attributes.get(<span class="string">&quot;static&quot;</span>).and_then(|st| {
+                        done_ports
+                            .get(<span class="kw-2">&amp;</span>pd.attributes[<span class="string">&quot;go&quot;</span>])
+                            .map(|done_port| (pd.name, <span class="kw-2">*</span>done_port, <span class="kw-2">*</span>st))
                     })
                 })
-                .<span class="ident">collect_vec</span>();
+                .collect_vec();
 
-            <span class="comment">// If this primitive has exactly one (go, done, static) pair, we</span>
-            <span class="comment">// can infer the latency of its invokes.</span>
-            <span class="kw">if</span> <span class="ident">go_ports</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
-                <span class="ident">comp_latency</span>.<span class="ident">insert</span>(<span class="ident">prim</span>.<span class="ident">name</span>, <span class="ident">go_ports</span>[<span class="number">0</span>].<span class="number">2</span>);
+            <span class="comment">// If this primitive has exactly one (go, done, static) pair, we
+            // can infer the latency of its invokes.
+            </span><span class="kw">if </span>go_ports.len() == <span class="number">1 </span>{
+                comp_latency.insert(prim.name, go_ports[<span class="number">0</span>].<span class="number">2</span>);
             }
-            <span class="ident">latency_data</span>.<span class="ident">insert</span>(<span class="ident">prim</span>.<span class="ident">name</span>, <span class="ident">GoDone::new</span>(<span class="ident">go_ports</span>));
+            latency_data.insert(prim.name, GoDone::new(go_ports));
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">InferStaticTiming</span> { <span class="ident">latency_data</span> })
+        <span class="prelude-val">Ok</span>(InferStaticTiming { latency_data })
     }
 
-    <span class="comment">// This pass shared information between components</span>
-    <span class="kw">fn</span> <span class="ident">clear_data</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="comment">/* All data is transferred between components */</span>
-    }
+    <span class="comment">// This pass shared information between components
+    </span><span class="kw">fn </span>clear_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="comment">/* All data is transferred between components */
+    </span>}
 }
 
-<span class="doccomment">/// Function to iterate over a vector of control statements and collect</span>
-<span class="doccomment">/// the &quot;static&quot; attribute using the `acc` function.</span>
-<span class="doccomment">/// Returns None if any of of the Control statements is a compound statement.</span>
-<span class="kw">fn</span> <span class="ident">accumulate_static_time</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(
-    <span class="ident">stmts</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Control</span>],
-    <span class="ident">start</span>: <span class="ident">u64</span>,
-    <span class="ident">acc</span>: <span class="ident">F</span>,
-) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">u64</span>, <span class="ident">u64</span>) -&gt; <span class="ident">u64</span>,
+<span class="doccomment">/// Function to iterate over a vector of control statements and collect
+/// the &quot;static&quot; attribute using the `acc` function.
+/// Returns None if any of of the Control statements is a compound statement.
+</span><span class="kw">fn </span>accumulate_static_time&lt;F&gt;(
+    stmts: <span class="kw-2">&amp;</span>[ir::Control],
+    start: u64,
+    acc: F,
+) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
+<span class="kw">where
+    </span>F: FnMut(u64, u64) -&gt; u64,
 {
-    <span class="ident">stmts</span>
-        .<span class="ident">iter</span>()
-        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">con</span><span class="op">|</span> <span class="ident">con</span>.<span class="ident">get_attribute</span>(<span class="string">&quot;static&quot;</span>).<span class="ident">copied</span>())
-        .<span class="ident">fold_options</span>(<span class="ident">start</span>, <span class="ident">acc</span>)
+    stmts
+        .iter()
+        .map(|con| con.get_attribute(<span class="string">&quot;static&quot;</span>).copied())
+        .fold_options(start, acc)
 }
 
-<span class="kw">impl</span> <span class="ident">Named</span> <span class="kw">for</span> <span class="ident">InferStaticTiming</span> {
-    <span class="kw">fn</span> <span class="ident">name</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="string">&quot;infer-static-timing&quot;</span>
-    }
+<span class="kw">impl </span>Named <span class="kw">for </span>InferStaticTiming {
+    <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;infer-static-timing&quot;
+    </span>}
 
-    <span class="kw">fn</span> <span class="ident">description</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="string">&quot;infers and annotates static timing for groups when possible&quot;</span>
-    }
+    <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;infers and annotates static timing for groups when possible&quot;
+    </span>}
 }
 
-<span class="kw">impl</span> <span class="ident">InferStaticTiming</span> {
-    <span class="doccomment">/// Return true if the edge (`src`, `dst`) meet one these criteria, and false otherwise:</span>
-    <span class="doccomment">///   - `src` is an &quot;out&quot; port of a constant, and `dst` is a &quot;go&quot; port</span>
-    <span class="doccomment">///   - `src` is a &quot;done&quot; port, and `dst` is a &quot;go&quot; port</span>
-    <span class="doccomment">///   - `src` is a &quot;done&quot; port, and `dst` is the &quot;done&quot; port of a group</span>
-    <span class="kw">fn</span> <span class="ident">mem_wrt_dep_graph</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Port</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Port</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">parent</span>, <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">parent</span>) {
+<span class="kw">impl </span>InferStaticTiming {
+    <span class="doccomment">/// Return true if the edge (`src`, `dst`) meet one these criteria, and false otherwise:
+    ///   - `src` is an &quot;out&quot; port of a constant, and `dst` is a &quot;go&quot; port
+    ///   - `src` is a &quot;done&quot; port, and `dst` is a &quot;go&quot; port
+    ///   - `src` is a &quot;done&quot; port, and `dst` is the &quot;done&quot; port of a group
+    </span><span class="kw">fn </span>mem_wrt_dep_graph(<span class="kw-2">&amp;</span><span class="self">self</span>, src: <span class="kw-2">&amp;</span>ir::Port, dst: <span class="kw-2">&amp;</span>ir::Port) -&gt; bool {
+        <span class="kw">match </span>(<span class="kw-2">&amp;</span>src.parent, <span class="kw-2">&amp;</span>dst.parent) {
             (
-                <span class="ident">ir::PortParent::Cell</span>(<span class="ident">src_cell_wrf</span>),
-                <span class="ident">ir::PortParent::Cell</span>(<span class="ident">dst_cell_wrf</span>),
+                ir::PortParent::Cell(src_cell_wrf),
+                ir::PortParent::Cell(dst_cell_wrf),
             ) =&gt; {
-                <span class="kw">let</span> <span class="ident">src_rf</span> <span class="op">=</span> <span class="ident">src_cell_wrf</span>.<span class="ident">upgrade</span>();
-                <span class="kw">let</span> <span class="ident">src_cell</span> <span class="op">=</span> <span class="ident">src_rf</span>.<span class="ident">borrow</span>();
-                <span class="kw">let</span> <span class="ident">dst_rf</span> <span class="op">=</span> <span class="ident">dst_cell_wrf</span>.<span class="ident">upgrade</span>();
-                <span class="kw">let</span> <span class="ident">dst_cell</span> <span class="op">=</span> <span class="ident">dst_rf</span>.<span class="ident">borrow</span>();
-                <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">s_name</span>), <span class="prelude-val">Some</span>(<span class="ident">d_name</span>)) <span class="op">=</span>
-                    (<span class="ident">src_cell</span>.<span class="ident">type_name</span>(), <span class="ident">dst_cell</span>.<span class="ident">type_name</span>())
+                <span class="kw">let </span>src_rf = src_cell_wrf.upgrade();
+                <span class="kw">let </span>src_cell = src_rf.borrow();
+                <span class="kw">let </span>dst_rf = dst_cell_wrf.upgrade();
+                <span class="kw">let </span>dst_cell = dst_rf.borrow();
+                <span class="kw">if let </span>(<span class="prelude-val">Some</span>(s_name), <span class="prelude-val">Some</span>(d_name)) =
+                    (src_cell.type_name(), dst_cell.type_name())
                 {
-                    <span class="kw">let</span> <span class="ident">data_src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">s_name</span>);
-                    <span class="kw">let</span> <span class="ident">data_dst</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">d_name</span>);
-                    <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">dst_ports</span>), <span class="prelude-val">Some</span>(<span class="ident">src_ports</span>)) <span class="op">=</span>
-                        (<span class="ident">data_dst</span>, <span class="ident">data_src</span>)
+                    <span class="kw">let </span>data_src = <span class="self">self</span>.latency_data.get(<span class="kw-2">&amp;</span>s_name);
+                    <span class="kw">let </span>data_dst = <span class="self">self</span>.latency_data.get(<span class="kw-2">&amp;</span>d_name);
+                    <span class="kw">if let </span>(<span class="prelude-val">Some</span>(dst_ports), <span class="prelude-val">Some</span>(src_ports)) =
+                        (data_dst, data_src)
                     {
-                        <span class="kw">return</span> <span class="ident">src_ports</span>.<span class="ident">is_done</span>(<span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">name</span>)
-                            <span class="op">&amp;&amp;</span> <span class="ident">dst_ports</span>.<span class="ident">is_go</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">name</span>);
+                        <span class="kw">return </span>src_ports.is_done(<span class="kw-2">&amp;</span>src.name)
+                            &amp;&amp; dst_ports.is_go(<span class="kw-2">&amp;</span>dst.name);
                     }
                 }
 
-                <span class="comment">// A constant writes to a cell: to be added to the graph, the cell needs to be a &quot;done&quot; port.</span>
-                <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">d_name</span>), <span class="ident">ir::CellType::Constant</span> { .. }) <span class="op">=</span>
-                    (<span class="ident">dst_cell</span>.<span class="ident">type_name</span>(), <span class="kw-2">&amp;</span><span class="ident">src_cell</span>.<span class="ident">prototype</span>)
+                <span class="comment">// A constant writes to a cell: to be added to the graph, the cell needs to be a &quot;done&quot; port.
+                </span><span class="kw">if let </span>(<span class="prelude-val">Some</span>(d_name), ir::CellType::Constant { .. }) =
+                    (dst_cell.type_name(), <span class="kw-2">&amp;</span>src_cell.prototype)
                 {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">d_name</span>) {
-                        <span class="kw">return</span> <span class="ident">ports</span>.<span class="ident">is_go</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">name</span>);
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(ports) = <span class="self">self</span>.latency_data.get(<span class="kw-2">&amp;</span>d_name) {
+                        <span class="kw">return </span>ports.is_go(<span class="kw-2">&amp;</span>dst.name);
                     }
                 }
 
-                <span class="bool-val">false</span>
-            }
+                <span class="bool-val">false
+            </span>}
 
-            <span class="comment">// Something is written to a group: to be added to the graph, this needs to be a &quot;done&quot; port.</span>
-            (<span class="kw">_</span>, <span class="ident">ir::PortParent::Group</span>(<span class="kw">_</span>)) =&gt; <span class="ident">dst</span>.<span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;done&quot;</span>,
+            <span class="comment">// Something is written to a group: to be added to the graph, this needs to be a &quot;done&quot; port.
+            </span>(<span class="kw">_</span>, ir::PortParent::Group(<span class="kw">_</span>)) =&gt; dst.name == <span class="string">&quot;done&quot;</span>,
 
-            <span class="comment">// If we encounter anything else, no need to add it to the graph.</span>
-            <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
+            <span class="comment">// If we encounter anything else, no need to add it to the graph.
+            </span><span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         }
     }
 
-    <span class="doccomment">/// Return a Vec of edges (`a`, `b`), where `a` is a &quot;go&quot; port and `b`</span>
-    <span class="doccomment">/// is a &quot;done&quot; port, and `a` and `b` have the same parent cell.</span>
-    <span class="kw">fn</span> <span class="ident">find_go_done_edges</span>(
+    <span class="doccomment">/// Return a Vec of edges (`a`, `b`), where `a` is a &quot;go&quot; port and `b`
+    /// is a &quot;done&quot; port, and `a` and `b` have the same parent cell.
+    </span><span class="kw">fn </span>find_go_done_edges(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">group</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Group</span>,
-    ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">rw_set</span> <span class="op">=</span> <span class="ident">ReadWriteSet::uses</span>(<span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">iter</span>());
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">go_done_edges</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>, <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        group: <span class="kw-2">&amp;</span>ir::Group,
+    ) -&gt; Vec&lt;(RRC&lt;ir::Port&gt;, RRC&lt;ir::Port&gt;)&gt; {
+        <span class="kw">let </span>rw_set = ReadWriteSet::uses(group.assignments.iter());
+        <span class="kw">let </span><span class="kw-2">mut </span>go_done_edges: Vec&lt;(RRC&lt;ir::Port&gt;, RRC&lt;ir::Port&gt;)&gt; = Vec::new();
 
-        <span class="kw">for</span> <span class="ident">cell_ref</span> <span class="kw">in</span> <span class="ident">rw_set</span> {
-            <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cell_ref</span>.<span class="ident">borrow</span>();
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span>
-                <span class="ident">cell</span>.<span class="ident">type_name</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>))
+        <span class="kw">for </span>cell_ref <span class="kw">in </span>rw_set {
+            <span class="kw">let </span>cell = cell_ref.borrow();
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(ports) =
+                cell.type_name().and_then(|c| <span class="self">self</span>.latency_data.get(<span class="kw-2">&amp;</span>c))
             {
-                <span class="ident">go_done_edges</span>.<span class="ident">extend</span>(
-                    <span class="ident">ports</span>
-                        .<span class="ident">iter</span>()
-                        .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">go</span>, <span class="ident">done</span>, <span class="kw">_</span>)<span class="op">|</span> (<span class="ident">cell</span>.<span class="ident">get</span>(<span class="ident">go</span>), <span class="ident">cell</span>.<span class="ident">get</span>(<span class="ident">done</span>))),
+                go_done_edges.extend(
+                    ports
+                        .iter()
+                        .map(|(go, done, <span class="kw">_</span>)| (cell.get(go), cell.get(done))),
                 )
             }
         }
-        <span class="ident">go_done_edges</span>
+        go_done_edges
     }
 
-    <span class="doccomment">/// Returns true if `port` is a &quot;done&quot; port, and we know the latency data</span>
-    <span class="doccomment">/// about `port`, or is a constant.</span>
-    <span class="kw">fn</span> <span class="ident">is_done_port_or_const</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">port</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Port</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cwrf</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">parent</span> {
-            <span class="kw">let</span> <span class="ident">cr</span> <span class="op">=</span> <span class="ident">cwrf</span>.<span class="ident">upgrade</span>();
-            <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cr</span>.<span class="ident">borrow</span>();
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::CellType::Constant</span> { <span class="ident">val</span>, .. } <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">prototype</span> {
-                <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">val</span> <span class="op">&gt;</span> <span class="number">0</span> {
-                    <span class="kw">return</span> <span class="bool-val">true</span>;
+    <span class="doccomment">/// Returns true if `port` is a &quot;done&quot; port, and we know the latency data
+    /// about `port`, or is a constant.
+    </span><span class="kw">fn </span>is_done_port_or_const(<span class="kw-2">&amp;</span><span class="self">self</span>, port: <span class="kw-2">&amp;</span>ir::Port) -&gt; bool {
+        <span class="kw">if let </span>ir::PortParent::Cell(cwrf) = <span class="kw-2">&amp;</span>port.parent {
+            <span class="kw">let </span>cr = cwrf.upgrade();
+            <span class="kw">let </span>cell = cr.borrow();
+            <span class="kw">if let </span>ir::CellType::Constant { val, .. } = <span class="kw-2">&amp;</span>cell.prototype {
+                <span class="kw">if </span><span class="kw-2">*</span>val &gt; <span class="number">0 </span>{
+                    <span class="kw">return </span><span class="bool-val">true</span>;
                 }
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span>
-                <span class="ident">cell</span>.<span class="ident">type_name</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>))
+            } <span class="kw">else if let </span><span class="prelude-val">Some</span>(ports) =
+                cell.type_name().and_then(|c| <span class="self">self</span>.latency_data.get(<span class="kw-2">&amp;</span>c))
             {
-                <span class="kw">return</span> <span class="ident">ports</span>.<span class="ident">is_done</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">name</span>);
+                <span class="kw">return </span>ports.is_done(<span class="kw-2">&amp;</span>port.name);
             }
         }
-        <span class="bool-val">false</span>
-    }
+        <span class="bool-val">false
+    </span>}
 
-    <span class="doccomment">/// Returns true if `graph` contains writes to &quot;done&quot; ports</span>
-    <span class="doccomment">/// that could have dynamic latencies, false otherwise.</span>
-    <span class="kw">fn</span> <span class="ident">contains_dyn_writes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">graph</span>: <span class="kw-2">&amp;</span><span class="ident">GraphAnalysis</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">for</span> <span class="ident">port</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">graph</span>.<span class="ident">ports</span>() {
-            <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">parent</span> {
-                <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell_wrf</span>) =&gt; {
-                    <span class="kw">let</span> <span class="ident">cr</span> <span class="op">=</span> <span class="ident">cell_wrf</span>.<span class="ident">upgrade</span>();
-                    <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cr</span>.<span class="ident">borrow</span>();
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span>
-                        <span class="ident">cell</span>.<span class="ident">type_name</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>))
+    <span class="doccomment">/// Returns true if `graph` contains writes to &quot;done&quot; ports
+    /// that could have dynamic latencies, false otherwise.
+    </span><span class="kw">fn </span>contains_dyn_writes(<span class="kw-2">&amp;</span><span class="self">self</span>, graph: <span class="kw-2">&amp;</span>GraphAnalysis) -&gt; bool {
+        <span class="kw">for </span>port <span class="kw">in </span><span class="kw-2">&amp;</span>graph.ports() {
+            <span class="kw">match </span><span class="kw-2">&amp;</span>port.borrow().parent {
+                ir::PortParent::Cell(cell_wrf) =&gt; {
+                    <span class="kw">let </span>cr = cell_wrf.upgrade();
+                    <span class="kw">let </span>cell = cr.borrow();
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(ports) =
+                        cell.type_name().and_then(|c| <span class="self">self</span>.latency_data.get(<span class="kw-2">&amp;</span>c))
                     {
-                        <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">name</span>;
-                        <span class="kw">if</span> <span class="ident">ports</span>.<span class="ident">is_go</span>(<span class="ident">name</span>) {
-                            <span class="kw">for</span> <span class="ident">write_port</span> <span class="kw">in</span> <span class="ident">graph</span>.<span class="ident">writes_to</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>()) {
-                                <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>
-                                    .<span class="ident">is_done_port_or_const</span>(<span class="kw-2">&amp;</span><span class="ident">write_port</span>.<span class="ident">borrow</span>())
+                        <span class="kw">let </span>name = <span class="kw-2">&amp;</span>port.borrow().name;
+                        <span class="kw">if </span>ports.is_go(name) {
+                            <span class="kw">for </span>write_port <span class="kw">in </span>graph.writes_to(<span class="kw-2">&amp;</span>port.borrow()) {
+                                <span class="kw">if </span>!<span class="self">self
+                                    </span>.is_done_port_or_const(<span class="kw-2">&amp;</span>write_port.borrow())
                                 {
                                     <span class="macro">log::debug!</span>(
                                         <span class="string">&quot;`{}` is not a done port&quot;</span>,
-                                        <span class="ident">write_port</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>(),
+                                        write_port.borrow().canonical(),
                                     );
-                                    <span class="kw">return</span> <span class="bool-val">true</span>;
+                                    <span class="kw">return </span><span class="bool-val">true</span>;
                                 }
                             }
                         }
                     }
                 }
 
-                <span class="ident">ir::PortParent::Group</span>(<span class="kw">_</span>) =&gt; {
-                    <span class="kw">if</span> <span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;done&quot;</span> {
-                        <span class="kw">for</span> <span class="ident">write_port</span> <span class="kw">in</span> <span class="ident">graph</span>.<span class="ident">writes_to</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>()) {
-                            <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_done_port_or_const</span>(<span class="kw-2">&amp;</span><span class="ident">write_port</span>.<span class="ident">borrow</span>())
+                ir::PortParent::Group(<span class="kw">_</span>) =&gt; {
+                    <span class="kw">if </span>port.borrow().name == <span class="string">&quot;done&quot; </span>{
+                        <span class="kw">for </span>write_port <span class="kw">in </span>graph.writes_to(<span class="kw-2">&amp;</span>port.borrow()) {
+                            <span class="kw">if </span>!<span class="self">self</span>.is_done_port_or_const(<span class="kw-2">&amp;</span>write_port.borrow())
                             {
                                 <span class="macro">log::debug!</span>(
                                     <span class="string">&quot;`{}` is not a done port&quot;</span>,
-                                    <span class="ident">write_port</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>(),
+                                    write_port.borrow().canonical(),
                                 );
-                                <span class="kw">return</span> <span class="bool-val">true</span>;
+                                <span class="kw">return </span><span class="bool-val">true</span>;
                             }
                         }
                     }
                 }
             }
         }
-        <span class="bool-val">false</span>
-    }
+        <span class="bool-val">false
+    </span>}
 
-    <span class="doccomment">/// Returns true if `graph` contains any nodes with degree &gt; 1.</span>
-    <span class="kw">fn</span> <span class="ident">contains_node_deg_gt_one</span>(<span class="ident">graph</span>: <span class="kw-2">&amp;</span><span class="ident">GraphAnalysis</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">for</span> <span class="ident">port</span> <span class="kw">in</span> <span class="ident">graph</span>.<span class="ident">ports</span>() {
-            <span class="kw">if</span> <span class="ident">graph</span>.<span class="ident">writes_to</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>()).<span class="ident">count</span>() <span class="op">&gt;</span> <span class="number">1</span> {
-                <span class="kw">return</span> <span class="bool-val">true</span>;
+    <span class="doccomment">/// Returns true if `graph` contains any nodes with degree &gt; 1.
+    </span><span class="kw">fn </span>contains_node_deg_gt_one(graph: <span class="kw-2">&amp;</span>GraphAnalysis) -&gt; bool {
+        <span class="kw">for </span>port <span class="kw">in </span>graph.ports() {
+            <span class="kw">if </span>graph.writes_to(<span class="kw-2">&amp;</span>port.borrow()).count() &gt; <span class="number">1 </span>{
+                <span class="kw">return </span><span class="bool-val">true</span>;
             }
         }
-        <span class="bool-val">false</span>
-    }
+        <span class="bool-val">false
+    </span>}
 
-    <span class="doccomment">/// Attempts to infer the number of cycles starting when</span>
-    <span class="doccomment">/// `group[go]` is high, and port is high. If inference is</span>
-    <span class="doccomment">/// not possible, returns None.</span>
-    <span class="kw">fn</span> <span class="ident">infer_latency</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">group</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Group</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
-        <span class="comment">// Creates a write dependency graph, which contains an edge (`a`, `b`) if:</span>
-        <span class="comment">//   - `a` is a &quot;done&quot; port, and writes to `b`, which is a &quot;go&quot; port</span>
-        <span class="comment">//   - `a` is a &quot;done&quot; port, and writes to `b`, which is the &quot;done&quot; port of this group</span>
-        <span class="comment">//   - `a` is an &quot;out&quot; port, and is a constant, and writes to `b`, a &quot;go&quot; port</span>
-        <span class="comment">//   - `a` is a &quot;go&quot; port, and `b` is a &quot;done&quot; port, and `a` and `b` share a parent cell</span>
-        <span class="comment">// Nodes that are not part of any edges that meet these criteria are excluded.</span>
-        <span class="comment">//</span>
-        <span class="comment">// For example, this group:</span>
-        <span class="comment">// ```</span>
-        <span class="comment">// group g1 {</span>
-        <span class="comment">//   a.in = 32&#39;d1;</span>
-        <span class="comment">//   a.write_en = 1&#39;d1;</span>
-        <span class="comment">//   g1[done] = a.done;</span>
-        <span class="comment">// }</span>
-        <span class="comment">// ```</span>
-        <span class="comment">// corresponds to this graph:</span>
-        <span class="comment">// ```</span>
-        <span class="comment">// constant(1) -&gt; a.write_en</span>
-        <span class="comment">// a.write_en -&gt; a.done</span>
-        <span class="comment">// a.done -&gt; g1[done]</span>
-        <span class="comment">// ```</span>
-        <span class="macro">log::debug!</span>(<span class="string">&quot;Checking group `{}`&quot;</span>, <span class="ident">group</span>.<span class="ident">name</span>());
-        <span class="kw">let</span> <span class="ident">graph_unprocessed</span> <span class="op">=</span> <span class="ident">GraphAnalysis::from</span>(<span class="ident">group</span>);
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">contains_dyn_writes</span>(<span class="kw-2">&amp;</span><span class="ident">graph_unprocessed</span>) {
+    <span class="doccomment">/// Attempts to infer the number of cycles starting when
+    /// `group[go]` is high, and port is high. If inference is
+    /// not possible, returns None.
+    </span><span class="kw">fn </span>infer_latency(<span class="kw-2">&amp;</span><span class="self">self</span>, group: <span class="kw-2">&amp;</span>ir::Group) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="comment">// Creates a write dependency graph, which contains an edge (`a`, `b`) if:
+        //   - `a` is a &quot;done&quot; port, and writes to `b`, which is a &quot;go&quot; port
+        //   - `a` is a &quot;done&quot; port, and writes to `b`, which is the &quot;done&quot; port of this group
+        //   - `a` is an &quot;out&quot; port, and is a constant, and writes to `b`, a &quot;go&quot; port
+        //   - `a` is a &quot;go&quot; port, and `b` is a &quot;done&quot; port, and `a` and `b` share a parent cell
+        // Nodes that are not part of any edges that meet these criteria are excluded.
+        //
+        // For example, this group:
+        // ```
+        // group g1 {
+        //   a.in = 32&#39;d1;
+        //   a.write_en = 1&#39;d1;
+        //   g1[done] = a.done;
+        // }
+        // ```
+        // corresponds to this graph:
+        // ```
+        // constant(1) -&gt; a.write_en
+        // a.write_en -&gt; a.done
+        // a.done -&gt; g1[done]
+        // ```
+        </span><span class="macro">log::debug!</span>(<span class="string">&quot;Checking group `{}`&quot;</span>, group.name());
+        <span class="kw">let </span>graph_unprocessed = GraphAnalysis::from(group);
+        <span class="kw">if </span><span class="self">self</span>.contains_dyn_writes(<span class="kw-2">&amp;</span>graph_unprocessed) {
             <span class="macro">log::debug!</span>(<span class="string">&quot;FAIL: contains dynamic writes&quot;</span>);
-            <span class="kw">return</span> <span class="prelude-val">None</span>;
+            <span class="kw">return </span><span class="prelude-val">None</span>;
         }
 
-        <span class="kw">let</span> <span class="ident">go_done_edges</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">find_go_done_edges</span>(<span class="ident">group</span>);
-        <span class="kw">let</span> <span class="ident">graph</span> <span class="op">=</span> <span class="ident">graph_unprocessed</span>
-            .<span class="ident">edge_induced_subgraph</span>(<span class="op">|</span><span class="ident">src</span>, <span class="ident">dst</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">mem_wrt_dep_graph</span>(<span class="ident">src</span>, <span class="ident">dst</span>))
-            .<span class="ident">add_edges</span>(<span class="kw-2">&amp;</span><span class="ident">go_done_edges</span>)
-            .<span class="ident">remove_isolated_vertices</span>();
+        <span class="kw">let </span>go_done_edges = <span class="self">self</span>.find_go_done_edges(group);
+        <span class="kw">let </span>graph = graph_unprocessed
+            .edge_induced_subgraph(|src, dst| <span class="self">self</span>.mem_wrt_dep_graph(src, dst))
+            .add_edges(<span class="kw-2">&amp;</span>go_done_edges)
+            .remove_isolated_vertices();
 
-        <span class="comment">// Give up if a port has multiple writes to it.</span>
-        <span class="kw">if</span> <span class="ident"><span class="self">Self</span>::contains_node_deg_gt_one</span>(<span class="kw-2">&amp;</span><span class="ident">graph</span>) {
+        <span class="comment">// Give up if a port has multiple writes to it.
+        </span><span class="kw">if </span><span class="self">Self</span>::contains_node_deg_gt_one(<span class="kw-2">&amp;</span>graph) {
             <span class="macro">log::debug!</span>(<span class="string">&quot;FAIL: Group contains multiple writes&quot;</span>);
-            <span class="kw">return</span> <span class="prelude-val">None</span>;
+            <span class="kw">return </span><span class="prelude-val">None</span>;
         }
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tsort</span> <span class="op">=</span> <span class="ident">graph</span>.<span class="ident">toposort</span>();
-        <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">tsort</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">finish</span> <span class="op">=</span> <span class="ident">tsort</span>.<span class="ident">last</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>tsort = graph.toposort();
+        <span class="kw">let </span>start = tsort.next().unwrap();
+        <span class="kw">let </span>finish = tsort.last().unwrap();
 
-        <span class="kw">let</span> <span class="ident">paths</span> <span class="op">=</span> <span class="ident">graph</span>.<span class="ident">paths</span>(<span class="kw-2">&amp;</span><span class="ident">start</span>.<span class="ident">borrow</span>(), <span class="kw-2">&amp;</span><span class="ident">finish</span>.<span class="ident">borrow</span>());
-        <span class="comment">// If there are no paths, give up.</span>
-        <span class="kw">if</span> <span class="ident">paths</span>.<span class="ident">is_empty</span>() {
+        <span class="kw">let </span>paths = graph.paths(<span class="kw-2">&amp;</span>start.borrow(), <span class="kw-2">&amp;</span>finish.borrow());
+        <span class="comment">// If there are no paths, give up.
+        </span><span class="kw">if </span>paths.is_empty() {
             <span class="macro">log::debug!</span>(<span class="string">&quot;FAIL: No path between @go and @done port&quot;</span>);
-            <span class="kw">return</span> <span class="prelude-val">None</span>;
+            <span class="kw">return </span><span class="prelude-val">None</span>;
         }
-        <span class="kw">let</span> <span class="ident">first_path</span> <span class="op">=</span> <span class="ident">paths</span>.<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let </span>first_path = paths.get(<span class="number">0</span>).unwrap();
 
-        <span class="comment">// Sum the latencies of each primitive along the path.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">latency_sum</span> <span class="op">=</span> <span class="number">0</span>;
-        <span class="kw">for</span> <span class="ident">port</span> <span class="kw">in</span> <span class="ident">first_path</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cwrf</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">parent</span> {
-                <span class="kw">let</span> <span class="ident">cr</span> <span class="op">=</span> <span class="ident">cwrf</span>.<span class="ident">upgrade</span>();
-                <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cr</span>.<span class="ident">borrow</span>();
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ports</span>) <span class="op">=</span>
-                    <span class="ident">cell</span>.<span class="ident">type_name</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>))
+        <span class="comment">// Sum the latencies of each primitive along the path.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>latency_sum = <span class="number">0</span>;
+        <span class="kw">for </span>port <span class="kw">in </span>first_path {
+            <span class="kw">if let </span>ir::PortParent::Cell(cwrf) = <span class="kw-2">&amp;</span>port.borrow().parent {
+                <span class="kw">let </span>cr = cwrf.upgrade();
+                <span class="kw">let </span>cell = cr.borrow();
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(ports) =
+                    cell.type_name().and_then(|c| <span class="self">self</span>.latency_data.get(<span class="kw-2">&amp;</span>c))
                 {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">latency</span>) <span class="op">=</span>
-                        <span class="ident">ports</span>.<span class="ident">get_latency</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">name</span>)
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) =
+                        ports.get_latency(<span class="kw-2">&amp;</span>port.borrow().name)
                     {
-                        <span class="ident">latency_sum</span> <span class="op">+</span><span class="op">=</span> <span class="ident">latency</span>;
+                        latency_sum += latency;
                     }
                 }
             }
         }
 
-        <span class="macro">log::debug!</span>(<span class="string">&quot;SUCCESS: Latency = {}&quot;</span>, <span class="ident">latency_sum</span>);
-        <span class="prelude-val">Some</span>(<span class="ident">latency_sum</span>)
+        <span class="macro">log::debug!</span>(<span class="string">&quot;SUCCESS: Latency = {}&quot;</span>, latency_sum);
+        <span class="prelude-val">Some</span>(latency_sum)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Visitor</span> <span class="kw">for</span> <span class="ident">InferStaticTiming</span> {
-    <span class="comment">// Require post order traversal of components to ensure `invoke` nodes</span>
-    <span class="comment">// get timing information for components.</span>
-    <span class="kw">fn</span> <span class="ident">require_postorder</span>() -&gt; <span class="ident">bool</span> {
-        <span class="bool-val">true</span>
-    }
+<span class="kw">impl </span>Visitor <span class="kw">for </span>InferStaticTiming {
+    <span class="comment">// Require post order traversal of components to ensure `invoke` nodes
+    // get timing information for components.
+    </span><span class="kw">fn </span>require_postorder() -&gt; bool {
+        <span class="bool-val">true
+    </span>}
 
-    <span class="kw">fn</span> <span class="ident">start</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">_lib</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">latency_result</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>;
-        <span class="kw">for</span> <span class="ident">group</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>() {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">latency</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">infer_latency</span>(<span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">borrow</span>()) {
-                <span class="kw">let</span> <span class="ident">grp</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">borrow</span>();
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">curr_lat</span>) <span class="op">=</span> <span class="ident">grp</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>) {
-                    <span class="comment">// Inferred latency is not the same as the provided latency annotation.</span>
-                    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">curr_lat</span> <span class="op">!</span><span class="op">=</span> <span class="ident">latency</span> {
-                        <span class="kw">let</span> <span class="ident">msg1</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Annotated latency: {}&quot;</span>, <span class="ident">curr_lat</span>);
-                        <span class="kw">let</span> <span class="ident">msg2</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Inferred latency: {}&quot;</span>, <span class="ident">latency</span>);
-                        <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(
+    <span class="kw">fn </span>start(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _lib: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">let </span><span class="kw-2">mut </span>latency_result: <span class="prelude-ty">Option</span>&lt;u64&gt;;
+        <span class="kw">for </span>group <span class="kw">in </span>comp.groups.iter() {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = <span class="self">self</span>.infer_latency(<span class="kw-2">&amp;</span>group.borrow()) {
+                <span class="kw">let </span>grp = group.borrow();
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(curr_lat) = grp.attributes.get(<span class="string">&quot;static&quot;</span>) {
+                    <span class="comment">// Inferred latency is not the same as the provided latency annotation.
+                    </span><span class="kw">if </span><span class="kw-2">*</span>curr_lat != latency {
+                        <span class="kw">let </span>msg1 = <span class="macro">format!</span>(<span class="string">&quot;Annotated latency: {}&quot;</span>, curr_lat);
+                        <span class="kw">let </span>msg2 = <span class="macro">format!</span>(<span class="string">&quot;Inferred latency: {}&quot;</span>, latency);
+                        <span class="kw">let </span>msg = <span class="macro">format!</span>(
                             <span class="string">&quot;Invalid \&quot;static\&quot; latency annotation for group {}.\n{}\n{}&quot;</span>,
-                            <span class="ident">grp</span>.<span class="ident">name</span>(),
-                            <span class="ident">msg1</span>,
-                            <span class="ident">msg2</span>
+                            grp.name(),
+                            msg1,
+                            msg2
                         );
-                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="ident">msg</span>)
-                            .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">grp</span>.<span class="ident">attributes</span>));
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(msg)
+                            .with_pos(<span class="kw-2">&amp;</span>grp.attributes));
                     }
                 }
-                <span class="ident">latency_result</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">latency</span>);
-            } <span class="kw">else</span> {
-                <span class="ident">latency_result</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+                latency_result = <span class="prelude-val">Some</span>(latency);
+            } <span class="kw">else </span>{
+                latency_result = <span class="prelude-val">None</span>;
             }
 
-            <span class="kw">match</span> <span class="ident">latency_result</span> {
-                <span class="prelude-val">Some</span>(<span class="ident">res</span>) =&gt; {
-                    <span class="ident">group</span>.<span class="ident">borrow_mut</span>().<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="ident">res</span>);
+            <span class="kw">match </span>latency_result {
+                <span class="prelude-val">Some</span>(res) =&gt; {
+                    group.borrow_mut().attributes.insert(<span class="string">&quot;static&quot;</span>, res);
                 }
-                <span class="prelude-val">None</span> =&gt; <span class="kw">continue</span>,
+                <span class="prelude-val">None </span>=&gt; <span class="kw">continue</span>,
             }
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
-    <span class="kw">fn</span> <span class="ident">finish_while</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">s</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::While</span>,
-        <span class="ident">_comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">bound</span>), <span class="prelude-val">Some</span>(<span class="ident">body_time</span>)) <span class="op">=</span> (
-            <span class="ident">s</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;bound&quot;</span>).<span class="ident">cloned</span>(),
-            <span class="ident">s</span>.<span class="ident">body</span>.<span class="ident">get_attribute</span>(<span class="string">&quot;static&quot;</span>),
+    <span class="kw">fn </span>finish_while(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::While,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">if let </span>(<span class="prelude-val">Some</span>(bound), <span class="prelude-val">Some</span>(body_time)) = (
+            s.attributes.get(<span class="string">&quot;bound&quot;</span>).cloned(),
+            s.body.get_attribute(<span class="string">&quot;static&quot;</span>),
         ) {
-            <span class="ident">s</span>.<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="ident">bound</span> <span class="op">*</span> <span class="ident">body_time</span>);
+            s.attributes.insert(<span class="string">&quot;static&quot;</span>, bound * body_time);
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
-    <span class="kw">fn</span> <span class="ident">finish_if</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">s</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::If</span>,
-        <span class="ident">_comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">ttime</span>), <span class="prelude-val">Some</span>(<span class="ident">ftime</span>)) <span class="op">=</span> (
-            <span class="ident">s</span>.<span class="ident">tbranch</span>.<span class="ident">get_attribute</span>(<span class="string">&quot;static&quot;</span>),
-            <span class="ident">s</span>.<span class="ident">fbranch</span>.<span class="ident">get_attribute</span>(<span class="string">&quot;static&quot;</span>),
+    <span class="kw">fn </span>finish_if(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::If,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">if let </span>(<span class="prelude-val">Some</span>(ttime), <span class="prelude-val">Some</span>(ftime)) = (
+            s.tbranch.get_attribute(<span class="string">&quot;static&quot;</span>),
+            s.fbranch.get_attribute(<span class="string">&quot;static&quot;</span>),
         ) {
-            <span class="ident">s</span>.<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="number">1</span> <span class="op">+</span> <span class="ident">cmp::max</span>(<span class="ident">ttime</span>, <span class="ident">ftime</span>));
+            s.attributes.insert(<span class="string">&quot;static&quot;</span>, <span class="number">1 </span>+ cmp::max(ttime, ftime));
         }
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
-    <span class="kw">fn</span> <span class="ident">finish_par</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">s</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Par</span>,
-        <span class="ident">_comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">time</span>) <span class="op">=</span> <span class="ident">accumulate_static_time</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">stmts</span>, <span class="number">0</span>, <span class="ident">cmp::max</span>) {
-            <span class="ident">s</span>.<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="ident">time</span>);
+    <span class="kw">fn </span>finish_par(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::Par,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = accumulate_static_time(<span class="kw-2">&amp;</span>s.stmts, <span class="number">0</span>, cmp::max) {
+            s.attributes.insert(<span class="string">&quot;static&quot;</span>, time);
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
-    <span class="kw">fn</span> <span class="ident">finish_seq</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">s</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Seq</span>,
-        <span class="ident">_comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">time</span>) <span class="op">=</span> <span class="ident">accumulate_static_time</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">stmts</span>, <span class="number">0</span>, <span class="ident">Add::add</span>) {
-            <span class="ident">s</span>.<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="ident">time</span>);
+    <span class="kw">fn </span>finish_seq(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::Seq,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = accumulate_static_time(<span class="kw-2">&amp;</span>s.stmts, <span class="number">0</span>, Add::add) {
+            s.attributes.insert(<span class="string">&quot;static&quot;</span>, time);
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
-    <span class="kw">fn</span> <span class="ident">enable</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">s</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Enable</span>,
-        <span class="ident">_comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">time</span>) <span class="op">=</span> <span class="ident">s</span>.<span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>) {
-            <span class="ident">s</span>.<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="kw-2">*</span><span class="ident">time</span>);
+    <span class="kw">fn </span>enable(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::Enable,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = s.group.borrow().attributes.get(<span class="string">&quot;static&quot;</span>) {
+            s.attributes.insert(<span class="string">&quot;static&quot;</span>, <span class="kw-2">*</span>time);
         }
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
-    <span class="kw">fn</span> <span class="ident">invoke</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">s</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Invoke</span>,
-        <span class="ident">_comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">_sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="comment">// If we&#39;ve found static timing for the invoked component, add</span>
-        <span class="comment">// this information to invoke.</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">time</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">s</span>
-            .<span class="ident">comp</span>
-            .<span class="ident">borrow</span>()
-            .<span class="ident">type_name</span>()
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">name</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>))
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">ports</span><span class="op">|</span> <span class="ident">ports</span>.<span class="ident">invoke_latency</span>())
+    <span class="kw">fn </span>invoke(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::Invoke,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="comment">// If we&#39;ve found static timing for the invoked component, add
+        // this information to invoke.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(time) = <span class="kw-2">&amp;</span>s
+            .comp
+            .borrow()
+            .type_name()
+            .and_then(|name| <span class="self">self</span>.latency_data.get(<span class="kw-2">&amp;</span>name))
+            .and_then(|ports| ports.invoke_latency())
         {
-            <span class="ident">s</span>.<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="kw-2">*</span><span class="ident">time</span>);
+            s.attributes.insert(<span class="string">&quot;static&quot;</span>, <span class="kw-2">*</span>time);
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
-    <span class="kw">fn</span> <span class="ident">finish</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">_lib</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">go_ports</span> <span class="op">=</span> <span class="ident">comp</span>
-            .<span class="ident">signature</span>
-            .<span class="ident">borrow</span>()
-            .<span class="ident">find_all_with_attr</span>(<span class="string">&quot;go&quot;</span>)
-            .<span class="ident">collect_vec</span>();
+    <span class="kw">fn </span>finish(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _lib: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">let </span><span class="kw-2">mut </span>go_ports = comp
+            .signature
+            .borrow()
+            .find_all_with_attr(<span class="string">&quot;go&quot;</span>)
+            .collect_vec();
 
-        <span class="comment">// There is exactly one go port.</span>
-        <span class="kw">if</span> <span class="ident">go_ports</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
-            <span class="kw">let</span> <span class="ident">go_port</span> <span class="op">=</span> <span class="ident">go_ports</span>.<span class="ident">pop</span>().<span class="ident">unwrap</span>();
-            <span class="comment">// If the control program has a static time, make sure the go port&#39;s static annotation matches it</span>
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">time</span>) <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">control</span>.<span class="ident">borrow</span>().<span class="ident">get_attribute</span>(<span class="string">&quot;static&quot;</span>) {
-                <span class="kw">let</span> <span class="ident">maybe_go_time</span> <span class="op">=</span> {
-                    <span class="kw">let</span> <span class="ident">gp</span> <span class="op">=</span> <span class="ident">go_port</span>.<span class="ident">borrow</span>();
-                    <span class="ident">gp</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>).<span class="ident">copied</span>()
+        <span class="comment">// There is exactly one go port.
+        </span><span class="kw">if </span>go_ports.len() == <span class="number">1 </span>{
+            <span class="kw">let </span>go_port = go_ports.pop().unwrap();
+            <span class="comment">// If the control program has a static time, make sure the go port&#39;s static annotation matches it
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>time) = comp.control.borrow().get_attribute(<span class="string">&quot;static&quot;</span>) {
+                <span class="kw">let </span>maybe_go_time = {
+                    <span class="kw">let </span>gp = go_port.borrow();
+                    gp.attributes.get(<span class="string">&quot;static&quot;</span>).copied()
                 };
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">go_time</span>) <span class="op">=</span> <span class="ident">maybe_go_time</span> {
-                    <span class="kw">if</span> <span class="ident">go_time</span> <span class="op">!</span><span class="op">=</span> <span class="ident">time</span> {
-                        <span class="kw">let</span> <span class="ident">msg1</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Annotated latency: {}&quot;</span>, <span class="ident">go_time</span>);
-                        <span class="kw">let</span> <span class="ident">msg2</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Inferred latency: {}&quot;</span>, <span class="ident">time</span>);
-                        <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(go_time) = maybe_go_time {
+                    <span class="kw">if </span>go_time != time {
+                        <span class="kw">let </span>msg1 = <span class="macro">format!</span>(<span class="string">&quot;Annotated latency: {}&quot;</span>, go_time);
+                        <span class="kw">let </span>msg2 = <span class="macro">format!</span>(<span class="string">&quot;Inferred latency: {}&quot;</span>, time);
+                        <span class="kw">let </span>msg = <span class="macro">format!</span>(
                         <span class="string">&quot;Impossible \&quot;static\&quot; latency annotation for component {}.\n{}\n{}&quot;</span>,
-                        <span class="ident">comp</span>.<span class="ident">name</span>,
-                        <span class="ident">msg1</span>,
-                        <span class="ident">msg2</span>
+                        comp.name,
+                        msg1,
+                        msg2
                     );
-                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="ident">msg</span>)
-                            .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">go_port</span>.<span class="ident">borrow</span>().<span class="ident">attributes</span>));
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(msg)
+                            .with_pos(<span class="kw-2">&amp;</span>go_port.borrow().attributes));
                     }
-                } <span class="kw">else</span> {
-                    <span class="ident">go_port</span>.<span class="ident">borrow_mut</span>().<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;static&quot;</span>, <span class="ident">time</span>);
+                } <span class="kw">else </span>{
+                    go_port.borrow_mut().attributes.insert(<span class="string">&quot;static&quot;</span>, time);
                 }
                 <span class="macro">log::info!</span>(
                     <span class="string">&quot;Component `{}` has static time {}&quot;</span>,
-                    <span class="ident">comp</span>.<span class="ident">name</span>,
-                    <span class="ident">time</span>
+                    comp.name,
+                    time
                 );
             }
         }
 
-        <span class="comment">// Add all go-done latencies to the context</span>
-        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">comp</span>.<span class="ident">signature</span>.<span class="ident">borrow</span>();
-        <span class="kw">let</span> <span class="ident">ports</span>: <span class="ident">GoDone</span> <span class="op">=</span> <span class="ident">sig</span>.<span class="ident">into</span>();
+        <span class="comment">// Add all go-done latencies to the context
+        </span><span class="kw">let </span>sig = <span class="kw-2">&amp;*</span>comp.signature.borrow();
+        <span class="kw">let </span>ports: GoDone = sig.into();
 
-        <span class="self">self</span>.<span class="ident">latency_data</span>.<span class="ident">insert</span>(<span class="ident">comp</span>.<span class="ident">name</span>, <span class="ident">ports</span>);
+        <span class="self">self</span>.latency_data.insert(comp.name, ports);
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>)
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

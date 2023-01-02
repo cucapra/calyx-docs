@@ -1,107 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/analysis/dataflow_order.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>dataflow_order.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/analysis/dataflow_order.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>dataflow_order.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -200,203 +195,202 @@
 <span id="195">195</span>
 <span id="196">196</span>
 <span id="197">197</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
+</pre><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
-<span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
-<span class="kw">use</span> <span class="ident">petgraph</span>::{
-    <span class="ident">algo</span>,
-    <span class="ident">graph</span>::{<span class="ident">DiGraph</span>, <span class="ident">NodeIndex</span>},
+<span class="kw">use </span>itertools::Itertools;
+<span class="kw">use </span>petgraph::{
+    algo,
+    graph::{DiGraph, NodeIndex},
 };
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::read_write_set::ReadWriteSet</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">analysis</span>, <span class="ident">ir</span>, <span class="ident">ir::RRC</span>};
+<span class="kw">use </span><span class="kw">super</span>::read_write_set::ReadWriteSet;
+<span class="kw">use </span><span class="kw">crate</span>::errors::{CalyxResult, Error};
+<span class="kw">use crate</span>::{analysis, ir, ir::RRC};
 
-<span class="doccomment">/// Mapping from the name output port to all the input ports that must be driven before it.</span>
-<span class="kw">type</span> <span class="ident">WriteMap</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Mapping from the name output port to all the input ports that must be driven before it.
+</span><span class="kw">type </span>WriteMap = HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt;;
 
-<span class="doccomment">/// Given a set of assignment, generates an ordering that respects combinatinal</span>
-<span class="doccomment">/// dataflow.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataflowOrder</span> {
-    <span class="comment">// Mapping from name of a primitive to its [WriteMap].</span>
-    <span class="ident">write_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">WriteMap</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Given a set of assignment, generates an ordering that respects combinatinal
+/// dataflow.
+</span><span class="kw">pub struct </span>DataflowOrder {
+    <span class="comment">// Mapping from name of a primitive to its [WriteMap].
+    </span>write_map: HashMap&lt;ir::Id, WriteMap&gt;,
 }
 
-<span class="doccomment">/// Generate a write map using a primitive definition.</span>
-<span class="kw">fn</span> <span class="ident">prim_to_write_map</span>(<span class="ident">prim</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Primitive</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">WriteMap</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">read_together_spec</span> <span class="op">=</span> <span class="ident">analysis::PortInterface::comb_path_spec</span>(<span class="ident">prim</span>)<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inputs</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">outputs</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ir::Id</span>, <span class="ident">bool</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+<span class="doccomment">/// Generate a write map using a primitive definition.
+</span><span class="kw">fn </span>prim_to_write_map(prim: <span class="kw-2">&amp;</span>ir::Primitive) -&gt; CalyxResult&lt;WriteMap&gt; {
+    <span class="kw">let </span>read_together_spec = analysis::PortInterface::comb_path_spec(prim)<span class="question-mark">?</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>inputs = HashSet::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>outputs: Vec&lt;(ir::Id, bool)&gt; = Vec::new();
 
-    <span class="comment">// Handle ports not mentioned in read_together specs.</span>
-    <span class="comment">// Each remaining output ports are dependent on all remaining inputs unless it is marked as</span>
-    <span class="comment">// @stable or is an interface port in which case it does not depend on any inputs.</span>
-    <span class="kw">for</span> <span class="ident">port</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">prim</span>.<span class="ident">signature</span> {
-        <span class="kw">let</span> <span class="ident">attrs</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">attributes</span>;
-        <span class="kw">if</span> <span class="ident">attrs</span>.<span class="ident">get</span>(<span class="string">&quot;read_together&quot;</span>).<span class="ident">is_some</span>() {
+    <span class="comment">// Handle ports not mentioned in read_together specs.
+    // Each remaining output ports are dependent on all remaining inputs unless it is marked as
+    // @stable or is an interface port in which case it does not depend on any inputs.
+    </span><span class="kw">for </span>port <span class="kw">in </span><span class="kw-2">&amp;</span>prim.signature {
+        <span class="kw">let </span>attrs = <span class="kw-2">&amp;</span>port.attributes;
+        <span class="kw">if </span>attrs.get(<span class="string">&quot;read_together&quot;</span>).is_some() {
             <span class="kw">continue</span>;
         }
-        <span class="kw">match</span> <span class="ident">port</span>.<span class="ident">direction</span> {
-            <span class="ident">ir::Direction::Input</span> =&gt; {
-                <span class="ident">inputs</span>.<span class="ident">insert</span>(<span class="ident">port</span>.<span class="ident">name</span>);
+        <span class="kw">match </span>port.direction {
+            ir::Direction::Input =&gt; {
+                inputs.insert(port.name);
             }
-            <span class="ident">ir::Direction::Output</span> =&gt; <span class="ident">outputs</span>.<span class="ident">push</span>((
-                <span class="ident">port</span>.<span class="ident">name</span>,
-                <span class="ident">attrs</span>.<span class="ident">get</span>(<span class="string">&quot;stable&quot;</span>).<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">attrs</span>.<span class="ident">get</span>(<span class="string">&quot;done&quot;</span>)).<span class="ident">is_some</span>(),
+            ir::Direction::Output =&gt; outputs.push((
+                port.name,
+                attrs.get(<span class="string">&quot;stable&quot;</span>).or_else(|| attrs.get(<span class="string">&quot;done&quot;</span>)).is_some(),
             )),
-            <span class="ident">ir::Direction::Inout</span> =&gt; {
+            ir::Direction::Inout =&gt; {
                 <span class="macro">unreachable!</span>(<span class="string">&quot;Primitive ports should not be inout&quot;</span>)
             }
         }
     }
-    <span class="kw">let</span> <span class="ident">all_ports</span>: <span class="ident">WriteMap</span> <span class="op">=</span> <span class="ident">outputs</span>
-        .<span class="ident">into_iter</span>()
-        .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">out</span>, <span class="ident">stable</span>)<span class="op">|</span> {
-            <span class="comment">// Stable ports don&#39;t depend on anything</span>
-            <span class="kw">if</span> <span class="ident">stable</span> {
-                (<span class="ident">out</span>, <span class="ident">HashSet::new</span>())
-            } <span class="kw">else</span> {
-                (<span class="ident">out</span>, <span class="ident">inputs</span>.<span class="ident">clone</span>())
+    <span class="kw">let </span>all_ports: WriteMap = outputs
+        .into_iter()
+        .map(|(out, stable)| {
+            <span class="comment">// Stable ports don&#39;t depend on anything
+            </span><span class="kw">if </span>stable {
+                (out, HashSet::new())
+            } <span class="kw">else </span>{
+                (out, inputs.clone())
             }
         })
-        .<span class="ident">chain</span>(<span class="ident">read_together_spec</span>)
-        .<span class="ident">collect</span>();
-    <span class="prelude-val">Ok</span>(<span class="ident">all_ports</span>)
+        .chain(read_together_spec)
+        .collect();
+    <span class="prelude-val">Ok</span>(all_ports)
 }
 
-<span class="doccomment">/// Get the name of the port&#39;s cell&#39;s prototype if it is a component.</span>
-<span class="kw">fn</span> <span class="ident">primitive_parent</span>(<span class="ident">pr</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">pr</span>.<span class="ident">borrow</span>();
-    <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">cell_parent</span>().<span class="ident">borrow</span>().<span class="ident">prototype</span> {
-        <span class="ident">ir::CellType::Primitive</span> { <span class="ident">name</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">name</span>),
-        <span class="ident">ir::CellType::Component</span> { .. }
-        <span class="op">|</span> <span class="ident">ir::CellType::ThisComponent</span>
-        <span class="op">|</span> <span class="ident">ir::CellType::Constant</span> { .. } =&gt; <span class="prelude-val">None</span>,
+<span class="doccomment">/// Get the name of the port&#39;s cell&#39;s prototype if it is a component.
+</span><span class="kw">fn </span>primitive_parent(pr: <span class="kw-2">&amp;</span>RRC&lt;ir::Port&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;ir::Id&gt; {
+    <span class="kw">let </span>port = pr.borrow();
+    <span class="kw">match </span><span class="kw-2">&amp;</span>port.cell_parent().borrow().prototype {
+        ir::CellType::Primitive { name, .. } =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span>name),
+        ir::CellType::Component { .. }
+        | ir::CellType::ThisComponent
+        | ir::CellType::Constant { .. } =&gt; <span class="prelude-val">None</span>,
     }
 }
 
-<span class="kw">impl</span> <span class="ident">DataflowOrder</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
-        <span class="ident">primitives</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ir::Primitive</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">write_map</span> <span class="op">=</span> <span class="ident">primitives</span>
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">prim_to_write_map</span>(<span class="ident">p</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">wm</span><span class="op">|</span> (<span class="ident">p</span>.<span class="ident">name</span>, <span class="ident">wm</span>)))
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">DataflowOrder</span> { <span class="ident">write_map</span> })
+<span class="kw">impl </span>DataflowOrder {
+    <span class="kw">pub fn </span>new&lt;<span class="lifetime">&#39;a</span>&gt;(
+        primitives: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Primitive&gt;,
+    ) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>write_map = primitives
+            .map(|p| prim_to_write_map(p).map(|wm| (p.name, wm)))
+            .collect::&lt;CalyxResult&lt;<span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(DataflowOrder { write_map })
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dataflow_sort</span>(
+    <span class="kw">pub fn </span>dataflow_sort(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">assigns</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="comment">// Construct a graph where a node is an assignment and there is edge between</span>
-        <span class="comment">// nodes if one should occur before another.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gr</span>: <span class="ident">DiGraph</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">DiGraph::new</span>();
+        assigns: Vec&lt;ir::Assignment&gt;,
+    ) -&gt; CalyxResult&lt;Vec&lt;ir::Assignment&gt;&gt; {
+        <span class="comment">// Construct a graph where a node is an assignment and there is edge between
+        // nodes if one should occur before another.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>gr: DiGraph&lt;<span class="prelude-ty">Option</span>&lt;ir::Assignment&gt;, ()&gt; = DiGraph::new();
 
-        <span class="comment">// Mapping from the index corresponding to an assignment to its read/write sets.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writes</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Canonical</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">NodeIndex</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reads</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">NodeIndex</span>, (<span class="ident">ir::Id</span>, <span class="ident">ir::Canonical</span>))<span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">Vec::with_capacity</span>(<span class="ident">assigns</span>.<span class="ident">len</span>());
+        <span class="comment">// Mapping from the index corresponding to an assignment to its read/write sets.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>writes: HashMap&lt;ir::Canonical, Vec&lt;NodeIndex&gt;&gt; = HashMap::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>reads: Vec&lt;(NodeIndex, (ir::Id, ir::Canonical))&gt; =
+            Vec::with_capacity(assigns.len());
 
-        <span class="comment">// Assignments to the hole are not considered in the sorting.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hole_writes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="comment">// Assignments to the hole are not considered in the sorting.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>hole_writes: Vec&lt;ir::Assignment&gt; = Vec::new();
 
-        <span class="comment">// Construct the nodes that contain the assignments</span>
-        <span class="kw">for</span> <span class="ident">assign</span> <span class="kw">in</span> <span class="ident">assigns</span> {
-            <span class="kw">if</span> <span class="ident">assign</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>().<span class="ident">is_hole</span>() {
-                <span class="ident">hole_writes</span>.<span class="ident">push</span>(<span class="ident">assign</span>)
-            } <span class="kw">else</span> {
-                <span class="kw">let</span> <span class="ident">rs</span> <span class="op">=</span> <span class="ident">ReadWriteSet::port_reads</span>(<span class="kw-2">&amp;</span><span class="ident">assign</span>)
-                    .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> {
-                        <span class="ident">primitive_parent</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>)
-                            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">comp</span><span class="op">|</span> (<span class="ident">comp</span>, <span class="ident">p</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>()))
+        <span class="comment">// Construct the nodes that contain the assignments
+        </span><span class="kw">for </span>assign <span class="kw">in </span>assigns {
+            <span class="kw">if </span>assign.dst.borrow().is_hole() {
+                hole_writes.push(assign)
+            } <span class="kw">else </span>{
+                <span class="kw">let </span>rs = ReadWriteSet::port_reads(<span class="kw-2">&amp;</span>assign)
+                    .filter_map(|p| {
+                        primitive_parent(<span class="kw-2">&amp;</span>p)
+                            .map(|comp| (comp, p.borrow().canonical()))
                     })
-                    .<span class="ident">collect_vec</span>();
-                <span class="kw">let</span> <span class="ident">ws</span> <span class="op">=</span> {
-                    <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">assign</span>.<span class="ident">dst</span>.<span class="ident">borrow</span>();
-                    <span class="kw">let</span> <span class="ident">dst_parent</span> <span class="op">=</span> <span class="macro">matches!</span>(
-                        <span class="ident">dst</span>.<span class="ident">cell_parent</span>().<span class="ident">borrow</span>().<span class="ident">prototype</span>,
-                        <span class="ident">ir::CellType::Primitive</span> { .. }
+                    .collect_vec();
+                <span class="kw">let </span>ws = {
+                    <span class="kw">let </span>dst = assign.dst.borrow();
+                    <span class="kw">let </span>dst_parent = <span class="macro">matches!</span>(
+                        dst.cell_parent().borrow().prototype,
+                        ir::CellType::Primitive { .. }
                     );
-                    <span class="kw">if</span> <span class="ident">dst_parent</span> {
-                        <span class="prelude-val">Some</span>(<span class="ident">dst</span>.<span class="ident">canonical</span>())
-                    } <span class="kw">else</span> {
-                        <span class="prelude-val">None</span>
-                    }
+                    <span class="kw">if </span>dst_parent {
+                        <span class="prelude-val">Some</span>(dst.canonical())
+                    } <span class="kw">else </span>{
+                        <span class="prelude-val">None
+                    </span>}
                 };
-                <span class="kw">let</span> <span class="ident">idx</span> <span class="op">=</span> <span class="ident">gr</span>.<span class="ident">add_node</span>(<span class="prelude-val">Some</span>(<span class="ident">assign</span>));
-                <span class="ident">reads</span>.<span class="ident">extend</span>(<span class="ident">rs</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> (<span class="ident">idx</span>, <span class="ident">r</span>)));
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">w_can</span>) <span class="op">=</span> <span class="ident">ws</span> {
-                    <span class="ident">writes</span>.<span class="ident">entry</span>(<span class="ident">w_can</span>).<span class="ident">or_default</span>().<span class="ident">push</span>(<span class="ident">idx</span>);
+                <span class="kw">let </span>idx = gr.add_node(<span class="prelude-val">Some</span>(assign));
+                reads.extend(rs.into_iter().map(|r| (idx, r)));
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(w_can) = ws {
+                    writes.entry(w_can).or_default().push(idx);
                 }
             }
         }
 
-        <span class="comment">// Walk over the writes and add edges between all required reads</span>
-        <span class="comment">// XXX(rachit): This probably adds a bunch of duplicate edges and in the</span>
-        <span class="comment">// worst case makes this pass much slower than it needs to be.</span>
-        <span class="kw">for</span> (<span class="ident">r_idx</span>, (<span class="ident">comp</span>, <span class="ident">canonical_port</span>)) <span class="kw">in</span> <span class="ident">reads</span> {
-            <span class="kw">let</span> <span class="ident">ir::Canonical</span>(<span class="ident">inst</span>, <span class="ident">port</span>) <span class="op">=</span> <span class="ident">canonical_port</span>;
-            <span class="kw">let</span> <span class="ident">dep_ports</span> <span class="op">=</span> <span class="self">self</span>
-                .<span class="ident">write_map</span>
-                .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">comp</span>)
-                .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Component `{}` write map is not defined&quot;</span>, <span class="ident">comp</span>)
+        <span class="comment">// Walk over the writes and add edges between all required reads
+        // XXX(rachit): This probably adds a bunch of duplicate edges and in the
+        // worst case makes this pass much slower than it needs to be.
+        </span><span class="kw">for </span>(r_idx, (comp, canonical_port)) <span class="kw">in </span>reads {
+            <span class="kw">let </span>ir::Canonical(inst, port) = canonical_port;
+            <span class="kw">let </span>dep_ports = <span class="self">self
+                </span>.write_map
+                .get(<span class="kw-2">&amp;</span>comp)
+                .unwrap_or_else(|| {
+                    <span class="macro">panic!</span>(<span class="string">&quot;Component `{}` write map is not defined&quot;</span>, comp)
                 })
-                .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>)
-                .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+                .get(<span class="kw-2">&amp;</span>port)
+                .unwrap_or_else(|| {
                     <span class="macro">panic!</span>(
                         <span class="string">&quot;Port `{}.{}` write map is not defined&quot;</span>,
-                        <span class="ident">comp</span>,
-                        <span class="ident">port</span>.<span class="ident">clone</span>()
+                        comp,
+                        port.clone()
                     )
                 });
 
-            <span class="ident">dep_ports</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">cloned</span>()
-                .<span class="ident">flat_map</span>(<span class="op">|</span><span class="ident">port</span><span class="op">|</span> <span class="ident">writes</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">ir::Canonical</span>(<span class="ident">inst</span>, <span class="ident">port</span>)))
-                .<span class="ident">flatten</span>()
-                .<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">w_idx</span><span class="op">|</span> {
-                    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">w_idx</span> <span class="op">==</span> <span class="ident">r_idx</span> {
-                        <span class="prelude-val">Err</span>(<span class="ident">Error::misc</span>(<span class="macro">format!</span>(
+            dep_ports
+                .iter()
+                .cloned()
+                .flat_map(|port| writes.get(<span class="kw-2">&amp;</span>ir::Canonical(inst, port)))
+                .flatten()
+                .try_for_each(|w_idx| {
+                    <span class="kw">if </span><span class="kw-2">*</span>w_idx == r_idx {
+                        <span class="prelude-val">Err</span>(Error::misc(<span class="macro">format!</span>(
                             <span class="string">&quot;Assignment depends on itself: {}&quot;</span>,
-                            <span class="ident">ir::Printer::assignment_to_str</span>(
-                                <span class="ident">gr</span>[<span class="kw-2">*</span><span class="ident">w_idx</span>].<span class="ident">as_ref</span>().<span class="ident">unwrap</span>()
+                            ir::Printer::assignment_to_str(
+                                gr[<span class="kw-2">*</span>w_idx].as_ref().unwrap()
                             )
                         )))
-                    } <span class="kw">else</span> {
-                        <span class="ident">gr</span>.<span class="ident">add_edge</span>(<span class="kw-2">*</span><span class="ident">w_idx</span>, <span class="ident">r_idx</span>, ());
+                    } <span class="kw">else </span>{
+                        gr.add_edge(<span class="kw-2">*</span>w_idx, r_idx, ());
                         <span class="prelude-val">Ok</span>(())
                     }
                 })<span class="question-mark">?</span>;
         }
 
-        <span class="comment">// Generate a topological ordering</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">order</span>) <span class="op">=</span> <span class="ident">algo::toposort</span>(<span class="kw-2">&amp;</span><span class="ident">gr</span>, <span class="prelude-val">None</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">assigns</span> <span class="op">=</span> <span class="ident">order</span>
-                .<span class="ident">into_iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="ident">std::mem::replace</span>(<span class="kw-2">&amp;mut</span> <span class="ident">gr</span>[<span class="ident">idx</span>], <span class="prelude-val">None</span>).<span class="ident">unwrap</span>())
-                .<span class="ident">collect_vec</span>();
-            <span class="ident">assigns</span>.<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">hole_writes</span>);
-            <span class="prelude-val">Ok</span>(<span class="ident">assigns</span>)
-        } <span class="kw">else</span> {
-            <span class="comment">// Compute strongly connected component of the graph</span>
-            <span class="kw">let</span> <span class="ident">sccs</span> <span class="op">=</span> <span class="ident">algo::kosaraju_scc</span>(<span class="kw-2">&amp;</span><span class="ident">gr</span>);
-            <span class="kw">let</span> <span class="ident">scc</span> <span class="op">=</span> <span class="ident">sccs</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">find</span>(<span class="op">|</span><span class="ident">cc</span><span class="op">|</span> <span class="ident">cc</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">1</span>)
-                .<span class="ident">expect</span>(<span class="string">&quot;All combinational cycles are self loops&quot;</span>);
-            <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="ident">scc</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">idx</span><span class="op">|</span> {
-                    <span class="ident">ir::Printer::assignment_to_str</span>(<span class="ident">gr</span>[<span class="kw-2">*</span><span class="ident">idx</span>].<span class="ident">as_ref</span>().<span class="ident">unwrap</span>())
+        <span class="comment">// Generate a topological ordering
+        </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(order) = algo::toposort(<span class="kw-2">&amp;</span>gr, <span class="prelude-val">None</span>) {
+            <span class="kw">let </span><span class="kw-2">mut </span>assigns = order
+                .into_iter()
+                .map(|idx| std::mem::replace(<span class="kw-2">&amp;mut </span>gr[idx], <span class="prelude-val">None</span>).unwrap())
+                .collect_vec();
+            assigns.append(<span class="kw-2">&amp;mut </span>hole_writes);
+            <span class="prelude-val">Ok</span>(assigns)
+        } <span class="kw">else </span>{
+            <span class="comment">// Compute strongly connected component of the graph
+            </span><span class="kw">let </span>sccs = algo::kosaraju_scc(<span class="kw-2">&amp;</span>gr);
+            <span class="kw">let </span>scc = sccs
+                .iter()
+                .find(|cc| cc.len() &gt; <span class="number">1</span>)
+                .expect(<span class="string">&quot;All combinational cycles are self loops&quot;</span>);
+            <span class="kw">let </span>msg = scc
+                .iter()
+                .map(|idx| {
+                    ir::Printer::assignment_to_str(gr[<span class="kw-2">*</span>idx].as_ref().unwrap())
                 })
-                .<span class="ident">join</span>(<span class="string">&quot;\n&quot;</span>);
-            <span class="prelude-val">Err</span>(<span class="ident">Error::misc</span>(<span class="macro">format!</span>(<span class="string">&quot;Found combinational cycle:\n{}&quot;</span>, <span class="ident">msg</span>)))
+                .join(<span class="string">&quot;\n&quot;</span>);
+            <span class="prelude-val">Err</span>(Error::misc(<span class="macro">format!</span>(<span class="string">&quot;Found combinational cycle:\n{}&quot;</span>, msg)))
         }
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

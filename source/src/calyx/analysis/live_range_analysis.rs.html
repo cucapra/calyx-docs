@@ -1,107 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/analysis/live_range_analysis.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>live_range_analysis.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/analysis/live_range_analysis.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>live_range_analysis.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -954,957 +949,956 @@
 <span id="949">949</span>
 <span id="950">950</span>
 <span id="951">951</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">analysis</span>::{<span class="ident">ControlId</span>, <span class="ident">ReadWriteSet</span>, <span class="ident">ShareSet</span>, <span class="ident">VariableDetection</span>},
-    <span class="ident">ir</span>::{<span class="self">self</span>, <span class="ident">CloneName</span>, <span class="ident">Id</span>, <span class="ident">RRC</span>},
+</pre><pre class="rust"><code><span class="kw">use crate</span>::{
+    analysis::{ControlId, ReadWriteSet, ShareSet, VariableDetection},
+    ir::{<span class="self">self</span>, CloneName, Id, RRC},
 };
-<span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
-<span class="kw">use</span> <span class="ident">std</span>::{
-    <span class="ident">collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>},
-    <span class="ident">fmt::Debug</span>,
+<span class="kw">use </span>itertools::Itertools;
+<span class="kw">use </span>std::{
+    collections::{HashMap, HashSet},
+    fmt::Debug,
 };
 
-<span class="kw">type</span> <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">HashSet</span><span class="op">&lt;</span>(<span class="ident">ir::CellType</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span>;
-<span class="kw">type</span> <span class="ident">CellsByType</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::CellType</span>, <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span><span class="op">&gt;</span>;
-<span class="comment">// maps cell type to maps that map cell name to control statement</span>
-<span class="kw">type</span> <span class="ident">LiveMapByType</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::CellType</span>, <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">type </span>TypeNameSet = HashSet&lt;(ir::CellType, ir::Id)&gt;;
+<span class="kw">type </span>CellsByType = HashMap&lt;ir::CellType, HashSet&lt;ir::Id&gt;&gt;;
+<span class="comment">// maps cell type to maps that map cell name to control statement
+</span><span class="kw">type </span>LiveMapByType = HashMap&lt;ir::CellType, HashMap&lt;ir::Id, HashSet&lt;u64&gt;&gt;&gt;;
 
-<span class="doccomment">/// The data structure used to represent sets of ids. This is used to represent</span>
-<span class="doccomment">/// the `live`, `gen`, and `kill` sets.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Prop</span> {
-    <span class="ident">map</span>: <span class="ident">CellsByType</span>,
+<span class="doccomment">/// The data structure used to represent sets of ids. This is used to represent
+/// the `live`, `gen`, and `kill` sets.
+</span><span class="attribute">#[derive(Default, Clone)]
+</span><span class="kw">pub struct </span>Prop {
+    map: CellsByType,
 }
 
-<span class="doccomment">/// Implement nice printing for prop for debugging purposes.</span>
-<span class="kw">impl</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Prop</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
-        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{{&quot;</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">names</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">iter</span>().<span class="ident">flat_map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">ids</span>)<span class="op">|</span> <span class="ident">ids</span>).<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>);
-        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">names</span>)<span class="question-mark">?</span>;
-        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;}}&quot;</span>)
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">Prop</span> {
-    <span class="doccomment">/// Defines the dataflow transfer function.</span>
-    <span class="doccomment">/// We use the standard definition for liveness:</span>
-    <span class="doccomment">/// `(alive - kill) + gen`</span>
-    <span class="kw">fn</span> <span class="ident">transfer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">gen</span>: <span class="ident">Prop</span>, <span class="ident">kill</span>: <span class="ident">Prop</span>) {
-        <span class="self">self</span>.<span class="ident">sub</span>(<span class="ident">kill</span>);
-        <span class="self">self</span>.<span class="ident">or</span>(<span class="ident">gen</span>);
-    }
-
-    <span class="doccomment">/// Defines the data_flow transfer function. `(alive - kill) + gen`.</span>
-    <span class="doccomment">/// However, this is for when gen and kill are sets, and self is a map.</span>
-    <span class="kw">fn</span> <span class="ident">transfer_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">gen</span>: <span class="ident">TypeNameSet</span>, <span class="ident">kill</span>: <span class="ident">TypeNameSet</span>) {
-        <span class="self">self</span>.<span class="ident">sub_set</span>(<span class="ident">kill</span>);
-        <span class="self">self</span>.<span class="ident">or_set</span>(<span class="ident">gen</span>);
-    }
-
-    <span class="comment">// The or operation, but when the self is a map and rhs is a set of tuples.</span>
-    <span class="kw">fn</span> <span class="ident">or_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">TypeNameSet</span>) {
-        <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">cell_name</span>) <span class="kw">in</span> <span class="ident">rhs</span> {
-            <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">entry</span>(<span class="ident">cell_type</span>).<span class="ident">or_default</span>().<span class="ident">insert</span>(<span class="ident">cell_name</span>);
-        }
-    }
-
-    <span class="comment">// The sub operation, but when the self is a map and rhs is a set of tuples.</span>
-    <span class="kw">fn</span> <span class="ident">sub_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">TypeNameSet</span>) {
-        <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">cell_name</span>) <span class="kw">in</span> <span class="ident">rhs</span> {
-            <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">entry</span>(<span class="ident">cell_type</span>).<span class="ident">or_default</span>().<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">cell_name</span>);
-        }
-    }
-
-    <span class="comment">// edits self to equal self | rhs. Faster than self | rhs  but must take rhs</span>
-    <span class="comment">// ownership and not &amp;rhs.</span>
-    <span class="kw">fn</span> <span class="ident">or</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">Prop</span>) {
-        <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">cell_names</span>) <span class="kw">in</span> <span class="ident">rhs</span>.<span class="ident">map</span> {
-            <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">entry</span>(<span class="ident">cell_type</span>).<span class="ident">or_default</span>().<span class="ident">extend</span>(<span class="ident">cell_names</span>);
-        }
-    }
-
-    <span class="comment">// edits self to equal self intersect rhs. Must take ownership of rhs</span>
-    <span class="comment">// ownership and not &amp;rhs.</span>
-    <span class="kw">fn</span> <span class="ident">intersect</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">rhs</span>: <span class="ident">Prop</span>) {
-        <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">cell_names</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">iter_mut</span>() {
-            <span class="kw">let</span> <span class="ident">empty_hash</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
-            <span class="kw">let</span> <span class="ident">entry</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span> <span class="op">=</span>
-                <span class="ident">rhs</span>.<span class="ident">map</span>.<span class="ident">remove</span>(<span class="ident">cell_type</span>).<span class="ident">unwrap_or</span>(<span class="ident">empty_hash</span>);
-            <span class="ident">cell_names</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">entry</span>.<span class="ident">contains</span>(<span class="ident">cell</span>));
-        }
-    }
-
-    <span class="comment">// edits self to equal self - rhs. Faster than self - rhs  but must take rhs</span>
-    <span class="comment">// ownership and not &amp;rhs.</span>
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">Prop</span>) {
-        <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">cell_names</span>) <span class="kw">in</span> <span class="ident">rhs</span>.<span class="ident">map</span> {
-            <span class="self">self</span>.<span class="ident">map</span>
-                .<span class="ident">entry</span>(<span class="ident">cell_type</span>)
-                .<span class="ident">or_default</span>()
-                .<span class="ident">retain</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="op">!</span><span class="ident">cell_names</span>.<span class="ident">contains</span>(<span class="ident">cell</span>));
-        }
+<span class="doccomment">/// Implement nice printing for prop for debugging purposes.
+</span><span class="kw">impl </span>Debug <span class="kw">for </span>Prop {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">&quot;{{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>names = <span class="self">self</span>.map.iter().flat_map(|(<span class="kw">_</span>, ids)| ids).join(<span class="string">&quot;, &quot;</span>);
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, names)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(f, <span class="string">&quot;}}&quot;</span>)
     }
 }
 
-<span class="doccomment">/// This analysis implements a parallel version of a classic liveness analysis.</span>
-<span class="doccomment">/// For each group or invoke, it returns a list of the state shareable cells</span>
-<span class="doccomment">/// that are &quot;alive&quot; during an execution of a group or invoke statement (we</span>
-<span class="doccomment">/// identify an invoke statement by the cell that is being invoked, and groups</span>
-<span class="doccomment">/// by the name of the group).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## Parallel Analog to a CFG</span>
-<span class="doccomment">/// The `par` statement introduces a new kind of control branching that can</span>
-<span class="doccomment">/// not be captured by a traditional CFG.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Consider whether `x` is alive at `foo` in the following program.</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// seq {</span>
-<span class="doccomment">///   wr_x; // writes register x</span>
-<span class="doccomment">///   foo;</span>
-<span class="doccomment">///   par {</span>
-<span class="doccomment">///     wr_x2; // writes register x</span>
-<span class="doccomment">///     bar;</span>
-<span class="doccomment">///   }</span>
-<span class="doccomment">///   rd_x; // reads register x</span>
-<span class="doccomment">/// }</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// `x` is not alive at `foo` because there are no reads to `x` before</span>
-<span class="doccomment">/// `wr_x2` is executed which writes to `x` again. Note that `wr_x2` is always</span>
-<span class="doccomment">/// executed.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// We might try and represent the `par` branching with a normal CFG like this:</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///       +------+</span>
-<span class="doccomment">///       | wr_x |</span>
-<span class="doccomment">///       +--+---+</span>
-<span class="doccomment">///          |</span>
-<span class="doccomment">///          v</span>
-<span class="doccomment">///       +--+--+</span>
-<span class="doccomment">///    +--+ foo +--+</span>
-<span class="doccomment">///    |  +-----+  |</span>
-<span class="doccomment">///    |           |</span>
-<span class="doccomment">///    v           v</span>
-<span class="doccomment">/// +--+----+   +--+--+</span>
-<span class="doccomment">/// | wr_x2 |   | bar |</span>
-<span class="doccomment">/// +--+----+   +--+--+</span>
-<span class="doccomment">///    |           |</span>
-<span class="doccomment">///    +------+----+</span>
-<span class="doccomment">///           |</span>
-<span class="doccomment">///           v</span>
-<span class="doccomment">///       +------+</span>
-<span class="doccomment">///       | rd_x |</span>
-<span class="doccomment">///       +------+</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// But then this program is identical to</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// seq {</span>
-<span class="doccomment">///   wr_x; // writes register x</span>
-<span class="doccomment">///   foo;</span>
-<span class="doccomment">///   if blah.out with B {</span>
-<span class="doccomment">///     wr_x2; // writes register x</span>
-<span class="doccomment">///   } else {</span>
-<span class="doccomment">///     bar;</span>
-<span class="doccomment">///   }</span>
-<span class="doccomment">///   rd_x; // reads register x</span>
-<span class="doccomment">/// }</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// which has different semantics. In particular `x` is still alive at `foo` because</span>
-<span class="doccomment">/// `wr_x2` may not be executed.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// We need to augment the traditional CFG to account for `par`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## A Parallel CFG</span>
-<span class="doccomment">/// The representation should:</span>
-<span class="doccomment">///  1) Have the same properties as a normal CFG when no parallelism is present.</span>
-<span class="doccomment">///  2) Threads of a `par` block should not have to know that they are in a `par` (i.e. are just CFGs themselves)</span>
-<span class="doccomment">///  3) External to the `par` block, the information of running all threads in `par` should be visible.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// To address these concerns, we use a parallel CFG (pCFG) based on</span>
-<span class="doccomment">/// [Analyzing programs with explicit parallelism](https://link.springer.com/chapter/10.1007%2FBFb0038679).</span>
-<span class="doccomment">/// We introduce a new kind of node in the CFG called a `par node`. A `par node` represents an entire</span>
-<span class="doccomment">/// `par` block. The above program with `par` would look like:</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// +------+</span>
-<span class="doccomment">/// | wr_x |</span>
-<span class="doccomment">/// +--+---+</span>
-<span class="doccomment">///    |</span>
-<span class="doccomment">///    v</span>
-<span class="doccomment">/// +--+--+</span>
-<span class="doccomment">/// | foo |</span>
-<span class="doccomment">/// +--+--+</span>
-<span class="doccomment">///    |</span>
-<span class="doccomment">///    v</span>
-<span class="doccomment">/// +--+---+</span>
-<span class="doccomment">/// | par1 |</span>
-<span class="doccomment">/// +--+---+</span>
-<span class="doccomment">///    |</span>
-<span class="doccomment">///    v</span>
-<span class="doccomment">/// +--+---+</span>
-<span class="doccomment">/// | rd_x |</span>
-<span class="doccomment">/// +------+</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// For each `par node`, we associate a list of pCFGs where each pCFG represents a thread.</span>
-<span class="doccomment">/// Each thread starts with a `begin par` node and ends with a `end par` node.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// These are the graphs associated with `par1`.</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// First thread:    Second thread:</span>
-<span class="doccomment">/// +----------+      +----------+</span>
-<span class="doccomment">/// |begin par1|      |begin par1|</span>
-<span class="doccomment">/// +--+-------+      +-+--------+</span>
-<span class="doccomment">///    |                |</span>
-<span class="doccomment">///    v                v</span>
-<span class="doccomment">/// +--+--+           +-+-+</span>
-<span class="doccomment">/// |wr_x2|           |bar|</span>
-<span class="doccomment">/// +--+--+           +-+-+</span>
-<span class="doccomment">///    |                |</span>
-<span class="doccomment">///    v                v</span>
-<span class="doccomment">/// +--+-----+        +-+------+</span>
-<span class="doccomment">/// |end par1|        |end par1|</span>
-<span class="doccomment">/// +--------+        +--------+</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The idea with the `begin/end parx` nodes is that these will handle the flow</span>
-<span class="doccomment">/// of information in and out of the threads. For example, you could write these equations:</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// out(begin par1) = in(par1)</span>
-<span class="doccomment">/// out(par1) = join over all in(end par1)</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## Definition of Liveness</span>
-<span class="doccomment">/// Now we finally come to the definition of &quot;liveness&quot; and how we use the pCFG to compute this.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// We say a cell `x` is &quot;live&quot; at a node `p` in the CFG if there is a write to `x` ordered before</span>
-<span class="doccomment">/// `p` (such that there are no more writes to `x` at a point between that and `p`) and if there is a read</span>
-<span class="doccomment">/// of `x` ordered after `p` (such that there are no writes between that and `p`).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// We define the following equations (assuming a reversed direction dataflow analysis):</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// for some node n:</span>
-<span class="doccomment">///   gen(n) = registers that may be read in n</span>
-<span class="doccomment">///   kill(n) = register that must be written to in n</span>
-<span class="doccomment">///   live_in(n) = union over live_out(pred(n))</span>
-<span class="doccomment">///   live_out(n) = (live_in(n) - kill(n)) + gen(n)</span>
-<span class="doccomment">/// for some par node p:</span>
-<span class="doccomment">///   gen(p) = union over gen(n) for sub-nodes n in p</span>
-<span class="doccomment">///   kill(p) = union over kill(n) for sub-nodes n in p</span>
-<span class="doccomment">///   live_in(p) = union over live_out(pred(p))</span>
-<span class="doccomment">///   live_out(p) = (live_in(p) - kill(p)) + gen(p)</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// The main place this analysis differs from traditional liveness analysis</span>
-<span class="doccomment">/// is the definition of `gen(p)` and `kill(p)` for `par` nodes. These are the</span>
-<span class="doccomment">/// union of the `gen`s and `kill`s of all of their sub-nodes. Intuitively we</span>
-<span class="doccomment">/// are treating `par` blocks as if they were just a single group. Note that this</span>
-<span class="doccomment">/// is overly conservative because we are potentially ignoring ordering</span>
-<span class="doccomment">/// information of the threads.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LiveRangeAnalysis</span> {
-    <span class="doccomment">/// Map from node ids (i.e., group enables or invokes) names</span>
-    <span class="doccomment">/// to the components live inside them.</span>
-    <span class="ident">live</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">Prop</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Groups that have been identified as variable-like.</span>
-    <span class="doccomment">/// Mapping from group name to Some(type, name) where type is the cell type and</span>
-    <span class="doccomment">/// name is the cell name. If group is not variable like, maps to None.</span>
-    <span class="ident">variable_like</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ir::Id</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ir::CellType</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Set of state shareable components (as type names)</span>
-    <span class="ident">state_share</span>: <span class="ident">ShareSet</span>,
-    <span class="doccomment">/// Set of shareable components (as type names)</span>
-    <span class="ident">share</span>: <span class="ident">ShareSet</span>,
-    <span class="doccomment">/// maps invokes/enable ids to the shareable cell types/names live in them</span>
-    <span class="ident">invokes_enables_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">TypeNameSet</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// maps comb groups of if/while statements to the cell types/</span>
-    <span class="doccomment">/// names used in them</span>
-    <span class="ident">cgroup_uses_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">TypeNameSet</span><span class="op">&gt;</span>,
-}
+<span class="kw">impl </span>Prop {
+    <span class="doccomment">/// Defines the dataflow transfer function.
+    /// We use the standard definition for liveness:
+    /// `(alive - kill) + gen`
+    </span><span class="kw">fn </span>transfer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, gen: Prop, kill: Prop) {
+        <span class="self">self</span>.sub(kill);
+        <span class="self">self</span>.or(gen);
+    }
 
-<span class="kw">impl</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">LiveRangeAnalysis</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
-        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;Live variables {{&quot;</span>)<span class="question-mark">?</span>;
-        <span class="kw">for</span> (<span class="ident">k</span>, <span class="ident">v</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">live</span>.<span class="ident">iter</span>() {
-            <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;  {}: {:?}&quot;</span>, <span class="ident">k</span>, <span class="ident">v</span>)<span class="question-mark">?</span>;
+    <span class="doccomment">/// Defines the data_flow transfer function. `(alive - kill) + gen`.
+    /// However, this is for when gen and kill are sets, and self is a map.
+    </span><span class="kw">fn </span>transfer_set(<span class="kw-2">&amp;mut </span><span class="self">self</span>, gen: TypeNameSet, kill: TypeNameSet) {
+        <span class="self">self</span>.sub_set(kill);
+        <span class="self">self</span>.or_set(gen);
+    }
+
+    <span class="comment">// The or operation, but when the self is a map and rhs is a set of tuples.
+    </span><span class="kw">fn </span>or_set(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: TypeNameSet) {
+        <span class="kw">for </span>(cell_type, cell_name) <span class="kw">in </span>rhs {
+            <span class="self">self</span>.map.entry(cell_type).or_default().insert(cell_name);
         }
-        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;}}&quot;</span>)
+    }
+
+    <span class="comment">// The sub operation, but when the self is a map and rhs is a set of tuples.
+    </span><span class="kw">fn </span>sub_set(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: TypeNameSet) {
+        <span class="kw">for </span>(cell_type, cell_name) <span class="kw">in </span>rhs {
+            <span class="self">self</span>.map.entry(cell_type).or_default().remove(<span class="kw-2">&amp;</span>cell_name);
+        }
+    }
+
+    <span class="comment">// edits self to equal self | rhs. Faster than self | rhs  but must take rhs
+    // ownership and not &amp;rhs.
+    </span><span class="kw">fn </span>or(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: Prop) {
+        <span class="kw">for </span>(cell_type, cell_names) <span class="kw">in </span>rhs.map {
+            <span class="self">self</span>.map.entry(cell_type).or_default().extend(cell_names);
+        }
+    }
+
+    <span class="comment">// edits self to equal self intersect rhs. Must take ownership of rhs
+    // ownership and not &amp;rhs.
+    </span><span class="kw">fn </span>intersect(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>rhs: Prop) {
+        <span class="kw">for </span>(cell_type, cell_names) <span class="kw">in </span><span class="self">self</span>.map.iter_mut() {
+            <span class="kw">let </span>empty_hash = HashSet::new();
+            <span class="kw">let </span>entry: HashSet&lt;Id&gt; =
+                rhs.map.remove(cell_type).unwrap_or(empty_hash);
+            cell_names.retain(|cell| entry.contains(cell));
+        }
+    }
+
+    <span class="comment">// edits self to equal self - rhs. Faster than self - rhs  but must take rhs
+    // ownership and not &amp;rhs.
+    </span><span class="kw">fn </span>sub(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: Prop) {
+        <span class="kw">for </span>(cell_type, cell_names) <span class="kw">in </span>rhs.map {
+            <span class="self">self</span>.map
+                .entry(cell_type)
+                .or_default()
+                .retain(|cell| !cell_names.contains(cell));
+        }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">LiveRangeAnalysis</span> {
-    <span class="doccomment">/// Construct a live range analysis.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
-        <span class="ident">control</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Control</span>,
-        <span class="ident">state_share</span>: <span class="ident">ShareSet</span>,
-        <span class="ident">share</span>: <span class="ident">ShareSet</span>,
-    ) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ranges</span> <span class="op">=</span> <span class="ident">LiveRangeAnalysis</span> {
-            <span class="ident">state_share</span>,
-            <span class="ident">share</span>,
-            ..<span class="ident">Default::default</span>()
+<span class="doccomment">/// This analysis implements a parallel version of a classic liveness analysis.
+/// For each group or invoke, it returns a list of the state shareable cells
+/// that are &quot;alive&quot; during an execution of a group or invoke statement (we
+/// identify an invoke statement by the cell that is being invoked, and groups
+/// by the name of the group).
+///
+/// ## Parallel Analog to a CFG
+/// The `par` statement introduces a new kind of control branching that can
+/// not be captured by a traditional CFG.
+///
+/// Consider whether `x` is alive at `foo` in the following program.
+/// ```
+/// seq {
+///   wr_x; // writes register x
+///   foo;
+///   par {
+///     wr_x2; // writes register x
+///     bar;
+///   }
+///   rd_x; // reads register x
+/// }
+/// ```
+/// `x` is not alive at `foo` because there are no reads to `x` before
+/// `wr_x2` is executed which writes to `x` again. Note that `wr_x2` is always
+/// executed.
+///
+/// We might try and represent the `par` branching with a normal CFG like this:
+/// ```
+///       +------+
+///       | wr_x |
+///       +--+---+
+///          |
+///          v
+///       +--+--+
+///    +--+ foo +--+
+///    |  +-----+  |
+///    |           |
+///    v           v
+/// +--+----+   +--+--+
+/// | wr_x2 |   | bar |
+/// +--+----+   +--+--+
+///    |           |
+///    +------+----+
+///           |
+///           v
+///       +------+
+///       | rd_x |
+///       +------+
+/// ```
+/// But then this program is identical to
+/// ```
+/// seq {
+///   wr_x; // writes register x
+///   foo;
+///   if blah.out with B {
+///     wr_x2; // writes register x
+///   } else {
+///     bar;
+///   }
+///   rd_x; // reads register x
+/// }
+/// ```
+/// which has different semantics. In particular `x` is still alive at `foo` because
+/// `wr_x2` may not be executed.
+///
+/// We need to augment the traditional CFG to account for `par`.
+///
+/// ## A Parallel CFG
+/// The representation should:
+///  1) Have the same properties as a normal CFG when no parallelism is present.
+///  2) Threads of a `par` block should not have to know that they are in a `par` (i.e. are just CFGs themselves)
+///  3) External to the `par` block, the information of running all threads in `par` should be visible.
+///
+/// To address these concerns, we use a parallel CFG (pCFG) based on
+/// [Analyzing programs with explicit parallelism](https://link.springer.com/chapter/10.1007%2FBFb0038679).
+/// We introduce a new kind of node in the CFG called a `par node`. A `par node` represents an entire
+/// `par` block. The above program with `par` would look like:
+/// ```
+/// +------+
+/// | wr_x |
+/// +--+---+
+///    |
+///    v
+/// +--+--+
+/// | foo |
+/// +--+--+
+///    |
+///    v
+/// +--+---+
+/// | par1 |
+/// +--+---+
+///    |
+///    v
+/// +--+---+
+/// | rd_x |
+/// +------+
+/// ```
+/// For each `par node`, we associate a list of pCFGs where each pCFG represents a thread.
+/// Each thread starts with a `begin par` node and ends with a `end par` node.
+///
+/// These are the graphs associated with `par1`.
+/// ```
+/// First thread:    Second thread:
+/// +----------+      +----------+
+/// |begin par1|      |begin par1|
+/// +--+-------+      +-+--------+
+///    |                |
+///    v                v
+/// +--+--+           +-+-+
+/// |wr_x2|           |bar|
+/// +--+--+           +-+-+
+///    |                |
+///    v                v
+/// +--+-----+        +-+------+
+/// |end par1|        |end par1|
+/// +--------+        +--------+
+/// ```
+///
+/// The idea with the `begin/end parx` nodes is that these will handle the flow
+/// of information in and out of the threads. For example, you could write these equations:
+/// ```
+/// out(begin par1) = in(par1)
+/// out(par1) = join over all in(end par1)
+/// ```
+///
+/// ## Definition of Liveness
+/// Now we finally come to the definition of &quot;liveness&quot; and how we use the pCFG to compute this.
+///
+/// We say a cell `x` is &quot;live&quot; at a node `p` in the CFG if there is a write to `x` ordered before
+/// `p` (such that there are no more writes to `x` at a point between that and `p`) and if there is a read
+/// of `x` ordered after `p` (such that there are no writes between that and `p`).
+///
+/// We define the following equations (assuming a reversed direction dataflow analysis):
+/// ```
+/// for some node n:
+///   gen(n) = registers that may be read in n
+///   kill(n) = register that must be written to in n
+///   live_in(n) = union over live_out(pred(n))
+///   live_out(n) = (live_in(n) - kill(n)) + gen(n)
+/// for some par node p:
+///   gen(p) = union over gen(n) for sub-nodes n in p
+///   kill(p) = union over kill(n) for sub-nodes n in p
+///   live_in(p) = union over live_out(pred(p))
+///   live_out(p) = (live_in(p) - kill(p)) + gen(p)
+/// ```
+/// The main place this analysis differs from traditional liveness analysis
+/// is the definition of `gen(p)` and `kill(p)` for `par` nodes. These are the
+/// union of the `gen`s and `kill`s of all of their sub-nodes. Intuitively we
+/// are treating `par` blocks as if they were just a single group. Note that this
+/// is overly conservative because we are potentially ignoring ordering
+/// information of the threads.
+</span><span class="attribute">#[derive(Default)]
+</span><span class="kw">pub struct </span>LiveRangeAnalysis {
+    <span class="doccomment">/// Map from node ids (i.e., group enables or invokes) names
+    /// to the components live inside them.
+    </span>live: HashMap&lt;u64, Prop&gt;,
+    <span class="doccomment">/// Groups that have been identified as variable-like.
+    /// Mapping from group name to Some(type, name) where type is the cell type and
+    /// name is the cell name. If group is not variable like, maps to None.
+    </span>variable_like: HashMap&lt;ir::Id, <span class="prelude-ty">Option</span>&lt;(ir::CellType, ir::Id)&gt;&gt;,
+    <span class="doccomment">/// Set of state shareable components (as type names)
+    </span>state_share: ShareSet,
+    <span class="doccomment">/// Set of shareable components (as type names)
+    </span>share: ShareSet,
+    <span class="doccomment">/// maps invokes/enable ids to the shareable cell types/names live in them
+    </span>invokes_enables_map: HashMap&lt;u64, TypeNameSet&gt;,
+    <span class="doccomment">/// maps comb groups of if/while statements to the cell types/
+    /// names used in them
+    </span>cgroup_uses_map: HashMap&lt;u64, TypeNameSet&gt;,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>LiveRangeAnalysis {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="macro">writeln!</span>(f, <span class="string">&quot;Live variables {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">for </span>(k, v) <span class="kw">in </span><span class="self">self</span>.live.iter() {
+            <span class="macro">writeln!</span>(f, <span class="string">&quot;  {}: {:?}&quot;</span>, k, v)<span class="question-mark">?</span>;
+        }
+        <span class="macro">write!</span>(f, <span class="string">&quot;}}&quot;</span>)
+    }
+}
+
+<span class="kw">impl </span>LiveRangeAnalysis {
+    <span class="doccomment">/// Construct a live range analysis.
+    </span><span class="kw">pub fn </span>new(
+        control: <span class="kw-2">&amp;mut </span>ir::Control,
+        state_share: ShareSet,
+        share: ShareSet,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>ranges = LiveRangeAnalysis {
+            state_share,
+            share,
+            ..Default::default()
         };
 
-        <span class="comment">// Give each control statement a unique &quot;NODE_ID&quot; attribute.</span>
-        <span class="ident">ControlId::compute_unique_ids</span>(<span class="ident">control</span>, <span class="number">0</span>, <span class="bool-val">false</span>);
+        <span class="comment">// Give each control statement a unique &quot;NODE_ID&quot; attribute.
+        </span>ControlId::compute_unique_ids(control, <span class="number">0</span>, <span class="bool-val">false</span>);
 
-        <span class="ident">ranges</span>.<span class="ident">build_live_ranges</span>(
-            <span class="ident">control</span>,
-            <span class="ident">Prop::default</span>(),
-            <span class="ident">Prop::default</span>(),
-            <span class="ident">Prop::default</span>(),
+        ranges.build_live_ranges(
+            control,
+            Prop::default(),
+            Prop::default(),
+            Prop::default(),
         );
 
-        <span class="kw">for</span> (<span class="ident">node</span>, <span class="ident">cells_by_type</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">ranges</span>.<span class="ident">invokes_enables_map</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">prop</span>) <span class="op">=</span> <span class="ident">ranges</span>.<span class="ident">live</span>.<span class="ident">get_mut</span>(<span class="ident">node</span>) {
-                <span class="ident">prop</span>.<span class="ident">or_set</span>(<span class="ident">cells_by_type</span>.<span class="ident">clone</span>());
+        <span class="kw">for </span>(node, cells_by_type) <span class="kw">in </span><span class="kw-2">&amp;</span>ranges.invokes_enables_map {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(prop) = ranges.live.get_mut(node) {
+                prop.or_set(cells_by_type.clone());
             }
         }
 
-        <span class="comment">// LivRangeAnalysis does not handle comb groups currently. Eventually, we want to and make</span>
-        <span class="comment">// remove-comb-groups optional.</span>
+        <span class="comment">// LivRangeAnalysis does not handle comb groups currently. Eventually, we want to and make
+        // remove-comb-groups optional.
 
-        <span class="ident">ranges</span>
+        </span>ranges
     }
 
-    <span class="doccomment">/// Updates live_once_map and par_thread_map.</span>
-    <span class="doccomment">/// live_once_map should map celltypes to a map, which should map cells of</span>
-    <span class="doccomment">/// celltype to control statements in which it is live for at least one group</span>
-    <span class="doccomment">/// or invoke in the control. We only map to control statements that are</span>
-    <span class="doccomment">/// direct children of par blocks.</span>
-    <span class="doccomment">/// parents is the list of current control statements (that are direct children</span>
-    <span class="doccomment">/// of par blocks) that are parents (at any level of neesting) of c.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_live_control_data</span>(
+    <span class="doccomment">/// Updates live_once_map and par_thread_map.
+    /// live_once_map should map celltypes to a map, which should map cells of
+    /// celltype to control statements in which it is live for at least one group
+    /// or invoke in the control. We only map to control statements that are
+    /// direct children of par blocks.
+    /// parents is the list of current control statements (that are direct children
+    /// of par blocks) that are parents (at any level of neesting) of c.
+    </span><span class="kw">pub fn </span>get_live_control_data(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">live_once_map</span>: <span class="kw-2">&amp;mut</span> <span class="ident">LiveMapByType</span>,
-        <span class="ident">par_thread_map</span>: <span class="kw-2">&amp;mut</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">u64</span><span class="op">&gt;</span>,
-        <span class="ident">live_cell_map</span>: <span class="kw-2">&amp;mut</span> <span class="ident">LiveMapByType</span>,
-        <span class="ident">parents</span>: <span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
-        <span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>,
+        live_once_map: <span class="kw-2">&amp;mut </span>LiveMapByType,
+        par_thread_map: <span class="kw-2">&amp;mut </span>HashMap&lt;u64, u64&gt;,
+        live_cell_map: <span class="kw-2">&amp;mut </span>LiveMapByType,
+        parents: <span class="kw-2">&amp;</span>HashSet&lt;u64&gt;,
+        c: <span class="kw-2">&amp;</span>ir::Control,
     ) {
-        <span class="kw">match</span> <span class="ident">c</span> {
-            <span class="ident">ir::Control::Empty</span>(<span class="kw">_</span>) =&gt; (),
-            <span class="ident">ir::Control::Par</span>(<span class="ident">ir::Par</span> { <span class="ident">stmts</span>, .. }) =&gt; {
-                <span class="kw">let</span> <span class="ident">parent_id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>);
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new_parents</span> <span class="op">=</span> <span class="ident">parents</span>.<span class="ident">clone</span>();
-                <span class="kw">for</span> <span class="ident">stmt</span> <span class="kw">in</span> <span class="ident">stmts</span> {
-                    <span class="comment">// building par_thread_map</span>
-                    <span class="kw">let</span> <span class="ident">child_id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">stmt</span>);
-                    <span class="ident">par_thread_map</span>.<span class="ident">insert</span>(<span class="ident">child_id</span>, <span class="ident">parent_id</span>);
+        <span class="kw">match </span>c {
+            ir::Control::Empty(<span class="kw">_</span>) =&gt; (),
+            ir::Control::Par(ir::Par { stmts, .. }) =&gt; {
+                <span class="kw">let </span>parent_id = ControlId::get_guaranteed_id(c);
+                <span class="kw">let </span><span class="kw-2">mut </span>new_parents = parents.clone();
+                <span class="kw">for </span>stmt <span class="kw">in </span>stmts {
+                    <span class="comment">// building par_thread_map
+                    </span><span class="kw">let </span>child_id = ControlId::get_guaranteed_id(stmt);
+                    par_thread_map.insert(child_id, parent_id);
 
-                    <span class="comment">// building live_once_map by adding child_id to parents when</span>
-                    <span class="comment">// we recursively call get_live_control_data on each child</span>
-                    <span class="ident">new_parents</span>.<span class="ident">insert</span>(<span class="ident">child_id</span>);
-                    <span class="self">self</span>.<span class="ident">get_live_control_data</span>(
-                        <span class="ident">live_once_map</span>,
-                        <span class="ident">par_thread_map</span>,
-                        <span class="ident">live_cell_map</span>,
-                        <span class="kw-2">&amp;</span><span class="ident">new_parents</span>,
-                        <span class="ident">stmt</span>,
+                    <span class="comment">// building live_once_map by adding child_id to parents when
+                    // we recursively call get_live_control_data on each child
+                    </span>new_parents.insert(child_id);
+                    <span class="self">self</span>.get_live_control_data(
+                        live_once_map,
+                        par_thread_map,
+                        live_cell_map,
+                        <span class="kw-2">&amp;</span>new_parents,
+                        stmt,
                     );
-                    <span class="ident">new_parents</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">child_id</span>);
+                    new_parents.remove(<span class="kw-2">&amp;</span>child_id);
                 }
             }
-            <span class="ident">ir::Control::Seq</span>(<span class="ident">ir::Seq</span> { <span class="ident">stmts</span>, .. }) =&gt; {
-                <span class="kw">for</span> <span class="ident">stmt</span> <span class="kw">in</span> <span class="ident">stmts</span> {
-                    <span class="self">self</span>.<span class="ident">get_live_control_data</span>(
-                        <span class="ident">live_once_map</span>,
-                        <span class="ident">par_thread_map</span>,
-                        <span class="ident">live_cell_map</span>,
-                        <span class="ident">parents</span>,
-                        <span class="ident">stmt</span>,
+            ir::Control::Seq(ir::Seq { stmts, .. }) =&gt; {
+                <span class="kw">for </span>stmt <span class="kw">in </span>stmts {
+                    <span class="self">self</span>.get_live_control_data(
+                        live_once_map,
+                        par_thread_map,
+                        live_cell_map,
+                        parents,
+                        stmt,
                     );
                 }
             }
-            <span class="ident">ir::Control::If</span>(<span class="ident">ir::If</span> {
-                <span class="ident">tbranch</span>, <span class="ident">fbranch</span>, ..
+            ir::Control::If(ir::If {
+                tbranch, fbranch, ..
             }) =&gt; {
-                <span class="self">self</span>.<span class="ident">get_live_control_data</span>(
-                    <span class="ident">live_once_map</span>,
-                    <span class="ident">par_thread_map</span>,
-                    <span class="ident">live_cell_map</span>,
-                    <span class="ident">parents</span>,
-                    <span class="ident">tbranch</span>,
+                <span class="self">self</span>.get_live_control_data(
+                    live_once_map,
+                    par_thread_map,
+                    live_cell_map,
+                    parents,
+                    tbranch,
                 );
-                <span class="self">self</span>.<span class="ident">get_live_control_data</span>(
-                    <span class="ident">live_once_map</span>,
-                    <span class="ident">par_thread_map</span>,
-                    <span class="ident">live_cell_map</span>,
-                    <span class="ident">parents</span>,
-                    <span class="ident">fbranch</span>,
+                <span class="self">self</span>.get_live_control_data(
+                    live_once_map,
+                    par_thread_map,
+                    live_cell_map,
+                    parents,
+                    fbranch,
                 );
-                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>);
-                <span class="comment">// Examining all the cells used at the comb group of the if stmt</span>
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group_uses</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">cgroup_uses_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
-                    <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">cell_name</span>) <span class="kw">in</span> <span class="ident">comb_group_uses</span> {
-                        <span class="comment">// add cells as live within whichever direct children of</span>
-                        <span class="comment">// par blocks they&#39;re located within</span>
-                        <span class="kw">if</span> <span class="op">!</span><span class="ident">parents</span>.<span class="ident">is_empty</span>() {
-                            <span class="ident">live_once_map</span>
-                                .<span class="ident">entry</span>(<span class="ident">cell_type</span>.<span class="ident">clone</span>())
-                                .<span class="ident">or_default</span>()
-                                .<span class="ident">entry</span>(<span class="kw-2">*</span><span class="ident">cell_name</span>)
-                                .<span class="ident">or_default</span>()
-                                .<span class="ident">extend</span>(<span class="ident">parents</span>);
+                <span class="kw">let </span>id = ControlId::get_guaranteed_id(c);
+                <span class="comment">// Examining all the cells used at the comb group of the if stmt
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(comb_group_uses) = <span class="self">self</span>.cgroup_uses_map.get(<span class="kw-2">&amp;</span>id) {
+                    <span class="kw">for </span>(cell_type, cell_name) <span class="kw">in </span>comb_group_uses {
+                        <span class="comment">// add cells as live within whichever direct children of
+                        // par blocks they&#39;re located within
+                        </span><span class="kw">if </span>!parents.is_empty() {
+                            live_once_map
+                                .entry(cell_type.clone())
+                                .or_default()
+                                .entry(<span class="kw-2">*</span>cell_name)
+                                .or_default()
+                                .extend(parents);
                         }
-                        <span class="comment">// mark cell as live in the control id of the if statement.</span>
-                        <span class="comment">// What this really means, though, is that the cell is live</span>
-                        <span class="comment">// at the comb group/port guard of the if statement</span>
-                        <span class="ident">live_cell_map</span>
-                            .<span class="ident">entry</span>(<span class="ident">cell_type</span>.<span class="ident">clone</span>())
-                            .<span class="ident">or_default</span>()
-                            .<span class="ident">entry</span>(<span class="kw-2">*</span><span class="ident">cell_name</span>)
-                            .<span class="ident">or_default</span>()
-                            .<span class="ident">insert</span>(<span class="ident">id</span>);
+                        <span class="comment">// mark cell as live in the control id of the if statement.
+                        // What this really means, though, is that the cell is live
+                        // at the comb group/port guard of the if statement
+                        </span>live_cell_map
+                            .entry(cell_type.clone())
+                            .or_default()
+                            .entry(<span class="kw-2">*</span>cell_name)
+                            .or_default()
+                            .insert(id);
                     }
                 }
             }
-            <span class="ident">ir::Control::While</span>(<span class="ident">ir::While</span> { <span class="ident">body</span>, .. }) =&gt; {
-                <span class="self">self</span>.<span class="ident">get_live_control_data</span>(
-                    <span class="ident">live_once_map</span>,
-                    <span class="ident">par_thread_map</span>,
-                    <span class="ident">live_cell_map</span>,
-                    <span class="ident">parents</span>,
-                    <span class="ident">body</span>,
+            ir::Control::While(ir::While { body, .. }) =&gt; {
+                <span class="self">self</span>.get_live_control_data(
+                    live_once_map,
+                    par_thread_map,
+                    live_cell_map,
+                    parents,
+                    body,
                 );
-                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>);
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group_uses</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">cgroup_uses_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
-                    <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">cell_name</span>) <span class="kw">in</span> <span class="ident">comb_group_uses</span> {
-                        <span class="kw">if</span> <span class="op">!</span><span class="ident">parents</span>.<span class="ident">is_empty</span>() {
-                            <span class="ident">live_once_map</span>
-                                .<span class="ident">entry</span>(<span class="ident">cell_type</span>.<span class="ident">clone</span>())
-                                .<span class="ident">or_default</span>()
-                                .<span class="ident">entry</span>(<span class="kw-2">*</span><span class="ident">cell_name</span>)
-                                .<span class="ident">or_default</span>()
-                                .<span class="ident">extend</span>(<span class="ident">parents</span>);
+                <span class="kw">let </span>id = ControlId::get_guaranteed_id(c);
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(comb_group_uses) = <span class="self">self</span>.cgroup_uses_map.get(<span class="kw-2">&amp;</span>id) {
+                    <span class="kw">for </span>(cell_type, cell_name) <span class="kw">in </span>comb_group_uses {
+                        <span class="kw">if </span>!parents.is_empty() {
+                            live_once_map
+                                .entry(cell_type.clone())
+                                .or_default()
+                                .entry(<span class="kw-2">*</span>cell_name)
+                                .or_default()
+                                .extend(parents);
                         }
-                        <span class="ident">live_cell_map</span>
-                            .<span class="ident">entry</span>(<span class="ident">cell_type</span>.<span class="ident">clone</span>())
-                            .<span class="ident">or_default</span>()
-                            .<span class="ident">entry</span>(<span class="kw-2">*</span><span class="ident">cell_name</span>)
-                            .<span class="ident">or_default</span>()
-                            .<span class="ident">insert</span>(<span class="ident">id</span>);
+                        live_cell_map
+                            .entry(cell_type.clone())
+                            .or_default()
+                            .entry(<span class="kw-2">*</span>cell_name)
+                            .or_default()
+                            .insert(id);
                     }
                 }
             }
-            <span class="ident">ir::Control::Enable</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">ir::Control::Invoke</span>(<span class="kw">_</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>);
-                <span class="kw">let</span> <span class="ident">live_set</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">live</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">unwrap</span>().<span class="ident">map</span>.<span class="ident">clone</span>();
-                <span class="kw">for</span> (<span class="ident">cell_type</span>, <span class="ident">live_cells</span>) <span class="kw">in</span> <span class="ident">live_set</span> {
-                    <span class="kw">let</span> <span class="ident">cell_to_node</span> <span class="op">=</span>
-                        <span class="ident">live_cell_map</span>.<span class="ident">entry</span>(<span class="ident">cell_type</span>.<span class="ident">clone</span>()).<span class="ident">or_default</span>();
-                    <span class="kw">let</span> <span class="ident">cell_to_control</span> <span class="op">=</span>
-                        <span class="ident">live_once_map</span>.<span class="ident">entry</span>(<span class="ident">cell_type</span>).<span class="ident">or_default</span>();
-                    <span class="kw">for</span> <span class="ident">cell</span> <span class="kw">in</span> <span class="ident">live_cells</span> {
-                        <span class="ident">cell_to_node</span>.<span class="ident">entry</span>(<span class="ident">cell</span>).<span class="ident">or_default</span>().<span class="ident">insert</span>(<span class="ident">id</span>);
-                        <span class="ident">cell_to_control</span>
-                            .<span class="ident">entry</span>(<span class="ident">cell</span>)
-                            .<span class="ident">or_default</span>()
-                            .<span class="ident">extend</span>(<span class="ident">parents</span>);
+            ir::Control::Enable(<span class="kw">_</span>) | ir::Control::Invoke(<span class="kw">_</span>) =&gt; {
+                <span class="kw">let </span>id = ControlId::get_guaranteed_id(c);
+                <span class="kw">let </span>live_set = <span class="self">self</span>.live.get(<span class="kw-2">&amp;</span>id).unwrap().map.clone();
+                <span class="kw">for </span>(cell_type, live_cells) <span class="kw">in </span>live_set {
+                    <span class="kw">let </span>cell_to_node =
+                        live_cell_map.entry(cell_type.clone()).or_default();
+                    <span class="kw">let </span>cell_to_control =
+                        live_once_map.entry(cell_type).or_default();
+                    <span class="kw">for </span>cell <span class="kw">in </span>live_cells {
+                        cell_to_node.entry(cell).or_default().insert(id);
+                        cell_to_control
+                            .entry(cell)
+                            .or_default()
+                            .extend(parents);
                     }
                 }
             }
         }
     }
 
-    <span class="doccomment">/// Look up the set of things live at a node (i.e. group or invoke) definition.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">node</span>: <span class="kw-2">&amp;</span><span class="ident">u64</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">CellsByType</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>
-            .<span class="ident">live</span>
-            .<span class="ident">get</span>(<span class="ident">node</span>)
-            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">panic!</span>(<span class="string">&quot;Live set missing for {}&quot;</span>, <span class="ident">node</span>))
-            .<span class="ident">map</span>
+    <span class="doccomment">/// Look up the set of things live at a node (i.e. group or invoke) definition.
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, node: <span class="kw-2">&amp;</span>u64) -&gt; <span class="kw-2">&amp;</span>CellsByType {
+        <span class="kw-2">&amp;</span><span class="self">self
+            </span>.live
+            .get(node)
+            .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;Live set missing for {}&quot;</span>, node))
+            .map
     }
 
-    <span class="doccomment">/// Get a unique list of all live cells in `component`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_all</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ir::Id</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
-        <span class="self">self</span>.<span class="ident">live</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">flat_map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">set</span>)<span class="op">|</span> {
-                <span class="ident">set</span>.<span class="ident">map</span>.<span class="ident">iter</span>().<span class="ident">fold</span>(<span class="ident">HashSet::new</span>(), <span class="op">|</span><span class="kw-2">mut</span> <span class="ident">acc</span>, (<span class="kw">_</span>, <span class="ident">set</span>)<span class="op">|</span> {
-                    <span class="ident">acc</span>.<span class="ident">extend</span>(<span class="ident">set</span>);
-                    <span class="ident">acc</span>
+    <span class="doccomment">/// Get a unique list of all live cells in `component`.
+    </span><span class="kw">pub fn </span>get_all(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = ir::Id&gt; + <span class="lifetime">&#39;_ </span>{
+        <span class="self">self</span>.live
+            .iter()
+            .flat_map(|(<span class="kw">_</span>, set)| {
+                set.map.iter().fold(HashSet::new(), |<span class="kw-2">mut </span>acc, (<span class="kw">_</span>, set)| {
+                    acc.extend(set);
+                    acc
                 })
             })
-            .<span class="ident">unique</span>()
-            .<span class="ident">cloned</span>()
+            .unique()
+            .cloned()
     }
 
-    <span class="kw">fn</span> <span class="ident">variable_like</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">grp</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ir::CellType</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">grp</span>.<span class="ident">borrow</span>();
-        <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">name</span>();
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">variable_like</span>.<span class="ident">contains_key</span>(<span class="ident">name</span>) {
-            <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">VariableDetection::variable_like</span>(<span class="ident">grp</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>);
-            <span class="self">self</span>.<span class="ident">variable_like</span>.<span class="ident">insert</span>(<span class="ident">grp</span>.<span class="ident">clone_name</span>(), <span class="ident">res</span>);
+    <span class="kw">fn </span>variable_like(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        grp: <span class="kw-2">&amp;</span>RRC&lt;ir::Group&gt;,
+    ) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;(ir::CellType, ir::Id)&gt; {
+        <span class="kw">let </span>group = grp.borrow();
+        <span class="kw">let </span>name = <span class="kw-2">&amp;</span>group.name();
+        <span class="kw">if </span>!<span class="self">self</span>.variable_like.contains_key(name) {
+            <span class="kw">let </span>res = VariableDetection::variable_like(grp, <span class="kw-2">&amp;</span><span class="self">self</span>.state_share);
+            <span class="self">self</span>.variable_like.insert(grp.clone_name(), res);
         }
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">variable_like</span>[<span class="ident">name</span>]
+        <span class="kw-2">&amp;</span><span class="self">self</span>.variable_like[name]
     }
 
-    <span class="doccomment">/// Compute the `gen` and `kill` sets for a given group definition. Because</span>
-    <span class="doccomment">/// we can&#39;t always know if a group will *definitely* kill something or *definitely*</span>
-    <span class="doccomment">/// read something, this function is conservative.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// However, it is conservative in different directions for `gens` and `kills`.</span>
-    <span class="doccomment">/// In particular, it is always ok to accidentally put something in `gens` because</span>
-    <span class="doccomment">/// in the worst case we say something is alive when it isn&#39;t.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// However, it is **never** ok to accidentally put something in `writes` because</span>
-    <span class="doccomment">/// we might accidentally kill something that should be alive.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// To implement this, we say that something is being read if it shows up on the rhs</span>
-    <span class="doccomment">/// of any assignment in a group. Something is written if it it&#39;s guard is `1` or if it has no guard.</span>
-    <span class="kw">fn</span> <span class="ident">find_gen_kill_group</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">group_ref</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span>,
-    ) -&gt; (<span class="ident">TypeNameSet</span>, <span class="ident">TypeNameSet</span>) {
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">group_ref</span>.<span class="ident">borrow</span>();
-        <span class="kw">let</span> <span class="ident">maybe_var</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">variable_like</span>(<span class="ident">group_ref</span>).<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">sc_clone</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>;
-        <span class="comment">// if the group contains what looks like a variable write,</span>
-        <span class="comment">// then just add variable to write set</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">cell_type</span>, <span class="ident">variable</span>)) <span class="op">=</span> <span class="ident">maybe_var</span> {
-            <span class="comment">// we don&#39;t want to read the control signal of `variable`</span>
-            <span class="kw">let</span> <span class="ident">assignments</span> <span class="op">=</span> <span class="ident">group</span>
-                .<span class="ident">assignments</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">asgn</span><span class="op">|</span> {
-                    <span class="op">!</span>(<span class="ident">asgn</span>.<span class="ident">src</span>.<span class="ident">borrow</span>().<span class="ident">get_parent_name</span>() <span class="op">==</span> <span class="ident">variable</span>
-                        <span class="op">&amp;&amp;</span> <span class="ident">asgn</span>.<span class="ident">src</span>.<span class="ident">borrow</span>().<span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;done&quot;</span>)
+    <span class="doccomment">/// Compute the `gen` and `kill` sets for a given group definition. Because
+    /// we can&#39;t always know if a group will *definitely* kill something or *definitely*
+    /// read something, this function is conservative.
+    ///
+    /// However, it is conservative in different directions for `gens` and `kills`.
+    /// In particular, it is always ok to accidentally put something in `gens` because
+    /// in the worst case we say something is alive when it isn&#39;t.
+    ///
+    /// However, it is **never** ok to accidentally put something in `writes` because
+    /// we might accidentally kill something that should be alive.
+    ///
+    /// To implement this, we say that something is being read if it shows up on the rhs
+    /// of any assignment in a group. Something is written if it it&#39;s guard is `1` or if it has no guard.
+    </span><span class="kw">fn </span>find_gen_kill_group(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        group_ref: <span class="kw-2">&amp;</span>RRC&lt;ir::Group&gt;,
+    ) -&gt; (TypeNameSet, TypeNameSet) {
+        <span class="kw">let </span>group = group_ref.borrow();
+        <span class="kw">let </span>maybe_var = <span class="self">self</span>.variable_like(group_ref).clone();
+        <span class="kw">let </span>sc_clone = <span class="kw-2">&amp;</span><span class="self">self</span>.state_share;
+        <span class="comment">// if the group contains what looks like a variable write,
+        // then just add variable to write set
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>((cell_type, variable)) = maybe_var {
+            <span class="comment">// we don&#39;t want to read the control signal of `variable`
+            </span><span class="kw">let </span>assignments = group
+                .assignments
+                .iter()
+                .filter(|asgn| {
+                    !(asgn.src.borrow().get_parent_name() == variable
+                        &amp;&amp; asgn.src.borrow().name == <span class="string">&quot;done&quot;</span>)
                 })
-                .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">asgn</span><span class="op">|</span> {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::Guard::Port</span>(<span class="ident">port</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">asgn</span>.<span class="ident">guard</span> {
-                        <span class="op">!</span>(<span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">get_parent_name</span>() <span class="op">==</span> <span class="ident">variable</span>
-                            <span class="op">&amp;&amp;</span> <span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;done&quot;</span>)
-                    } <span class="kw">else</span> {
-                        <span class="bool-val">true</span>
-                    }
+                .filter(|asgn| {
+                    <span class="kw">if let </span>ir::Guard::Port(port) = <span class="kw-2">&amp;*</span>asgn.guard {
+                        !(port.borrow().get_parent_name() == variable
+                            &amp;&amp; port.borrow().name == <span class="string">&quot;done&quot;</span>)
+                    } <span class="kw">else </span>{
+                        <span class="bool-val">true
+                    </span>}
                 });
 
-            <span class="comment">// calculate reads, but ignore `variable`. we&#39;ve already dealt with that</span>
-            <span class="kw">let</span> <span class="ident">reads</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ReadWriteSet::read_set</span>(<span class="ident">assignments</span>)
-                .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">sc_clone</span>.<span class="ident">is_shareable_component</span>(<span class="ident">c</span>))
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> (<span class="ident">c</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">c</span>.<span class="ident">clone_name</span>()))
-                .<span class="ident">collect</span>();
+            <span class="comment">// calculate reads, but ignore `variable`. we&#39;ve already dealt with that
+            </span><span class="kw">let </span>reads: HashSet&lt;<span class="kw">_</span>&gt; = ReadWriteSet::read_set(assignments)
+                .filter(|c| sc_clone.is_shareable_component(c))
+                .map(|c| (c.borrow().prototype.clone(), c.clone_name()))
+                .collect();
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writes</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
-            <span class="ident">writes</span>.<span class="ident">insert</span>((<span class="ident">cell_type</span>, <span class="ident">variable</span>));
+            <span class="kw">let </span><span class="kw-2">mut </span>writes = HashSet::new();
+            writes.insert((cell_type, variable));
 
-            (<span class="ident">reads</span>, <span class="ident">writes</span>)
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">reads</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span>
-                <span class="ident">ReadWriteSet::read_set</span>(<span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">iter</span>())
-                    .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">sc_clone</span>.<span class="ident">is_shareable_component</span>(<span class="ident">c</span>))
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> (<span class="ident">c</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">c</span>.<span class="ident">clone_name</span>()))
-                    .<span class="ident">collect</span>();
+            (reads, writes)
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>reads: HashSet&lt;<span class="kw">_</span>&gt; =
+                ReadWriteSet::read_set(group.assignments.iter())
+                    .filter(|c| sc_clone.is_shareable_component(c))
+                    .map(|c| (c.borrow().prototype.clone(), c.clone_name()))
+                    .collect();
 
-            <span class="comment">// only consider write assignments where the guard is true</span>
-            <span class="kw">let</span> <span class="ident">assignments</span> <span class="op">=</span> <span class="ident">group</span>
-                .<span class="ident">assignments</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">asgn</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">asgn</span>.<span class="ident">guard</span> <span class="op">==</span> <span class="ident">ir::Guard::True</span>)
-                .<span class="ident">cloned</span>()
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+            <span class="comment">// only consider write assignments where the guard is true
+            </span><span class="kw">let </span>assignments = group
+                .assignments
+                .iter()
+                .filter(|asgn| <span class="kw-2">*</span>asgn.guard == ir::Guard::True)
+                .cloned()
+                .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
 
-            <span class="kw">let</span> <span class="ident">writes</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span>
-                <span class="ident">ReadWriteSet::write_set</span>(<span class="ident">assignments</span>.<span class="ident">iter</span>())
-                    .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">sc_clone</span>.<span class="ident">is_shareable_component</span>(<span class="ident">c</span>))
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> (<span class="ident">c</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">c</span>.<span class="ident">clone_name</span>()))
-                    .<span class="ident">collect</span>();
+            <span class="kw">let </span>writes: HashSet&lt;<span class="kw">_</span>&gt; =
+                ReadWriteSet::write_set(assignments.iter())
+                    .filter(|c| sc_clone.is_shareable_component(c))
+                    .map(|c| (c.borrow().prototype.clone(), c.clone_name()))
+                    .collect();
 
-            (<span class="ident">reads</span>, <span class="ident">writes</span>)
+            (reads, writes)
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">find_uses_group</span>(
-        <span class="ident">group_ref</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span>,
-        <span class="ident">shareable_components</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
-    ) -&gt; <span class="ident">TypeNameSet</span> {
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">group_ref</span>.<span class="ident">borrow</span>();
-        <span class="ident">ReadWriteSet::uses</span>(<span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">iter</span>())
-            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">shareable_components</span>.<span class="ident">is_shareable_component</span>(<span class="ident">cell</span>))
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> (<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">cell</span>.<span class="ident">clone_name</span>()))
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+    <span class="kw">fn </span>find_uses_group(
+        group_ref: <span class="kw-2">&amp;</span>RRC&lt;ir::Group&gt;,
+        shareable_components: <span class="kw-2">&amp;</span>ShareSet,
+    ) -&gt; TypeNameSet {
+        <span class="kw">let </span>group = group_ref.borrow();
+        ReadWriteSet::uses(group.assignments.iter())
+            .filter(|cell| shareable_components.is_shareable_component(cell))
+            .map(|cell| (cell.borrow().prototype.clone(), cell.clone_name()))
+            .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;()
     }
 
-    <span class="comment">// returns (share_uses, state_reads), which are the uses of shareable components</span>
-    <span class="comment">// and reads of state shareable components</span>
-    <span class="kw">fn</span> <span class="ident">uses_reads_cgroup</span>(
-        <span class="ident">group_ref</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::CombGroup</span><span class="op">&gt;</span>,
-        <span class="ident">shareable</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
-        <span class="ident">state_shareable</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
-    ) -&gt; (<span class="ident">TypeNameSet</span>, <span class="ident">TypeNameSet</span>) {
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">group_ref</span>.<span class="ident">borrow</span>();
-        <span class="kw">let</span> <span class="ident">share_uses</span> <span class="op">=</span> <span class="ident">ReadWriteSet::uses</span>(<span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">iter</span>())
-            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">shareable</span>.<span class="ident">is_shareable_component</span>(<span class="ident">cell</span>))
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> (<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">cell</span>.<span class="ident">clone_name</span>()))
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-        <span class="kw">let</span> <span class="ident">state_reads</span> <span class="op">=</span> <span class="ident">ReadWriteSet::read_set</span>(<span class="ident">group</span>.<span class="ident">assignments</span>.<span class="ident">iter</span>())
-            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">state_shareable</span>.<span class="ident">is_shareable_component</span>(<span class="ident">cell</span>))
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> (<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">cell</span>.<span class="ident">clone_name</span>()))
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-        (<span class="ident">share_uses</span>, <span class="ident">state_reads</span>)
+    <span class="comment">// returns (share_uses, state_reads), which are the uses of shareable components
+    // and reads of state shareable components
+    </span><span class="kw">fn </span>uses_reads_cgroup(
+        group_ref: <span class="kw-2">&amp;</span>RRC&lt;ir::CombGroup&gt;,
+        shareable: <span class="kw-2">&amp;</span>ShareSet,
+        state_shareable: <span class="kw-2">&amp;</span>ShareSet,
+    ) -&gt; (TypeNameSet, TypeNameSet) {
+        <span class="kw">let </span>group = group_ref.borrow();
+        <span class="kw">let </span>share_uses = ReadWriteSet::uses(group.assignments.iter())
+            .filter(|cell| shareable.is_shareable_component(cell))
+            .map(|cell| (cell.borrow().prototype.clone(), cell.clone_name()))
+            .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span>state_reads = ReadWriteSet::read_set(group.assignments.iter())
+            .filter(|cell| state_shareable.is_shareable_component(cell))
+            .map(|cell| (cell.borrow().prototype.clone(), cell.clone_name()))
+            .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();
+        (share_uses, state_reads)
     }
 
-    <span class="kw">fn</span> <span class="ident">port_to_cell_name</span>(
-        <span class="ident">port</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Port</span><span class="op">&gt;</span>,
-        <span class="ident">shareable_components</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
-    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ir::CellType</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ir::PortParent::Cell</span>(<span class="ident">cell_wref</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">port</span>.<span class="ident">borrow</span>().<span class="ident">parent</span> {
-            <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">cell_wref</span>.<span class="ident">upgrade</span>();
-            <span class="kw">if</span> <span class="ident">shareable_components</span>.<span class="ident">is_shareable_component</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>) {
-                <span class="kw">return</span> <span class="prelude-val">Some</span>((
-                    <span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(),
-                    <span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">clone_name</span>(),
+    <span class="kw">fn </span>port_to_cell_name(
+        port: <span class="kw-2">&amp;</span>RRC&lt;ir::Port&gt;,
+        shareable_components: <span class="kw-2">&amp;</span>ShareSet,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;(ir::CellType, ir::Id)&gt; {
+        <span class="kw">if let </span>ir::PortParent::Cell(cell_wref) = <span class="kw-2">&amp;</span>port.borrow().parent {
+            <span class="kw">let </span>cell = cell_wref.upgrade();
+            <span class="kw">if </span>shareable_components.is_shareable_component(<span class="kw-2">&amp;</span>cell) {
+                <span class="kw">return </span><span class="prelude-val">Some</span>((
+                    cell.borrow().prototype.clone(),
+                    cell.borrow().clone_name(),
                 ));
             }
         }
-        <span class="prelude-val">None</span>
-    }
+        <span class="prelude-val">None
+    </span>}
 
-    <span class="doccomment">/// Returns (reads, writes) that occur in the [ir::Invoke] statement.</span>
-    <span class="kw">fn</span> <span class="ident">find_gen_kill_invoke</span>(
-        <span class="ident">invoke</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Invoke</span>,
-        <span class="ident">shareable_components</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
-    ) -&gt; (<span class="ident">TypeNameSet</span>, <span class="ident">TypeNameSet</span>) {
-        <span class="comment">// The writes of the invoke include its outputs. Also, if the input to the invoke</span>
-        <span class="comment">// is not empty, we also count the cell being invoked as being written to.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">write_set</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">invoke</span>
-            .<span class="ident">outputs</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">src</span>)<span class="op">|</span> {
-                <span class="ident"><span class="self">Self</span>::port_to_cell_name</span>(<span class="ident">src</span>, <span class="ident">shareable_components</span>)
+    <span class="doccomment">/// Returns (reads, writes) that occur in the [ir::Invoke] statement.
+    </span><span class="kw">fn </span>find_gen_kill_invoke(
+        invoke: <span class="kw-2">&amp;</span>ir::Invoke,
+        shareable_components: <span class="kw-2">&amp;</span>ShareSet,
+    ) -&gt; (TypeNameSet, TypeNameSet) {
+        <span class="comment">// The writes of the invoke include its outputs. Also, if the input to the invoke
+        // is not empty, we also count the cell being invoked as being written to.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>write_set: TypeNameSet = invoke
+            .outputs
+            .iter()
+            .filter_map(|(<span class="kw">_</span>, src)| {
+                <span class="self">Self</span>::port_to_cell_name(src, shareable_components)
             })
-            .<span class="ident">collect</span>();
-        <span class="kw">let</span> <span class="ident">comp_is_written</span> <span class="op">=</span> <span class="op">!</span><span class="ident">invoke</span>.<span class="ident">inputs</span>.<span class="ident">is_empty</span>()
-            <span class="op">&amp;&amp;</span> <span class="ident">shareable_components</span>.<span class="ident">is_shareable_component</span>(<span class="kw-2">&amp;</span><span class="ident">invoke</span>.<span class="ident">comp</span>);
-        <span class="kw">if</span> <span class="ident">comp_is_written</span> {
-            <span class="ident">write_set</span>.<span class="ident">insert</span>((
-                <span class="ident">invoke</span>.<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(),
-                <span class="ident">invoke</span>.<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">clone_name</span>(),
+            .collect();
+        <span class="kw">let </span>comp_is_written = !invoke.inputs.is_empty()
+            &amp;&amp; shareable_components.is_shareable_component(<span class="kw-2">&amp;</span>invoke.comp);
+        <span class="kw">if </span>comp_is_written {
+            write_set.insert((
+                invoke.comp.borrow().prototype.clone(),
+                invoke.comp.borrow().clone_name(),
             ));
         }
 
-        <span class="comment">// The reads of the invoke include its inputs. Also, if the outputs are</span>
-        <span class="comment">// not empty, the cell being invoked will be considered as being read from.</span>
-        <span class="comment">// One quick note: if the component is written to, there is no need to include this</span>
-        <span class="comment">// component as being read from since we know the write to the component</span>
-        <span class="comment">// precedes the read from it, due to the nature of `invoke` statements.</span>
-        <span class="comment">// This is &quot;cheating&quot; in a sense, since the componenet is technically being</span>
-        <span class="comment">// read from. However, since we know that there is a write to the component</span>
-        <span class="comment">// that that precedes the read from it within the very same invoke statement,</span>
-        <span class="comment">// it &quot;appears&quot; to all the other control statements in the program that the</span>
-        <span class="comment">// component is not being read from in the invoke statement.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">read_set</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">invoke</span>
-            .<span class="ident">inputs</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">src</span>)<span class="op">|</span> {
-                <span class="ident"><span class="self">Self</span>::port_to_cell_name</span>(<span class="ident">src</span>, <span class="ident">shareable_components</span>)
+        <span class="comment">// The reads of the invoke include its inputs. Also, if the outputs are
+        // not empty, the cell being invoked will be considered as being read from.
+        // One quick note: if the component is written to, there is no need to include this
+        // component as being read from since we know the write to the component
+        // precedes the read from it, due to the nature of `invoke` statements.
+        // This is &quot;cheating&quot; in a sense, since the componenet is technically being
+        // read from. However, since we know that there is a write to the component
+        // that that precedes the read from it within the very same invoke statement,
+        // it &quot;appears&quot; to all the other control statements in the program that the
+        // component is not being read from in the invoke statement.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>read_set: TypeNameSet = invoke
+            .inputs
+            .iter()
+            .filter_map(|(<span class="kw">_</span>, src)| {
+                <span class="self">Self</span>::port_to_cell_name(src, shareable_components)
             })
-            .<span class="ident">collect</span>();
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">invoke</span>.<span class="ident">outputs</span>.<span class="ident">is_empty</span>()
-            <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">comp_is_written</span>
-            <span class="op">&amp;&amp;</span> <span class="ident">shareable_components</span>.<span class="ident">is_shareable_component</span>(<span class="kw-2">&amp;</span><span class="ident">invoke</span>.<span class="ident">comp</span>)
+            .collect();
+        <span class="kw">if </span>!invoke.outputs.is_empty()
+            &amp;&amp; !comp_is_written
+            &amp;&amp; shareable_components.is_shareable_component(<span class="kw-2">&amp;</span>invoke.comp)
         {
-            <span class="ident">read_set</span>.<span class="ident">insert</span>((
-                <span class="ident">invoke</span>.<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(),
-                <span class="ident">invoke</span>.<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">clone_name</span>(),
+            read_set.insert((
+                invoke.comp.borrow().prototype.clone(),
+                invoke.comp.borrow().clone_name(),
             ));
         }
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">invoke</span>.<span class="ident">comb_group</span> {
-            <span class="ident">read_set</span>.<span class="ident">extend</span>(
-                <span class="ident">ReadWriteSet::read_set</span>(<span class="ident">comb_group</span>.<span class="ident">borrow</span>().<span class="ident">assignments</span>.<span class="ident">iter</span>())
-                    .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> {
-                        <span class="ident">shareable_components</span>.<span class="ident">is_shareable_component</span>(<span class="ident">cell</span>)
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(comb_group) = <span class="kw-2">&amp;</span>invoke.comb_group {
+            read_set.extend(
+                ReadWriteSet::read_set(comb_group.borrow().assignments.iter())
+                    .filter(|cell| {
+                        shareable_components.is_shareable_component(cell)
                     })
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> {
-                        (<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">cell</span>.<span class="ident">clone_name</span>())
+                    .map(|cell| {
+                        (cell.borrow().prototype.clone(), cell.clone_name())
                     }),
             );
         }
 
-        (<span class="ident">read_set</span>, <span class="ident">write_set</span>)
+        (read_set, write_set)
     }
 
-    <span class="kw">fn</span> <span class="ident">find_uses_invoke</span>(
-        <span class="ident">invoke</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Invoke</span>,
-        <span class="ident">shareable_components</span>: <span class="kw-2">&amp;</span><span class="ident">ShareSet</span>,
-    ) -&gt; <span class="ident">TypeNameSet</span> {
-        <span class="comment">// uses of shareable components in the invoke statement</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">invoke_uses</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">invoke</span>
-            .<span class="ident">inputs</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">chain</span>(<span class="ident">invoke</span>.<span class="ident">outputs</span>.<span class="ident">iter</span>())
-            .<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">src</span>)<span class="op">|</span> {
-                <span class="ident"><span class="self">Self</span>::port_to_cell_name</span>(<span class="ident">src</span>, <span class="ident">shareable_components</span>)
+    <span class="kw">fn </span>find_uses_invoke(
+        invoke: <span class="kw-2">&amp;</span>ir::Invoke,
+        shareable_components: <span class="kw-2">&amp;</span>ShareSet,
+    ) -&gt; TypeNameSet {
+        <span class="comment">// uses of shareable components in the invoke statement
+        </span><span class="kw">let </span><span class="kw-2">mut </span>invoke_uses: TypeNameSet = invoke
+            .inputs
+            .iter()
+            .chain(invoke.outputs.iter())
+            .filter_map(|(<span class="kw">_</span>, src)| {
+                <span class="self">Self</span>::port_to_cell_name(src, shareable_components)
             })
-            .<span class="ident">collect</span>();
-        <span class="comment">// uses of shareable components in the comb group (if it exists)</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">invoke</span>.<span class="ident">comb_group</span> {
-            <span class="ident">invoke_uses</span>.<span class="ident">extend</span>(
-                <span class="ident">ReadWriteSet::uses</span>(<span class="ident">comb_group</span>.<span class="ident">borrow</span>().<span class="ident">assignments</span>.<span class="ident">iter</span>())
-                    .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> {
-                        <span class="ident">shareable_components</span>.<span class="ident">is_shareable_component</span>(<span class="ident">cell</span>)
+            .collect();
+        <span class="comment">// uses of shareable components in the comb group (if it exists)
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(comb_group) = <span class="kw-2">&amp;</span>invoke.comb_group {
+            invoke_uses.extend(
+                ReadWriteSet::uses(comb_group.borrow().assignments.iter())
+                    .filter(|cell| {
+                        shareable_components.is_shareable_component(cell)
                     })
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> {
-                        (<span class="ident">cell</span>.<span class="ident">borrow</span>().<span class="ident">prototype</span>.<span class="ident">clone</span>(), <span class="ident">cell</span>.<span class="ident">clone_name</span>())
+                    .map(|cell| {
+                        (cell.borrow().prototype.clone(), cell.clone_name())
                     }),
             );
         }
-        <span class="ident">invoke_uses</span>
+        invoke_uses
     }
 
-    <span class="doccomment">/// Implements the parallel dataflow analysis that computes the liveness of every state shareable component</span>
-    <span class="doccomment">/// at every point in the program.</span>
-    <span class="kw">fn</span> <span class="ident">build_live_ranges</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>,
-        <span class="kw-2">mut</span> <span class="ident">alive</span>: <span class="ident">Prop</span>,
-        <span class="kw-2">mut</span> <span class="ident">gens</span>: <span class="ident">Prop</span>,
-        <span class="kw-2">mut</span> <span class="ident">kills</span>: <span class="ident">Prop</span>,
-    ) -&gt; (<span class="ident">Prop</span>, <span class="ident">Prop</span>, <span class="ident">Prop</span>) {
-        <span class="kw">match</span> <span class="ident">c</span> {
-            <span class="ident">ir::Control::Empty</span>(<span class="kw">_</span>) =&gt; (<span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>),
-            <span class="ident">ir::Control::Invoke</span>(<span class="ident">invoke</span>) =&gt; {
-                <span class="comment">//get the shareable components used in the invoke stmt</span>
-                <span class="kw">let</span> <span class="ident">uses_share</span> <span class="op">=</span>
-                    <span class="ident">LiveRangeAnalysis::find_uses_invoke</span>(<span class="ident">invoke</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">share</span>);
-                <span class="self">self</span>.<span class="ident">invokes_enables_map</span>
-                    .<span class="ident">entry</span>(<span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>))
-                    .<span class="ident">or_default</span>()
-                    .<span class="ident">extend</span>(<span class="ident">uses_share</span>);
+    <span class="doccomment">/// Implements the parallel dataflow analysis that computes the liveness of every state shareable component
+    /// at every point in the program.
+    </span><span class="kw">fn </span>build_live_ranges(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        c: <span class="kw-2">&amp;</span>ir::Control,
+        <span class="kw-2">mut </span>alive: Prop,
+        <span class="kw-2">mut </span>gens: Prop,
+        <span class="kw-2">mut </span>kills: Prop,
+    ) -&gt; (Prop, Prop, Prop) {
+        <span class="kw">match </span>c {
+            ir::Control::Empty(<span class="kw">_</span>) =&gt; (alive, gens, kills),
+            ir::Control::Invoke(invoke) =&gt; {
+                <span class="comment">//get the shareable components used in the invoke stmt
+                </span><span class="kw">let </span>uses_share =
+                    LiveRangeAnalysis::find_uses_invoke(invoke, <span class="kw-2">&amp;</span><span class="self">self</span>.share);
+                <span class="self">self</span>.invokes_enables_map
+                    .entry(ControlId::get_guaranteed_id(c))
+                    .or_default()
+                    .extend(uses_share);
 
-                <span class="kw">let</span> (<span class="ident">reads</span>, <span class="ident">writes</span>) <span class="op">=</span> <span class="ident">LiveRangeAnalysis::find_gen_kill_invoke</span>(
-                    <span class="ident">invoke</span>,
-                    <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
+                <span class="kw">let </span>(reads, writes) = LiveRangeAnalysis::find_gen_kill_invoke(
+                    invoke,
+                    <span class="kw-2">&amp;</span><span class="self">self</span>.state_share,
                 );
 
-                <span class="ident">alive</span>.<span class="ident">transfer_set</span>(<span class="ident">reads</span>.<span class="ident">clone</span>(), <span class="ident">writes</span>.<span class="ident">clone</span>());
-                <span class="kw">let</span> <span class="ident">alive_out</span> <span class="op">=</span> <span class="ident">alive</span>.<span class="ident">clone</span>();
+                alive.transfer_set(reads.clone(), writes.clone());
+                <span class="kw">let </span>alive_out = alive.clone();
 
-                <span class="comment">// set the live set of this node to be the things live on the</span>
-                <span class="comment">// output of this node plus the things written to in this invoke</span>
-                <span class="comment">// plus all shareable components used</span>
-                <span class="self">self</span>.<span class="ident">live</span>.<span class="ident">insert</span>(<span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>), {
-                    <span class="ident">alive</span>.<span class="ident">or_set</span>(<span class="ident">writes</span>.<span class="ident">clone</span>());
-                    <span class="ident">alive</span>
+                <span class="comment">// set the live set of this node to be the things live on the
+                // output of this node plus the things written to in this invoke
+                // plus all shareable components used
+                </span><span class="self">self</span>.live.insert(ControlId::get_guaranteed_id(c), {
+                    alive.or_set(writes.clone());
+                    alive
                 });
                 (
-                    <span class="ident">alive_out</span>,
+                    alive_out,
                     {
-                        <span class="ident">gens</span>.<span class="ident">sub_set</span>(<span class="ident">writes</span>.<span class="ident">clone</span>());
-                        <span class="ident">gens</span>.<span class="ident">or_set</span>(<span class="ident">reads</span>);
-                        <span class="ident">gens</span>
+                        gens.sub_set(writes.clone());
+                        gens.or_set(reads);
+                        gens
                     },
                     {
-                        <span class="ident">kills</span>.<span class="ident">or_set</span>(<span class="ident">writes</span>);
-                        <span class="ident">kills</span>
+                        kills.or_set(writes);
+                        kills
                     },
                 )
             }
-            <span class="ident">ir::Control::Enable</span>(<span class="ident">ir::Enable</span> { <span class="ident">group</span>, .. }) =&gt; {
-                <span class="kw">let</span> <span class="ident">uses_share</span> <span class="op">=</span>
-                    <span class="ident">LiveRangeAnalysis::find_uses_group</span>(<span class="ident">group</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">share</span>);
-                <span class="self">self</span>.<span class="ident">invokes_enables_map</span>
-                    .<span class="ident">entry</span>(<span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>))
-                    .<span class="ident">or_default</span>()
-                    .<span class="ident">extend</span>(<span class="ident">uses_share</span>);
-                <span class="comment">// XXX(sam) no reason to compute this every time</span>
-                <span class="kw">let</span> (<span class="ident">reads</span>, <span class="ident">writes</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">find_gen_kill_group</span>(<span class="ident">group</span>);
+            ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
+                <span class="kw">let </span>uses_share =
+                    LiveRangeAnalysis::find_uses_group(group, <span class="kw-2">&amp;</span><span class="self">self</span>.share);
+                <span class="self">self</span>.invokes_enables_map
+                    .entry(ControlId::get_guaranteed_id(c))
+                    .or_default()
+                    .extend(uses_share);
+                <span class="comment">// XXX(sam) no reason to compute this every time
+                </span><span class="kw">let </span>(reads, writes) = <span class="self">self</span>.find_gen_kill_group(group);
 
-                <span class="comment">// compute transfer function</span>
-                <span class="ident">alive</span>.<span class="ident">transfer_set</span>(<span class="ident">reads</span>.<span class="ident">clone</span>(), <span class="ident">writes</span>.<span class="ident">clone</span>());
-                <span class="kw">let</span> <span class="ident">alive_out</span> <span class="op">=</span> <span class="ident">alive</span>.<span class="ident">clone</span>();
+                <span class="comment">// compute transfer function
+                </span>alive.transfer_set(reads.clone(), writes.clone());
+                <span class="kw">let </span>alive_out = alive.clone();
 
-                <span class="comment">// set the live set of this node to be the things live on the</span>
-                <span class="comment">// output of this node plus the things written to in this group</span>
-                <span class="self">self</span>.<span class="ident">live</span>.<span class="ident">insert</span>(<span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>), {
-                    <span class="ident">alive</span>.<span class="ident">or_set</span>(<span class="ident">writes</span>.<span class="ident">clone</span>());
-                    <span class="ident">alive</span>
+                <span class="comment">// set the live set of this node to be the things live on the
+                // output of this node plus the things written to in this group
+                </span><span class="self">self</span>.live.insert(ControlId::get_guaranteed_id(c), {
+                    alive.or_set(writes.clone());
+                    alive
                 });
                 (
-                    <span class="ident">alive_out</span>,
+                    alive_out,
                     {
-                        <span class="ident">gens</span>.<span class="ident">sub_set</span>(<span class="ident">writes</span>.<span class="ident">clone</span>());
-                        <span class="ident">gens</span>.<span class="ident">or_set</span>(<span class="ident">reads</span>);
-                        <span class="ident">gens</span>
+                        gens.sub_set(writes.clone());
+                        gens.or_set(reads);
+                        gens
                     },
                     {
-                        <span class="ident">kills</span>.<span class="ident">or_set</span>(<span class="ident">writes</span>);
-                        <span class="ident">kills</span>
+                        kills.or_set(writes);
+                        kills
                     },
                 )
             }
-            <span class="ident">ir::Control::Seq</span>(<span class="ident">ir::Seq</span> { <span class="ident">stmts</span>, .. }) =&gt; <span class="ident">stmts</span>.<span class="ident">iter</span>().<span class="ident">rev</span>().<span class="ident">fold</span>(
-                (<span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>),
-                <span class="op">|</span>(<span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>), <span class="ident">e</span><span class="op">|</span> {
-                    <span class="self">self</span>.<span class="ident">build_live_ranges</span>(<span class="ident">e</span>, <span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>)
+            ir::Control::Seq(ir::Seq { stmts, .. }) =&gt; stmts.iter().rev().fold(
+                (alive, gens, kills),
+                |(alive, gens, kills), e| {
+                    <span class="self">self</span>.build_live_ranges(e, alive, gens, kills)
                 },
             ),
-            <span class="ident">ir::Control::If</span>(<span class="ident">ir::If</span> {
-                <span class="ident">tbranch</span>,
-                <span class="ident">fbranch</span>,
-                <span class="ident">port</span>,
-                <span class="ident">cond</span>,
+            ir::Control::If(ir::If {
+                tbranch,
+                fbranch,
+                port,
+                cond,
                 ..
             }) =&gt; {
-                <span class="comment">// compute each branch</span>
-                <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">t_alive</span>, <span class="kw-2">mut</span> <span class="ident">t_gens</span>, <span class="kw-2">mut</span> <span class="ident">t_kills</span>) <span class="op">=</span> <span class="self">self</span>
-                    .<span class="ident">build_live_ranges</span>(
-                        <span class="ident">tbranch</span>,
-                        <span class="ident">alive</span>.<span class="ident">clone</span>(),
-                        <span class="ident">gens</span>.<span class="ident">clone</span>(),
-                        <span class="ident">kills</span>.<span class="ident">clone</span>(),
+                <span class="comment">// compute each branch
+                </span><span class="kw">let </span>(<span class="kw-2">mut </span>t_alive, <span class="kw-2">mut </span>t_gens, <span class="kw-2">mut </span>t_kills) = <span class="self">self
+                    </span>.build_live_ranges(
+                        tbranch,
+                        alive.clone(),
+                        gens.clone(),
+                        kills.clone(),
                     );
-                <span class="kw">let</span> (<span class="ident">f_alive</span>, <span class="ident">f_gens</span>, <span class="ident">f_kills</span>) <span class="op">=</span>
-                    <span class="self">self</span>.<span class="ident">build_live_ranges</span>(<span class="ident">fbranch</span>, <span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>);
+                <span class="kw">let </span>(f_alive, f_gens, f_kills) =
+                    <span class="self">self</span>.build_live_ranges(fbranch, alive, gens, kills);
 
-                <span class="comment">// take union</span>
-                <span class="ident">t_alive</span>.<span class="ident">or</span>(<span class="ident">f_alive</span>);
-                <span class="ident">t_gens</span>.<span class="ident">or</span>(<span class="ident">f_gens</span>);
-                <span class="ident">t_kills</span>.<span class="ident">intersect</span>(<span class="ident">f_kills</span>);
+                <span class="comment">// take union
+                </span>t_alive.or(f_alive);
+                t_gens.or(f_gens);
+                t_kills.intersect(f_kills);
 
-                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>);
+                <span class="kw">let </span>id = ControlId::get_guaranteed_id(c);
 
-                <span class="comment">// reads from state shareable components in the comb group</span>
-                <span class="comment">// These should get &quot;passed on&quot; as live/gens as we go up the</span>
-                <span class="comment">// control flow of the program</span>
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cgroup_reads</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
-                <span class="comment">// Any uses of any shareable components in the comb group.</span>
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shareable_uses</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
+                <span class="comment">// reads from state shareable components in the comb group
+                // These should get &quot;passed on&quot; as live/gens as we go up the
+                // control flow of the program
+                </span><span class="kw">let </span><span class="kw-2">mut </span>cgroup_reads: TypeNameSet = HashSet::new();
+                <span class="comment">// Any uses of any shareable components in the comb group.
+                </span><span class="kw">let </span><span class="kw-2">mut </span>shareable_uses: TypeNameSet = HashSet::new();
 
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group</span>) <span class="op">=</span> <span class="ident">cond</span> {
-                    <span class="kw">let</span> (<span class="ident">share_uses</span>, <span class="ident">state_reads</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::uses_reads_cgroup</span>(
-                        <span class="ident">comb_group</span>,
-                        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">share</span>,
-                        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(comb_group) = cond {
+                    <span class="kw">let </span>(share_uses, state_reads) = <span class="self">Self</span>::uses_reads_cgroup(
+                        comb_group,
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.share,
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.state_share,
                     );
-                    <span class="ident">shareable_uses</span> <span class="op">=</span> <span class="ident">share_uses</span>;
-                    <span class="ident">cgroup_reads</span> <span class="op">=</span> <span class="ident">state_reads</span>;
+                    shareable_uses = share_uses;
+                    cgroup_reads = state_reads;
                 }
 
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cell_info</span>) <span class="op">=</span> <span class="ident">LiveRangeAnalysis::port_to_cell_name</span>(
-                    <span class="ident">port</span>,
-                    <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(cell_info) = LiveRangeAnalysis::port_to_cell_name(
+                    port,
+                    <span class="kw-2">&amp;</span><span class="self">self</span>.state_share,
                 ) {
-                    <span class="comment">// If we read from a state shareable component (like a register)</span>
-                    <span class="comment">// in the port, then we add it to cgroup_reads.</span>
-                    <span class="ident">cgroup_reads</span>.<span class="ident">insert</span>(<span class="ident">cell_info</span>);
+                    <span class="comment">// If we read from a state shareable component (like a register)
+                    // in the port, then we add it to cgroup_reads.
+                    </span>cgroup_reads.insert(cell_info);
                 }
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">cgroup_reads</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">shareable_uses</span>.<span class="ident">is_empty</span>() {
-                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">all_uses</span> <span class="op">=</span> <span class="ident">cgroup_reads</span>.<span class="ident">clone</span>();
-                    <span class="ident">all_uses</span>.<span class="ident">extend</span>(<span class="ident">shareable_uses</span>);
-                    <span class="comment">// add all uses of both shareable and state-shareable components</span>
-                    <span class="comment">// in the cgroup_uses_map.</span>
-                    <span class="self">self</span>.<span class="ident">cgroup_uses_map</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">all_uses</span>);
+                <span class="kw">if </span>!cgroup_reads.is_empty() || !shareable_uses.is_empty() {
+                    <span class="kw">let </span><span class="kw-2">mut </span>all_uses = cgroup_reads.clone();
+                    all_uses.extend(shareable_uses);
+                    <span class="comment">// add all uses of both shareable and state-shareable components
+                    // in the cgroup_uses_map.
+                    </span><span class="self">self</span>.cgroup_uses_map.insert(id, all_uses);
                 }
-                <span class="comment">// adding cgroup_reads as live on output of if stmt</span>
-                <span class="ident">t_alive</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>.<span class="ident">clone</span>());
-                <span class="ident">t_gens</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>);
-                (<span class="ident">t_alive</span>, <span class="ident">t_gens</span>, <span class="ident">t_kills</span>)
+                <span class="comment">// adding cgroup_reads as live on output of if stmt
+                </span>t_alive.or_set(cgroup_reads.clone());
+                t_gens.or_set(cgroup_reads);
+                (t_alive, t_gens, t_kills)
             }
-            <span class="ident">ir::Control::Par</span>(<span class="ident">ir::Par</span> { <span class="ident">stmts</span>, .. }) =&gt; {
-                <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>) <span class="op">=</span> <span class="ident">stmts</span>
-                    .<span class="ident">iter</span>()
-                    .<span class="ident">rev</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-                        <span class="self">self</span>.<span class="ident">build_live_ranges</span>(
-                            <span class="ident">e</span>,
-                            <span class="ident">alive</span>.<span class="ident">clone</span>(),
-                            <span class="ident">Prop::default</span>(),
-                            <span class="ident">Prop::default</span>(),
+            ir::Control::Par(ir::Par { stmts, .. }) =&gt; {
+                <span class="kw">let </span>(<span class="kw-2">mut </span>alive, gens, kills) = stmts
+                    .iter()
+                    .rev()
+                    .map(|e| {
+                        <span class="self">self</span>.build_live_ranges(
+                            e,
+                            alive.clone(),
+                            Prop::default(),
+                            Prop::default(),
                         )
                     })
-                    .<span class="ident">fold</span>(
-                        (<span class="ident">Prop::default</span>(), <span class="ident">Prop::default</span>(), <span class="ident">Prop::default</span>()),
-                        <span class="op">|</span>(<span class="kw-2">mut</span> <span class="ident">acc_alive</span>, <span class="kw-2">mut</span> <span class="ident">acc_gen</span>, <span class="kw-2">mut</span> <span class="ident">acc_kill</span>),
-                         (<span class="ident">alive</span>, <span class="ident">gen</span>, <span class="ident">kill</span>)<span class="op">|</span> {
+                    .fold(
+                        (Prop::default(), Prop::default(), Prop::default()),
+                        |(<span class="kw-2">mut </span>acc_alive, <span class="kw-2">mut </span>acc_gen, <span class="kw-2">mut </span>acc_kill),
+                         (alive, gen, kill)| {
                             (
-                                <span class="comment">// Doing in place operations saves time</span>
-                                {
-                                    <span class="ident">acc_alive</span>.<span class="ident">or</span>(<span class="ident">alive</span>);
-                                    <span class="ident">acc_alive</span>
+                                <span class="comment">// Doing in place operations saves time
+                                </span>{
+                                    acc_alive.or(alive);
+                                    acc_alive
                                 },
                                 {
-                                    <span class="ident">acc_gen</span>.<span class="ident">or</span>(<span class="ident">gen</span>);
-                                    <span class="ident">acc_gen</span>
+                                    acc_gen.or(gen);
+                                    acc_gen
                                 },
                                 {
-                                    <span class="ident">acc_kill</span>.<span class="ident">or</span>(<span class="ident">kill</span>);
-                                    <span class="ident">acc_kill</span>
+                                    acc_kill.or(kill);
+                                    acc_kill
                                 },
                             )
                         },
                     );
-                <span class="comment">// should only count as a &quot;gen&quot; if it is alive on at least one</span>
-                <span class="comment">// of the outputs of the child node</span>
-                <span class="ident">alive</span>.<span class="ident">transfer</span>(<span class="ident">gens</span>.<span class="ident">clone</span>(), <span class="ident">kills</span>.<span class="ident">clone</span>());
-                (<span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>)
+                <span class="comment">// should only count as a &quot;gen&quot; if it is alive on at least one
+                // of the outputs of the child node
+                </span>alive.transfer(gens.clone(), kills.clone());
+                (alive, gens, kills)
             }
-            <span class="ident">ir::Control::While</span>(<span class="ident">ir::While</span> {
-                <span class="ident">body</span>, <span class="ident">port</span>, <span class="ident">cond</span>, ..
+            ir::Control::While(ir::While {
+                body, port, cond, ..
             }) =&gt; {
-                <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">ControlId::get_guaranteed_id</span>(<span class="ident">c</span>);
-                <span class="comment">// need this info twice, so just pre-calculate whether port is</span>
-                <span class="comment">// a state shareable component.</span>
-                <span class="kw">let</span> <span class="ident">port_if_shareable</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ir::CellType</span>, <span class="ident">ir::Id</span>)<span class="op">&gt;</span> <span class="op">=</span>
-                    <span class="ident">LiveRangeAnalysis::port_to_cell_name</span>(
-                        <span class="ident">port</span>,
-                        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
+                <span class="kw">let </span>id = ControlId::get_guaranteed_id(c);
+                <span class="comment">// need this info twice, so just pre-calculate whether port is
+                // a state shareable component.
+                </span><span class="kw">let </span>port_if_shareable: <span class="prelude-ty">Option</span>&lt;(ir::CellType, ir::Id)&gt; =
+                    LiveRangeAnalysis::port_to_cell_name(
+                        port,
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.state_share,
                     );
-                <span class="comment">// all reads from state shareable components in the comb group or port</span>
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cgroup_reads</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
-                <span class="comment">// all uses of shareable components in the comb group or port</span>
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shareable_uses</span>: <span class="ident">TypeNameSet</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
+                <span class="comment">// all reads from state shareable components in the comb group or port
+                </span><span class="kw">let </span><span class="kw-2">mut </span>cgroup_reads: TypeNameSet = HashSet::new();
+                <span class="comment">// all uses of shareable components in the comb group or port
+                </span><span class="kw">let </span><span class="kw-2">mut </span>shareable_uses: TypeNameSet = HashSet::new();
 
-                <span class="kw">let</span> <span class="ident">input_kills</span> <span class="op">=</span> <span class="ident">kills</span>.<span class="ident">clone</span>();
-                <span class="comment">// Go through while body and while port + comb group once</span>
-                <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">alive</span>, <span class="kw-2">mut</span> <span class="ident">gens</span>, <span class="ident">kills</span>) <span class="op">=</span>
-                    <span class="self">self</span>.<span class="ident">build_live_ranges</span>(<span class="ident">body</span>, <span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>);
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cell_info</span>) <span class="op">=</span> <span class="ident">port_if_shareable</span> {
-                    <span class="comment">// adds port to cgroup_reads if state_shareable.</span>
-                    <span class="ident">cgroup_reads</span>.<span class="ident">insert</span>(<span class="ident">cell_info</span>);
+                <span class="kw">let </span>input_kills = kills.clone();
+                <span class="comment">// Go through while body and while port + comb group once
+                </span><span class="kw">let </span>(<span class="kw-2">mut </span>alive, <span class="kw-2">mut </span>gens, kills) =
+                    <span class="self">self</span>.build_live_ranges(body, alive, gens, kills);
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(cell_info) = port_if_shareable {
+                    <span class="comment">// adds port to cgroup_reads if state_shareable.
+                    </span>cgroup_reads.insert(cell_info);
                 }
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">comb_group</span>) <span class="op">=</span> <span class="ident">cond</span> {
-                    <span class="kw">let</span> (<span class="ident">share_uses</span>, <span class="ident">state_reads</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::uses_reads_cgroup</span>(
-                        <span class="ident">comb_group</span>,
-                        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">share</span>,
-                        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state_share</span>,
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(comb_group) = cond {
+                    <span class="kw">let </span>(share_uses, state_reads) = <span class="self">Self</span>::uses_reads_cgroup(
+                        comb_group,
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.share,
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.state_share,
                     );
-                    <span class="ident">shareable_uses</span> <span class="op">=</span> <span class="ident">share_uses</span>;
-                    <span class="ident">cgroup_reads</span>.<span class="ident">extend</span>(<span class="ident">state_reads</span>);
+                    shareable_uses = share_uses;
+                    cgroup_reads.extend(state_reads);
                 }
-                <span class="comment">// setting alive and gens appropriately based on the updated info</span>
-                <span class="comment">// from the comb group + port.</span>
-                <span class="ident">alive</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>.<span class="ident">clone</span>());
-                <span class="ident">gens</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>.<span class="ident">clone</span>());
+                <span class="comment">// setting alive and gens appropriately based on the updated info
+                // from the comb group + port.
+                </span>alive.or_set(cgroup_reads.clone());
+                gens.or_set(cgroup_reads.clone());
 
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">cgroup_reads</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">shareable_uses</span>.<span class="ident">is_empty</span>() {
-                    <span class="comment">// add all uses of shareable and non-shareable components into</span>
-                    <span class="comment">// cgroup_uses_map</span>
-                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">all_uses</span> <span class="op">=</span> <span class="ident">cgroup_reads</span>.<span class="ident">clone</span>();
-                    <span class="ident">all_uses</span>.<span class="ident">extend</span>(<span class="ident">shareable_uses</span>);
-                    <span class="self">self</span>.<span class="ident">cgroup_uses_map</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">all_uses</span>);
+                <span class="kw">if </span>!cgroup_reads.is_empty() || !shareable_uses.is_empty() {
+                    <span class="comment">// add all uses of shareable and non-shareable components into
+                    // cgroup_uses_map
+                    </span><span class="kw">let </span><span class="kw-2">mut </span>all_uses = cgroup_reads.clone();
+                    all_uses.extend(shareable_uses);
+                    <span class="self">self</span>.cgroup_uses_map.insert(id, all_uses);
                 }
 
-                <span class="comment">// Going through the while body and guard + port once again</span>
-                <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">alive</span>, <span class="kw-2">mut</span> <span class="ident">gens</span>, <span class="ident">kills</span>) <span class="op">=</span>
-                    <span class="self">self</span>.<span class="ident">build_live_ranges</span>(<span class="ident">body</span>, <span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>);
-                <span class="ident">alive</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>.<span class="ident">clone</span>());
-                <span class="ident">gens</span>.<span class="ident">or_set</span>(<span class="ident">cgroup_reads</span>);
+                <span class="comment">// Going through the while body and guard + port once again
+                </span><span class="kw">let </span>(<span class="kw-2">mut </span>alive, <span class="kw-2">mut </span>gens, kills) =
+                    <span class="self">self</span>.build_live_ranges(body, alive, gens, kills);
+                alive.or_set(cgroup_reads.clone());
+                gens.or_set(cgroup_reads);
 
-                <span class="comment">// we can only inlcude the kills if we know the while loop executes</span>
-                <span class="comment">// at least once</span>
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">val</span>) <span class="op">=</span> <span class="ident">c</span>.<span class="ident">get_attribute</span>(<span class="string">&quot;bound&quot;</span>) {
-                    <span class="kw">if</span> <span class="ident">val</span> <span class="op">&gt;</span> <span class="number">0</span> {
-                        <span class="kw">return</span> (<span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">kills</span>);
+                <span class="comment">// we can only inlcude the kills if we know the while loop executes
+                // at least once
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>val) = c.get_attribute(<span class="string">&quot;bound&quot;</span>) {
+                    <span class="kw">if </span>val &gt; <span class="number">0 </span>{
+                        <span class="kw">return </span>(alive, gens, kills);
                     }
                 }
 
-                (<span class="ident">alive</span>, <span class="ident">gens</span>, <span class="ident">input_kills</span>)
+                (alive, gens, input_kills)
             }
         }
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

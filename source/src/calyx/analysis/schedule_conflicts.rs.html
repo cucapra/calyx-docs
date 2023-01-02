@@ -1,107 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/analysis/schedule_conflicts.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>schedule_conflicts.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/analysis/schedule_conflicts.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>schedule_conflicts.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -163,166 +158,165 @@
 <span id="158">158</span>
 <span id="159">159</span>
 <span id="160">160</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="self">self</span>, <span class="ident">CloneName</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>::{<span class="ident">Idx</span>, <span class="ident">WeightGraph</span>};
-<span class="kw">use</span> <span class="ident">petgraph::visit::IntoEdgeReferences</span>;
-<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, CloneName};
+<span class="kw">use </span><span class="kw">crate</span>::utils::{Idx, WeightGraph};
+<span class="kw">use </span>petgraph::visit::IntoEdgeReferences;
+<span class="kw">use </span>std::collections::{HashMap, HashSet};
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="doccomment">/// A conflict graph that describes which nodes (i.e. groups/invokes) are being run in parallel</span>
-<span class="doccomment">/// to each other.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ScheduleConflicts</span> {
-    <span class="ident">graph</span>: <span class="ident">WeightGraph</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Reverse mapping from node indices to node (i.e. group/invoke) names.</span>
-    <span class="doccomment">/// We can store this because we don&#39;t expect nodes or edges to be added</span>
-    <span class="doccomment">/// once a conflict graph is constructed.</span>
-    <span class="ident">rev_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Idx</span>, <span class="ident">ir::Id</span><span class="op">&gt;</span>,
+<span class="attribute">#[derive(Default)]
+</span><span class="doccomment">/// A conflict graph that describes which nodes (i.e. groups/invokes) are being run in parallel
+/// to each other.
+</span><span class="kw">pub struct </span>ScheduleConflicts {
+    graph: WeightGraph&lt;ir::Id&gt;,
+    <span class="doccomment">/// Reverse mapping from node indices to node (i.e. group/invoke) names.
+    /// We can store this because we don&#39;t expect nodes or edges to be added
+    /// once a conflict graph is constructed.
+    </span>rev_map: HashMap&lt;Idx, ir::Id&gt;,
 }
 
-<span class="doccomment">/// A conflict between two nodes is specified using the name of the nodes</span>
-<span class="doccomment">/// involved</span>
-<span class="kw">type</span> <span class="ident">Conflict</span> <span class="op">=</span> (<span class="ident">ir::Id</span>, <span class="ident">ir::Id</span>);
+<span class="doccomment">/// A conflict between two nodes is specified using the name of the nodes
+/// involved
+</span><span class="kw">type </span>Conflict = (ir::Id, ir::Id);
 
-<span class="kw">impl</span> <span class="ident">ScheduleConflicts</span> {
-    <span class="doccomment">/// Return a vector of all nodes that conflict with this nodes.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">conflicts_with</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">node</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) -&gt; <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Id</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">graph</span>
-            .<span class="ident">graph</span>
-            .<span class="ident">neighbors</span>(<span class="self">self</span>.<span class="ident">graph</span>.<span class="ident">index_map</span>[<span class="ident">node</span>])
-            .<span class="ident">into_iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">rev_map</span>[<span class="kw-2">&amp;</span><span class="ident">idx</span>])
-            .<span class="ident">collect</span>()
+<span class="kw">impl </span>ScheduleConflicts {
+    <span class="doccomment">/// Return a vector of all nodes that conflict with this nodes.
+    </span><span class="kw">pub fn </span>conflicts_with(<span class="kw-2">&amp;</span><span class="self">self</span>, node: <span class="kw-2">&amp;</span>ir::Id) -&gt; HashSet&lt;ir::Id&gt; {
+        <span class="self">self</span>.graph
+            .graph
+            .neighbors(<span class="self">self</span>.graph.index_map[node])
+            .into_iter()
+            .map(|idx| <span class="self">self</span>.rev_map[<span class="kw-2">&amp;</span>idx])
+            .collect()
     }
 
-    <span class="doccomment">/// Returns an iterator containing all conflict edges,</span>
-    <span class="doccomment">/// `(src node: ir::Id, dst node: ir::Id)`, in this graph.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">all_conflicts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">Conflict</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
-        <span class="self">self</span>.<span class="ident">graph</span>
-            .<span class="ident">graph</span>
-            .<span class="ident">edge_references</span>()
-            .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="kw">_</span>)<span class="op">|</span> (<span class="self">self</span>.<span class="ident">rev_map</span>[<span class="kw-2">&amp;</span><span class="ident">src</span>], <span class="self">self</span>.<span class="ident">rev_map</span>[<span class="kw-2">&amp;</span><span class="ident">dst</span>]))
+    <span class="doccomment">/// Returns an iterator containing all conflict edges,
+    /// `(src node: ir::Id, dst node: ir::Id)`, in this graph.
+    </span><span class="kw">pub fn </span>all_conflicts(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = Conflict&gt; + <span class="lifetime">&#39;_ </span>{
+        <span class="self">self</span>.graph
+            .graph
+            .edge_references()
+            .map(<span class="kw">move </span>|(src, dst, <span class="kw">_</span>)| (<span class="self">self</span>.rev_map[<span class="kw-2">&amp;</span>src], <span class="self">self</span>.rev_map[<span class="kw-2">&amp;</span>dst]))
     }
 
-    <span class="comment">/////////////// Internal Methods //////////////////</span>
-    <span class="doccomment">/// Adds a node to the CurrentConflict set.</span>
-    <span class="kw">fn</span> <span class="ident">add_node</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">node</span>: <span class="ident">ir::Id</span>) {
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">graph</span>.<span class="ident">contains_node</span>(<span class="kw-2">&amp;</span><span class="ident">node</span>) {
-            <span class="self">self</span>.<span class="ident">graph</span>.<span class="ident">add_node</span>(<span class="ident">node</span>)
+    <span class="comment">/////////////// Internal Methods //////////////////
+    </span><span class="doccomment">/// Adds a node to the CurrentConflict set.
+    </span><span class="kw">fn </span>add_node(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: ir::Id) {
+        <span class="kw">if </span>!<span class="self">self</span>.graph.contains_node(<span class="kw-2">&amp;</span>node) {
+            <span class="self">self</span>.graph.add_node(node)
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">add_edge</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">g1</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>, <span class="ident">g2</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Id</span>) {
-        <span class="self">self</span>.<span class="ident">graph</span>.<span class="ident">add_edge</span>(<span class="ident">g1</span>, <span class="ident">g2</span>)
+    <span class="kw">fn </span>add_edge(<span class="kw-2">&amp;mut </span><span class="self">self</span>, g1: <span class="kw-2">&amp;</span>ir::Id, g2: <span class="kw-2">&amp;</span>ir::Id) {
+        <span class="self">self</span>.graph.add_edge(g1, g2)
     }
 }
 
-<span class="doccomment">/// Given a set of vectors of nodes, adds edges between all nodes in one</span>
-<span class="doccomment">/// vector to all nodes in every other vector.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// For example:</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// vec![</span>
-<span class="doccomment">///     vec![&quot;a&quot;, &quot;b&quot;],</span>
-<span class="doccomment">///     vec![&quot;c&quot;, &quot;d&quot;]</span>
-<span class="doccomment">/// ]</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// will create the edges:</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// a --- c</span>
-<span class="doccomment">/// b --- c</span>
-<span class="doccomment">/// a --- d</span>
-<span class="doccomment">/// b --- d</span>
-<span class="doccomment">/// ```</span>
-<span class="kw">fn</span> <span class="ident">all_conflicting</span>(
-    <span class="ident">groups</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>],
-    <span class="ident">current_conflicts</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ScheduleConflicts</span>,
+<span class="doccomment">/// Given a set of vectors of nodes, adds edges between all nodes in one
+/// vector to all nodes in every other vector.
+///
+/// For example:
+/// ```
+/// vec![
+///     vec![&quot;a&quot;, &quot;b&quot;],
+///     vec![&quot;c&quot;, &quot;d&quot;]
+/// ]
+/// ```
+/// will create the edges:
+/// ```
+/// a --- c
+/// b --- c
+/// a --- d
+/// b --- d
+/// ```
+</span><span class="kw">fn </span>all_conflicting(
+    groups: <span class="kw-2">&amp;</span>[Vec&lt;ir::Id&gt;],
+    current_conflicts: <span class="kw-2">&amp;mut </span>ScheduleConflicts,
 ) {
-    <span class="kw">for</span> <span class="ident">group1</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">groups</span>.<span class="ident">len</span>() {
-        <span class="kw">for</span> <span class="ident">group2</span> <span class="kw">in</span> <span class="ident">group1</span> <span class="op">+</span> <span class="number">1</span>..<span class="ident">groups</span>.<span class="ident">len</span>() {
-            <span class="kw">for</span> <span class="ident">node1</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">groups</span>[<span class="ident">group1</span>] {
-                <span class="kw">for</span> <span class="ident">node2</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">groups</span>[<span class="ident">group2</span>] {
-                    <span class="ident">current_conflicts</span>.<span class="ident">add_edge</span>(<span class="ident">node1</span>, <span class="ident">node2</span>);
+    <span class="kw">for </span>group1 <span class="kw">in </span><span class="number">0</span>..groups.len() {
+        <span class="kw">for </span>group2 <span class="kw">in </span>group1 + <span class="number">1</span>..groups.len() {
+            <span class="kw">for </span>node1 <span class="kw">in </span><span class="kw-2">&amp;</span>groups[group1] {
+                <span class="kw">for </span>node2 <span class="kw">in </span><span class="kw-2">&amp;</span>groups[group2] {
+                    current_conflicts.add_edge(node1, node2);
                 }
             }
         }
     }
 }
 
-<span class="doccomment">/// Construct a conflict graph by traversing the Control program.</span>
-<span class="kw">fn</span> <span class="ident">build_conflict_graph</span>(
-    <span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>,
-    <span class="ident">confs</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ScheduleConflicts</span>,
-    <span class="ident">all_nodes</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Id</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Construct a conflict graph by traversing the Control program.
+</span><span class="kw">fn </span>build_conflict_graph(
+    c: <span class="kw-2">&amp;</span>ir::Control,
+    confs: <span class="kw-2">&amp;mut </span>ScheduleConflicts,
+    all_nodes: <span class="kw-2">&amp;mut </span>Vec&lt;ir::Id&gt;,
 ) {
-    <span class="kw">match</span> <span class="ident">c</span> {
-        <span class="ident">ir::Control::Empty</span>(<span class="kw">_</span>) =&gt; (),
-        <span class="ident">ir::Control::Invoke</span>(<span class="ident">ir::Invoke</span> { <span class="ident">comp</span>, .. }) =&gt; {
-            <span class="ident">confs</span>.<span class="ident">add_node</span>(<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">name</span>());
-            <span class="ident">all_nodes</span>.<span class="ident">push</span>(<span class="ident">comp</span>.<span class="ident">borrow</span>().<span class="ident">name</span>());
+    <span class="kw">match </span>c {
+        ir::Control::Empty(<span class="kw">_</span>) =&gt; (),
+        ir::Control::Invoke(ir::Invoke { comp, .. }) =&gt; {
+            confs.add_node(comp.borrow().name());
+            all_nodes.push(comp.borrow().name());
         }
-        <span class="ident">ir::Control::Enable</span>(<span class="ident">ir::Enable</span> { <span class="ident">group</span>, .. }) =&gt; {
-            <span class="ident">confs</span>.<span class="ident">add_node</span>(<span class="ident">group</span>.<span class="ident">borrow</span>().<span class="ident">name</span>());
-            <span class="ident">all_nodes</span>.<span class="ident">push</span>(<span class="ident">group</span>.<span class="ident">clone_name</span>());
+        ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
+            confs.add_node(group.borrow().name());
+            all_nodes.push(group.clone_name());
         }
-        <span class="ident">ir::Control::Seq</span>(<span class="ident">ir::Seq</span> { <span class="ident">stmts</span>, .. }) =&gt; <span class="ident">stmts</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">build_conflict_graph</span>(<span class="ident">c</span>, <span class="ident">confs</span>, <span class="ident">all_nodes</span>)),
-        <span class="ident">ir::Control::If</span>(<span class="ident">ir::If</span> {
-            <span class="ident">cond</span>,
-            <span class="ident">tbranch</span>,
-            <span class="ident">fbranch</span>,
+        ir::Control::Seq(ir::Seq { stmts, .. }) =&gt; stmts
+            .iter()
+            .for_each(|c| build_conflict_graph(c, confs, all_nodes)),
+        ir::Control::If(ir::If {
+            cond,
+            tbranch,
+            fbranch,
             ..
         }) =&gt; {
-            <span class="comment">// XXX (rachit): This might be incorrect since cond is a combinational</span>
-            <span class="comment">// group</span>
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span> <span class="ident">cond</span> {
-                <span class="ident">all_nodes</span>.<span class="ident">push</span>(<span class="ident">c</span>.<span class="ident">clone_name</span>());
-                <span class="ident">confs</span>.<span class="ident">add_node</span>(<span class="ident">c</span>.<span class="ident">borrow</span>().<span class="ident">name</span>());
+            <span class="comment">// XXX (rachit): This might be incorrect since cond is a combinational
+            // group
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(c) = cond {
+                all_nodes.push(c.clone_name());
+                confs.add_node(c.borrow().name());
             }
-            <span class="ident">build_conflict_graph</span>(<span class="ident">tbranch</span>, <span class="ident">confs</span>, <span class="ident">all_nodes</span>);
-            <span class="ident">build_conflict_graph</span>(<span class="ident">fbranch</span>, <span class="ident">confs</span>, <span class="ident">all_nodes</span>);
+            build_conflict_graph(tbranch, confs, all_nodes);
+            build_conflict_graph(fbranch, confs, all_nodes);
         }
-        <span class="ident">ir::Control::While</span>(<span class="ident">ir::While</span> { <span class="ident">cond</span>, <span class="ident">body</span>, .. }) =&gt; {
-            <span class="comment">// XXX (rachit): This might be incorrect since cond is a combinational</span>
-            <span class="comment">// group</span>
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span> <span class="ident">cond</span> {
-                <span class="ident">all_nodes</span>.<span class="ident">push</span>(<span class="ident">c</span>.<span class="ident">clone_name</span>());
-                <span class="ident">confs</span>.<span class="ident">add_node</span>(<span class="ident">c</span>.<span class="ident">borrow</span>().<span class="ident">name</span>());
+        ir::Control::While(ir::While { cond, body, .. }) =&gt; {
+            <span class="comment">// XXX (rachit): This might be incorrect since cond is a combinational
+            // group
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(c) = cond {
+                all_nodes.push(c.clone_name());
+                confs.add_node(c.borrow().name());
             }
-            <span class="ident">build_conflict_graph</span>(<span class="ident">body</span>, <span class="ident">confs</span>, <span class="ident">all_nodes</span>);
+            build_conflict_graph(body, confs, all_nodes);
         }
-        <span class="ident">ir::Control::Par</span>(<span class="ident">ir::Par</span> { <span class="ident">stmts</span>, .. }) =&gt; {
-            <span class="kw">let</span> <span class="ident">par_nodes</span> <span class="op">=</span> <span class="ident">stmts</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> {
-                    <span class="comment">// Visit this child and add conflict edges.</span>
-                    <span class="comment">// Collect the enables in this into a new vector.</span>
-                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nodes</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-                    <span class="ident">build_conflict_graph</span>(<span class="ident">c</span>, <span class="ident">confs</span>, <span class="kw-2">&amp;mut</span> <span class="ident">nodes</span>);
-                    <span class="ident">nodes</span>
+        ir::Control::Par(ir::Par { stmts, .. }) =&gt; {
+            <span class="kw">let </span>par_nodes = stmts
+                .iter()
+                .map(|c| {
+                    <span class="comment">// Visit this child and add conflict edges.
+                    // Collect the enables in this into a new vector.
+                    </span><span class="kw">let </span><span class="kw-2">mut </span>nodes = Vec::new();
+                    build_conflict_graph(c, confs, <span class="kw-2">&amp;mut </span>nodes);
+                    nodes
                 })
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+                .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
 
-            <span class="comment">// Add conflict edges between all children.</span>
-            <span class="ident">all_conflicting</span>(<span class="kw-2">&amp;</span><span class="ident">par_nodes</span>, <span class="ident">confs</span>);
+            <span class="comment">// Add conflict edges between all children.
+            </span>all_conflicting(<span class="kw-2">&amp;</span>par_nodes, confs);
 
-            <span class="comment">// Add the enables from visiting the children to the current</span>
-            <span class="comment">// set of enables.</span>
-            <span class="ident">all_nodes</span>.<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">par_nodes</span>.<span class="ident">into_iter</span>().<span class="ident">flatten</span>().<span class="ident">collect</span>());
+            <span class="comment">// Add the enables from visiting the children to the current
+            // set of enables.
+            </span>all_nodes.append(<span class="kw-2">&amp;mut </span>par_nodes.into_iter().flatten().collect());
         }
     }
 }
 
-<span class="doccomment">/// Construct ScheduleConflicts from a ir::Control.</span>
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ir::Control</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ScheduleConflicts</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">control</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">confs</span> <span class="op">=</span> <span class="ident">ScheduleConflicts::default</span>();
-        <span class="ident">build_conflict_graph</span>(<span class="ident">control</span>, <span class="kw-2">&amp;mut</span> <span class="ident">confs</span>, <span class="kw-2">&amp;mut</span> <span class="macro">vec!</span>[]);
-        <span class="comment">// Build the reverse index</span>
-        <span class="ident">confs</span>.<span class="ident">rev_map</span> <span class="op">=</span> <span class="ident">confs</span>.<span class="ident">graph</span>.<span class="ident">reverse_index</span>();
-        <span class="ident">confs</span>
+<span class="doccomment">/// Construct ScheduleConflicts from a ir::Control.
+</span><span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>ir::Control&gt; <span class="kw">for </span>ScheduleConflicts {
+    <span class="kw">fn </span>from(control: <span class="kw-2">&amp;</span>ir::Control) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>confs = ScheduleConflicts::default();
+        build_conflict_graph(control, <span class="kw-2">&amp;mut </span>confs, <span class="kw-2">&amp;mut </span><span class="macro">vec!</span>[]);
+        <span class="comment">// Build the reverse index
+        </span>confs.rev_map = confs.graph.reverse_index();
+        confs
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

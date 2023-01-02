@@ -1,107 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/passes/top_down_static_timing.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>top_down_static_timing.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/passes/top_down_static_timing.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>top_down_static_timing.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -618,621 +613,620 @@
 <span id="613">613</span>
 <span id="614">614</span>
 <span id="615">615</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::math_utilities::get_bit_width_from</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal::ConstructVisitor</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
+<span class="kw">use </span><span class="kw">crate</span>::errors::{CalyxResult, Error};
+<span class="kw">use </span><span class="kw">crate</span>::ir::traversal::ConstructVisitor;
+<span class="kw">use </span><span class="kw">crate</span>::ir::{
     <span class="self">self</span>,
-    <span class="ident">traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>},
-    <span class="ident">LibrarySignatures</span>, <span class="ident">Printer</span>, <span class="ident">RRC</span>,
+    traversal::{Action, Named, VisResult, Visitor},
+    LibrarySignatures, Printer, RRC,
 };
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">build_assignments</span>, <span class="ident">guard</span>, <span class="ident">passes</span>, <span class="ident">structure</span>};
-<span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
-<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
-<span class="kw">use</span> <span class="ident">std::ops::Not</span>;
-<span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
+<span class="kw">use crate</span>::{build_assignments, guard, passes, structure};
+<span class="kw">use </span>itertools::Itertools;
+<span class="kw">use </span>std::collections::{HashMap, HashSet};
+<span class="kw">use </span>std::ops::Not;
+<span class="kw">use </span>std::rc::Rc;
 
-<span class="doccomment">/// A range of FSM states.</span>
-<span class="kw">type</span> <span class="ident">Range</span> <span class="op">=</span> (<span class="ident">u64</span>, <span class="ident">u64</span>);
+<span class="doccomment">/// A range of FSM states.
+</span><span class="kw">type </span>Range = (u64, u64);
 
-<span class="doccomment">/// A schedule keeps track of two things:</span>
-<span class="doccomment">/// 1. `enables`: Specifies which groups are active during a range of</span>
-<span class="doccomment">///     FSM states.</span>
-<span class="doccomment">/// 2. `transitions`: Transitions for the FSM registers. A static FSM normally</span>
-<span class="doccomment">///    transitions from `state` to `state + 1`. However, special transitions</span>
-<span class="doccomment">///    are needed for loops, conditionals, and reseting the FSM.</span>
-<span class="kw">struct</span> <span class="ident">Schedule</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="ident">enables</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Range</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ir::Assignment</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">transitions</span>: <span class="ident">HashSet</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">u64</span>, <span class="ident">ir::Guard</span>)<span class="op">&gt;</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">ir::Builder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+<span class="doccomment">/// A schedule keeps track of two things:
+/// 1. `enables`: Specifies which groups are active during a range of
+///     FSM states.
+/// 2. `transitions`: Transitions for the FSM registers. A static FSM normally
+///    transitions from `state` to `state + 1`. However, special transitions
+///    are needed for loops, conditionals, and reseting the FSM.
+</span><span class="kw">struct </span>Schedule&lt;<span class="lifetime">&#39;a</span>&gt; {
+    enables: HashMap&lt;Range, Vec&lt;ir::Assignment&gt;&gt;,
+    transitions: HashSet&lt;(u64, u64, ir::Guard)&gt;,
+    builder: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ir::Builder&lt;<span class="lifetime">&#39;a</span>&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Schedule</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">ir::Builder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">enables</span>: <span class="ident">HashMap::default</span>(),
-            <span class="ident">transitions</span>: <span class="ident">HashSet::default</span>(),
-            <span class="ident">builder</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Schedule&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>new(builder: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ir::Builder&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            enables: HashMap::default(),
+            transitions: HashSet::default(),
+            builder,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">last_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">transitions</span>.<span class="ident">is_empty</span>(), <span class="string">&quot;Transitions are empty&quot;</span>);
-        <span class="self">self</span>.<span class="ident">transitions</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">e</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">e</span>).<span class="ident">max</span>().<span class="ident">unwrap</span>()
+    <span class="kw">fn </span>last_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+        <span class="macro">assert!</span>(!<span class="self">self</span>.transitions.is_empty(), <span class="string">&quot;Transitions are empty&quot;</span>);
+        <span class="self">self</span>.transitions.iter().map(|(<span class="kw">_</span>, e, <span class="kw">_</span>)| <span class="kw-2">*</span>e).max().unwrap()
     }
 
-    <span class="kw">fn</span> <span class="ident">display</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="kw">let</span> <span class="ident">out</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">std::io::stdout</span>();
-        <span class="kw">let</span> (<span class="ident">uncond</span>, <span class="ident">cond</span>) <span class="op">=</span>
-            <span class="ident"><span class="self">Self</span>::calculate_runs</span>(<span class="self">self</span>.<span class="ident">transitions</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>());
+    <span class="kw">fn </span>display(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">let </span>out = <span class="kw-2">&amp;mut </span>std::io::stdout();
+        <span class="kw">let </span>(uncond, cond) =
+            <span class="self">Self</span>::calculate_runs(<span class="self">self</span>.transitions.iter().cloned());
 
         <span class="macro">println!</span>(<span class="string">&quot;enables:&quot;</span>);
-        <span class="self">self</span>.<span class="ident">enables</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">sorted_by</span>(<span class="op">|</span>(<span class="ident">k1</span>, <span class="kw">_</span>), (<span class="ident">k2</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">k1</span>.<span class="ident">cmp</span>(<span class="ident">k2</span>))
-            .<span class="ident">for_each</span>(<span class="op">|</span>((<span class="ident">start</span>, <span class="ident">end</span>), <span class="ident">assigns</span>)<span class="op">|</span> {
-                <span class="macro">println!</span>(<span class="string">&quot;[{}, {})&quot;</span>, <span class="ident">start</span>, <span class="ident">end</span>);
-                <span class="ident">assigns</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
+        <span class="self">self</span>.enables
+            .iter()
+            .sorted_by(|(k1, <span class="kw">_</span>), (k2, <span class="kw">_</span>)| k1.cmp(k2))
+            .for_each(|((start, end), assigns)| {
+                <span class="macro">println!</span>(<span class="string">&quot;[{}, {})&quot;</span>, start, end);
+                assigns.iter().for_each(|assign| {
                     <span class="macro">print!</span>(<span class="string">&quot;  &quot;</span>);
-                    <span class="ident">Printer::write_assignment</span>(<span class="ident">assign</span>, <span class="number">0</span>, <span class="ident">out</span>)
-                        .<span class="ident">expect</span>(<span class="string">&quot;Printing failed!&quot;</span>);
+                    Printer::write_assignment(assign, <span class="number">0</span>, out)
+                        .expect(<span class="string">&quot;Printing failed!&quot;</span>);
                     <span class="macro">println!</span>();
                 })
             });
         <span class="macro">println!</span>(<span class="string">&quot;transitions:&quot;</span>);
-        <span class="ident">cond</span>.<span class="ident">iter</span>()
-            .<span class="ident">sorted_by</span>(<span class="op">|</span>(<span class="ident">k1</span>, <span class="ident">k2</span>, <span class="ident">g1</span>), (<span class="ident">k3</span>, <span class="ident">k4</span>, <span class="ident">g2</span>)<span class="op">|</span> {
-                <span class="ident">k1</span>.<span class="ident">cmp</span>(<span class="ident">k3</span>).<span class="ident">then_with</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">k2</span>.<span class="ident">cmp</span>(<span class="ident">k4</span>)).<span class="ident">then_with</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">g1</span>.<span class="ident">cmp</span>(<span class="ident">g2</span>))
+        cond.iter()
+            .sorted_by(|(k1, k2, g1), (k3, k4, g2)| {
+                k1.cmp(k3).then_with(|| k2.cmp(k4)).then_with(|| g1.cmp(g2))
             })
-            .<span class="ident">for_each</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>, <span class="ident">g</span>)<span class="op">|</span> {
-                <span class="macro">println!</span>(<span class="string">&quot;({})-&gt;({})\n  {}&quot;</span>, <span class="ident">i</span>, <span class="ident">f</span>, <span class="ident">Printer::guard_str</span>(<span class="ident">g</span>));
+            .for_each(|(i, f, g)| {
+                <span class="macro">println!</span>(<span class="string">&quot;({})-&gt;({})\n  {}&quot;</span>, i, f, Printer::guard_str(g));
             });
 
-        <span class="comment">// Unconditional +1 transitions</span>
-        <span class="kw">let</span> <span class="ident">uncond_trans</span> <span class="op">=</span> <span class="ident">uncond</span>
-            .<span class="ident">into_iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">s</span>, <span class="ident">e</span>)<span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;({}, {})&quot;</span>, <span class="ident">s</span>, <span class="ident">e</span>))
-            .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>);
-        <span class="macro">println!</span>(<span class="string">&quot;unconditional:\n{}&quot;</span>, <span class="ident">uncond_trans</span>);
+        <span class="comment">// Unconditional +1 transitions
+        </span><span class="kw">let </span>uncond_trans = uncond
+            .into_iter()
+            .map(|(s, e)| <span class="macro">format!</span>(<span class="string">&quot;({}, {})&quot;</span>, s, e))
+            .join(<span class="string">&quot;, &quot;</span>);
+        <span class="macro">println!</span>(<span class="string">&quot;unconditional:\n{}&quot;</span>, uncond_trans);
     }
 
-    <span class="doccomment">/// Returns &quot;runs&quot; of FSM states where transitions happen unconditionally</span>
-    <span class="kw">fn</span> <span class="ident">calculate_runs</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(
-        <span class="ident">transitions</span>: <span class="ident">I</span>,
-    ) -&gt; (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Range</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">u64</span>, <span class="ident">ir::Guard</span>)<span class="op">&gt;</span>)
-    <span class="kw">where</span>
-        <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">u64</span>, <span class="ident">u64</span>, <span class="ident">ir::Guard</span>)<span class="op">&gt;</span>,
+    <span class="doccomment">/// Returns &quot;runs&quot; of FSM states where transitions happen unconditionally
+    </span><span class="kw">fn </span>calculate_runs&lt;I&gt;(
+        transitions: I,
+    ) -&gt; (Vec&lt;Range&gt;, Vec&lt;(u64, u64, ir::Guard)&gt;)
+    <span class="kw">where
+        </span>I: Iterator&lt;Item = (u64, u64, ir::Guard)&gt;,
     {
-        <span class="comment">// XXX(rachit): This only works for &quot;true&quot; guards and fails to compress if there is any</span>
-        <span class="comment">// other guard. For example, if there is a sequence under a conditional branch, this will</span>
-        <span class="comment">// fail to compress that sequence.</span>
-        <span class="kw">let</span> (<span class="ident">unconditional</span>, <span class="ident">conditional</span>): (<span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>) <span class="op">=</span> <span class="ident">transitions</span>
-            .<span class="ident">partition</span>(<span class="op">|</span>(<span class="ident">s</span>, <span class="ident">e</span>, <span class="ident">guard</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">e</span> <span class="op">==</span> <span class="ident">s</span> <span class="op">+</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">guard</span>.<span class="ident">is_true</span>());
+        <span class="comment">// XXX(rachit): This only works for &quot;true&quot; guards and fails to compress if there is any
+        // other guard. For example, if there is a sequence under a conditional branch, this will
+        // fail to compress that sequence.
+        </span><span class="kw">let </span>(unconditional, conditional): (Vec&lt;<span class="kw">_</span>&gt;, Vec&lt;<span class="kw">_</span>&gt;) = transitions
+            .partition(|(s, e, guard)| <span class="kw-2">*</span>e == s + <span class="number">1 </span>&amp;&amp; guard.is_true());
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unconditional</span> <span class="op">=</span>
-            <span class="ident">unconditional</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">s</span>, <span class="kw">_</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">s</span>).<span class="ident">sorted</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>unconditional =
+            unconditional.into_iter().map(|(s, <span class="kw">_</span>, <span class="kw">_</span>)| s).sorted();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ranges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Range</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">cur_s</span>) <span class="op">=</span> <span class="ident">unconditional</span>.<span class="ident">next</span>() {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">start_s</span> <span class="op">=</span> <span class="ident">cur_s</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>ranges: Vec&lt;Range&gt; = Vec::new();
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>cur_s) = unconditional.next() {
+            <span class="kw">let </span><span class="kw-2">mut </span>start_s = cur_s;
 
-            <span class="comment">// Extract the next state</span>
-            <span class="kw">for</span> <span class="ident">nxt_s</span> <span class="kw">in</span> <span class="ident">unconditional</span> {
-                <span class="kw">if</span> <span class="ident">nxt_s</span> <span class="op">!</span><span class="op">=</span> <span class="ident">cur_s</span> <span class="op">+</span> <span class="number">1</span> {
-                    <span class="ident">ranges</span>.<span class="ident">push</span>((<span class="ident">start_s</span>, <span class="ident">cur_s</span> <span class="op">+</span> <span class="number">1</span>));
-                    <span class="ident">start_s</span> <span class="op">=</span> <span class="ident">cur_s</span>;
+            <span class="comment">// Extract the next state
+            </span><span class="kw">for </span>nxt_s <span class="kw">in </span>unconditional {
+                <span class="kw">if </span>nxt_s != cur_s + <span class="number">1 </span>{
+                    ranges.push((start_s, cur_s + <span class="number">1</span>));
+                    start_s = cur_s;
                 }
-                <span class="ident">cur_s</span> <span class="op">=</span> <span class="ident">nxt_s</span>
+                cur_s = nxt_s
             }
-            <span class="ident">ranges</span>.<span class="ident">push</span>((<span class="ident">start_s</span>, <span class="ident">cur_s</span> <span class="op">+</span> <span class="number">1</span>));
+            ranges.push((start_s, cur_s + <span class="number">1</span>));
         }
 
-        (<span class="ident">ranges</span>, <span class="ident">conditional</span>)
+        (ranges, conditional)
     }
 
-    <span class="kw">fn</span> <span class="ident">range_guard</span>(
-        <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Builder</span>,
-        <span class="ident">s</span>: <span class="ident">u64</span>,
-        <span class="ident">e</span>: <span class="ident">u64</span>,
-        <span class="ident">fsm_size</span>: <span class="ident">u64</span>,
-        <span class="ident">fsm</span>: <span class="kw-2">&amp;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Cell</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="ident">ir::Guard</span> {
-        <span class="kw">let</span> <span class="ident">lb_const</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_constant</span>(<span class="ident">s</span>, <span class="ident">fsm_size</span>);
-        <span class="kw">let</span> <span class="ident">ub_const</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_constant</span>(<span class="ident">e</span>, <span class="ident">fsm_size</span>);
-        <span class="kw">if</span> <span class="ident">s</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>]).<span class="ident">lt</span>(<span class="macro">guard!</span>(<span class="ident">ub_const</span>[<span class="string">&quot;out&quot;</span>]))
-        } <span class="kw">else</span> {
-            <span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>])
-                .<span class="ident">ge</span>(<span class="macro">guard!</span>(<span class="ident">lb_const</span>[<span class="string">&quot;out&quot;</span>]))
-                .<span class="ident">and</span>(<span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>]).<span class="ident">lt</span>(<span class="macro">guard!</span>(<span class="ident">ub_const</span>[<span class="string">&quot;out&quot;</span>])))
+    <span class="kw">fn </span>range_guard(
+        builder: <span class="kw-2">&amp;mut </span>ir::Builder,
+        s: u64,
+        e: u64,
+        fsm_size: u64,
+        fsm: <span class="kw-2">&amp;</span>RRC&lt;ir::Cell&gt;,
+    ) -&gt; ir::Guard {
+        <span class="kw">let </span>lb_const = builder.add_constant(s, fsm_size);
+        <span class="kw">let </span>ub_const = builder.add_constant(e, fsm_size);
+        <span class="kw">if </span>s == <span class="number">0 </span>{
+            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).lt(<span class="macro">guard!</span>(ub_const[<span class="string">&quot;out&quot;</span>]))
+        } <span class="kw">else </span>{
+            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>])
+                .ge(<span class="macro">guard!</span>(lb_const[<span class="string">&quot;out&quot;</span>]))
+                .and(<span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).lt(<span class="macro">guard!</span>(ub_const[<span class="string">&quot;out&quot;</span>])))
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">realize_schedule</span>(<span class="self">self</span>) -&gt; <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">ir::Group</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">final_state</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">last_state</span>();
-        <span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">builder</span>;
-        <span class="kw">let</span> (<span class="ident">unconditional</span>, <span class="ident">conditional</span>) <span class="op">=</span>
-            <span class="ident"><span class="self">Self</span>::calculate_runs</span>(<span class="self">self</span>.<span class="ident">transitions</span>.<span class="ident">into_iter</span>());
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_group</span>(<span class="string">&quot;tdst&quot;</span>);
-        <span class="kw">let</span> <span class="ident">fsm_size</span> <span class="op">=</span> <span class="ident">get_bit_width_from</span>(<span class="ident">final_state</span> <span class="op">+</span> <span class="number">1</span>);
+    <span class="kw">fn </span>realize_schedule(<span class="self">self</span>) -&gt; RRC&lt;ir::Group&gt; {
+        <span class="kw">let </span>final_state = <span class="self">self</span>.last_state();
+        <span class="kw">let </span>builder = <span class="self">self</span>.builder;
+        <span class="kw">let </span>(unconditional, conditional) =
+            <span class="self">Self</span>::calculate_runs(<span class="self">self</span>.transitions.into_iter());
+        <span class="kw">let </span>group = builder.add_group(<span class="string">&quot;tdst&quot;</span>);
+        <span class="kw">let </span>fsm_size = get_bit_width_from(final_state + <span class="number">1</span>);
 
-        <span class="macro">structure!</span>(<span class="ident">builder</span>;
-           <span class="kw">let</span> <span class="ident">fsm</span> <span class="op">=</span> <span class="ident">prim</span> <span class="ident">std_reg</span>(<span class="ident">fsm_size</span>);
-           <span class="kw">let</span> <span class="ident">signal_on</span> <span class="op">=</span> <span class="ident">constant</span>(<span class="number">1</span>, <span class="number">1</span>);
-           <span class="kw">let</span> <span class="ident">first_state</span> <span class="op">=</span> <span class="ident">constant</span>(<span class="number">0</span>, <span class="ident">fsm_size</span>);
-           <span class="kw">let</span> <span class="ident">last_state</span> <span class="op">=</span> <span class="ident">constant</span>(<span class="ident">final_state</span>, <span class="ident">fsm_size</span>);
+        <span class="macro">structure!</span>(builder;
+           <span class="kw">let </span>fsm = prim std_reg(fsm_size);
+           <span class="kw">let </span>signal_on = constant(<span class="number">1</span>, <span class="number">1</span>);
+           <span class="kw">let </span>first_state = constant(<span class="number">0</span>, fsm_size);
+           <span class="kw">let </span>last_state = constant(final_state, fsm_size);
         );
 
-        <span class="comment">// Enable assignments.</span>
-        <span class="ident">group</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span>.<span class="ident">extend</span>(
-            <span class="self">self</span>.<span class="ident">enables</span>
-                .<span class="ident">into_iter</span>()
-                .<span class="ident">sorted_by</span>(<span class="op">|</span>(<span class="ident">k1</span>, <span class="kw">_</span>), (<span class="ident">k2</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">k1</span>.<span class="ident">cmp</span>(<span class="ident">k2</span>))
-                .<span class="ident">flat_map</span>(<span class="op">|</span>((<span class="ident">lb</span>, <span class="ident">ub</span>), <span class="kw-2">mut</span> <span class="ident">assigns</span>)<span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">state_guard</span> <span class="op">=</span>
-                        <span class="ident"><span class="self">Self</span>::range_guard</span>(<span class="ident">builder</span>, <span class="ident">lb</span>, <span class="ident">ub</span>, <span class="ident">fsm_size</span>, <span class="kw-2">&amp;</span><span class="ident">fsm</span>);
-                    <span class="ident">assigns</span>.<span class="ident">iter_mut</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
-                        <span class="ident">assign</span>.<span class="ident">guard</span>.<span class="ident">update</span>(<span class="op">|</span><span class="ident">g</span><span class="op">|</span> <span class="ident">g</span>.<span class="ident">and</span>(<span class="ident">state_guard</span>.<span class="ident">clone</span>()))
+        <span class="comment">// Enable assignments.
+        </span>group.borrow_mut().assignments.extend(
+            <span class="self">self</span>.enables
+                .into_iter()
+                .sorted_by(|(k1, <span class="kw">_</span>), (k2, <span class="kw">_</span>)| k1.cmp(k2))
+                .flat_map(|((lb, ub), <span class="kw-2">mut </span>assigns)| {
+                    <span class="kw">let </span>state_guard =
+                        <span class="self">Self</span>::range_guard(builder, lb, ub, fsm_size, <span class="kw-2">&amp;</span>fsm);
+                    assigns.iter_mut().for_each(|assign| {
+                        assign.guard.update(|g| g.and(state_guard.clone()))
                     });
-                    <span class="ident">assigns</span>
+                    assigns
                 }),
         );
 
-        <span class="comment">// Conditional Transition assignments.</span>
-        <span class="ident">group</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span>.<span class="ident">extend</span>(
-            <span class="ident">conditional</span>
-                .<span class="ident">into_iter</span>()
-                .<span class="ident">sorted_by_key</span>(<span class="op">|</span>(<span class="ident">start</span>, <span class="kw">_</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">start</span>)
-                .<span class="ident">flat_map</span>(<span class="op">|</span>(<span class="ident">start</span>, <span class="ident">end</span>, <span class="ident">guard</span>)<span class="op">|</span> {
-                    <span class="macro">structure!</span>(<span class="ident">builder</span>;
-                        <span class="kw">let</span> <span class="ident">start_const</span> <span class="op">=</span> <span class="ident">constant</span>(<span class="ident">start</span>, <span class="ident">fsm_size</span>);
-                        <span class="kw">let</span> <span class="ident">end_const</span> <span class="op">=</span> <span class="ident">constant</span>(<span class="ident">end</span>, <span class="ident">fsm_size</span>);
+        <span class="comment">// Conditional Transition assignments.
+        </span>group.borrow_mut().assignments.extend(
+            conditional
+                .into_iter()
+                .sorted_by_key(|(start, <span class="kw">_</span>, <span class="kw">_</span>)| <span class="kw-2">*</span>start)
+                .flat_map(|(start, end, guard)| {
+                    <span class="macro">structure!</span>(builder;
+                        <span class="kw">let </span>start_const = constant(start, fsm_size);
+                        <span class="kw">let </span>end_const = constant(end, fsm_size);
                     );
 
-                    <span class="kw">let</span> <span class="ident">transition_guard</span> <span class="op">=</span> <span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>])
-                        .<span class="ident">eq</span>(<span class="macro">guard!</span>(<span class="ident">start_const</span>[<span class="string">&quot;out&quot;</span>]))
-                        .<span class="ident">and</span>(<span class="ident">guard</span>);
+                    <span class="kw">let </span>transition_guard = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>])
+                        .eq(<span class="macro">guard!</span>(start_const[<span class="string">&quot;out&quot;</span>]))
+                        .and(guard);
 
-                    <span class="kw">let</span> <span class="ident">assigns</span> <span class="op">=</span> <span class="macro">build_assignments!</span>(<span class="ident">builder</span>;
-                        <span class="ident">fsm</span>[<span class="string">&quot;in&quot;</span>] <span class="op">=</span> <span class="ident">transition_guard</span> <span class="question-mark">?</span> <span class="ident">end_const</span>[<span class="string">&quot;out&quot;</span>];
-                        <span class="ident">fsm</span>[<span class="string">&quot;write_en&quot;</span>] <span class="op">=</span> <span class="ident">transition_guard</span> <span class="question-mark">?</span> <span class="ident">signal_on</span>[<span class="string">&quot;out&quot;</span>];
+                    <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
+                        fsm[<span class="string">&quot;in&quot;</span>] = transition_guard <span class="question-mark">? </span>end_const[<span class="string">&quot;out&quot;</span>];
+                        fsm[<span class="string">&quot;write_en&quot;</span>] = transition_guard <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
                     );
-                    <span class="ident">assigns</span>
+                    assigns
                 }),
         );
-        <span class="comment">// Unconditional Transitions</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">unconditional</span>.<span class="ident">is_empty</span>() {
-            <span class="kw">let</span> <span class="ident">uncond_guard</span>: <span class="ident">ir::Guard</span> <span class="op">=</span> <span class="ident">unconditional</span>.<span class="ident">into_iter</span>().<span class="ident">fold</span>(
-                <span class="ident">ir::Guard::True</span>.<span class="ident">not</span>(),
-                <span class="op">|</span><span class="ident">g</span>, (<span class="ident">s</span>, <span class="ident">e</span>)<span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span>
-                        <span class="ident"><span class="self">Self</span>::range_guard</span>(<span class="ident">builder</span>, <span class="ident">s</span>, <span class="ident">e</span>, <span class="ident">fsm_size</span>, <span class="kw-2">&amp;</span><span class="ident">fsm</span>);
-                    <span class="ident">g</span>.<span class="ident">or</span>(<span class="ident">range</span>)
+        <span class="comment">// Unconditional Transitions
+        </span><span class="kw">if </span>!unconditional.is_empty() {
+            <span class="kw">let </span>uncond_guard: ir::Guard = unconditional.into_iter().fold(
+                ir::Guard::True.not(),
+                |g, (s, e)| {
+                    <span class="kw">let </span>range =
+                        <span class="self">Self</span>::range_guard(builder, s, e, fsm_size, <span class="kw-2">&amp;</span>fsm);
+                    g.or(range)
                 },
             );
-            <span class="macro">structure!</span>(<span class="ident">builder</span>;
-                <span class="kw">let</span> <span class="ident">fsm_incr</span> <span class="op">=</span> <span class="ident">prim</span> <span class="ident">std_add</span>(<span class="ident">fsm_size</span>);
-                <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="ident">constant</span>(<span class="number">1</span>, <span class="ident">fsm_size</span>);
+            <span class="macro">structure!</span>(builder;
+                <span class="kw">let </span>fsm_incr = prim std_add(fsm_size);
+                <span class="kw">let </span>one = constant(<span class="number">1</span>, fsm_size);
             );
-            <span class="kw">let</span> <span class="ident">uncond_incr</span> <span class="op">=</span> <span class="macro">build_assignments!</span>(<span class="ident">builder</span>;
-                <span class="ident">fsm_incr</span>[<span class="string">&quot;left&quot;</span>] <span class="op">=</span> <span class="question-mark">?</span> <span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>];
-                <span class="ident">fsm_incr</span>[<span class="string">&quot;right&quot;</span>] <span class="op">=</span> <span class="question-mark">?</span> <span class="ident">one</span>[<span class="string">&quot;out&quot;</span>];
-                <span class="ident">fsm</span>[<span class="string">&quot;in&quot;</span>] <span class="op">=</span> <span class="ident">uncond_guard</span> <span class="question-mark">?</span> <span class="ident">fsm_incr</span>[<span class="string">&quot;out&quot;</span>];
-                <span class="ident">fsm</span>[<span class="string">&quot;write_en&quot;</span>] <span class="op">=</span> <span class="ident">uncond_guard</span> <span class="question-mark">?</span> <span class="ident">signal_on</span>[<span class="string">&quot;out&quot;</span>];
+            <span class="kw">let </span>uncond_incr = <span class="macro">build_assignments!</span>(builder;
+                fsm_incr[<span class="string">&quot;left&quot;</span>] = <span class="question-mark">? </span>fsm[<span class="string">&quot;out&quot;</span>];
+                fsm_incr[<span class="string">&quot;right&quot;</span>] = <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
+                fsm[<span class="string">&quot;in&quot;</span>] = uncond_guard <span class="question-mark">? </span>fsm_incr[<span class="string">&quot;out&quot;</span>];
+                fsm[<span class="string">&quot;write_en&quot;</span>] = uncond_guard <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
             );
-            <span class="ident">group</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span>.<span class="ident">extend</span>(<span class="ident">uncond_incr</span>);
+            group.borrow_mut().assignments.extend(uncond_incr);
         }
 
-        <span class="comment">// Done condition for group.</span>
-        <span class="kw">let</span> <span class="ident">last_guard</span> <span class="op">=</span> <span class="macro">guard!</span>(<span class="ident">fsm</span>[<span class="string">&quot;out&quot;</span>]).<span class="ident">eq</span>(<span class="macro">guard!</span>(<span class="ident">last_state</span>[<span class="string">&quot;out&quot;</span>]));
-        <span class="kw">let</span> <span class="ident">done_assign</span> <span class="op">=</span> <span class="macro">build_assignments!</span>(<span class="ident">builder</span>;
-            <span class="ident">group</span>[<span class="string">&quot;done&quot;</span>] <span class="op">=</span> <span class="ident">last_guard</span> <span class="question-mark">?</span> <span class="ident">signal_on</span>[<span class="string">&quot;out&quot;</span>];
+        <span class="comment">// Done condition for group.
+        </span><span class="kw">let </span>last_guard = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(last_state[<span class="string">&quot;out&quot;</span>]));
+        <span class="kw">let </span>done_assign = <span class="macro">build_assignments!</span>(builder;
+            group[<span class="string">&quot;done&quot;</span>] = last_guard <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
         );
-        <span class="ident">group</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span>.<span class="ident">extend</span>(<span class="ident">done_assign</span>);
+        group.borrow_mut().assignments.extend(done_assign);
 
-        <span class="comment">// Cleanup: Add a transition from last state to the first state.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reset_fsm</span> <span class="op">=</span> <span class="macro">build_assignments!</span>(<span class="ident">builder</span>;
-            <span class="ident">fsm</span>[<span class="string">&quot;in&quot;</span>] <span class="op">=</span> <span class="ident">last_guard</span> <span class="question-mark">?</span> <span class="ident">first_state</span>[<span class="string">&quot;out&quot;</span>];
-            <span class="ident">fsm</span>[<span class="string">&quot;write_en&quot;</span>] <span class="op">=</span> <span class="ident">last_guard</span> <span class="question-mark">?</span> <span class="ident">signal_on</span>[<span class="string">&quot;out&quot;</span>];
+        <span class="comment">// Cleanup: Add a transition from last state to the first state.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>reset_fsm = <span class="macro">build_assignments!</span>(builder;
+            fsm[<span class="string">&quot;in&quot;</span>] = last_guard <span class="question-mark">? </span>first_state[<span class="string">&quot;out&quot;</span>];
+            fsm[<span class="string">&quot;write_en&quot;</span>] = last_guard <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
         );
-        <span class="ident">builder</span>
-            .<span class="ident">component</span>
-            .<span class="ident">continuous_assignments</span>
-            .<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">reset_fsm</span>);
+        builder
+            .component
+            .continuous_assignments
+            .append(<span class="kw-2">&amp;mut </span>reset_fsm);
 
-        <span class="ident">group</span>
+        group
     }
 }
 
-<span class="doccomment">/// Represents an edge from a predeccesor to the current control node.</span>
-<span class="doccomment">/// The `u64` represents the FSM state of the predeccesor and the guard needs</span>
-<span class="doccomment">/// to be true for the predeccesor to transition to the current state.</span>
-<span class="kw">type</span> <span class="ident">PredEdge</span> <span class="op">=</span> (<span class="ident">u64</span>, <span class="ident">ir::Guard</span>);
+<span class="doccomment">/// Represents an edge from a predeccesor to the current control node.
+/// The `u64` represents the FSM state of the predeccesor and the guard needs
+/// to be true for the predeccesor to transition to the current state.
+</span><span class="kw">type </span>PredEdge = (u64, ir::Guard);
 
-<span class="kw">impl</span> <span class="ident">Schedule</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">calculate_states</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">con</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Control</span>,
-        <span class="comment">// The current state</span>
-        <span class="ident">cur_state</span>: <span class="ident">u64</span>,
-        <span class="comment">// Additional guard for this condition.</span>
-        <span class="ident">pre_guard</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Guard</span>,
-    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PredEdge</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">con</span> {
-        <span class="ident">ir::Control::Enable</span>(<span class="ident">e</span>) =&gt; {
-            <span class="self">self</span>.<span class="ident">enable_calculate_states</span>(<span class="ident">e</span>, <span class="ident">cur_state</span>, <span class="ident">pre_guard</span>)
+<span class="kw">impl </span>Schedule&lt;<span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">fn </span>calculate_states(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;</span>ir::Control,
+        <span class="comment">// The current state
+        </span>cur_state: u64,
+        <span class="comment">// Additional guard for this condition.
+        </span>pre_guard: <span class="kw-2">&amp;</span>ir::Guard,
+    ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
+        <span class="kw">match </span>con {
+        ir::Control::Enable(e) =&gt; {
+            <span class="self">self</span>.enable_calculate_states(e, cur_state, pre_guard)
         }
-        <span class="ident">ir::Control::Seq</span>(<span class="ident">s</span>) =&gt; {
-            <span class="self">self</span>.<span class="ident">seq_calculate_states</span>(<span class="ident">s</span>, <span class="ident">cur_state</span>, <span class="ident">pre_guard</span>)
+        ir::Control::Seq(s) =&gt; {
+            <span class="self">self</span>.seq_calculate_states(s, cur_state, pre_guard)
         }
-        <span class="ident">ir::Control::Par</span>(<span class="ident">p</span>) =&gt; {
-            <span class="self">self</span>.<span class="ident">par_calculate_states</span>(<span class="ident">p</span>, <span class="ident">cur_state</span>, <span class="ident">pre_guard</span>)
+        ir::Control::Par(p) =&gt; {
+            <span class="self">self</span>.par_calculate_states(p, cur_state, pre_guard)
         }
-        <span class="ident">ir::Control::If</span>(<span class="ident">i</span>) =&gt; {
-            <span class="self">self</span>.<span class="ident">if_calculate_states</span>(<span class="ident">i</span>, <span class="ident">cur_state</span>, <span class="ident">pre_guard</span>)
+        ir::Control::If(i) =&gt; {
+            <span class="self">self</span>.if_calculate_states(i, cur_state, pre_guard)
         }
-        <span class="ident">ir::Control::While</span>(<span class="ident">w</span>) =&gt; {
-            <span class="self">self</span>.<span class="ident">while_calculate_states</span>(<span class="ident">w</span>, <span class="ident">cur_state</span>, <span class="ident">pre_guard</span>)
+        ir::Control::While(w) =&gt; {
+            <span class="self">self</span>.while_calculate_states(w, cur_state, pre_guard)
         }
-        <span class="ident">ir::Control::Invoke</span>(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+        ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
             <span class="string">&quot;`invoke` statements should have been compiled away. Run `{}` before this pass.&quot;</span>,
-            <span class="ident">passes::CompileInvoke::name</span>()),
-        <span class="ident">ir::Control::Empty</span>(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+            passes::CompileInvoke::name()),
+        ir::Control::Empty(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
             <span class="string">&quot;`empty` statements should have been compiled away. Run `{}` before this pass.&quot;</span>,
-            <span class="ident">passes::CompileEmpty::name</span>()),
+            passes::CompileEmpty::name()),
     }
     }
 
-    <span class="doccomment">/// Helper to add seqential transitions and return the next state.</span>
-    <span class="kw">fn</span> <span class="ident">seq_add_transitions</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">preds</span>: <span class="kw-2">&amp;</span>[<span class="ident">PredEdge</span>],
-        <span class="ident">default_pred</span>: <span class="kw-2">&amp;</span><span class="ident">PredEdge</span>,
-    ) -&gt; <span class="ident">u64</span> {
-        <span class="comment">// Compute the new start state from the latest predecessor.</span>
-        <span class="kw">let</span> <span class="ident">new_state</span> <span class="op">=</span> <span class="ident">preds</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">max_by_key</span>(<span class="op">|</span>(<span class="ident">state</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">state</span>)
-            .<span class="ident">unwrap_or</span>(<span class="ident">default_pred</span>)
+    <span class="doccomment">/// Helper to add seqential transitions and return the next state.
+    </span><span class="kw">fn </span>seq_add_transitions(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        preds: <span class="kw-2">&amp;</span>[PredEdge],
+        default_pred: <span class="kw-2">&amp;</span>PredEdge,
+    ) -&gt; u64 {
+        <span class="comment">// Compute the new start state from the latest predecessor.
+        </span><span class="kw">let </span>new_state = preds
+            .iter()
+            .max_by_key(|(state, <span class="kw">_</span>)| state)
+            .unwrap_or(default_pred)
             .<span class="number">0</span>;
 
-        <span class="comment">// Add transitions from each predecessor to the new state.</span>
-        <span class="self">self</span>.<span class="ident">transitions</span>
-            .<span class="ident">extend</span>(<span class="ident">preds</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">s</span>, <span class="ident">g</span>)<span class="op">|</span> (<span class="ident">s</span> <span class="op">-</span> <span class="number">1</span>, <span class="ident">new_state</span>, <span class="ident">g</span>.<span class="ident">clone</span>())));
+        <span class="comment">// Add transitions from each predecessor to the new state.
+        </span><span class="self">self</span>.transitions
+            .extend(preds.iter().map(|(s, g)| (s - <span class="number">1</span>, new_state, g.clone())));
 
-        <span class="comment">// Return the new state.</span>
-        <span class="ident">new_state</span>
+        <span class="comment">// Return the new state.
+        </span>new_state
     }
 
-    <span class="kw">fn</span> <span class="ident">seq_calculate_states</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">con</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Seq</span>,
-        <span class="ident">cur_state</span>: <span class="ident">u64</span>,
-        <span class="ident">pre_guard</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Guard</span>,
-    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PredEdge</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">preds</span> <span class="op">=</span> <span class="macro">vec!</span>[];
-        <span class="kw">let</span> <span class="ident">default_pred</span> <span class="op">=</span> (<span class="ident">cur_state</span>, <span class="ident">pre_guard</span>.<span class="ident">clone</span>());
-        <span class="kw">for</span> <span class="ident">stmt</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">con</span>.<span class="ident">stmts</span> {
-            <span class="comment">// Add transition(s) from last state to the new state.</span>
-            <span class="kw">let</span> <span class="ident">new_state</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">seq_add_transitions</span>(<span class="kw-2">&amp;</span><span class="ident">preds</span>, <span class="kw-2">&amp;</span><span class="ident">default_pred</span>);
+    <span class="kw">fn </span>seq_calculate_states(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;</span>ir::Seq,
+        cur_state: u64,
+        pre_guard: <span class="kw-2">&amp;</span>ir::Guard,
+    ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>preds = <span class="macro">vec!</span>[];
+        <span class="kw">let </span>default_pred = (cur_state, pre_guard.clone());
+        <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;</span>con.stmts {
+            <span class="comment">// Add transition(s) from last state to the new state.
+            </span><span class="kw">let </span>new_state = <span class="self">self</span>.seq_add_transitions(<span class="kw-2">&amp;</span>preds, <span class="kw-2">&amp;</span>default_pred);
 
-            <span class="comment">// Recurse into statement and save new predecessors.</span>
-            <span class="ident">preds</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">calculate_states</span>(<span class="ident">stmt</span>, <span class="ident">new_state</span>, <span class="ident">pre_guard</span>)<span class="question-mark">?</span>;
+            <span class="comment">// Recurse into statement and save new predecessors.
+            </span>preds = <span class="self">self</span>.calculate_states(stmt, new_state, pre_guard)<span class="question-mark">?</span>;
         }
 
-        <span class="comment">// Add final transition(s) from the last statement.</span>
-        <span class="self">self</span>.<span class="ident">seq_add_transitions</span>(<span class="kw-2">&amp;</span><span class="ident">preds</span>, <span class="kw-2">&amp;</span><span class="ident">default_pred</span>);
+        <span class="comment">// Add final transition(s) from the last statement.
+        </span><span class="self">self</span>.seq_add_transitions(<span class="kw-2">&amp;</span>preds, <span class="kw-2">&amp;</span>default_pred);
 
-        <span class="prelude-val">Ok</span>(<span class="ident">preds</span>)
+        <span class="prelude-val">Ok</span>(preds)
     }
 
-    <span class="kw">fn</span> <span class="ident">par_calculate_states</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">con</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Par</span>,
-        <span class="ident">cur_state</span>: <span class="ident">u64</span>,
-        <span class="ident">pre_guard</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Guard</span>,
-    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PredEdge</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">max_state</span> <span class="op">=</span> <span class="number">0</span>;
-        <span class="kw">for</span> <span class="ident">stmt</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">con</span>.<span class="ident">stmts</span> {
-            <span class="kw">let</span> <span class="ident">preds</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">calculate_states</span>(<span class="ident">stmt</span>, <span class="ident">cur_state</span>, <span class="ident">pre_guard</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn </span>par_calculate_states(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;</span>ir::Par,
+        cur_state: u64,
+        pre_guard: <span class="kw-2">&amp;</span>ir::Guard,
+    ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>max_state = <span class="number">0</span>;
+        <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;</span>con.stmts {
+            <span class="kw">let </span>preds = <span class="self">self</span>.calculate_states(stmt, cur_state, pre_guard)<span class="question-mark">?</span>;
 
-            <span class="comment">// Compute the start state from the latest predecessor.</span>
-            <span class="kw">let</span> <span class="ident">inner_max_state</span> <span class="op">=</span>
-                <span class="ident">preds</span>.<span class="ident">iter</span>().<span class="ident">max_by_key</span>(<span class="op">|</span>(<span class="ident">state</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">state</span>).<span class="ident">unwrap</span>().<span class="number">0</span>;
+            <span class="comment">// Compute the start state from the latest predecessor.
+            </span><span class="kw">let </span>inner_max_state =
+                preds.iter().max_by_key(|(state, <span class="kw">_</span>)| state).unwrap().<span class="number">0</span>;
 
-            <span class="comment">// Keep track of the latest predecessor state from any statement.</span>
-            <span class="kw">if</span> <span class="ident">inner_max_state</span> <span class="op">&gt;</span> <span class="ident">max_state</span> {
-                <span class="ident">max_state</span> <span class="op">=</span> <span class="ident">inner_max_state</span>;
+            <span class="comment">// Keep track of the latest predecessor state from any statement.
+            </span><span class="kw">if </span>inner_max_state &gt; max_state {
+                max_state = inner_max_state;
             }
         }
 
-        <span class="comment">// Add transitions from the cur_state up to the max_state.</span>
-        <span class="kw">if</span> <span class="ident">cur_state</span> <span class="op">+</span> <span class="number">1</span> <span class="op">==</span> <span class="ident">max_state</span> {
-            <span class="self">self</span>.<span class="ident">transitions</span>
-                .<span class="ident">insert</span>((<span class="ident">cur_state</span>, <span class="ident">max_state</span>, <span class="ident">pre_guard</span>.<span class="ident">clone</span>()));
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">starts</span> <span class="op">=</span> <span class="ident">cur_state</span>..<span class="ident">max_state</span> <span class="op">-</span> <span class="number">1</span>;
-            <span class="kw">let</span> <span class="ident">ends</span> <span class="op">=</span> <span class="ident">cur_state</span> <span class="op">+</span> <span class="number">1</span>..<span class="ident">max_state</span>;
-            <span class="self">self</span>.<span class="ident">transitions</span>.<span class="ident">extend</span>(
-                <span class="ident">starts</span>.<span class="ident">zip</span>(<span class="ident">ends</span>).<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">s</span>, <span class="ident">e</span>)<span class="op">|</span> (<span class="ident">s</span>, <span class="ident">e</span>, <span class="ident">pre_guard</span>.<span class="ident">clone</span>())),
+        <span class="comment">// Add transitions from the cur_state up to the max_state.
+        </span><span class="kw">if </span>cur_state + <span class="number">1 </span>== max_state {
+            <span class="self">self</span>.transitions
+                .insert((cur_state, max_state, pre_guard.clone()));
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>starts = cur_state..max_state - <span class="number">1</span>;
+            <span class="kw">let </span>ends = cur_state + <span class="number">1</span>..max_state;
+            <span class="self">self</span>.transitions.extend(
+                starts.zip(ends).map(|(s, e)| (s, e, pre_guard.clone())),
             );
         }
 
-        <span class="comment">// Return a single predecessor for the last state.</span>
-        <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(<span class="ident">max_state</span>, <span class="ident">pre_guard</span>.<span class="ident">clone</span>())])
+        <span class="comment">// Return a single predecessor for the last state.
+        </span><span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(max_state, pre_guard.clone())])
     }
 
-    <span class="kw">fn</span> <span class="ident">if_calculate_states</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">con</span>: <span class="kw-2">&amp;</span><span class="ident">ir::If</span>,
-        <span class="ident">cur_state</span>: <span class="ident">u64</span>,
-        <span class="ident">pre_guard</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Guard</span>,
-    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PredEdge</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">con</span>.<span class="ident">cond</span>.<span class="ident">is_some</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(
+    <span class="kw">fn </span>if_calculate_states(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;</span>ir::If,
+        cur_state: u64,
+        pre_guard: <span class="kw-2">&amp;</span>ir::Guard,
+    ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
+        <span class="kw">if </span>con.cond.is_some() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
                 <span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of if. This should have compiled away.&quot;</span>,
-                        <span class="ident">TopDownStaticTiming::name</span>(),
-                        <span class="ident">con</span>.<span class="ident">cond</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>().<span class="ident">name</span>()))
-            .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">con</span>.<span class="ident">attributes</span>));
+                        TopDownStaticTiming::name(),
+                        con.cond.as_ref().unwrap().borrow().name()))
+            .with_pos(<span class="kw-2">&amp;</span>con.attributes));
         }
 
-        <span class="kw">let</span> <span class="ident">port_guard</span>: <span class="ident">ir::Guard</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">con</span>.<span class="ident">port</span>).<span class="ident">into</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">preds</span> <span class="op">=</span> <span class="macro">vec!</span>[];
+        <span class="kw">let </span>port_guard: ir::Guard = Rc::clone(<span class="kw-2">&amp;</span>con.port).into();
+        <span class="kw">let </span><span class="kw-2">mut </span>preds = <span class="macro">vec!</span>[];
 
-        <span class="comment">// Then branch.</span>
-        <span class="ident">preds</span>.<span class="ident">extend</span>(<span class="self">self</span>.<span class="ident">calculate_states</span>(
-            <span class="kw-2">&amp;</span><span class="ident">con</span>.<span class="ident">tbranch</span>,
-            <span class="ident">cur_state</span>,
-            <span class="kw-2">&amp;</span><span class="ident">pre_guard</span>.<span class="ident">clone</span>().<span class="ident">and</span>(<span class="ident">port_guard</span>.<span class="ident">clone</span>()),
+        <span class="comment">// Then branch.
+        </span>preds.extend(<span class="self">self</span>.calculate_states(
+            <span class="kw-2">&amp;</span>con.tbranch,
+            cur_state,
+            <span class="kw-2">&amp;</span>pre_guard.clone().and(port_guard.clone()),
         )<span class="question-mark">?</span>);
 
-        <span class="comment">// Else branch.</span>
-        <span class="ident">preds</span>.<span class="ident">extend</span>(<span class="self">self</span>.<span class="ident">calculate_states</span>(
-            <span class="kw-2">&amp;</span><span class="ident">con</span>.<span class="ident">fbranch</span>,
-            <span class="ident">cur_state</span>,
-            <span class="kw-2">&amp;</span><span class="ident">pre_guard</span>.<span class="ident">clone</span>().<span class="ident">and</span>(<span class="ident">port_guard</span>.<span class="ident">not</span>()),
+        <span class="comment">// Else branch.
+        </span>preds.extend(<span class="self">self</span>.calculate_states(
+            <span class="kw-2">&amp;</span>con.fbranch,
+            cur_state,
+            <span class="kw-2">&amp;</span>pre_guard.clone().and(port_guard.not()),
         )<span class="question-mark">?</span>);
 
-        <span class="prelude-val">Ok</span>(<span class="ident">preds</span>)
+        <span class="prelude-val">Ok</span>(preds)
     }
 
-    <span class="kw">fn</span> <span class="ident">while_calculate_states</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">con</span>: <span class="kw-2">&amp;</span><span class="ident">ir::While</span>,
-        <span class="ident">cur_state</span>: <span class="ident">u64</span>,
-        <span class="ident">pre_guard</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Guard</span>,
-    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PredEdge</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">con</span>.<span class="ident">cond</span>.<span class="ident">is_some</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(
+    <span class="kw">fn </span>while_calculate_states(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;</span>ir::While,
+        cur_state: u64,
+        pre_guard: <span class="kw-2">&amp;</span>ir::Guard,
+    ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
+        <span class="kw">if </span>con.cond.is_some() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
                 <span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of while. This should have compiled away.&quot;</span>,
-                        <span class="ident">TopDownStaticTiming::name</span>(),
-                        <span class="ident">con</span>.<span class="ident">cond</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">borrow</span>().<span class="ident">name</span>()))
-            .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">con</span>.<span class="ident">attributes</span>));
+                        TopDownStaticTiming::name(),
+                        con.cond.as_ref().unwrap().borrow().name()))
+            .with_pos(<span class="kw-2">&amp;</span>con.attributes));
         }
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">body_exit</span> <span class="op">=</span> <span class="ident">cur_state</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>body_exit = cur_state;
 
-        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="kw-2">*</span><span class="ident">con</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;bound&quot;</span>).<span class="ident">unwrap</span>() {
-            <span class="kw">let</span> <span class="ident">preds</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">calculate_states</span>(
-                <span class="kw-2">&amp;</span><span class="ident">con</span>.<span class="ident">body</span>,
-                <span class="ident">body_exit</span>,
-                <span class="kw-2">&amp;</span><span class="ident">pre_guard</span>.<span class="ident">clone</span>(),
+        <span class="kw">for _ in </span><span class="number">0</span>..<span class="kw-2">*</span>con.attributes.get(<span class="string">&quot;bound&quot;</span>).unwrap() {
+            <span class="kw">let </span>preds = <span class="self">self</span>.calculate_states(
+                <span class="kw-2">&amp;</span>con.body,
+                body_exit,
+                <span class="kw-2">&amp;</span>pre_guard.clone(),
             )<span class="question-mark">?</span>;
 
-            <span class="ident">body_exit</span> <span class="op">=</span> <span class="ident">preds</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">max_by_key</span>(<span class="op">|</span>(<span class="ident">state</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">state</span>)
-                .<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span>(<span class="ident">body_exit</span>, <span class="ident">pre_guard</span>.<span class="ident">clone</span>()))
+            body_exit = preds
+                .iter()
+                .max_by_key(|(state, <span class="kw">_</span>)| state)
+                .unwrap_or(<span class="kw-2">&amp;</span>(body_exit, pre_guard.clone()))
                 .<span class="number">0</span>;
         }
 
-        <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(<span class="ident">body_exit</span>, <span class="ident">pre_guard</span>.<span class="ident">clone</span>())])
+        <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(body_exit, pre_guard.clone())])
     }
 
-    <span class="doccomment">/// Compiled to:</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// group[go] = (fsm &gt;= cur_start &amp; fsm &lt; cur_state + static) &amp; pre_guard ? 1&#39;d1;</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">enable_calculate_states</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">con</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Enable</span>,
-        <span class="comment">// The current state</span>
-        <span class="ident">cur_state</span>: <span class="ident">u64</span>,
-        <span class="comment">// Additional guard for this condition.</span>
-        <span class="ident">pre_guard</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Guard</span>,
-    ) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PredEdge</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">time_option</span> <span class="op">=</span> <span class="ident">con</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>);
-        <span class="kw">if</span> <span class="ident">time_option</span>.<span class="ident">is_none</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::pass_assumption</span>(
-            <span class="ident">TopDownStaticTiming::name</span>(),
-            <span class="string">&quot;enable is missing @static annotation. This happens when the enclosing control program has a @static annotation but the enable is missing one.&quot;</span>.<span class="ident">to_string</span>(),
+    <span class="doccomment">/// Compiled to:
+    /// ```
+    /// group[go] = (fsm &gt;= cur_start &amp; fsm &lt; cur_state + static) &amp; pre_guard ? 1&#39;d1;
+    /// ```
+    </span><span class="kw">fn </span>enable_calculate_states(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;</span>ir::Enable,
+        <span class="comment">// The current state
+        </span>cur_state: u64,
+        <span class="comment">// Additional guard for this condition.
+        </span>pre_guard: <span class="kw-2">&amp;</span>ir::Guard,
+    ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
+        <span class="kw">let </span>time_option = con.attributes.get(<span class="string">&quot;static&quot;</span>);
+        <span class="kw">if </span>time_option.is_none() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::pass_assumption(
+            TopDownStaticTiming::name(),
+            <span class="string">&quot;enable is missing @static annotation. This happens when the enclosing control program has a @static annotation but the enable is missing one.&quot;</span>.to_string(),
         )
-        .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">con</span>.<span class="ident">attributes</span>));
+        .with_pos(<span class="kw-2">&amp;</span>con.attributes));
         }
-        <span class="kw">let</span> <span class="ident">time</span> <span class="op">=</span> <span class="ident">time_option</span>.<span class="ident">unwrap</span>();
+        <span class="kw">let </span>time = time_option.unwrap();
 
-        <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> (<span class="ident">cur_state</span>, <span class="ident">cur_state</span> <span class="op">+</span> <span class="ident">time</span>);
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">con</span>.<span class="ident">group</span>;
-        <span class="macro">structure!</span>(<span class="self">self</span>.<span class="ident">builder</span>;
-            <span class="kw">let</span> <span class="ident">signal_on</span> <span class="op">=</span> <span class="ident">constant</span>(<span class="number">1</span>, <span class="number">1</span>);
+        <span class="kw">let </span>range = (cur_state, cur_state + time);
+        <span class="kw">let </span>group = <span class="kw-2">&amp;</span>con.group;
+        <span class="macro">structure!</span>(<span class="self">self</span>.builder;
+            <span class="kw">let </span>signal_on = constant(<span class="number">1</span>, <span class="number">1</span>);
         );
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">assigns</span> <span class="op">=</span> <span class="macro">build_assignments!</span>(<span class="self">self</span>.<span class="ident">builder</span>;
-            <span class="ident">group</span>[<span class="string">&quot;go&quot;</span>] <span class="op">=</span> <span class="ident">pre_guard</span> <span class="question-mark">?</span> <span class="ident">signal_on</span>[<span class="string">&quot;out&quot;</span>];
+        <span class="kw">let </span><span class="kw-2">mut </span>assigns = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
+            group[<span class="string">&quot;go&quot;</span>] = pre_guard <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
         );
 
-        <span class="comment">// Enable when in range of group&#39;s latency.</span>
-        <span class="self">self</span>.<span class="ident">enables</span>.<span class="ident">entry</span>(<span class="ident">range</span>).<span class="ident">or_default</span>().<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">assigns</span>);
+        <span class="comment">// Enable when in range of group&#39;s latency.
+        </span><span class="self">self</span>.enables.entry(range).or_default().append(<span class="kw-2">&amp;mut </span>assigns);
 
-        <span class="comment">// Add any necessary internal transitions. In the case time is 1 and there</span>
-        <span class="comment">// is a single transition, it is taken care of by the parent.</span>
-        <span class="kw">let</span> <span class="ident">starts</span> <span class="op">=</span> <span class="ident">cur_state</span>..<span class="ident">cur_state</span> <span class="op">+</span> <span class="ident">time</span> <span class="op">-</span> <span class="number">1</span>;
-        <span class="kw">let</span> <span class="ident">ends</span> <span class="op">=</span> <span class="ident">cur_state</span> <span class="op">+</span> <span class="number">1</span>..<span class="ident">cur_state</span> <span class="op">+</span> <span class="ident">time</span>;
-        <span class="self">self</span>.<span class="ident">transitions</span>
-            .<span class="ident">extend</span>(<span class="ident">starts</span>.<span class="ident">zip</span>(<span class="ident">ends</span>).<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">s</span>, <span class="ident">e</span>)<span class="op">|</span> (<span class="ident">s</span>, <span class="ident">e</span>, <span class="ident">pre_guard</span>.<span class="ident">clone</span>())));
+        <span class="comment">// Add any necessary internal transitions. In the case time is 1 and there
+        // is a single transition, it is taken care of by the parent.
+        </span><span class="kw">let </span>starts = cur_state..cur_state + time - <span class="number">1</span>;
+        <span class="kw">let </span>ends = cur_state + <span class="number">1</span>..cur_state + time;
+        <span class="self">self</span>.transitions
+            .extend(starts.zip(ends).map(|(s, e)| (s, e, pre_guard.clone())));
 
-        <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(<span class="ident">cur_state</span> <span class="op">+</span> <span class="ident">time</span>, <span class="ident">pre_guard</span>.<span class="ident">clone</span>())])
+        <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(cur_state + time, pre_guard.clone())])
     }
 }
 
-<span class="doccomment">/// Lowering pass that generates latency-sensitive FSMs when control sub-programs have `@static`</span>
-<span class="doccomment">/// annotations. The pass works opportunisitically and attempts to compile all nested static</span>
-<span class="doccomment">/// control programs nested within the overall program, replacing them with groups that implement</span>
-<span class="doccomment">/// the correct transitions.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `while` control blocks can only be statically compiled when they additionally have a `@bound`</span>
-<span class="doccomment">/// annotation which mentions the expected number of times a loop will iterate.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TopDownStaticTiming</span> {
-    <span class="doccomment">/// Print out the FSM representation to STDOUT.</span>
-    <span class="ident">dump_fsm</span>: <span class="ident">bool</span>,
+<span class="doccomment">/// Lowering pass that generates latency-sensitive FSMs when control sub-programs have `@static`
+/// annotations. The pass works opportunisitically and attempts to compile all nested static
+/// control programs nested within the overall program, replacing them with groups that implement
+/// the correct transitions.
+///
+/// `while` control blocks can only be statically compiled when they additionally have a `@bound`
+/// annotation which mentions the expected number of times a loop will iterate.
+</span><span class="kw">pub struct </span>TopDownStaticTiming {
+    <span class="doccomment">/// Print out the FSM representation to STDOUT.
+    </span>dump_fsm: bool,
 }
 
-<span class="kw">impl</span> <span class="ident">ConstructVisitor</span> <span class="kw">for</span> <span class="ident">TopDownStaticTiming</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Context</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="self">Self</span>: <span class="ident">Sized</span> <span class="op">+</span> <span class="ident">Named</span>,
+<span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>TopDownStaticTiming {
+    <span class="kw">fn </span>from(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt;
+    <span class="kw">where
+        </span><span class="self">Self</span>: Sized + Named,
     {
-        <span class="kw">let</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_opts</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;dump-fsm&quot;</span>], <span class="ident">ctx</span>);
+        <span class="kw">let </span>opts = <span class="self">Self</span>::get_opts(<span class="kw-2">&amp;</span>[<span class="string">&quot;dump-fsm&quot;</span>], ctx);
 
-        <span class="prelude-val">Ok</span>(<span class="ident">TopDownStaticTiming</span> { <span class="ident">dump_fsm</span>: <span class="ident">opts</span>[<span class="number">0</span>] })
+        <span class="prelude-val">Ok</span>(TopDownStaticTiming { dump_fsm: opts[<span class="number">0</span>] })
     }
 
-    <span class="kw">fn</span> <span class="ident">clear_data</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="comment">/* All data can be transferred between components */</span>
-    }
+    <span class="kw">fn </span>clear_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="comment">/* All data can be transferred between components */
+    </span>}
 }
 
-<span class="kw">impl</span> <span class="ident">Named</span> <span class="kw">for</span> <span class="ident">TopDownStaticTiming</span> {
-    <span class="kw">fn</span> <span class="ident">name</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="string">&quot;top-down-st&quot;</span>
-    }
+<span class="kw">impl </span>Named <span class="kw">for </span>TopDownStaticTiming {
+    <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;top-down-st&quot;
+    </span>}
 
-    <span class="kw">fn</span> <span class="ident">description</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="string">&quot;Top-down latency-sensitive compilation for removing control constructs&quot;</span>
-    }
+    <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;Top-down latency-sensitive compilation for removing control constructs&quot;
+    </span>}
 }
 
-<span class="kw">impl</span> <span class="ident">Visitor</span> <span class="kw">for</span> <span class="ident">TopDownStaticTiming</span> {
-    <span class="kw">fn</span> <span class="ident">start_seq</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">con</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Seq</span>,
-        <span class="ident">comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">let</span> <span class="ident">time_option</span> <span class="op">=</span> <span class="ident">con</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>);
+<span class="kw">impl </span>Visitor <span class="kw">for </span>TopDownStaticTiming {
+    <span class="kw">fn </span>start_seq(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;mut </span>ir::Seq,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">let </span>time_option = con.attributes.get(<span class="string">&quot;static&quot;</span>);
 
-        <span class="comment">// If sub-tree is not static, skip this node.</span>
-        <span class="kw">if</span> <span class="ident">time_option</span>.<span class="ident">is_none</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
+        <span class="comment">// If sub-tree is not static, skip this node.
+        </span><span class="kw">if </span>time_option.is_none() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
         }
 
-        <span class="comment">// Compile control program and save schedule.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ir::Builder::new</span>(<span class="ident">comp</span>, <span class="ident">sigs</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">schedule</span> <span class="op">=</span> <span class="ident">Schedule::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">builder</span>);
-        <span class="ident">schedule</span>.<span class="ident">seq_calculate_states</span>(<span class="ident">con</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">ir::Guard::True</span>)<span class="question-mark">?</span>;
+        <span class="comment">// Compile control program and save schedule.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+        <span class="kw">let </span><span class="kw-2">mut </span>schedule = Schedule::new(<span class="kw-2">&amp;mut </span>builder);
+        schedule.seq_calculate_states(con, <span class="number">0</span>, <span class="kw-2">&amp;</span>ir::Guard::True)<span class="question-mark">?</span>;
 
-        <span class="comment">// Dump FSM if requested.</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">dump_fsm</span> {
-            <span class="ident">schedule</span>.<span class="ident">display</span>();
+        <span class="comment">// Dump FSM if requested.
+        </span><span class="kw">if </span><span class="self">self</span>.dump_fsm {
+            schedule.display();
         }
 
-        <span class="comment">// Realize the schedule in a replacement control group.</span>
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">schedule</span>.<span class="ident">realize_schedule</span>();
+        <span class="comment">// Realize the schedule in a replacement control group.
+        </span><span class="kw">let </span>group = schedule.realize_schedule();
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
+        <span class="prelude-val">Ok</span>(Action::change(ir::Control::enable(group)))
     }
 
-    <span class="kw">fn</span> <span class="ident">start_par</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">con</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Par</span>,
-        <span class="ident">comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">let</span> <span class="ident">time_option</span> <span class="op">=</span> <span class="ident">con</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>);
+    <span class="kw">fn </span>start_par(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;mut </span>ir::Par,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">let </span>time_option = con.attributes.get(<span class="string">&quot;static&quot;</span>);
 
-        <span class="comment">// If sub-tree is not static, skip this node.</span>
-        <span class="kw">if</span> <span class="ident">time_option</span>.<span class="ident">is_none</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
+        <span class="comment">// If sub-tree is not static, skip this node.
+        </span><span class="kw">if </span>time_option.is_none() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
         }
 
-        <span class="comment">// Compile control program and save schedule.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ir::Builder::new</span>(<span class="ident">comp</span>, <span class="ident">sigs</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">schedule</span> <span class="op">=</span> <span class="ident">Schedule::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">builder</span>);
-        <span class="ident">schedule</span>.<span class="ident">par_calculate_states</span>(<span class="ident">con</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">ir::Guard::True</span>)<span class="question-mark">?</span>;
+        <span class="comment">// Compile control program and save schedule.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+        <span class="kw">let </span><span class="kw-2">mut </span>schedule = Schedule::new(<span class="kw-2">&amp;mut </span>builder);
+        schedule.par_calculate_states(con, <span class="number">0</span>, <span class="kw-2">&amp;</span>ir::Guard::True)<span class="question-mark">?</span>;
 
-        <span class="comment">// Dump FSM if requested.</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">dump_fsm</span> {
-            <span class="ident">schedule</span>.<span class="ident">display</span>();
+        <span class="comment">// Dump FSM if requested.
+        </span><span class="kw">if </span><span class="self">self</span>.dump_fsm {
+            schedule.display();
         }
 
-        <span class="comment">// Realize the schedule in a replacement control group.</span>
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">schedule</span>.<span class="ident">realize_schedule</span>();
+        <span class="comment">// Realize the schedule in a replacement control group.
+        </span><span class="kw">let </span>group = schedule.realize_schedule();
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
+        <span class="prelude-val">Ok</span>(Action::change(ir::Control::enable(group)))
     }
 
-    <span class="kw">fn</span> <span class="ident">start_while</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">con</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::While</span>,
-        <span class="ident">comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">let</span> <span class="ident">time_option</span> <span class="op">=</span> <span class="ident">con</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>);
-        <span class="kw">let</span> <span class="ident">bound_option</span> <span class="op">=</span> <span class="ident">con</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;option&quot;</span>);
+    <span class="kw">fn </span>start_while(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;mut </span>ir::While,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">let </span>time_option = con.attributes.get(<span class="string">&quot;static&quot;</span>);
+        <span class="kw">let </span>bound_option = con.attributes.get(<span class="string">&quot;option&quot;</span>);
 
-        <span class="comment">// If sub-tree is not static, skip this node.</span>
-        <span class="kw">if</span> <span class="ident">time_option</span>.<span class="ident">is_none</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">bound_option</span>.<span class="ident">is_none</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
+        <span class="comment">// If sub-tree is not static, skip this node.
+        </span><span class="kw">if </span>time_option.is_none() || bound_option.is_none() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
         }
 
-        <span class="comment">// Compile control program and save schedule.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ir::Builder::new</span>(<span class="ident">comp</span>, <span class="ident">sigs</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">schedule</span> <span class="op">=</span> <span class="ident">Schedule::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">builder</span>);
-        <span class="ident">schedule</span>.<span class="ident">while_calculate_states</span>(<span class="ident">con</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">ir::Guard::True</span>)<span class="question-mark">?</span>;
+        <span class="comment">// Compile control program and save schedule.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+        <span class="kw">let </span><span class="kw-2">mut </span>schedule = Schedule::new(<span class="kw-2">&amp;mut </span>builder);
+        schedule.while_calculate_states(con, <span class="number">0</span>, <span class="kw-2">&amp;</span>ir::Guard::True)<span class="question-mark">?</span>;
 
-        <span class="comment">// Dump FSM if requested.</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">dump_fsm</span> {
-            <span class="ident">schedule</span>.<span class="ident">display</span>();
+        <span class="comment">// Dump FSM if requested.
+        </span><span class="kw">if </span><span class="self">self</span>.dump_fsm {
+            schedule.display();
         }
 
-        <span class="comment">// Realize the schedule in a replacement control group.</span>
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">schedule</span>.<span class="ident">realize_schedule</span>();
+        <span class="comment">// Realize the schedule in a replacement control group.
+        </span><span class="kw">let </span>group = schedule.realize_schedule();
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
+        <span class="prelude-val">Ok</span>(Action::change(ir::Control::enable(group)))
     }
 
-    <span class="kw">fn</span> <span class="ident">start_if</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">con</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::If</span>,
-        <span class="ident">comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">sigs</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="kw">let</span> <span class="ident">time_option</span> <span class="op">=</span> <span class="ident">con</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;static&quot;</span>);
+    <span class="kw">fn </span>start_if(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;mut </span>ir::If,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">let </span>time_option = con.attributes.get(<span class="string">&quot;static&quot;</span>);
 
-        <span class="comment">// If sub-tree is not static, skip this node.</span>
-        <span class="kw">if</span> <span class="ident">time_option</span>.<span class="ident">is_none</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Action::Continue</span>);
+        <span class="comment">// If sub-tree is not static, skip this node.
+        </span><span class="kw">if </span>time_option.is_none() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
         }
 
-        <span class="comment">// Compile control program and save schedule.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ir::Builder::new</span>(<span class="ident">comp</span>, <span class="ident">sigs</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">schedule</span> <span class="op">=</span> <span class="ident">Schedule::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">builder</span>);
-        <span class="ident">schedule</span>.<span class="ident">if_calculate_states</span>(<span class="ident">con</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">ir::Guard::True</span>)<span class="question-mark">?</span>;
+        <span class="comment">// Compile control program and save schedule.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+        <span class="kw">let </span><span class="kw-2">mut </span>schedule = Schedule::new(<span class="kw-2">&amp;mut </span>builder);
+        schedule.if_calculate_states(con, <span class="number">0</span>, <span class="kw-2">&amp;</span>ir::Guard::True)<span class="question-mark">?</span>;
 
-        <span class="comment">// Dump FSM if requested.</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">dump_fsm</span> {
-            <span class="ident">schedule</span>.<span class="ident">display</span>();
+        <span class="comment">// Dump FSM if requested.
+        </span><span class="kw">if </span><span class="self">self</span>.dump_fsm {
+            schedule.display();
         }
 
-        <span class="comment">// Realize the schedule in a replacement control group.</span>
-        <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">schedule</span>.<span class="ident">realize_schedule</span>();
+        <span class="comment">// Realize the schedule in a replacement control group.
+        </span><span class="kw">let </span>group = schedule.realize_schedule();
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::change</span>(<span class="ident">ir::Control::enable</span>(<span class="ident">group</span>)))
+        <span class="prelude-val">Ok</span>(Action::change(ir::Control::enable(group)))
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

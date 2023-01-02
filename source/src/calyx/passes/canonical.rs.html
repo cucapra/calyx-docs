@@ -1,17 +1,12 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/passes/canonical.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>canonical.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1"> 1</span>
-<span id="2"> 2</span>
-<span id="3"> 3</span>
-<span id="4"> 4</span>
-<span id="5"> 5</span>
-<span id="6"> 6</span>
-<span id="7"> 7</span>
-<span id="8"> 8</span>
-<span id="9"> 9</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/passes/canonical.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>canonical.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
 <span id="10">10</span>
 <span id="11">11</span>
 <span id="12">12</span>
@@ -95,98 +90,97 @@
 <span id="90">90</span>
 <span id="91">91</span>
 <span id="92">92</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::analysis</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::traversal::ConstructVisitor</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::Guard</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
+<span class="kw">use </span><span class="kw">crate</span>::ir::traversal::ConstructVisitor;
+<span class="kw">use </span><span class="kw">crate</span>::ir::Guard;
+<span class="kw">use </span><span class="kw">crate</span>::ir::{
     <span class="self">self</span>,
-    <span class="ident">traversal</span>::{<span class="ident">Action</span>, <span class="ident">Named</span>, <span class="ident">VisResult</span>, <span class="ident">Visitor</span>},
-    <span class="ident">LibrarySignatures</span>,
+    traversal::{Action, Named, VisResult, Visitor},
+    LibrarySignatures,
 };
 
-<span class="doccomment">/// Perform serval canonicalizations on the program.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## Simplifying Guards</span>
-<span class="doccomment">/// For each group and continuous assignments, canonicalize guard</span>
-<span class="doccomment">/// statements that has constant 1 as either a source or a guard.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Example</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// a[done] = r1.done ? 1&#39;d1 -&gt; a[done] = r1.done</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## Dataflow Ordering of Assignments</span>
-<span class="doccomment">/// Uses [analysis::DataflowOrder] to sort all sets of assignments in the</span>
-<span class="doccomment">/// program into dataflow order.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Canonicalize</span> {
-    <span class="comment">// A [analysis::DataflowOrder] used to reorder assignments into dataflow order.</span>
-    <span class="ident">order</span>: <span class="ident">analysis::DataflowOrder</span>,
+<span class="doccomment">/// Perform serval canonicalizations on the program.
+///
+/// ## Simplifying Guards
+/// For each group and continuous assignments, canonicalize guard
+/// statements that has constant 1 as either a source or a guard.
+///
+/// # Example
+/// ```
+/// a[done] = r1.done ? 1&#39;d1 -&gt; a[done] = r1.done
+/// ```
+///
+/// ## Dataflow Ordering of Assignments
+/// Uses [analysis::DataflowOrder] to sort all sets of assignments in the
+/// program into dataflow order.
+</span><span class="kw">pub struct </span>Canonicalize {
+    <span class="comment">// A [analysis::DataflowOrder] used to reorder assignments into dataflow order.
+    </span>order: analysis::DataflowOrder,
 }
 
-<span class="kw">impl</span> <span class="ident">ConstructVisitor</span> <span class="kw">for</span> <span class="ident">Canonicalize</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Context</span>) -&gt; <span class="ident"><span class="kw">crate</span>::errors::CalyxResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="self">Self</span>: <span class="ident">Sized</span>,
+<span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>Canonicalize {
+    <span class="kw">fn </span>from(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; <span class="kw">crate</span>::errors::CalyxResult&lt;<span class="self">Self</span>&gt;
+    <span class="kw">where
+        </span><span class="self">Self</span>: Sized,
     {
-        <span class="kw">let</span> <span class="ident">order</span> <span class="op">=</span> <span class="ident">analysis::DataflowOrder::new</span>(<span class="ident">ctx</span>.<span class="ident">lib</span>.<span class="ident">signatures</span>())<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">Canonicalize</span> { <span class="ident">order</span> })
+        <span class="kw">let </span>order = analysis::DataflowOrder::new(ctx.lib.signatures())<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(Canonicalize { order })
     }
 
-    <span class="kw">fn</span> <span class="ident">clear_data</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="comment">// Data is shared between components</span>
-    }
+    <span class="kw">fn </span>clear_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="comment">// Data is shared between components
+    </span>}
 }
 
-<span class="kw">impl</span> <span class="ident">Named</span> <span class="kw">for</span> <span class="ident">Canonicalize</span> {
-    <span class="kw">fn</span> <span class="ident">name</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="string">&quot;canonicalize&quot;</span>
-    }
+<span class="kw">impl </span>Named <span class="kw">for </span>Canonicalize {
+    <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;canonicalize&quot;
+    </span>}
 
-    <span class="kw">fn</span> <span class="ident">description</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="string">&quot;canonicalize the program&quot;</span>
-    }
+    <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;canonicalize the program&quot;
+    </span>}
 }
 
-<span class="kw">impl</span> <span class="ident">Visitor</span> <span class="kw">for</span> <span class="ident">Canonicalize</span> {
-    <span class="kw">fn</span> <span class="ident">start</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">comp</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ir::Component</span>,
-        <span class="ident">_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">LibrarySignatures</span>,
-        <span class="ident">_comps</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Component</span>],
-    ) -&gt; <span class="ident">VisResult</span> {
-        <span class="ident">comp</span>.<span class="ident">for_each_assignment</span>(<span class="op">|</span><span class="ident">assign</span><span class="op">|</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Guard::Port</span>(<span class="ident">p</span>) <span class="op">=</span> <span class="kw-2">&amp;</span>(<span class="kw-2">*</span><span class="ident">assign</span>.<span class="ident">guard</span>) {
-                <span class="comment">// 1&#39;d1 ? r1.done</span>
-                <span class="kw">if</span> <span class="ident">p</span>.<span class="ident">borrow</span>().<span class="ident">is_constant</span>(<span class="number">1</span>, <span class="number">1</span>) {
-                    <span class="ident">assign</span>.<span class="ident">guard</span> <span class="op">=</span> <span class="ident">Guard::True</span>.<span class="ident">into</span>()
+<span class="kw">impl </span>Visitor <span class="kw">for </span>Canonicalize {
+    <span class="kw">fn </span>start(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _ctx: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        comp.for_each_assignment(|assign| {
+            <span class="kw">if let </span>Guard::Port(p) = <span class="kw-2">&amp;</span>(<span class="kw-2">*</span>assign.guard) {
+                <span class="comment">// 1&#39;d1 ? r1.done
+                </span><span class="kw">if </span>p.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>) {
+                    assign.guard = Guard::True.into()
                 }
             }
         });
 
-        <span class="kw">for</span> <span class="ident">gr</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">groups</span>.<span class="ident">iter</span>() {
-            <span class="comment">// Handles group[done] = a ? 1&#39;d1 -&gt; group[done] = a</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">gr</span>.<span class="ident">borrow_mut</span>();
-            <span class="kw">let</span> <span class="ident">done_assign</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">done_cond_mut</span>();
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Guard::Port</span>(<span class="ident">p</span>) <span class="op">=</span> <span class="kw-2">&amp;</span>(<span class="kw-2">*</span><span class="ident">done_assign</span>.<span class="ident">guard</span>) {
-                <span class="kw">if</span> <span class="ident">done_assign</span>.<span class="ident">src</span>.<span class="ident">borrow</span>().<span class="ident">is_constant</span>(<span class="number">1</span>, <span class="number">1</span>) {
-                    <span class="ident">done_assign</span>.<span class="ident">src</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">clone</span>(); <span class="comment">//rc clone</span>
-                    <span class="ident">done_assign</span>.<span class="ident">guard</span> <span class="op">=</span> <span class="ident">Guard::True</span>.<span class="ident">into</span>();
+        <span class="kw">for </span>gr <span class="kw">in </span>comp.groups.iter() {
+            <span class="comment">// Handles group[done] = a ? 1&#39;d1 -&gt; group[done] = a
+            </span><span class="kw">let </span><span class="kw-2">mut </span>group = gr.borrow_mut();
+            <span class="kw">let </span>done_assign = group.done_cond_mut();
+            <span class="kw">if let </span>Guard::Port(p) = <span class="kw-2">&amp;</span>(<span class="kw-2">*</span>done_assign.guard) {
+                <span class="kw">if </span>done_assign.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>) {
+                    done_assign.src = p.clone(); <span class="comment">//rc clone
+                    </span>done_assign.guard = Guard::True.into();
                 }
             }
-            <span class="comment">// Deals with aassignment ordering</span>
-            <span class="kw">let</span> <span class="ident">assigns</span> <span class="op">=</span> <span class="ident">std::mem::take</span>(<span class="kw-2">&amp;mut</span> <span class="ident">group</span>.<span class="ident">assignments</span>);
-            <span class="ident">group</span>.<span class="ident">assignments</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">order</span>.<span class="ident">dataflow_sort</span>(<span class="ident">assigns</span>)<span class="question-mark">?</span>;
+            <span class="comment">// Deals with aassignment ordering
+            </span><span class="kw">let </span>assigns = std::mem::take(<span class="kw-2">&amp;mut </span>group.assignments);
+            group.assignments = <span class="self">self</span>.order.dataflow_sort(assigns)<span class="question-mark">?</span>;
         }
-        <span class="kw">for</span> <span class="ident">cgr</span> <span class="kw">in</span> <span class="ident">comp</span>.<span class="ident">comb_groups</span>.<span class="ident">iter</span>() {
-            <span class="kw">let</span> <span class="ident">assigns</span> <span class="op">=</span> <span class="ident">std::mem::take</span>(<span class="kw-2">&amp;mut</span> <span class="ident">cgr</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span>);
-            <span class="ident">cgr</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">order</span>.<span class="ident">dataflow_sort</span>(<span class="ident">assigns</span>)<span class="question-mark">?</span>;
+        <span class="kw">for </span>cgr <span class="kw">in </span>comp.comb_groups.iter() {
+            <span class="kw">let </span>assigns = std::mem::take(<span class="kw-2">&amp;mut </span>cgr.borrow_mut().assignments);
+            cgr.borrow_mut().assignments = <span class="self">self</span>.order.dataflow_sort(assigns)<span class="question-mark">?</span>;
         }
-        <span class="kw">let</span> <span class="ident">cont_assigns</span> <span class="op">=</span> <span class="ident">std::mem::take</span>(<span class="kw-2">&amp;mut</span> <span class="ident">comp</span>.<span class="ident">continuous_assignments</span>);
-        <span class="ident">comp</span>.<span class="ident">continuous_assignments</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">order</span>.<span class="ident">dataflow_sort</span>(<span class="ident">cont_assigns</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>cont_assigns = std::mem::take(<span class="kw-2">&amp;mut </span>comp.continuous_assignments);
+        comp.continuous_assignments = <span class="self">self</span>.order.dataflow_sort(cont_assigns)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Action::Stop</span>)
+        <span class="prelude-val">Ok</span>(Action::Stop)
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

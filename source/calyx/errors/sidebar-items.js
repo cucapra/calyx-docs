@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ErrorKind","Standard error type for Calyx errors."]],"struct":[["Error",""]],"type":[["CalyxResult","Convience wrapper to represent success or meaningul compiler error."]]});
+window.SIDEBAR_ITEMS = {"enum":[["ErrorKind","Standard error type for Calyx errors."]],"struct":[["Error",""]],"type":[["CalyxResult","Convience wrapper to represent success or meaningul compiler error."]]};

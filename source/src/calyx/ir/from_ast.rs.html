@@ -1,107 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/ir/from_ast.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>from_ast.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../../calyx/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/src/ir/from_ast.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>from_ast.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -625,62 +620,62 @@
 <span id="620">620</span>
 <span id="621">621</span>
 <span id="622">622</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::{
-    <span class="ident">Assignment</span>, <span class="ident">Attributes</span>, <span class="ident">BackendConf</span>, <span class="ident">Builder</span>, <span class="ident">Canonical</span>, <span class="ident">CellType</span>,
-    <span class="ident">Component</span>, <span class="ident">Context</span>, <span class="ident">Control</span>, <span class="ident">Direction</span>, <span class="ident">GetAttributes</span>, <span class="ident">Guard</span>, <span class="ident">Id</span>, <span class="ident">Invoke</span>,
-    <span class="ident">LibrarySignatures</span>, <span class="ident">Port</span>, <span class="ident">PortDef</span>, <span class="ident">RESERVED_NAMES</span>, <span class="ident">RRC</span>,
+</pre><pre class="rust"><code><span class="kw">use super</span>::{
+    Assignment, Attributes, BackendConf, Builder, Canonical, CellType,
+    Component, Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
+    LibrarySignatures, Port, PortDef, RESERVED_NAMES, RRC,
 };
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">errors</span>::{<span class="ident">CalyxResult</span>, <span class="ident">Error</span>},
-    <span class="ident">frontend</span>::{<span class="self">self</span>, <span class="ident">ast</span>},
-    <span class="ident">ir::PortComp</span>,
-    <span class="ident">utils</span>::{<span class="ident">GPosIdx</span>, <span class="ident">NameGenerator</span>, <span class="ident">WithPos</span>},
+<span class="kw">use crate</span>::{
+    errors::{CalyxResult, Error},
+    frontend::{<span class="self">self</span>, ast},
+    ir::PortComp,
+    utils::{GPosIdx, NameGenerator, WithPos},
 };
-<span class="kw">use</span> <span class="ident">std::cell::RefCell</span>;
-<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
-<span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
+<span class="kw">use </span>std::cell::RefCell;
+<span class="kw">use </span>std::collections::{HashMap, HashSet};
+<span class="kw">use </span>std::rc::Rc;
 
-<span class="doccomment">/// Context to store the signature information for all defined primitives and</span>
-<span class="doccomment">/// components.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="kw">struct</span> <span class="ident">SigCtx</span> {
-    <span class="doccomment">/// Mapping from component names to signatures</span>
-    <span class="ident">comp_sigs</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Id</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Context to store the signature information for all defined primitives and
+/// components.
+</span><span class="attribute">#[derive(Default)]
+</span><span class="kw">struct </span>SigCtx {
+    <span class="doccomment">/// Mapping from component names to signatures
+    </span>comp_sigs: HashMap&lt;Id, Vec&lt;PortDef&lt;u64&gt;&gt;&gt;,
 
-    <span class="doccomment">/// Mapping from library functions to signatures</span>
-    <span class="ident">lib</span>: <span class="ident">LibrarySignatures</span>,
+    <span class="doccomment">/// Mapping from library functions to signatures
+    </span>lib: LibrarySignatures,
 }
 
-<span class="doccomment">/// Validates a component signature to make sure there are not duplicate ports.</span>
-<span class="kw">fn</span> <span class="ident">check_signature</span>(<span class="ident">pds</span>: <span class="kw-2">&amp;</span>[<span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>]) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ports</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Id</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
-    <span class="kw">for</span> <span class="ident">PortDef</span> {
-        <span class="ident">name</span>, <span class="ident">direction</span>, ..
-    } <span class="kw">in</span> <span class="ident">pds</span>
+<span class="doccomment">/// Validates a component signature to make sure there are not duplicate ports.
+</span><span class="kw">fn </span>check_signature(pds: <span class="kw-2">&amp;</span>[PortDef&lt;u64&gt;]) -&gt; CalyxResult&lt;()&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>ports: HashSet&lt;<span class="kw-2">&amp;</span>Id&gt; = HashSet::new();
+    <span class="kw">for </span>PortDef {
+        name, direction, ..
+    } <span class="kw">in </span>pds
     {
-        <span class="comment">// check for uniqueness</span>
-        <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">direction</span> {
-            <span class="ident">Direction::Input</span> =&gt; {
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">ports</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>) {
-                    <span class="ident">ports</span>.<span class="ident">insert</span>(<span class="ident">name</span>);
-                } <span class="kw">else</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::already_bound</span>(
-                        <span class="kw-2">*</span><span class="ident">name</span>,
-                        <span class="string">&quot;port&quot;</span>.<span class="ident">to_string</span>(),
+        <span class="comment">// check for uniqueness
+        </span><span class="kw">match </span><span class="kw-2">&amp;</span>direction {
+            Direction::Input =&gt; {
+                <span class="kw">if </span>!ports.contains(<span class="kw-2">&amp;</span>name) {
+                    ports.insert(name);
+                } <span class="kw">else </span>{
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(
+                        <span class="kw-2">*</span>name,
+                        <span class="string">&quot;port&quot;</span>.to_string(),
                     ));
                 }
             }
-            <span class="ident">Direction::Output</span> =&gt; {
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">ports</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>) {
-                    <span class="ident">ports</span>.<span class="ident">insert</span>(<span class="ident">name</span>);
-                } <span class="kw">else</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::already_bound</span>(
-                        <span class="kw-2">*</span><span class="ident">name</span>,
-                        <span class="string">&quot;port&quot;</span>.<span class="ident">to_string</span>(),
+            Direction::Output =&gt; {
+                <span class="kw">if </span>!ports.contains(<span class="kw-2">&amp;</span>name) {
+                    ports.insert(name);
+                } <span class="kw">else </span>{
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(
+                        <span class="kw-2">*</span>name,
+                        <span class="string">&quot;port&quot;</span>.to_string(),
                     ));
                 }
             }
-            <span class="ident">Direction::Inout</span> =&gt; {
+            Direction::Inout =&gt; {
                 <span class="macro">panic!</span>(<span class="string">&quot;Components shouldn&#39;t have inout ports.&quot;</span>)
             }
         }
@@ -688,565 +683,564 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="doccomment">/// Definition of special interface ports.</span>
-<span class="kw">const</span> <span class="ident">INTERFACE_PORTS</span>: [(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">u64</span>, <span class="ident">Direction</span>); <span class="number">4</span>] <span class="op">=</span> [
-    (<span class="string">&quot;go&quot;</span>, <span class="number">1</span>, <span class="ident">Direction::Input</span>),
-    (<span class="string">&quot;clk&quot;</span>, <span class="number">1</span>, <span class="ident">Direction::Input</span>),
-    (<span class="string">&quot;reset&quot;</span>, <span class="number">1</span>, <span class="ident">Direction::Input</span>),
-    (<span class="string">&quot;done&quot;</span>, <span class="number">1</span>, <span class="ident">Direction::Output</span>),
+<span class="doccomment">/// Definition of special interface ports.
+</span><span class="kw">const </span>INTERFACE_PORTS: [(<span class="kw-2">&amp;</span>str, u64, Direction); <span class="number">4</span>] = [
+    (<span class="string">&quot;go&quot;</span>, <span class="number">1</span>, Direction::Input),
+    (<span class="string">&quot;clk&quot;</span>, <span class="number">1</span>, Direction::Input),
+    (<span class="string">&quot;reset&quot;</span>, <span class="number">1</span>, Direction::Input),
+    (<span class="string">&quot;done&quot;</span>, <span class="number">1</span>, Direction::Output),
 ];
 
-<span class="doccomment">/// Extend the signature with magical ports.</span>
-<span class="kw">fn</span> <span class="ident">extend_signature</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PortDef</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
-    <span class="kw">let</span> <span class="ident">port_names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">sig</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> <span class="ident">pd</span>.<span class="ident">name</span>).<span class="ident">collect</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">namegen</span> <span class="op">=</span> <span class="ident">NameGenerator::with_prev_defined_names</span>(<span class="ident">port_names</span>);
-    <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">width</span>, <span class="ident">direction</span>) <span class="kw">in</span> <span class="ident">INTERFACE_PORTS</span>.<span class="ident">iter</span>() {
-        <span class="comment">// Check if there is already another interface port defined for the</span>
-        <span class="comment">// component</span>
-        <span class="kw">let</span> <span class="ident">attr</span> <span class="op">=</span> <span class="ident">Id::from</span>(<span class="kw-2">*</span><span class="ident">name</span>);
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">sig</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">pd</span><span class="op">|</span> <span class="ident">pd</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="ident">attr</span>)) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">attributes</span> <span class="op">=</span> <span class="ident">Attributes::default</span>();
-            <span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="ident">attr</span>, <span class="number">1</span>);
-            <span class="ident">sig</span>.<span class="ident">push</span>(<span class="ident">PortDef</span> {
-                <span class="ident">name</span>: <span class="ident">namegen</span>.<span class="ident">gen_name</span>(<span class="ident">name</span>.<span class="ident">to_string</span>()),
-                <span class="ident">width</span>: <span class="kw-2">*</span><span class="ident">width</span>,
-                <span class="ident">direction</span>: <span class="ident">direction</span>.<span class="ident">clone</span>(),
-                <span class="ident">attributes</span>,
+<span class="doccomment">/// Extend the signature with magical ports.
+</span><span class="kw">fn </span>extend_signature(sig: <span class="kw-2">&amp;mut </span>Vec&lt;PortDef&lt;u64&gt;&gt;) {
+    <span class="kw">let </span>port_names: HashSet&lt;<span class="kw">_</span>&gt; = sig.iter().map(|pd| pd.name).collect();
+    <span class="kw">let </span><span class="kw-2">mut </span>namegen = NameGenerator::with_prev_defined_names(port_names);
+    <span class="kw">for </span>(name, width, direction) <span class="kw">in </span>INTERFACE_PORTS.iter() {
+        <span class="comment">// Check if there is already another interface port defined for the
+        // component
+        </span><span class="kw">let </span>attr = Id::from(<span class="kw-2">*</span>name);
+        <span class="kw">if </span>!sig.iter().any(|pd| pd.attributes.has(attr)) {
+            <span class="kw">let </span><span class="kw-2">mut </span>attributes = Attributes::default();
+            attributes.insert(attr, <span class="number">1</span>);
+            sig.push(PortDef {
+                name: namegen.gen_name(name.to_string()),
+                width: <span class="kw-2">*</span>width,
+                direction: direction.clone(),
+                attributes,
             });
         }
     }
 }
 
-<span class="doccomment">/// Construct an IR representation using a parsed AST and command line options.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ast_to_ir</span>(<span class="kw-2">mut</span> <span class="ident">workspace</span>: <span class="ident">frontend::Workspace</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">all_names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Id</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashSet::with_capacity</span>(
-        <span class="ident">workspace</span>.<span class="ident">components</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="ident">workspace</span>.<span class="ident">externs</span>.<span class="ident">len</span>(),
+<span class="doccomment">/// Construct an IR representation using a parsed AST and command line options.
+</span><span class="kw">pub fn </span>ast_to_ir(<span class="kw-2">mut </span>workspace: frontend::Workspace) -&gt; CalyxResult&lt;Context&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>all_names: HashSet&lt;<span class="kw-2">&amp;</span>Id&gt; = HashSet::with_capacity(
+        workspace.components.len() + workspace.externs.len(),
     );
 
-    <span class="kw">let</span> <span class="ident">prim_names</span> <span class="op">=</span> <span class="ident">workspace</span>
-        .<span class="ident">externs</span>
-        .<span class="ident">iter</span>()
-        .<span class="ident">flat_map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">prims</span>)<span class="op">|</span> <span class="ident">prims</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">prim</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">prim</span>.<span class="ident">name</span>));
-    <span class="kw">let</span> <span class="ident">comp_names</span> <span class="op">=</span> <span class="ident">workspace</span>.<span class="ident">components</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">comp</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">comp</span>.<span class="ident">name</span>);
+    <span class="kw">let </span>prim_names = workspace
+        .externs
+        .iter()
+        .flat_map(|(<span class="kw">_</span>, prims)| prims.iter().map(|prim| <span class="kw-2">&amp;</span>prim.name));
+    <span class="kw">let </span>comp_names = workspace.components.iter().map(|comp| <span class="kw-2">&amp;</span>comp.name);
 
-    <span class="kw">for</span> <span class="ident">bound</span> <span class="kw">in</span> <span class="ident">prim_names</span>.<span class="ident">chain</span>(<span class="ident">comp_names</span>) {
-        <span class="kw">if</span> <span class="ident">all_names</span>.<span class="ident">contains</span>(<span class="ident">bound</span>) {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::already_bound</span>(
-                <span class="kw-2">*</span><span class="ident">bound</span>,
-                <span class="string">&quot;component or primitive&quot;</span>.<span class="ident">to_string</span>(),
+    <span class="kw">for </span>bound <span class="kw">in </span>prim_names.chain(comp_names) {
+        <span class="kw">if </span>all_names.contains(bound) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(
+                <span class="kw-2">*</span>bound,
+                <span class="string">&quot;component or primitive&quot;</span>.to_string(),
             ));
         }
-        <span class="ident">all_names</span>.<span class="ident">insert</span>(<span class="ident">bound</span>);
+        all_names.insert(bound);
     }
 
-    <span class="comment">// Build the signature context</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sig_ctx</span> <span class="op">=</span> <span class="ident">SigCtx</span> {
-        <span class="ident">lib</span>: <span class="ident">workspace</span>.<span class="ident">externs</span>.<span class="ident">into</span>(),
-        ..<span class="ident">Default::default</span>()
+    <span class="comment">// Build the signature context
+    </span><span class="kw">let </span><span class="kw-2">mut </span>sig_ctx = SigCtx {
+        lib: workspace.externs.into(),
+        ..Default::default()
     };
 
-    <span class="comment">// Add declarations to context</span>
-    <span class="kw">for</span> <span class="ident">comp</span> <span class="kw">in</span> <span class="ident">workspace</span>
-        .<span class="ident">declarations</span>
-        .<span class="ident">iter_mut</span>()
-        .<span class="ident">chain</span>(<span class="ident">workspace</span>.<span class="ident">components</span>.<span class="ident">iter_mut</span>())
+    <span class="comment">// Add declarations to context
+    </span><span class="kw">for </span>comp <span class="kw">in </span>workspace
+        .declarations
+        .iter_mut()
+        .chain(workspace.components.iter_mut())
     {
-        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">comp</span>.<span class="ident">signature</span>;
-        <span class="ident">check_signature</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">sig</span>)<span class="question-mark">?</span>;
-        <span class="comment">// extend the signature if the component does not have the @nointerface attribute.</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">comp</span>.<span class="ident">attributes</span>.<span class="ident">has</span>(<span class="string">&quot;nointerface&quot;</span>) <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">comp</span>.<span class="ident">is_comb</span> {
-            <span class="ident">extend_signature</span>(<span class="ident">sig</span>);
+        <span class="kw">let </span>sig = <span class="kw-2">&amp;mut </span>comp.signature;
+        check_signature(<span class="kw-2">&amp;*</span>sig)<span class="question-mark">?</span>;
+        <span class="comment">// extend the signature if the component does not have the @nointerface attribute.
+        </span><span class="kw">if </span>!comp.attributes.has(<span class="string">&quot;nointerface&quot;</span>) &amp;&amp; !comp.is_comb {
+            extend_signature(sig);
         }
-        <span class="ident">sig_ctx</span>.<span class="ident">comp_sigs</span>.<span class="ident">insert</span>(<span class="ident">comp</span>.<span class="ident">name</span>, <span class="ident">sig</span>.<span class="ident">clone</span>());
+        sig_ctx.comp_sigs.insert(comp.name, sig.clone());
     }
 
-    <span class="kw">let</span> <span class="ident">comps</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Component</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">workspace</span>
-        .<span class="ident">components</span>
-        .<span class="ident">into_iter</span>()
-        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">comp</span><span class="op">|</span> <span class="ident">build_component</span>(<span class="ident">comp</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sig_ctx</span>))
-        .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+    <span class="kw">let </span>comps: Vec&lt;Component&gt; = workspace
+        .components
+        .into_iter()
+        .map(|comp| build_component(comp, <span class="kw-2">&amp;mut </span>sig_ctx))
+        .collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
 
-    <span class="comment">// Find the entrypoint for the program.</span>
-    <span class="kw">let</span> <span class="ident">entrypoint</span> <span class="op">=</span> <span class="ident">comps</span>
-        .<span class="ident">iter</span>()
-        .<span class="ident">find</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;toplevel&quot;</span>).<span class="ident">is_some</span>())
-        .<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">comps</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">name</span> <span class="op">==</span> <span class="string">&quot;main&quot;</span>))
-        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">name</span>)
-        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::misc</span>(<span class="string">&quot;No entry point for the program. Program needs to be either mark a component with the \&quot;toplevel\&quot; attribute or define a component named `main`&quot;</span>.<span class="ident">to_string</span>()))<span class="question-mark">?</span>;
+    <span class="comment">// Find the entrypoint for the program.
+    </span><span class="kw">let </span>entrypoint = comps
+        .iter()
+        .find(|c| c.attributes.get(<span class="string">&quot;toplevel&quot;</span>).is_some())
+        .or_else(|| comps.iter().find(|c| c.name == <span class="string">&quot;main&quot;</span>))
+        .map(|c| c.name)
+        .ok_or_else(|| Error::misc(<span class="string">&quot;No entry point for the program. Program needs to be either mark a component with the \&quot;toplevel\&quot; attribute or define a component named `main`&quot;</span>.to_string()))<span class="question-mark">?</span>;
 
-    <span class="prelude-val">Ok</span>(<span class="ident">Context</span> {
-        <span class="ident">components</span>: <span class="ident">comps</span>,
-        <span class="ident">lib</span>: <span class="ident">sig_ctx</span>.<span class="ident">lib</span>,
-        <span class="ident">bc</span>: <span class="ident">BackendConf::default</span>(),
-        <span class="ident">entrypoint</span>,
-        <span class="ident">extra_opts</span>: <span class="macro">vec!</span>[],
-        <span class="ident">metadata</span>: <span class="ident">workspace</span>.<span class="ident">metadata</span>,
+    <span class="prelude-val">Ok</span>(Context {
+        components: comps,
+        lib: sig_ctx.lib,
+        bc: BackendConf::default(),
+        entrypoint,
+        extra_opts: <span class="macro">vec!</span>[],
+        metadata: workspace.metadata,
     })
 }
 
-<span class="kw">fn</span> <span class="ident">validate_component</span>(
-    <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="ident">ast::ComponentDef</span>,
-    <span class="ident">sig_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">SigCtx</span>,
-) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cells</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Id</span>, <span class="ident">GPosIdx</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">groups</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Id</span>, <span class="ident">GPosIdx</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
+<span class="kw">fn </span>validate_component(
+    comp: <span class="kw-2">&amp;</span>ast::ComponentDef,
+    sig_ctx: <span class="kw-2">&amp;</span>SigCtx,
+) -&gt; CalyxResult&lt;()&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>cells: HashMap&lt;Id, GPosIdx&gt; = HashMap::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>groups: HashMap&lt;Id, GPosIdx&gt; = HashMap::new();
 
-    <span class="kw">for</span> <span class="ident">cell</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">comp</span>.<span class="ident">cells</span> {
-        <span class="kw">let</span> <span class="ident">attrs</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">attributes</span>;
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pos</span>) <span class="op">=</span> <span class="ident">cells</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">name</span>) {
-            <span class="kw">let</span> <span class="ident">prev</span> <span class="op">=</span>
-                <span class="ident">pos</span>.<span class="ident">into_option</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">format</span>(<span class="string">&quot;Previous definition&quot;</span>));
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::already_bound</span>(<span class="ident">cell</span>.<span class="ident">name</span>, <span class="string">&quot;cell&quot;</span>.<span class="ident">to_string</span>())
-                .<span class="ident">with_pos</span>(<span class="ident">attrs</span>)
-                .<span class="ident">with_post_msg</span>(<span class="ident">prev</span>));
+    <span class="kw">for </span>cell <span class="kw">in </span><span class="kw-2">&amp;</span>comp.cells {
+        <span class="kw">let </span>attrs = <span class="kw-2">&amp;</span>cell.attributes;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(pos) = cells.get(<span class="kw-2">&amp;</span>cell.name) {
+            <span class="kw">let </span>prev =
+                pos.into_option().map(|s| s.format(<span class="string">&quot;Previous definition&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(cell.name, <span class="string">&quot;cell&quot;</span>.to_string())
+                .with_pos(attrs)
+                .with_post_msg(prev));
         }
-        <span class="ident">cells</span>.<span class="ident">insert</span>(<span class="ident">cell</span>.<span class="ident">name</span>, <span class="ident">cell</span>.<span class="ident">attributes</span>.<span class="ident">copy_span</span>());
+        cells.insert(cell.name, cell.attributes.copy_span());
 
-        <span class="kw">let</span> <span class="ident">proto_name</span> <span class="op">=</span> <span class="ident">cell</span>.<span class="ident">prototype</span>.<span class="ident">name</span>;
+        <span class="kw">let </span>proto_name = cell.prototype.name;
 
-        <span class="kw">if</span> <span class="ident">sig_ctx</span>.<span class="ident">lib</span>.<span class="ident">find_primitive</span>(<span class="ident">proto_name</span>).<span class="ident">is_none</span>()
-            <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">sig_ctx</span>.<span class="ident">comp_sigs</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">proto_name</span>)
+        <span class="kw">if </span>sig_ctx.lib.find_primitive(proto_name).is_none()
+            &amp;&amp; !sig_ctx.comp_sigs.contains_key(<span class="kw-2">&amp;</span>proto_name)
         {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::undefined</span>(
-                <span class="ident">proto_name</span>,
-                <span class="string">&quot;primitive or component&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::undefined(
+                proto_name,
+                <span class="string">&quot;primitive or component&quot;</span>.to_string(),
             )
-            .<span class="ident">with_pos</span>(<span class="ident">attrs</span>));
+            .with_pos(attrs));
         }
     }
 
-    <span class="kw">for</span> <span class="ident">group</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">comp</span>.<span class="ident">groups</span> {
-        <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">name</span>;
-        <span class="kw">let</span> <span class="ident">attrs</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">group</span>.<span class="ident">attributes</span>;
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pos</span>) <span class="op">=</span> <span class="ident">groups</span>.<span class="ident">get</span>(<span class="ident">name</span>) {
-            <span class="kw">let</span> <span class="ident">prev</span> <span class="op">=</span>
-                <span class="ident">pos</span>.<span class="ident">into_option</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">format</span>(<span class="string">&quot;Previous definition&quot;</span>));
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::already_bound</span>(<span class="kw-2">*</span><span class="ident">name</span>, <span class="string">&quot;group&quot;</span>.<span class="ident">to_string</span>())
-                .<span class="ident">with_pos</span>(<span class="ident">attrs</span>)
-                .<span class="ident">with_post_msg</span>(<span class="ident">prev</span>));
+    <span class="kw">for </span>group <span class="kw">in </span><span class="kw-2">&amp;</span>comp.groups {
+        <span class="kw">let </span>name = <span class="kw-2">&amp;</span>group.name;
+        <span class="kw">let </span>attrs = <span class="kw-2">&amp;</span>group.attributes;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(pos) = groups.get(name) {
+            <span class="kw">let </span>prev =
+                pos.into_option().map(|s| s.format(<span class="string">&quot;Previous definition&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(<span class="kw-2">*</span>name, <span class="string">&quot;group&quot;</span>.to_string())
+                .with_pos(attrs)
+                .with_post_msg(prev));
         }
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pos</span>) <span class="op">=</span> <span class="ident">cells</span>.<span class="ident">get</span>(<span class="ident">name</span>) {
-            <span class="kw">let</span> <span class="ident">prev</span> <span class="op">=</span>
-                <span class="ident">pos</span>.<span class="ident">into_option</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">format</span>(<span class="string">&quot;Previous definition&quot;</span>));
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::already_bound</span>(<span class="kw-2">*</span><span class="ident">name</span>, <span class="string">&quot;cell&quot;</span>.<span class="ident">to_string</span>())
-                .<span class="ident">with_pos</span>(<span class="ident">attrs</span>)
-                .<span class="ident">with_post_msg</span>(<span class="ident">prev</span>));
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(pos) = cells.get(name) {
+            <span class="kw">let </span>prev =
+                pos.into_option().map(|s| s.format(<span class="string">&quot;Previous definition&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(<span class="kw-2">*</span>name, <span class="string">&quot;cell&quot;</span>.to_string())
+                .with_pos(attrs)
+                .with_post_msg(prev));
         }
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pos</span>) <span class="op">=</span> <span class="ident">cells</span>.<span class="ident">get</span>(<span class="ident">name</span>) {
-            <span class="kw">let</span> <span class="ident">prev</span> <span class="op">=</span>
-                <span class="ident">pos</span>.<span class="ident">into_option</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">format</span>(<span class="string">&quot;Previous definition&quot;</span>));
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::already_bound</span>(<span class="kw-2">*</span><span class="ident">name</span>, <span class="string">&quot;cell&quot;</span>.<span class="ident">to_string</span>())
-                .<span class="ident">with_pos</span>(<span class="ident">attrs</span>)
-                .<span class="ident">with_post_msg</span>(<span class="ident">prev</span>));
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(pos) = cells.get(name) {
+            <span class="kw">let </span>prev =
+                pos.into_option().map(|s| s.format(<span class="string">&quot;Previous definition&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(<span class="kw-2">*</span>name, <span class="string">&quot;cell&quot;</span>.to_string())
+                .with_pos(attrs)
+                .with_post_msg(prev));
         }
-        <span class="ident">groups</span>.<span class="ident">insert</span>(<span class="kw-2">*</span><span class="ident">name</span>, <span class="ident">group</span>.<span class="ident">attributes</span>.<span class="ident">copy_span</span>());
+        groups.insert(<span class="kw-2">*</span>name, group.attributes.copy_span());
     }
 
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="doccomment">/// Build an `ir::component::Component` using an `frontend::ast::ComponentDef`.</span>
-<span class="kw">fn</span> <span class="ident">build_component</span>(
-    <span class="ident">comp</span>: <span class="ident">ast::ComponentDef</span>,
-    <span class="ident">sig_ctx</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SigCtx</span>,
-) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Component</span><span class="op">&gt;</span> {
-    <span class="comment">// Validate the component before building it.</span>
-    <span class="ident">validate_component</span>(<span class="kw-2">&amp;</span><span class="ident">comp</span>, <span class="ident">sig_ctx</span>)<span class="question-mark">?</span>;
+<span class="doccomment">/// Build an `ir::component::Component` using an `frontend::ast::ComponentDef`.
+</span><span class="kw">fn </span>build_component(
+    comp: ast::ComponentDef,
+    sig_ctx: <span class="kw-2">&amp;mut </span>SigCtx,
+) -&gt; CalyxResult&lt;Component&gt; {
+    <span class="comment">// Validate the component before building it.
+    </span>validate_component(<span class="kw-2">&amp;</span>comp, sig_ctx)<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ir_component</span> <span class="op">=</span>
-        <span class="ident">Component::new</span>(<span class="ident">comp</span>.<span class="ident">name</span>, <span class="ident">comp</span>.<span class="ident">signature</span>, <span class="ident">comp</span>.<span class="ident">is_comb</span>);
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span>
-        <span class="ident">Builder::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">ir_component</span>, <span class="kw-2">&amp;</span><span class="ident">sig_ctx</span>.<span class="ident">lib</span>).<span class="ident">not_generated</span>();
+    <span class="kw">let </span><span class="kw-2">mut </span>ir_component =
+        Component::new(comp.name, comp.signature, comp.is_comb);
+    <span class="kw">let </span><span class="kw-2">mut </span>builder =
+        Builder::new(<span class="kw-2">&amp;mut </span>ir_component, <span class="kw-2">&amp;</span>sig_ctx.lib).not_generated();
 
-    <span class="comment">// For each ast::Cell, add a Cell that contains all the</span>
-    <span class="comment">// required information.</span>
-    <span class="ident">comp</span>.<span class="ident">cells</span>
-        .<span class="ident">into_iter</span>()
-        .<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">cell</span><span class="op">|</span> <span class="ident">add_cell</span>(<span class="ident">cell</span>, <span class="ident">sig_ctx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>));
+    <span class="comment">// For each ast::Cell, add a Cell that contains all the
+    // required information.
+    </span>comp.cells
+        .into_iter()
+        .for_each(|cell| add_cell(cell, sig_ctx, <span class="kw-2">&amp;mut </span>builder));
 
-    <span class="ident">comp</span>.<span class="ident">groups</span>
-        .<span class="ident">into_iter</span>()
-        .<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">g</span><span class="op">|</span> <span class="ident">add_group</span>(<span class="ident">g</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>))<span class="question-mark">?</span>;
+    comp.groups
+        .into_iter()
+        .try_for_each(|g| add_group(g, <span class="kw-2">&amp;mut </span>builder))<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="ident">continuous_assignments</span> <span class="op">=</span>
-        <span class="ident">build_assignments</span>(<span class="ident">comp</span>.<span class="ident">continuous_assignments</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>)<span class="question-mark">?</span>;
-    <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">continuous_assignments</span> <span class="op">=</span> <span class="ident">continuous_assignments</span>;
+    <span class="kw">let </span>continuous_assignments =
+        build_assignments(comp.continuous_assignments, <span class="kw-2">&amp;mut </span>builder)<span class="question-mark">?</span>;
+    builder.component.continuous_assignments = continuous_assignments;
 
-    <span class="comment">// Build the Control ast using ast::Control.</span>
-    <span class="kw">let</span> <span class="ident">control</span> <span class="op">=</span>
-        <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">build_control</span>(<span class="ident">comp</span>.<span class="ident">control</span>, <span class="kw-2">&amp;mut</span> <span class="ident">builder</span>)<span class="question-mark">?</span>));
-    <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">control</span> <span class="op">=</span> <span class="ident">control</span>;
+    <span class="comment">// Build the Control ast using ast::Control.
+    </span><span class="kw">let </span>control =
+        Rc::new(RefCell::new(build_control(comp.control, <span class="kw-2">&amp;mut </span>builder)<span class="question-mark">?</span>));
+    builder.component.control = control;
 
-    <span class="ident">ir_component</span>.<span class="ident">attributes</span> <span class="op">=</span> <span class="ident">comp</span>.<span class="ident">attributes</span>;
+    ir_component.attributes = comp.attributes;
 
-    <span class="comment">// Add reserved names to the component&#39;s namegenerator so future conflicts</span>
-    <span class="comment">// don&#39;t occur</span>
-    <span class="ident">ir_component</span>
-        .<span class="ident">add_names</span>(<span class="ident">RESERVED_NAMES</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">Id::from</span>(<span class="kw-2">*</span><span class="ident">s</span>)).<span class="ident">collect</span>());
+    <span class="comment">// Add reserved names to the component&#39;s namegenerator so future conflicts
+    // don&#39;t occur
+    </span>ir_component
+        .add_names(RESERVED_NAMES.iter().map(|s| Id::from(<span class="kw-2">*</span>s)).collect());
 
-    <span class="prelude-val">Ok</span>(<span class="ident">ir_component</span>)
+    <span class="prelude-val">Ok</span>(ir_component)
 }
 
-<span class="comment">///////////////// Cell Construction /////////////////////////</span>
+<span class="comment">///////////////// Cell Construction /////////////////////////
 
-<span class="kw">fn</span> <span class="ident">add_cell</span>(<span class="ident">cell</span>: <span class="ident">ast::Cell</span>, <span class="ident">sig_ctx</span>: <span class="kw-2">&amp;</span><span class="ident">SigCtx</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>) {
-    <span class="kw">let</span> <span class="ident">proto_name</span> <span class="op">=</span> <span class="ident">cell</span>.<span class="ident">prototype</span>.<span class="ident">name</span>;
+</span><span class="kw">fn </span>add_cell(cell: ast::Cell, sig_ctx: <span class="kw-2">&amp;</span>SigCtx, builder: <span class="kw-2">&amp;mut </span>Builder) {
+    <span class="kw">let </span>proto_name = cell.prototype.name;
 
-    <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">sig_ctx</span>.<span class="ident">lib</span>.<span class="ident">find_primitive</span>(<span class="ident">proto_name</span>).<span class="ident">is_some</span>() {
-        <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_primitive</span>(
-            <span class="ident">cell</span>.<span class="ident">name</span>,
-            <span class="ident">proto_name</span>,
-            <span class="kw-2">&amp;</span><span class="ident">cell</span>.<span class="ident">prototype</span>.<span class="ident">params</span>,
+    <span class="kw">let </span>res = <span class="kw">if </span>sig_ctx.lib.find_primitive(proto_name).is_some() {
+        <span class="kw">let </span>c = builder.add_primitive(
+            cell.name,
+            proto_name,
+            <span class="kw-2">&amp;</span>cell.prototype.params,
         );
-        <span class="ident">c</span>.<span class="ident">borrow_mut</span>().<span class="ident">set_reference</span>(<span class="ident">cell</span>.<span class="ident">reference</span>);
-        <span class="ident">c</span>
-    } <span class="kw">else</span> {
-        <span class="comment">// Validator ensures that if the protoype is not a primitive, it</span>
-        <span class="comment">// is a component.</span>
-        <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">generate_name</span>(<span class="ident">cell</span>.<span class="ident">name</span>);
-        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">sig_ctx</span>.<span class="ident">comp_sigs</span>[<span class="kw-2">&amp;</span><span class="ident">proto_name</span>];
-        <span class="kw">let</span> <span class="ident">typ</span> <span class="op">=</span> <span class="ident">CellType::Component</span> { <span class="ident">name</span>: <span class="ident">proto_name</span> };
-        <span class="kw">let</span> <span class="ident">reference</span> <span class="op">=</span> <span class="ident">cell</span>.<span class="ident">reference</span>;
-        <span class="comment">// Components do not have any bindings for parameters</span>
-        <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">Builder::cell_from_signature</span>(<span class="ident">name</span>, <span class="ident">typ</span>, <span class="ident">sig</span>.<span class="ident">clone</span>());
-        <span class="ident">cell</span>.<span class="ident">borrow_mut</span>().<span class="ident">set_reference</span>(<span class="ident">reference</span>);
-        <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">cells</span>.<span class="ident">add</span>(<span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">cell</span>));
-        <span class="ident">cell</span>
+        c.borrow_mut().set_reference(cell.reference);
+        c
+    } <span class="kw">else </span>{
+        <span class="comment">// Validator ensures that if the protoype is not a primitive, it
+        // is a component.
+        </span><span class="kw">let </span>name = builder.component.generate_name(cell.name);
+        <span class="kw">let </span>sig = <span class="kw-2">&amp;</span>sig_ctx.comp_sigs[<span class="kw-2">&amp;</span>proto_name];
+        <span class="kw">let </span>typ = CellType::Component { name: proto_name };
+        <span class="kw">let </span>reference = cell.reference;
+        <span class="comment">// Components do not have any bindings for parameters
+        </span><span class="kw">let </span>cell = Builder::cell_from_signature(name, typ, sig.clone());
+        cell.borrow_mut().set_reference(reference);
+        builder.component.cells.add(Rc::clone(<span class="kw-2">&amp;</span>cell));
+        cell
     };
 
-    <span class="comment">// Add attributes to the built cell</span>
-    <span class="ident">res</span>.<span class="ident">borrow_mut</span>().<span class="ident">attributes</span> <span class="op">=</span> <span class="ident">cell</span>.<span class="ident">attributes</span>;
+    <span class="comment">// Add attributes to the built cell
+    </span>res.borrow_mut().attributes = cell.attributes;
 }
 
-<span class="comment">///////////////// Group Construction /////////////////////////</span>
+<span class="comment">///////////////// Group Construction /////////////////////////
 
-<span class="doccomment">/// Build an [super::Group] from an [ast::Group] and attach it to the [Component]</span>
-<span class="doccomment">/// associated with the [Builder]</span>
-<span class="kw">fn</span> <span class="ident">add_group</span>(<span class="ident">group</span>: <span class="ident">ast::Group</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">if</span> <span class="ident">group</span>.<span class="ident">is_comb</span> {
-        <span class="kw">let</span> <span class="ident">ir_group</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_comb_group</span>(<span class="ident">group</span>.<span class="ident">name</span>);
-        <span class="kw">let</span> <span class="ident">assigns</span> <span class="op">=</span> <span class="ident">build_assignments</span>(<span class="ident">group</span>.<span class="ident">wires</span>, <span class="ident">builder</span>)<span class="question-mark">?</span>;
+</span><span class="doccomment">/// Build an [super::Group] from an [ast::Group] and attach it to the [Component]
+/// associated with the [Builder]
+</span><span class="kw">fn </span>add_group(group: ast::Group, builder: <span class="kw-2">&amp;mut </span>Builder) -&gt; CalyxResult&lt;()&gt; {
+    <span class="kw">if </span>group.is_comb {
+        <span class="kw">let </span>ir_group = builder.add_comb_group(group.name);
+        <span class="kw">let </span>assigns = build_assignments(group.wires, builder)<span class="question-mark">?</span>;
 
-        <span class="ident">ir_group</span>.<span class="ident">borrow_mut</span>().<span class="ident">attributes</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">attributes</span>;
-        <span class="ident">ir_group</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span> <span class="op">=</span> <span class="ident">assigns</span>;
-    } <span class="kw">else</span> {
-        <span class="kw">let</span> <span class="ident">ir_group</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_group</span>(<span class="ident">group</span>.<span class="ident">name</span>);
-        <span class="kw">let</span> <span class="ident">assigns</span> <span class="op">=</span> <span class="ident">build_assignments</span>(<span class="ident">group</span>.<span class="ident">wires</span>, <span class="ident">builder</span>)<span class="question-mark">?</span>;
+        ir_group.borrow_mut().attributes = group.attributes;
+        ir_group.borrow_mut().assignments = assigns;
+    } <span class="kw">else </span>{
+        <span class="kw">let </span>ir_group = builder.add_group(group.name);
+        <span class="kw">let </span>assigns = build_assignments(group.wires, builder)<span class="question-mark">?</span>;
 
-        <span class="ident">ir_group</span>.<span class="ident">borrow_mut</span>().<span class="ident">attributes</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">attributes</span>;
-        <span class="ident">ir_group</span>.<span class="ident">borrow_mut</span>().<span class="ident">assignments</span> <span class="op">=</span> <span class="ident">assigns</span>;
+        ir_group.borrow_mut().attributes = group.attributes;
+        ir_group.borrow_mut().assignments = assigns;
     };
 
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="comment">///////////////// Assignment Construction /////////////////////////</span>
+<span class="comment">///////////////// Assignment Construction /////////////////////////
 
-<span class="doccomment">/// Get the pointer to the Port represented by `port`.</span>
-<span class="kw">fn</span> <span class="ident">get_port_ref</span>(<span class="ident">port</span>: <span class="ident">ast::Port</span>, <span class="ident">comp</span>: <span class="kw-2">&amp;</span><span class="ident">Component</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">match</span> <span class="ident">port</span> {
-        <span class="ident">ast::Port::Comp</span> { <span class="ident">component</span>, <span class="ident">port</span> } =&gt; <span class="ident">comp</span>
-            .<span class="ident">find_cell</span>(<span class="ident">component</span>)
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::undefined</span>(<span class="ident">component</span>, <span class="string">&quot;cell&quot;</span>.<span class="ident">to_string</span>()))<span class="question-mark">?</span>
-            .<span class="ident">borrow</span>()
-            .<span class="ident">find</span>(<span class="ident">port</span>)
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::undefined</span>(<span class="ident">port</span>, <span class="string">&quot;port&quot;</span>.<span class="ident">to_string</span>())),
-        <span class="ident">ast::Port::This</span> { <span class="ident">port</span> } =&gt; {
-            <span class="ident">comp</span>.<span class="ident">signature</span>.<span class="ident">borrow</span>().<span class="ident">find</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                <span class="ident">Error::undefined</span>(<span class="ident">port</span>, <span class="string">&quot;component port&quot;</span>.<span class="ident">to_string</span>())
+</span><span class="doccomment">/// Get the pointer to the Port represented by `port`.
+</span><span class="kw">fn </span>get_port_ref(port: ast::Port, comp: <span class="kw-2">&amp;</span>Component) -&gt; CalyxResult&lt;RRC&lt;Port&gt;&gt; {
+    <span class="kw">match </span>port {
+        ast::Port::Comp { component, port } =&gt; comp
+            .find_cell(component)
+            .ok_or_else(|| Error::undefined(component, <span class="string">&quot;cell&quot;</span>.to_string()))<span class="question-mark">?
+            </span>.borrow()
+            .find(port)
+            .ok_or_else(|| Error::undefined(port, <span class="string">&quot;port&quot;</span>.to_string())),
+        ast::Port::This { port } =&gt; {
+            comp.signature.borrow().find(<span class="kw-2">&amp;</span>port).ok_or_else(|| {
+                Error::undefined(port, <span class="string">&quot;component port&quot;</span>.to_string())
             })
         }
-        <span class="ident">ast::Port::Hole</span> { <span class="ident">group</span>, <span class="ident">name</span>: <span class="ident">port</span> } =&gt; <span class="ident">comp</span>
-            .<span class="ident">find_group</span>(<span class="ident">group</span>)
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::undefined</span>(<span class="ident">group</span>, <span class="string">&quot;group&quot;</span>.<span class="ident">to_string</span>()))<span class="question-mark">?</span>
-            .<span class="ident">borrow</span>()
-            .<span class="ident">find</span>(<span class="ident">port</span>)
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::undefined</span>(<span class="ident">port</span>, <span class="string">&quot;hole&quot;</span>.<span class="ident">to_string</span>())),
+        ast::Port::Hole { group, name: port } =&gt; comp
+            .find_group(group)
+            .ok_or_else(|| Error::undefined(group, <span class="string">&quot;group&quot;</span>.to_string()))<span class="question-mark">?
+            </span>.borrow()
+            .find(port)
+            .ok_or_else(|| Error::undefined(port, <span class="string">&quot;hole&quot;</span>.to_string())),
     }
 }
 
-<span class="doccomment">/// Get an port using an ast::Atom.</span>
-<span class="doccomment">/// If the atom is a number and the context doesn&#39;t already contain a cell</span>
-<span class="doccomment">/// for this constant, instantiate the constant node and get the &quot;out&quot; port</span>
-<span class="doccomment">/// from it.</span>
-<span class="kw">fn</span> <span class="ident">atom_to_port</span>(
-    <span class="ident">atom</span>: <span class="ident">ast::Atom</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>,
-) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">match</span> <span class="ident">atom</span> {
-        <span class="ident">ast::Atom::Num</span>(<span class="ident">n</span>) =&gt; {
-            <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">add_constant</span>(<span class="ident">n</span>.<span class="ident">val</span>, <span class="ident">n</span>.<span class="ident">width</span>).<span class="ident">borrow</span>().<span class="ident">get</span>(<span class="string">&quot;out&quot;</span>);
-            <span class="prelude-val">Ok</span>(<span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">port</span>))
+<span class="doccomment">/// Get an port using an ast::Atom.
+/// If the atom is a number and the context doesn&#39;t already contain a cell
+/// for this constant, instantiate the constant node and get the &quot;out&quot; port
+/// from it.
+</span><span class="kw">fn </span>atom_to_port(
+    atom: ast::Atom,
+    builder: <span class="kw-2">&amp;mut </span>Builder,
+) -&gt; CalyxResult&lt;RRC&lt;Port&gt;&gt; {
+    <span class="kw">match </span>atom {
+        ast::Atom::Num(n) =&gt; {
+            <span class="kw">let </span>port = builder.add_constant(n.val, n.width).borrow().get(<span class="string">&quot;out&quot;</span>);
+            <span class="prelude-val">Ok</span>(Rc::clone(<span class="kw-2">&amp;</span>port))
         }
-        <span class="ident">ast::Atom::Port</span>(<span class="ident">p</span>) =&gt; <span class="ident">get_port_ref</span>(<span class="ident">p</span>, <span class="ident">builder</span>.<span class="ident">component</span>),
+        ast::Atom::Port(p) =&gt; get_port_ref(p, builder.component),
     }
 }
 
-<span class="doccomment">/// Ensures that the given port has the required direction.</span>
-<span class="kw">fn</span> <span class="ident">ensure_direction</span>(<span class="ident">pr</span>: <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span>, <span class="ident">dir</span>: <span class="ident">Direction</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">port_dir</span> <span class="op">=</span> <span class="ident">pr</span>.<span class="ident">borrow</span>().<span class="ident">direction</span>.<span class="ident">clone</span>();
-    <span class="kw">match</span> (<span class="ident">dir</span>, <span class="ident">port_dir</span>) {
-        (<span class="ident">Direction::Input</span>, <span class="ident">Direction::Output</span>) =&gt; {
-            <span class="kw">let</span> <span class="ident">Canonical</span>(<span class="ident">c</span>, <span class="ident">p</span>) <span class="op">=</span> <span class="ident">pr</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>();
-            <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(
+<span class="doccomment">/// Ensures that the given port has the required direction.
+</span><span class="kw">fn </span>ensure_direction(pr: RRC&lt;Port&gt;, dir: Direction) -&gt; CalyxResult&lt;RRC&lt;Port&gt;&gt; {
+    <span class="kw">let </span>port_dir = pr.borrow().direction.clone();
+    <span class="kw">match </span>(dir, port_dir) {
+        (Direction::Input, Direction::Output) =&gt; {
+            <span class="kw">let </span>Canonical(c, p) = pr.borrow().canonical();
+            <span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
                 <span class="string">&quot;Port `{}.{}` occurs in write position but is an output port&quot;</span>,
-                <span class="ident">c</span>, <span class="ident">p</span>
+                c, p
             )))
         }
-        (<span class="ident">Direction::Output</span>, <span class="ident">Direction::Input</span>) =&gt; {
-            <span class="kw">let</span> <span class="ident">Canonical</span>(<span class="ident">c</span>, <span class="ident">p</span>) <span class="op">=</span> <span class="ident">pr</span>.<span class="ident">borrow</span>().<span class="ident">canonical</span>();
-            <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="macro">format!</span>(
+        (Direction::Output, Direction::Input) =&gt; {
+            <span class="kw">let </span>Canonical(c, p) = pr.borrow().canonical();
+            <span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
                 <span class="string">&quot;Port `{}.{}` occurs in write position but is an output port&quot;</span>,
-                <span class="ident">c</span>, <span class="ident">p</span>
+                c, p
             )))
         }
-        <span class="kw">_</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">pr</span>),
+        <span class="kw">_ </span>=&gt; <span class="prelude-val">Ok</span>(pr),
     }
 }
 
-<span class="doccomment">/// Build an ir::Assignment from ast::Wire.</span>
-<span class="doccomment">/// The Assignment contains pointers to the relevant ports.</span>
-<span class="kw">fn</span> <span class="ident">build_assignment</span>(
-    <span class="ident">wire</span>: <span class="ident">ast::Wire</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>,
-) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Assignment</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">src_port</span>: <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ensure_direction</span>(
-        <span class="ident">atom_to_port</span>(<span class="ident">wire</span>.<span class="ident">src</span>.<span class="ident">expr</span>, <span class="ident">builder</span>)<span class="question-mark">?</span>,
-        <span class="ident">Direction::Output</span>,
+<span class="doccomment">/// Build an ir::Assignment from ast::Wire.
+/// The Assignment contains pointers to the relevant ports.
+</span><span class="kw">fn </span>build_assignment(
+    wire: ast::Wire,
+    builder: <span class="kw-2">&amp;mut </span>Builder,
+) -&gt; CalyxResult&lt;Assignment&gt; {
+    <span class="kw">let </span>src_port: RRC&lt;Port&gt; = ensure_direction(
+        atom_to_port(wire.src.expr, builder)<span class="question-mark">?</span>,
+        Direction::Output,
     )<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="ident">dst_port</span>: <span class="ident">RRC</span><span class="op">&lt;</span><span class="ident">Port</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ensure_direction</span>(
-        <span class="ident">get_port_ref</span>(<span class="ident">wire</span>.<span class="ident">dest</span>, <span class="ident">builder</span>.<span class="ident">component</span>)<span class="question-mark">?</span>,
-        <span class="ident">Direction::Input</span>,
+    <span class="kw">let </span>dst_port: RRC&lt;Port&gt; = ensure_direction(
+        get_port_ref(wire.dest, builder.component)<span class="question-mark">?</span>,
+        Direction::Input,
     )<span class="question-mark">?</span>;
-    <span class="kw">if</span> <span class="ident">src_port</span>.<span class="ident">borrow</span>().<span class="ident">width</span> <span class="op">!</span><span class="op">=</span> <span class="ident">dst_port</span>.<span class="ident">borrow</span>().<span class="ident">width</span> {
-        <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(
+    <span class="kw">if </span>src_port.borrow().width != dst_port.borrow().width {
+        <span class="kw">let </span>msg = <span class="macro">format!</span>(
             <span class="string">&quot;Mismatched port widths. Source has size {} while destination requires {}.&quot;</span>,
-            <span class="ident">src_port</span>.<span class="ident">borrow</span>().<span class="ident">width</span>,
-            <span class="ident">dst_port</span>.<span class="ident">borrow</span>().<span class="ident">width</span>,
+            src_port.borrow().width,
+            dst_port.borrow().width,
         );
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::malformed_structure</span>(<span class="ident">msg</span>).<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">wire</span>.<span class="ident">attributes</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(msg).with_pos(<span class="kw-2">&amp;</span>wire.attributes));
     }
-    <span class="kw">let</span> <span class="ident">guard</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">wire</span>.<span class="ident">src</span>.<span class="ident">guard</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">g</span>) =&gt; <span class="ident">build_guard</span>(<span class="ident">g</span>, <span class="ident">builder</span>)<span class="question-mark">?</span>,
-        <span class="prelude-val">None</span> =&gt; <span class="ident">Guard::True</span>,
+    <span class="kw">let </span>guard = <span class="kw">match </span>wire.src.guard {
+        <span class="prelude-val">Some</span>(g) =&gt; build_guard(g, builder)<span class="question-mark">?</span>,
+        <span class="prelude-val">None </span>=&gt; Guard::True,
     };
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">assign</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build_assignment</span>(<span class="ident">dst_port</span>, <span class="ident">src_port</span>, <span class="ident">guard</span>);
-    <span class="ident">assign</span>.<span class="ident">attributes</span> <span class="op">=</span> <span class="ident">wire</span>.<span class="ident">attributes</span>;
-    <span class="prelude-val">Ok</span>(<span class="ident">assign</span>)
+    <span class="kw">let </span><span class="kw-2">mut </span>assign = builder.build_assignment(dst_port, src_port, guard);
+    assign.attributes = wire.attributes;
+    <span class="prelude-val">Ok</span>(assign)
 }
 
-<span class="kw">fn</span> <span class="ident">build_assignments</span>(
-    <span class="ident">assigns</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ast::Wire</span><span class="op">&gt;</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>,
-) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Assignment</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="ident">assigns</span>
-        .<span class="ident">into_iter</span>()
-        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">attrs</span> <span class="op">=</span> <span class="ident">w</span>.<span class="ident">attributes</span>.<span class="ident">clone</span>();
-            <span class="ident">build_assignment</span>(<span class="ident">w</span>, <span class="ident">builder</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="ident">err</span>.<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">attrs</span>))
+<span class="kw">fn </span>build_assignments(
+    assigns: Vec&lt;ast::Wire&gt;,
+    builder: <span class="kw-2">&amp;mut </span>Builder,
+) -&gt; CalyxResult&lt;Vec&lt;Assignment&gt;&gt; {
+    assigns
+        .into_iter()
+        .map(|w| {
+            <span class="kw">let </span>attrs = w.attributes.clone();
+            build_assignment(w, builder).map_err(|err| err.with_pos(<span class="kw-2">&amp;</span>attrs))
         })
-        .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+        .collect::&lt;CalyxResult&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;&gt;()
 }
 
-<span class="doccomment">/// Transform an ast::GuardExpr to an ir::Guard.</span>
-<span class="kw">fn</span> <span class="ident">build_guard</span>(<span class="ident">guard</span>: <span class="ident">ast::GuardExpr</span>, <span class="ident">bd</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Guard</span><span class="op">&gt;</span> {
-    <span class="kw">use</span> <span class="ident">ast::GuardExpr</span> <span class="kw">as</span> <span class="ident">GE</span>;
+<span class="doccomment">/// Transform an ast::GuardExpr to an ir::Guard.
+</span><span class="kw">fn </span>build_guard(guard: ast::GuardExpr, bd: <span class="kw-2">&amp;mut </span>Builder) -&gt; CalyxResult&lt;Guard&gt; {
+    <span class="kw">use </span>ast::GuardExpr <span class="kw">as </span>GE;
 
-    <span class="kw">let</span> <span class="ident">into_box_guard</span> <span class="op">=</span> <span class="op">|</span><span class="ident">g</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">GE</span><span class="op">&gt;</span>, <span class="ident">bd</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span><span class="op">|</span> -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">build_guard</span>(<span class="kw-2">*</span><span class="ident">g</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>))
+    <span class="kw">let </span>into_box_guard = |g: Box&lt;GE&gt;, bd: <span class="kw-2">&amp;mut </span>Builder| -&gt; CalyxResult&lt;<span class="kw">_</span>&gt; {
+        <span class="prelude-val">Ok</span>(Box::new(build_guard(<span class="kw-2">*</span>g, bd)<span class="question-mark">?</span>))
     };
 
-    <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">guard</span> {
-        <span class="ident">GE::Atom</span>(<span class="ident">atom</span>) =&gt; <span class="ident">Guard::port</span>(<span class="ident">ensure_direction</span>(
-            <span class="ident">atom_to_port</span>(<span class="ident">atom</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>,
-            <span class="ident">Direction::Output</span>,
+    <span class="prelude-val">Ok</span>(<span class="kw">match </span>guard {
+        GE::Atom(atom) =&gt; Guard::port(ensure_direction(
+            atom_to_port(atom, bd)<span class="question-mark">?</span>,
+            Direction::Output,
         )<span class="question-mark">?</span>),
-        <span class="ident">GE::Or</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::or</span>(<span class="ident">build_guard</span>(<span class="kw-2">*</span><span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">build_guard</span>(<span class="kw-2">*</span><span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
-        <span class="ident">GE::And</span>(<span class="ident">l</span>, <span class="ident">r</span>) =&gt; <span class="ident">Guard::and</span>(<span class="ident">build_guard</span>(<span class="kw-2">*</span><span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">build_guard</span>(<span class="kw-2">*</span><span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
-        <span class="ident">GE::Not</span>(<span class="ident">g</span>) =&gt; <span class="ident">Guard::Not</span>(<span class="ident">into_box_guard</span>(<span class="ident">g</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>),
-        <span class="ident">GE::CompOp</span>(<span class="ident">op</span>, <span class="ident">l</span>, <span class="ident">r</span>) =&gt; {
-            <span class="kw">let</span> <span class="ident">nl</span> <span class="op">=</span> <span class="ident">ensure_direction</span>(<span class="ident">atom_to_port</span>(<span class="ident">l</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">Direction::Output</span>)<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="ident">nr</span> <span class="op">=</span> <span class="ident">ensure_direction</span>(<span class="ident">atom_to_port</span>(<span class="ident">r</span>, <span class="ident">bd</span>)<span class="question-mark">?</span>, <span class="ident">Direction::Output</span>)<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="ident">nop</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">op</span> {
-                <span class="ident">ast::GuardComp::Eq</span> =&gt; <span class="ident">PortComp::Eq</span>,
-                <span class="ident">ast::GuardComp::Neq</span> =&gt; <span class="ident">PortComp::Neq</span>,
-                <span class="ident">ast::GuardComp::Gt</span> =&gt; <span class="ident">PortComp::Gt</span>,
-                <span class="ident">ast::GuardComp::Lt</span> =&gt; <span class="ident">PortComp::Lt</span>,
-                <span class="ident">ast::GuardComp::Geq</span> =&gt; <span class="ident">PortComp::Geq</span>,
-                <span class="ident">ast::GuardComp::Leq</span> =&gt; <span class="ident">PortComp::Leq</span>,
+        GE::Or(l, r) =&gt; Guard::or(build_guard(<span class="kw-2">*</span>l, bd)<span class="question-mark">?</span>, build_guard(<span class="kw-2">*</span>r, bd)<span class="question-mark">?</span>),
+        GE::And(l, r) =&gt; Guard::and(build_guard(<span class="kw-2">*</span>l, bd)<span class="question-mark">?</span>, build_guard(<span class="kw-2">*</span>r, bd)<span class="question-mark">?</span>),
+        GE::Not(g) =&gt; Guard::Not(into_box_guard(g, bd)<span class="question-mark">?</span>),
+        GE::CompOp(op, l, r) =&gt; {
+            <span class="kw">let </span>nl = ensure_direction(atom_to_port(l, bd)<span class="question-mark">?</span>, Direction::Output)<span class="question-mark">?</span>;
+            <span class="kw">let </span>nr = ensure_direction(atom_to_port(r, bd)<span class="question-mark">?</span>, Direction::Output)<span class="question-mark">?</span>;
+            <span class="kw">let </span>nop = <span class="kw">match </span>op {
+                ast::GuardComp::Eq =&gt; PortComp::Eq,
+                ast::GuardComp::Neq =&gt; PortComp::Neq,
+                ast::GuardComp::Gt =&gt; PortComp::Gt,
+                ast::GuardComp::Lt =&gt; PortComp::Lt,
+                ast::GuardComp::Geq =&gt; PortComp::Geq,
+                ast::GuardComp::Leq =&gt; PortComp::Leq,
             };
-            <span class="ident">Guard::CompOp</span>(<span class="ident">nop</span>, <span class="ident">nl</span>, <span class="ident">nr</span>)
+            Guard::CompOp(nop, nl, nr)
         }
     })
 }
 
-<span class="comment">///////////////// Control Construction /////////////////////////</span>
+<span class="comment">///////////////// Control Construction /////////////////////////
 
-<span class="doccomment">/// Transform ast::Control to ir::Control.</span>
-<span class="kw">fn</span> <span class="ident">build_control</span>(
-    <span class="ident">control</span>: <span class="ident">ast::Control</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Builder</span>,
-) -&gt; <span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span> {
-    <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">control</span> {
-        <span class="ident">ast::Control::Enable</span> {
-            <span class="ident">comp</span>: <span class="ident">component</span>,
-            <span class="ident">attributes</span>,
+</span><span class="doccomment">/// Transform ast::Control to ir::Control.
+</span><span class="kw">fn </span>build_control(
+    control: ast::Control,
+    builder: <span class="kw-2">&amp;mut </span>Builder,
+) -&gt; CalyxResult&lt;Control&gt; {
+    <span class="prelude-val">Ok</span>(<span class="kw">match </span>control {
+        ast::Control::Enable {
+            comp: component,
+            attributes,
         } =&gt; {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">en</span> <span class="op">=</span> <span class="ident">Control::enable</span>(<span class="ident">Rc::clone</span>(
-                <span class="kw-2">&amp;</span><span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">find_group</span>(<span class="ident">component</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                    <span class="ident">Error::undefined</span>(<span class="ident">component</span>, <span class="string">&quot;group&quot;</span>.<span class="ident">to_string</span>())
-                        .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">attributes</span>)
+            <span class="kw">let </span><span class="kw-2">mut </span>en = Control::enable(Rc::clone(
+                <span class="kw-2">&amp;</span>builder.component.find_group(component).ok_or_else(|| {
+                    Error::undefined(component, <span class="string">&quot;group&quot;</span>.to_string())
+                        .with_pos(<span class="kw-2">&amp;</span>attributes)
                 })<span class="question-mark">?</span>,
             ));
-            <span class="kw-2">*</span><span class="ident">en</span>.<span class="ident">get_mut_attributes</span>() <span class="op">=</span> <span class="ident">attributes</span>;
-            <span class="ident">en</span>
+            <span class="kw-2">*</span>en.get_mut_attributes() = attributes;
+            en
         }
-        <span class="ident">ast::Control::Invoke</span> {
-            <span class="ident">comp</span>: <span class="ident">component</span>,
-            <span class="ident">inputs</span>,
-            <span class="ident">outputs</span>,
-            <span class="ident">attributes</span>,
-            <span class="ident">comb_group</span>,
-            <span class="ident">ref_cells</span>,
+        ast::Control::Invoke {
+            comp: component,
+            inputs,
+            outputs,
+            attributes,
+            comb_group,
+            ref_cells,
         } =&gt; {
-            <span class="kw">let</span> <span class="ident">cell</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(
-                <span class="kw-2">&amp;</span><span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">find_cell</span>(<span class="ident">component</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                    <span class="ident">Error::undefined</span>(<span class="ident">component</span>, <span class="string">&quot;cell&quot;</span>.<span class="ident">to_string</span>())
-                        .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">attributes</span>)
+            <span class="kw">let </span>cell = Rc::clone(
+                <span class="kw-2">&amp;</span>builder.component.find_cell(component).ok_or_else(|| {
+                    Error::undefined(component, <span class="string">&quot;cell&quot;</span>.to_string())
+                        .with_pos(<span class="kw-2">&amp;</span>attributes)
                 })<span class="question-mark">?</span>,
             );
 
-            <span class="kw">let</span> <span class="ident">inputs</span> <span class="op">=</span> <span class="ident">inputs</span>
-                .<span class="ident">into_iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">id</span>, <span class="ident">port</span>)<span class="op">|</span> {
-                    <span class="ident">atom_to_port</span>(<span class="ident">port</span>, <span class="ident">builder</span>)
-                        .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">pr</span><span class="op">|</span> <span class="ident">ensure_direction</span>(<span class="ident">pr</span>, <span class="ident">Direction::Output</span>))
-                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> (<span class="ident">id</span>, <span class="ident">p</span>))
+            <span class="kw">let </span>inputs = inputs
+                .into_iter()
+                .map(|(id, port)| {
+                    atom_to_port(port, builder)
+                        .and_then(|pr| ensure_direction(pr, Direction::Output))
+                        .map(|p| (id, p))
                 })
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="ident">outputs</span> <span class="op">=</span> <span class="ident">outputs</span>
-                .<span class="ident">into_iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">id</span>, <span class="ident">port</span>)<span class="op">|</span> {
-                    <span class="ident">atom_to_port</span>(<span class="ident">port</span>, <span class="ident">builder</span>)
-                        .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">pr</span><span class="op">|</span> <span class="ident">ensure_direction</span>(<span class="ident">pr</span>, <span class="ident">Direction::Input</span>))
-                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> (<span class="ident">id</span>, <span class="ident">p</span>))
+                .collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
+            <span class="kw">let </span>outputs = outputs
+                .into_iter()
+                .map(|(id, port)| {
+                    atom_to_port(port, builder)
+                        .and_then(|pr| ensure_direction(pr, Direction::Input))
+                        .map(|p| (id, p))
                 })
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inv</span> <span class="op">=</span> <span class="ident">Invoke</span> {
-                <span class="ident">comp</span>: <span class="ident">cell</span>,
-                <span class="ident">inputs</span>,
-                <span class="ident">outputs</span>,
-                <span class="ident">attributes</span>,
-                <span class="ident">comb_group</span>: <span class="prelude-val">None</span>,
-                <span class="ident">ref_cells</span>: <span class="ident">Vec::new</span>(),
+                .collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>inv = Invoke {
+                comp: cell,
+                inputs,
+                outputs,
+                attributes,
+                comb_group: <span class="prelude-val">None</span>,
+                ref_cells: Vec::new(),
             };
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cg</span>) <span class="op">=</span> <span class="ident">comb_group</span> {
-                <span class="kw">let</span> <span class="ident">cg_ref</span> <span class="op">=</span>
-                    <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">find_comb_group</span>(<span class="ident">cg</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                        <span class="ident">Error::undefined</span>(<span class="ident">cg</span>, <span class="string">&quot;combinational group&quot;</span>.<span class="ident">to_string</span>())
-                            .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">inv</span>.<span class="ident">attributes</span>)
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(cg) = comb_group {
+                <span class="kw">let </span>cg_ref =
+                    builder.component.find_comb_group(cg).ok_or_else(|| {
+                        Error::undefined(cg, <span class="string">&quot;combinational group&quot;</span>.to_string())
+                            .with_pos(<span class="kw-2">&amp;</span>inv.attributes)
                     })<span class="question-mark">?</span>;
-                <span class="ident">inv</span>.<span class="ident">comb_group</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">cg_ref</span>);
+                inv.comb_group = <span class="prelude-val">Some</span>(cg_ref);
             }
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">ref_cells</span>.<span class="ident">is_empty</span>() {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ext_cell_tuples</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-                <span class="kw">for</span> (<span class="ident">outcell</span>, <span class="ident">incell</span>) <span class="kw">in</span> <span class="ident">ref_cells</span> {
-                    <span class="kw">let</span> <span class="ident">ext_cell_ref</span> <span class="op">=</span>
-                        <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">find_cell</span>(<span class="ident">incell</span>).<span class="ident">ok_or_else</span>(
-                            <span class="op">|</span><span class="op">|</span> <span class="ident">Error::undefined</span>(<span class="ident">incell</span>, <span class="string">&quot;cell&quot;</span>.<span class="ident">to_string</span>()),
+            <span class="kw">if </span>!ref_cells.is_empty() {
+                <span class="kw">let </span><span class="kw-2">mut </span>ext_cell_tuples = Vec::new();
+                <span class="kw">for </span>(outcell, incell) <span class="kw">in </span>ref_cells {
+                    <span class="kw">let </span>ext_cell_ref =
+                        builder.component.find_cell(incell).ok_or_else(
+                            || Error::undefined(incell, <span class="string">&quot;cell&quot;</span>.to_string()),
                         )<span class="question-mark">?</span>;
-                    <span class="ident">ext_cell_tuples</span>.<span class="ident">push</span>((<span class="ident">outcell</span>, <span class="ident">ext_cell_ref</span>));
+                    ext_cell_tuples.push((outcell, ext_cell_ref));
                 }
-                <span class="ident">inv</span>.<span class="ident">ref_cells</span> <span class="op">=</span> <span class="ident">ext_cell_tuples</span>;
+                inv.ref_cells = ext_cell_tuples;
             }
-            <span class="ident">Control::Invoke</span>(<span class="ident">inv</span>)
+            Control::Invoke(inv)
         }
-        <span class="ident">ast::Control::Seq</span> { <span class="ident">stmts</span>, <span class="ident">attributes</span> } =&gt; {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">Control::seq</span>(
-                <span class="ident">stmts</span>
-                    .<span class="ident">into_iter</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">build_control</span>(<span class="ident">c</span>, <span class="ident">builder</span>))
-                    .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>,
+        ast::Control::Seq { stmts, attributes } =&gt; {
+            <span class="kw">let </span><span class="kw-2">mut </span>s = Control::seq(
+                stmts
+                    .into_iter()
+                    .map(|c| build_control(c, builder))
+                    .collect::&lt;CalyxResult&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;&gt;()<span class="question-mark">?</span>,
             );
-            <span class="kw-2">*</span><span class="ident">s</span>.<span class="ident">get_mut_attributes</span>() <span class="op">=</span> <span class="ident">attributes</span>;
-            <span class="ident">s</span>
+            <span class="kw-2">*</span>s.get_mut_attributes() = attributes;
+            s
         }
-        <span class="ident">ast::Control::Par</span> { <span class="ident">stmts</span>, <span class="ident">attributes</span> } =&gt; {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">Control::par</span>(
-                <span class="ident">stmts</span>
-                    .<span class="ident">into_iter</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">build_control</span>(<span class="ident">c</span>, <span class="ident">builder</span>))
-                    .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">CalyxResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>,
+        ast::Control::Par { stmts, attributes } =&gt; {
+            <span class="kw">let </span><span class="kw-2">mut </span>p = Control::par(
+                stmts
+                    .into_iter()
+                    .map(|c| build_control(c, builder))
+                    .collect::&lt;CalyxResult&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;&gt;()<span class="question-mark">?</span>,
             );
-            <span class="kw-2">*</span><span class="ident">p</span>.<span class="ident">get_mut_attributes</span>() <span class="op">=</span> <span class="ident">attributes</span>;
-            <span class="ident">p</span>
+            <span class="kw-2">*</span>p.get_mut_attributes() = attributes;
+            p
         }
-        <span class="ident">ast::Control::If</span> {
-            <span class="ident">port</span>,
-            <span class="ident">cond</span>: <span class="ident">maybe_cond</span>,
-            <span class="ident">tbranch</span>,
-            <span class="ident">fbranch</span>,
-            <span class="ident">attributes</span>,
+        ast::Control::If {
+            port,
+            cond: maybe_cond,
+            tbranch,
+            fbranch,
+            attributes,
         } =&gt; {
-            <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">maybe_cond</span>
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cond</span><span class="op">|</span> {
-                    <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">find_comb_group</span>(<span class="ident">cond</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                        <span class="ident">Error::undefined</span>(
-                            <span class="ident">cond</span>,
-                            <span class="string">&quot;combinational group&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="kw">let </span>group = maybe_cond
+                .map(|cond| {
+                    builder.component.find_comb_group(cond).ok_or_else(|| {
+                        Error::undefined(
+                            cond,
+                            <span class="string">&quot;combinational group&quot;</span>.to_string(),
                         )
-                        .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">attributes</span>)
+                        .with_pos(<span class="kw-2">&amp;</span>attributes)
                     })
                 })
-                .<span class="ident">transpose</span>()<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">con</span> <span class="op">=</span> <span class="ident">Control::if_</span>(
-                <span class="ident">ensure_direction</span>(
-                    <span class="ident">get_port_ref</span>(<span class="ident">port</span>, <span class="ident">builder</span>.<span class="ident">component</span>)<span class="question-mark">?</span>,
-                    <span class="ident">Direction::Output</span>,
+                .transpose()<span class="question-mark">?</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>con = Control::if_(
+                ensure_direction(
+                    get_port_ref(port, builder.component)<span class="question-mark">?</span>,
+                    Direction::Output,
                 )<span class="question-mark">?</span>,
-                <span class="ident">group</span>,
-                <span class="ident">Box::new</span>(<span class="ident">build_control</span>(<span class="kw-2">*</span><span class="ident">tbranch</span>, <span class="ident">builder</span>)<span class="question-mark">?</span>),
-                <span class="ident">Box::new</span>(<span class="ident">build_control</span>(<span class="kw-2">*</span><span class="ident">fbranch</span>, <span class="ident">builder</span>)<span class="question-mark">?</span>),
+                group,
+                Box::new(build_control(<span class="kw-2">*</span>tbranch, builder)<span class="question-mark">?</span>),
+                Box::new(build_control(<span class="kw-2">*</span>fbranch, builder)<span class="question-mark">?</span>),
             );
-            <span class="kw-2">*</span><span class="ident">con</span>.<span class="ident">get_mut_attributes</span>() <span class="op">=</span> <span class="ident">attributes</span>;
-            <span class="ident">con</span>
+            <span class="kw-2">*</span>con.get_mut_attributes() = attributes;
+            con
         }
-        <span class="ident">ast::Control::While</span> {
-            <span class="ident">port</span>,
-            <span class="ident">cond</span>: <span class="ident">maybe_cond</span>,
-            <span class="ident">body</span>,
-            <span class="ident">attributes</span>,
+        ast::Control::While {
+            port,
+            cond: maybe_cond,
+            body,
+            attributes,
         } =&gt; {
-            <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">maybe_cond</span>
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">cond</span><span class="op">|</span> {
-                    <span class="ident">builder</span>.<span class="ident">component</span>.<span class="ident">find_comb_group</span>(<span class="ident">cond</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                        <span class="ident">Error::undefined</span>(
-                            <span class="ident">cond</span>,
-                            <span class="string">&quot;combinational group&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="kw">let </span>group = maybe_cond
+                .map(|cond| {
+                    builder.component.find_comb_group(cond).ok_or_else(|| {
+                        Error::undefined(
+                            cond,
+                            <span class="string">&quot;combinational group&quot;</span>.to_string(),
                         )
-                        .<span class="ident">with_pos</span>(<span class="kw-2">&amp;</span><span class="ident">attributes</span>)
+                        .with_pos(<span class="kw-2">&amp;</span>attributes)
                     })
                 })
-                .<span class="ident">transpose</span>()<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">con</span> <span class="op">=</span> <span class="ident">Control::while_</span>(
-                <span class="ident">ensure_direction</span>(
-                    <span class="ident">get_port_ref</span>(<span class="ident">port</span>, <span class="ident">builder</span>.<span class="ident">component</span>)<span class="question-mark">?</span>,
-                    <span class="ident">Direction::Output</span>,
+                .transpose()<span class="question-mark">?</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>con = Control::while_(
+                ensure_direction(
+                    get_port_ref(port, builder.component)<span class="question-mark">?</span>,
+                    Direction::Output,
                 )<span class="question-mark">?</span>,
-                <span class="ident">group</span>,
-                <span class="ident">Box::new</span>(<span class="ident">build_control</span>(<span class="kw-2">*</span><span class="ident">body</span>, <span class="ident">builder</span>)<span class="question-mark">?</span>),
+                group,
+                Box::new(build_control(<span class="kw-2">*</span>body, builder)<span class="question-mark">?</span>),
             );
-            <span class="kw-2">*</span><span class="ident">con</span>.<span class="ident">get_mut_attributes</span>() <span class="op">=</span> <span class="ident">attributes</span>;
-            <span class="ident">con</span>
+            <span class="kw-2">*</span>con.get_mut_attributes() = attributes;
+            con
         }
-        <span class="ident">ast::Control::Empty</span> { <span class="ident">attributes</span> } =&gt; {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">emp</span> <span class="op">=</span> <span class="ident">Control::empty</span>();
-            <span class="kw-2">*</span><span class="ident">emp</span>.<span class="ident">get_mut_attributes</span>() <span class="op">=</span> <span class="ident">attributes</span>;
-            <span class="ident">emp</span>
+        ast::Control::Empty { attributes } =&gt; {
+            <span class="kw">let </span><span class="kw-2">mut </span>emp = Control::empty();
+            <span class="kw-2">*</span>emp.get_mut_attributes() = attributes;
+            emp
         }
     })
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
