@@ -1010,81 +1010,6 @@
 <span id="1010">1010</span>
 <span id="1011">1011</span>
 <span id="1012">1012</span>
-<span id="1013">1013</span>
-<span id="1014">1014</span>
-<span id="1015">1015</span>
-<span id="1016">1016</span>
-<span id="1017">1017</span>
-<span id="1018">1018</span>
-<span id="1019">1019</span>
-<span id="1020">1020</span>
-<span id="1021">1021</span>
-<span id="1022">1022</span>
-<span id="1023">1023</span>
-<span id="1024">1024</span>
-<span id="1025">1025</span>
-<span id="1026">1026</span>
-<span id="1027">1027</span>
-<span id="1028">1028</span>
-<span id="1029">1029</span>
-<span id="1030">1030</span>
-<span id="1031">1031</span>
-<span id="1032">1032</span>
-<span id="1033">1033</span>
-<span id="1034">1034</span>
-<span id="1035">1035</span>
-<span id="1036">1036</span>
-<span id="1037">1037</span>
-<span id="1038">1038</span>
-<span id="1039">1039</span>
-<span id="1040">1040</span>
-<span id="1041">1041</span>
-<span id="1042">1042</span>
-<span id="1043">1043</span>
-<span id="1044">1044</span>
-<span id="1045">1045</span>
-<span id="1046">1046</span>
-<span id="1047">1047</span>
-<span id="1048">1048</span>
-<span id="1049">1049</span>
-<span id="1050">1050</span>
-<span id="1051">1051</span>
-<span id="1052">1052</span>
-<span id="1053">1053</span>
-<span id="1054">1054</span>
-<span id="1055">1055</span>
-<span id="1056">1056</span>
-<span id="1057">1057</span>
-<span id="1058">1058</span>
-<span id="1059">1059</span>
-<span id="1060">1060</span>
-<span id="1061">1061</span>
-<span id="1062">1062</span>
-<span id="1063">1063</span>
-<span id="1064">1064</span>
-<span id="1065">1065</span>
-<span id="1066">1066</span>
-<span id="1067">1067</span>
-<span id="1068">1068</span>
-<span id="1069">1069</span>
-<span id="1070">1070</span>
-<span id="1071">1071</span>
-<span id="1072">1072</span>
-<span id="1073">1073</span>
-<span id="1074">1074</span>
-<span id="1075">1075</span>
-<span id="1076">1076</span>
-<span id="1077">1077</span>
-<span id="1078">1078</span>
-<span id="1079">1079</span>
-<span id="1080">1080</span>
-<span id="1081">1081</span>
-<span id="1082">1082</span>
-<span id="1083">1083</span>
-<span id="1084">1084</span>
-<span id="1085">1085</span>
-<span id="1086">1086</span>
-<span id="1087">1087</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::errors::CalyxResult;
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::ConstructVisitor;
@@ -1213,7 +1138,7 @@
         </span>}
         ir::Control::Seq(ir::Seq { stmts, attributes }) =&gt; {
             <span class="kw">let </span>new_fsm = attributes.has(<span class="string">&quot;new_fsm&quot;</span>);
-            <span class="comment">// if new_fsm is true, then insert attribute at the seq, and then 
+            <span class="comment">// if new_fsm is true, then insert attribute at the seq, and then
             // start over counting states from 0
             </span><span class="kw">let </span><span class="kw-2">mut </span>cur = <span class="kw">if </span>new_fsm{
                 attributes.insert(NODE_ID, cur_state);
@@ -1224,7 +1149,7 @@
             stmts.iter_mut().for_each(|stmt| {
                 cur = compute_unique_ids(stmt, cur);
             });
-            <span class="comment">// If new_fsm is true then we want to return cur_state + 1, since this 
+            <span class="comment">// If new_fsm is true then we want to return cur_state + 1, since this
             // seq should really only take up 1 &quot;state&quot; on the &quot;outer&quot; fsm
             </span><span class="kw">if </span>new_fsm{
                 cur_state + <span class="number">1
@@ -1236,15 +1161,15 @@
             tbranch, fbranch, attributes, ..
         }) =&gt; {
             <span class="kw">let </span>new_fsm = attributes.has(<span class="string">&quot;new_fsm&quot;</span>);
-            <span class="comment">// if new_fsm is true, then we want to add an attribute to this 
+            <span class="comment">// if new_fsm is true, then we want to add an attribute to this
             // control statement
             </span><span class="kw">if </span>new_fsm {
                 attributes.insert(NODE_ID, cur_state);
             }
             <span class="comment">// If the program starts with a branch then branches can&#39;t get
-            // the initial state. 
-            // Also, if new_fsm is true, we want to start with state 1 as well: 
-            // we can&#39;t start at 0 for the reason mentioned above  
+            // the initial state.
+            // Also, if new_fsm is true, we want to start with state 1 as well:
+            // we can&#39;t start at 0 for the reason mentioned above
             </span><span class="kw">let </span>cur = <span class="kw">if </span>new_fsm || cur_state == <span class="number">0 </span>{
                 <span class="number">1
             </span>} <span class="kw">else </span>{
@@ -1256,7 +1181,7 @@
             <span class="kw">let </span>false_nxt = compute_unique_ids(
                 fbranch, tru_nxt
             );
-            <span class="comment">// If new_fsm is true then we want to return cur_state + 1, since this 
+            <span class="comment">// If new_fsm is true then we want to return cur_state + 1, since this
             // if stmt should really only take up 1 &quot;state&quot; on the &quot;outer&quot; fsm
             </span><span class="kw">if </span>new_fsm {
                 cur_state + <span class="number">1
@@ -1266,22 +1191,22 @@
         }
         ir::Control::While(ir::While { body, attributes, .. }) =&gt; {
             <span class="kw">let </span>new_fsm = attributes.has(<span class="string">&quot;new_fsm&quot;</span>);
-            <span class="comment">// if new_fsm is true, then we want to add an attribute to this 
+            <span class="comment">// if new_fsm is true, then we want to add an attribute to this
             // control statement
             </span><span class="kw">if </span>new_fsm{
                 attributes.insert(NODE_ID, cur_state);
             }
             <span class="comment">// If the program starts with a branch then branches can&#39;t get
             // the initial state.
-            // Also, if new_fsm is true, we want to start with state 1 as well: 
-            // we can&#39;t start at 0 for the reason mentioned above 
+            // Also, if new_fsm is true, we want to start with state 1 as well:
+            // we can&#39;t start at 0 for the reason mentioned above
             </span><span class="kw">let </span>cur = <span class="kw">if </span>new_fsm || cur_state == <span class="number">0 </span>{
                 <span class="number">1
             </span>} <span class="kw">else </span>{
                 cur_state
             };
             <span class="kw">let </span>body_nxt = compute_unique_ids(body, cur);
-            <span class="comment">// If new_fsm is true then we want to return cur_state + 1, since this 
+            <span class="comment">// If new_fsm is true then we want to return cur_state + 1, since this
             // while loop should really only take up 1 &quot;state&quot; on the &quot;outer&quot; fsm
             </span><span class="kw">if </span>new_fsm{
                 cur_state + <span class="number">1
@@ -1295,23 +1220,33 @@
 }
 
 <span class="doccomment">/// Represents the dyanmic execution schedule of a control program.
-</span><span class="attribute">#[derive(Default)]
-</span><span class="kw">struct </span>Schedule {
+</span><span class="kw">struct </span>Schedule&lt;<span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;b</span>&gt; {
     <span class="doccomment">/// Assigments that should be enabled in a given state.
     </span><span class="kw">pub </span>enables: HashMap&lt;u64, Vec&lt;ir::Assignment&gt;&gt;,
     <span class="doccomment">/// Transition from one state to another when the guard is true.
     </span><span class="kw">pub </span>transitions: Vec&lt;(u64, u64, ir::Guard)&gt;,
+    <span class="doccomment">/// The component builder. The reference has a shorter lifetime than the builder itself
+    /// to allow multiple schedules to use the same builder.
+    </span><span class="kw">pub </span>builder: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>ir::Builder&lt;<span class="lifetime">&#39;a</span>&gt;,
 }
 
-<span class="kw">impl </span>Schedule {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>ir::Builder&lt;<span class="lifetime">&#39;a</span>&gt;&gt; <span class="kw">for </span>Schedule&lt;<span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>from(builder: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>ir::Builder&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+        Schedule {
+            enables: HashMap::new(),
+            transitions: Vec::new(),
+            builder,
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span>&gt; Schedule&lt;<span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span>&gt; {
     <span class="doccomment">/// Validate that all states are reachable in the transition graph.
     </span><span class="kw">fn </span>validate(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">let </span>graph = DiGraph::&lt;(), u32&gt;::from_edges(
-            <span class="kw-2">&amp;</span><span class="self">self
-                </span>.transitions
+            <span class="self">self</span>.transitions
                 .iter()
-                .map(|(s, e, <span class="kw">_</span>)| (<span class="kw-2">*</span>s <span class="kw">as </span>u32, <span class="kw-2">*</span>e <span class="kw">as </span>u32))
-                .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(),
+                .map(|(s, e, <span class="kw">_</span>)| (<span class="kw-2">*</span>s <span class="kw">as </span>u32, <span class="kw-2">*</span>e <span class="kw">as </span>u32)),
         );
 
         <span class="macro">debug_assert!</span>(
@@ -1355,17 +1290,23 @@
 
     <span class="doccomment">/// Implement a given [Schedule] and return the name of the [ir::Group] that
     /// implements it.
-    </span><span class="kw">fn </span>realize_schedule(
-        <span class="self">self</span>,
-        group: RRC&lt;ir::Group&gt;,
-        builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-    ) -&gt; RRC&lt;ir::Group&gt; {
+    </span><span class="kw">fn </span>realize_schedule(<span class="self">self</span>, dump_fsm: bool) -&gt; RRC&lt;ir::Group&gt; {
         <span class="self">self</span>.validate();
+
+        <span class="kw">let </span>group = <span class="self">self</span>.builder.add_group(<span class="string">&quot;tdcc&quot;</span>);
+        <span class="kw">if </span>dump_fsm {
+            <span class="self">self</span>.display(<span class="macro">format!</span>(
+                <span class="string">&quot;{}:{}&quot;</span>,
+                <span class="self">self</span>.builder.component.name,
+                group.borrow().name()
+            ));
+        }
+
         <span class="kw">let </span>final_state = <span class="self">self</span>.last_state();
         <span class="kw">let </span>fsm_size = get_bit_width_from(
             final_state + <span class="number">1</span>, <span class="comment">/* represent 0..final_state */
         </span>);
-        <span class="macro">structure!</span>(builder;
+        <span class="macro">structure!</span>(<span class="self">self</span>.builder;
             <span class="kw">let </span>fsm = prim std_reg(fsm_size);
             <span class="kw">let </span>signal_on = constant(<span class="number">1</span>, <span class="number">1</span>);
             <span class="kw">let </span>last_state = constant(final_state, fsm_size);
@@ -1378,7 +1319,8 @@
                 .into_iter()
                 .sorted_by(|(k1, <span class="kw">_</span>), (k2, <span class="kw">_</span>)| k1.cmp(k2))
                 .flat_map(|(state, <span class="kw-2">mut </span>assigns)| {
-                    <span class="kw">let </span>state_const = builder.add_constant(state, fsm_size);
+                    <span class="kw">let </span>state_const =
+                        <span class="self">self</span>.builder.add_constant(state, fsm_size);
                     <span class="kw">let </span>state_guard =
                         <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(state_const[<span class="string">&quot;out&quot;</span>]));
                     assigns.iter_mut().for_each(|asgn| {
@@ -1391,7 +1333,7 @@
         <span class="comment">// Transition assignments
         </span>group.borrow_mut().assignments.extend(
             <span class="self">self</span>.transitions.into_iter().flat_map(|(s, e, guard)| {
-                <span class="macro">structure!</span>(builder;
+                <span class="macro">structure!</span>(<span class="self">self</span>.builder;
                     <span class="kw">let </span>end_const = constant(e, fsm_size);
                     <span class="kw">let </span>start_const = constant(s, fsm_size);
                 );
@@ -1400,12 +1342,12 @@
                     <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(start_const[<span class="string">&quot;out&quot;</span>])) &amp; guard;
 
                 <span class="macro">vec!</span>[
-                    builder.build_assignment(
+                    <span class="self">self</span>.builder.build_assignment(
                         fsm.borrow().get(<span class="string">&quot;in&quot;</span>),
                         ec_borrow.get(<span class="string">&quot;out&quot;</span>),
                         trans_guard.clone(),
                     ),
-                    builder.build_assignment(
+                    <span class="self">self</span>.builder.build_assignment(
                         fsm.borrow().get(<span class="string">&quot;write_en&quot;</span>),
                         signal_on.borrow().get(<span class="string">&quot;out&quot;</span>),
                         trans_guard,
@@ -1416,7 +1358,7 @@
 
         <span class="comment">// Done condition for group
         </span><span class="kw">let </span>last_guard = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(last_state[<span class="string">&quot;out&quot;</span>]));
-        <span class="kw">let </span>done_assign = builder.build_assignment(
+        <span class="kw">let </span>done_assign = <span class="self">self</span>.builder.build_assignment(
             group.borrow().get(<span class="string">&quot;done&quot;</span>),
             signal_on.borrow().get(<span class="string">&quot;out&quot;</span>),
             last_guard.clone(),
@@ -1424,11 +1366,11 @@
         group.borrow_mut().assignments.push(done_assign);
 
         <span class="comment">// Cleanup: Add a transition from last state to the first state.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>reset_fsm = <span class="macro">build_assignments!</span>(builder;
+        </span><span class="kw">let </span><span class="kw-2">mut </span>reset_fsm = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
             fsm[<span class="string">&quot;in&quot;</span>] = last_guard <span class="question-mark">? </span>first_state[<span class="string">&quot;out&quot;</span>];
             fsm[<span class="string">&quot;write_en&quot;</span>] = last_guard <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
         );
-        builder
+        <span class="self">self</span>.builder
             .component
             .continuous_assignments
             .append(<span class="kw-2">&amp;mut </span>reset_fsm);
@@ -1442,30 +1384,29 @@
 /// to be true for the predeccesor to transition to the current state.
 </span><span class="kw">type </span>PredEdge = (u64, ir::Guard);
 
-<span class="doccomment">/// Recursively build an dynamic finite state machine represented by a [Schedule].
-/// Does the following, given an [ir::Control]:
-///     1. If needed, add transitions from predeccesors to the current state.
-///     2. Enable the groups in the current state
-///     3. Calculate [PredEdge] implied by this state
-///     4. Return [PredEdge] and the next state.
-/// Another note: the functions calc_seq_recur, calc_while_recur, and calc_if_recur
-/// are functions that `calculate_states_recur` uses for when con is a seq, while,
-/// and if respectively. The reason why they are defined as separate functions is because we
-/// need to call `calculate_seq_recur` (for example) directly when we are in `finish_seq`
-/// since `finish_seq` only gives us access to a `&amp; mut seq` type, not a `&amp; Control`
-/// type.
-</span><span class="kw">fn </span>calculate_states_recur(
-    con: <span class="kw-2">&amp;</span>ir::Control,
-    <span class="comment">// The set of previous states that want to transition into cur_state
-    </span>preds: Vec&lt;(u64, ir::Guard)&gt;,
-    <span class="comment">// Current schedule.
-    </span>schedule: <span class="kw-2">&amp;mut </span>Schedule,
-    <span class="comment">// Component builder
-    </span>builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-    <span class="comment">// True if early_transitions are allowed
-    </span>early_transitions: bool,
-) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
-    <span class="kw">match </span>con {
+<span class="kw">impl </span>Schedule&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+    <span class="doccomment">/// Recursively build an dynamic finite state machine represented by a [Schedule].
+    /// Does the following, given an [ir::Control]:
+    ///     1. If needed, add transitions from predeccesors to the current state.
+    ///     2. Enable the groups in the current state
+    ///     3. Calculate [PredEdge] implied by this state
+    ///     4. Return [PredEdge] and the next state.
+    /// Another note: the functions calc_seq_recur, calc_while_recur, and calc_if_recur
+    /// are functions that `calculate_states_recur` uses for when con is a seq, while,
+    /// and if respectively. The reason why they are defined as separate functions is because we
+    /// need to call `calculate_seq_recur` (for example) directly when we are in `finish_seq`
+    /// since `finish_seq` only gives us access to a `&amp; mut seq` type, not a `&amp; Control`
+    /// type.
+    </span><span class="kw">fn </span>calculate_states_recur(
+        <span class="comment">// Current schedule.
+        </span><span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;</span>ir::Control,
+        <span class="comment">// The set of previous states that want to transition into cur_state
+        </span>preds: Vec&lt;PredEdge&gt;,
+        <span class="comment">// True if early_transitions are allowed
+        </span>early_transitions: bool,
+    ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
+        <span class="kw">match </span>con {
         <span class="comment">// See explanation of FSM states generated in [ir::TopDownCompileControl].
         </span>ir::Control::Enable(ir::Enable { group, attributes }) =&gt; {
             <span class="kw">let </span>cur_state = <span class="kw-2">*</span>attributes.get(NODE_ID).unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;Group `{}` does not have node_id information&quot;</span>, group.borrow().name()));
@@ -1480,14 +1421,14 @@
             };
 
             <span class="kw">let </span>not_done = !<span class="macro">guard!</span>(group[<span class="string">&quot;done&quot;</span>]);
-            <span class="kw">let </span>signal_on = builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
+            <span class="kw">let </span>signal_on = <span class="self">self</span>.builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
 
             <span class="comment">// Activate this group in the current state
-            </span><span class="kw">let </span><span class="kw-2">mut </span>en_go = <span class="macro">build_assignments!</span>(builder;
+            </span><span class="kw">let </span><span class="kw-2">mut </span>en_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
                 group[<span class="string">&quot;go&quot;</span>] = not_done <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
             );
-            schedule
-                .enables
+            <span class="self">self
+                </span>.enables
                 .entry(cur_state)
                 .or_default()
                 .append(<span class="kw-2">&amp;mut </span>en_go);
@@ -1498,292 +1439,255 @@
             // why.
             </span><span class="kw">if </span>early_transitions {
                 <span class="kw">for </span>(st, g) <span class="kw">in </span><span class="kw-2">&amp;</span>prev_states {
-                    <span class="kw">let </span><span class="kw-2">mut </span>early_go = <span class="macro">build_assignments!</span>(builder;
+                    <span class="kw">let </span><span class="kw-2">mut </span>early_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
                         group[<span class="string">&quot;go&quot;</span>] = g <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
                     );
-                    schedule.enables.entry(<span class="kw-2">*</span>st).or_default().append(<span class="kw-2">&amp;mut </span>early_go);
+                    <span class="self">self</span>.enables.entry(<span class="kw-2">*</span>st).or_default().append(<span class="kw-2">&amp;mut </span>early_go);
                 }
             }
 
             <span class="kw">let </span>transitions = prev_states
                 .into_iter()
                 .map(|(st, guard)| (st, cur_state, guard));
-            schedule.transitions.extend(transitions);
+            <span class="self">self</span>.transitions.extend(transitions);
 
             <span class="kw">let </span>done_cond = <span class="macro">guard!</span>(group[<span class="string">&quot;done&quot;</span>]);
             <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(cur_state, done_cond)])
         }
         ir::Control::Seq(seq) =&gt; {
-            calc_seq_recur(seq, preds, schedule, builder, early_transitions)
+            <span class="self">self</span>.calc_seq_recur(seq, preds, early_transitions)
         }
         ir::Control::If(if_stmt) =&gt; {
-            calc_if_recur(if_stmt, preds, schedule, builder, early_transitions)
+            <span class="self">self</span>.calc_if_recur(if_stmt, preds, early_transitions)
         }
         ir::Control::While(while_stmt) =&gt; {
-            calc_while_recur(while_stmt, preds, schedule, builder, early_transitions)
+            <span class="self">self</span>.calc_while_recur(while_stmt, preds, early_transitions)
         }
         ir::Control::Par(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
         ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`invoke` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileInvoke::name()),
         ir::Control::Empty(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`empty` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileEmpty::name()),
     }
-}
+    }
 
-<span class="doccomment">/// Builds a finite state machine for `seq` represented by a [Schedule].
-/// At a high level, it iterates through each stmt in the seq&#39;s control, using the
-/// previous stmt&#39;s [PredEdge] as the `preds` for the current stmt, and returns
-/// the [PredEdge] implied by the last stmt in `seq`&#39;s control.
-</span><span class="kw">fn </span>calc_seq_recur(
-    seq: <span class="kw-2">&amp;</span>ir::Seq,
-    <span class="comment">// The set of previous states that want to transition into cur_state
-    </span>preds: Vec&lt;(u64, ir::Guard)&gt;,
-    <span class="comment">// Current schedule.
-    </span>schedule: <span class="kw-2">&amp;mut </span>Schedule,
-    <span class="comment">// Component builder
-    </span>builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-    <span class="comment">// True if early_transitions are allowed
-    </span>early_transitions: bool,
-) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>prev = preds;
-    <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;</span>seq.stmts {
-        prev = calculate_states_recur(
-            stmt,
-            prev,
-            schedule,
-            builder,
+    <span class="doccomment">/// Builds a finite state machine for `seq` represented by a [Schedule].
+    /// At a high level, it iterates through each stmt in the seq&#39;s control, using the
+    /// previous stmt&#39;s [PredEdge] as the `preds` for the current stmt, and returns
+    /// the [PredEdge] implied by the last stmt in `seq`&#39;s control.
+    </span><span class="kw">fn </span>calc_seq_recur(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        seq: <span class="kw-2">&amp;</span>ir::Seq,
+        <span class="comment">// The set of previous states that want to transition into cur_state
+        </span>preds: Vec&lt;PredEdge&gt;,
+        <span class="comment">// True if early_transitions are allowed
+        </span>early_transitions: bool,
+    ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>prev = preds;
+        <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;</span>seq.stmts {
+            prev =
+                <span class="self">self</span>.calculate_states_recur(stmt, prev, early_transitions)<span class="question-mark">?</span>;
+        }
+        <span class="prelude-val">Ok</span>(prev)
+    }
+
+    <span class="doccomment">/// Builds a finite state machine for `if_stmt` represented by a [Schedule].
+    /// First generates the transitions into the true branch + the transitions that exist
+    /// inside the true branch. Then generates the transitions into the false branch + the transitions
+    /// that exist inside the false branch. Then calculates the transitions needed to
+    /// exit the if statmement (which include edges from both the true and false branches).
+    </span><span class="kw">fn </span>calc_if_recur(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        if_stmt: <span class="kw-2">&amp;</span>ir::If,
+        <span class="comment">// The set of previous states that want to transition into cur_state
+        </span>preds: Vec&lt;PredEdge&gt;,
+        <span class="comment">// True if early_transitions are allowed
+        </span>early_transitions: bool,
+    ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
+        <span class="kw">if </span>if_stmt.cond.is_some() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of if. This should have compiled away.&quot;</span>, TopDownCompileControl::name(), if_stmt.cond.as_ref().unwrap().borrow().name())));
+        }
+        <span class="kw">let </span>port_guard: ir::Guard = Rc::clone(<span class="kw-2">&amp;</span>if_stmt.port).into();
+        <span class="comment">// Previous states transitioning into true branch need the conditional
+        // to be true.
+        </span><span class="kw">let </span>tru_transitions = preds
+            .clone()
+            .into_iter()
+            .map(|(s, g)| (s, g &amp; port_guard.clone()))
+            .collect();
+        <span class="kw">let </span>tru_prev = <span class="self">self</span>.calculate_states_recur(
+            <span class="kw-2">&amp;</span>if_stmt.tbranch,
+            tru_transitions,
             early_transitions,
         )<span class="question-mark">?</span>;
-    }
-    <span class="prelude-val">Ok</span>(prev)
-}
+        <span class="comment">// Previous states transitioning into false branch need the conditional
+        // to be false.
+        </span><span class="kw">let </span>fal_transitions = preds
+            .into_iter()
+            .map(|(s, g)| (s, g &amp; !port_guard.clone()))
+            .collect();
 
-<span class="doccomment">/// Builds a finite state machine for `if_stmt` represented by a [Schedule].
-/// First generates the transitions into the true branch + the transitions that exist
-/// inside the true branch. Then generates the transitions into the false branch + the transitions
-/// that exist inside the false branch. Then calculates the transitions needed to
-/// exit the if statmement (which include edges from both the true and false branches).
-</span><span class="kw">fn </span>calc_if_recur(
-    if_stmt: <span class="kw-2">&amp;</span>ir::If,
-    <span class="comment">// The set of previous states that want to transition into cur_state
-    </span>preds: Vec&lt;(u64, ir::Guard)&gt;,
-    <span class="comment">// Current schedule.
-    </span>schedule: <span class="kw-2">&amp;mut </span>Schedule,
-    <span class="comment">// Component builder
-    </span>builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-    <span class="comment">// True if early_transitions are allowed
-    </span>early_transitions: bool,
-) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
-    <span class="kw">if </span>if_stmt.cond.is_some() {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of if. This should have compiled away.&quot;</span>, TopDownCompileControl::name(), if_stmt.cond.as_ref().unwrap().borrow().name())));
-    }
-    <span class="kw">let </span>port_guard: ir::Guard = Rc::clone(<span class="kw-2">&amp;</span>if_stmt.port).into();
-    <span class="comment">// Previous states transitioning into true branch need the conditional
-    // to be true.
-    </span><span class="kw">let </span>tru_transitions = preds
-        .clone()
-        .into_iter()
-        .map(|(s, g)| (s, g &amp; port_guard.clone()))
-        .collect();
-    <span class="kw">let </span>tru_prev = calculate_states_recur(
-        <span class="kw-2">&amp;</span>if_stmt.tbranch,
-        tru_transitions,
-        schedule,
-        builder,
-        early_transitions,
-    )<span class="question-mark">?</span>;
-    <span class="comment">// Previous states transitioning into false branch need the conditional
-    // to be false.
-    </span><span class="kw">let </span>fal_transitions = preds
-        .into_iter()
-        .map(|(s, g)| (s, g &amp; !port_guard.clone()))
-        .collect();
+        <span class="kw">let </span>fal_prev = <span class="kw">if let </span>ir::Control::Empty(..) = <span class="kw-2">*</span>if_stmt.fbranch {
+            <span class="comment">// If the false branch is empty, then all the prevs to this node will become prevs
+            // to the next node.
+            </span>fal_transitions
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.calculate_states_recur(
+                <span class="kw-2">&amp;</span>if_stmt.fbranch,
+                fal_transitions,
+                early_transitions,
+            )<span class="question-mark">?
+        </span>};
 
-    <span class="kw">let </span>fal_prev = <span class="kw">if let </span>ir::Control::Empty(..) = <span class="kw-2">*</span>if_stmt.fbranch {
-        <span class="comment">// If the false branch is empty, then all the prevs to this node will become prevs
-        // to the next node.
-        </span>fal_transitions
-    } <span class="kw">else </span>{
-        calculate_states_recur(
-            <span class="kw-2">&amp;</span>if_stmt.fbranch,
-            fal_transitions,
-            schedule,
-            builder,
+        <span class="kw">let </span>prevs = tru_prev.into_iter().chain(fal_prev.into_iter()).collect();
+        <span class="prelude-val">Ok</span>(prevs)
+    }
+
+    <span class="doccomment">/// Builds a finite state machine for `while_stmt` represented by a [Schedule].
+    /// It first generates the backwards edges (i.e., edges from the end of the while
+    /// body back to the beginning of the while body), then generates the forwards
+    /// edges in the body, then generates the edges that exit the while loop.
+    </span><span class="kw">fn </span>calc_while_recur(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        while_stmt: <span class="kw-2">&amp;</span>ir::While,
+        <span class="comment">// The set of previous states that want to transition into cur_state
+        </span>preds: Vec&lt;PredEdge&gt;,
+        <span class="comment">// True if early_transitions are allowed
+        </span>early_transitions: bool,
+    ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
+        <span class="kw">if </span>while_stmt.cond.is_some() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of if. This should have compiled away.&quot;</span>, TopDownCompileControl::name(), while_stmt.cond.as_ref().unwrap().borrow().name())));
+        }
+
+        <span class="kw">let </span>port_guard: ir::Guard = Rc::clone(<span class="kw-2">&amp;</span>while_stmt.port).into();
+
+        <span class="comment">// Step 1: Generate the backward edges
+        // First compute the entry and exit points.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>exits = <span class="macro">vec!</span>[];
+        control_exits(<span class="kw-2">&amp;</span>while_stmt.body, <span class="bool-val">true</span>, <span class="kw-2">&amp;mut </span>exits);
+        <span class="kw">let </span>back_edge_prevs = exits
+            .into_iter()
+            .map(|(st, group)| (st, group.borrow().get(<span class="string">&quot;done&quot;</span>).into()));
+
+        <span class="comment">// Step 2: Generate the forward edges normally.
+        // Previous transitions into the body require the condition to be
+        // true.
+        </span><span class="kw">let </span>transitions: Vec&lt;PredEdge&gt; = preds
+            .clone()
+            .into_iter()
+            .chain(back_edge_prevs)
+            .map(|(s, g)| (s, g &amp; port_guard.clone()))
+            .collect();
+        <span class="kw">let </span>prevs = <span class="self">self</span>.calculate_states_recur(
+            <span class="kw-2">&amp;</span>while_stmt.body,
+            transitions,
             early_transitions,
-        )<span class="question-mark">?
-    </span>};
+        )<span class="question-mark">?</span>;
 
-    <span class="kw">let </span>prevs = tru_prev.into_iter().chain(fal_prev.into_iter()).collect();
-    <span class="prelude-val">Ok</span>(prevs)
-}
+        <span class="comment">// Step 3: The final out edges from the while come from:
+        //   - Before the body when the condition is false
+        //   - Inside the body when the condition is false
+        </span><span class="kw">let </span>not_port_guard = !port_guard;
+        <span class="kw">let </span>all_prevs = preds
+            .into_iter()
+            .chain(prevs.into_iter())
+            .map(|(st, guard)| (st, guard &amp; not_port_guard.clone()))
+            .collect();
 
-<span class="doccomment">/// Builds a finite state machine for `while_stmt` represented by a [Schedule].
-/// It first generates the backwards edges (i.e., edges from the end of the while
-/// body back to the beginning of the while body), then generates the forwards
-/// edges in the body, then generates the edges that exit the while loop.
-</span><span class="kw">fn </span>calc_while_recur(
-    while_stmt: <span class="kw-2">&amp;</span>ir::While,
-    <span class="comment">// The set of previous states that want to transition into cur_state
-    </span>preds: Vec&lt;(u64, ir::Guard)&gt;,
-    <span class="comment">// Current schedule.
-    </span>schedule: <span class="kw-2">&amp;mut </span>Schedule,
-    <span class="comment">// Component builder
-    </span>builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-    <span class="comment">// True if early_transitions are allowed
-    </span>early_transitions: bool,
-) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
-    <span class="kw">if </span>while_stmt.cond.is_some() {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of if. This should have compiled away.&quot;</span>, TopDownCompileControl::name(), while_stmt.cond.as_ref().unwrap().borrow().name())));
+        <span class="prelude-val">Ok</span>(all_prevs)
     }
 
-    <span class="kw">let </span>port_guard: ir::Guard = Rc::clone(<span class="kw-2">&amp;</span>while_stmt.port).into();
+    <span class="doccomment">/// Creates a Schedule that represents `seq`, mainly relying on `calc_seq_recur()`.
+    </span><span class="kw">fn </span>calculate_states_seq(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        seq: <span class="kw-2">&amp;</span>ir::Seq,
+        early_transitions: bool,
+    ) -&gt; CalyxResult&lt;()&gt; {
+        <span class="kw">let </span>first_state = (<span class="number">0</span>, ir::Guard::True);
+        <span class="comment">// We create an empty first state in case the control program starts with
+        // a branch (if, while).
+        // If the program doesn&#39;t branch, then the initial state is merged into
+        // the first group.
+        </span><span class="kw">let </span>prev =
+            <span class="self">self</span>.calc_seq_recur(seq, <span class="macro">vec!</span>[first_state], early_transitions)<span class="question-mark">?</span>;
+        <span class="self">self</span>.add_nxt_transition(prev);
+        <span class="prelude-val">Ok</span>(())
+    }
 
-    <span class="comment">// Step 1: Generate the backward edges
-    // First compute the entry and exit points.
-    </span><span class="kw">let </span><span class="kw-2">mut </span>exits = <span class="macro">vec!</span>[];
-    control_exits(<span class="kw-2">&amp;</span>while_stmt.body, <span class="bool-val">true</span>, <span class="kw-2">&amp;mut </span>exits);
-    <span class="kw">let </span>back_edge_prevs = exits
-        .into_iter()
-        .map(|(st, group)| (st, group.borrow().get(<span class="string">&quot;done&quot;</span>).into()));
+    <span class="doccomment">/// Creates a Schedule that represents `if`, mainly relying on `calc_if_recur()`.
+    </span><span class="kw">fn </span>calculate_states_if(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        if_stmt: <span class="kw-2">&amp;</span>ir::If,
+        early_transitions: bool,
+    ) -&gt; CalyxResult&lt;()&gt; {
+        <span class="kw">let </span>first_state = (<span class="number">0</span>, ir::Guard::True);
+        <span class="comment">// We create an empty first state in case the control program starts with
+        // a branch (if, while).
+        // If the program doesn&#39;t branch, then the initial state is merged into
+        // the first group.
+        </span><span class="kw">let </span>prev =
+            <span class="self">self</span>.calc_if_recur(if_stmt, <span class="macro">vec!</span>[first_state], early_transitions)<span class="question-mark">?</span>;
+        <span class="self">self</span>.add_nxt_transition(prev);
+        <span class="prelude-val">Ok</span>(())
+    }
 
-    <span class="comment">// Step 2: Generate the forward edges normally.
-    // Previous transitions into the body require the condition to be
-    // true.
-    </span><span class="kw">let </span>transitions: Vec&lt;(u64, ir::Guard)&gt; = preds
-        .clone()
-        .into_iter()
-        .chain(back_edge_prevs)
-        .map(|(s, g)| (s, g &amp; port_guard.clone()))
-        .collect();
-    <span class="kw">let </span>prevs = calculate_states_recur(
-        <span class="kw-2">&amp;</span>while_stmt.body,
-        transitions,
-        schedule,
-        builder,
-        early_transitions,
-    )<span class="question-mark">?</span>;
+    <span class="doccomment">/// Creates a Schedule that represents `while`, mainly relying on `calc_while_recur()`.
+    </span><span class="kw">fn </span>calculate_states_while(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        while_stmt: <span class="kw-2">&amp;</span>ir::While,
+        early_transitions: bool,
+    ) -&gt; CalyxResult&lt;()&gt; {
+        <span class="kw">let </span>first_state = (<span class="number">0</span>, ir::Guard::True);
+        <span class="comment">// We create an empty first state in case the control program starts with
+        // a branch (if, while).
+        // If the program doesn&#39;t branch, then the initial state is merged into
+        // the first group.
+        </span><span class="kw">let </span>prev = <span class="self">self</span>.calc_while_recur(
+            while_stmt,
+            <span class="macro">vec!</span>[first_state],
+            early_transitions,
+        )<span class="question-mark">?</span>;
+        <span class="self">self</span>.add_nxt_transition(prev);
+        <span class="prelude-val">Ok</span>(())
+    }
 
-    <span class="comment">// Step 3: The final out edges from the while come from:
-    //   - Before the body when the condition is false
-    //   - Inside the body when the condition is false
-    </span><span class="kw">let </span>not_port_guard = !port_guard;
-    <span class="kw">let </span>all_prevs = preds
-        .into_iter()
-        .chain(prevs.into_iter())
-        .map(|(st, guard)| (st, guard &amp; not_port_guard.clone()))
-        .collect();
+    <span class="doccomment">/// Given predecessors prev, creates a new &quot;next&quot; state and transitions from
+    /// each state in prev to the next state.
+    /// In other words, it just adds an &quot;end&quot; state to [Schedule] and the
+    /// appropriate transitions to that &quot;end&quot; state.
+    </span><span class="kw">fn </span>add_nxt_transition(<span class="kw-2">&amp;mut </span><span class="self">self</span>, prev: Vec&lt;PredEdge&gt;) {
+        <span class="kw">let </span>nxt = prev
+            .iter()
+            .max_by(|(st1, <span class="kw">_</span>), (st2, <span class="kw">_</span>)| st1.cmp(st2))
+            .unwrap()
+            .<span class="number">0
+            </span>+ <span class="number">1</span>;
+        <span class="kw">let </span>transitions = prev.into_iter().map(|(st, guard)| (st, nxt, guard));
+        <span class="self">self</span>.transitions.extend(transitions);
+    }
 
-    <span class="prelude-val">Ok</span>(all_prevs)
-}
-
-<span class="doccomment">/// Creates a Schedule that represents `seq`, mainly relying on `calc_seq_recur()`.
-</span><span class="kw">fn </span>calculate_states_seq(
-    seq: <span class="kw-2">&amp;</span>ir::Seq,
-    builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-    early_transitions: bool,
-) -&gt; CalyxResult&lt;Schedule&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>schedule = Schedule::default();
-    <span class="kw">let </span>first_state = (<span class="number">0</span>, ir::Guard::True);
-    <span class="comment">// We create an empty first state in case the control program starts with
-    // a branch (if, while).
-    // If the program doesn&#39;t branch, then the initial state is merged into
-    // the first group.
-    </span><span class="kw">let </span>prev = calc_seq_recur(
-        seq,
-        <span class="macro">vec!</span>[first_state],
-        <span class="kw-2">&amp;mut </span>schedule,
-        builder,
-        early_transitions,
-    )<span class="question-mark">?</span>;
-    add_nxt_transition(<span class="kw-2">&amp;mut </span>schedule, prev);
-    <span class="prelude-val">Ok</span>(schedule)
-}
-
-<span class="doccomment">/// Creates a Schedule that represents `if`, mainly relying on `calc_if_recur()`.
-</span><span class="kw">fn </span>calculate_states_if(
-    if_stmt: <span class="kw-2">&amp;</span>ir::If,
-    builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-    early_transitions: bool,
-) -&gt; CalyxResult&lt;Schedule&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>schedule = Schedule::default();
-    <span class="kw">let </span>first_state = (<span class="number">0</span>, ir::Guard::True);
-    <span class="comment">// We create an empty first state in case the control program starts with
-    // a branch (if, while).
-    // If the program doesn&#39;t branch, then the initial state is merged into
-    // the first group.
-    </span><span class="kw">let </span>prev = calc_if_recur(
-        if_stmt,
-        <span class="macro">vec!</span>[first_state],
-        <span class="kw-2">&amp;mut </span>schedule,
-        builder,
-        early_transitions,
-    )<span class="question-mark">?</span>;
-    add_nxt_transition(<span class="kw-2">&amp;mut </span>schedule, prev);
-    <span class="prelude-val">Ok</span>(schedule)
-}
-
-<span class="doccomment">/// Creates a Schedule that represents `while`, mainly relying on `calc_while_recur()`.
-</span><span class="kw">fn </span>calculate_states_while(
-    while_stmt: <span class="kw-2">&amp;</span>ir::While,
-    builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-    early_transitions: bool,
-) -&gt; CalyxResult&lt;Schedule&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>schedule = Schedule::default();
-    <span class="kw">let </span>first_state = (<span class="number">0</span>, ir::Guard::True);
-    <span class="comment">// We create an empty first state in case the control program starts with
-    // a branch (if, while).
-    // If the program doesn&#39;t branch, then the initial state is merged into
-    // the first group.
-    </span><span class="kw">let </span>prev = calc_while_recur(
-        while_stmt,
-        <span class="macro">vec!</span>[first_state],
-        <span class="kw-2">&amp;mut </span>schedule,
-        builder,
-        early_transitions,
-    )<span class="question-mark">?</span>;
-    add_nxt_transition(<span class="kw-2">&amp;mut </span>schedule, prev);
-    <span class="prelude-val">Ok</span>(schedule)
-}
-
-<span class="kw">fn </span>add_nxt_transition(schedule: <span class="kw-2">&amp;mut </span>Schedule, prev: Vec&lt;PredEdge&gt;) {
-    <span class="comment">// Helper function: given predecessors prev, creates a new &quot;next&quot; state and
-    // transitions from each state in prev to the next state. In other words, it just
-    // adds an &quot;end&quot; state to `schedule` and the appropriate transitions to that
-    // &quot;end&quot; state.
-    </span><span class="kw">let </span>nxt = prev
-        .iter()
-        .max_by(|(st1, <span class="kw">_</span>), (st2, <span class="kw">_</span>)| st1.cmp(st2))
-        .unwrap()
-        .<span class="number">0
-        </span>+ <span class="number">1</span>;
-    <span class="kw">let </span>transitions = prev.into_iter().map(|(st, guard)| (st, nxt, guard));
-    schedule.transitions.extend(transitions);
-}
-
-<span class="doccomment">/// Note: the functions calculate_states_seq, calculate_states_while, and calculate_states_if
-/// are functions that basically do what `calculate_states` would do if `calculate_states` knew (for certain)
-/// that its input parameter would be a seq/while/if.
-/// The reason why we need to define these as separate functions is because `finish_seq`
-/// (for example) we only gives us access to a `&amp; mut seq` type, not a `&amp; Control`
-/// type.
-</span><span class="kw">fn </span>calculate_states(
-    con: <span class="kw-2">&amp;</span>ir::Control,
-    builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-    early_transitions: bool,
-) -&gt; CalyxResult&lt;Schedule&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>schedule = Schedule::default();
-    <span class="kw">let </span>first_state = (<span class="number">0</span>, ir::Guard::True);
-    <span class="comment">// We create an empty first state in case the control program starts with
-    // a branch (if, while).
-    // If the program doesn&#39;t branch, then the initial state is merged into
-    // the first group.
-    </span><span class="kw">let </span>prev = calculate_states_recur(
-        con,
-        <span class="macro">vec!</span>[first_state],
-        <span class="kw-2">&amp;mut </span>schedule,
-        builder,
-        early_transitions,
-    )<span class="question-mark">?</span>;
-    add_nxt_transition(<span class="kw-2">&amp;mut </span>schedule, prev);
-    <span class="prelude-val">Ok</span>(schedule)
+    <span class="doccomment">/// Note: the functions calculate_states_seq, calculate_states_while, and calculate_states_if
+    /// are functions that basically do what `calculate_states` would do if `calculate_states` knew (for certain)
+    /// that its input parameter would be a seq/while/if.
+    /// The reason why we need to define these as separate functions is because `finish_seq`
+    /// (for example) we only gives us access to a `&amp; mut seq` type, not a `&amp; Control`
+    /// type.
+    </span><span class="kw">fn </span>calculate_states(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        con: <span class="kw-2">&amp;</span>ir::Control,
+        early_transitions: bool,
+    ) -&gt; CalyxResult&lt;()&gt; {
+        <span class="kw">let </span>first_state = (<span class="number">0</span>, ir::Guard::True);
+        <span class="comment">// We create an empty first state in case the control program starts with
+        // a branch (if, while).
+        // If the program doesn&#39;t branch, then the initial state is merged into
+        // the first group.
+        </span><span class="kw">let </span>prev = <span class="self">self</span>.calculate_states_recur(
+            con,
+            <span class="macro">vec!</span>[first_state],
+            early_transitions,
+        )<span class="question-mark">?</span>;
+        <span class="self">self</span>.add_nxt_transition(prev);
+        <span class="prelude-val">Ok</span>(())
+    }
 }
 
 <span class="doccomment">/// **Core lowering pass.**
@@ -1945,20 +1849,10 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
         }
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+        <span class="kw">let </span><span class="kw-2">mut </span>sch = Schedule::from(<span class="kw-2">&amp;mut </span>builder);
+        sch.calculate_states_seq(s, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
         <span class="comment">// Compile schedule and return the group.
-        </span><span class="kw">let </span>seq_group = {
-            <span class="kw">let </span>schedule =
-                calculate_states_seq(s, <span class="kw-2">&amp;mut </span>builder, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
-            <span class="kw">let </span>group = builder.add_group(<span class="string">&quot;tdcc&quot;</span>);
-            <span class="kw">if </span><span class="self">self</span>.dump_fsm {
-                schedule.display(<span class="macro">format!</span>(
-                    <span class="string">&quot;{}:{}&quot;</span>,
-                    builder.component.name,
-                    group.borrow().name()
-                ));
-            }
-            schedule.realize_schedule(group, <span class="kw-2">&amp;mut </span>builder)
-        };
+        </span><span class="kw">let </span>seq_group = sch.realize_schedule(<span class="self">self</span>.dump_fsm);
 
         <span class="comment">// Add NODE_ID to compiled group.
         </span><span class="kw">let </span><span class="kw-2">mut </span>en = ir::Control::enable(seq_group);
@@ -1980,21 +1874,11 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
         }
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+        <span class="kw">let </span><span class="kw-2">mut </span>sch = Schedule::from(<span class="kw-2">&amp;mut </span>builder);
 
         <span class="comment">// Compile schedule and return the group.
-        </span><span class="kw">let </span>if_group = {
-            <span class="kw">let </span>schedule =
-                calculate_states_if(i, <span class="kw-2">&amp;mut </span>builder, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
-            <span class="kw">let </span>group = builder.add_group(<span class="string">&quot;tdcc&quot;</span>);
-            <span class="kw">if </span><span class="self">self</span>.dump_fsm {
-                schedule.display(<span class="macro">format!</span>(
-                    <span class="string">&quot;{}:{}&quot;</span>,
-                    builder.component.name,
-                    group.borrow().name()
-                ));
-            }
-            schedule.realize_schedule(group, <span class="kw-2">&amp;mut </span>builder)
-        };
+        </span>sch.calculate_states_if(i, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
+        <span class="kw">let </span>if_group = sch.realize_schedule(<span class="self">self</span>.dump_fsm);
 
         <span class="comment">// Add NODE_ID to compiled group.
         </span><span class="kw">let </span><span class="kw-2">mut </span>en = ir::Control::enable(if_group);
@@ -2016,23 +1900,11 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
         }
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+        <span class="kw">let </span><span class="kw-2">mut </span>sch = Schedule::from(<span class="kw-2">&amp;mut </span>builder);
+        sch.calculate_states_while(w, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
+
         <span class="comment">// Compile schedule and return the group.
-        </span><span class="kw">let </span>if_group = {
-            <span class="kw">let </span>schedule = calculate_states_while(
-                w,
-                <span class="kw-2">&amp;mut </span>builder,
-                <span class="self">self</span>.early_transitions,
-            )<span class="question-mark">?</span>;
-            <span class="kw">let </span>group = builder.add_group(<span class="string">&quot;tdcc&quot;</span>);
-            <span class="kw">if </span><span class="self">self</span>.dump_fsm {
-                schedule.display(<span class="macro">format!</span>(
-                    <span class="string">&quot;{}:{}&quot;</span>,
-                    builder.component.name,
-                    group.borrow().name()
-                ));
-            }
-            schedule.realize_schedule(group, <span class="kw-2">&amp;mut </span>builder)
-        };
+        </span><span class="kw">let </span>if_group = sch.realize_schedule(<span class="self">self</span>.dump_fsm);
 
         <span class="comment">// Add NODE_ID to compiled group.
         </span><span class="kw">let </span><span class="kw-2">mut </span>en = ir::Control::enable(if_group);
@@ -2072,20 +1944,9 @@
                 }
                 <span class="comment">// Compile complex schedule and return the group.
                 </span><span class="kw">_ </span>=&gt; {
-                    <span class="kw">let </span>schedule = calculate_states(
-                        con,
-                        <span class="kw-2">&amp;mut </span>builder,
-                        <span class="self">self</span>.early_transitions,
-                    )<span class="question-mark">?</span>;
-                    <span class="kw">let </span>group = builder.add_group(<span class="string">&quot;tdcc&quot;</span>);
-                    <span class="kw">if </span><span class="self">self</span>.dump_fsm {
-                        schedule.display(<span class="macro">format!</span>(
-                            <span class="string">&quot;{}:{}&quot;</span>,
-                            builder.component.name,
-                            group.borrow().name()
-                        ));
-                    }
-                    schedule.realize_schedule(group, <span class="kw-2">&amp;mut </span>builder)
+                    <span class="kw">let </span><span class="kw-2">mut </span>sch = Schedule::from(<span class="kw-2">&amp;mut </span>builder);
+                    sch.calculate_states(con, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
+                    sch.realize_schedule(<span class="self">self</span>.dump_fsm)
                 }
             };
 
@@ -2153,21 +2014,10 @@
         <span class="kw">let </span>control = Rc::clone(<span class="kw-2">&amp;</span>comp.control);
         <span class="comment">// IRPrinter::write_control(&amp;control.borrow(), 0, &amp;mut std::io::stderr());
         </span><span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+        <span class="kw">let </span><span class="kw-2">mut </span>sch = Schedule::from(<span class="kw-2">&amp;mut </span>builder);
         <span class="comment">// Add assignments for the final states
-        </span><span class="kw">let </span>schedule = calculate_states(
-            <span class="kw-2">&amp;</span>control.borrow(),
-            <span class="kw-2">&amp;mut </span>builder,
-            <span class="self">self</span>.early_transitions,
-        )<span class="question-mark">?</span>;
-        <span class="kw">let </span>group = builder.add_group(<span class="string">&quot;tdcc&quot;</span>);
-        <span class="kw">if </span><span class="self">self</span>.dump_fsm {
-            schedule.display(<span class="macro">format!</span>(
-                <span class="string">&quot;{}:{}&quot;</span>,
-                builder.component.name,
-                group.borrow().name()
-            ));
-        }
-        <span class="kw">let </span>comp_group = schedule.realize_schedule(group, <span class="kw-2">&amp;mut </span>builder);
+        </span>sch.calculate_states(<span class="kw-2">&amp;</span>control.borrow(), <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
+        <span class="kw">let </span>comp_group = sch.realize_schedule(<span class="self">self</span>.dump_fsm);
 
         <span class="prelude-val">Ok</span>(Action::change(ir::Control::enable(comp_group)))
     }
