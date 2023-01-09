@@ -1006,10 +1006,6 @@
 <span id="1006">1006</span>
 <span id="1007">1007</span>
 <span id="1008">1008</span>
-<span id="1009">1009</span>
-<span id="1010">1010</span>
-<span id="1011">1011</span>
-<span id="1012">1012</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::errors::CalyxResult;
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::ConstructVisitor;
@@ -1032,62 +1028,62 @@
 
 <span class="kw">const </span>NODE_ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;NODE_ID&quot;</span>;
 
-<span class="doccomment">/// Computes the entry and exit points of a given [ir::Control] program.
+<span class="doccomment">/// Computes the exit edges of a given [ir::Control] program.
 ///
 /// ## Example
 /// In the following Calyx program:
 /// ```
 /// while comb_reg.out {
 ///   seq {
-///     incr;
-///     cond0;
+///     @NODE_ID(4) incr;
+///     @NODE_ID(5) cond0;
 ///   }
 /// }
 /// ```
-/// The exit point is `cond0`.
+/// The exit edge is is `[(5, cond0[done])]` indicating that the state 5 exits when the guard
+/// `cond0[done]` is true.
 ///
 /// Multiple exit points are created when conditions are used:
 /// ```
 /// while comb_reg.out {
-///   incr;
+///   @NODE_ID(7) incr;
 ///   if comb_reg2.out {
-///     true;
+///     @NODE_ID(8) tru;
 ///   } else {
-///     false;
+///     @NODE_ID(9) fal;
 ///   }
 /// }
 /// ```
-/// The exit set is `[true, false]`.
-</span><span class="kw">fn </span>control_exits(
-    con: <span class="kw-2">&amp;</span>ir::Control,
-    is_exit: bool,
-    exits: <span class="kw-2">&amp;mut </span>Vec&lt;(u64, RRC&lt;ir::Group&gt;)&gt;,
-) {
+/// The exit set is `[(8, tru[done] &amp; !comb_reg.out), (9, fal &amp; !comb_reg.out)]`.
+</span><span class="kw">fn </span>control_exits(con: <span class="kw-2">&amp;</span>ir::Control, exits: <span class="kw-2">&amp;mut </span>Vec&lt;PredEdge&gt;) {
     <span class="kw">match </span>con {
+        ir::Control::Empty(<span class="kw">_</span>) =&gt; {}
         ir::Control::Enable(ir::Enable { group, attributes }) =&gt; {
-            <span class="kw">if </span>is_exit {
-                <span class="kw">let </span>cur_state = attributes.get(NODE_ID).unwrap();
-                exits.push((<span class="kw-2">*</span>cur_state, Rc::clone(group)))
-            }
+            <span class="kw">let </span>cur_state = attributes.get(NODE_ID).unwrap();
+            exits.push((<span class="kw-2">*</span>cur_state, <span class="macro">guard!</span>(group[<span class="string">&quot;done&quot;</span>])))
         }
         ir::Control::Seq(ir::Seq { stmts, .. }) =&gt; {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(stmt) = stmts.last() { control_exits(stmt, <span class="bool-val">true</span>, exits) }
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(stmt) = stmts.last() { control_exits(stmt, exits) }
         }
         ir::Control::If(ir::If {
             tbranch, fbranch, ..
         }) =&gt; {
             control_exits(
-                tbranch, is_exit, exits,
+                tbranch, exits,
             );
             control_exits(
-                fbranch, is_exit, exits,
+                fbranch, exits,
             )
         }
-        ir::Control::While(ir::While { body, .. }) =&gt; control_exits(
-            body, is_exit, exits,
-        ),
+        ir::Control::While(ir::While { body, port, .. }) =&gt; {
+            <span class="kw">let </span><span class="kw-2">mut </span>loop_exits = <span class="macro">vec!</span>[];
+            control_exits(body, <span class="kw-2">&amp;mut </span>loop_exits);
+            <span class="comment">// Loop exits only happen when the loop guard is false
+            </span>exits.extend(loop_exits.into_iter().map(|(s, g)| {
+                (s, g &amp; !ir::Guard::from(port.clone()))
+            }));
+        },
         ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`invoke` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileInvoke::name()),
-        ir::Control::Empty(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`empty` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileEmpty::name()),
         ir::Control::Par(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
     }
 }
@@ -1559,13 +1555,9 @@
 
         <span class="kw">let </span>port_guard: ir::Guard = Rc::clone(<span class="kw-2">&amp;</span>while_stmt.port).into();
 
-        <span class="comment">// Step 1: Generate the backward edges
-        // First compute the entry and exit points.
+        <span class="comment">// Step 1: Generate the backward edges by computing the exit nodes.
         </span><span class="kw">let </span><span class="kw-2">mut </span>exits = <span class="macro">vec!</span>[];
-        control_exits(<span class="kw-2">&amp;</span>while_stmt.body, <span class="bool-val">true</span>, <span class="kw-2">&amp;mut </span>exits);
-        <span class="kw">let </span>back_edge_prevs = exits
-            .into_iter()
-            .map(|(st, group)| (st, group.borrow().get(<span class="string">&quot;done&quot;</span>).into()));
+        control_exits(<span class="kw-2">&amp;</span>while_stmt.body, <span class="kw-2">&amp;mut </span>exits);
 
         <span class="comment">// Step 2: Generate the forward edges normally.
         // Previous transitions into the body require the condition to be
@@ -1573,7 +1565,7 @@
         </span><span class="kw">let </span>transitions: Vec&lt;PredEdge&gt; = preds
             .clone()
             .into_iter()
-            .chain(back_edge_prevs)
+            .chain(exits)
             .map(|(s, g)| (s, g &amp; port_guard.clone()))
             .collect();
         <span class="kw">let </span>prevs = <span class="self">self</span>.calculate_states_recur(
