@@ -949,6 +949,63 @@
 <span id="949">949</span>
 <span id="950">950</span>
 <span id="951">951</span>
+<span id="952">952</span>
+<span id="953">953</span>
+<span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
+<span id="974">974</span>
+<span id="975">975</span>
+<span id="976">976</span>
+<span id="977">977</span>
+<span id="978">978</span>
+<span id="979">979</span>
+<span id="980">980</span>
+<span id="981">981</span>
+<span id="982">982</span>
+<span id="983">983</span>
+<span id="984">984</span>
+<span id="985">985</span>
+<span id="986">986</span>
+<span id="987">987</span>
+<span id="988">988</span>
+<span id="989">989</span>
+<span id="990">990</span>
+<span id="991">991</span>
+<span id="992">992</span>
+<span id="993">993</span>
+<span id="994">994</span>
+<span id="995">995</span>
+<span id="996">996</span>
+<span id="997">997</span>
+<span id="998">998</span>
+<span id="999">999</span>
+<span id="1000">1000</span>
+<span id="1001">1001</span>
+<span id="1002">1002</span>
+<span id="1003">1003</span>
+<span id="1004">1004</span>
+<span id="1005">1005</span>
+<span id="1006">1006</span>
+<span id="1007">1007</span>
+<span id="1008">1008</span>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     analysis::{ControlId, ReadWriteSet, ShareSet, VariableDetection},
     ir::{<span class="self">self</span>, CloneName, Id, RRC},
@@ -957,12 +1014,69 @@
 <span class="kw">use </span>std::{
     collections::{HashMap, HashSet},
     fmt::Debug,
+    rc::Rc,
 };
 
 <span class="kw">type </span>TypeNameSet = HashSet&lt;(ir::CellType, ir::Id)&gt;;
 <span class="kw">type </span>CellsByType = HashMap&lt;ir::CellType, HashSet&lt;ir::Id&gt;&gt;;
 <span class="comment">// maps cell type to maps that map cell name to control statement
 </span><span class="kw">type </span>LiveMapByType = HashMap&lt;ir::CellType, HashMap&lt;ir::Id, HashSet&lt;u64&gt;&gt;&gt;;
+
+<span class="doccomment">/// Returns [ir::Cell] which are read from in the assignments.
+/// **Ignores** reads from group holes, and reads from done signals, when it
+/// is safe to do so.
+/// To ignore a read from a done signal:
+/// the `@go` signal for the same cell *must* be written to in the group
+</span><span class="kw">pub fn </span>meaningful_read_set&lt;<span class="lifetime">&#39;a</span>&gt;(
+    assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt; + Clone + <span class="lifetime">&#39;a</span>,
+) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
+    meaningful_port_read_set(assigns)
+        .map(|port| Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent()))
+        .unique_by(|cell| cell.clone_name())
+}
+
+<span class="doccomment">/// Returns the &quot;meaningful&quot; [ir::Port] which are read from in the assignments.
+/// &quot;Meaningful&quot; means we just exclude the following `@done` reads:
+/// the `@go` signal for the same cell *must* be written to in the group
+</span><span class="kw">pub fn </span>meaningful_port_read_set&lt;<span class="lifetime">&#39;a</span>&gt;(
+    assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt; + Clone + <span class="lifetime">&#39;a</span>,
+) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a </span>{
+    <span class="comment">// go_writes = all cells which are guaranteed to have their go port written to in assigns
+    </span><span class="kw">let </span>go_writes: Vec&lt;RRC&lt;ir::Cell&gt;&gt; =
+        ReadWriteSet::port_write_set(assigns.clone().filter(|asgn| {
+            <span class="comment">// to be included in go_writes, one of the following must hold:
+            // a) guard is true
+            // b) cell.go = !cell.done ? 1&#39;d1
+            </span><span class="kw">if </span>asgn.guard.is_true() {
+                <span class="kw">return </span><span class="bool-val">true</span>;
+            }
+
+            <span class="comment">// checking cell.go = !cell.done! 1&#39;d1
+            </span>asgn.dst.borrow().attributes.has(<span class="string">&quot;go&quot;</span>)
+                &amp;&amp; asgn.guard.is_not_done(
+                    <span class="kw-2">&amp;</span>asgn.dst.borrow().cell_parent().borrow().name(),
+                )
+                &amp;&amp; asgn.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>)
+        }))
+        .filter(|port| port.borrow().attributes.has(<span class="string">&quot;go&quot;</span>))
+        .map(|port| Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent()))
+        .collect();
+
+    <span class="comment">// if we have a done port that overlaps with go_writes, then can remove the
+    // done port. Otherwise, we should keep it.
+    </span>assigns
+        .flat_map(ReadWriteSet::port_reads)
+        .filter(<span class="kw">move </span>|port| {
+            <span class="kw">if </span>port.borrow().attributes.has(<span class="string">&quot;done&quot;</span>) {
+                <span class="kw">let </span>done_parent = Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent());
+                go_writes
+                    .iter()
+                    .all(|go_parent| !Rc::ptr_eq(go_parent, <span class="kw-2">&amp;</span>done_parent))
+            } <span class="kw">else </span>{
+                <span class="bool-val">true
+            </span>}
+        })
+}
 
 <span class="doccomment">/// The data structure used to represent sets of ids. This is used to represent
 /// the `live`, `gen`, and `kill` sets.
@@ -1486,7 +1600,7 @@
             (reads, writes)
         } <span class="kw">else </span>{
             <span class="kw">let </span>reads: HashSet&lt;<span class="kw">_</span>&gt; =
-                ReadWriteSet::read_set(group.assignments.iter())
+                meaningful_read_set(group.assignments.iter())
                     .filter(|c| sc_clone.is_shareable_component(c))
                     .map(|c| (c.borrow().prototype.clone(), c.clone_name()))
                     .collect();

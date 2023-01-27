@@ -347,17 +347,6 @@
 <span id="347">347</span>
 <span id="348">348</span>
 <span id="349">349</span>
-<span id="350">350</span>
-<span id="351">351</span>
-<span id="352">352</span>
-<span id="353">353</span>
-<span id="354">354</span>
-<span id="355">355</span>
-<span id="356">356</span>
-<span id="357">357</span>
-<span id="358">358</span>
-<span id="359">359</span>
-<span id="360">360</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ReadWriteSet;
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, CloneName};
@@ -677,22 +666,11 @@
     <span class="comment">//Returns whether the given assignment writes to the go assignment of cell
     //in the form cell.go = !cell.done? 1&#39;d1.
     </span><span class="kw">pub fn </span>is_specific_go(asmt: <span class="kw-2">&amp;</span>ir::Assignment, cell: <span class="kw-2">&amp;</span>ir::Id) -&gt; bool {
-        <span class="comment">//checks whether guard is !cell.done
-        </span><span class="kw">let </span>guard_not_done = |guard: <span class="kw-2">&amp;</span>ir::Guard| -&gt; bool {
-            <span class="kw">if let </span>ir::Guard::Not(g) = guard {
-                <span class="kw">if let </span>ir::Guard::Port(port) = <span class="kw-2">&amp;</span>(<span class="kw-2">**</span>g) {
-                    <span class="kw">return </span>port.borrow().attributes.has(<span class="string">&quot;done&quot;</span>)
-                        &amp;&amp; port.borrow().get_parent_name() == cell;
-                }
-            }
-            <span class="bool-val">false
-        </span>};
-
         <span class="kw">let </span>dst = asmt.dst.borrow();
         <span class="comment">// checks cell.go =
         </span>dst.get_parent_name() == cell  &amp;&amp; dst.attributes.has(<span class="string">&quot;go&quot;</span>)
         <span class="comment">// checks !cell.done ?
-        </span>&amp;&amp; guard_not_done(<span class="kw-2">&amp;</span>asmt.guard)
+        </span>&amp;&amp; asmt.guard.is_not_done(cell)
         <span class="comment">// checks 1&#39;d1
         </span>&amp;&amp; asmt.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>)
     }

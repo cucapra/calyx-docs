@@ -434,6 +434,17 @@
 <span id="434">434</span>
 <span id="435">435</span>
 <span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{Port, RRC};
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not};
@@ -569,6 +580,17 @@
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         }
     }
+
+    <span class="doccomment">/// returns true if the self is !cell_name, false otherwise.
+    </span><span class="kw">pub fn </span>is_not_done(<span class="kw-2">&amp;</span><span class="self">self</span>, cell_name: <span class="kw-2">&amp;</span><span class="kw">crate</span>::ir::Id) -&gt; bool {
+        <span class="kw">if let </span>Guard::Not(g) = <span class="self">self </span>{
+            <span class="kw">if let </span>Guard::Port(port) = <span class="kw-2">&amp;</span>(<span class="kw-2">**</span>g) {
+                <span class="kw">return </span>port.borrow().attributes.has(<span class="string">&quot;done&quot;</span>)
+                    &amp;&amp; port.borrow().get_parent_name() == cell_name;
+            }
+        }
+        <span class="bool-val">false
+    </span>}
 
     <span class="doccomment">/// Update the guard in place. Replaces this guard with `upd(self)`.
     /// Uses `std::mem::take` for the in-place update.
