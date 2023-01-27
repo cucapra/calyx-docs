@@ -611,7 +611,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphAnalysis, ReadWriteSet};
 <span class="kw">use </span><span class="kw">crate</span>::errors::{CalyxResult, Error};
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::{
-    Action, ConstructVisitor, Named, VisResult, Visitor,
+    Action, ConstructVisitor, Named, Order, VisResult, Visitor,
 };
 <span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, LibrarySignatures, RRC};
 <span class="kw">use </span>itertools::Itertools;
@@ -1022,9 +1022,9 @@
 <span class="kw">impl </span>Visitor <span class="kw">for </span>InferStaticTiming {
     <span class="comment">// Require post order traversal of components to ensure `invoke` nodes
     // get timing information for components.
-    </span><span class="kw">fn </span>require_postorder() -&gt; bool {
-        <span class="bool-val">true
-    </span>}
+    </span><span class="kw">fn </span>iteration_order() -&gt; Order {
+        Order::Post
+    }
 
     <span class="kw">fn </span>start(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,

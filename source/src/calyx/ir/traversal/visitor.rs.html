@@ -418,26 +418,13 @@
 <span id="418">418</span>
 <span id="419">419</span>
 <span id="420">420</span>
-<span id="421">421</span>
-<span id="422">422</span>
-<span id="423">423</span>
-<span id="424">424</span>
-<span id="425">425</span>
-<span id="426">426</span>
-<span id="427">427</span>
-<span id="428">428</span>
-<span id="429">429</span>
-<span id="430">430</span>
-<span id="431">431</span>
-<span id="432">432</span>
-<span id="433">433</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a visitor for `ir::Control` programs.
 //! Program passes implemented as the Visitor are directly invoked on
 //! [`ir::Context`] to compile every [`ir::Component`] using the pass.
 </span><span class="kw">use </span>itertools::Itertools;
 
 <span class="kw">use </span><span class="kw">super</span>::action::{Action, VisResult};
-<span class="kw">use </span><span class="kw">super</span>::PostOrder;
+<span class="kw">use super</span>::{CompTraversal, Order};
 <span class="kw">use </span><span class="kw">crate</span>::errors::CalyxResult;
 <span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, Component, Context, Control, LibrarySignatures};
 <span class="kw">use </span>std::collections::HashSet;
@@ -535,17 +522,14 @@
 /// A pass will usually override one or more function and rely on the default
 /// visitors to automatically visit the children.
 </span><span class="kw">pub trait </span>Visitor {
-    <span class="doccomment">/// Returns true if this pass requires a post-order traversal of the
-    /// components.
-    /// In a post-order traversal, if component `B` uses a component `A`,
-    /// then `A` is guaranteed to be traversed before `B`.
+    <span class="doccomment">/// Define the iteration order in which components should be visited
     </span><span class="attribute">#[inline(always)]
-    </span><span class="kw">fn </span>require_postorder() -&gt; bool
+    </span><span class="kw">fn </span>iteration_order() -&gt; Order
     <span class="kw">where
         </span><span class="self">Self</span>: Sized,
     {
-        <span class="bool-val">false
-    </span>}
+        Order::No
+    }
 
     <span class="doccomment">/// Define the traversal over a component.
     /// Calls [Visitor::start], visits each control node, and finally calls
@@ -593,26 +577,16 @@
         </span><span class="self">Self</span>: Sized + ConstructVisitor,
     {
         <span class="kw">let </span>signatures = <span class="kw-2">&amp;</span>context.lib;
-        <span class="kw">let </span><span class="kw-2">mut </span>comps = context.components.drain(..).collect_vec();
+        <span class="kw">let </span>comps = context.components.drain(..).collect_vec();
 
-        <span class="kw">if </span><span class="self">Self</span>::require_postorder() {
-            <span class="comment">// Temporarily take ownership of components from context.
-            </span><span class="kw">let </span><span class="kw-2">mut </span>po = PostOrder::new(comps);
-            po.apply_update(|comp, comps| {
-                <span class="self">self</span>.traverse_component(comp, signatures, comps)<span class="question-mark">?</span>;
-                <span class="self">self</span>.clear_data();
-                <span class="prelude-val">Ok</span>(())
-            })<span class="question-mark">?</span>;
-            context.components = po.take();
-        } <span class="kw">else </span>{
-            <span class="kw">for </span>idx <span class="kw">in </span><span class="number">0</span>..comps.len() {
-                <span class="kw">let </span><span class="kw-2">mut </span>comp = comps.remove(idx);
-                <span class="self">self</span>.traverse_component(<span class="kw-2">&amp;mut </span>comp, signatures, <span class="kw-2">&amp;</span>comps)<span class="question-mark">?</span>;
-                <span class="self">self</span>.clear_data();
-                comps.insert(idx, comp);
-            }
-            context.components = comps;
-        }
+        <span class="comment">// Temporarily take ownership of components from context.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>po = CompTraversal::new(comps, <span class="self">Self</span>::iteration_order());
+        po.apply_update(|comp, comps| {
+            <span class="self">self</span>.traverse_component(comp, signatures, comps)<span class="question-mark">?</span>;
+            <span class="self">self</span>.clear_data();
+            <span class="prelude-val">Ok</span>(())
+        })<span class="question-mark">?</span>;
+        context.components = po.take();
 
         <span class="prelude-val">Ok</span>(())
     }

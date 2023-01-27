@@ -121,7 +121,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::errors::CalyxResult;
 <span class="kw">use </span><span class="kw">crate</span>::ir;
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::{
-    Action, ConstructVisitor, Named, VisResult, Visitor,
+    Action, ConstructVisitor, Named, Order, VisResult, Visitor,
 };
 
 <span class="doccomment">/// This pass checks if components are (state) shareable. Here is the process it
@@ -169,9 +169,9 @@
 }
 
 <span class="kw">impl </span>Visitor <span class="kw">for </span>InferShare {
-    <span class="kw">fn </span>require_postorder() -&gt; bool {
-        <span class="bool-val">true
-    </span>}
+    <span class="kw">fn </span>iteration_order() -&gt; Order {
+        Order::Post
+    }
     <span class="kw">fn </span>start(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         comp: <span class="kw-2">&amp;mut </span>ir::Component,

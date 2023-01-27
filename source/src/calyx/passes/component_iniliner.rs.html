@@ -491,7 +491,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::errors::Error;
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::{
-    Action, ConstructVisitor, Named, VisResult, Visitor,
+    Action, ConstructVisitor, Named, Order, VisResult, Visitor,
 };
 <span class="kw">use </span><span class="kw">crate</span>::ir::{
     <span class="self">self</span>, rewriter, CloneName, GetAttributes, LibrarySignatures, RRC,
@@ -764,9 +764,9 @@
 
 <span class="kw">impl </span>Visitor <span class="kw">for </span>ComponentInliner {
     <span class="comment">// Inlining should proceed bottom-up
-    </span><span class="kw">fn </span>require_postorder() -&gt; bool {
-        <span class="bool-val">true
-    </span>}
+    </span><span class="kw">fn </span>iteration_order() -&gt; Order {
+        Order::Post
+    }
 
     <span class="kw">fn </span>start(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
