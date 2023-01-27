@@ -131,6 +131,18 @@
 <span id="131">131</span>
 <span id="132">132</span>
 <span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
 </pre><pre class="rust"><code><span class="kw">use </span>linked_hash_map::LinkedHashMap;
 <span class="kw">use </span>std::{convert::TryFrom, ops::Index};
 
@@ -148,6 +160,23 @@
     </span><span class="kw">pub</span>(<span class="kw">super</span>) attrs: LinkedHashMap&lt;Id, u64&gt;,
     <span class="doccomment">/// Source location information for the item
     </span>span: GPosIdx,
+}
+
+<span class="kw">impl </span>IntoIterator <span class="kw">for </span>Attributes {
+    <span class="kw">type </span>Item = (Id, u64);
+    <span class="kw">type </span>IntoIter = linked_hash_map::IntoIter&lt;Id, u64&gt;;
+
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
+        <span class="self">self</span>.attrs.into_iter()
+    }
+}
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Attributes {
+    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Id, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>u64);
+    <span class="kw">type </span>IntoIter = linked_hash_map::Iter&lt;<span class="lifetime">&#39;a</span>, Id, u64&gt;;
+
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
+        <span class="self">self</span>.attrs.iter()
+    }
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>Attributes {
@@ -232,11 +261,6 @@
         </span>S: Into&lt;Id&gt;,
     {
         <span class="self">self</span>.attrs.remove(<span class="kw-2">&amp;</span>key.into())
-    }
-
-    <span class="doccomment">/// Iterate over all attributes
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (<span class="kw-2">&amp;</span>Id, <span class="kw-2">&amp;</span>u64)&gt; {
-        <span class="self">self</span>.attrs.iter()
     }
 
     <span class="doccomment">/// Set the span information
