@@ -210,11 +210,11 @@
                 <span class="kw">let </span>one = constant(<span class="number">1</span>, <span class="number">1</span>);
             );
             <span class="kw">let </span>group_done = <span class="macro">guard!</span>(group[<span class="string">&quot;done&quot;</span>]);
-            <span class="kw">let </span><span class="kw-2">mut </span>assigns = <span class="macro">build_assignments!</span>(builder;
+            <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
                 group[<span class="string">&quot;go&quot;</span>] = <span class="question-mark">? </span>this[<span class="string">&quot;go&quot;</span>];
                 this[<span class="string">&quot;done&quot;</span>] = group_done <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
             );
-            comp.continuous_assignments.append(<span class="kw-2">&amp;mut </span>assigns);
+            comp.continuous_assignments.extend(assigns);
         } <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::errors::Error::malformed_control(<span class="macro">format!</span>(
                 <span class="string">&quot;{}: Structure has more than one group&quot;</span>,

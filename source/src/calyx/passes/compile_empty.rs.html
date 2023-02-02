@@ -143,12 +143,12 @@
                     <span class="kw">let </span>signal_on = constant(<span class="number">1</span>, <span class="number">1</span>);
                     <span class="kw">let </span>empty_reg = prim std_reg(<span class="number">1</span>);
                 );
-                <span class="kw">let </span><span class="kw-2">mut </span>assigns: Vec&lt;<span class="kw">_</span>&gt; = <span class="macro">build_assignments!</span>(builder;
+                <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
                     empty_reg[<span class="string">&quot;write_en&quot;</span>] = <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
                     empty_reg[<span class="string">&quot;in&quot;</span>] = <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
                     empty_group[<span class="string">&quot;done&quot;</span>] = <span class="question-mark">? </span>empty_reg[<span class="string">&quot;done&quot;</span>];
                 );
-                empty_group.borrow_mut().assignments.append(<span class="kw-2">&amp;mut </span>assigns);
+                empty_group.borrow_mut().assignments.extend(assigns);
 
                 <span class="comment">// Register the name of the group to the pass
                 </span><span class="self">self</span>.group_name = <span class="prelude-val">Some</span>(empty_group.borrow().name());

@@ -171,7 +171,7 @@
      $(<span class="macro-nonterminal">$dst_node</span>:ident[<span class="macro-nonterminal">$dst_port</span>:expr] =
          $(<span class="macro-nonterminal">$guard</span>:ident)<span class="question-mark">? ?
          </span><span class="macro-nonterminal">$src_node</span>:ident[<span class="macro-nonterminal">$src_port</span>:expr];)<span class="kw-2">*</span>)  =&gt; {
-        <span class="macro">vec!</span>[$(
+        [$(
             <span class="macro">build_assignments!</span>(@base <span class="macro-nonterminal">$builder</span>;
                 <span class="macro-nonterminal">$dst_node</span>[<span class="macro-nonterminal">$dst_port</span>] = $(<span class="macro-nonterminal">$guard</span>)<span class="question-mark">? ? </span><span class="macro-nonterminal">$src_node</span>[<span class="macro-nonterminal">$src_port</span>])
         ),<span class="kw-2">*</span>]

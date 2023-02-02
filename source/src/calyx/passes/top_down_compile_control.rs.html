@@ -1362,14 +1362,14 @@
         group.borrow_mut().assignments.push(done_assign);
 
         <span class="comment">// Cleanup: Add a transition from last state to the first state.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>reset_fsm = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
+        </span><span class="kw">let </span>reset_fsm = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
             fsm[<span class="string">&quot;in&quot;</span>] = last_guard <span class="question-mark">? </span>first_state[<span class="string">&quot;out&quot;</span>];
             fsm[<span class="string">&quot;write_en&quot;</span>] = last_guard <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
         );
         <span class="self">self</span>.builder
             .component
             .continuous_assignments
-            .append(<span class="kw-2">&amp;mut </span>reset_fsm);
+            .extend(reset_fsm);
 
         group
     }
@@ -1420,14 +1420,14 @@
             <span class="kw">let </span>signal_on = <span class="self">self</span>.builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
 
             <span class="comment">// Activate this group in the current state
-            </span><span class="kw">let </span><span class="kw-2">mut </span>en_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
+            </span><span class="kw">let </span>en_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
                 group[<span class="string">&quot;go&quot;</span>] = not_done <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
             );
             <span class="self">self
                 </span>.enables
                 .entry(cur_state)
                 .or_default()
-                .append(<span class="kw-2">&amp;mut </span>en_go);
+                .extend(en_go);
 
             <span class="comment">// Activate group in the cycle when previous state signals done.
             // NOTE: We explicilty do not add `not_done` to the guard.
@@ -1435,10 +1435,10 @@
             // why.
             </span><span class="kw">if </span>early_transitions {
                 <span class="kw">for </span>(st, g) <span class="kw">in </span><span class="kw-2">&amp;</span>prev_states {
-                    <span class="kw">let </span><span class="kw-2">mut </span>early_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
+                    <span class="kw">let </span>early_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
                         group[<span class="string">&quot;go&quot;</span>] = g <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
                     );
-                    <span class="self">self</span>.enables.entry(<span class="kw-2">*</span>st).or_default().append(<span class="kw-2">&amp;mut </span>early_go);
+                    <span class="self">self</span>.enables.entry(<span class="kw-2">*</span>st).or_default().extend(early_go);
                 }
             }
 
@@ -1950,12 +1950,12 @@
             <span class="kw">let </span>group_done = <span class="macro">guard!</span>(group[<span class="string">&quot;done&quot;</span>]);
 
             <span class="comment">// Save the done condition in a register.
-            </span><span class="kw">let </span><span class="kw-2">mut </span>assigns = <span class="macro">build_assignments!</span>(builder;
+            </span><span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
                 group[<span class="string">&quot;go&quot;</span>] = group_go <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
                 pd[<span class="string">&quot;in&quot;</span>] = group_done <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
                 pd[<span class="string">&quot;write_en&quot;</span>] = group_done <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
             );
-            par_group.borrow_mut().assignments.append(<span class="kw-2">&amp;mut </span>assigns);
+            par_group.borrow_mut().assignments.extend(assigns);
             done_regs.push(pd)
         }
 

@@ -396,9 +396,6 @@
 <span id="396">396</span>
 <span id="397">397</span>
 <span id="398">398</span>
-<span id="399">399</span>
-<span id="400">400</span>
-<span id="401">401</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::errors::{CalyxResult, Error};
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::rc::Rc;
@@ -577,7 +574,7 @@
         <span class="kw">let </span>cst_1 = constant(<span class="number">1</span>, <span class="number">1</span>);
         <span class="kw">let </span>cst_2 = constant(<span class="number">1</span>, <span class="number">32</span>););
     <span class="kw">let </span>read_done_guard = <span class="macro">guard!</span>(barrier[<span class="macro">format!</span>(<span class="string">&quot;read_done_{member_idx}&quot;</span>)]);
-    <span class="kw">let </span><span class="kw-2">mut </span>assigns = <span class="macro">build_assignments!</span>(builder;
+    <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
         <span class="comment">// barrier_*.read_en_0 = 1&#39;d1;
         </span>barrier[<span class="macro">format!</span>(<span class="string">&quot;read_en_{member_idx}&quot;</span>)] = <span class="question-mark">?</span>cst_1[<span class="string">&quot;out&quot;</span>];
         <span class="comment">//incr_*_*.left = barrier_*.out_*;
@@ -592,7 +589,7 @@
         </span>group[<span class="string">&quot;done&quot;</span>] = <span class="question-mark">?</span>save[<span class="string">&quot;done&quot;</span>];
     );
 
-    group.borrow_mut().assignments.append(<span class="kw-2">&amp;mut </span>assigns);
+    group.borrow_mut().assignments.extend(assigns);
     group
 }
 
@@ -606,7 +603,7 @@
     <span class="kw">let </span>group = builder.add_group(<span class="string">&quot;write_barrier&quot;</span>);
     <span class="macro">structure!</span>(builder;
     <span class="kw">let </span>cst_1 = constant(<span class="number">1</span>, <span class="number">1</span>););
-    <span class="kw">let </span><span class="kw-2">mut </span>assigns = <span class="macro">build_assignments!</span>(builder;
+    <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
         <span class="comment">// barrier_*.write_en_* = 1&#39;d1;
         </span>barrier[<span class="macro">format!</span>(<span class="string">&quot;write_en_{member_idx}&quot;</span>)] = <span class="question-mark">?</span>cst_1[<span class="string">&quot;out&quot;</span>];
         <span class="comment">// barrier_*.in_* = save_*_*.out;
@@ -614,7 +611,7 @@
         <span class="comment">// write_barrier_*_*[done] = barrier_*.write_done_*;
         </span>group[<span class="string">&quot;done&quot;</span>] = <span class="question-mark">?</span>barrier[<span class="macro">format!</span>(<span class="string">&quot;write_done_{member_idx}&quot;</span>)];
     );
-    group.borrow_mut().assignments.append(<span class="kw-2">&amp;mut </span>assigns);
+    group.borrow_mut().assignments.extend(assigns);
     group
 }
 
@@ -628,7 +625,7 @@
     <span class="kw">let </span>wait_reg = prim std_reg(<span class="number">1</span>);
     <span class="kw">let </span>cst_1 = constant(<span class="number">1</span>, <span class="number">1</span>););
     <span class="kw">let </span>eq_guard = <span class="macro">guard!</span>(eq[<span class="string">&quot;out&quot;</span>]);
-    <span class="kw">let </span><span class="kw-2">mut </span>assigns = <span class="macro">build_assignments!</span>(builder;
+    <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
         <span class="comment">// wait_reg_*.in = eq_*.out;
         // XXX(rachit): Since the value doesn&#39;t matter, can this just be zero?
         </span>wait_reg[<span class="string">&quot;in&quot;</span>] = <span class="question-mark">?</span>eq[<span class="string">&quot;out&quot;</span>];
@@ -636,7 +633,7 @@
         </span>wait_reg[<span class="string">&quot;write_en&quot;</span>] = eq_guard<span class="question-mark">? </span>cst_1[<span class="string">&quot;out&quot;</span>];
         <span class="comment">// wait_*[done] = wait_reg_*.done;
         </span>group[<span class="string">&quot;done&quot;</span>] = <span class="question-mark">?</span>wait_reg[<span class="string">&quot;done&quot;</span>];);
-    group.borrow_mut().assignments.append(<span class="kw-2">&amp;mut </span>assigns);
+    group.borrow_mut().assignments.extend(assigns);
     group
 }
 
@@ -648,13 +645,13 @@
     <span class="kw">let </span>group = builder.add_group(<span class="string">&quot;clear_barrier&quot;</span>);
     <span class="macro">structure!</span>(builder;
     <span class="kw">let </span>cst_1 = constant(<span class="number">1</span>, <span class="number">1</span>););
-    <span class="kw">let </span><span class="kw-2">mut </span>assigns = <span class="macro">build_assignments!</span>(builder;
+    <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
     <span class="comment">// barrier_*.read_en_0 = 1&#39;d1;
     </span>barrier[<span class="string">&quot;read_en_0&quot;</span>] = <span class="question-mark">?</span>cst_1[<span class="string">&quot;out&quot;</span>];
     <span class="comment">//clear_barrier_*[done] = barrier_1.read_done_0;
     </span>group[<span class="string">&quot;done&quot;</span>] = <span class="question-mark">?</span>barrier[<span class="string">&quot;read_done_0&quot;</span>];
     );
-    group.borrow_mut().assignments.append(<span class="kw-2">&amp;mut </span>assigns);
+    group.borrow_mut().assignments.extend(assigns);
     group
 }
 
@@ -667,7 +664,7 @@
     <span class="macro">structure!</span>(builder;
     <span class="kw">let </span>cst_1 = constant(<span class="number">1</span>,<span class="number">1</span>);
     <span class="kw">let </span>cst_2 = constant(<span class="number">0</span>, <span class="number">32</span>););
-    <span class="kw">let </span><span class="kw-2">mut </span>assigns = <span class="macro">build_assignments!</span>(builder;
+    <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
         <span class="comment">// barrier_*.write_en_0 = 1&#39;d1;
         </span>barrier[<span class="string">&quot;write_en_0&quot;</span>] = <span class="question-mark">?</span>cst_1[<span class="string">&quot;out&quot;</span>];
         <span class="comment">// barrier_*.in_0 = 32&#39;d0;
@@ -675,7 +672,7 @@
         <span class="comment">// restore_*[done] = barrier_*.write_done_0;
         </span>group[<span class="string">&quot;done&quot;</span>] = <span class="question-mark">?</span>barrier[<span class="string">&quot;write_done_0&quot;</span>];
     );
-    group.borrow_mut().assignments.append(<span class="kw-2">&amp;mut </span>assigns);
+    group.borrow_mut().assignments.extend(assigns);
     group
 }
 
@@ -691,7 +688,7 @@
     <span class="kw">let </span>wait_restore_reg = prim std_reg(<span class="number">1</span>);
     <span class="kw">let </span>cst_1 = constant(<span class="number">1</span>, <span class="number">1</span>););
     <span class="kw">let </span>eq_guard = !<span class="macro">guard!</span>(eq[<span class="string">&quot;out&quot;</span>]);
-    <span class="kw">let </span><span class="kw-2">mut </span>assigns = <span class="macro">build_assignments!</span>(builder;
+    <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
     <span class="comment">// wait_restore_reg_*.in = !eq_*.out? 1&#39;d1;
     </span>wait_restore_reg[<span class="string">&quot;in&quot;</span>] = eq_guard<span class="question-mark">? </span>cst_1[<span class="string">&quot;out&quot;</span>];
     <span class="comment">// wait_restore_reg_*.write_en = !eq_*.out? 1&#39;d1;
@@ -699,7 +696,7 @@
     <span class="comment">//wait_restore_*[done] = wait_restore_reg_*.done;
     </span>group[<span class="string">&quot;done&quot;</span>] = <span class="question-mark">?</span>wait_restore_reg[<span class="string">&quot;done&quot;</span>];
     );
-    group.borrow_mut().assignments.append(<span class="kw-2">&amp;mut </span>assigns);
+    group.borrow_mut().assignments.extend(assigns);
     group
 }
 
@@ -774,16 +771,13 @@
                 <span class="kw">let </span>num_members = constant(<span class="kw-2">*</span>n_members, <span class="number">32</span>);
             );
             <span class="comment">// add continuous assignments
-            </span><span class="kw">let </span><span class="kw-2">mut </span>assigns = <span class="macro">build_assignments!</span>(builder;
+            </span><span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
             <span class="comment">// eq_*.left = barrier_*.peek;
             </span>eq[<span class="string">&quot;left&quot;</span>] = <span class="question-mark">?</span>barrier[<span class="string">&quot;peek&quot;</span>];
             <span class="comment">// eq_*.right = 32&#39;d* (number of members);
             </span>eq[<span class="string">&quot;right&quot;</span>] = <span class="question-mark">?</span>num_members[<span class="string">&quot;out&quot;</span>];
             );
-            builder
-                .component
-                .continuous_assignments
-                .append(<span class="kw-2">&amp;mut </span>assigns);
+            builder.component.continuous_assignments.extend(assigns);
 
             init_barriers.push(ir::Control::enable(restore));
         }
