@@ -47,6 +47,8 @@
 <span id="47">47</span>
 <span id="48">48</span>
 <span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Internal representation for the Calyx compiler.
 //!
 //! The representation is generated from the frontend AST.
@@ -76,7 +78,9 @@
 <span class="kw">pub use </span>common::{RRC, WRC};
 <span class="kw">pub use </span>component::{Component, IdList};
 <span class="kw">pub use </span>context::{BackendConf, Context, LibrarySignatures};
-<span class="kw">pub use </span>control::{Control, Empty, Enable, If, Invoke, Par, Seq, While};
+<span class="kw">pub use </span>control::{
+    Cloner, Control, Empty, Enable, If, Invoke, Par, Seq, While,
+};
 <span class="kw">pub use </span>guard::{Guard, PortComp};
 <span class="kw">pub use </span>id::Id;
 <span class="kw">pub use </span>primitives::{PortDef, Primitive, Width};

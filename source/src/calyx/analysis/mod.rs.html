@@ -31,12 +31,15 @@
 <span id="31">31</span>
 <span id="32">32</span>
 <span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Analysis for Calyx programs.
 //!
 //! The analyses construct data-structures that make answering certain queries
 //! about Calyx programs easier.
 
-</span><span class="kw">mod </span>control_id;
+</span><span class="kw">mod </span>compute_static;
+<span class="kw">mod </span>control_id;
 <span class="kw">mod </span>control_order;
 <span class="kw">mod </span>control_ports;
 <span class="kw">mod </span>dataflow_order;
@@ -51,6 +54,7 @@
 <span class="kw">mod </span>share_set;
 <span class="kw">mod </span>variable_detection;
 
+<span class="kw">pub use </span>compute_static::WithStatic;
 <span class="kw">pub use </span>control_id::ControlId;
 <span class="kw">pub use </span>control_order::ControlOrder;
 <span class="kw">pub use </span>control_ports::ControlPorts;

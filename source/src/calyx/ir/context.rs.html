@@ -105,6 +105,27 @@
 <span id="105">105</span>
 <span id="106">106</span>
 <span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An IR context. This is the top-level object for an IR and contains all information
 //! need to transform, lower, an emit a program.
 //! Passes usually have transform/analyze the components in the IR.
@@ -211,6 +232,27 @@
     </span><span class="kw">pub </span>extra_opts: Vec&lt;String&gt;,
     <span class="doccomment">/// An optional opaque metadata string which is used by Cider
     </span><span class="kw">pub </span>metadata: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="kw">impl </span>Context {
+    <span class="comment">// Return the index to the entrypoint component.
+    </span><span class="kw">fn </span>entrypoint_idx(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.components
+            .iter()
+            .position(|c| c.name == <span class="self">self</span>.entrypoint)
+            .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;No entrypoint in the program&quot;</span>))
+    }
+
+    <span class="doccomment">/// Return the entrypoint component.
+    </span><span class="kw">pub fn </span>entrypoint(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Component {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.components[<span class="self">self</span>.entrypoint_idx()]
+    }
+
+    <span class="doccomment">/// Return the entrypoint component with mutable access.
+    </span><span class="kw">pub fn </span>entrypoint_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Component {
+        <span class="kw">let </span>idx = <span class="self">self</span>.entrypoint_idx();
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.components[idx]
+    }
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

@@ -1,0 +1,225 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Static Timing - Calyx Documentation</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Getting Started</a></li><li class="chapter-item expanded affix "><li class="part-title">Calyx Language</li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">1.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">1.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">1.2.</strong> Passing Memories by Reference</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/ref.html"><strong aria-hidden="true">2.</strong> Language Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/data-format.html"><strong aria-hidden="true">2.1.</strong> Data Format</a></li><li class="chapter-item expanded "><a href="../lang/static.html" class="active"><strong aria-hidden="true">2.2.</strong> Static Timing</a></li><li class="chapter-item expanded "><a href="../lang/sync.html"><strong aria-hidden="true">2.3.</strong> Experimental: Synchronization</a></li><li class="chapter-item expanded "><a href="../lang/undefined.html"><strong aria-hidden="true">2.4.</strong> Undefined Behaviors</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">3.</strong> Attributes</a></li><li class="chapter-item expanded affix "><li class="part-title">Running Calyx Programs</li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">4.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">4.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/xilinx.html"><strong aria-hidden="true">4.2.</strong> Xilinx Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/axi-gen.html"><strong aria-hidden="true">4.2.1.</strong> AXI Generation</a></li></ol></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">4.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">4.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">4.5.</strong> CIRCT</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">5.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded affix "><li class="part-title">The Calyx Compiler</li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">6.</strong> The Calyx Compiler</a></li><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">7.</strong> Primitive Library</a></li><li class="chapter-item expanded "><a href="../compiler-as-library.html"><strong aria-hidden="true">8.</strong> The calyx Library</a></li><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">9.</strong> Dataflow Analysis</a></li><li class="chapter-item expanded "><a href="../debug/index.html"><strong aria-hidden="true">10.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../debug/cider.html"><strong aria-hidden="true">10.1.</strong> Logical Bugs</a></li><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">10.2.</strong> Compilation Bugs</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Generating Calyx</li><li class="chapter-item expanded "><a href="../calyx-py.html"><strong aria-hidden="true">11.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">12.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">13.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">13.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">13.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">13.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">13.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">13.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">14.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/data-gen.html"><strong aria-hidden="true">15.</strong> Data Gen</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">16.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">17.</strong> Editor Highlighting</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Calyx Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="static-timing"><a class="header" href="#static-timing">Static Timing</a></h1>
+<p>By default, Calyx programs use a <em>latency-insensitive</em> model of computation.
+This means that the compiler does not track the number of cycles it takes to perform a computation or run a control operator
+In general, latency-insensitivity makes it easier to compose programs together and gives the compiler freedom to schedule operators however it wants.
+However, the generated hardware to schedule the execution may not be efficient–especially if the program can take advantage of the <em>latency</em> information.</p>
+<p>More crucially, however, it is impossible for <em>latency-insensitive</em> programs to interact with <em>latency-sensitive</em> hardware implemented in RTL.</p>
+<p>Calyx uses the <code>@static</code> attribute to provide latency information to various constructs and provides strong guarantees about the generated programs.</p>
+<h2 id="guarantees"><a class="header" href="#guarantees">Guarantees</a></h2>
+<h2 id="tricks--tips"><a class="header" href="#tricks--tips">Tricks &amp; Tips</a></h2>
+<h3 id="delay-by-n-cycles"><a class="header" href="#delay-by-n-cycles">Delay by <code>n</code> cycles</a></h3>
+<p>Sometimes it can be useful to delay the execution of a group by <code>n</code> cycles:</p>
+<pre><code>seq {
+  @static(1) a; // Run in first cycle
+  ???
+  @static(2) b; // Run in the 10th cycle
+}
+</code></pre>
+<p>A simple trick to achieve this is adding an empty group with <code>@static(n)</code> attribute on it:</p>
+<pre><code>cell {
+  r = @std_reg(0);
+}
+@static(9) group delay_9 {
+  delay_9[done] = r.out; // Don't use r.done here
+}
+seq {
+    @static(1) a; // Run in first cycle
+    @static(9) delay_9;
+    @static(2) b; // Run in the 10th cycle
+}
+</code></pre>
+<p>The static compilation pass <code>tdst</code> will never attempt to use the <code>delay_9</code>'s <code>done</code> condition and since there are no assignments in the group, it'll not generate any additional hardware.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../lang/data-format.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="../lang/sync.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../lang/data-format.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="../lang/sync.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>

@@ -731,7 +731,7 @@
             .extend(cont_assigns);
 
         <span class="comment">// Generate a control program associated with this instance
-        </span><span class="kw">let </span><span class="kw-2">mut </span>con = ir::Control::clone(<span class="kw-2">&amp;</span>comp.control.borrow());
+        </span><span class="kw">let </span><span class="kw-2">mut </span>con = ir::Cloner::control(<span class="kw-2">&amp;</span>comp.control.borrow());
         rewrite.rewrite_control(<span class="kw-2">&amp;mut </span>con, <span class="kw-2">&amp;</span>group_map, <span class="kw-2">&amp;</span>comb_group_map);
 
         <span class="comment">// Generate interface map for use in the parent cell.
@@ -962,7 +962,7 @@
             <span class="kw">if </span><span class="self">self</span>.new_fsms {
                 con.get_mut_attributes().insert(<span class="string">&quot;new_fsm&quot;</span>, <span class="number">1</span>);
             }
-            <span class="prelude-val">Ok</span>(Action::change(ir::Control::clone(con)))
+            <span class="prelude-val">Ok</span>(Action::change(ir::Cloner::control(con)))
         } <span class="kw">else </span>{
             <span class="prelude-val">Ok</span>(Action::Continue)
         }

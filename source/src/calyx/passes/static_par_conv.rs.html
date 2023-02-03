@@ -234,17 +234,6 @@
 <span id="234">234</span>
 <span id="235">235</span>
 <span id="236">236</span>
-<span id="237">237</span>
-<span id="238">238</span>
-<span id="239">239</span>
-<span id="240">240</span>
-<span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ir;
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>std::cmp::Ordering;
@@ -309,16 +298,13 @@
     <span class="kw">let </span><span class="kw-2">mut </span>counter = <span class="number">0</span>;
 
     <span class="kw">while let </span>(<span class="prelude-val">Some</span>(c1), <span class="prelude-val">Some</span>(c2)) = (long_val, short_val) {
-        <span class="kw">match </span>(c1.get_attribute(<span class="string">&quot;static&quot;</span>), c2.get_attribute(<span class="string">&quot;static&quot;</span>)) {
-            (<span class="prelude-val">Some</span>(x1), <span class="prelude-val">Some</span>(x2)) =&gt; {
-                <span class="kw">if </span>x2 &lt;= x1 {
-                    short_val = short_iter.next();
-                    index_counter.push(counter);
-                }
-                long_val = long_iter.next();
-            }
-            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
+        <span class="kw">let </span>x1 = c1.get_attribute(<span class="string">&quot;static&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>x2 = c2.get_attribute(<span class="string">&quot;static&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">if </span>x2 &lt;= x1 {
+            short_val = short_iter.next();
+            index_counter.push(counter);
         }
+        long_val = long_iter.next();
         counter += <span class="number">1</span>;
     }
 
@@ -339,13 +325,11 @@
 // stmt in seq. Returns None if there is at least one statement in seq
 // that does not have a static attribute
 </span><span class="kw">fn </span>get_static_sum(seq: <span class="kw-2">&amp;</span>ir::Seq) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
-    <span class="kw">let </span>static_vals = seq
-        .stmts
-        .iter()
-        .map(|c| c.get_attribute(<span class="string">&quot;static&quot;</span>))
-        .collect::&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;<span class="kw-2">&amp;</span>u64&gt;&gt;&gt;()<span class="question-mark">?</span>;
-
-    <span class="prelude-val">Some</span>(static_vals.into_iter().sum())
+    <span class="kw">let </span><span class="kw-2">mut </span>count = <span class="number">0</span>;
+    <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;</span>seq.stmts {
+        count += stmt.get_attribute(<span class="string">&quot;static&quot;</span>)<span class="question-mark">?</span>;
+    }
+    <span class="prelude-val">Some</span>(count)
 }
 
 <span class="kw">impl </span>Visitor <span class="kw">for </span>StaticParConv {
@@ -406,11 +390,8 @@
                     <span class="kw">if </span>seq.stmts.len() != index_vec.len() {
                         <span class="macro">unreachable!</span>(<span class="string">&quot;seq should be same len as indices&quot;</span>)
                     }
-                    <span class="kw">let </span>indexed_stmts: Vec&lt;(ir::Control, usize)&gt; = seq
-                        .stmts
-                        .into_iter()
-                        .zip(index_vec.into_iter())
-                        .collect();
+                    <span class="kw">let </span>indexed_stmts: Vec&lt;(ir::Control, usize)&gt; =
+                        seq.stmts.into_iter().zip(index_vec).collect();
                     partition_group.push(indexed_stmts);
                 } <span class="kw">else </span>{
                     i += <span class="number">1</span>;
@@ -448,16 +429,13 @@
                 .map(|stmts| {
                     stmts
                         .iter()
-                        .map(|stmt| {
-                            <span class="kw">match </span>stmt.get_attribute(<span class="string">&quot;static&quot;</span>)
-                            {
-                                <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>x1) =&gt; x1,
-                                <span class="prelude-val">None </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;every statement in the new par blocks should have a static attribute&quot;</span>),
-                            }
-                        })
+                        .map(|stmt| stmt.get_attribute(<span class="string">&quot;static&quot;</span>).unwrap())
                         .max()
                 })
-                .collect::&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u64&gt;&gt;&gt;().unwrap_or_else(|| <span class="macro">unreachable!</span>(<span class="string">&quot;none of the par blocks should be empty&quot;</span>));
+                .collect::&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u64&gt;&gt;&gt;()
+                .unwrap_or_else(|| {
+                    <span class="macro">unreachable!</span>(<span class="string">&quot;none of the par blocks should be empty&quot;</span>)
+                });
 
             <span class="kw">let </span>new_seq_static = new_pars_static.iter().sum();
 
@@ -482,14 +460,14 @@
 
         <span class="comment">//no need for a par block if the par block will only contain one control statement
         </span><span class="kw">if </span>has_been_partitioned.len() == <span class="number">1 </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Change(Box::new(
-                has_been_partitioned.remove(<span class="number">0</span>),
-            )));
+            <span class="prelude-val">Ok</span>(Action::Change(Box::new(
+                has_been_partitioned.pop().unwrap(),
+            )))
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Ok</span>(Action::Change(Box::new(ir::Control::par(
+                has_been_partitioned,
+            ))))
         }
-
-        <span class="prelude-val">Ok</span>(Action::Change(Box::new(ir::Control::par(
-            has_been_partitioned,
-        ))))
     }
 }
 </code></pre></div>

@@ -636,7 +636,7 @@
         <span class="kw">match </span><span class="self">self</span>.group_invoke_map.get(<span class="kw-2">&amp;</span>s.group.borrow().name()) {
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(Action::Continue),
             <span class="prelude-val">Some</span>(invoke) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>inv = ir::Control::clone(invoke);
+                <span class="kw">let </span><span class="kw-2">mut </span>inv = ir::Cloner::control(invoke);
                 <span class="kw">let </span>attrs = std::mem::take(<span class="kw-2">&amp;mut </span>s.attributes);
                 <span class="kw-2">*</span>inv.get_mut_attributes() = attrs;
                 <span class="prelude-val">Ok</span>(Action::Change(Box::new(inv)))

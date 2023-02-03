@@ -246,6 +246,14 @@
 <span id="246">246</span>
 <span id="247">247</span>
 <span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, Builder, Cell, CellType, CloneName, CombGroup,
     Control, GetName, Group, Id, PortDef, RRC,
@@ -453,6 +461,14 @@
     </span><span class="kw">pub fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, item: RRC&lt;T&gt;) {
         <span class="kw">let </span>name = item.clone_name();
         <span class="self">self</span>.<span class="number">0</span>.insert(name, item);
+    }
+
+    <span class="comment">// Remove and return the element with the given name.
+    </span><span class="kw">pub fn </span>remove&lt;S&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;T&gt;&gt;
+    <span class="kw">where
+        </span>S: Into&lt;Id&gt;,
+    {
+        <span class="self">self</span>.<span class="number">0</span>.remove(<span class="kw-2">&amp;</span>name.into())
     }
 
     <span class="doccomment">/// Add all elements to the collection

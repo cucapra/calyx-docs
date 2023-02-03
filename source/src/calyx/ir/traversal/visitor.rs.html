@@ -418,6 +418,20 @@
 <span id="418">418</span>
 <span id="419">419</span>
 <span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a visitor for `ir::Control` programs.
 //! Program passes implemented as the Visitor are directly invoked on
 //! [`ir::Context`] to compile every [`ir::Component`] using the pass.
@@ -522,6 +536,15 @@
 /// A pass will usually override one or more function and rely on the default
 /// visitors to automatically visit the children.
 </span><span class="kw">pub trait </span>Visitor {
+    <span class="doccomment">/// Precondition for this pass to run on the program. If this function returns
+    /// None, the pass triggers. Otherwise it aborts and logs the string as the reason.
+    </span><span class="kw">fn </span>precondition(_ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt;
+    <span class="kw">where
+        </span><span class="self">Self</span>: Sized,
+    {
+        <span class="prelude-val">None
+    </span>}
+
     <span class="doccomment">/// Define the iteration order in which components should be visited
     </span><span class="attribute">#[inline(always)]
     </span><span class="kw">fn </span>iteration_order() -&gt; Order
@@ -574,8 +597,13 @@
     /// Panics if the pass attempts to use the control program mutably.
     </span><span class="kw">fn </span>do_pass(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>Context) -&gt; CalyxResult&lt;()&gt;
     <span class="kw">where
-        </span><span class="self">Self</span>: Sized + ConstructVisitor,
+        </span><span class="self">Self</span>: Sized + ConstructVisitor + Named,
     {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(msg) = <span class="self">Self</span>::precondition(<span class="kw-2">&amp;*</span>context) {
+            <span class="macro">log::info!</span>(<span class="string">&quot;Skipping `{}&#39;: {msg}&quot;</span>, <span class="self">Self</span>::name());
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        }
+
         <span class="kw">let </span>signatures = <span class="kw-2">&amp;</span>context.lib;
         <span class="kw">let </span>comps = context.components.drain(..).collect_vec();
 
@@ -596,7 +624,7 @@
     </span><span class="attribute">#[inline(always)]
     </span><span class="kw">fn </span>do_pass_default(context: <span class="kw-2">&amp;mut </span>Context) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
-        </span><span class="self">Self</span>: ConstructVisitor + Sized,
+        </span><span class="self">Self</span>: ConstructVisitor + Sized + Named,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>visitor = <span class="self">Self</span>::from(<span class="kw-2">&amp;*</span>context)<span class="question-mark">?</span>;
         visitor.do_pass(context)<span class="question-mark">?</span>;

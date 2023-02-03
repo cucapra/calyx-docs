@@ -562,7 +562,7 @@
         }
         <span class="kw">_ </span>=&gt; c.get_attribute(NODE_ID),
     };
-    <span class="kw-2">*</span>v.unwrap_or_else(|| <span class="macro">unreachable!</span>(
+    v.unwrap_or_else(|| <span class="macro">unreachable!</span>(
             <span class="string">&quot;get_id() shouldn&#39;t be called on control stmts that don&#39;t have id numbering&quot;
     </span>))
 }
@@ -574,7 +574,7 @@
         <span class="kw">return </span><span class="bool-val">true</span>;
     }
     <span class="comment">//could match the end id of an if statement as well
-    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>end) = c.get_attribute(END_ID) {
+    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(end) = c.get_attribute(END_ID) {
         key == end
     } <span class="kw">else </span>{
         <span class="bool-val">false

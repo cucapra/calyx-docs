@@ -143,8 +143,25 @@
 <span id="143">143</span>
 <span id="144">144</span>
 <span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
 </pre><pre class="rust"><code><span class="kw">use </span>linked_hash_map::LinkedHashMap;
-<span class="kw">use </span>std::{convert::TryFrom, ops::Index};
+<span class="kw">use </span>std::{
+    convert::TryFrom,
+    ops::{Index, IndexMut},
+};
 
 <span class="kw">use crate</span>::{
     errors::CalyxResult,
@@ -286,6 +303,17 @@
         <span class="kw">let </span>idx = key.into();
         <span class="self">self</span>.get(idx)
             .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;No key `{}` in attribute map&quot;</span>, idx))
+    }
+}
+
+<span class="kw">impl</span>&lt;S&gt; IndexMut&lt;S&gt; <span class="kw">for </span>Attributes
+<span class="kw">where
+    </span>S: Into&lt;Id&gt;,
+{
+    <span class="kw">fn </span>index_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: S) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Output {
+        <span class="kw">let </span>key = index.into();
+        <span class="self">self</span>.attrs.insert(key, <span class="number">0</span>);
+        <span class="self">self</span>.attrs.get_mut(<span class="kw-2">&amp;</span>key).unwrap()
     }
 }
 </code></pre></div>

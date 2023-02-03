@@ -309,6 +309,58 @@
 <span id="309">309</span>
 <span id="310">310</span>
 <span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
 </pre><pre class="rust"><code><span class="kw">use </span>std::rc::Rc;
 
 <span class="kw">use super</span>::{Attributes, Cell, CombGroup, GetAttributes, Group, Id, Port, RRC};
@@ -321,6 +373,14 @@
     <span class="doccomment">/// Attributes attached to this control statement.
     </span><span class="kw">pub </span>attributes: Attributes,
 }
+<span class="kw">impl </span>GetAttributes <span class="kw">for </span>Seq {
+    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
+    }
+    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
+    }
+}
 
 <span class="doccomment">/// Data for the `par` control statement.
 </span><span class="attribute">#[derive(Debug)]
@@ -329,6 +389,14 @@
     </span><span class="kw">pub </span>stmts: Vec&lt;Control&gt;,
     <span class="doccomment">/// Attributes attached to this control statement.
     </span><span class="kw">pub </span>attributes: Attributes,
+}
+<span class="kw">impl </span>GetAttributes <span class="kw">for </span>Par {
+    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
+    }
+    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
+    }
 }
 
 <span class="doccomment">/// Data for the `if` control statement.
@@ -349,20 +417,36 @@
     <span class="doccomment">/// Attributes attached to this control statement.
     </span><span class="kw">pub </span>attributes: Attributes,
 }
+<span class="kw">impl </span>GetAttributes <span class="kw">for </span>If {
+    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
+    }
+
+    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
+    }
+}
 
 <span class="doccomment">/// Data for the `if` control statement.
 </span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>While {
     <span class="doccomment">/// Port that connects the conditional check.
     </span><span class="kw">pub </span>port: RRC&lt;Port&gt;,
-
     <span class="doccomment">/// Group that makes the signal on the conditional port valid.
     </span><span class="kw">pub </span>cond: <span class="prelude-ty">Option</span>&lt;RRC&lt;CombGroup&gt;&gt;,
-
     <span class="doccomment">/// Control for the loop body.
     </span><span class="kw">pub </span>body: Box&lt;Control&gt;,
     <span class="doccomment">/// Attributes attached to this control statement.
     </span><span class="kw">pub </span>attributes: Attributes,
+}
+<span class="kw">impl </span>GetAttributes <span class="kw">for </span>While {
+    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
+    }
+
+    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
+    }
 }
 
 <span class="doccomment">/// Data for the `enable` control statement.
@@ -372,6 +456,15 @@
     </span><span class="kw">pub </span>group: RRC&lt;Group&gt;,
     <span class="doccomment">/// Attributes attached to this control statement.
     </span><span class="kw">pub </span>attributes: Attributes,
+}
+<span class="kw">impl </span>GetAttributes <span class="kw">for </span>Enable {
+    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
+    }
+
+    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
+    }
 }
 
 <span class="kw">type </span>PortMap = Vec&lt;(Id, RRC&lt;Port&gt;)&gt;;
@@ -392,6 +485,15 @@
     </span><span class="kw">pub </span>comb_group: <span class="prelude-ty">Option</span>&lt;RRC&lt;CombGroup&gt;&gt;,
     <span class="doccomment">/// Mapping from name of external cell in &#39;comp&#39; to the cell connected to it.
     </span><span class="kw">pub </span>ref_cells: CellMap,
+}
+<span class="kw">impl </span>GetAttributes <span class="kw">for </span>Invoke {
+    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
+    }
+
+    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
+    }
 }
 
 <span class="doccomment">/// Data for the `empty` control statement.
@@ -531,11 +633,11 @@
     }
 
     <span class="doccomment">/// Returns the value of an attribute if present
-    </span><span class="kw">pub fn </span>get_attribute&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: S) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>u64&gt;
+    </span><span class="kw">pub fn </span>get_attribute&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: S) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
     <span class="kw">where
         </span>S: Into&lt;Id&gt;,
     {
-        <span class="self">self</span>.get_attributes().get(attr)
+        <span class="self">self</span>.get_attributes().get(attr).cloned()
     }
 
     <span class="doccomment">/// Returns true if the node has a specific attribute
@@ -547,76 +649,78 @@
     }
 }
 
-<span class="kw">impl </span>Control {
-    <span class="doccomment">/// Associated clone method the control program. We don&#39;t define this using the
-    /// [Clone] trait because cloning control is not very common and clones
-    /// should be explicit.
-    </span><span class="attribute">#[allow(clippy::should_implement_trait)]
-    </span><span class="kw">pub fn </span>clone(con: <span class="kw-2">&amp;</span>Control) -&gt; Control {
+<span class="doccomment">/// Implement cloning operations on control statements.
+/// We implement these separatily from the [Clone] trait because cloning trait
+/// is not very common and clones should be explicit.
+</span><span class="kw">pub struct </span>Cloner;
+
+<span class="kw">impl </span>Cloner {
+    <span class="kw">pub fn </span>enable(en: <span class="kw-2">&amp;</span>Enable) -&gt; Enable {
+        Enable {
+            group: Rc::clone(<span class="kw-2">&amp;</span>en.group),
+            attributes: en.attributes.clone(),
+        }
+    }
+
+    <span class="kw">pub fn </span>invoke(inv: <span class="kw-2">&amp;</span>Invoke) -&gt; Invoke {
+        Invoke {
+            comp: Rc::clone(<span class="kw-2">&amp;</span>inv.comp),
+            inputs: inv.inputs.clone(),
+            outputs: inv.outputs.clone(),
+            attributes: inv.attributes.clone(),
+            comb_group: inv.comb_group.clone(),
+            ref_cells: inv.ref_cells.clone(),
+        }
+    }
+
+    <span class="kw">pub fn </span>empty(en: <span class="kw-2">&amp;</span>Empty) -&gt; Empty {
+        Empty {
+            attributes: en.attributes.clone(),
+        }
+    }
+
+    <span class="kw">pub fn </span>while_(wh: <span class="kw-2">&amp;</span>While) -&gt; While {
+        While {
+            port: Rc::clone(<span class="kw-2">&amp;</span>wh.port),
+            cond: wh.cond.clone(),
+            body: Box::new(<span class="self">Self</span>::control(<span class="kw-2">&amp;</span>wh.body)),
+            attributes: wh.attributes.clone(),
+        }
+    }
+
+    <span class="kw">pub fn </span>if_(if_: <span class="kw-2">&amp;</span>If) -&gt; If {
+        If {
+            port: Rc::clone(<span class="kw-2">&amp;</span>if_.port),
+            cond: if_.cond.clone(),
+            tbranch: Box::new(<span class="self">Self</span>::control(<span class="kw-2">&amp;</span>if_.tbranch)),
+            fbranch: Box::new(<span class="self">Self</span>::control(<span class="kw-2">&amp;</span>if_.fbranch)),
+            attributes: if_.attributes.clone(),
+        }
+    }
+
+    <span class="kw">pub fn </span>par(par: <span class="kw-2">&amp;</span>Par) -&gt; Par {
+        Par {
+            stmts: par.stmts.iter().map(<span class="self">Self</span>::control).collect(),
+            attributes: par.attributes.clone(),
+        }
+    }
+
+    <span class="kw">pub fn </span>seq(seq: <span class="kw-2">&amp;</span>Seq) -&gt; Seq {
+        Seq {
+            stmts: seq.stmts.iter().map(<span class="self">Self</span>::control).collect(),
+            attributes: seq.attributes.clone(),
+        }
+    }
+
+    <span class="kw">pub fn </span>control(con: <span class="kw-2">&amp;</span>Control) -&gt; Control {
         <span class="kw">match </span>con {
-            Control::Seq(Seq { stmts, attributes }) =&gt; Control::Seq(Seq {
-                stmts: stmts.iter().map(Control::clone).collect(),
-                attributes: attributes.clone(),
-            }),
-            Control::Par(Par { stmts, attributes }) =&gt; Control::Par(Par {
-                stmts: stmts.iter().map(Control::clone).collect(),
-                attributes: attributes.clone(),
-            }),
-            Control::If(If {
-                port,
-                cond,
-                tbranch,
-                fbranch,
-                attributes,
-            }) =&gt; Control::If(If {
-                port: Rc::clone(port),
-                cond: cond.clone().map(|cg| Rc::clone(<span class="kw-2">&amp;</span>cg)),
-                tbranch: Box::new(Control::clone(tbranch)),
-                fbranch: Box::new(Control::clone(fbranch)),
-                attributes: attributes.clone(),
-            }),
-            Control::While(While {
-                port,
-                cond,
-                body,
-                attributes,
-            }) =&gt; Control::While(While {
-                port: Rc::clone(port),
-                cond: cond.clone().map(|cg| Rc::clone(<span class="kw-2">&amp;</span>cg)),
-                body: Box::new(Control::clone(body)),
-                attributes: attributes.clone(),
-            }),
-            Control::Invoke(Invoke {
-                comp,
-                inputs,
-                outputs,
-                attributes,
-                comb_group,
-                ref_cells,
-            }) =&gt; Control::Invoke(Invoke {
-                comp: Rc::clone(comp),
-                inputs: inputs
-                    .iter()
-                    .map(|(name, port)| (<span class="kw-2">*</span>name, Rc::clone(port)))
-                    .collect(),
-                outputs: outputs
-                    .iter()
-                    .map(|(name, port)| (<span class="kw-2">*</span>name, Rc::clone(port)))
-                    .collect(),
-                comb_group: comb_group.clone().map(|cg| Rc::clone(<span class="kw-2">&amp;</span>cg)),
-                attributes: attributes.clone(),
-                ref_cells: ref_cells
-                    .iter()
-                    .map(|(outcell, incell)| (<span class="kw-2">*</span>outcell, Rc::clone(incell)))
-                    .collect(),
-            }),
-            Control::Enable(Enable { group, attributes }) =&gt; {
-                Control::Enable(Enable {
-                    group: Rc::clone(group),
-                    attributes: attributes.clone(),
-                })
-            }
-            Control::Empty(<span class="kw">_</span>) =&gt; Control::empty(),
+            Control::Seq(seq) =&gt; Control::Seq(Cloner::seq(seq)),
+            Control::Par(par) =&gt; Control::Par(Cloner::par(par)),
+            Control::If(if_) =&gt; Control::If(Cloner::if_(if_)),
+            Control::While(wh) =&gt; Control::While(Cloner::while_(wh)),
+            Control::Invoke(inv) =&gt; Control::Invoke(Cloner::invoke(inv)),
+            Control::Enable(en) =&gt; Control::Enable(Cloner::enable(en)),
+            Control::Empty(en) =&gt; Control::Empty(Cloner::empty(en)),
         }
     }
 }
