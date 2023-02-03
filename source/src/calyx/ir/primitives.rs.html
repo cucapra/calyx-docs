@@ -178,6 +178,8 @@
 <span id="178">178</span>
 <span id="179">179</span>
 <span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{Attributes, Direction, GetName, Id};
 <span class="kw">use </span><span class="kw">crate</span>::errors::{CalyxResult, Error};
 <span class="kw">use </span>linked_hash_map::LinkedHashMap;
@@ -208,6 +210,8 @@
     </span><span class="kw">pub </span>attributes: Attributes,
     <span class="doccomment">/// True iff this is a combinational primitive
     </span><span class="kw">pub </span>is_comb: bool,
+    <span class="doccomment">/// body of the string, if it is an inlined primitive
+    </span><span class="kw">pub </span>body: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>Primitive {

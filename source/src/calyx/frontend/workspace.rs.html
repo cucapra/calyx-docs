@@ -230,6 +230,17 @@
 <span id="230">230</span>
 <span id="231">231</span>
 <span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     ast::{ComponentDef, NamespaceDef},
     parser,
@@ -276,7 +287,7 @@
     /// compilation mode.
     </span><span class="kw">pub </span>declarations: Vec&lt;ComponentDef&gt;,
     <span class="doccomment">/// Absolute path to extern definitions and primitives defined by them.
-    </span><span class="kw">pub </span>externs: LinkedHashMap&lt;PathBuf, Vec&lt;ir::Primitive&gt;&gt;,
+    </span><span class="kw">pub </span>externs: LinkedHashMap&lt;<span class="prelude-ty">Option</span>&lt;PathBuf&gt;, Vec&lt;ir::Primitive&gt;&gt;,
     <span class="doccomment">/// Original import statements present in the top-level file.
     </span><span class="kw">pub </span>original_imports: Vec&lt;String&gt;,
     <span class="doccomment">/// Optional opaque metadata attached to the top-level file
@@ -408,12 +419,23 @@
          -&gt; CalyxResult&lt;Vec&lt;PathBuf&gt;&gt; {
             <span class="comment">// Canonicalize the extern paths and add them
             </span><span class="kw">for </span>(path, <span class="kw-2">mut </span>exts) <span class="kw">in </span>ns.externs {
-                <span class="kw">let </span>abs_path = <span class="self">Self</span>::canonicalize_extern(path, parent)<span class="question-mark">?</span>;
-                workspace
-                    .externs
-                    .entry(abs_path)
-                    .or_default()
-                    .append(<span class="kw-2">&amp;mut </span>exts);
+                <span class="kw">match </span>path {
+                    <span class="prelude-val">Some</span>(p) =&gt; {
+                        <span class="kw">let </span>abs_path = <span class="self">Self</span>::canonicalize_extern(p, parent)<span class="question-mark">?</span>;
+                        workspace
+                            .externs
+                            .entry(<span class="prelude-val">Some</span>(abs_path))
+                            .or_default()
+                            .append(<span class="kw-2">&amp;mut </span>exts);
+                    }
+                    <span class="prelude-val">None </span>=&gt; {
+                        workspace
+                            .externs
+                            .entry(<span class="prelude-val">None</span>)
+                            .or_default()
+                            .append(<span class="kw-2">&amp;mut </span>exts);
+                    }
+                }
             }
 
             <span class="comment">// Add components defined by this namespace to either components or

@@ -126,6 +126,32 @@
 <span id="126">126</span>
 <span id="127">127</span>
 <span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An IR context. This is the top-level object for an IR and contains all information
 //! need to transform, lower, an emit a program.
 //! Passes usually have transform/analyze the components in the IR.
@@ -141,6 +167,8 @@
 </span><span class="kw">pub struct </span>LibrarySignatures {
     <span class="doccomment">/// Direct mapping from name to primitives
     </span>primitive_definitions: Vec&lt;(PathBuf, LinkedHashMap&lt;Id, Primitive&gt;)&gt;,
+    <span class="doccomment">/// Inlined Primitiveds
+    </span>prim_inlines: LinkedHashMap&lt;Id, Primitive&gt;,
 }
 
 <span class="kw">impl </span>LibrarySignatures {
@@ -154,6 +182,9 @@
             <span class="kw">if let </span><span class="prelude-val">Some</span>(p) = sig.get(<span class="kw-2">&amp;</span>key) {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(p);
             }
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(p) = <span class="self">self</span>.prim_inlines.get(<span class="kw-2">&amp;</span>key) {
+            <span class="kw">return </span><span class="prelude-val">Some</span>(p);
         }
         <span class="prelude-val">None
     </span>}
@@ -174,11 +205,29 @@
         <span class="self">self</span>.primitive_definitions
             .iter()
             .flat_map(|(<span class="kw">_</span>, sig)| sig.values())
+            .chain(<span class="self">self</span>.prim_inlines.iter().map(|(<span class="kw">_</span>, p)| p))
     }
 
     <span class="doccomment">/// Return the underlying externs
     </span><span class="kw">pub fn </span>externs(<span class="self">self</span>) -&gt; Vec&lt;(PathBuf, LinkedHashMap&lt;Id, Primitive&gt;)&gt; {
         <span class="self">self</span>.primitive_definitions
+    }
+
+    <span class="kw">pub fn </span>all_prims(
+        <span class="self">self</span>,
+    ) -&gt; Vec&lt;(<span class="prelude-ty">Option</span>&lt;PathBuf&gt;, LinkedHashMap&lt;Id, Primitive&gt;)&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>res: Vec&lt;(<span class="prelude-ty">Option</span>&lt;PathBuf&gt;, LinkedHashMap&lt;Id, Primitive&gt;)&gt; =
+            <span class="self">self</span>.primitive_definitions
+                .into_iter()
+                .map(|(pb, map)| (<span class="prelude-val">Some</span>(pb), map))
+                .collect();
+        res.push((<span class="prelude-val">None</span>, <span class="self">self</span>.prim_inlines));
+        res
+    }
+
+    <span class="doccomment">/// Return the underyling inlined primitives
+    </span><span class="kw">pub fn </span>prim_inlines(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span>Primitive&gt; + <span class="lifetime">&#39;_ </span>{
+        <span class="self">self</span>.prim_inlines.iter().map(|(<span class="kw">_</span>, prim)| prim)
     }
 
     <span class="doccomment">/// Return the paths for the extern defining files
@@ -192,14 +241,17 @@
 
 <span class="kw">impl</span>&lt;I&gt; From&lt;I&gt; <span class="kw">for </span>LibrarySignatures
 <span class="kw">where
-    </span>I: IntoIterator&lt;Item = (PathBuf, Vec&lt;Primitive&gt;)&gt;,
+    </span>I: IntoIterator&lt;Item = (<span class="prelude-ty">Option</span>&lt;PathBuf&gt;, Vec&lt;Primitive&gt;)&gt;,
 {
     <span class="kw">fn </span>from(externs: I) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>lib = LibrarySignatures::default();
         <span class="kw">for </span>(path, prims) <span class="kw">in </span>externs {
             <span class="kw">let </span>map: LinkedHashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; =
                 prims.into_iter().map(|p| (p.name, p)).collect();
-            lib.primitive_definitions.push((path, map));
+            <span class="kw">match </span>path {
+                <span class="prelude-val">Some</span>(p) =&gt; lib.primitive_definitions.push((p, map)),
+                <span class="prelude-val">None </span>=&gt; lib.prim_inlines.extend(map),
+            }
         }
         lib
     }

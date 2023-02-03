@@ -916,12 +916,67 @@
 <span id="916">916</span>
 <span id="917">917</span>
 <span id="918">918</span>
+<span id="919">919</span>
+<span id="920">920</span>
+<span id="921">921</span>
+<span id="922">922</span>
+<span id="923">923</span>
+<span id="924">924</span>
+<span id="925">925</span>
+<span id="926">926</span>
+<span id="927">927</span>
+<span id="928">928</span>
+<span id="929">929</span>
+<span id="930">930</span>
+<span id="931">931</span>
+<span id="932">932</span>
+<span id="933">933</span>
+<span id="934">934</span>
+<span id="935">935</span>
+<span id="936">936</span>
+<span id="937">937</span>
+<span id="938">938</span>
+<span id="939">939</span>
+<span id="940">940</span>
+<span id="941">941</span>
+<span id="942">942</span>
+<span id="943">943</span>
+<span id="944">944</span>
+<span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
+<span id="948">948</span>
+<span id="949">949</span>
+<span id="950">950</span>
+<span id="951">951</span>
+<span id="952">952</span>
+<span id="953">953</span>
+<span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
 </pre><pre class="rust"><code><span class="attribute">#![allow(clippy::upper_case_acronyms)]
 
 </span><span class="doccomment">//! Parser for Calyx programs.
 </span><span class="kw">use </span><span class="kw">super</span>::ast::{<span class="self">self</span>, BitNum, Control, GuardComp <span class="kw">as </span>GC, GuardExpr, NumType};
 <span class="kw">use </span><span class="kw">crate</span>::errors::{<span class="self">self</span>, CalyxResult};
-<span class="kw">use </span><span class="kw">crate</span>::ir;
+<span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, Primitive};
 <span class="kw">use </span><span class="kw">crate</span>::utils::{FileIdx, GPosIdx, GlobalPositionTable};
 <span class="kw">use </span>pest::pratt_parser::{Assoc, Op, PrattParser};
 <span class="kw">use </span>pest_consume::{match_nodes, Error, Parser};
@@ -1047,8 +1102,9 @@
 
 <span class="attribute">#[allow(clippy::large_enum_variant)]
 </span><span class="kw">enum </span>ExtOrComp {
-    Ext((String, Vec&lt;ir::Primitive&gt;)),
+    Ext((<span class="prelude-ty">Option</span>&lt;String&gt;, Vec&lt;ir::Primitive&gt;)),
     Comp(ComponentDef),
+    PrimInline(Primitive),
 }
 
 <span class="attribute">#[pest_consume::parser]
@@ -1189,6 +1245,17 @@
         ))
     }
 
+    <span class="kw">fn </span>block_char(input: Node) -&gt; ParseResult&lt;<span class="kw-2">&amp;</span>str&gt; {
+        <span class="prelude-val">Ok</span>(input.as_str())
+    }
+
+    <span class="kw">fn </span>block_string(input: Node) -&gt; ParseResult&lt;String&gt; {
+        <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
+            input.into_children();
+            [block_char(c)..] =&gt; c.collect::&lt;String&gt;()
+        ))
+    }
+
     <span class="kw">fn </span>attr_val(input: Node) -&gt; ParseResult&lt;u64&gt; {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             input.into_children();
@@ -1295,6 +1362,7 @@
                 signature: s,
                 attributes: attrs.add_span(span),
                 is_comb: <span class="bool-val">false</span>,
+                body: <span class="prelude-val">None</span>,
             },
             [comb(<span class="kw">_</span>), name_with_attribute((name, attrs)), sig_with_params((p, s))] =&gt; ir::Primitive {
                 name,
@@ -1302,6 +1370,7 @@
                 signature: s,
                 attributes: attrs.add_span(span),
                 is_comb: <span class="bool-val">true</span>,
+                body: <span class="prelude-val">None</span>,
             },
         ))
     }
@@ -1754,10 +1823,34 @@
         ))
     }
 
-    <span class="kw">fn </span>ext(input: Node) -&gt; ParseResult&lt;(String, Vec&lt;ir::Primitive&gt;)&gt; {
+    <span class="kw">fn </span>ext(input: Node) -&gt; ParseResult&lt;(<span class="prelude-ty">Option</span>&lt;String&gt;, Vec&lt;ir::Primitive&gt;)&gt; {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             input.into_children();
-            [string_lit(file), primitive(prims)..] =&gt; (file, prims.collect())
+            [string_lit(file), primitive(prims)..] =&gt; (<span class="prelude-val">Some</span>(file), prims.collect())
+        ))
+    }
+
+    <span class="kw">fn </span>prim_inline(input: Node) -&gt; ParseResult&lt;Primitive&gt; {
+        <span class="kw">let </span>span = <span class="self">Self</span>::get_span(<span class="kw-2">&amp;</span>input);
+        <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
+            input.into_children();
+            [name_with_attribute((name, attrs)), sig_with_params((p, s)), block_string(b)] =&gt; {
+                ir::Primitive {
+                name,
+                params: p,
+                signature: s,
+                attributes: attrs.add_span(span),
+                is_comb: <span class="bool-val">false</span>,
+                body: <span class="prelude-val">Some</span>(b),
+            }},
+            [comb(<span class="kw">_</span>), name_with_attribute((name, attrs)), sig_with_params((p, s)), block_string(b)] =&gt; ir::Primitive {
+                name,
+                params: p,
+                signature: s,
+                attributes: attrs.add_span(span),
+                is_comb: <span class="bool-val">true</span>,
+                body: <span class="prelude-val">Some</span>(b),
+            },
         ))
     }
 
@@ -1765,7 +1858,8 @@
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             input.into_children();
             [component(comp)] =&gt; ExtOrComp::Comp(comp),
-            [ext(ext)] =&gt; ExtOrComp::Ext(ext)
+            [ext(ext)] =&gt; ExtOrComp::Ext(ext),
+            [prim_inline(prim_inline)] =&gt; ExtOrComp::PrimInline(prim_inline),
         ))
     }
 
@@ -1810,6 +1904,14 @@
                     <span class="kw">match </span>m {
                         ExtOrComp::Ext(ext) =&gt; namespace.externs.push(ext),
                         ExtOrComp::Comp(comp) =&gt; namespace.components.push(comp),
+                        ExtOrComp::PrimInline(prim) =&gt; {
+                            <span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="kw">_</span>, prim_inlines)) = namespace.externs.iter_mut().find(|(filename, <span class="kw">_</span>)| filename.is_none()) {
+                                prim_inlines.push(prim)
+                            }
+                            <span class="kw">else</span>{
+                                namespace.externs.push((<span class="prelude-val">None</span>, <span class="macro">vec!</span>[prim]));
+                            }
+                        },
                     }
                 }
                 namespace
@@ -1826,6 +1928,14 @@
                     <span class="kw">match </span>m {
                         ExtOrComp::Ext(ext) =&gt; namespace.externs.push(ext),
                         ExtOrComp::Comp(comp) =&gt; namespace.components.push(comp),
+                        ExtOrComp::PrimInline(prim) =&gt; {
+                            <span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="kw">_</span>, prim_inlines)) = namespace.externs.iter_mut().find(|(filename, <span class="kw">_</span>)| filename.is_none()) {
+                                prim_inlines.push(prim)
+                            }
+                            <span class="kw">else</span>{
+                                namespace.externs.push((<span class="prelude-val">None</span>, <span class="macro">vec!</span>[prim]));
+                            }
+                        },
                     }
                 }
                 namespace

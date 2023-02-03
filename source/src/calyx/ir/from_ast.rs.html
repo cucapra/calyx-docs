@@ -620,6 +620,7 @@
 <span id="620">620</span>
 <span id="621">621</span>
 <span id="622">622</span>
+<span id="623">623</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Canonical, CellType,
     Component, Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
@@ -722,6 +723,7 @@
         .externs
         .iter()
         .flat_map(|(<span class="kw">_</span>, prims)| prims.iter().map(|prim| <span class="kw-2">&amp;</span>prim.name));
+
     <span class="kw">let </span>comp_names = workspace.components.iter().map(|comp| <span class="kw-2">&amp;</span>comp.name);
 
     <span class="kw">for </span>bound <span class="kw">in </span>prim_names.chain(comp_names) {

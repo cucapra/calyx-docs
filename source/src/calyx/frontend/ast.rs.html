@@ -332,7 +332,7 @@
     <span class="doccomment">/// List of component definitions.
     </span><span class="kw">pub </span>components: Vec&lt;ComponentDef&gt;,
     <span class="doccomment">/// Extern statements and any primitive declarations in them.
-    </span><span class="kw">pub </span>externs: Vec&lt;(String, Vec&lt;ir::Primitive&gt;)&gt;,
+    </span><span class="kw">pub </span>externs: Vec&lt;(<span class="prelude-ty">Option</span>&lt;String&gt;, Vec&lt;ir::Primitive&gt;)&gt;,
     <span class="doccomment">/// Optional opaque metadata
     </span><span class="kw">pub </span>metadata: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
