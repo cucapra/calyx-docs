@@ -32,6 +32,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
@@ -143,7 +144,7 @@
                     <main>
                         <h1 id="editor-highlighting"><a class="header" href="#editor-highlighting">Editor Highlighting</a></h1>
 <h2 id="vim"><a class="header" href="#vim">Vim</a></h2>
-<p>The vim extension highlights files with the extension <code>.futil</code>. 
+<p>The vim extension highlights files with the extension <code>.futil</code>.
 It can be installed using a plugin manager such as <a href="https://github.com/junegunn/vim-plug">vim-plug</a> using a
 local installation.
 Add the following to your vim plug configuration:</p>
@@ -166,7 +167,7 @@ If you use <a href="https://www.spacemacs.org/">Spacemacs</a>, this looks like a
 <h2 id="visual-studio-code"><a class="header" href="#visual-studio-code">Visual Studio Code</a></h2>
 <p>Add a link to the Calyx VSCode extension directory to your VSCode extensions directory.</p>
 <pre><code>cd $HOME/.vscode/extensions
-ln -s &lt;calyx root directory/tools/vscode calyx.calyx-0.0.1
+ln -s &lt;calyx root directory&gt;/tools/vscode calyx.calyx-0.0.1
 </code></pre>
 <p>Restart VSCode.</p>
 
@@ -218,5 +219,6 @@ ln -s &lt;calyx root directory/tools/vscode calyx.calyx-0.0.1
         <!-- Custom JS scripts -->
 
 
+    </div>
     </body>
 </html>

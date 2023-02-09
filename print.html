@@ -33,6 +33,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "";
@@ -245,7 +246,7 @@ to hardware modules (or function definitions for the software-minded).</p>
 statement to import the standard library:</p>
 <pre><code>import &quot;primitives/core.futil&quot;;
 
-component main(go: 1) -&gt; (done: 1) {
+component main(@go go: 1) -&gt; (@done done: 1) {
   cells {}
   wires {}
   control {}
@@ -274,7 +275,7 @@ You can see the definition of <code>std_mem_d1</code>, and all the other standar
 the data width (here, 32 bits),
 the number of elements (just one),
 and the width of the address port (one bit).</p>
-<p>The <code>@external</code> syntax is an <a href="tutorial/../lang/attributes.html#external1">extra bit of magic</a> that allows us
+<p>The <code>@external</code> syntax is an <a href="tutorial/../lang/attributes.html#external">extra bit of magic</a> that allows us
 to read and write to the memory.</p>
 <p>Next, we'll add some assignments to the <code>wires</code> section to update the value in
 the memory.
@@ -503,7 +504,7 @@ The output should be the result of adding 4 to the initial value 8 times, so 10 
 <p>Calyx designs can define and instantiate other Calyx components that themselves
 encode complex <code>control</code> programs.</p>
 <p>As an example, we'll build a Calyx design that uses a simple Calyx component
-to save a value in a register and use it in different component.</p>
+to save a value in a register and use it in a different component.</p>
 <p>We define a new component called <code>identity</code> that has an input port <code>in</code>
 and an output port <code>out</code>.</p>
 <pre><code>component identity(in: 32) -&gt; (out: 32) {
@@ -596,7 +597,7 @@ int main() {
 <li>Define the component in a manner such that it can accept a memory by reference.</li>
 <li>Pass the desired memory by reference.</li>
 </ol>
-<p>The language provides two ways to doing this.</p>
+<p>The language provides two ways of doing this.</p>
 <h2 id="the-easy-way"><a class="header" href="#the-easy-way">The Easy Way</a></h2>
 <p>Calyx uses the <code>ref</code> keyword to describe cells that are passed in by-reference:</p>
 <pre><code>component add_one() -&gt; () {
@@ -950,7 +951,7 @@ port. Omitting a guard expression is equivalent to using <code>1'd1</code> (a co
 <p><strong>Well-formedness</strong>: For each input port on the LHS, only one guard should be active in any given cycle during the execution of a Calyx program.</p>
 </blockquote>
 <h3 id="continuous-assignments"><a class="header" href="#continuous-assignments">Continuous Assignments</a></h3>
-<p>When an assignment is appears directly inside a component's <code>wires</code> section, it
+<p>When an assignment appears directly inside a component's <code>wires</code> section, it
 is called a <em>continuous assignment</em> and is permanently active, even when the
 <a href="lang/ref.html#the-control-operators">control program</a> of the component is inactive.</p>
 <h3 id="group-definitions"><a class="header" href="#group-definitions"><code>group</code> definitions</a></h3>
@@ -965,7 +966,7 @@ meaningful action:</p>
 in other groups.
 Unlike <a href="lang/ref.html#continuous-assignments">continuous assignments</a>, a group's encapsulated assignments
 only execute as dictated by the <a href="lang/ref.html#the-control-operators">control program</a>.
-These means that seemingly conflicting writes to the same ports are allowed:</p>
+This means that seemingly conflicting writes to the same ports are allowed:</p>
 <pre><code>group foo {
   r.in = 32'd10;
   foo[done] = ...;
@@ -1026,7 +1027,7 @@ statement.</li>
 required <a href="lang/ref.html#ref-cells"><em>cell reference</em></a>. (It can be omitted if the invoked component
 contains no cell references.)</li>
 </ul>
-<p>Invoking a instance runs its control program to completion before returning.
+<p>Invoking an instance runs its control program to completion before returning.
 Any Calyx component or primitive that implements the <a href="lang/ref.html#the-go-done-interface">go-done interface</a> can be invoked.
 Like the <a href="lang/ref.html#group-enable">group enable</a> statement, <code>invoke</code> is a leaf node in the control program.</p>
 <h3 id="seq"><a class="header" href="#seq"><code>seq</code></a></h3>
@@ -1082,7 +1083,7 @@ value of <code>port</code>.</p>
 loop and therefore should not have conflicting assignments with <code>body_c</code>.</p>
 </blockquote>
 <h2 id="the-go-done-interface"><a class="header" href="#the-go-done-interface">The <code>go</code>-<code>done</code> Interface</a></h2>
-<p>By default, calyx components implement a one-sided ready-valid interface called
+<p>By default, Calyx components implement a one-sided ready-valid interface called
 <em>the <code>go</code>-<code>done</code> interface</em>.
 During compilation, the Calyx compiler will add an input port marked with the attribute <a href="lang/./attributes.html#go-done-clk-and-reset"><code>@go</code></a> and an output port marked with the attribute <a href="lang/./attributes.html#go-done-clk-and-reset"><code>@done</code></a> to the interface of the component:</p>
 <pre><code>component counter(left: 32, right: 32, @go go: 1) -&gt; (out: 32, @done done: 1)
@@ -1135,7 +1136,7 @@ See <a href="lang/./memories-by-reference.html">the tutorial</a> for longer exam
 <div style="break-before: page; page-break-before: always;"></div><h1 id="data-format"><a class="header" href="#data-format">Data Format</a></h1>
 <p>Calyx's <a href="lang/../fud/index.html"><code>fud</code></a>-based workflows specifies a JSON-based data format which can be used with software simulators.</p>
 <h2 id="external-memories"><a class="header" href="#external-memories">External memories</a></h2>
-<p>First, a Calyx program must mark memories using the <a href="lang/attributed.html#external"><code>@external</code> attribute</a> to tell the compiler that the memory is used as either an input or an ouput.</p>
+<p>First, a Calyx program must mark memories using the <a href="lang/attributes.html#external"><code>@external</code> attribute</a> to tell the compiler that the memory is used as either an input or an ouput.</p>
 <pre><code>component main() {
     cells {
         @external ext = std_mem_d1(...);
@@ -1415,7 +1416,7 @@ It has two meanings:</p>
 <li>If the <code>externalize</code> pass is enabled, the cell is turned into an &quot;external&quot;
 cell by exposing all its ports through the current component and rewriting
 assignments to the use the ports. See the documentation on
-See <a href="https://docs.calyxir.org/source/calyx/passes/struct.Externalize.html" title="Externalize Pass">externalize</a> for more information.</li>
+<a href="https://docs.calyxir.org/source/calyx/passes/struct.Externalize.html" title="Externalize Pass">externalize</a> for more information.</li>
 <li>If the cell is a memory and has an <code>external</code> attribute on it, the verilog backend (<code>-b verilog</code>) generates code to read <code>&lt;cell_name&gt;.dat</code> to initialize the memory state and dumps out its final value after execution.</li>
 </ol>
 <h3 id="staticn"><a class="header" href="#staticn"><code>static(n)</code></a></h3>
@@ -2191,7 +2192,7 @@ component main(@go go: 1, @clk clk: 1, @reset reset: 1) -&gt; (out: 1, @done don
 <div style="break-before: page; page-break-before: always;"></div><h1 id="the-calyx-interpreter"><a class="header" href="#the-calyx-interpreter">The Calyx Interpreter</a></h1>
 <p>The experimental Calyx interpreter resides in the <code>interp/</code> directory of the
 repository.
-The interpreter supports all Calyx programs---from high-level programs that
+The interpreter supports all Calyx programs—from high-level programs that
 make heavy use of control operators, to fully lowered Calyx programs.
 (RTL simulation, in contrast, only supports execution of fully lowered programs.)</p>
 <p>There are two ways to use the interpreter: you can directly invoke it, or you can use <a href="fud/index.html">fud</a>.</p>
@@ -2222,8 +2223,8 @@ For example, to fully lower the Calyx program before interpreting it:</p>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="the-calyx-compiler"><a class="header" href="#the-calyx-compiler">The Calyx Compiler</a></h1>
 <p>The source code documentation for the compiler can be <a href="https://docs.calyxir.org/source/calyx/">found here</a>.</p>
-<p>The Calyx compiler has several command line to control the execution of various
-passes and backends.</p>
+<p>The Calyx compiler has several command line options to control the execution of
+various passes and backends.</p>
 <h2 id="specifying-primitives-library"><a class="header" href="#specifying-primitives-library">Specifying Primitives Library</a></h2>
 <p>The compiler implementation uses a standard library of components to compile
 programs.</p>
@@ -2257,8 +2258,8 @@ Aliases:
 - all: well-formed, papercut, remove-external-memories, ...
 ...
 </code></pre>
-<p>The first section list all the passes implemented in the compiler.
-The second section lists <em>aliases</em> for combination of passes that are commonly
+<p>The first section lists all the passes implemented in the compiler.
+The second section lists <em>aliases</em> for combinations of passes that are commonly
 run together.
 For example, the alias <code>all</code> is an ordered sequence of default passes executed
 when the compiler is run from the command-line.</p>
@@ -2289,7 +2290,7 @@ such as registers and basic bitwise operations.</p>
 <ul>
 <li><code>in: WIDTH</code> - An input value to the register <code>WIDTH</code>-bits.</li>
 <li><code>write_en: 1</code> - The one bit write enabled signal. Indicates that the register
-should store the value on the in wire.</li>
+should store the value on the <code>in</code> wire.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
@@ -2307,7 +2308,7 @@ new value.</li>
 </ul>
 <hr />
 <h3 id="std_lshwidth"><a class="header" href="#std_lshwidth"><code>std_lsh&lt;WIDTH&gt;</code></a></h3>
-<p>A left bit shift. Performs <code>LEFT &lt;&lt; RIGHT</code>. This component is combinational.</p>
+<p>A left bit shift. Performs <code>left &lt;&lt; right</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
 <li><code>left: WIDTH</code> - A WIDTH-bit value to be shifted</li>
@@ -2315,11 +2316,11 @@ new value.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>LEFT &lt;&lt; RIGHT</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left &lt;&lt; right</code></li>
 </ul>
 <hr />
 <h3 id="std_rshwidth"><a class="header" href="#std_rshwidth"><code>std_rsh&lt;WIDTH&gt;</code></a></h3>
-<p>A right bit shift. Performs <code>LEFT &gt;&gt; RIGHT</code>. This component is combinational.</p>
+<p>A right bit shift. Performs <code>left &gt;&gt; right</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
 <li><code>left: WIDTH</code> - A WIDTH-bit value to be shifted</li>
@@ -2327,11 +2328,11 @@ new value.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>LEFT &gt;&gt; RIGHT</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left &gt;&gt; right</code></li>
 </ul>
 <hr />
 <h3 id="std_addwidth"><a class="header" href="#std_addwidth"><code>std_add&lt;WIDTH&gt;</code></a></h3>
-<p>Bitwise addition without a carry flag. Performs <code>LEFT + RIGHT</code>. This component
+<p>Bitwise addition without a carry flag. Performs <code>left + right</code>. This component
 is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
@@ -2340,11 +2341,11 @@ is combinational.</p>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>LEFT + RIGHT</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left + right</code></li>
 </ul>
 <hr />
 <h3 id="std_subwidth"><a class="header" href="#std_subwidth"><code>std_sub&lt;WIDTH&gt;</code></a></h3>
-<p>Bitwise subtraction. Performs <code>LEFT - RIGHT</code>. This component is combinational.</p>
+<p>Bitwise subtraction. Performs <code>left - right</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
 <li><code>left: WIDTH</code> - A WIDTH-bit value</li>
@@ -2352,12 +2353,12 @@ is combinational.</p>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>LEFT - RIGHT</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left - right</code></li>
 </ul>
 <hr />
 <h3 id="std_slicein_width-out_width"><a class="header" href="#std_slicein_width-out_width"><code>std_slice&lt;IN_WIDTH, OUT_WIDTH&gt;</code></a></h3>
 <p>Slice out the lower OUT_WIDTH bits of an IN_WIDTH-bit value. Computes
-<code>in[out_width - 1 : 0]</code>. This component is combinational.</p>
+<code>in[OUT_WIDTH - 1 : 0]</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
 <li><code>in: IN_WIDTH</code> - An IN_WIDTH-bit value</li>
@@ -2511,7 +2512,7 @@ OUT_WIDTH-bits. This component is combinational.</p>
 </ul>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li>`addr0: IDX_SIZE - The index to be accessed or updated</li>
+<li><code>addr0: IDX_SIZE</code> - The index to be accessed or updated</li>
 <li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot</li>
 <li><code>write_en: 1</code> - One bit write enabled signal, causes the memory to write <code>write_data</code> to the slot indexed by <code>addr0</code></li>
 </ul>
@@ -2601,7 +2602,7 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="the-calyx-library"><a class="header" href="#the-calyx-library">The calyx Library</a></h1>
 <p>The implementation of the compiler separates the frontend from the internal data structures.
 This allows developers to use the compiler as a library.
-The <code>calyx</code> library exports all the data structures used by the compiler can be used to design new
+The <code>calyx</code> library exports all the data structures used by the compiler and can be used to design new
 tools that make use of Calyx.</p>
 <p>See the <a href="https://docs.calyxir.org/source/calyx/">library documentation</a> for an example of how to use the <code>calyx</code> library.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="dataflow-optimizations"><a class="header" href="#dataflow-optimizations">Dataflow Optimizations</a></h1>
@@ -3611,7 +3612,7 @@ collections of tests into test suites and specifies configuration for them.</p>
 <li><code>-o</code>: Filter out reported test results based on test status. Running with <code>miss</code> will only show the tests that don't have an <code>.expect</code> file.</li>
 </ul>
 <p><strong>Differences</strong>. <code>-d</code> or <code>--diff</code> shows differences between the expected test output and the generated output. Use this in conjunction with <code>-i</code> to focus on particular failing tests.</p>
-<p><strong>Saving Files</strong>. <code>-s</code> is used to save test outputs when the have expected changes. In the case of <code>miss</code> tests, i.e. tests that currently don't any expected output file, this saves a completely new <code>.expect</code> file.</p>
+<p><strong>Saving Files</strong>. <code>-s</code> is used to save test outputs when they have expected changes. In the case of <code>miss</code> tests, i.e. tests that currently don't have any expected output file, this saves a completely new <code>.expect</code> file.</p>
 <p><strong>Dry run</strong>. <code>-n</code> flag shows the commands that <code>runt</code> will run for each test. Use this when you directly want to run the command for the test directly.</p>
 <p>For other options, look at <code>runt --help</code> which documents other features in <code>runt</code>.</p>
 <p>For instruction on using runt, see the <a href="https://github.com/rachitnigam/runt#run-test-runt--">official documentation</a>.</p>
@@ -3672,7 +3673,7 @@ calculate <code>b^x</code> for any base <code>b</code>. </li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="editor-highlighting"><a class="header" href="#editor-highlighting">Editor Highlighting</a></h1>
 <h2 id="vim"><a class="header" href="#vim">Vim</a></h2>
-<p>The vim extension highlights files with the extension <code>.futil</code>. 
+<p>The vim extension highlights files with the extension <code>.futil</code>.
 It can be installed using a plugin manager such as <a href="https://github.com/junegunn/vim-plug">vim-plug</a> using a
 local installation.
 Add the following to your vim plug configuration:</p>
@@ -3695,7 +3696,7 @@ If you use <a href="https://www.spacemacs.org/">Spacemacs</a>, this looks like a
 <h2 id="visual-studio-code"><a class="header" href="#visual-studio-code">Visual Studio Code</a></h2>
 <p>Add a link to the Calyx VSCode extension directory to your VSCode extensions directory.</p>
 <pre><code>cd $HOME/.vscode/extensions
-ln -s &lt;calyx root directory/tools/vscode calyx.calyx-0.0.1
+ln -s &lt;calyx root directory&gt;/tools/vscode calyx.calyx-0.0.1
 </code></pre>
 <p>Restart VSCode.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="contributors"><a class="header" href="#contributors">Contributors</a></h1>
@@ -3770,5 +3771,6 @@ ln -s &lt;calyx root directory/tools/vscode calyx.calyx-0.0.1
         });
         </script>
 
+    </div>
     </body>
 </html>

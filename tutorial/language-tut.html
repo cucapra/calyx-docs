@@ -32,6 +32,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
@@ -155,7 +156,7 @@ to hardware modules (or function definitions for the software-minded).</p>
 statement to import the standard library:</p>
 <pre><code>import &quot;primitives/core.futil&quot;;
 
-component main(go: 1) -&gt; (done: 1) {
+component main(@go go: 1) -&gt; (@done done: 1) {
   cells {}
   wires {}
   control {}
@@ -184,7 +185,7 @@ You can see the definition of <code>std_mem_d1</code>, and all the other standar
 the data width (here, 32 bits),
 the number of elements (just one),
 and the width of the address port (one bit).</p>
-<p>The <code>@external</code> syntax is an <a href="../lang/attributes.html#external1">extra bit of magic</a> that allows us
+<p>The <code>@external</code> syntax is an <a href="../lang/attributes.html#external">extra bit of magic</a> that allows us
 to read and write to the memory.</p>
 <p>Next, we'll add some assignments to the <code>wires</code> section to update the value in
 the memory.
@@ -458,5 +459,6 @@ The output should be the result of adding 4 to the initial value 8 times, so 10 
         <!-- Custom JS scripts -->
 
 
+    </div>
     </body>
 </html>

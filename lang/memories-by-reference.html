@@ -32,6 +32,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
@@ -162,7 +163,7 @@ int main() {
 <li>Define the component in a manner such that it can accept a memory by reference.</li>
 <li>Pass the desired memory by reference.</li>
 </ol>
-<p>The language provides two ways to doing this.</p>
+<p>The language provides two ways of doing this.</p>
 <h2 id="the-easy-way"><a class="header" href="#the-easy-way">The Easy Way</a></h2>
 <p>Calyx uses the <code>ref</code> keyword to describe cells that are passed in by-reference:</p>
 <pre><code>component add_one() -&gt; () {
@@ -412,5 +413,6 @@ component main() -&gt; () {
         <!-- Custom JS scripts -->
 
 
+    </div>
     </body>
 </html>

@@ -32,6 +32,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "";
@@ -143,8 +144,8 @@
                     <main>
                         <h1 id="the-calyx-compiler"><a class="header" href="#the-calyx-compiler">The Calyx Compiler</a></h1>
 <p>The source code documentation for the compiler can be <a href="https://docs.calyxir.org/source/calyx/">found here</a>.</p>
-<p>The Calyx compiler has several command line to control the execution of various
-passes and backends.</p>
+<p>The Calyx compiler has several command line options to control the execution of
+various passes and backends.</p>
 <h2 id="specifying-primitives-library"><a class="header" href="#specifying-primitives-library">Specifying Primitives Library</a></h2>
 <p>The compiler implementation uses a standard library of components to compile
 programs.</p>
@@ -178,8 +179,8 @@ Aliases:
 - all: well-formed, papercut, remove-external-memories, ...
 ...
 </code></pre>
-<p>The first section list all the passes implemented in the compiler.
-The second section lists <em>aliases</em> for combination of passes that are commonly
+<p>The first section lists all the passes implemented in the compiler.
+The second section lists <em>aliases</em> for combinations of passes that are commonly
 run together.
 For example, the alias <code>all</code> is an ordered sequence of default passes executed
 when the compiler is run from the command-line.</p>
@@ -241,5 +242,6 @@ the default execution alias <code>all</code>:</p>
         <!-- Custom JS scripts -->
 
 
+    </div>
     </body>
 </html>

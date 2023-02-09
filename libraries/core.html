@@ -32,6 +32,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
@@ -159,7 +160,7 @@ such as registers and basic bitwise operations.</p>
 <ul>
 <li><code>in: WIDTH</code> - An input value to the register <code>WIDTH</code>-bits.</li>
 <li><code>write_en: 1</code> - The one bit write enabled signal. Indicates that the register
-should store the value on the in wire.</li>
+should store the value on the <code>in</code> wire.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
@@ -177,7 +178,7 @@ new value.</li>
 </ul>
 <hr />
 <h3 id="std_lshwidth"><a class="header" href="#std_lshwidth"><code>std_lsh&lt;WIDTH&gt;</code></a></h3>
-<p>A left bit shift. Performs <code>LEFT &lt;&lt; RIGHT</code>. This component is combinational.</p>
+<p>A left bit shift. Performs <code>left &lt;&lt; right</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
 <li><code>left: WIDTH</code> - A WIDTH-bit value to be shifted</li>
@@ -185,11 +186,11 @@ new value.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>LEFT &lt;&lt; RIGHT</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left &lt;&lt; right</code></li>
 </ul>
 <hr />
 <h3 id="std_rshwidth"><a class="header" href="#std_rshwidth"><code>std_rsh&lt;WIDTH&gt;</code></a></h3>
-<p>A right bit shift. Performs <code>LEFT &gt;&gt; RIGHT</code>. This component is combinational.</p>
+<p>A right bit shift. Performs <code>left &gt;&gt; right</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
 <li><code>left: WIDTH</code> - A WIDTH-bit value to be shifted</li>
@@ -197,11 +198,11 @@ new value.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>LEFT &gt;&gt; RIGHT</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left &gt;&gt; right</code></li>
 </ul>
 <hr />
 <h3 id="std_addwidth"><a class="header" href="#std_addwidth"><code>std_add&lt;WIDTH&gt;</code></a></h3>
-<p>Bitwise addition without a carry flag. Performs <code>LEFT + RIGHT</code>. This component
+<p>Bitwise addition without a carry flag. Performs <code>left + right</code>. This component
 is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
@@ -210,11 +211,11 @@ is combinational.</p>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>LEFT + RIGHT</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left + right</code></li>
 </ul>
 <hr />
 <h3 id="std_subwidth"><a class="header" href="#std_subwidth"><code>std_sub&lt;WIDTH&gt;</code></a></h3>
-<p>Bitwise subtraction. Performs <code>LEFT - RIGHT</code>. This component is combinational.</p>
+<p>Bitwise subtraction. Performs <code>left - right</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
 <li><code>left: WIDTH</code> - A WIDTH-bit value</li>
@@ -222,12 +223,12 @@ is combinational.</p>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>LEFT - RIGHT</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left - right</code></li>
 </ul>
 <hr />
 <h3 id="std_slicein_width-out_width"><a class="header" href="#std_slicein_width-out_width"><code>std_slice&lt;IN_WIDTH, OUT_WIDTH&gt;</code></a></h3>
 <p>Slice out the lower OUT_WIDTH bits of an IN_WIDTH-bit value. Computes
-<code>in[out_width - 1 : 0]</code>. This component is combinational.</p>
+<code>in[OUT_WIDTH - 1 : 0]</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
 <li><code>in: IN_WIDTH</code> - An IN_WIDTH-bit value</li>
@@ -381,7 +382,7 @@ OUT_WIDTH-bits. This component is combinational.</p>
 </ul>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li>`addr0: IDX_SIZE - The index to be accessed or updated</li>
+<li><code>addr0: IDX_SIZE</code> - The index to be accessed or updated</li>
 <li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot</li>
 <li><code>write_en: 1</code> - One bit write enabled signal, causes the memory to write <code>write_data</code> to the slot indexed by <code>addr0</code></li>
 </ul>
@@ -517,5 +518,6 @@ OUT_WIDTH-bits. This component is combinational.</p>
         <!-- Custom JS scripts -->
 
 
+    </div>
     </body>
 </html>

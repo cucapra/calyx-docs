@@ -32,6 +32,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
@@ -195,7 +196,7 @@ It has two meanings:</p>
 <li>If the <code>externalize</code> pass is enabled, the cell is turned into an &quot;external&quot;
 cell by exposing all its ports through the current component and rewriting
 assignments to the use the ports. See the documentation on
-See <a href="https://docs.calyxir.org/source/calyx/passes/struct.Externalize.html" title="Externalize Pass">externalize</a> for more information.</li>
+<a href="https://docs.calyxir.org/source/calyx/passes/struct.Externalize.html" title="Externalize Pass">externalize</a> for more information.</li>
 <li>If the cell is a memory and has an <code>external</code> attribute on it, the verilog backend (<code>-b verilog</code>) generates code to read <code>&lt;cell_name&gt;.dat</code> to initialize the memory state and dumps out its final value after execution.</li>
 </ol>
 <h3 id="staticn"><a class="header" href="#staticn"><code>static(n)</code></a></h3>
@@ -350,5 +351,6 @@ Note that each group must have exactly one output port in it.</p>
         <!-- Custom JS scripts -->
 
 
+    </div>
     </body>
 </html>

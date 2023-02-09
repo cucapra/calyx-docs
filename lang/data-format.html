@@ -32,6 +32,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
@@ -144,7 +145,7 @@
                         <h1 id="data-format"><a class="header" href="#data-format">Data Format</a></h1>
 <p>Calyx's <a href="../fud/index.html"><code>fud</code></a>-based workflows specifies a JSON-based data format which can be used with software simulators.</p>
 <h2 id="external-memories"><a class="header" href="#external-memories">External memories</a></h2>
-<p>First, a Calyx program must mark memories using the <a href="attributed.html#external"><code>@external</code> attribute</a> to tell the compiler that the memory is used as either an input or an ouput.</p>
+<p>First, a Calyx program must mark memories using the <a href="attributes.html#external"><code>@external</code> attribute</a> to tell the compiler that the memory is used as either an input or an ouput.</p>
 <pre><code>component main() {
     cells {
         @external ext = std_mem_d1(...);
@@ -257,5 +258,6 @@ fud e --to interpreter-out &lt;CALYX FILE&gt; -s verilog.data &lt;JSON&gt;
         <!-- Custom JS scripts -->
 
 
+    </div>
     </body>
 </html>

@@ -32,6 +32,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
@@ -145,7 +146,7 @@
 <p>Calyx designs can define and instantiate other Calyx components that themselves
 encode complex <code>control</code> programs.</p>
 <p>As an example, we'll build a Calyx design that uses a simple Calyx component
-to save a value in a register and use it in different component.</p>
+to save a value in a register and use it in a different component.</p>
 <p>We define a new component called <code>identity</code> that has an input port <code>in</code>
 and an output port <code>out</code>.</p>
 <pre><code>component identity(in: 32) -&gt; (out: 32) {
@@ -266,5 +267,6 @@ The component executes the two groups in-order.</p>
         <!-- Custom JS scripts -->
 
 
+    </div>
     </body>
 </html>
