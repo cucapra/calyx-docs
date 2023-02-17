@@ -476,10 +476,46 @@
 <span id="476">476</span>
 <span id="477">477</span>
 <span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::errors::CalyxResult;
 <span class="kw">use </span><span class="kw">crate</span>::ir::rewriter;
 <span class="kw">use crate</span>::{
-    analysis::{GraphColoring, LiveRangeAnalysis, ReadWriteSet, ShareSet},
+    analysis::{
+        GraphColoring, LiveRangeAnalysis, ReadWriteSet, ShareSet,
+        StaticParTiming,
+    },
     ir::{
         <span class="self">self</span>,
         traversal::Named,
@@ -492,7 +528,7 @@
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::fs;
 
-<span class="comment">// function to turn cell types to string when we are building hte json for
+<span class="comment">// function to turn cell types to string when we are building the json for
 // share_freqs
 </span><span class="kw">fn </span>cell_type_to_string(cell_type: <span class="kw-2">&amp;</span>ir::CellType) -&gt; String {
     <span class="kw">match </span>cell_type {
@@ -586,6 +622,11 @@
     /// length 3 to hold the 3 classes: comb cells, registers, and everything else
     </span>bounds: Vec&lt;<span class="prelude-ty">Option</span>&lt;i64&gt;&gt;,
 
+    <span class="doccomment">/// maps the ids of groups to a set of tuples (i,j), the clock cycles (relative
+    /// to the start of the par) that group is live
+    </span>par_timing_map: StaticParTiming,
+    print_par_timing: bool,
+
     <span class="doccomment">/// Maps cell types to the corresponding pdf. Each pdf is a hashmap which maps
     /// the number of times a given cell name reused (i.e., shared) to the
     /// number of cells that have been shared that many times times.
@@ -607,7 +648,8 @@
     <span class="kw">fn </span>from(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>state_shareable = ShareSet::from_context::&lt;<span class="bool-val">true</span>&gt;(ctx);
         <span class="kw">let </span>shareable = ShareSet::from_context::&lt;<span class="bool-val">false</span>&gt;(ctx);
-        <span class="kw">let </span>(print_share_freqs, bounds) = <span class="self">Self</span>::parse_args(ctx);
+        <span class="kw">let </span>(print_share_freqs, bounds, print_par_timing) =
+            <span class="self">Self</span>::parse_args(ctx);
 
         <span class="prelude-val">Ok</span>(CellShare {
             live: LiveRangeAnalysis::default(),
@@ -616,6 +658,8 @@
             state_shareable,
             shareable,
             bounds,
+            par_timing_map: StaticParTiming::default(),
+            print_par_timing,
             share_freqs: HashMap::new(),
             print_share_freqs,
         })
@@ -654,6 +698,15 @@
             <span class="self">self</span>.state_shareable.clone(),
             <span class="self">self</span>.shareable.clone(),
         );
+
+        <span class="self">self</span>.par_timing_map = StaticParTiming::new(
+            <span class="kw-2">&amp;mut </span>comp.control.borrow_mut(),
+            comp.name,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.live,
+        );
+        <span class="kw">if </span><span class="self">self</span>.print_par_timing {
+            <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="self">self</span>.par_timing_map);
+        }
     }
 
     <span class="kw">fn </span>cell_filter(<span class="kw-2">&amp;</span><span class="self">self</span>, cell: <span class="kw-2">&amp;</span>ir::Cell) -&gt; bool {
@@ -668,12 +721,14 @@
         </span>}
     }
 
-    <span class="comment">// given a ctx, gets the bounds and the file to write the sharing frequencies
-    // to. For example, if &quot;-x cell-share:bounds=2,3,4&quot;
-    // is passed in the cmd line, we should return [2,3,4]. If no such argument
-    // is given, return the default, which is currently set rather
-    // arbitrarily at [4,6,18].
-    </span><span class="kw">fn </span>parse_args(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; (<span class="prelude-ty">Option</span>&lt;String&gt;, Vec&lt;<span class="prelude-ty">Option</span>&lt;i64&gt;&gt;)
+    <span class="comment">// given a ctx, gets the
+    // 1) file to write the sharing frequencies. for example, if &quot;-x cell-share:print-share-freqs=a.json&quot;,
+    // we would return Some(a.json).
+    // 2) gets the bounds. For example, if &quot;-x cell-share:bounds=2,3,4&quot; is passed
+    // we would return [Some(2),Some(3),Some(4)].
+    // 3) whether to print the par timing map. For exampe, if &quot;-x cell-share:print_par_timing&quot;
+    // is passed, then we would return true.
+    </span><span class="kw">fn </span>parse_args(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; (<span class="prelude-ty">Option</span>&lt;String&gt;, Vec&lt;<span class="prelude-ty">Option</span>&lt;i64&gt;&gt;, bool)
     <span class="kw">where
         </span><span class="self">Self</span>: Named,
     {
@@ -703,6 +758,9 @@
             }
             <span class="prelude-val">None
         </span>});
+
+        <span class="kw">let </span>print_par_timing =
+            given_opts.iter().any(|arg| <span class="kw-2">*</span>arg == <span class="string">&quot;print_par_timing&quot;</span>);
 
         <span class="comment">// searching for &quot;-x cell-share:print-share-freqs=file_name&quot; and getting Some(file_name) back
         </span><span class="kw">let </span>print_pdf_arg = given_opts.iter().find_map(|arg| {
@@ -743,9 +801,9 @@
         <span class="kw">if </span>set_default {
             <span class="comment">// could possibly put vec![x,y,z] where x,y, and z are deliberately
             // chosen numbers here instead
-            </span>(print_pdf_arg, <span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>])
+            </span>(print_pdf_arg, <span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>], print_par_timing)
         } <span class="kw">else </span>{
-            (print_pdf_arg, bounds)
+            (print_pdf_arg, bounds, print_par_timing)
         }
     }
 
@@ -789,7 +847,9 @@
 ///  c1 and c2
 ///  - if c1 and c2 don&#39;t have overlapping live ranges, check if c1 and c2 are ever
 ///  live at within the same par block, and they are live at different children
-///  of the par block, then add a conflict.
+///  of the par block. If the parent par is not static, then add a conflict.
+///  If the parent par is static, then we can use the static_par_timing analysis
+///  to check whether the cells&#39; liveness actually overlaps.
 ///  - perform graph coloring using `self.ordering` to define the order of the greedy coloring
 ///  - use coloring to rewrite group assignments, continuous assignments, and conditional ports.
 </span><span class="kw">impl </span>Visitor <span class="kw">for </span>CellShare {
@@ -878,9 +938,15 @@
                             <span class="kw">for </span>live_b <span class="kw">in </span>live_once_b {
                                 <span class="comment">// a and b are live within the same par block but not within
                                 // the same child thread, then insert conflict.
-                                </span><span class="kw">if </span>live_a != live_b
-                                    &amp;&amp; par_thread_map.get(live_a).unwrap()
-                                        == par_thread_map.get(live_b).unwrap()
+                                </span><span class="kw">let </span>parent_a =
+                                    par_thread_map.get(live_a).unwrap();
+                                <span class="kw">let </span>parent_b =
+                                    par_thread_map.get(live_b).unwrap();
+                                <span class="kw">if </span>live_a != live_b
+                                    &amp;&amp; parent_a == parent_b
+                                    &amp;&amp; <span class="self">self</span>.par_timing_map.liveness_overlaps(
+                                        parent_a, live_a, live_b, a, b,
+                                    )
                                 {
                                     g.insert_conflict(a, b);
                                     <span class="kw">break </span><span class="lifetime">&#39;outer</span>;
