@@ -509,6 +509,72 @@
 <span id="509">509</span>
 <span id="510">510</span>
 <span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::errors::CalyxResult;
 <span class="kw">use </span><span class="kw">crate</span>::ir::rewriter;
 <span class="kw">use crate</span>::{
@@ -604,6 +670,12 @@
 /// exactly n times. So the key n = 2 will be mapped to the number of cells in the
 /// new design that are shared exactly twice.
 ///
+/// Other flags:
+/// print_par_timing: prints the par-timing-map
+/// calyx_2020: shares using the Calyx 2020 settings: unlimited sharing of combinational
+/// components and registers, but no sharing of anything else
+///
+///
 /// This pass only renames uses of cells. [crate::passes::DeadCellRemoval] should be run after this
 /// to actually remove the definitions.
 </span><span class="kw">pub struct </span>CellShare {
@@ -625,7 +697,13 @@
     <span class="doccomment">/// maps the ids of groups to a set of tuples (i,j), the clock cycles (relative
     /// to the start of the par) that group is live
     </span>par_timing_map: StaticParTiming,
+
     print_par_timing: bool,
+    <span class="doccomment">/// executes cell share pass using Calyx 2020 benchmarks: no component
+    /// sharing, and only sharing registers and combinational components
+    </span>calyx_2020: bool,
+    <span class="doccomment">/// whether to share across static pars or not
+    </span>share_static_par: bool,
 
     <span class="doccomment">/// Maps cell types to the corresponding pdf. Each pdf is a hashmap which maps
     /// the number of times a given cell name reused (i.e., shared) to the
@@ -648,8 +726,13 @@
     <span class="kw">fn </span>from(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>state_shareable = ShareSet::from_context::&lt;<span class="bool-val">true</span>&gt;(ctx);
         <span class="kw">let </span>shareable = ShareSet::from_context::&lt;<span class="bool-val">false</span>&gt;(ctx);
-        <span class="kw">let </span>(print_share_freqs, bounds, print_par_timing) =
-            <span class="self">Self</span>::parse_args(ctx);
+        <span class="kw">let </span>(
+            print_share_freqs,
+            bounds,
+            print_par_timing,
+            calyx_2020,
+            share_static_par,
+        ) = <span class="self">Self</span>::parse_args(ctx);
 
         <span class="prelude-val">Ok</span>(CellShare {
             live: LiveRangeAnalysis::default(),
@@ -660,6 +743,8 @@
             bounds,
             par_timing_map: StaticParTiming::default(),
             print_par_timing,
+            calyx_2020,
+            share_static_par,
             share_freqs: HashMap::new(),
             print_share_freqs,
         })
@@ -727,8 +812,13 @@
     // 2) gets the bounds. For example, if &quot;-x cell-share:bounds=2,3,4&quot; is passed
     // we would return [Some(2),Some(3),Some(4)].
     // 3) whether to print the par timing map. For exampe, if &quot;-x cell-share:print_par_timing&quot;
-    // is passed, then we would return true.
-    </span><span class="kw">fn </span>parse_args(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; (<span class="prelude-ty">Option</span>&lt;String&gt;, Vec&lt;<span class="prelude-ty">Option</span>&lt;i64&gt;&gt;, bool)
+    </span><span class="doccomment">///4) whether to run sharing with Calyx 2020 settings: no component sharing,
+    /// only share registers/combinational components (e.g., &quot;-x cell-share:calyx_2020&quot;)
+    /// 5) whether to share across static par threads (e.g., &quot;-x cell-share:share_static_par&quot;)
+    </span><span class="comment">// is passed, then we would return true.
+    </span><span class="kw">fn </span>parse_args(
+        ctx: <span class="kw-2">&amp;</span>ir::Context,
+    ) -&gt; (<span class="prelude-ty">Option</span>&lt;String&gt;, Vec&lt;<span class="prelude-ty">Option</span>&lt;i64&gt;&gt;, bool, bool, bool)
     <span class="kw">where
         </span><span class="self">Self</span>: Named,
     {
@@ -759,8 +849,19 @@
             <span class="prelude-val">None
         </span>});
 
-        <span class="kw">let </span>print_par_timing =
-            given_opts.iter().any(|arg| <span class="kw-2">*</span>arg == <span class="string">&quot;print_par_timing&quot;</span>);
+        <span class="kw">let </span>(<span class="kw-2">mut </span>print_par_timing, <span class="kw-2">mut </span>calyx_2020, <span class="kw-2">mut </span>share_static_par) =
+            (<span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>);
+        <span class="comment">// these we know what the exact flags will be so we don&#39;t have to pars,e
+        // just check if they&#39;re there
+        </span>given_opts.iter().for_each(|arg| {
+            <span class="kw">if </span><span class="kw-2">*</span>arg == <span class="string">&quot;print_par_timing&quot; </span>{
+                print_par_timing = <span class="bool-val">true
+            </span>} <span class="kw">else if </span><span class="kw-2">*</span>arg == <span class="string">&quot;calyx_2020&quot; </span>{
+                calyx_2020 = <span class="bool-val">true
+            </span>} <span class="kw">else if </span><span class="kw-2">*</span>arg == <span class="string">&quot;share_static_par&quot; </span>{
+                share_static_par = <span class="bool-val">true
+            </span>};
+        });
 
         <span class="comment">// searching for &quot;-x cell-share:print-share-freqs=file_name&quot; and getting Some(file_name) back
         </span><span class="kw">let </span>print_pdf_arg = given_opts.iter().find_map(|arg| {
@@ -801,9 +902,21 @@
         <span class="kw">if </span>set_default {
             <span class="comment">// could possibly put vec![x,y,z] where x,y, and z are deliberately
             // chosen numbers here instead
-            </span>(print_pdf_arg, <span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>], print_par_timing)
+            </span>(
+                print_pdf_arg,
+                <span class="macro">vec!</span>[<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>],
+                print_par_timing,
+                calyx_2020,
+                share_static_par,
+            )
         } <span class="kw">else </span>{
-            (print_pdf_arg, bounds, print_par_timing)
+            (
+                print_pdf_arg,
+                bounds,
+                print_par_timing,
+                calyx_2020,
+                share_static_par,
+            )
         }
     }
 
@@ -942,14 +1055,21 @@
                                     par_thread_map.get(live_a).unwrap();
                                 <span class="kw">let </span>parent_b =
                                     par_thread_map.get(live_b).unwrap();
-                                <span class="kw">if </span>live_a != live_b
-                                    &amp;&amp; parent_a == parent_b
-                                    &amp;&amp; <span class="self">self</span>.par_timing_map.liveness_overlaps(
-                                        parent_a, live_a, live_b, a, b,
-                                    )
-                                {
-                                    g.insert_conflict(a, b);
-                                    <span class="kw">break </span><span class="lifetime">&#39;outer</span>;
+                                <span class="kw">if </span>live_a != live_b &amp;&amp; parent_a == parent_b {
+                                    <span class="comment">// if not share_static_par, then we can
+                                    // insert a conflict immediately
+                                    // otherwise, we have to check par_timing_map
+                                    // to see whether liveness overlaps
+                                    </span><span class="kw">if </span>!<span class="self">self</span>.share_static_par
+                                        || <span class="self">self
+                                            </span>.par_timing_map
+                                            .liveness_overlaps(
+                                                parent_a, live_a, live_b, a, b,
+                                            )
+                                    {
+                                        g.insert_conflict(a, b);
+                                        <span class="kw">break </span><span class="lifetime">&#39;outer</span>;
+                                    }
                                 }
                             }
                         }
@@ -962,22 +1082,34 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>coloring: rewriter::RewriteMap&lt;ir::Cell&gt; = HashMap::new();
         <span class="kw">let </span><span class="kw-2">mut </span>comp_share_freqs: HashMap&lt;ir::CellType, HashMap&lt;i64, i64&gt;&gt; =
             HashMap::new();
+        <span class="kw">let </span>comb_bound = <span class="self">self</span>.bounds.get(<span class="number">0</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
+        <span class="kw">let </span>reg_bound = <span class="self">self</span>.bounds.get(<span class="number">1</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
+        <span class="kw">let </span>other_bound = <span class="self">self</span>.bounds.get(<span class="number">2</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
         <span class="kw">for </span>(cell_type, <span class="kw-2">mut </span>graph) <span class="kw">in </span>graphs_by_type {
             <span class="comment">// getting bound, based on self.bounds and cell_type
             </span><span class="kw">let </span>bound = {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>name) = cell_type.get_name() {
-                    <span class="kw">let </span>comb_bound = <span class="self">self</span>.bounds.get(<span class="number">0</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
-                    <span class="kw">let </span>reg_bound = <span class="self">self</span>.bounds.get(<span class="number">1</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
-                    <span class="kw">let </span>other_bound = <span class="self">self</span>.bounds.get(<span class="number">2</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
-                    <span class="kw">if </span><span class="self">self</span>.shareable.contains(name) {
+                    <span class="kw">let </span>is_comb = <span class="self">self</span>.shareable.contains(name);
+                    <span class="kw">let </span>is_reg = name == <span class="string">&quot;std_reg&quot;</span>;
+                    <span class="comment">// if self.calyx_2020, then set bounds based on that
+                    // otherwise, look at the actual self.bounds values to
+                    // get the bounds
+                    </span><span class="kw">if </span><span class="self">self</span>.calyx_2020 {
+                        <span class="kw">if </span>is_comb || is_reg {
+                            <span class="kw-2">&amp;</span><span class="prelude-val">None
+                        </span>} <span class="kw">else </span>{
+                            <span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="number">1</span>)
+                        }
+                    } <span class="kw">else if </span>is_comb {
                         comb_bound
-                    } <span class="kw">else if </span>name == <span class="string">&quot;std_reg&quot; </span>{
+                    } <span class="kw">else if </span>is_reg {
                         reg_bound
                     } <span class="kw">else </span>{
                         other_bound
                     }
                 } <span class="kw">else </span>{
-                    <span class="kw-2">&amp;</span><span class="prelude-val">None
+                    <span class="comment">// sharing bound doesn&#39;t really matter for ThisComponent/Constants
+                    </span><span class="kw-2">&amp;</span><span class="prelude-val">None
                 </span>}
             };
             <span class="kw">if </span>graph.has_nodes() {

@@ -318,6 +318,7 @@
 <span id="318">318</span>
 <span id="319">319</span>
 <span id="320">320</span>
+<span id="321">321</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::LiveRangeAnalysis;
 <span class="kw">use crate</span>::{
     analysis::ControlId,
@@ -424,7 +425,8 @@
         // a_liveness, b_liveness, that we actually care about
         </span><span class="kw">let </span>thread_timing_map = <span class="kw">match </span><span class="self">self</span>.cell_map.get(par_id) {
             <span class="prelude-val">Some</span>(m) =&gt; m,
-            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="bool-val">true</span>,
+            <span class="comment">// not a static par block, so must assume overlap
+            </span><span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="bool-val">true</span>,
         };
         <span class="kw">let </span>a_liveness = thread_timing_map
             .get(thread_a)
