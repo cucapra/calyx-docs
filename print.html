@@ -71,10 +71,12 @@
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
             var html = document.querySelector('html');
-            var sidebar = 'hidden';
+            var sidebar = null;
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
             }
             html.classList.remove('sidebar-visible');
             html.classList.add("sidebar-" + sidebar);
@@ -851,6 +853,12 @@ Calyx standard library:</p>
 </code></pre>
 <p>The primitive defines one parameter called <code>WIDTH</code>, which describes the sizes for
 the <code>in</code> and the <code>out</code> ports.</p>
+<p><em>Inlined primitives</em> do not have a corresponding Verilog file, and are defined within Calyx. The Calyx backend then converts these definitions into Verilog.</p>
+<p>For example, the <code>std_unsyn_mult</code> primitive is inlined:</p>
+<pre><code>comb primitive std_unsyn_mult&lt;&quot;share&quot;=1&gt;[WIDTH](left: WIDTH, right: WIDTH) -&gt; (out: WIDTH) {
+  assign out = left * right;
+};
+</code></pre>
 <h2 id="calyx-components"><a class="header" href="#calyx-components">Calyx Components</a></h2>
 <p><code>component</code>s are the primary encapsulation unit of a Calyx program.
 They look like this:</p>
