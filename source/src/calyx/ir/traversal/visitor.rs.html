@@ -605,7 +605,7 @@
         }
 
         <span class="kw">let </span>signatures = <span class="kw-2">&amp;</span>context.lib;
-        <span class="kw">let </span>comps = context.components.drain(..).collect_vec();
+        <span class="kw">let </span>comps = std::mem::take(<span class="kw-2">&amp;mut </span>context.components);
 
         <span class="comment">// Temporarily take ownership of components from context.
         </span><span class="kw">let </span><span class="kw-2">mut </span>po = CompTraversal::new(comps, <span class="self">Self</span>::iteration_order());
