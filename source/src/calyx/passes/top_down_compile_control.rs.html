@@ -1006,6 +1006,19 @@
 <span id="1006">1006</span>
 <span id="1007">1007</span>
 <span id="1008">1008</span>
+<span id="1009">1009</span>
+<span id="1010">1010</span>
+<span id="1011">1011</span>
+<span id="1012">1012</span>
+<span id="1013">1013</span>
+<span id="1014">1014</span>
+<span id="1015">1015</span>
+<span id="1016">1016</span>
+<span id="1017">1017</span>
+<span id="1018">1018</span>
+<span id="1019">1019</span>
+<span id="1020">1020</span>
+<span id="1021">1021</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::errors::CalyxResult;
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::ConstructVisitor;
@@ -1785,7 +1798,7 @@
     <span class="kw">where
         </span><span class="self">Self</span>: Sized + Named,
     {
-        <span class="kw">let </span>opts = <span class="self">Self</span>::get_opts(<span class="kw-2">&amp;</span>[<span class="string">&quot;dump-fsm&quot;</span>, <span class="string">&quot;early-transitions&quot;</span>], ctx);
+        <span class="kw">let </span>opts = <span class="self">Self</span>::get_opts(ctx);
 
         <span class="prelude-val">Ok</span>(TopDownCompileControl {
             dump_fsm: opts[<span class="number">0</span>],
@@ -1806,6 +1819,19 @@
     <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
         <span class="string">&quot;Top-down compilation for removing control constructs&quot;
     </span>}
+
+    <span class="kw">fn </span>opts() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str)] {
+        <span class="kw-2">&amp;</span>[
+            (
+                <span class="string">&quot;dump-fsm&quot;</span>,
+                <span class="string">&quot;Print out the state machine implementing the schedule&quot;</span>,
+            ),
+            (
+                <span class="string">&quot;early-transitions&quot;</span>,
+                <span class="string">&quot;Experimental: Enable early transitions for group enables&quot;</span>,
+            ),
+        ]
+    }
 }
 
 <span class="kw">impl </span>Visitor <span class="kw">for </span>TopDownCompileControl {

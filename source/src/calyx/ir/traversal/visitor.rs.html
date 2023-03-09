@@ -432,6 +432,17 @@
 <span id="432">432</span>
 <span id="433">433</span>
 <span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a visitor for `ir::Control` programs.
 //! Program passes implemented as the Visitor are directly invoked on
 //! [`ir::Context`] to compile every [`ir::Component`] using the pass.
@@ -452,9 +463,13 @@
 </span><span class="kw">pub trait </span>Named {
     <span class="doccomment">/// The name of a pass. Is used for identifying passes.
     </span><span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
-
     <span class="doccomment">/// A short description of the pass.
     </span><span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
+    <span class="doccomment">/// Set of options that can be passed to the pass.
+    /// The options contains a tuple of the option name and a description.
+    </span><span class="kw">fn </span>opts() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str)] {
+        <span class="kw-2">&amp;</span>[]
+    }
 }
 
 <span class="doccomment">/// Trait defining method that can be used to construct a Visitor from an
@@ -465,10 +480,11 @@
 /// For passes that don&#39;t need to use the context, this trait can be automatically
 /// be derived from [Default].
 </span><span class="kw">pub trait </span>ConstructVisitor {
-    <span class="kw">fn </span>get_opts(opts: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str], ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; Vec&lt;bool&gt;
+    <span class="kw">fn </span>get_opts(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; Vec&lt;bool&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: Named,
     {
+        <span class="kw">let </span>opts = <span class="self">Self</span>::opts();
         <span class="kw">let </span>n = <span class="self">Self</span>::name();
         <span class="kw">let </span>given_opts: HashSet&lt;<span class="kw">_</span>&gt; = ctx
             .extra_opts
@@ -483,9 +499,15 @@
             })
             .collect();
 
-        <span class="kw">let </span>values = opts.iter().map(|o| given_opts.contains(o)).collect_vec();
+        <span class="kw">let </span>values = opts
+            .iter()
+            .map(|(o, <span class="kw">_</span>)| given_opts.contains(o))
+            .collect_vec();
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(unknown) = given_opts.iter().find(|o| !opts.contains(o)) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(unknown) = given_opts
+            .iter()
+            .find(|&amp;&amp;o| !opts.iter().any(|(opts, <span class="kw">_</span>)| opts == <span class="kw-2">&amp;</span>o))
+        {
             <span class="macro">log::warn!</span>(
                 <span class="string">&quot;Ignoring unknown option for pass `{}`: {}&quot;</span>,
                 <span class="self">Self</span>::name(),
@@ -499,7 +521,7 @@
                 <span class="self">Self</span>::name(),
                 opts.iter()
                     .zip(values.iter())
-                    .map(|(o, v)| <span class="macro">format!</span>(<span class="string">&quot;{o}-&gt;{v}&quot;</span>))
+                    .map(|((o, <span class="kw">_</span>), v)| <span class="macro">format!</span>(<span class="string">&quot;{o}-&gt;{v}&quot;</span>))
                     .join(<span class="string">&quot;, &quot;</span>)
             );
         }

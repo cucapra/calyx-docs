@@ -483,6 +483,16 @@
 <span id="483">483</span>
 <span id="484">484</span>
 <span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::rc::Rc;
 
@@ -523,6 +533,26 @@
     </span>inlined_cells: Vec&lt;RRC&lt;ir::Cell&gt;&gt;,
 }
 
+<span class="kw">impl </span>Named <span class="kw">for </span>ComponentInliner {
+    <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;inline&quot;
+    </span>}
+
+    <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="string">&quot;inline all component instances marked with @inline attribute&quot;
+    </span>}
+
+    <span class="kw">fn </span>opts() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str)] {
+        <span class="kw-2">&amp;</span>[
+            (
+                <span class="string">&quot;always&quot;</span>,
+                <span class="string">&quot;Attempt to inline all components into the main component&quot;</span>,
+            ),
+            (<span class="string">&quot;new-fsms&quot;</span>, <span class="string">&quot;Instantiate new FSM for each inlined component&quot;</span>),
+        ]
+    }
+}
+
 <span class="kw">impl </span>ComponentInliner {
     <span class="doccomment">/// Equivalent to a default method but not automatically derived because
     /// it conflicts with the autogeneration of `ConstructVisitor`.
@@ -542,7 +572,7 @@
     <span class="kw">where
         </span><span class="self">Self</span>: Sized,
     {
-        <span class="kw">let </span>opts = <span class="self">Self</span>::get_opts(<span class="kw-2">&amp;</span>[<span class="string">&quot;always&quot;</span>, <span class="string">&quot;new-fsms&quot;</span>], ctx);
+        <span class="kw">let </span>opts = <span class="self">Self</span>::get_opts(ctx);
         <span class="prelude-val">Ok</span>(ComponentInliner::new(opts[<span class="number">0</span>], opts[<span class="number">1</span>]))
     }
 
@@ -750,16 +780,6 @@
 
         (con, rev_interface_map)
     }
-}
-
-<span class="kw">impl </span>Named <span class="kw">for </span>ComponentInliner {
-    <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
-        <span class="string">&quot;inline&quot;
-    </span>}
-
-    <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
-        <span class="string">&quot;inline all component instances marked with @inline attribute&quot;
-    </span>}
 }
 
 <span class="kw">impl </span>Visitor <span class="kw">for </span>ComponentInliner {

@@ -906,6 +906,13 @@
 <span id="906">906</span>
 <span id="907">907</span>
 <span id="908">908</span>
+<span id="909">909</span>
+<span id="910">910</span>
+<span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
+<span id="915">915</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::compute_states::{END, START};
 <span class="kw">use </span><span class="kw">crate</span>::analysis::WithStatic;
 <span class="kw">use </span><span class="kw">crate</span>::errors::{CalyxResult, Error};
@@ -1656,7 +1663,7 @@
     <span class="kw">where
         </span><span class="self">Self</span>: Sized + Named,
     {
-        <span class="kw">let </span>opts = <span class="self">Self</span>::get_opts(<span class="kw-2">&amp;</span>[<span class="string">&quot;dump-fsm&quot;</span>, <span class="string">&quot;force&quot;</span>], ctx);
+        <span class="kw">let </span>opts = <span class="self">Self</span>::get_opts(ctx);
 
         <span class="prelude-val">Ok</span>(TopDownStaticTiming {
             dump_fsm: opts[<span class="number">0</span>],
@@ -1677,6 +1684,13 @@
     <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
         <span class="string">&quot;Top-down latency-sensitive compilation for removing control constructs&quot;
     </span>}
+
+    <span class="kw">fn </span>opts() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str)] {
+        <span class="kw-2">&amp;</span>[
+            (<span class="string">&quot;dump-fsm&quot;</span>, <span class="string">&quot;Print out the state machine implementing the schedule&quot;</span>),
+            (<span class="string">&quot;force&quot;</span>, <span class="string">&quot;Error if the program cannot be fully compiled using static timing&quot;</span>)
+        ]
+    }
 }
 
 <span class="kw">impl </span>TopDownStaticTiming {
