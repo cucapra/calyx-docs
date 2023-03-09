@@ -1806,6 +1806,13 @@ fud config stages.vivado-hls.ssh_username &lt;username&gt;
 fud config stages.vivado-hls.remote 1
 </code></pre>
 <p>The server must have <code>vivado</code> and <code>vivado_hls</code> available on the remote machine's path. (If you need the executable names to be something else, please file an issue.)</p>
+<p>To tell if this has been set up correctly, run <code>ssh &lt;username&gt;@&lt;xilinx.tool.server&gt;</code> and ensure that you are not prompted for a password. The <code>ssh-copy-id</code> command will let you setup your server to authenticate without a password. Note that after you SSH into the server, the Vivado command should work without needing to run any source command. </p>
+<p>Here's how you would ssh into Havarti:</p>
+<pre><code>ssh user@havarti.cs.cornell.edu
+user@havarti:~$ vivado
+
+****** Vivado v2020.2 (64-bit)
+</code></pre>
 <h3 id="setting-up-local-tools"><a class="header" href="#setting-up-local-tools">Setting up Local Tools</a></h3>
 <p>To instead <strong>invoke the Xilinx tools locally</strong>, just let <code>fud</code> run the <code>vivado</code> and <code>vivado_hls</code> commands.
 You can optionally tell <code>fud</code> where these commands exist on your machine:</p>
