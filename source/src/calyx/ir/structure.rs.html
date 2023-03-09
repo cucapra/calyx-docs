@@ -595,6 +595,16 @@
 <span id="595">595</span>
 <span id="596">596</span>
 <span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
 </span><span class="kw">use super</span>::{Attributes, GetAttributes, Guard, Id, PortDef, RRC, WRC};
@@ -712,10 +722,20 @@
 <span class="doccomment">/// Wraps generic iterators over ports to allow functions to build and return port iterators in
 /// different ways.
 </span><span class="kw">pub struct </span>PortIterator&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>port_iter: Box&lt;<span class="kw">dyn </span>Iterator&lt;Item = RRC&lt;Port&gt;&gt; + <span class="lifetime">&#39;a</span>&gt;,
+    port_iter: Box&lt;<span class="kw">dyn </span>Iterator&lt;Item = RRC&lt;Port&gt;&gt; + <span class="lifetime">&#39;a</span>&gt;,
 }
 
-<span class="kw">impl </span>PortIterator&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PortIterator&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Construct a new PortIterator from an iterator over ports.
+    </span><span class="kw">pub fn </span>new&lt;T&gt;(iter: T) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>T: Iterator&lt;Item = RRC&lt;Port&gt;&gt; + <span class="lifetime">&#39;a</span>,
+    {
+        PortIterator {
+            port_iter: Box::new(iter),
+        }
+    }
+
     <span class="doccomment">/// Returns an empty iterator over ports.
     </span><span class="kw">pub fn </span>empty() -&gt; <span class="self">Self </span>{
         PortIterator {
