@@ -152,6 +152,8 @@
 <span id="152">152</span>
 <span id="153">153</span>
 <span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An IR context. This is the top-level object for an IR and contains all information
 //! need to transform, lower, an emit a program.
 //! Passes usually have transform/analyze the components in the IR.
@@ -266,6 +268,8 @@
     </span><span class="kw">pub </span>enable_verification: bool,
     <span class="doccomment">/// Generate initial assignments for input ports
     </span><span class="kw">pub </span>initialize_inputs: bool,
+    <span class="doccomment">/// Use flat (ANF) assignments for guards instead of deep expression trees.
+    </span><span class="kw">pub </span>flat_assign: bool,
 }
 
 <span class="doccomment">/// The IR Context that represents an entire Calyx program with all of its

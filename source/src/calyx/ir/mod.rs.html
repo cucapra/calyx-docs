@@ -49,6 +49,8 @@
 <span id="49">49</span>
 <span id="50">50</span>
 <span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Internal representation for the Calyx compiler.
 //!
 //! The representation is generated from the frontend AST.
@@ -64,6 +66,7 @@
 <span class="kw">mod </span>component;
 <span class="kw">mod </span>context;
 <span class="kw">mod </span>control;
+<span class="kw">mod </span>flat_guard;
 <span class="kw">mod </span>guard;
 <span class="kw">mod </span>id;
 <span class="kw">mod </span>primitives;
@@ -81,6 +84,7 @@
 <span class="kw">pub use </span>control::{
     Cloner, Control, Empty, Enable, If, Invoke, Par, Seq, StaticEnable, While,
 };
+<span class="kw">pub use </span>flat_guard::{FlatGuard, GuardPool, GuardRef};
 <span class="kw">pub use </span>guard::{Guard, PortComp};
 <span class="kw">pub use </span>id::Id;
 <span class="kw">pub use </span>primitives::{PortDef, Primitive, Width};
