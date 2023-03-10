@@ -57,6 +57,7 @@
 <span id="57">57</span>
 <span id="58">58</span>
 <span id="59">59</span>
+<span id="60">60</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::guard;
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, LibrarySignatures};
@@ -98,7 +99,8 @@
         _c: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">for </span>group <span class="kw">in </span>comp.groups.iter() {
+        <span class="comment">// assume static groups is empty
+        </span><span class="kw">for </span>group <span class="kw">in </span>comp.get_groups().iter() {
             <span class="kw">let </span>group_go = <span class="macro">guard!</span>(group[<span class="string">&quot;go&quot;</span>]);
             <span class="comment">// Detach the group&#39;s assignments so we can drop the mutable access to it.
             </span><span class="kw">let </span><span class="kw-2">mut </span>group_assigns =

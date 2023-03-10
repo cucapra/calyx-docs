@@ -493,6 +493,62 @@
 <span id="493">493</span>
 <span id="494">494</span>
 <span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::rc::Rc;
 
@@ -634,6 +690,30 @@
         })
     }
 
+    <span class="doccomment">/// Rewrite assignments using a [CellMap], [PortMap], and an optional new group.
+    /// Attempts the following rewrites in order:
+    /// 1. Using the [CellMap] to get the same port on a new [Cell].
+    /// 2. Using the [PortMap] to a new [Port].
+    /// 3. Using `new_group` to rewrite use of a group hole if the port is a hole.
+    </span><span class="kw">fn </span>rewrite_assigns_static(
+        assigns: <span class="kw-2">&amp;mut </span>[ir::Assignment],
+        port_rewrite: <span class="kw-2">&amp;</span>ir::Rewriter,
+        new_group: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>RRC&lt;ir::StaticGroup&gt;&gt;,
+    ) {
+        assigns.iter_mut().for_each(|assign| {
+            assign.for_each_port(|port| {
+                port_rewrite.get(port).or_else(|| {
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(grp) = new_group {
+                        <span class="kw">if </span>port.borrow().is_hole() {
+                            <span class="kw">return </span><span class="prelude-val">Some</span>(grp.borrow().get(<span class="kw-2">&amp;</span>port.borrow().name));
+                        }
+                    }
+                    <span class="prelude-val">None
+                </span>})
+            });
+        })
+    }
+
     <span class="doccomment">/// Rewrites vec based on self.interface_rewrites Used as a helper function
     /// for rewrite_invoke_ports
     </span><span class="kw">fn </span>rewrite_vec(<span class="kw-2">&amp;</span><span class="self">self</span>, v: <span class="kw-2">&amp;mut </span>[(ir::Id, RRC&lt;ir::Port&gt;)]) {
@@ -665,6 +745,28 @@
         <span class="comment">// Rewrite assignments
         </span><span class="kw">let </span><span class="kw-2">mut </span>asgns = group.assignments.clone();
         <span class="self">Self</span>::rewrite_assigns(<span class="kw-2">&amp;mut </span>asgns, port_rewrite, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>new_group));
+        new_group.borrow_mut().assignments = asgns;
+        (group.clone_name(), new_group)
+    }
+
+    <span class="doccomment">/// Inline a group definition from a component into the component associated
+    /// with the `builder`.
+    </span><span class="kw">fn </span>inline_static_group(
+        builder: <span class="kw-2">&amp;mut </span>ir::Builder,
+        port_rewrite: <span class="kw-2">&amp;</span>ir::Rewriter,
+        gr: <span class="kw-2">&amp;</span>RRC&lt;ir::StaticGroup&gt;,
+    ) -&gt; (ir::Id, RRC&lt;ir::StaticGroup&gt;) {
+        <span class="kw">let </span>group = gr.borrow();
+        <span class="kw">let </span>new_group = builder.add_static_group(group.clone_name());
+        new_group.borrow_mut().attributes = group.attributes.clone();
+
+        <span class="comment">// Rewrite assignments
+        </span><span class="kw">let </span><span class="kw-2">mut </span>asgns = group.assignments.clone();
+        <span class="self">Self</span>::rewrite_assigns_static(
+            <span class="kw-2">&amp;mut </span>asgns,
+            port_rewrite,
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>new_group),
+        );
         new_group.borrow_mut().assignments = asgns;
         (group.clone_name(), new_group)
     }
@@ -742,9 +844,14 @@
         <span class="comment">// For each group, create a new group and rewrite all assignments within
         // it using the `rewrite_map`.
         </span><span class="kw">let </span>group_map: rewriter::RewriteMap&lt;ir::Group&gt; = comp
-            .groups
+            .get_groups()
             .iter()
             .map(|gr| <span class="self">Self</span>::inline_group(builder, <span class="kw-2">&amp;</span>rewrite, gr))
+            .collect();
+        <span class="kw">let </span>static_group_map: rewriter::RewriteMap&lt;ir::StaticGroup&gt; = comp
+            .get_static_groups()
+            .iter()
+            .map(|gr| <span class="self">Self</span>::inline_static_group(builder, <span class="kw-2">&amp;</span>rewrite, gr))
             .collect();
         <span class="kw">let </span>comb_group_map: rewriter::RewriteMap&lt;ir::CombGroup&gt; = comp
             .comb_groups
@@ -762,7 +869,12 @@
 
         <span class="comment">// Generate a control program associated with this instance
         </span><span class="kw">let </span><span class="kw-2">mut </span>con = ir::Cloner::control(<span class="kw-2">&amp;</span>comp.control.borrow());
-        rewrite.rewrite_control(<span class="kw-2">&amp;mut </span>con, <span class="kw-2">&amp;</span>group_map, <span class="kw-2">&amp;</span>comb_group_map);
+        rewrite.rewrite_control(
+            <span class="kw-2">&amp;mut </span>con,
+            <span class="kw-2">&amp;</span>group_map,
+            <span class="kw-2">&amp;</span>comb_group_map,
+            <span class="kw-2">&amp;</span>static_group_map,
+        );
 
         <span class="comment">// Generate interface map for use in the parent cell.
         // Return as an iterator because it&#39;s immediately merged into the global rewrite map.

@@ -422,6 +422,12 @@
 <span id="422">422</span>
 <span id="423">423</span>
 <span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     domination_analysis::node_analysis::{NodeReads, NodeSearch},
     ControlId, ShareSet,
@@ -587,6 +593,7 @@
         ir::Control::Empty(<span class="kw">_</span>) =&gt; (),
         ir::Control::Invoke(<span class="kw">_</span>)
         | ir::Control::Enable(<span class="kw">_</span>)
+        | ir::Control::StaticEnable(<span class="kw">_</span>)
         | ir::Control::While(<span class="kw">_</span>) =&gt; {
             hs.insert(ControlId::get_guaranteed_attribute(c, NODE_ID));
         }
@@ -627,7 +634,9 @@
     </span><span class="kw">fn </span>build_exit_map(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: <span class="kw-2">&amp;</span>ir::Control) {
         <span class="kw">match </span>c {
             ir::Control::Empty(<span class="kw">_</span>) =&gt; (),
-            ir::Control::Invoke(<span class="kw">_</span>) | ir::Control::Enable(<span class="kw">_</span>) =&gt; {
+            ir::Control::Invoke(<span class="kw">_</span>)
+            | ir::Control::Enable(<span class="kw">_</span>)
+            | ir::Control::StaticEnable(<span class="kw">_</span>) =&gt; {
                 <span class="kw">let </span>id = ControlId::get_guaranteed_attribute(c, NODE_ID);
                 <span class="self">self</span>.exits_map.insert(id, HashSet::from([id]));
             }
@@ -699,7 +708,9 @@
                     <span class="string">&quot;should not pattern match agaisnt empty in update_map()&quot;
                 </span>)
             }
-            ir::Control::Invoke(<span class="kw">_</span>) | ir::Control::Enable(<span class="kw">_</span>) =&gt; {
+            ir::Control::Invoke(<span class="kw">_</span>)
+            | ir::Control::Enable(<span class="kw">_</span>)
+            | ir::Control::StaticEnable(<span class="kw">_</span>) =&gt; {
                 <span class="self">self</span>.update_node(pred, cur_id);
             }
             ir::Control::Seq(ir::Seq { stmts, .. }) =&gt; {
@@ -774,6 +785,7 @@
         <span class="kw">match </span>c {
             ir::Control::Empty(<span class="kw">_</span>)
             | ir::Control::Invoke(<span class="kw">_</span>)
+            | ir::Control::StaticEnable(<span class="kw">_</span>)
             | ir::Control::Enable(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
             ir::Control::Seq(ir::Seq { stmts, .. })
             | ir::Control::Par(ir::Par { stmts, .. }) =&gt; {

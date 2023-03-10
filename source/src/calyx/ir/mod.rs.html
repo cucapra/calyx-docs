@@ -79,7 +79,7 @@
 <span class="kw">pub use </span>component::{Component, IdList};
 <span class="kw">pub use </span>context::{BackendConf, Context, LibrarySignatures};
 <span class="kw">pub use </span>control::{
-    Cloner, Control, Empty, Enable, If, Invoke, Par, Seq, While,
+    Cloner, Control, Empty, Enable, If, Invoke, Par, Seq, StaticEnable, While,
 };
 <span class="kw">pub use </span>guard::{Guard, PortComp};
 <span class="kw">pub use </span>id::Id;
@@ -89,7 +89,7 @@
 <span class="kw">pub use </span>rewriter::Rewriter;
 <span class="kw">pub use </span>structure::{
     Assignment, Binding, Canonical, Cell, CellType, CloneName, CombGroup,
-    Direction, GetName, Group, Port, PortIterator, PortParent,
+    Direction, GetName, Group, Port, PortIterator, PortParent, StaticGroup,
 };
 
 <span class="doccomment">/// Visitor to traverse a control program.

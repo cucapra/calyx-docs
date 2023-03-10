@@ -225,6 +225,12 @@
 <span id="225">225</span>
 <span id="226">226</span>
 <span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     analysis::GraphAnalysis,
     errors::Error,
@@ -381,11 +387,16 @@
         <span class="comment">// map of holes to their guard expressions
         </span><span class="kw">let </span><span class="kw-2">mut </span>map: Store = HashMap::new();
         <span class="kw">let </span><span class="kw-2">mut </span>assignments = <span class="macro">vec!</span>[];
-        <span class="kw">for </span>group <span class="kw">in </span>builder.component.groups.iter() {
+        <span class="kw">for </span>group <span class="kw">in </span>builder.component.get_groups().iter() {
             <span class="comment">// remove all assignments from group, taking ownership
             </span><span class="kw">let </span><span class="kw-2">mut </span>group = group.borrow_mut();
             assignments.append(<span class="kw-2">&amp;mut </span>group.assignments.drain(..).collect());
         }
+
+        <span class="macro">assert!</span>(
+            builder.component.get_static_groups().is_empty(),
+            <span class="string">&quot;should have removed static groups when inlining holes&quot;
+        </span>);
 
         <span class="comment">// add the continuous assignment edges
         </span>assignments.append(
@@ -446,7 +457,8 @@
         comp.continuous_assignments = assignments;
 
         <span class="comment">// remove all groups
-        </span>comp.groups.clear();
+        </span>comp.get_groups_mut().clear();
+        comp.get_static_groups_mut().clear();
 
         <span class="comment">// remove group from control
         </span><span class="prelude-val">Ok</span>(Action::change(ir::Control::empty()))

@@ -102,6 +102,16 @@
 <span id="102">102</span>
 <span id="103">103</span>
 <span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ir::{
     <span class="self">self</span>,
     traversal::{Action, Named, VisResult, Visitor},
@@ -188,7 +198,15 @@
     ) -&gt; VisResult {
         <span class="comment">// Groups that are driven by their `go` signals should not be
         // removed.
-        </span><span class="kw">for </span>group <span class="kw">in </span>comp.groups.iter() {
+        </span><span class="kw">for </span>group <span class="kw">in </span>comp.get_groups().iter() {
+            <span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group.borrow().assignments {
+                <span class="kw">let </span>dst = assign.dst.borrow();
+                <span class="kw">if </span>dst.is_hole() &amp;&amp; dst.name == <span class="string">&quot;go&quot; </span>{
+                    <span class="self">self</span>.used_groups.insert(dst.get_parent_name());
+                }
+            }
+        }
+        <span class="kw">for </span>group <span class="kw">in </span>comp.get_static_groups().iter() {
             <span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group.borrow().assignments {
                 <span class="kw">let </span>dst = assign.dst.borrow();
                 <span class="kw">if </span>dst.is_hole() &amp;&amp; dst.name == <span class="string">&quot;go&quot; </span>{
@@ -198,7 +216,9 @@
         }
 
         <span class="comment">// Remove Groups that are not used
-        </span>comp.groups
+        </span>comp.get_groups_mut()
+            .retain(|g| <span class="self">self</span>.used_groups.contains(<span class="kw-2">&amp;</span>g.borrow().name()));
+        comp.get_static_groups_mut()
             .retain(|g| <span class="self">self</span>.used_groups.contains(<span class="kw-2">&amp;</span>g.borrow().name()));
         comp.comb_groups
             .retain(|cg| <span class="self">self</span>.used_comb_groups.contains(<span class="kw-2">&amp;</span>cg.borrow().name()));

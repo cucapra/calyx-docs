@@ -536,6 +536,51 @@
 <span id="536">536</span>
 <span id="537">537</span>
 <span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a formatter for the in-memory representation of Components.
 //! The printing operation clones inner nodes and doesn&#39;t perform any mutation
 //! to the Component.
@@ -706,8 +751,12 @@
 
         <span class="comment">// Add the wires
         </span><span class="macro">writeln!</span>(f, <span class="string">&quot;  wires {{&quot;</span>)<span class="question-mark">?</span>;
-        <span class="kw">for </span>group <span class="kw">in </span>comp.groups.iter() {
+        <span class="kw">for </span>group <span class="kw">in </span>comp.get_groups().iter() {
             <span class="self">Self</span>::write_group(<span class="kw-2">&amp;</span>group.borrow(), <span class="number">4</span>, f)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(f)<span class="question-mark">?</span>;
+        }
+        <span class="kw">for </span>group <span class="kw">in </span>comp.get_static_groups().iter() {
+            <span class="self">Self</span>::write_static_group(<span class="kw-2">&amp;</span>group.borrow(), <span class="number">4</span>, f)<span class="question-mark">?</span>;
             <span class="macro">writeln!</span>(f)<span class="question-mark">?</span>;
         }
         <span class="kw">for </span>comb_group <span class="kw">in </span>comp.comb_groups.iter() {
@@ -853,6 +902,26 @@
         <span class="macro">write!</span>(f, <span class="string">&quot;{}}}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))
     }
 
+    <span class="doccomment">/// Format and write a static group.
+    </span><span class="kw">pub fn </span>write_static_group&lt;F: io::Write&gt;(
+        group: <span class="kw-2">&amp;</span>ir::StaticGroup,
+        indent_level: usize,
+        f: <span class="kw-2">&amp;mut </span>F,
+    ) -&gt; io::Result&lt;()&gt; {
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(f, <span class="string">&quot;group {}&quot;</span>, group.name().id)<span class="question-mark">?</span>;
+        <span class="kw">if </span>!group.attributes.is_empty() {
+            <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_attributes(<span class="kw-2">&amp;</span>group.attributes))<span class="question-mark">?</span>;
+        }
+        <span class="macro">writeln!</span>(f, <span class="string">&quot; {{&quot;</span>)<span class="question-mark">?</span>;
+
+        <span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group.assignments {
+            <span class="self">Self</span>::write_assignment(assign, indent_level + <span class="number">2</span>, f)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(f)<span class="question-mark">?</span>;
+        }
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}}}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))
+    }
+
     <span class="doccomment">/// Format and write a control program
     </span><span class="kw">pub fn </span>write_control&lt;F: io::Write&gt;(
         control: <span class="kw-2">&amp;</span>ir::Control,
@@ -862,6 +931,13 @@
         <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))<span class="question-mark">?</span>;
         <span class="kw">match </span>control {
             ir::Control::Enable(ir::Enable { group, attributes }) =&gt; {
+                <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
+                <span class="macro">writeln!</span>(f, <span class="string">&quot;{};&quot;</span>, group.borrow().name().id)
+            }
+            ir::Control::StaticEnable(ir::StaticEnable {
+                group,
+                attributes,
+            }) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
                 <span class="macro">writeln!</span>(f, <span class="string">&quot;{};&quot;</span>, group.borrow().name().id)
             }
@@ -1049,6 +1125,20 @@
                 }
             }
             ir::PortParent::Group(group_wref) =&gt; <span class="macro">format!</span>(
+                <span class="string">&quot;{}[{}]&quot;</span>,
+                group_wref
+                    .internal
+                    .upgrade()
+                    .unwrap_or_else(|| <span class="macro">panic!</span>(
+                        <span class="string">&quot;Malformed AST: No reference to Group for port `{:#?}&#39;&quot;</span>,
+                        port
+                    ))
+                    .borrow()
+                    .name()
+                    .id,
+                port.name.id
+            ),
+            ir::PortParent::StaticGroup(group_wref) =&gt; <span class="macro">format!</span>(
                 <span class="string">&quot;{}[{}]&quot;</span>,
                 group_wref
                     .internal

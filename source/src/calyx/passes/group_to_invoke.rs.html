@@ -321,6 +321,35 @@
 <span id="321">321</span>
 <span id="322">322</span>
 <span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ReadWriteSet;
 <span class="kw">use </span><span class="kw">crate</span>::errors::CalyxResult;
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::ConstructVisitor;
@@ -328,7 +357,7 @@
     <span class="self">self</span>,
     traversal::{Action, Named, VisResult, Visitor},
 };
-<span class="kw">use </span><span class="kw">crate</span>::ir::{CloneName, GetAttributes, RRC};
+<span class="kw">use </span><span class="kw">crate</span>::ir::{GetAttributes, RRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::rc::Rc;
@@ -386,7 +415,7 @@
 
 <span class="doccomment">/// Construct an [ir::Invoke] from an [ir::Group] that has been validated by this pass.
 </span><span class="kw">fn </span>construct_invoke(
-    group: <span class="kw-2">&amp;</span>ir::Group,
+    assigns: <span class="kw-2">&amp;</span>[ir::Assignment],
     comp: RRC&lt;ir::Cell&gt;,
     builder: <span class="kw-2">&amp;mut </span>ir::Builder,
 ) -&gt; ir::Control {
@@ -416,7 +445,7 @@
     <span class="kw">let </span><span class="kw-2">mut </span>comb_assigns = Vec::new();
     <span class="kw">let </span><span class="kw-2">mut </span>wire_map: HashMap&lt;ir::Id, ir::RRC&lt;ir::Port&gt;&gt; = HashMap::new();
 
-    <span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group.assignments {
+    <span class="kw">for </span>assign <span class="kw">in </span>assigns {
         <span class="comment">// We know that all assignments in this group should write to either a)
         // a combinational component or b) comp or c) the group&#39;s done port-- we
         // should have checked for this condition before calling this function
@@ -505,123 +534,29 @@
         sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">let </span>groups = comp.groups.drain().collect_vec();
+        <span class="kw">let </span>groups = comp.get_groups_mut().drain().collect_vec();
+        <span class="kw">let </span>static_groups = comp.get_static_groups_mut().drain().collect_vec();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
-        <span class="lifetime">&#39;groups</span>: <span class="kw">for </span>g <span class="kw">in </span><span class="kw-2">&amp;</span>groups {
-            <span class="kw">let </span>group = g.borrow();
-
-            <span class="kw">let </span><span class="kw-2">mut </span>writes = ReadWriteSet::write_set(group.assignments.iter())
-                .filter(|cell| <span class="kw">match </span>cell.borrow().prototype {
-                    ir::CellType::Primitive { is_comb, .. } =&gt; !is_comb,
-                    <span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,
-                })
-                .collect_vec();
-            <span class="comment">// Excluding writes to combinational components, should write to exactly
-            // one cell
-            </span><span class="kw">if </span>writes.len() != <span class="number">1 </span>{
-                <span class="kw">continue</span>;
-            }
-
-            <span class="comment">// If component is ThisComponent, Reference, or External, don&#39;t turn into invoke
-            </span><span class="kw">let </span>cr = writes.pop().unwrap();
-            <span class="kw">let </span>cell = cr.borrow();
-            <span class="kw">match </span><span class="kw-2">&amp;</span>cell.prototype {
-                ir::CellType::Primitive { name, .. }
-                    <span class="kw">if </span><span class="self">self</span>.blacklist.contains(name) =&gt;
-                {
-                    <span class="kw">continue</span>;
-                }
-                ir::CellType::ThisComponent =&gt; <span class="kw">continue</span>,
-                <span class="kw">_ </span>=&gt; {}
-            }
-            <span class="kw">if </span>cell.is_reference() || cell.attributes.has(<span class="string">&quot;external&quot;</span>) {
-                <span class="kw">continue</span>;
-            }
-
-            <span class="comment">// Component must define a @go/@done interface
-            </span><span class="kw">let </span>maybe_go_port = cell.find_with_attr(<span class="string">&quot;go&quot;</span>);
-            <span class="kw">let </span>maybe_done_port = cell.find_with_attr(<span class="string">&quot;done&quot;</span>);
-            <span class="kw">if </span>maybe_go_port.is_none() || maybe_done_port.is_none() {
-                <span class="kw">continue</span>;
-            }
-
-            <span class="comment">// Component must have a single @go/@done pair
-            </span><span class="kw">let </span>go_ports = cell.find_all_with_attr(<span class="string">&quot;go&quot;</span>).count();
-            <span class="kw">let </span>done_ports = cell.find_all_with_attr(<span class="string">&quot;done&quot;</span>).count();
-            <span class="kw">if </span>go_ports &gt; <span class="number">1 </span>|| done_ports &gt; <span class="number">1 </span>{
-                <span class="kw">continue</span>;
-            }
-
-            <span class="kw">let </span>go_port = maybe_go_port.unwrap();
-            <span class="kw">let </span>done_port = maybe_done_port.unwrap();
-            <span class="kw">let </span><span class="kw-2">mut </span>go_wr_cnt = <span class="number">0</span>;
-            <span class="kw">let </span><span class="kw-2">mut </span>done_wr_cnt = <span class="number">0</span>;
-
-            <span class="lifetime">&#39;assigns</span>: <span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group.assignments {
-                <span class="comment">// @go port should have exactly one write and the src should be 1.
-                </span><span class="kw">if </span>assign.dst == go_port {
-                    <span class="kw">if </span>go_wr_cnt &gt; <span class="number">0 </span>{
-                        <span class="macro">log::info!</span>(
-                            <span class="string">&quot;Cannot transform `{}` due to multiple writes to @go port&quot;</span>,
-                            group.name(),
-                        );
-                        <span class="kw">continue </span><span class="lifetime">&#39;groups</span>;
-                    } <span class="kw">else if </span>!assign.guard.is_true() {
-                        <span class="macro">log::info!</span>(
-                            <span class="string">&quot;Cannot transform `{}` due to guarded write to @go port: {}&quot;</span>,
-                            group.name(),
-                            ir::Printer::assignment_to_str(assign)
-                        );
-                        <span class="kw">continue </span><span class="lifetime">&#39;groups</span>;
-                    } <span class="kw">else if </span>assign.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>) {
-                        go_wr_cnt += <span class="number">1</span>;
-                    } <span class="kw">else </span>{
-                        <span class="comment">// if go port&#39;s guard is not true, src is not (1,1), then
-                        // Continue
-                        </span><span class="kw">continue </span><span class="lifetime">&#39;assigns</span>;
-                    }
-                }
-                <span class="comment">// @done port should have exactly one read and the dst should be
-                // group&#39;s done signal.
-                </span><span class="kw">if </span>assign.src == done_port {
-                    <span class="kw">if </span>done_wr_cnt &gt; <span class="number">0 </span>{
-                        <span class="macro">log::info!</span>(
-                            <span class="string">&quot;Cannot transform `{}` due to multiple writes to @done port&quot;</span>,
-                            group.name(),
-                        );
-                        <span class="kw">continue </span><span class="lifetime">&#39;groups</span>;
-                    } <span class="kw">else if </span>!assign.guard.is_true() {
-                        <span class="macro">log::info!</span>(
-                            <span class="string">&quot;Cannot transform `{}` due to guarded write to @done port: {}&quot;</span>,
-                            group.name(),
-                            ir::Printer::assignment_to_str(assign)
-                        );
-                        <span class="kw">continue </span><span class="lifetime">&#39;groups</span>;
-                    } <span class="kw">else if </span>assign.dst == group.get(<span class="string">&quot;done&quot;</span>) {
-                        done_wr_cnt += <span class="number">1</span>;
-                    } <span class="kw">else </span>{
-                        <span class="comment">// If done port&#39;s guard is not true and does not write to group&#39;s done
-                        // then Continue
-                        </span><span class="kw">continue </span><span class="lifetime">&#39;assigns</span>;
-                    }
-                }
-            }
-            drop(cell);
-
-            <span class="kw">if </span>go_wr_cnt != <span class="number">1 </span>{
-                <span class="macro">log::info!</span>(<span class="string">&quot;Cannot transform `{}` because there are no writes to @go port&quot;</span>, group.name());
-                <span class="kw">continue </span><span class="lifetime">&#39;groups</span>;
-            } <span class="kw">else if </span>done_wr_cnt != <span class="number">1 </span>{
-                <span class="macro">log::info!</span>(<span class="string">&quot;Cannot transform `{}` because there are no writes to @done port&quot;</span>, group.name());
-                <span class="kw">continue </span><span class="lifetime">&#39;groups</span>;
-            }
-
-            <span class="self">self</span>.group_invoke_map.insert(
-                g.clone_name(),
-                construct_invoke(<span class="kw-2">&amp;</span>group, cr, <span class="kw-2">&amp;mut </span>builder),
-            );
+        <span class="kw">for </span>g <span class="kw">in </span><span class="kw-2">&amp;</span>groups {
+            <span class="self">self</span>.analyze_group(
+                <span class="kw-2">&amp;mut </span>builder,
+                g.borrow().name(),
+                <span class="kw-2">&amp;</span>g.borrow().assignments,
+                <span class="kw-2">&amp;</span>g.borrow().get(<span class="string">&quot;done&quot;</span>),
+            )
         }
-        comp.groups.append(groups.into_iter());
+        <span class="kw">for </span>g <span class="kw">in </span><span class="kw-2">&amp;</span>static_groups {
+            <span class="self">self</span>.analyze_group(
+                <span class="kw-2">&amp;mut </span>builder,
+                g.borrow().name(),
+                <span class="kw-2">&amp;</span>g.borrow().assignments,
+                <span class="kw-2">&amp;</span>g.borrow().get(<span class="string">&quot;done&quot;</span>),
+            )
+        }
+
+        comp.get_groups_mut().append(groups.into_iter());
+        comp.get_static_groups_mut()
+            .append(static_groups.into_iter());
 
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
@@ -642,6 +577,129 @@
                 <span class="prelude-val">Ok</span>(Action::Change(Box::new(inv)))
             }
         }
+    }
+}
+
+<span class="kw">impl </span>GroupToInvoke {
+    <span class="comment">// if g is able to be turned into invoke, then add to self.group_invoke_map
+    </span><span class="kw">fn </span>analyze_group(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        builder: <span class="kw-2">&amp;mut </span>ir::Builder,
+        group_name: ir::Id,
+        assigns: <span class="kw-2">&amp;</span>[ir::Assignment],
+        group_done_port: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::Port&gt;,
+    ) {
+        <span class="kw">let </span><span class="kw-2">mut </span>writes = ReadWriteSet::write_set(assigns.iter())
+            .filter(|cell| <span class="kw">match </span>cell.borrow().prototype {
+                ir::CellType::Primitive { is_comb, .. } =&gt; !is_comb,
+                <span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,
+            })
+            .collect_vec();
+        <span class="comment">// Excluding writes to combinational components, should write to exactly
+        // one cell
+        </span><span class="kw">if </span>writes.len() != <span class="number">1 </span>{
+            <span class="kw">return</span>;
+        }
+
+        <span class="comment">// If component is ThisComponent, Reference, or External, don&#39;t turn into invoke
+        </span><span class="kw">let </span>cr = writes.pop().unwrap();
+        <span class="kw">let </span>cell = cr.borrow();
+        <span class="kw">match </span><span class="kw-2">&amp;</span>cell.prototype {
+            ir::CellType::Primitive { name, .. }
+                <span class="kw">if </span><span class="self">self</span>.blacklist.contains(name) =&gt;
+            {
+                <span class="kw">return</span>;
+            }
+            ir::CellType::ThisComponent =&gt; <span class="kw">return</span>,
+            <span class="kw">_ </span>=&gt; {}
+        }
+        <span class="kw">if </span>cell.is_reference() || cell.attributes.has(<span class="string">&quot;external&quot;</span>) {
+            <span class="kw">return</span>;
+        }
+
+        <span class="comment">// Component must define a @go/@done interface
+        </span><span class="kw">let </span>maybe_go_port = cell.find_with_attr(<span class="string">&quot;go&quot;</span>);
+        <span class="kw">let </span>maybe_done_port = cell.find_with_attr(<span class="string">&quot;done&quot;</span>);
+        <span class="kw">if </span>maybe_go_port.is_none() || maybe_done_port.is_none() {
+            <span class="kw">return</span>;
+        }
+
+        <span class="comment">// Component must have a single @go/@done pair
+        </span><span class="kw">let </span>go_ports = cell.find_all_with_attr(<span class="string">&quot;go&quot;</span>).count();
+        <span class="kw">let </span>done_ports = cell.find_all_with_attr(<span class="string">&quot;done&quot;</span>).count();
+        <span class="kw">if </span>go_ports &gt; <span class="number">1 </span>|| done_ports &gt; <span class="number">1 </span>{
+            <span class="kw">return</span>;
+        }
+
+        <span class="kw">let </span>go_port = maybe_go_port.unwrap();
+        <span class="kw">let </span>done_port = maybe_done_port.unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>go_wr_cnt = <span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>done_wr_cnt = <span class="number">0</span>;
+
+        <span class="lifetime">&#39;assigns</span>: <span class="kw">for </span>assign <span class="kw">in </span>assigns {
+            <span class="comment">// @go port should have exactly one write and the src should be 1.
+            </span><span class="kw">if </span>assign.dst == go_port {
+                <span class="kw">if </span>go_wr_cnt &gt; <span class="number">0 </span>{
+                    <span class="macro">log::info!</span>(
+                            <span class="string">&quot;Cannot transform `{}` due to multiple writes to @go port&quot;</span>,
+                            group_name,
+                        );
+                    <span class="kw">return</span>;
+                } <span class="kw">else if </span>!assign.guard.is_true() {
+                    <span class="macro">log::info!</span>(
+                            <span class="string">&quot;Cannot transform `{}` due to guarded write to @go port: {}&quot;</span>,
+                            group_name,
+                            ir::Printer::assignment_to_str(assign)
+                        );
+                    <span class="kw">return</span>;
+                } <span class="kw">else if </span>assign.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>) {
+                    go_wr_cnt += <span class="number">1</span>;
+                } <span class="kw">else </span>{
+                    <span class="comment">// if go port&#39;s guard is not true, src is not (1,1), then
+                    // Continue
+                    </span><span class="kw">continue </span><span class="lifetime">&#39;assigns</span>;
+                }
+            }
+            <span class="comment">// @done port should have exactly one read and the dst should be
+            // group&#39;s done signal.
+            </span><span class="kw">if </span>assign.src == done_port {
+                <span class="kw">if </span>done_wr_cnt &gt; <span class="number">0 </span>{
+                    <span class="macro">log::info!</span>(
+                            <span class="string">&quot;Cannot transform `{}` due to multiple writes to @done port&quot;</span>,
+                            group_name,
+                        );
+                    <span class="kw">return</span>;
+                } <span class="kw">else if </span>!assign.guard.is_true() {
+                    <span class="macro">log::info!</span>(
+                            <span class="string">&quot;Cannot transform `{}` due to guarded write to @done port: {}&quot;</span>,
+                            group_name,
+                            ir::Printer::assignment_to_str(assign)
+                        );
+                    <span class="kw">return</span>;
+                } <span class="kw">else if </span>assign.dst == <span class="kw-2">*</span>group_done_port {
+                    done_wr_cnt += <span class="number">1</span>;
+                } <span class="kw">else </span>{
+                    <span class="comment">// If done port&#39;s guard is not true and does not write to group&#39;s done
+                    // then Continue
+                    </span><span class="kw">continue </span><span class="lifetime">&#39;assigns</span>;
+                }
+            }
+        }
+        drop(cell);
+
+        <span class="kw">if </span>go_wr_cnt != <span class="number">1 </span>{
+            <span class="macro">log::info!</span>(
+                <span class="string">&quot;Cannot transform `{}` because there are no writes to @go port&quot;</span>,
+                group_name
+            );
+            <span class="kw">return</span>;
+        } <span class="kw">else if </span>done_wr_cnt != <span class="number">1 </span>{
+            <span class="macro">log::info!</span>(<span class="string">&quot;Cannot transform `{}` because there are no writes to @done port&quot;</span>, group_name);
+            <span class="kw">return</span>;
+        }
+
+        <span class="self">self</span>.group_invoke_map
+            .insert(group_name, construct_invoke(assigns, cr, builder));
     }
 }
 </code></pre></div>

@@ -443,15 +443,29 @@
 <span id="443">443</span>
 <span id="444">444</span>
 <span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a visitor for `ir::Control` programs.
 //! Program passes implemented as the Visitor are directly invoked on
 //! [`ir::Context`] to compile every [`ir::Component`] using the pass.
-</span><span class="kw">use </span>itertools::Itertools;
-
-<span class="kw">use </span><span class="kw">super</span>::action::{Action, VisResult};
+</span><span class="kw">use </span><span class="kw">super</span>::action::{Action, VisResult};
 <span class="kw">use super</span>::{CompTraversal, Order};
 <span class="kw">use </span><span class="kw">crate</span>::errors::CalyxResult;
+<span class="kw">use </span><span class="kw">crate</span>::ir::control::StaticEnable;
 <span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, Component, Context, Control, LibrarySignatures};
+<span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::rc::Rc;
 
@@ -774,6 +788,17 @@
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
+    <span class="doccomment">/// Executed at an [ir::StaticEnable] node.
+    </span><span class="kw">fn </span>static_enable(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        _s: <span class="kw-2">&amp;mut </span>StaticEnable,
+        _comp: <span class="kw-2">&amp;mut </span>Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
     <span class="doccomment">/// Executed at an [ir::Invoke] node.
     </span><span class="kw">fn </span>invoke(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -855,6 +880,9 @@
                 })<span class="question-mark">?</span>,
             Control::Enable(ctrl) =&gt; {
                 visitor.enable(ctrl, component, sigs, comps)<span class="question-mark">?
+            </span>}
+            Control::StaticEnable(ctrl) =&gt; {
+                visitor.static_enable(ctrl, component, sigs, comps)<span class="question-mark">?
             </span>}
             Control::Empty(ctrl) =&gt; {
                 visitor.empty(ctrl, component, sigs, comps)<span class="question-mark">?

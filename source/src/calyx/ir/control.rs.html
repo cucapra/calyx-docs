@@ -361,7 +361,49 @@
 <span id="361">361</span>
 <span id="362">362</span>
 <span id="363">363</span>
-</pre><pre class="rust"><code><span class="kw">use </span>std::rc::Rc;
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ir::structure::StaticGroup;
+<span class="kw">use </span>std::rc::Rc;
 
 <span class="kw">use super</span>::{Attributes, Cell, CombGroup, GetAttributes, Group, Id, Port, RRC};
 
@@ -467,6 +509,24 @@
     }
 }
 
+<span class="doccomment">/// Data for the `enable` control for a static group.
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>StaticEnable {
+    <span class="doccomment">/// List of components to run.
+    </span><span class="kw">pub </span>group: RRC&lt;StaticGroup&gt;,
+    <span class="doccomment">/// Attributes attached to this control statement.
+    </span><span class="kw">pub </span>attributes: Attributes,
+}
+<span class="kw">impl </span>GetAttributes <span class="kw">for </span>StaticEnable {
+    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
+    }
+
+    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
+    }
+}
+
 <span class="kw">type </span>PortMap = Vec&lt;(Id, RRC&lt;Port&gt;)&gt;;
 <span class="kw">type </span>CellMap = Vec&lt;(Id, RRC&lt;Cell&gt;)&gt;;
 
@@ -519,6 +579,8 @@
     </span>Enable(Enable),
     <span class="doccomment">/// Control statement that does nothing.
     </span>Empty(Empty),
+    <span class="doccomment">/// Runs the control for a static group.
+    </span>StaticEnable(StaticEnable),
 }
 
 <span class="kw">impl </span>From&lt;Invoke&gt; <span class="kw">for </span>Control {
@@ -542,7 +604,8 @@
             | <span class="self">Self</span>::While(While { attributes, .. })
             | <span class="self">Self</span>::Invoke(Invoke { attributes, .. })
             | <span class="self">Self</span>::Enable(Enable { attributes, .. })
-            | <span class="self">Self</span>::Empty(Empty { attributes }) =&gt; attributes,
+            | <span class="self">Self</span>::Empty(Empty { attributes })
+            | <span class="self">Self</span>::StaticEnable(StaticEnable { attributes, .. }) =&gt; attributes,
         }
     }
 
@@ -554,7 +617,8 @@
             | <span class="self">Self</span>::While(While { attributes, .. })
             | <span class="self">Self</span>::Invoke(Invoke { attributes, .. })
             | <span class="self">Self</span>::Enable(Enable { attributes, .. })
-            | <span class="self">Self</span>::Empty(Empty { attributes }) =&gt; attributes,
+            | <span class="self">Self</span>::Empty(Empty { attributes })
+            | <span class="self">Self</span>::StaticEnable(StaticEnable { attributes, .. }) =&gt; attributes,
         }
     }
 }
@@ -585,6 +649,14 @@
     <span class="doccomment">/// Convience constructor for enable.
     </span><span class="kw">pub fn </span>enable(group: RRC&lt;Group&gt;) -&gt; <span class="self">Self </span>{
         Control::Enable(Enable {
+            group,
+            attributes: Attributes::default(),
+        })
+    }
+
+    <span class="doccomment">/// Convience constructor for static enable.
+    </span><span class="kw">pub fn </span>static_enable(group: RRC&lt;StaticGroup&gt;) -&gt; <span class="self">Self </span>{
+        Control::StaticEnable(StaticEnable {
             group,
             attributes: Attributes::default(),
         })
@@ -662,6 +734,13 @@
         }
     }
 
+    <span class="kw">pub fn </span>static_enable(en: <span class="kw-2">&amp;</span>StaticEnable) -&gt; StaticEnable {
+        StaticEnable {
+            group: Rc::clone(<span class="kw-2">&amp;</span>en.group),
+            attributes: en.attributes.clone(),
+        }
+    }
+
     <span class="kw">pub fn </span>invoke(inv: <span class="kw-2">&amp;</span>Invoke) -&gt; Invoke {
         Invoke {
             comp: Rc::clone(<span class="kw-2">&amp;</span>inv.comp),
@@ -720,6 +799,9 @@
             Control::While(wh) =&gt; Control::While(Cloner::while_(wh)),
             Control::Invoke(inv) =&gt; Control::Invoke(Cloner::invoke(inv)),
             Control::Enable(en) =&gt; Control::Enable(Cloner::enable(en)),
+            Control::StaticEnable(en) =&gt; {
+                Control::StaticEnable(Cloner::static_enable(en))
+            }
             Control::Empty(en) =&gt; Control::Empty(Cloner::empty(en)),
         }
     }

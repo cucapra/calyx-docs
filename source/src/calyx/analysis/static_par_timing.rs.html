@@ -319,6 +319,13 @@
 <span id="319">319</span>
 <span id="320">320</span>
 <span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::LiveRangeAnalysis;
 <span class="kw">use crate</span>::{
     analysis::ControlId,
@@ -497,52 +504,59 @@
                 cur_state
             }
             ir::Control::Empty(<span class="kw">_</span>) =&gt; cur_state,
-            ir::Control::Enable(<span class="kw">_</span>) =&gt; <span class="kw">match </span>cur_state {
-                <span class="prelude-val">Some</span>((par_id, thread_id, cur_clock)) =&gt; {
-                    <span class="kw">let </span>enable_id = ControlId::get_guaranteed_id(c);
-                    <span class="comment">// add enable to self.map
-                    </span><span class="kw">let </span>latency =
-                        ControlId::get_guaranteed_attribute(c, <span class="string">&quot;static&quot;</span>);
-                    <span class="comment">// live set is all cells live at this enable, organized by cell type
-                    </span><span class="kw">let </span>live_set = live.get(<span class="kw-2">&amp;</span>enable_id).clone();
-                    <span class="comment">// go thru all live cells in this enable add them to appropriate entry in
-                    // self.cell_map
-                    </span><span class="kw">for </span>(<span class="kw">_</span>, live_cells) <span class="kw">in </span>live_set {
-                        <span class="kw">for </span>cell <span class="kw">in </span>live_cells {
-                            <span class="kw">let </span>interval_vec = <span class="self">self
-                                </span>.cell_map
-                                .entry(par_id)
-                                .or_default()
-                                .entry(thread_id)
-                                .or_default()
-                                .entry(cell)
-                                .or_default();
-                            <span class="comment">// we need to check whether we&#39;ve already added this
-                            // to vec before or not. If we haven&#39;t,
-                            // then we can push
-                            // This can sometimes occur if there is a par block,
-                            // that contains a while loop, and that while loop
-                            // contains another par block.
-                            </span><span class="kw">match </span>interval_vec.last() {
-                                <span class="prelude-val">None </span>=&gt; interval_vec
-                                    .push((cur_clock, cur_clock + latency - <span class="number">1</span>)),
-                                <span class="prelude-val">Some</span>(interval) =&gt; {
-                                    <span class="kw">if </span><span class="kw-2">*</span>interval
-                                        != (cur_clock, cur_clock + latency - <span class="number">1</span>)
-                                    {
-                                        interval_vec.push((
-                                            cur_clock,
-                                            cur_clock + latency - <span class="number">1</span>,
-                                        ))
+            ir::Control::StaticEnable(<span class="kw">_</span>) | ir::Control::Enable(<span class="kw">_</span>) =&gt; {
+                <span class="kw">match </span>cur_state {
+                    <span class="prelude-val">Some</span>((par_id, thread_id, cur_clock)) =&gt; {
+                        <span class="kw">let </span>enable_id = ControlId::get_guaranteed_id(c);
+                        <span class="comment">// add enable to self.map
+                        </span><span class="kw">let </span>latency =
+                            ControlId::get_guaranteed_attribute(c, <span class="string">&quot;static&quot;</span>);
+                        <span class="comment">// live set is all cells live at this enable, organized by cell type
+                        </span><span class="kw">let </span>live_set = live.get(<span class="kw-2">&amp;</span>enable_id).clone();
+                        <span class="comment">// go thru all live cells in this enable add them to appropriate entry in
+                        // self.cell_map
+                        </span><span class="kw">for </span>(<span class="kw">_</span>, live_cells) <span class="kw">in </span>live_set {
+                            <span class="kw">for </span>cell <span class="kw">in </span>live_cells {
+                                <span class="kw">let </span>interval_vec = <span class="self">self
+                                    </span>.cell_map
+                                    .entry(par_id)
+                                    .or_default()
+                                    .entry(thread_id)
+                                    .or_default()
+                                    .entry(cell)
+                                    .or_default();
+                                <span class="comment">// we need to check whether we&#39;ve already added this
+                                // to vec before or not. If we haven&#39;t,
+                                // then we can push
+                                // This can sometimes occur if there is a par block,
+                                // that contains a while loop, and that while loop
+                                // contains another par block.
+                                </span><span class="kw">match </span>interval_vec.last() {
+                                    <span class="prelude-val">None </span>=&gt; interval_vec.push((
+                                        cur_clock,
+                                        cur_clock + latency - <span class="number">1</span>,
+                                    )),
+                                    <span class="prelude-val">Some</span>(interval) =&gt; {
+                                        <span class="kw">if </span><span class="kw-2">*</span>interval
+                                            != (
+                                                cur_clock,
+                                                cur_clock + latency - <span class="number">1</span>,
+                                            )
+                                        {
+                                            interval_vec.push((
+                                                cur_clock,
+                                                cur_clock + latency - <span class="number">1</span>,
+                                            ))
+                                        }
                                     }
                                 }
                             }
                         }
+                        <span class="prelude-val">Some</span>((par_id, thread_id, cur_clock + latency))
                     }
-                    <span class="prelude-val">Some</span>((par_id, thread_id, cur_clock + latency))
+                    <span class="prelude-val">None </span>=&gt; cur_state,
                 }
-                <span class="prelude-val">None </span>=&gt; cur_state,
-            },
+            }
             ir::Control::Seq(ir::Seq { stmts, .. }) =&gt; {
                 <span class="comment">// this works whether or not cur_state is None or Some
                 </span><span class="kw">let </span><span class="kw-2">mut </span>new_state = cur_state;

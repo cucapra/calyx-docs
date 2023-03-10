@@ -269,7 +269,7 @@
                 grp.borrow_mut().assignments.push(done_asmt);
 
                 grp.borrow_mut().attributes.insert(<span class="string">&quot;static&quot;</span>, key);
-                comp.groups.add(Rc::clone(<span class="kw-2">&amp;</span>grp));
+                comp.get_groups_mut().add(Rc::clone(<span class="kw-2">&amp;</span>grp));
 
                 <span class="kw">let </span><span class="kw-2">mut </span>enable: ir::Enable = Enable {
                     group: Rc::clone(<span class="kw-2">&amp;</span>grp),

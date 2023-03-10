@@ -135,6 +135,7 @@
 <span id="135">135</span>
 <span id="136">136</span>
 <span id="137">137</span>
+<span id="138">138</span>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     build_assignments, guard,
     ir::{<span class="self">self</span>, LibrarySignatures},
@@ -222,7 +223,8 @@
             )));
         }
 
-        <span class="kw">let </span>groups = comp.groups.drain().collect_vec();
+        <span class="comment">// assume static groups is empty
+        </span><span class="kw">let </span>groups = comp.get_groups_mut().drain().collect_vec();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="comment">// for each group, instantiate wires to hold its `go` and `done` signals.
         </span><span class="kw">let </span>hole_map: HoleMapping = groups

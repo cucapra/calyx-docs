@@ -171,6 +171,20 @@
 <span id="171">171</span>
 <span id="172">172</span>
 <span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ir::{
     <span class="self">self</span>,
     traversal::{Action, Named, VisResult, Visitor},
@@ -314,7 +328,7 @@
         <span class="comment">// Transform group assignments
         </span><span class="kw">let </span>groups = builder
             .component
-            .groups
+            .get_groups_mut()
             .drain()
             .map(|group| {
                 <span class="kw">let </span>assigns =
@@ -324,7 +338,21 @@
                 group
             })
             .into();
-        builder.component.groups = groups;
+        builder.component.set_groups(groups);
+
+        <span class="kw">let </span>static_groups = builder
+            .component
+            .get_static_groups_mut()
+            .drain()
+            .map(|group| {
+                <span class="kw">let </span>assigns =
+                    group.borrow_mut().assignments.drain(..).collect();
+                <span class="kw">let </span>new_assigns = lower_assigns(assigns, <span class="kw-2">&amp;mut </span>builder);
+                group.borrow_mut().assignments = new_assigns;
+                group
+            })
+            .into();
+        builder.component.set_static_groups(static_groups);
 
         <span class="comment">// Transform comb group assignments
         </span><span class="kw">let </span>comb_groups = builder

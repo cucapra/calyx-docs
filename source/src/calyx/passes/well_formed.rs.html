@@ -544,6 +544,70 @@
 <span id="544">544</span>
 <span id="545">545</span>
 <span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::errors::{CalyxResult, Error};
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::ConstructVisitor;
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::{Action, Named, VisResult, Visitor};
@@ -771,8 +835,14 @@
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but has a non-empty control program&quot;</span>, comp.name)));
             }
 
-            <span class="kw">if </span>!comp.groups.is_empty() {
-                <span class="kw">let </span>group = comp.groups.iter().next().unwrap().borrow();
+            <span class="kw">if </span>!comp.get_groups().is_empty() {
+                <span class="kw">let </span>group = comp.get_groups().iter().next().unwrap().borrow();
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains a group `{}`&quot;</span>, comp.name, group.clone_name())).with_pos(<span class="kw-2">&amp;</span>group.attributes));
+            }
+
+            <span class="kw">if </span>!comp.get_static_groups().is_empty() {
+                <span class="kw">let </span>group =
+                    comp.get_static_groups().iter().next().unwrap().borrow();
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains a group `{}`&quot;</span>, comp.name, group.clone_name())).with_pos(<span class="kw-2">&amp;</span>group.attributes));
             }
 
@@ -804,7 +874,46 @@
 
         <span class="comment">// For each non-combinational group, check if there is at least one write to the done
         // signal of that group and that the write is to the group&#39;s done signal.
-        </span><span class="kw">for </span>gr <span class="kw">in </span>comp.groups.iter() {
+        </span><span class="kw">for </span>gr <span class="kw">in </span>comp.get_groups().iter() {
+            <span class="kw">let </span>group = gr.borrow();
+            <span class="kw">let </span>gname = group.name();
+            <span class="kw">let </span><span class="kw-2">mut </span>has_done = <span class="bool-val">false</span>;
+            <span class="comment">// Find an assignment writing to this group&#39;s done condition.
+            </span><span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group.assignments {
+                <span class="kw">let </span>dst = assign.dst.borrow();
+                <span class="kw">if </span>dst.is_hole() &amp;&amp; dst.name == <span class="string">&quot;done&quot; </span>{
+                    <span class="comment">// Group has multiple done conditions
+                    </span><span class="kw">if </span>has_done {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                            <span class="string">&quot;Group `{}` has multiple done conditions&quot;</span>,
+                            gname
+                        ))
+                        .with_pos(<span class="kw-2">&amp;</span>assign.attributes));
+                    } <span class="kw">else </span>{
+                        has_done = <span class="bool-val">true</span>;
+                    }
+                    <span class="comment">// Group uses another group&#39;s done condition
+                    </span><span class="kw">if </span>gname != dst.get_parent_name() {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
+                            <span class="macro">format!</span>(<span class="string">&quot;Group `{}` refers to the done condition of another group (`{}`).&quot;</span>,
+                            gname,
+                            dst.get_parent_name())).with_pos(<span class="kw-2">&amp;</span>dst.attributes));
+                    }
+                }
+            }
+
+            <span class="comment">// Group does not have a done condition
+            </span><span class="kw">if </span>!has_done {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                    <span class="string">&quot;No writes to the `done&#39; hole for group `{gname}&#39;&quot;</span>,
+                ))
+                .with_pos(<span class="kw-2">&amp;</span>group.attributes));
+            }
+        }
+
+        <span class="comment">// For each non-combinational group, check if there is at least one write to the done
+        // signal of that group and that the write is to the group&#39;s done signal.
+        </span><span class="kw">for </span>gr <span class="kw">in </span>comp.get_static_groups().iter() {
             <span class="kw">let </span>group = gr.borrow();
             <span class="kw">let </span>gname = group.name();
             <span class="kw">let </span><span class="kw-2">mut </span>has_done = <span class="bool-val">false</span>;
@@ -1065,14 +1174,33 @@
         });
 
         <span class="comment">// Find unused groups
-        </span><span class="kw">let </span>all_groups: HashSet&lt;ir::Id&gt; =
-            comp.groups.iter().map(|g| g.clone_name()).collect();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>all_groups: HashSet&lt;ir::Id&gt; =
+            comp.get_groups().iter().map(|g| g.clone_name()).collect();
+        <span class="kw">let </span>static_groups: HashSet&lt;ir::Id&gt; = comp
+            .get_static_groups()
+            .iter()
+            .map(|g| g.clone_name())
+            .collect();
+        all_groups.extend(static_groups);
+
         <span class="kw">if let </span><span class="prelude-val">Some</span>(group) =
             all_groups.difference(<span class="kw-2">&amp;</span><span class="self">self</span>.used_groups).into_iter().next()
         {
-            <span class="kw">let </span>gr = comp.find_group(<span class="kw-2">*</span>group).unwrap();
-            <span class="kw">let </span>gr = gr.borrow();
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::unused(<span class="kw-2">*</span>group, <span class="string">&quot;group&quot;</span>).with_pos(<span class="kw-2">&amp;</span>gr.attributes));
+            <span class="kw">match </span>comp.find_group(<span class="kw-2">*</span>group) {
+                <span class="prelude-val">Some</span>(gr) =&gt; {
+                    <span class="kw">let </span>gr = gr.borrow();
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(
+                        Error::unused(<span class="kw-2">*</span>group, <span class="string">&quot;group&quot;</span>).with_pos(<span class="kw-2">&amp;</span>gr.attributes)
+                    );
+                }
+                <span class="prelude-val">None </span>=&gt; {
+                    <span class="kw">let </span>gr = comp.find_static_group(<span class="kw-2">*</span>group).unwrap();
+                    <span class="kw">let </span>gr = gr.borrow();
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(
+                        Error::unused(<span class="kw-2">*</span>group, <span class="string">&quot;group&quot;</span>).with_pos(<span class="kw-2">&amp;</span>gr.attributes)
+                    );
+                }
+            }
         };
 
         <span class="kw">let </span>all_comb_groups: HashSet&lt;ir::Id&gt; =

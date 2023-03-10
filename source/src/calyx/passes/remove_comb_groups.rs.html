@@ -524,7 +524,7 @@
             .collect::&lt;CalyxResult&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;&gt;()<span class="question-mark">?</span>;
 
         <span class="kw">for </span>group <span class="kw">in </span>groups {
-            comp.groups.add(group)
+            comp.get_groups_mut().add(group)
         }
 
         <span class="prelude-val">Ok</span>(Action::Continue)

@@ -489,6 +489,9 @@
 <span id="489">489</span>
 <span id="490">490</span>
 <span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphAnalysis, ReadWriteSet, WithStatic};
@@ -765,7 +768,6 @@
                         }
                     }
                 }
-
                 ir::PortParent::Group(<span class="kw">_</span>) =&gt; {
                     <span class="kw">if </span>port.borrow().name == <span class="string">&quot;done&quot; </span>{
                         <span class="kw">for </span>write_port <span class="kw">in </span>graph.writes_to(<span class="kw-2">&amp;</span>port.borrow()) {
@@ -780,6 +782,9 @@
                         }
                     }
                 }
+
+                ir::PortParent::StaticGroup(<span class="kw">_</span>) =&gt; <span class="comment">// done ports of static groups should clearly NOT have static latencies  
+                </span><span class="macro">panic!</span>(<span class="string">&quot;Have not decided how to handle static groups in infer-static-timing&quot;</span>),
             }
         }
         <span class="bool-val">false
@@ -889,7 +894,8 @@
     ) -&gt; VisResult {
         <span class="comment">// Compute latencies for all groups.
         </span><span class="kw">let </span><span class="kw-2">mut </span>latency_result: <span class="prelude-ty">Option</span>&lt;u64&gt;;
-        <span class="kw">for </span>group <span class="kw">in </span>comp.groups.iter() {
+        <span class="comment">// don&#39;t need to do all this work for static groups
+        </span><span class="kw">for </span>group <span class="kw">in </span>comp.get_groups().iter() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = <span class="self">self</span>.infer_latency(<span class="kw-2">&amp;</span>group.borrow()) {
                 <span class="kw">let </span>grp = group.borrow();
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(curr_lat) = grp.attributes.get(<span class="string">&quot;static&quot;</span>) {

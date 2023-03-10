@@ -158,6 +158,10 @@
 <span id="158">158</span>
 <span id="159">159</span>
 <span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, CloneName};
 <span class="kw">use </span><span class="kw">crate</span>::utils::{Idx, WeightGraph};
 <span class="kw">use </span>petgraph::visit::IntoEdgeReferences;
@@ -256,6 +260,10 @@
             all_nodes.push(comp.borrow().name());
         }
         ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
+            confs.add_node(group.borrow().name());
+            all_nodes.push(group.clone_name());
+        }
+        ir::Control::StaticEnable(ir::StaticEnable { group, .. }) =&gt; {
             confs.add_node(group.borrow().name());
             all_nodes.push(group.clone_name());
         }

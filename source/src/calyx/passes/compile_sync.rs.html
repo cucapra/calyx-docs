@@ -396,6 +396,16 @@
 <span id="396">396</span>
 <span id="397">397</span>
 <span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::errors::{CalyxResult, Error};
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::rc::Rc;
@@ -472,6 +482,16 @@
             <span class="prelude-val">Ok</span>(())
         }
         ir::Control::Enable(e) =&gt; {
+            <span class="kw">if </span>s.get_attributes().get(<span class="string">&quot;sync&quot;</span>).is_some() {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(
+                    <span class="string">&quot;Enable or Invoke controls cannot be marked with @sync&quot;
+                        </span>.to_string(),
+                )
+                .with_pos(<span class="kw-2">&amp;</span>e.attributes));
+            }
+            <span class="prelude-val">Ok</span>(())
+        }
+        ir::Control::StaticEnable(e) =&gt; {
             <span class="kw">if </span>s.get_attributes().get(<span class="string">&quot;sync&quot;</span>).is_some() {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(
                     <span class="string">&quot;Enable or Invoke controls cannot be marked with @sync&quot;

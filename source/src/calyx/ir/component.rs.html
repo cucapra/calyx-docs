@@ -272,9 +272,63 @@
 <span id="272">272</span>
 <span id="273">273</span>
 <span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, Builder, Cell, CellType, CloneName, CombGroup,
-    Control, GetName, Group, Id, PortDef, RRC,
+    Control, GetName, Group, Id, PortDef, StaticGroup, RRC,
 };
 <span class="kw">use </span><span class="kw">crate</span>::utils;
 <span class="kw">use </span>itertools::Itertools;
@@ -299,6 +353,8 @@
     </span><span class="kw">pub </span>cells: IdList&lt;Cell&gt;,
     <span class="doccomment">/// Groups of assignment wires.
     </span><span class="kw">pub </span>groups: IdList&lt;Group&gt;,
+    <span class="doccomment">/// Groups of assignment wires
+    </span><span class="kw">pub </span>static_groups: IdList&lt;StaticGroup&gt;,
     <span class="doccomment">/// Groups of assignment wires.
     </span><span class="kw">pub </span>comb_groups: IdList&lt;CombGroup&gt;,
     <span class="doccomment">/// The set of &quot;continuous assignments&quot;, i.e., assignments that are always
@@ -347,6 +403,7 @@
             signature: this_sig,
             cells: IdList::default(),
             groups: IdList::default(),
+            static_groups: IdList::default(),
             comb_groups: IdList::default(),
             continuous_assignments: <span class="macro">vec!</span>[],
             control: Rc::new(RefCell::new(Control::empty())),
@@ -360,12 +417,50 @@
         <span class="self">self</span>.namegen.add_names(names)
     }
 
+    <span class="doccomment">/// gets the component&#39;s groups
+    </span><span class="kw">pub fn </span>get_groups(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>IdList&lt;Group&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.groups
+    }
+
+    <span class="doccomment">/// gets the component&#39;s static groups
+    </span><span class="kw">pub fn </span>get_static_groups(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>IdList&lt;StaticGroup&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.static_groups
+    }
+
+    <span class="doccomment">/// gets the component&#39;s groups
+    </span><span class="kw">pub fn </span>get_groups_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>IdList&lt;Group&gt; {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.groups
+    }
+
+    <span class="doccomment">/// gets the component&#39;s groups
+    </span><span class="kw">pub fn </span>get_static_groups_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>IdList&lt;StaticGroup&gt; {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.static_groups
+    }
+
+    <span class="doccomment">/// gets the component&#39;s groups
+    </span><span class="kw">pub fn </span>set_groups(<span class="kw-2">&amp;mut </span><span class="self">self</span>, groups: IdList&lt;Group&gt;) {
+        <span class="self">self</span>.groups = groups
+    }
+
+    <span class="doccomment">/// gets the component&#39;s groups
+    </span><span class="kw">pub fn </span>set_static_groups(<span class="kw-2">&amp;mut </span><span class="self">self</span>, static_groups: IdList&lt;StaticGroup&gt;) {
+        <span class="self">self</span>.static_groups = static_groups
+    }
+
     <span class="doccomment">/// Return a reference to the group with `name` if present.
     </span><span class="kw">pub fn </span>find_group&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Group&gt;&gt;
     <span class="kw">where
         </span>S: Into&lt;Id&gt;,
     {
         <span class="self">self</span>.groups.find(name)
+    }
+
+    <span class="doccomment">/// Return a reference to the group with `name` if present.
+    </span><span class="kw">pub fn </span>find_static_group&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;StaticGroup&gt;&gt;
+    <span class="kw">where
+        </span>S: Into&lt;Id&gt;,
+    {
+        <span class="self">self</span>.static_groups.find(name)
     }
 
     <span class="doccomment">/// Return a refernece to a combination group with `name` if present.
@@ -407,6 +502,14 @@
             }
             group_ref.borrow_mut().assignments = assigns;
         }
+        <span class="kw">for </span>group_ref <span class="kw">in </span><span class="self">self</span>.get_static_groups().iter() {
+            <span class="kw">let </span><span class="kw-2">mut </span>assigns =
+                group_ref.borrow_mut().assignments.drain(..).collect_vec();
+            <span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;mut </span>assigns {
+                f(assign)
+            }
+            group_ref.borrow_mut().assignments = assigns;
+        }
         <span class="kw">for </span>group_ref <span class="kw">in </span><span class="self">self</span>.comb_groups.iter() {
             <span class="kw">let </span><span class="kw-2">mut </span>assigns =
                 group_ref.borrow_mut().assignments.drain(..).collect_vec();
@@ -424,6 +527,11 @@
         </span>F: FnMut(<span class="kw-2">&amp;</span>Assignment),
     {
         <span class="kw">for </span>group_ref <span class="kw">in </span><span class="self">self</span>.groups.iter() {
+            <span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group_ref.borrow().assignments {
+                f(assign)
+            }
+        }
+        <span class="kw">for </span>group_ref <span class="kw">in </span><span class="self">self</span>.get_static_groups().iter() {
             <span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group_ref.borrow().assignments {
                 f(assign)
             }

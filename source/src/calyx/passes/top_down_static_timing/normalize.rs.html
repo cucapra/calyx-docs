@@ -111,6 +111,7 @@
 <span id="111">111</span>
 <span id="112">112</span>
 <span id="113">113</span>
+<span id="114">114</span>
 </pre><pre class="rust"><code><span class="kw">use </span>std::{cmp, iter};
 
 <span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, GetAttributes};
@@ -165,6 +166,7 @@
             }
             ir::Control::Invoke(<span class="kw">_</span>)
             | ir::Control::Enable(<span class="kw">_</span>)
+            | ir::Control::StaticEnable(<span class="kw">_</span>)
             | ir::Control::Empty(<span class="kw">_</span>) =&gt; {}
         }
     }

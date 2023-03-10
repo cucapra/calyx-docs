@@ -261,6 +261,11 @@
 <span id="261">261</span>
 <span id="262">262</span>
 <span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::errors::{CalyxResult, Error};
 <span class="kw">use </span><span class="kw">crate</span>::ir::traversal::{
@@ -368,7 +373,12 @@
         // that component&#39;s `write_together&#39; and `read_together&#39; are also driven.
         // For example, for a register, both the `.in&#39; port and the `.write_en&#39; port need to be
         // driven.
-        </span><span class="kw">for </span>group_ref <span class="kw">in </span>comp.groups.iter() {
+        </span><span class="kw">for </span>group_ref <span class="kw">in </span>comp.get_groups().iter() {
+            <span class="kw">let </span>group = group_ref.borrow();
+            <span class="self">self</span>.check_specs(<span class="kw-2">&amp;</span>group.assignments)
+                .map_err(|err| err.with_pos(<span class="kw-2">&amp;</span>group.attributes))<span class="question-mark">?</span>;
+        }
+        <span class="kw">for </span>group_ref <span class="kw">in </span>comp.get_static_groups().iter() {
             <span class="kw">let </span>group = group_ref.borrow();
             <span class="self">self</span>.check_specs(<span class="kw-2">&amp;</span>group.assignments)
                 .map_err(|err| err.with_pos(<span class="kw-2">&amp;</span>group.attributes))<span class="question-mark">?</span>;

@@ -211,6 +211,13 @@
 <span id="211">211</span>
 <span id="212">212</span>
 <span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, CloneName, RRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::{iter, rc::Rc};
@@ -341,6 +348,13 @@
             ir::Control::Empty(<span class="kw">_</span>) =&gt; (<span class="macro">vec!</span>[], <span class="macro">vec!</span>[]),
             ir::Control::Enable(ir::Enable { group, .. }) =&gt; (
                 <span class="self">Self</span>::port_read_set(group.borrow().assignments.iter())
+                    .collect(),
+                <span class="self">Self</span>::port_write_set(group.borrow().assignments.iter())
+                    .collect(),
+            ),
+            ir::Control::StaticEnable(ir::StaticEnable { group, .. }) =&gt; (
+                <span class="comment">// Will have to change when we implement static assignments
+                </span><span class="self">Self</span>::port_read_set(group.borrow().assignments.iter())
                     .collect(),
                 <span class="self">Self</span>::port_write_set(group.borrow().assignments.iter())
                     .collect(),

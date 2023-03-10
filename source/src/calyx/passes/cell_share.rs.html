@@ -575,6 +575,7 @@
 <span id="575">575</span>
 <span id="576">576</span>
 <span id="577">577</span>
+<span id="578">578</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::errors::CalyxResult;
 <span class="kw">use </span><span class="kw">crate</span>::ir::rewriter;
 <span class="kw">use crate</span>::{
@@ -1145,6 +1146,7 @@
         <span class="comment">// Rewrite control uses of ports
         </span>rewriter.rewrite_control(
             <span class="kw-2">&amp;mut </span>comp.control.borrow_mut(),
+            <span class="kw-2">&amp;</span>HashMap::new(),
             <span class="kw-2">&amp;</span>HashMap::new(),
             <span class="kw-2">&amp;</span>HashMap::new(),
         );

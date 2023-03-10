@@ -184,6 +184,12 @@
 <span id="184">184</span>
 <span id="185">185</span>
 <span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
 </pre><pre class="rust"><code><span class="kw">use </span>std::rc::Rc;
 
 <span class="kw">use crate</span>::{
@@ -239,6 +245,9 @@
                 en.attributes[ID] = <span class="self">self</span>.cur_st;
                 <span class="kw">let </span>time = en.attributes[<span class="string">&quot;static&quot;</span>];
                 <span class="self">self</span>.cur_st += time;
+            }
+            ir::Control::StaticEnable(<span class="kw">_</span>) =&gt; {
+                <span class="macro">panic!</span>(<span class="string">&quot;StaticEnable behavior on tdst TBD&quot;</span>)
             }
             ir::Control::Seq(seq) =&gt; {
                 <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;mut </span>seq.stmts {
@@ -306,6 +315,9 @@
             ir::Control::Enable(en) =&gt; {
                 <span class="kw">let </span>st = en.attributes[ID] + en.attributes[<span class="string">&quot;static&quot;</span>] - <span class="number">1</span>;
                 exits.push((st, ir::Guard::True));
+            }
+            ir::Control::StaticEnable(<span class="kw">_</span>) =&gt; {
+                <span class="macro">panic!</span>(<span class="string">&quot;StaticEnable behavior on tdst TBD&quot;</span>)
             }
             ir::Control::Par(par) =&gt; {
                 <span class="kw">let </span>st = par.attributes[ID] + par.attributes[<span class="string">&quot;static&quot;</span>] - <span class="number">1</span>;

@@ -230,6 +230,22 @@
 <span id="230">230</span>
 <span id="231">231</span>
 <span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{DominatorMap, ReadWriteSet, ShareSet};
 <span class="kw">use </span><span class="kw">crate</span>::ir;
 <span class="kw">use </span><span class="kw">crate</span>::ir::CloneName;
@@ -351,6 +367,15 @@
                         }
                     }
                 }
+                ir::Control::StaticEnable(ir::StaticEnable {
+                    group, ..
+                }) =&gt; {
+                    add_assignment_reads(
+                        <span class="kw-2">&amp;mut </span>reads,
+                        state_shareable,
+                        <span class="kw-2">&amp;</span>group.borrow().assignments,
+                    );
+                }
                 ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
                     add_assignment_reads(
                         <span class="kw-2">&amp;mut </span>reads,
@@ -438,6 +463,13 @@
                     <span class="macro">unreachable!</span>(
                         <span class="string">&quot;no empty/seqs/pars should be in domination map&quot;
                     </span>)
+                }
+                ir::Control::StaticEnable(ir::StaticEnable {
+                    group, ..
+                }) =&gt; {
+                    <span class="kw">if </span><span class="self">self</span>.go_is_written(<span class="kw-2">&amp;</span>group.borrow().assignments) {
+                        <span class="kw">return </span><span class="bool-val">true</span>;
+                    }
                 }
                 ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
                     <span class="kw">if </span><span class="self">self</span>.go_is_written(<span class="kw-2">&amp;</span>group.borrow().assignments) {
