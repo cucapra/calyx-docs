@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["calyx"];
+window.ALL_CRATES = ["calyx_frontend","calyx_ir","calyx_opt","calyx_utils"];

@@ -1,3 +1,0 @@
-(function() {var implementors = {
-"calyx":[["impl <a class=\"trait\" href=\"https://docs.rs/serde/1.0.147/serde/ser/trait.Serialize.html\" title=\"trait serde::ser::Serialize\">Serialize</a> for <a class=\"struct\" href=\"calyx/ir/struct.Id.html\" title=\"struct calyx::ir::Id\">Id</a>"],["impl <a class=\"trait\" href=\"https://docs.rs/serde/1.0.147/serde/ser/trait.Serialize.html\" title=\"trait serde::ser::Serialize\">Serialize</a> for <a class=\"struct\" href=\"calyx/utils/struct.GSym.html\" title=\"struct calyx::utils::GSym\">GSym</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
