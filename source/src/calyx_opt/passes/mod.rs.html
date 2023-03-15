@@ -74,6 +74,8 @@
 <span id="74">74</span>
 <span id="75">75</span>
 <span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
@@ -85,6 +87,7 @@
 <span class="kw">mod </span>compile_ref;
 <span class="kw">mod </span>compile_sync;
 <span class="kw">mod </span>component_iniliner;
+<span class="kw">mod </span>dead_assignment_removal;
 <span class="kw">mod </span>dead_cell_removal;
 <span class="kw">mod </span>dead_group_removal;
 <span class="kw">mod </span>dump_ports;
@@ -124,6 +127,7 @@
 <span class="kw">pub use </span>compile_ref::CompileRef;
 <span class="kw">pub use </span>compile_sync::CompileSync;
 <span class="kw">pub use </span>component_iniliner::ComponentInliner;
+<span class="kw">pub use </span>dead_assignment_removal::DeadAssignmentRemoval;
 <span class="kw">pub use </span>dead_cell_removal::DeadCellRemoval;
 <span class="kw">pub use </span>dead_group_removal::DeadGroupRemoval;
 <span class="kw">pub use </span>externalize::Externalize;
