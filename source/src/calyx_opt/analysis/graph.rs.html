@@ -293,6 +293,9 @@
 <span id="293">293</span>
 <span id="294">294</span>
 <span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Id, PortIterator, RRC};
 <span class="kw">use </span>petgraph::{
     algo,
@@ -351,12 +354,15 @@
         component.iter_assignments(|asgn| {
             analysis.insert_assignment(asgn);
         });
+        component.iter_static_assignments(|asgn| {
+            analysis.insert_assignment(asgn);
+        });
         analysis
     }
 }
 
 <span class="kw">impl </span>GraphAnalysis {
-    <span class="kw">fn </span>insert_assignment(<span class="kw-2">&amp;mut </span><span class="self">self</span>, asgn: <span class="kw-2">&amp;</span>ir::Assignment) {
+    <span class="kw">fn </span>insert_assignment&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, asgn: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;) {
         <span class="kw">let </span>GraphAnalysis { nodes, graph } = <span class="self">self</span>;
         <span class="comment">// insert nodes for src and dst ports
         </span><span class="kw">let </span>src_key = asgn.src.borrow().canonical();

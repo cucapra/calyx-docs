@@ -681,9 +681,13 @@
 <span id="681">681</span>
 <span id="682">682</span>
 <span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
-</span><span class="kw">use super</span>::{
+</span><span class="kw">use </span><span class="kw">crate</span>::guard::{Nothing, StaticTiming};
+
+<span class="kw">use super</span>::{
     Attributes, Direction, GetAttributes, Guard, Id, PortDef, RRC, WRC,
 };
 <span class="kw">use </span>calyx_utils::GetName;
@@ -1106,7 +1110,7 @@
 
 <span class="doccomment">/// Represents a guarded assignment in the program
 </span><span class="attribute">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>Assignment {
+</span><span class="kw">pub struct </span>Assignment&lt;T&gt; {
     <span class="doccomment">/// The destination for the assignment.
     </span><span class="kw">pub </span>dst: RRC&lt;Port&gt;,
 
@@ -1114,13 +1118,13 @@
     </span><span class="kw">pub </span>src: RRC&lt;Port&gt;,
 
     <span class="doccomment">/// The guard for this assignment.
-    </span><span class="kw">pub </span>guard: Box&lt;Guard&gt;,
+    </span><span class="kw">pub </span>guard: Box&lt;Guard&lt;T&gt;&gt;,
 
     <span class="doccomment">/// Attributes for this assignment.
     </span><span class="kw">pub </span>attributes: Attributes,
 }
 
-<span class="kw">impl </span>Assignment {
+<span class="kw">impl</span>&lt;T&gt; Assignment&lt;T&gt; {
     <span class="doccomment">/// Apply function `f` to each port contained within the assignment and
     /// replace the port with the generated value if not None.
     </span><span class="kw">pub fn </span>for_each_port&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F)
@@ -1144,7 +1148,7 @@
     </span>name: Id,
 
     <span class="doccomment">/// The assignments used in this group
-    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&gt;,
+    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&lt;Nothing&gt;&gt;,
 
     <span class="doccomment">/// Holes for this group
     </span><span class="kw">pub </span>holes: SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">3</span>]&gt;,
@@ -1199,14 +1203,14 @@
     }
 
     <span class="doccomment">/// Returns a reference to the assignment in the group that writes to the done condition.
-    </span><span class="kw">pub fn </span>done_cond(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Assignment {
+    </span><span class="kw">pub fn </span>done_cond(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Assignment&lt;Nothing&gt; {
         <span class="kw">let </span>idx = <span class="self">self</span>.find_done_cond();
         <span class="kw-2">&amp;</span><span class="self">self</span>.assignments[idx]
     }
 
     <span class="doccomment">/// Returns a mutable reference to the assignment in the group that writes to the done
     /// condition.
-    </span><span class="kw">pub fn </span>done_cond_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Assignment {
+    </span><span class="kw">pub fn </span>done_cond_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Assignment&lt;Nothing&gt; {
         <span class="kw">let </span>idx = <span class="self">self</span>.find_done_cond();
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.assignments[idx]
     }
@@ -1231,7 +1235,7 @@
     </span>name: Id,
 
     <span class="doccomment">/// The assignments used in this group
-    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&gt;,
+    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&lt;StaticTiming&gt;&gt;,
 
     <span class="doccomment">/// Holes for this group
     </span><span class="kw">pub </span>holes: SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">3</span>]&gt;,
@@ -1288,14 +1292,14 @@
     }
 
     <span class="doccomment">/// Returns a reference to the assignment in the group that writes to the done condition.
-    </span><span class="kw">pub fn </span>done_cond(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Assignment {
+    </span><span class="kw">pub fn </span>done_cond(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Assignment&lt;StaticTiming&gt; {
         <span class="kw">let </span>idx = <span class="self">self</span>.find_done_cond();
         <span class="kw-2">&amp;</span><span class="self">self</span>.assignments[idx]
     }
 
     <span class="doccomment">/// Returns a mutable reference to the assignment in the group that writes to the done
     /// condition.
-    </span><span class="kw">pub fn </span>done_cond_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Assignment {
+    </span><span class="kw">pub fn </span>done_cond_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Assignment&lt;StaticTiming&gt; {
         <span class="kw">let </span>idx = <span class="self">self</span>.find_done_cond();
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.assignments[idx]
     }
@@ -1322,7 +1326,7 @@
     </span><span class="kw">pub</span>(<span class="kw">super</span>) name: Id,
 
     <span class="doccomment">/// The assignments used in this group
-    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&gt;,
+    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&lt;Nothing&gt;&gt;,
 
     <span class="doccomment">/// Attributes for this group.
     </span><span class="kw">pub </span>attributes: Attributes,

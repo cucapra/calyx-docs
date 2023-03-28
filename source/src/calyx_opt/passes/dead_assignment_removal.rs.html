@@ -124,7 +124,9 @@
 <span id="124">124</span>
 <span id="125">125</span>
 <span id="126">126</span>
-</pre><pre class="rust"><code><span class="kw">use </span>itertools::Itertools;
+<span id="127">127</span>
+</pre><pre class="rust"><code><span class="kw">use </span>ir::Nothing;
+<span class="kw">use </span>itertools::Itertools;
 
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
@@ -132,8 +134,8 @@
 
 <span class="comment">// maps combinational combinational components to set of all combinational components that it reads from
 // so the entries are (comb comp, &lt;set of comb components that write to comb comp&gt;)
-</span><span class="kw">fn </span>get_comb_dependence_map(
-    assigns: <span class="kw-2">&amp;</span>Vec&lt;ir::Assignment&gt;,
+</span><span class="kw">fn </span>get_comb_dependence_map&lt;T&gt;(
+    assigns: <span class="kw-2">&amp;</span>Vec&lt;ir::Assignment&lt;T&gt;&gt;,
 ) -&gt; HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>comb_dependence_map: HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt; =
         HashMap::new();
@@ -164,7 +166,7 @@
 <span class="comment">// non_comb_writes includes all combinational cells that write to
 // something besides a combinational cell
 // i.e., the combinational cells that write to group holes or stateful cells
-</span><span class="kw">fn </span>get_non_comb_writes(assigns: <span class="kw-2">&amp;</span>Vec&lt;ir::Assignment&gt;) -&gt; Vec&lt;ir::Id&gt; {
+</span><span class="kw">fn </span>get_non_comb_writes&lt;T&gt;(assigns: <span class="kw-2">&amp;</span>Vec&lt;ir::Assignment&lt;T&gt;&gt;) -&gt; Vec&lt;ir::Id&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>non_comb_writes: Vec&lt;ir::Id&gt; = Vec::new();
     <span class="kw">for </span>assign <span class="kw">in </span>assigns {
         <span class="kw">if </span>!assign.dst.borrow().parent_is_comb() {
@@ -232,7 +234,7 @@
             </span>used_combs.insert(used);
         }
 
-        <span class="kw">let </span>used_assigns: Vec&lt;ir::Assignment&gt; = s
+        <span class="kw">let </span>used_assigns: Vec&lt;ir::Assignment&lt;Nothing&gt;&gt; = s
             .group
             .borrow_mut()
             .assignments

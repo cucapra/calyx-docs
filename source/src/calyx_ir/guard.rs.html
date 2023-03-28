@@ -440,10 +440,95 @@
 <span id="440">440</span>
 <span id="441">441</span>
 <span id="442">442</span>
-</pre><pre class="rust"><code><span class="kw">use super</span>::{Port, RRC};
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::Group;
+<span class="kw">use super</span>::{Port, RRC};
+<span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not};
 <span class="kw">use </span>std::{cmp::Ordering, hash::Hash, rc::Rc};
+
+<span class="attribute">#[derive(Debug, Clone, Default)]
+</span><span class="kw">pub struct </span>Nothing;
+
+<span class="kw">impl </span>ToString <span class="kw">for </span>Nothing {
+    <span class="kw">fn </span>to_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+        <span class="string">&quot;&quot;</span>.to_string()
+    }
+}
 
 <span class="doccomment">/// Comparison operations that can be performed between ports by [Guard::CompOp].
 </span><span class="attribute">#[derive(Debug, Clone, PartialEq, Eq)]
@@ -463,24 +548,53 @@
 }
 
 <span class="doccomment">/// An assignment guard which has pointers to the various ports from which it reads.
-</span><span class="attribute">#[derive(Default, Debug, Clone)]
-</span><span class="kw">pub enum </span>Guard {
-    <span class="attribute">#[default]
-    </span><span class="doccomment">/// The constant true
-    </span>True,
+</span><span class="attribute">#[derive(Debug, Clone)]
+</span><span class="kw">pub enum </span>Guard&lt;T&gt; {
     <span class="doccomment">/// Represents `c1 || c2`.
-    </span>Or(Box&lt;Guard&gt;, Box&lt;Guard&gt;),
+    </span>Or(Box&lt;Guard&lt;T&gt;&gt;, Box&lt;Guard&lt;T&gt;&gt;),
     <span class="doccomment">/// Represents `c1 &amp;&amp; c2`.
-    </span>And(Box&lt;Guard&gt;, Box&lt;Guard&gt;),
+    </span>And(Box&lt;Guard&lt;T&gt;&gt;, Box&lt;Guard&lt;T&gt;&gt;),
     <span class="doccomment">/// Represents `!c1`
-    </span>Not(Box&lt;Guard&gt;),
+    </span>Not(Box&lt;Guard&lt;T&gt;&gt;),
+    <span class="doccomment">/// The constant true
+    </span>True,
     <span class="doccomment">/// Comparison operator.
     </span>CompOp(PortComp, RRC&lt;Port&gt;, RRC&lt;Port&gt;),
     <span class="doccomment">/// Uses the value on a port as the condition. Same as `p1 == true`
     </span>Port(RRC&lt;Port&gt;),
+    <span class="doccomment">/// Other types of information.
+    </span>Info(T),
 }
 
-<span class="kw">impl </span>Hash <span class="kw">for </span>Guard {
+<span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>Guard&lt;T&gt; {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        Guard::True
+    }
+}
+
+<span class="attribute">#[derive(Debug, Clone)]
+</span><span class="kw">pub struct </span>StaticTiming {
+    interval: (u64, u64),
+    parent: RRC&lt;Group&gt;,
+}
+
+<span class="kw">impl </span>ToString <span class="kw">for </span>StaticTiming {
+    <span class="kw">fn </span>to_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+        <span class="kw">let </span><span class="kw-2">mut </span>full_string = <span class="string">&quot;%&quot;</span>.to_owned();
+        full_string.push_str(<span class="self">self</span>.parent.borrow().name().as_ref());
+        full_string.push(<span class="string">&#39;[&#39;</span>);
+        full_string.push_str(<span class="kw-2">&amp;</span><span class="self">self</span>.interval.<span class="number">0</span>.to_string());
+        full_string.push(<span class="string">&#39;:&#39;</span>);
+        full_string.push_str(<span class="kw-2">&amp;</span><span class="self">self</span>.interval.<span class="number">1</span>.to_string());
+        full_string.push(<span class="string">&#39;]&#39;</span>);
+        full_string
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; Hash <span class="kw">for </span>Guard&lt;T&gt;
+<span class="kw">where
+    </span>T: ToString,
+{
     <span class="kw">fn </span>hash&lt;H: std::hash::Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H) {
         <span class="kw">match </span><span class="self">self </span>{
             Guard::Or(l, r) | Guard::And(l, r) =&gt; {
@@ -499,18 +613,224 @@
                 p.borrow().get_parent_name().hash(state);
             }
             Guard::True =&gt; {}
+            Guard::Info(i) =&gt; i.to_string().hash(state),
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; Guard&lt;T&gt; {
+    <span class="doccomment">/// Returns true if this is a `Guard::True`.
+    </span><span class="kw">pub fn </span>is_true(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="kw">match </span><span class="self">self </span>{
+            Guard::True =&gt; <span class="bool-val">true</span>,
+            Guard::Port(p) =&gt; p.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>),
+            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
+        }
+    }
+
+    <span class="doccomment">/// returns true if the self is !cell_name, false otherwise.
+    </span><span class="kw">pub fn </span>is_not_done(<span class="kw-2">&amp;</span><span class="self">self</span>, cell_name: <span class="kw-2">&amp;</span><span class="kw">crate</span>::Id) -&gt; bool {
+        <span class="kw">if let </span>Guard::Not(g) = <span class="self">self </span>{
+            <span class="kw">if let </span>Guard::Port(port) = <span class="kw-2">&amp;</span>(<span class="kw-2">**</span>g) {
+                <span class="kw">return </span>port.borrow().attributes.has(<span class="string">&quot;done&quot;</span>)
+                    &amp;&amp; port.borrow().get_parent_name() == cell_name;
+            }
+        }
+        <span class="bool-val">false
+    </span>}
+
+    <span class="doccomment">/// Update the guard in place. Replaces this guard with `upd(self)`.
+    /// Uses `std::mem::take` for the in-place update.
+    </span><span class="attribute">#[inline(always)]
+    </span><span class="kw">pub fn </span>update&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, upd: F)
+    <span class="kw">where
+        </span>F: FnOnce(Guard&lt;T&gt;) -&gt; Guard&lt;T&gt;,
+    {
+        <span class="kw">let </span>old = mem::take(<span class="self">self</span>);
+        <span class="kw">let </span>new = upd(old);
+        <span class="kw-2">*</span><span class="self">self </span>= new;
+    }
+
+    <span class="doccomment">/// Return the string corresponding to the guard operation.
+    </span><span class="kw">pub fn </span>op_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+        <span class="kw">match </span><span class="self">self </span>{
+            Guard::And(..) =&gt; <span class="string">&quot;&amp;&quot;</span>.to_string(),
+            Guard::Or(..) =&gt; <span class="string">&quot;|&quot;</span>.to_string(),
+            Guard::CompOp(op, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="kw">match </span>op {
+                PortComp::Eq =&gt; <span class="string">&quot;==&quot;</span>.to_string(),
+                PortComp::Neq =&gt; <span class="string">&quot;!=&quot;</span>.to_string(),
+                PortComp::Gt =&gt; <span class="string">&quot;&gt;&quot;</span>.to_string(),
+                PortComp::Lt =&gt; <span class="string">&quot;&lt;&quot;</span>.to_string(),
+                PortComp::Geq =&gt; <span class="string">&quot;&gt;=&quot;</span>.to_string(),
+                PortComp::Leq =&gt; <span class="string">&quot;&lt;=&quot;</span>.to_string(),
+            },
+            Guard::Not(..) =&gt; <span class="string">&quot;!&quot;</span>.to_string(),
+            Guard::Port(..) | Guard::True | Guard::Info(<span class="kw">_</span>) =&gt; {
+                <span class="macro">panic!</span>(<span class="string">&quot;No operator string for Guard::Port/True/Info&quot;</span>)
+            }
+        }
+    }
+
+    <span class="kw">pub fn </span>port(p: RRC&lt;Port&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>p.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>) {
+            Guard::True
+        } <span class="kw">else </span>{
+            Guard::Port(p)
+        }
+    }
+
+    <span class="kw">pub fn </span>and(<span class="self">self</span>, rhs: Guard&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>rhs == Guard::True {
+            <span class="self">self
+        </span>} <span class="kw">else if </span><span class="self">self </span>== Guard::True {
+            rhs
+        } <span class="kw">else if </span><span class="self">self </span>== rhs {
+            <span class="self">self
+        </span>} <span class="kw">else </span>{
+            Guard::And(Box::new(<span class="self">self</span>), Box::new(rhs))
+        }
+    }
+
+    <span class="kw">pub fn </span>or(<span class="self">self</span>, rhs: Guard&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>(<span class="self">self</span>, rhs) {
+            (Guard::True, <span class="kw">_</span>) | (<span class="kw">_</span>, Guard::True) =&gt; Guard::True,
+            (Guard::Not(n), g) | (g, Guard::Not(n)) =&gt; {
+                <span class="kw">if </span><span class="kw-2">*</span>n == Guard::True {
+                    g
+                } <span class="kw">else </span>{
+                    Guard::Or(Box::new(Guard::Not(n)), Box::new(g))
+                }
+            }
+            (l, r) =&gt; {
+                <span class="kw">if </span>l == r {
+                    l
+                } <span class="kw">else </span>{
+                    Guard::Or(Box::new(l), Box::new(r))
+                }
+            }
+        }
+    }
+
+    <span class="kw">pub fn </span>eq(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>T: Debug,
+    {
+        <span class="kw">match </span>(<span class="self">self</span>, other) {
+            (Guard::Port(l), Guard::Port(r)) =&gt; {
+                Guard::CompOp(PortComp::Eq, l, r)
+            }
+            (l, r) =&gt; {
+                <span class="macro">unreachable!</span>(<span class="string">&quot;Cannot build Guard::Eq using {:?} and {:?}&quot;</span>, l, r)
+            }
+        }
+    }
+
+    <span class="kw">pub fn </span>neq(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>T: Debug,
+    {
+        <span class="kw">match </span>(<span class="self">self</span>, other) {
+            (Guard::Port(l), Guard::Port(r)) =&gt; {
+                Guard::CompOp(PortComp::Neq, l, r)
+            }
+            (l, r) =&gt; {
+                <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;Cannot build Guard::Neq using {:?} and {:?}&quot;</span>,
+                    l, r
+                )
+            }
+        }
+    }
+
+    <span class="kw">pub fn </span>le(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>T: Debug,
+    {
+        <span class="kw">match </span>(<span class="self">self</span>, other) {
+            (Guard::Port(l), Guard::Port(r)) =&gt; {
+                Guard::CompOp(PortComp::Leq, l, r)
+            }
+            (l, r) =&gt; {
+                <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;Cannot build Guard::Leq using {:?} and {:?}&quot;</span>,
+                    l, r
+                )
+            }
+        }
+    }
+
+    <span class="kw">pub fn </span>lt(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>T: Debug,
+    {
+        <span class="kw">match </span>(<span class="self">self</span>, other) {
+            (Guard::Port(l), Guard::Port(r)) =&gt; {
+                Guard::CompOp(PortComp::Lt, l, r)
+            }
+            (l, r) =&gt; {
+                <span class="macro">unreachable!</span>(<span class="string">&quot;Cannot build Guard::Lt using {:?} and {:?}&quot;</span>, l, r)
+            }
+        }
+    }
+
+    <span class="kw">pub fn </span>ge(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>T: Debug,
+    {
+        <span class="kw">match </span>(<span class="self">self</span>, other) {
+            (Guard::Port(l), Guard::Port(r)) =&gt; {
+                Guard::CompOp(PortComp::Geq, l, r)
+            }
+            (l, r) =&gt; {
+                <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;Cannot build Guard::Geq using {:?} and {:?}&quot;</span>,
+                    l, r
+                )
+            }
+        }
+    }
+
+    <span class="kw">pub fn </span>gt(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>T: Debug,
+    {
+        <span class="kw">match </span>(<span class="self">self</span>, other) {
+            (Guard::Port(l), Guard::Port(r)) =&gt; {
+                Guard::CompOp(PortComp::Gt, l, r)
+            }
+            (l, r) =&gt; {
+                <span class="macro">unreachable!</span>(<span class="string">&quot;Cannot build Guard::Gt using {:?} and {:?}&quot;</span>, l, r)
+            }
+        }
+    }
+
+    <span class="doccomment">/// Returns all the ports used by this guard.
+    </span><span class="kw">pub fn </span>all_ports(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;RRC&lt;Port&gt;&gt; {
+        <span class="kw">match </span><span class="self">self </span>{
+            Guard::Port(a) =&gt; <span class="macro">vec!</span>[Rc::clone(a)],
+            Guard::And(l, r) | Guard::Or(l, r) =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>atoms = l.all_ports();
+                atoms.append(<span class="kw-2">&amp;mut </span>r.all_ports());
+                atoms
+            }
+            Guard::CompOp(<span class="kw">_</span>, l, r) =&gt; {
+                <span class="macro">vec!</span>[Rc::clone(l), Rc::clone(r)]
+            }
+            Guard::Not(g) =&gt; g.all_ports(),
+            Guard::True =&gt; <span class="macro">vec!</span>[],
+            Guard::Info(<span class="kw">_</span>) =&gt; <span class="macro">vec!</span>[],
         }
     }
 }
 
 <span class="doccomment">/// Helper functions for the guard.
-</span><span class="kw">impl </span>Guard {
+</span><span class="kw">impl</span>&lt;T&gt; Guard&lt;T&gt; {
     <span class="doccomment">/// Mutates a guard by calling `f` on every leaf in the
     /// guard tree and replacing the leaf with the guard that `f`
     /// returns.
     </span><span class="kw">pub fn </span>for_each&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>F)
     <span class="kw">where
-        </span>F: FnMut(RRC&lt;Port&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Guard&gt;,
+        </span>F: FnMut(RRC&lt;Port&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Guard&lt;T&gt;&gt;,
     {
         <span class="kw">match </span><span class="self">self </span>{
             Guard::And(l, r) | Guard::Or(l, r) =&gt; {
@@ -542,202 +862,21 @@
                 <span class="kw-2">*</span><span class="self">self </span>= guard;
             }
             Guard::True =&gt; {}
-        }
-    }
-
-    <span class="doccomment">/// Returns all the ports used by this guard.
-    </span><span class="kw">pub fn </span>all_ports(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;RRC&lt;Port&gt;&gt; {
-        <span class="kw">match </span><span class="self">self </span>{
-            Guard::Port(a) =&gt; <span class="macro">vec!</span>[Rc::clone(a)],
-            Guard::And(l, r) | Guard::Or(l, r) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>atoms = l.all_ports();
-                atoms.append(<span class="kw-2">&amp;mut </span>r.all_ports());
-                atoms
-            }
-            Guard::CompOp(<span class="kw">_</span>, l, r) =&gt; {
-                <span class="macro">vec!</span>[Rc::clone(l), Rc::clone(r)]
-            }
-            Guard::Not(g) =&gt; g.all_ports(),
-            Guard::True =&gt; <span class="macro">vec!</span>[],
-        }
-    }
-
-    <span class="doccomment">/// Returns true if this is a `Guard::True`.
-    </span><span class="kw">pub fn </span>is_true(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="self">self </span>{
-            Guard::True =&gt; <span class="bool-val">true</span>,
-            Guard::Port(p) =&gt; p.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>),
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
-    }
-
-    <span class="doccomment">/// returns true if the self is !cell_name, false otherwise.
-    </span><span class="kw">pub fn </span>is_not_done(<span class="kw-2">&amp;</span><span class="self">self</span>, cell_name: <span class="kw-2">&amp;</span><span class="kw">crate</span>::Id) -&gt; bool {
-        <span class="kw">if let </span>Guard::Not(g) = <span class="self">self </span>{
-            <span class="kw">if let </span>Guard::Port(port) = <span class="kw-2">&amp;</span>(<span class="kw-2">**</span>g) {
-                <span class="kw">return </span>port.borrow().attributes.has(<span class="string">&quot;done&quot;</span>)
-                    &amp;&amp; port.borrow().get_parent_name() == cell_name;
-            }
-        }
-        <span class="bool-val">false
-    </span>}
-
-    <span class="doccomment">/// Update the guard in place. Replaces this guard with `upd(self)`.
-    /// Uses `std::mem::take` for the in-place update.
-    </span><span class="attribute">#[inline(always)]
-    </span><span class="kw">pub fn </span>update&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, upd: F)
-    <span class="kw">where
-        </span>F: FnOnce(Guard) -&gt; Guard,
-    {
-        <span class="kw">let </span>old = mem::take(<span class="self">self</span>);
-        <span class="kw">let </span>new = upd(old);
-        <span class="kw-2">*</span><span class="self">self </span>= new;
-    }
-
-    <span class="doccomment">/// Return the string corresponding to the guard operation.
-    </span><span class="kw">pub fn </span>op_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
-        <span class="kw">match </span><span class="self">self </span>{
-            Guard::And(..) =&gt; <span class="string">&quot;&amp;&quot;</span>.to_string(),
-            Guard::Or(..) =&gt; <span class="string">&quot;|&quot;</span>.to_string(),
-            Guard::CompOp(op, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="kw">match </span>op {
-                PortComp::Eq =&gt; <span class="string">&quot;==&quot;</span>.to_string(),
-                PortComp::Neq =&gt; <span class="string">&quot;!=&quot;</span>.to_string(),
-                PortComp::Gt =&gt; <span class="string">&quot;&gt;&quot;</span>.to_string(),
-                PortComp::Lt =&gt; <span class="string">&quot;&lt;&quot;</span>.to_string(),
-                PortComp::Geq =&gt; <span class="string">&quot;&gt;=&quot;</span>.to_string(),
-                PortComp::Leq =&gt; <span class="string">&quot;&lt;=&quot;</span>.to_string(),
-            },
-            Guard::Not(..) =&gt; <span class="string">&quot;!&quot;</span>.to_string(),
-            Guard::Port(..) | Guard::True =&gt; {
-                <span class="macro">panic!</span>(<span class="string">&quot;No operator string for Guard::Port&quot;</span>)
-            }
-        }
-    }
-
-    <span class="kw">pub fn </span>port(p: RRC&lt;Port&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">if </span>p.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>) {
-            Guard::True
-        } <span class="kw">else </span>{
-            Guard::Port(p)
-        }
-    }
-
-    <span class="kw">pub fn </span>and(<span class="self">self</span>, rhs: Guard) -&gt; <span class="self">Self </span>{
-        <span class="kw">if </span>rhs == Guard::True {
-            <span class="self">self
-        </span>} <span class="kw">else if </span><span class="self">self </span>== Guard::True {
-            rhs
-        } <span class="kw">else if </span><span class="self">self </span>== rhs {
-            <span class="self">self
-        </span>} <span class="kw">else </span>{
-            Guard::And(Box::new(<span class="self">self</span>), Box::new(rhs))
-        }
-    }
-
-    <span class="kw">pub fn </span>or(<span class="self">self</span>, rhs: Guard) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>(<span class="self">self</span>, rhs) {
-            (Guard::True, <span class="kw">_</span>) | (<span class="kw">_</span>, Guard::True) =&gt; Guard::True,
-            (Guard::Not(n), g) | (g, Guard::Not(n)) =&gt; {
-                <span class="kw">if </span><span class="kw-2">*</span>n == Guard::True {
-                    g
-                } <span class="kw">else </span>{
-                    Guard::Or(Box::new(Guard::Not(n)), Box::new(g))
-                }
-            }
-            (l, r) =&gt; {
-                <span class="kw">if </span>l == r {
-                    l
-                } <span class="kw">else </span>{
-                    Guard::Or(Box::new(l), Box::new(r))
-                }
-            }
-        }
-    }
-
-    <span class="kw">pub fn </span>eq(<span class="self">self</span>, other: Guard) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>(<span class="self">self</span>, other) {
-            (Guard::Port(l), Guard::Port(r)) =&gt; {
-                Guard::CompOp(PortComp::Eq, l, r)
-            }
-            (l, r) =&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;Cannot build Guard::Eq using {:?} and {:?}&quot;</span>, l, r)
-            }
-        }
-    }
-
-    <span class="kw">pub fn </span>neq(<span class="self">self</span>, other: Guard) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>(<span class="self">self</span>, other) {
-            (Guard::Port(l), Guard::Port(r)) =&gt; {
-                Guard::CompOp(PortComp::Neq, l, r)
-            }
-            (l, r) =&gt; {
-                <span class="macro">unreachable!</span>(
-                    <span class="string">&quot;Cannot build Guard::Neq using {:?} and {:?}&quot;</span>,
-                    l, r
-                )
-            }
-        }
-    }
-
-    <span class="kw">pub fn </span>le(<span class="self">self</span>, other: Guard) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>(<span class="self">self</span>, other) {
-            (Guard::Port(l), Guard::Port(r)) =&gt; {
-                Guard::CompOp(PortComp::Leq, l, r)
-            }
-            (l, r) =&gt; {
-                <span class="macro">unreachable!</span>(
-                    <span class="string">&quot;Cannot build Guard::Leq using {:?} and {:?}&quot;</span>,
-                    l, r
-                )
-            }
-        }
-    }
-
-    <span class="kw">pub fn </span>lt(<span class="self">self</span>, other: Guard) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>(<span class="self">self</span>, other) {
-            (Guard::Port(l), Guard::Port(r)) =&gt; {
-                Guard::CompOp(PortComp::Lt, l, r)
-            }
-            (l, r) =&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;Cannot build Guard::Lt using {:?} and {:?}&quot;</span>, l, r)
-            }
-        }
-    }
-
-    <span class="kw">pub fn </span>ge(<span class="self">self</span>, other: Guard) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>(<span class="self">self</span>, other) {
-            (Guard::Port(l), Guard::Port(r)) =&gt; {
-                Guard::CompOp(PortComp::Geq, l, r)
-            }
-            (l, r) =&gt; {
-                <span class="macro">unreachable!</span>(
-                    <span class="string">&quot;Cannot build Guard::Geq using {:?} and {:?}&quot;</span>,
-                    l, r
-                )
-            }
-        }
-    }
-
-    <span class="kw">pub fn </span>gt(<span class="self">self</span>, other: Guard) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>(<span class="self">self</span>, other) {
-            (Guard::Port(l), Guard::Port(r)) =&gt; {
-                Guard::CompOp(PortComp::Gt, l, r)
-            }
-            (l, r) =&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;Cannot build Guard::Gt using {:?} and {:?}&quot;</span>, l, r)
-            }
+            Guard::Info(<span class="kw">_</span>) =&gt;
+                <span class="comment">// Info shouldn&#39;t count as port
+                </span>{}
         }
     }
 }
 
 <span class="doccomment">/// Construct guards from ports
-</span><span class="kw">impl </span>From&lt;RRC&lt;Port&gt;&gt; <span class="kw">for </span>Guard {
+</span><span class="kw">impl</span>&lt;T&gt; From&lt;RRC&lt;Port&gt;&gt; <span class="kw">for </span>Guard&lt;T&gt; {
     <span class="kw">fn </span>from(port: RRC&lt;Port&gt;) -&gt; <span class="self">Self </span>{
         Guard::Port(Rc::clone(<span class="kw-2">&amp;</span>port))
     }
 }
 
-<span class="kw">impl </span>PartialEq <span class="kw">for </span>Guard {
+<span class="kw">impl</span>&lt;T&gt; PartialEq <span class="kw">for </span>Guard&lt;T&gt; {
     <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
         <span class="kw">match </span>(<span class="self">self</span>, other) {
             (Guard::Or(la, ra), Guard::Or(lb, rb))
@@ -760,10 +899,13 @@
     }
 }
 
-<span class="kw">impl </span>Eq <span class="kw">for </span>Guard {}
+<span class="kw">impl</span>&lt;T&gt; Eq <span class="kw">for </span>Guard&lt;T&gt; {}
 
 <span class="doccomment">/// Define order on guards
-</span><span class="kw">impl </span>PartialOrd <span class="kw">for </span>Guard {
+</span><span class="kw">impl</span>&lt;T&gt; PartialOrd <span class="kw">for </span>Guard&lt;T&gt;
+<span class="kw">where
+    </span>Guard&lt;T&gt;: PartialEq,
+{
     <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; {
         <span class="prelude-val">Some</span>(<span class="self">self</span>.cmp(other))
     }
@@ -771,7 +913,10 @@
 
 <span class="doccomment">/// Define an ordering on the precedence of guards. Guards are
 /// considered equal when they have the same precedence.
-</span><span class="kw">impl </span>Ord <span class="kw">for </span>Guard {
+</span><span class="kw">impl</span>&lt;T&gt; Ord <span class="kw">for </span>Guard&lt;T&gt;
+<span class="kw">where
+    </span>Guard&lt;T&gt;: std::cmp::Eq,
+{
     <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering {
         <span class="kw">match </span>(<span class="self">self</span>, other) {
             (Guard::Or(..), Guard::Or(..))
@@ -800,6 +945,9 @@
             (<span class="kw">_</span>, Guard::Not(..)) =&gt; Ordering::Less,
             (Guard::Port(..), <span class="kw">_</span>) =&gt; Ordering::Greater,
             (<span class="kw">_</span>, Guard::Port(..)) =&gt; Ordering::Less,
+            <span class="comment">// maybe we should change this?
+            </span>(Guard::Info(..), <span class="kw">_</span>) =&gt; Ordering::Greater,
+            (<span class="kw">_</span>, Guard::Info(..)) =&gt; Ordering::Less,
         }
     }
 }
@@ -810,7 +958,7 @@
 /// ```
 /// let and_guard = g1 &amp; g2;
 /// ```
-</span><span class="kw">impl </span>BitAnd <span class="kw">for </span>Guard {
+</span><span class="kw">impl</span>&lt;T&gt; BitAnd <span class="kw">for </span>Guard&lt;T&gt; {
     <span class="kw">type </span>Output = <span class="self">Self</span>;
 
     <span class="kw">fn </span>bitand(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
@@ -822,7 +970,7 @@
 /// ```
 /// let or_guard = g1 | g2;
 /// ```
-</span><span class="kw">impl </span>BitOr <span class="kw">for </span>Guard {
+</span><span class="kw">impl</span>&lt;T&gt; BitOr <span class="kw">for </span>Guard&lt;T&gt; {
     <span class="kw">type </span>Output = <span class="self">Self</span>;
 
     <span class="kw">fn </span>bitor(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
@@ -834,7 +982,7 @@
 /// ```
 /// let not_guard = !g1;
 /// ```
-</span><span class="kw">impl </span>Not <span class="kw">for </span>Guard {
+</span><span class="kw">impl</span>&lt;T&gt; Not <span class="kw">for </span>Guard&lt;T&gt; {
     <span class="kw">type </span>Output = <span class="self">Self</span>;
 
     <span class="kw">fn </span>not(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
@@ -867,7 +1015,7 @@
 /// ```
 /// g1 |= g2;
 /// ```
-</span><span class="kw">impl </span>BitOrAssign <span class="kw">for </span>Guard {
+</span><span class="kw">impl</span>&lt;T&gt; BitOrAssign <span class="kw">for </span>Guard&lt;T&gt; {
     <span class="kw">fn </span>bitor_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
         <span class="self">self</span>.update(|old| old | other)
     }
@@ -877,7 +1025,7 @@
 /// ```
 /// g1 &amp;= g2;
 /// ```
-</span><span class="kw">impl </span>BitAndAssign <span class="kw">for </span>Guard {
+</span><span class="kw">impl</span>&lt;T&gt; BitAndAssign <span class="kw">for </span>Guard&lt;T&gt; {
     <span class="kw">fn </span>bitand_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
         <span class="self">self</span>.update(|old| old &amp; other)
     }

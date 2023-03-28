@@ -431,9 +431,39 @@
 <span id="431">431</span>
 <span id="432">432</span>
 <span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ReadWriteSet;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
+<span class="kw">use </span>ir::{Nothing, StaticTiming};
 <span class="kw">use </span>std::collections::BTreeMap;
 
 <span class="attribute">#[derive(Default)]
@@ -469,14 +499,27 @@
             comp.get_groups_mut().drain().collect();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="kw">for </span>g <span class="kw">in </span>groups.iter() {
-            <span class="kw">let </span>group_name = g.borrow().name();
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(seq) = SplitAnalysis::get_split(
-                <span class="kw-2">&amp;mut </span>g.borrow_mut().assignments,
+            <span class="kw">let </span><span class="kw-2">mut </span>g_ref = g.borrow_mut();
+            <span class="kw">let </span>group_name = g_ref.name();
+            <span class="kw">let </span>split_analysis: SplitAnalysis&lt;Nothing&gt; =
+                SplitAnalysis::default();
+            <span class="kw">if let </span><span class="prelude-val">Some</span>((outline1, outline2)) = split_analysis.get_split(
+                <span class="kw-2">&amp;mut </span>g_ref.assignments,
                 group_name,
                 <span class="kw-2">&amp;mut </span>builder,
-                <span class="comment">// seqs should not include static groups
-                </span><span class="bool-val">false</span>,
             ) {
+                <span class="kw">let </span>g1 = outline1.make_group(
+                    <span class="kw-2">&amp;mut </span>builder,
+                    <span class="macro">format!</span>(<span class="string">&quot;beg_spl_{}&quot;</span>, g_ref.name().id),
+                );
+                <span class="kw">let </span>g2 = outline2.make_group(
+                    <span class="kw-2">&amp;mut </span>builder,
+                    <span class="macro">format!</span>(<span class="string">&quot;end_spl_{}&quot;</span>, g_ref.name().id),
+                );
+                <span class="kw">let </span>seq = ir::Control::seq(<span class="macro">vec!</span>[
+                    ir::Control::enable(g1),
+                    ir::Control::enable(g2),
+                ]);
                 <span class="self">self</span>.group_seq_map.insert(group_name, seq);
             }
         }
@@ -490,28 +533,39 @@
         );
 
         <span class="comment">// do the same thing with static groups
-        </span><span class="kw">let </span>groups: Vec&lt;ir::RRC&lt;ir::StaticGroup&gt;&gt; =
+        </span><span class="kw">let </span>static_groups: Vec&lt;ir::RRC&lt;ir::StaticGroup&gt;&gt; =
             comp.get_static_groups_mut().drain().collect();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
-        <span class="kw">for </span>g <span class="kw">in </span>groups.iter() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(seq) = SplitAnalysis::get_split(
-                <span class="kw-2">&amp;mut </span>g.borrow_mut().assignments,
-                g.borrow().name(),
+        <span class="kw">for </span>sg <span class="kw">in </span>static_groups.iter() {
+            <span class="kw">let </span>split_analysis: SplitAnalysis&lt;StaticTiming&gt; =
+                SplitAnalysis::default();
+            <span class="kw">if let </span><span class="prelude-val">Some</span>((outline1, outline2)) = split_analysis.get_split(
+                <span class="kw-2">&amp;mut </span>sg.borrow_mut().assignments,
+                sg.borrow().name(),
                 <span class="kw-2">&amp;mut </span>builder,
-                <span class="comment">// seqs should include static groups
-                </span><span class="bool-val">true</span>,
             ) {
-                <span class="self">self</span>.group_seq_map.insert(g.borrow().name(), seq);
+                <span class="kw">let </span>g1 = outline1.make_group_static(
+                    <span class="kw-2">&amp;mut </span>builder,
+                    <span class="macro">format!</span>(<span class="string">&quot;beg_spl_{}&quot;</span>, sg.borrow().name().id),
+                );
+                <span class="kw">let </span>g2 = outline2.make_group_static(
+                    <span class="kw-2">&amp;mut </span>builder,
+                    <span class="macro">format!</span>(<span class="string">&quot;end_spl{}&quot;</span>, sg.borrow().name().id),
+                );
+                <span class="kw">let </span>seq = ir::Control::seq(<span class="macro">vec!</span>[
+                    ir::Control::static_enable(g1),
+                    ir::Control::static_enable(g2),
+                ]);
+                <span class="self">self</span>.group_seq_map.insert(sg.borrow().name(), seq);
             }
         }
 
         <span class="comment">// Add back the groups we drained at the beginning of this method, but
         // filter out the empty groups that were split into smaller groups
-        </span>comp.get_static_groups_mut().append(
-            groups
-                .into_iter()
-                .filter(|group| !group.borrow().assignments.is_empty()),
-        );
+        </span>comp.get_static_groups_mut()
+            .append(static_groups.into_iter().filter(|static_group| {
+                !static_group.borrow().assignments.is_empty()
+            }));
 
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
@@ -533,7 +587,10 @@
 
 <span class="comment">// For all port reads from name in assignment, returns whether all ports are either stable
 // or done.
-</span><span class="kw">fn </span>if_name_stable_or_done(assign: <span class="kw-2">&amp;</span>ir::Assignment, name: <span class="kw-2">&amp;</span>ir::Id) -&gt; bool {
+</span><span class="kw">fn </span>if_name_stable_or_done&lt;T&gt;(
+    assign: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;,
+    name: <span class="kw-2">&amp;</span>ir::Id,
+) -&gt; bool {
     <span class="kw">let </span>reads = ReadWriteSet::port_reads(assign);
     reads
         .filter(|port_ref| port_ref.borrow().get_parent_name() == name)
@@ -554,34 +611,55 @@
 
 <span class="comment">//If asmt is a write to a cell named name returns Some(name).
 //If asmt is a write to a group port, returns None.
-</span><span class="kw">fn </span>writes_to_cell(asmt: <span class="kw-2">&amp;</span>ir::Assignment) -&gt; <span class="prelude-ty">Option</span>&lt;ir::RRC&lt;ir::Cell&gt;&gt; {
+</span><span class="kw">fn </span>writes_to_cell&lt;T&gt;(asmt: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;ir::RRC&lt;ir::Cell&gt;&gt; {
     ReadWriteSet::write_set(std::iter::once(asmt)).next()
 }
 
-<span class="attribute">#[derive(Default)]
-</span><span class="doccomment">///Primarily used to help determine the order cells are executed within
+<span class="doccomment">///Primarily used to help determine the order cells are executed within
 ///the group, and if possible, to transform a group into a seq of two smaller groups
-</span><span class="kw">struct </span>SplitAnalysis {
+</span><span class="kw">struct </span>SplitAnalysis&lt;T&gt;
+<span class="kw">where
+    </span>T: Clone,
+{
     <span class="doccomment">/// Holds the go-done assignment, i.e. a.go = b.done
-    </span>go_done_asmt: <span class="prelude-ty">Option</span>&lt;ir::Assignment&gt;,
+    </span>go_done_asmt: <span class="prelude-ty">Option</span>&lt;ir::Assignment&lt;T&gt;&gt;,
 
     <span class="doccomment">/// Holds the first &quot;go&quot; assignment, *if* it is in the form a.go = !a.done ? 1&#39;d1
-    </span>first_go_asmt: <span class="prelude-ty">Option</span>&lt;ir::Assignment&gt;,
+    </span>first_go_asmt: <span class="prelude-ty">Option</span>&lt;ir::Assignment&lt;T&gt;&gt;,
 
     <span class="doccomment">/// Holds the group[done] = done assignment;
-    </span>group_done_asmt: <span class="prelude-ty">Option</span>&lt;ir::Assignment&gt;,
+    </span>group_done_asmt: <span class="prelude-ty">Option</span>&lt;ir::Assignment&lt;T&gt;&gt;,
 
     <span class="doccomment">/// Assignments that write to first cell, unless the assignment is already accounted by a different field
-    </span>fst_asmts: Vec&lt;ir::Assignment&gt;,
+    </span>fst_asmts: Vec&lt;ir::Assignment&lt;T&gt;&gt;,
 
     <span class="doccomment">/// Assignments that write to second cell, unless the assignment is already accounted by a different field
-    </span>snd_asmts: Vec&lt;ir::Assignment&gt;,
+    </span>snd_asmts: Vec&lt;ir::Assignment&lt;T&gt;&gt;,
 
     <span class="doccomment">/// Writes to combinational components
-    </span>comb_asmts: Vec&lt;ir::Assignment&gt;,
+    </span>comb_asmts: Vec&lt;ir::Assignment&lt;T&gt;&gt;,
 }
 
-<span class="kw">impl </span>SplitAnalysis {
+<span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>SplitAnalysis&lt;T&gt;
+<span class="kw">where
+    </span>T: Clone,
+{
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        SplitAnalysis {
+            go_done_asmt: <span class="prelude-val">None</span>,
+            first_go_asmt: <span class="prelude-val">None</span>,
+            group_done_asmt: <span class="prelude-val">None</span>,
+            fst_asmts: Vec::default(),
+            snd_asmts: Vec::default(),
+            comb_asmts: Vec::default(),
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; SplitAnalysis&lt;T&gt;
+<span class="kw">where
+    </span>T: Clone,
+{
     <span class="doccomment">/// Based on assigns, returns Some(seq), where seq = [group1,group2], which
     /// the groups that can be made by splitting assigns. If it is not possible to split
     /// assigns into two groups, then just regurn None.
@@ -592,12 +670,11 @@
     /// 3) Must have group[done] = cell2.done and cell2.go = cell1.done;
     /// 4) All reads of cell1 must be a stable port or cell1.done.
     </span><span class="kw">pub fn </span>get_split(
-        assigns: <span class="kw-2">&amp;mut </span>Vec&lt;ir::Assignment&gt;,
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        assigns: <span class="kw-2">&amp;mut </span>Vec&lt;ir::Assignment&lt;T&gt;&gt;,
         group_name: ir::Id,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-        <span class="comment">// whether the resulting seq should be of static groups or dynamic groups
-        </span>static_groups: bool,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;ir::Control&gt; {
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;(GroupOutline&lt;T&gt;, GroupOutline&lt;T&gt;)&gt; {
         <span class="kw">let </span>signal_on = builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
 
         <span class="comment">// Builds ordering. If it cannot build a valid linear ordering of length 2,
@@ -606,24 +683,23 @@
 
         <span class="comment">// Sets the first_go_asmt, fst_asmts, snd_asmts group_done_asmt, go_done_asmt
         // fields for split_analysis
-        </span><span class="kw">let </span><span class="kw-2">mut </span>split_analysis = SplitAnalysis::default();
-        split_analysis.organize_assignments(assigns, <span class="kw-2">&amp;</span>first, <span class="kw-2">&amp;</span>second);
+        </span><span class="self">self</span>.organize_assignments(assigns, <span class="kw-2">&amp;</span>first, <span class="kw-2">&amp;</span>second);
 
         <span class="comment">// If there is assignment in the form first.go = !first.done ? 1&#39;d1,
         // turn this into first.go = 1&#39;d1.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(go_asmt) = split_analysis.first_go_asmt {
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(go_asmt) = <span class="self">self</span>.first_go_asmt {
             <span class="kw">let </span>new_go_asmt = builder.build_assignment(
                 go_asmt.dst,
                 signal_on.borrow().get(<span class="string">&quot;out&quot;</span>),
                 ir::Guard::True,
             );
-            split_analysis.fst_asmts.push(new_go_asmt);
+            <span class="self">self</span>.fst_asmts.push(new_go_asmt);
         }
-        <span class="kw">let </span>comb_assigns_clones = split_analysis.comb_asmts.clone();
+        <span class="kw">let </span>comb_assigns_clones = <span class="self">self</span>.comb_asmts.clone();
         <span class="comment">// writes to comb components should be included in the first group
-        </span>split_analysis.fst_asmts.extend(comb_assigns_clones);
+        </span><span class="self">self</span>.fst_asmts.extend(comb_assigns_clones);
 
-        <span class="kw">let </span>go_done = split_analysis.go_done_asmt.unwrap_or_else(|| {
+        <span class="kw">let </span>go_done = <span class="self">self</span>.go_done_asmt.unwrap_or_else(|| {
             <span class="macro">unreachable!</span>(<span class="string">&quot;couldn&#39;t find a go-done assignment in {}&quot;</span>, group_name)
         });
 
@@ -633,66 +709,35 @@
             signal_on.borrow().get(<span class="string">&quot;out&quot;</span>),
             ir::Guard::True,
         );
-        split_analysis.snd_asmts.push(cell_go);
+        <span class="self">self</span>.snd_asmts.push(cell_go);
         <span class="comment">// writes to comb assigns should also be in the second group
-        </span>split_analysis.snd_asmts.extend(split_analysis.comb_asmts);
+        </span><span class="self">self</span>.snd_asmts.extend(<span class="self">self</span>.comb_asmts);
 
-        <span class="kw">let </span>group_done = split_analysis.group_done_asmt.unwrap_or_else(|| {
+        <span class="kw">let </span>group_done = <span class="self">self</span>.group_done_asmt.unwrap_or_else(|| {
             <span class="macro">unreachable!</span>(
                 <span class="string">&quot;Couldn&#39;t find a group[done] = _.done assignment in {}&quot;</span>,
                 group_name
             )
         });
 
-        <span class="kw">if </span>static_groups {
-            <span class="kw">let </span>first_group = <span class="self">Self</span>::make_group_static(
-                go_done.src,
-                ir::Guard::True,
-                split_analysis.fst_asmts,
-                builder,
-                <span class="macro">format!</span>(<span class="string">&quot;beg_spl_{}&quot;</span>, group_name.id),
-            );
-
-            <span class="kw">let </span>second_group = <span class="self">Self</span>::make_group_static(
-                group_done.src,
-                <span class="kw-2">*</span>group_done.guard,
-                split_analysis.snd_asmts,
-                builder,
-                <span class="macro">format!</span>(<span class="string">&quot;end_spl_{}&quot;</span>, group_name.id),
-            );
-            <span class="prelude-val">Some</span>(ir::Control::seq(<span class="macro">vec!</span>[
-                ir::Control::static_enable(first_group),
-                ir::Control::static_enable(second_group),
-            ]))
-        } <span class="kw">else </span>{
-            <span class="kw">let </span>first_group = <span class="self">Self</span>::make_group(
-                go_done.src,
-                ir::Guard::True,
-                split_analysis.fst_asmts,
-                builder,
-                <span class="macro">format!</span>(<span class="string">&quot;beg_spl_{}&quot;</span>, group_name.id),
-            );
-
-            <span class="kw">let </span>second_group = <span class="self">Self</span>::make_group(
-                group_done.src,
-                <span class="kw-2">*</span>group_done.guard,
-                split_analysis.snd_asmts,
-                builder,
-                <span class="macro">format!</span>(<span class="string">&quot;end_spl_{}&quot;</span>, group_name.id),
-            );
-
-            <span class="prelude-val">Some</span>(ir::Control::seq(<span class="macro">vec!</span>[
-                ir::Control::enable(first_group),
-                ir::Control::enable(second_group),
-            ]))
-        }
+        <span class="kw">let </span>g1_outline: GroupOutline&lt;T&gt; = GroupOutline {
+            assignments: <span class="self">self</span>.fst_asmts,
+            done_guard: ir::Guard::True,
+            done_src: go_done.src,
+        };
+        <span class="kw">let </span>g2_outline: GroupOutline&lt;T&gt; = GroupOutline {
+            assignments: <span class="self">self</span>.snd_asmts,
+            done_guard: <span class="kw-2">*</span>group_done.guard,
+            done_src: group_done.src,
+        };
+        <span class="prelude-val">Some</span>((g1_outline, g2_outline))
     }
 
     <span class="comment">// Goes through assignments, and properly fills in the fields go_done_asmt,
     // first_go_asmt, fst_asmts, snd_asmts, and group_done_asmt.
     </span><span class="kw">fn </span>organize_assignments(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        assigns: <span class="kw-2">&amp;mut </span>Vec&lt;ir::Assignment&gt;,
+        assigns: <span class="kw-2">&amp;mut </span>Vec&lt;ir::Assignment&lt;T&gt;&gt;,
         first_cell_name: <span class="kw-2">&amp;</span>ir::Id,
         second_cell_name: <span class="kw-2">&amp;</span>ir::Id,
     ) {
@@ -722,7 +767,7 @@
     // satisfy group2seq&#39;s criteria, then return the ordering in the form of
     // Some(cell1, cell2). Otherwise return None.
     </span><span class="kw">pub fn </span>possible_split(
-        asmts: <span class="kw-2">&amp;</span>[ir::Assignment],
+        asmts: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;],
     ) -&gt; <span class="prelude-ty">Option</span>&lt;(ir::Id, ir::Id)&gt; {
         <span class="kw">let </span>stateful_writes: Vec&lt;ir::Id&gt; =
             ReadWriteSet::write_set(asmts.iter())
@@ -756,7 +801,7 @@
     // If we can find examples of such assignments, returns Some(b,a,c).
     // Otherwise returns None.
     </span><span class="kw">fn </span>look_for_assigns(
-        asmts: <span class="kw-2">&amp;</span>[ir::Assignment],
+        asmts: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;],
     ) -&gt; <span class="prelude-ty">Option</span>&lt;(ir::Id, ir::Id, ir::Id)&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>done_go: <span class="prelude-ty">Option</span>&lt;(ir::Id, ir::Id)&gt; = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>last: <span class="prelude-ty">Option</span>&lt;ir::Id&gt; = <span class="prelude-val">None</span>;
@@ -799,7 +844,7 @@
     }
     <span class="comment">//Returns whether the given assignment is a go-done assignment
     //i.e. cell1.go = cell2.done.
-    </span><span class="kw">pub fn </span>is_go_done(asmt: <span class="kw-2">&amp;</span>ir::Assignment) -&gt; bool {
+    </span><span class="kw">pub fn </span>is_go_done(asmt: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;) -&gt; bool {
         <span class="kw">let </span>src = asmt.src.borrow();
         <span class="kw">let </span>dst = asmt.dst.borrow();
         <span class="kw">match </span>(<span class="kw-2">&amp;</span>src.parent, <span class="kw-2">&amp;</span>dst.parent) {
@@ -812,7 +857,7 @@
 
     <span class="comment">//Returns whether the given assignment writes to the go assignment of cell
     //in the form cell.go = !cell.done? 1&#39;d1.
-    </span><span class="kw">pub fn </span>is_specific_go(asmt: <span class="kw-2">&amp;</span>ir::Assignment, cell: <span class="kw-2">&amp;</span>ir::Id) -&gt; bool {
+    </span><span class="kw">pub fn </span>is_specific_go(asmt: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;, cell: <span class="kw-2">&amp;</span>ir::Id) -&gt; bool {
         <span class="kw">let </span>dst = asmt.dst.borrow();
         <span class="comment">// checks cell.go =
         </span>dst.get_parent_name() == cell  &amp;&amp; dst.attributes.has(<span class="string">&quot;go&quot;</span>)
@@ -821,43 +866,56 @@
         <span class="comment">// checks 1&#39;d1
         </span>&amp;&amp; asmt.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>)
     }
+}
 
+<span class="doccomment">/// Template for a Generic Group (i.e., either regular or static):
+/// Includes group&#39;s assignments, done guard, and done src.
+/// Can&#39;t include the done assignment in this struct, since this struct is for *before*
+/// we&#39;ve actually created the group, so we can&#39;t refer to the group yet (and we
+/// need to refer to the group to create its done port)
+/// This is intentional, since if we were to create the group, then it would
+/// no longer be generic (we would have to pick either group/static group)
+</span><span class="kw">struct </span>GroupOutline&lt;T&gt; {
+    assignments: Vec&lt;ir::Assignment&lt;T&gt;&gt;,
+    done_guard: ir::Guard&lt;T&gt;,
+    done_src: ir::RRC&lt;ir::Port&gt;,
+}
+
+<span class="kw">impl </span>GroupOutline&lt;Nothing&gt; {
     <span class="doccomment">/// Returns group with made using builder with prefix. The assignments are
-    /// asmts, plus a write to groups&#39;s done, based on done_src and done_guard.
+    /// self.assignments, plus a write to groups&#39;s done, based on done_src and done_guard.
     </span><span class="kw">fn </span>make_group(
-        done_src: ir::RRC&lt;ir::Port&gt;,
-        done_guard: ir::Guard,
-        asmts: Vec&lt;ir::Assignment&gt;,
+        <span class="self">self</span>,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
         prefix: String,
     ) -&gt; ir::RRC&lt;ir::Group&gt; {
         <span class="kw">let </span>group = builder.add_group(prefix);
-        <span class="kw">let </span><span class="kw-2">mut </span>group_asmts = asmts;
+        <span class="kw">let </span><span class="kw-2">mut </span>group_asmts = <span class="self">self</span>.assignments;
         <span class="kw">let </span>done_asmt = builder.build_assignment(
             group.borrow().get(<span class="string">&quot;done&quot;</span>),
-            done_src,
-            done_guard,
+            <span class="self">self</span>.done_src,
+            <span class="self">self</span>.done_guard,
         );
         group_asmts.push(done_asmt);
         group.borrow_mut().assignments.append(<span class="kw-2">&amp;mut </span>group_asmts);
         group
     }
+}
 
+<span class="kw">impl </span>GroupOutline&lt;StaticTiming&gt; {
     <span class="doccomment">/// Returns group with made using builder with prefix. The assignments are
-    /// asmts, plus a write to groups&#39;s done, based on done_src and done_guard.
+    /// self.assignments, plus a write to groups&#39;s done, based on done_src and done_guard.
     </span><span class="kw">fn </span>make_group_static(
-        done_src: ir::RRC&lt;ir::Port&gt;,
-        done_guard: ir::Guard,
-        asmts: Vec&lt;ir::Assignment&gt;,
+        <span class="self">self</span>,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
         prefix: String,
     ) -&gt; ir::RRC&lt;ir::StaticGroup&gt; {
         <span class="kw">let </span>group = builder.add_static_group(prefix);
-        <span class="kw">let </span><span class="kw-2">mut </span>group_asmts = asmts;
+        <span class="kw">let </span><span class="kw-2">mut </span>group_asmts = <span class="self">self</span>.assignments;
         <span class="kw">let </span>done_asmt = builder.build_assignment(
             group.borrow().get(<span class="string">&quot;done&quot;</span>),
-            done_src,
-            done_guard,
+            <span class="self">self</span>.done_src,
+            <span class="self">self</span>.done_guard,
         );
         group_asmts.push(done_asmt);
         group.borrow_mut().assignments.append(<span class="kw-2">&amp;mut </span>group_asmts);

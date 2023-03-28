@@ -976,6 +976,11 @@
 <span id="976">976</span>
 <span id="977">977</span>
 <span id="978">978</span>
+<span id="979">979</span>
+<span id="980">980</span>
+<span id="981">981</span>
+<span id="982">982</span>
+<span id="983">983</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::compute_states::{END, START};
 <span class="kw">use </span><span class="kw">crate</span>::analysis::WithStatic;
 <span class="kw">use </span><span class="kw">crate</span>::passes::top_down_static_timing::{ComputeStates, Normalize};
@@ -986,6 +991,7 @@
     LibrarySignatures, Printer, RRC,
 };
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
+<span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
@@ -999,6 +1005,8 @@
 <span class="doccomment">/// A range of FSM states.
 </span><span class="kw">type </span>Range = (u64, u64);
 
+<span class="kw">type </span>Conditional = (u64, u64, ir::Guard&lt;Nothing&gt;);
+
 <span class="doccomment">/// A schedule keeps track of two things:
 /// 1. `enables`: Specifies which groups are active during a range of
 ///     FSM states.
@@ -1007,9 +1015,9 @@
 ///    are needed for loops, conditionals, and reseting the FSM.
 </span><span class="kw">struct </span>Schedule&lt;<span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;b</span>&gt; {
     <span class="doccomment">/// Enable assignments in a particular range
-    </span>enables: HashMap&lt;Range, Vec&lt;ir::Assignment&gt;&gt;,
+    </span>enables: HashMap&lt;Range, Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;&gt;,
     <span class="doccomment">/// Transition from one state to another when a guard is true
-    </span>transitions: HashSet&lt;(u64, u64, ir::Guard)&gt;,
+    </span>transitions: HashSet&lt;Conditional&gt;,
     <span class="comment">// Builder for the associated component
     </span>builder: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>ir::Builder&lt;<span class="lifetime">&#39;a</span>&gt;,
     states: ComputeStates,
@@ -1033,7 +1041,12 @@
     </span>}
 
     <span class="doccomment">/// Add a new transition between the range [start, end).
-    </span><span class="kw">fn </span>add_transition(<span class="kw-2">&amp;mut </span><span class="self">self</span>, start: u64, end: u64, guard: ir::Guard) {
+    </span><span class="kw">fn </span>add_transition(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        start: u64,
+        end: u64,
+        guard: ir::Guard&lt;Nothing&gt;,
+    ) {
         <span class="macro">debug_assert!</span>(
             !(start == end &amp;&amp; guard.is_true()),
             <span class="string">&quot;Unconditional transition to the same state {start}&quot;
@@ -1047,7 +1060,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         start: u64,
         end: u64,
-        assigns: <span class="kw">impl </span>IntoIterator&lt;Item = ir::Assignment&gt;,
+        assigns: <span class="kw">impl </span>IntoIterator&lt;Item = ir::Assignment&lt;Nothing&gt;&gt;,
     ) {
         <span class="macro">debug_assert!</span>(
             start != end,
@@ -1061,7 +1074,7 @@
 
     <span class="kw">fn </span>add_transitions(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        transitions: <span class="kw">impl </span>Iterator&lt;Item = (u64, u64, ir::Guard)&gt;,
+        transitions: <span class="kw">impl </span>Iterator&lt;Item = Conditional&gt;,
     ) {
         transitions.for_each(|(s, e, g)| <span class="self">self</span>.add_transition(s, e, g));
     }
@@ -1113,11 +1126,9 @@
     }
 
     <span class="doccomment">/// Returns &quot;runs&quot; of FSM states where transitions happen unconditionally
-    </span><span class="kw">fn </span>calculate_runs&lt;I&gt;(
-        transitions: I,
-    ) -&gt; (Vec&lt;Range&gt;, Vec&lt;(u64, u64, ir::Guard)&gt;)
+    </span><span class="kw">fn </span>calculate_runs&lt;I&gt;(transitions: I) -&gt; (Vec&lt;Range&gt;, Vec&lt;Conditional&gt;)
     <span class="kw">where
-        </span>I: Iterator&lt;Item = (u64, u64, ir::Guard)&gt;,
+        </span>I: Iterator&lt;Item = Conditional&gt;,
     {
         <span class="comment">// XXX(rachit): This only works for &quot;true&quot; guards and fails to compress if there is any
         // other guard. For example, if there is a sequence under a conditional branch, this will
@@ -1152,7 +1163,7 @@
         e: u64,
         fsm_size: u64,
         fsm: <span class="kw-2">&amp;</span>RRC&lt;ir::Cell&gt;,
-    ) -&gt; ir::Guard {
+    ) -&gt; ir::Guard&lt;Nothing&gt; {
         <span class="macro">structure!</span>(builder;
             <span class="kw">let </span>lb_const = constant(s, fsm_size);
             <span class="kw">let </span>ub_const = constant(e, fsm_size);
@@ -1240,14 +1251,13 @@
         );
         <span class="comment">// Unconditional Transitions
         </span><span class="kw">if </span>!unconditional.is_empty() {
-            <span class="kw">let </span>uncond_guard: ir::Guard = unconditional.into_iter().fold(
-                ir::Guard::True.not(),
-                |g, (s, e)| {
+            <span class="kw">let </span>uncond_guard: ir::Guard&lt;Nothing&gt; = unconditional
+                .into_iter()
+                .fold(ir::Guard::True.not(), |g, (s, e)| {
                     <span class="kw">let </span>range =
                         <span class="self">Self</span>::range_guard(builder, s, e, fsm_size, <span class="kw-2">&amp;</span>st_fsm);
                     g.or(range)
-                },
-            );
+                });
             <span class="macro">structure!</span>(builder;
                 <span class="kw">let </span>fsm_incr = prim std_add(fsm_size);
                 <span class="kw">let </span>one = constant(<span class="number">1</span>, fsm_size);
@@ -1307,7 +1317,7 @@
 <span class="doccomment">/// Represents an edge from a predeccesor to the current control node.
 /// The `u64` represents the FSM state of the predeccesor and the guard needs
 /// to be true for the predeccesor to transition to the current state.
-</span><span class="kw">type </span>PredEdge = (u64, ir::Guard);
+</span><span class="kw">type </span>PredEdge = (u64, ir::Guard&lt;Nothing&gt;);
 
 <span class="kw">impl </span>Schedule&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
     <span class="kw">fn </span>calculate_states(
@@ -1549,7 +1559,7 @@
             .with_pos(<span class="kw-2">&amp;</span>con.attributes));
         }
 
-        <span class="kw">let </span>port_guard: ir::Guard = Rc::clone(port).into();
+        <span class="kw">let </span>port_guard: ir::Guard&lt;Nothing&gt; = Rc::clone(port).into();
         <span class="kw">let </span><span class="kw-2">mut </span>tpreds = <span class="self">self</span>.calculate_states(
             tbranch,
             preds

@@ -1096,8 +1096,8 @@
 /// is safe to do so.
 /// To ignore a read from a done signal:
 /// the `@go` signal for the same cell *must* be written to in the group
-</span><span class="kw">pub fn </span>meaningful_read_set&lt;<span class="lifetime">&#39;a</span>&gt;(
-    assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt; + Clone + <span class="lifetime">&#39;a</span>,
+</span><span class="kw">pub fn </span>meaningful_read_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
+    assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + Clone + <span class="lifetime">&#39;a</span>,
 ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
     meaningful_port_read_set(assigns)
         .map(|port| Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent()))
@@ -1107,8 +1107,8 @@
 <span class="doccomment">/// Returns the &quot;meaningful&quot; [ir::Port] which are read from in the assignments.
 /// &quot;Meaningful&quot; means we just exclude the following `@done` reads:
 /// the `@go` signal for the same cell *must* be written to in the group
-</span><span class="kw">pub fn </span>meaningful_port_read_set&lt;<span class="lifetime">&#39;a</span>&gt;(
-    assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt; + Clone + <span class="lifetime">&#39;a</span>,
+</span><span class="kw">pub fn </span>meaningful_port_read_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
+    assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + Clone + <span class="lifetime">&#39;a</span>,
 ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a </span>{
     <span class="comment">// go_writes = all cells which are guaranteed to have their go port written to in assigns
     </span><span class="kw">let </span>go_writes: Vec&lt;RRC&lt;ir::Cell&gt;&gt; =
@@ -1726,8 +1726,8 @@
         (reads, writes)
     }
 
-    <span class="kw">fn </span>find_uses_assigns(
-        assigns: <span class="kw-2">&amp;</span>[ir::Assignment],
+    <span class="kw">fn </span>find_uses_assigns&lt;T&gt;(
+        assigns: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;],
         shareable_components: <span class="kw-2">&amp;</span>ShareSet,
     ) -&gt; TypeNameSet {
         ReadWriteSet::uses(assigns.iter())

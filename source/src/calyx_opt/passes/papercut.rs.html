@@ -461,7 +461,7 @@
 }
 
 <span class="kw">impl </span>Papercut {
-    <span class="kw">fn </span>check_specs(<span class="kw-2">&amp;mut </span><span class="self">self</span>, assigns: <span class="kw-2">&amp;</span>[ir::Assignment]) -&gt; VisResult {
+    <span class="kw">fn </span>check_specs&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, assigns: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;]) -&gt; VisResult {
         <span class="kw">let </span>all_writes = analysis::ReadWriteSet::port_write_set(assigns.iter())
             .filter_map(port_information)
             .into_grouping_map()

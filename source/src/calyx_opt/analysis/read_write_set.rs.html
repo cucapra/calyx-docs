@@ -227,8 +227,8 @@
 
 <span class="kw">impl </span>ReadWriteSet {
     <span class="doccomment">/// Returns [ir::Port] that are read from in the given Assignment.
-    </span><span class="kw">pub fn </span>port_reads(
-        assign: <span class="kw-2">&amp;</span>ir::Assignment,
+    </span><span class="kw">pub fn </span>port_reads&lt;T&gt;(
+        assign: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;,
     ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;_ </span>{
         assign
             .guard
@@ -239,15 +239,15 @@
     }
 
     <span class="doccomment">/// Returns [ir::Port] which are read from in the assignments.
-    </span><span class="kw">pub fn </span>port_read_set&lt;<span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt; + <span class="lifetime">&#39;a</span>,
+    </span><span class="kw">pub fn </span>port_read_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
+        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + <span class="lifetime">&#39;a</span>,
     ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a </span>{
         assigns.flat_map(<span class="self">Self</span>::port_reads)
     }
 
     <span class="doccomment">/// Returns [ir::Port] which are written to in the assignments.
-    </span><span class="kw">pub fn </span>port_write_set&lt;<span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt; + <span class="lifetime">&#39;a</span>,
+    </span><span class="kw">pub fn </span>port_write_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
+        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + <span class="lifetime">&#39;a</span>,
     ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a </span>{
         assigns
             .map(|assign| Rc::clone(<span class="kw-2">&amp;</span>assign.dst))
@@ -256,8 +256,8 @@
 
     <span class="doccomment">/// Returns [ir::Cell] which are read from in the assignments.
     /// **Ignores** reads from group holes.
-    </span><span class="kw">pub fn </span>read_set&lt;<span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt; + <span class="lifetime">&#39;a</span>,
+    </span><span class="kw">pub fn </span>read_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
+        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + <span class="lifetime">&#39;a</span>,
     ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
         <span class="self">Self</span>::port_read_set(assigns)
             .map(|port| Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent()))
@@ -266,8 +266,8 @@
 
     <span class="doccomment">/// Returns [ir::Cell] which are written to by the assignments.
     /// **Ignores** reads from group holes.
-    </span><span class="kw">pub fn </span>write_set&lt;<span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt; + <span class="lifetime">&#39;a</span>,
+    </span><span class="kw">pub fn </span>write_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
+        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + <span class="lifetime">&#39;a</span>,
     ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
         <span class="self">Self</span>::port_write_set(assigns)
             .map(|port| Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent()))
@@ -276,8 +276,8 @@
 
     <span class="doccomment">/// Returns the register cells whose out port is read anywhere in the given
     /// assignments
-    </span><span class="kw">pub fn </span>register_reads&lt;<span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt; + Clone + <span class="lifetime">&#39;a</span>,
+    </span><span class="kw">pub fn </span>register_reads&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
+        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + Clone + <span class="lifetime">&#39;a</span>,
     ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
         <span class="kw">fn </span>is_register_out(port_ref: RRC&lt;ir::Port&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;ir::Cell&gt;&gt; {
             <span class="kw">let </span>port = port_ref.borrow();
@@ -311,8 +311,8 @@
     <span class="doccomment">/// Return the name of the cells that these assignments write to for writes
     /// that are guarded by true.
     /// **Ignores** writes to group holes.
-    </span><span class="kw">pub fn </span>must_write_set&lt;<span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt; + <span class="lifetime">&#39;a</span>,
+    </span><span class="kw">pub fn </span>must_write_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
+        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + <span class="lifetime">&#39;a</span>,
     ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
         assigns
             .filter_map(|assignment| {
@@ -329,8 +329,8 @@
 
     <span class="doccomment">/// Returns all uses of cells in this group. Uses constitute both reads and
     /// writes to cells.
-    </span><span class="kw">pub fn </span>uses&lt;<span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt; + Clone + <span class="lifetime">&#39;a</span>,
+    </span><span class="kw">pub fn </span>uses&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
+        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + Clone + <span class="lifetime">&#39;a</span>,
     ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
         <span class="kw">let </span>reads = <span class="self">Self</span>::read_set(assigns.clone());
         reads

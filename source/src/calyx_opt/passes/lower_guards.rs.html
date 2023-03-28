@@ -182,8 +182,14 @@
 <span id="182">182</span>
 <span id="183">183</span>
 <span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
+<span class="kw">use </span>ir::Nothing;
 
 <span class="doccomment">/// Lowers guards into a purely structural representation. After this pass,
 /// all guards are guaranteed to be either [ir::Guard::True] or [ir::Guard::Port].
@@ -200,7 +206,7 @@
     </span>}
 }
 
-<span class="kw">fn </span>guard_to_prim(guard: <span class="kw-2">&amp;</span>ir::Guard) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
+<span class="kw">fn </span>guard_to_prim(guard: <span class="kw-2">&amp;</span>ir::Guard&lt;ir::Nothing&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
     <span class="kw">let </span>var_name = <span class="kw">match </span>guard {
         ir::Guard::Or(..) =&gt; <span class="string">&quot;or&quot;</span>,
         ir::Guard::And(..) =&gt; <span class="string">&quot;and&quot;</span>,
@@ -215,13 +221,16 @@
         ir::Guard::True | ir::Guard::Not(<span class="kw">_</span>) | ir::Guard::Port(<span class="kw">_</span>) =&gt; {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
+        ir::Guard::Info(<span class="kw">_</span>) =&gt; {
+            <span class="macro">panic!</span>(<span class="string">&quot;Guards Shouldn&#39;t Take Info at this Point&quot;</span>)
+        }
     };
     <span class="prelude-val">Some</span>(var_name.to_string())
 }
 
 <span class="kw">fn </span>lower_guard(
-    guard: ir::Guard,
-    assigns: <span class="kw-2">&amp;mut </span>Vec&lt;ir::Assignment&gt;,
+    guard: ir::Guard&lt;Nothing&gt;,
+    assigns: <span class="kw-2">&amp;mut </span>Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;,
     builder: <span class="kw-2">&amp;mut </span>ir::Builder,
 ) -&gt; RRC&lt;ir::Port&gt; {
     <span class="kw">let </span>maybe_prim = guard_to_prim(<span class="kw-2">&amp;</span>guard);
@@ -285,13 +294,14 @@
         }
         ir::Guard::True =&gt; builder.add_constant(<span class="number">1</span>, <span class="number">1</span>).borrow().get(<span class="string">&quot;out&quot;</span>),
         ir::Guard::Port(p) =&gt; p,
+        ir::Guard::Info(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;shouldn&#39;t have info ports at this point&quot;</span>),
     }
 }
 
 <span class="kw">fn </span>lower_assigns(
-    assigns: Vec&lt;ir::Assignment&gt;,
+    assigns: Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;,
     builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-) -&gt; Vec&lt;ir::Assignment&gt; {
+) -&gt; Vec&lt;ir::Assignment&lt;Nothing&gt;&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>new_assigns = Vec::with_capacity(assigns.len() * <span class="number">2</span>);
     <span class="kw">for </span><span class="kw-2">mut </span>assign <span class="kw">in </span>assigns {
         <span class="kw">let </span>g = std::mem::take(<span class="kw-2">&amp;mut </span>assign.guard);
@@ -334,21 +344,21 @@
             .into();
         builder.component.set_groups(groups);
 
-        <span class="kw">let </span>static_groups = builder
+        <span class="comment">/*let static_groups = builder
             .component
             .get_static_groups_mut()
             .drain()
             .map(|group| {
-                <span class="kw">let </span>assigns =
+                let assigns =
                     group.borrow_mut().assignments.drain(..).collect();
-                <span class="kw">let </span>new_assigns = lower_assigns(assigns, <span class="kw-2">&amp;mut </span>builder);
+                let new_assigns = lower_assigns(assigns, &amp;mut builder);
                 group.borrow_mut().assignments = new_assigns;
                 group
             })
             .into();
-        builder.component.set_static_groups(static_groups);
+        builder.component.set_static_groups(static_groups);*/
 
-        <span class="comment">// Transform comb group assignments
+        // Transform comb group assignments
         </span><span class="kw">let </span>comb_groups = builder
             .component
             .comb_groups

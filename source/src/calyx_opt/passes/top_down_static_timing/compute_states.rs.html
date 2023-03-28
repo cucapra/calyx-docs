@@ -185,8 +185,10 @@
 <span id="185">185</span>
 <span id="186">186</span>
 <span id="187">187</span>
+<span id="188">188</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::passes::math_utilities::get_bit_width_from;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, guard, structure, RRC};
+<span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>std::rc::Rc;
 
 <span class="doccomment">/// Name of the attributes added by this pass.
@@ -299,7 +301,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         con: <span class="kw-2">&amp;</span>ir::Control,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-        exits: <span class="kw-2">&amp;mut </span>Vec&lt;(u64, ir::Guard)&gt;,
+        exits: <span class="kw-2">&amp;mut </span>Vec&lt;(u64, ir::Guard&lt;Nothing&gt;)&gt;,
     ) {
         <span class="kw">match </span>con {
             ir::Control::Enable(en) =&gt; {

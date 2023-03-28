@@ -545,12 +545,28 @@
 <span id="545">545</span>
 <span id="546">546</span>
 <span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
 };
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, rewriter, GetAttributes, LibrarySignatures, RRC};
 <span class="kw">use </span>calyx_utils::Error;
+<span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::rc::Rc;
@@ -664,7 +680,7 @@
     /// 2. Using the [PortMap] to a new [Port].
     /// 3. Using `new_group` to rewrite use of a group hole if the port is a hole.
     </span><span class="kw">fn </span>rewrite_assigns(
-        assigns: <span class="kw-2">&amp;mut </span>[ir::Assignment],
+        assigns: <span class="kw-2">&amp;mut </span>[ir::Assignment&lt;Nothing&gt;],
         port_rewrite: <span class="kw-2">&amp;</span>ir::Rewriter,
         new_group: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>RRC&lt;ir::Group&gt;&gt;,
     ) {
@@ -688,7 +704,7 @@
     /// 2. Using the [PortMap] to a new [Port].
     /// 3. Using `new_group` to rewrite use of a group hole if the port is a hole.
     </span><span class="kw">fn </span>rewrite_assigns_static(
-        assigns: <span class="kw-2">&amp;mut </span>[ir::Assignment],
+        assigns: <span class="kw-2">&amp;mut </span>[ir::Assignment&lt;ir::StaticTiming&gt;],
         port_rewrite: <span class="kw-2">&amp;</span>ir::Rewriter,
         new_group: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>RRC&lt;ir::StaticGroup&gt;&gt;,
     ) {
@@ -958,6 +974,20 @@
         // from the inlined instances and check if the `go` or `done` ports
         // on any of the instances was used for structural invokes.
         </span>builder.component.for_each_assignment(|assign| {
+            assign.for_each_port(|pr| {
+                <span class="kw">let </span>port = <span class="kw-2">&amp;</span>pr.borrow();
+                <span class="kw">let </span>np = interface_rewrites.get(<span class="kw-2">&amp;</span>port.canonical());
+                <span class="kw">if </span>np.is_some() &amp;&amp; (port.name == <span class="string">&quot;go&quot; </span>|| port.name == <span class="string">&quot;done&quot;</span>) {
+                    <span class="macro">panic!</span>(
+                        <span class="string">&quot;Cannot inline instance. It is structurally structurally invoked: `{}`&quot;</span>,
+                        port.cell_parent().borrow().name(),
+                    );
+                }
+                np.cloned()
+            });
+        });
+
+        builder.component.for_each_static_assignment(|assign| {
             assign.for_each_port(|pr| {
                 <span class="kw">let </span>port = <span class="kw-2">&amp;</span>pr.borrow();
                 <span class="kw">let </span>np = interface_rewrites.get(<span class="kw-2">&amp;</span>port.canonical());

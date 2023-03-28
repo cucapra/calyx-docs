@@ -1015,6 +1015,7 @@
 <span id="1015">1015</span>
 <span id="1016">1016</span>
 <span id="1017">1017</span>
+<span id="1018">1018</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::passes;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
@@ -1022,6 +1023,7 @@
 <span class="kw">use </span>calyx_ir::{build_assignments, guard, structure};
 <span class="kw">use </span>calyx_utils::CalyxResult;
 <span class="kw">use </span>calyx_utils::Error;
+<span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>petgraph::graph::DiGraph;
 <span class="kw">use </span>std::collections::HashMap;
@@ -1222,9 +1224,9 @@
 <span class="doccomment">/// Represents the dyanmic execution schedule of a control program.
 </span><span class="kw">struct </span>Schedule&lt;<span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;b</span>&gt; {
     <span class="doccomment">/// Assigments that should be enabled in a given state.
-    </span><span class="kw">pub </span>enables: HashMap&lt;u64, Vec&lt;ir::Assignment&gt;&gt;,
+    </span><span class="kw">pub </span>enables: HashMap&lt;u64, Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;&gt;,
     <span class="doccomment">/// Transition from one state to another when the guard is true.
-    </span><span class="kw">pub </span>transitions: Vec&lt;(u64, u64, ir::Guard)&gt;,
+    </span><span class="kw">pub </span>transitions: Vec&lt;(u64, u64, ir::Guard&lt;Nothing&gt;)&gt;,
     <span class="doccomment">/// The component builder. The reference has a shorter lifetime than the builder itself
     /// to allow multiple schedules to use the same builder.
     </span><span class="kw">pub </span>builder: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>ir::Builder&lt;<span class="lifetime">&#39;a</span>&gt;,
@@ -1382,7 +1384,7 @@
 <span class="doccomment">/// Represents an edge from a predeccesor to the current control node.
 /// The `u64` represents the FSM state of the predeccesor and the guard needs
 /// to be true for the predeccesor to transition to the current state.
-</span><span class="kw">type </span>PredEdge = (u64, ir::Guard);
+</span><span class="kw">type </span>PredEdge = (u64, ir::Guard&lt;Nothing&gt;);
 
 <span class="kw">impl </span>Schedule&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
     <span class="doccomment">/// Recursively build an dynamic finite state machine represented by a [Schedule].
@@ -1506,7 +1508,7 @@
         <span class="kw">if </span>if_stmt.cond.is_some() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of if. This should have compiled away.&quot;</span>, TopDownCompileControl::name(), if_stmt.cond.as_ref().unwrap().borrow().name())));
         }
-        <span class="kw">let </span>port_guard: ir::Guard = Rc::clone(<span class="kw-2">&amp;</span>if_stmt.port).into();
+        <span class="kw">let </span>port_guard: ir::Guard&lt;Nothing&gt; = Rc::clone(<span class="kw-2">&amp;</span>if_stmt.port).into();
         <span class="comment">// Previous states transitioning into true branch need the conditional
         // to be true.
         </span><span class="kw">let </span>tru_transitions = preds
@@ -1558,7 +1560,7 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;{}: Found group `{}` in with position of if. This should have compiled away.&quot;</span>, TopDownCompileControl::name(), while_stmt.cond.as_ref().unwrap().borrow().name())));
         }
 
-        <span class="kw">let </span>port_guard: ir::Guard = Rc::clone(<span class="kw-2">&amp;</span>while_stmt.port).into();
+        <span class="kw">let </span>port_guard: ir::Guard&lt;Nothing&gt; = Rc::clone(<span class="kw-2">&amp;</span>while_stmt.port).into();
 
         <span class="comment">// Step 1: Generate the backward edges by computing the exit nodes.
         </span><span class="kw">let </span><span class="kw-2">mut </span>exits = <span class="macro">vec!</span>[];

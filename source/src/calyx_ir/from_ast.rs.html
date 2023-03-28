@@ -618,11 +618,16 @@
 <span id="618">618</span>
 <span id="619">619</span>
 <span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Canonical, CellType,
     Component, Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
     LibrarySignatures, Port, PortDef, RESERVED_NAMES, RRC,
 };
+<span class="kw">use </span><span class="kw">crate</span>::guard::Nothing;
 <span class="kw">use </span><span class="kw">crate</span>::PortComp;
 <span class="kw">use </span>calyx_frontend::{ast, Workspace};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, GPosIdx, NameGenerator, WithPos};
@@ -1000,7 +1005,7 @@
 </span><span class="kw">fn </span>build_assignment(
     wire: ast::Wire,
     builder: <span class="kw-2">&amp;mut </span>Builder,
-) -&gt; CalyxResult&lt;Assignment&gt; {
+) -&gt; CalyxResult&lt;Assignment&lt;Nothing&gt;&gt; {
     <span class="kw">let </span>src_port: RRC&lt;Port&gt; = ensure_direction(
         atom_to_port(wire.src.expr, builder)<span class="question-mark">?</span>,
         Direction::Output,
@@ -1030,7 +1035,7 @@
 <span class="kw">fn </span>build_assignments(
     assigns: Vec&lt;ast::Wire&gt;,
     builder: <span class="kw-2">&amp;mut </span>Builder,
-) -&gt; CalyxResult&lt;Vec&lt;Assignment&gt;&gt; {
+) -&gt; CalyxResult&lt;Vec&lt;Assignment&lt;Nothing&gt;&gt;&gt; {
     assigns
         .into_iter()
         .map(|w| {
@@ -1041,7 +1046,10 @@
 }
 
 <span class="doccomment">/// Transform an ast::GuardExpr to an ir::Guard.
-</span><span class="kw">fn </span>build_guard(guard: ast::GuardExpr, bd: <span class="kw-2">&amp;mut </span>Builder) -&gt; CalyxResult&lt;Guard&gt; {
+</span><span class="kw">fn </span>build_guard(
+    guard: ast::GuardExpr,
+    bd: <span class="kw-2">&amp;mut </span>Builder,
+) -&gt; CalyxResult&lt;Guard&lt;Nothing&gt;&gt; {
     <span class="kw">use </span>ast::GuardExpr <span class="kw">as </span>GE;
 
     <span class="kw">let </span>into_box_guard = |g: Box&lt;GE&gt;, bd: <span class="kw-2">&amp;mut </span>Builder| -&gt; CalyxResult&lt;<span class="kw">_</span>&gt; {

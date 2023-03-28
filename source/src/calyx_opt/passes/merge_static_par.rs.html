@@ -139,8 +139,10 @@
 <span id="139">139</span>
 <span id="140">140</span>
 <span id="141">141</span>
+<span id="142">142</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Attributes, Enable, RRC};
+<span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>linked_hash_map::LinkedHashMap;
 <span class="kw">use </span>std::iter::Iterator;
 <span class="kw">use </span>std::mem;
@@ -227,23 +229,23 @@
             <span class="kw">if </span>value.len() != <span class="number">1 </span>{
                 <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
                 <span class="kw">let </span>grp = builder.add_group(<span class="string">&quot;msp&quot;</span>);
-                <span class="kw">let </span><span class="kw-2">mut </span>assignments: Vec&lt;ir::Assignment&gt; = Vec::new();
+                <span class="kw">let </span><span class="kw-2">mut </span>assignments: Vec&lt;ir::Assignment&lt;Nothing&gt;&gt; = Vec::new();
                 <span class="kw">for </span>group <span class="kw">in </span>value.iter() {
                     assignments.extend(group.borrow().assignments.clone());
                 }
 
                 <span class="kw">let </span>(done_asmts, asmts): (
-                    Vec&lt;ir::Assignment&gt;,
-                    Vec&lt;ir::Assignment&gt;,
+                    Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;,
+                    Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;,
                 ) = mem::take(<span class="kw-2">&amp;mut </span>assignments)
                     .into_iter()
                     .partition(|x| x.dst.borrow().is_hole());
 
                 grp.borrow_mut().assignments.extend(asmts);
 
-                <span class="kw">let </span><span class="kw-2">mut </span>fin_grd: ir::Guard = ir::Guard::True;
+                <span class="kw">let </span><span class="kw-2">mut </span>fin_grd: ir::Guard&lt;Nothing&gt; = ir::Guard::True;
                 <span class="kw">for </span>asmt <span class="kw">in </span>done_asmts.clone() {
-                    <span class="kw">let </span>grd: ir::Guard = ir::Guard::Port(asmt.src);
+                    <span class="kw">let </span>grd: ir::Guard&lt;Nothing&gt; = ir::Guard::Port(asmt.src);
                     fin_grd &amp;= grd;
                     fin_grd &amp;= <span class="kw-2">*</span>asmt.guard;
                 }

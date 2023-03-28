@@ -83,8 +83,13 @@
 <span id="83">83</span>
 <span id="84">84</span>
 <span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures};
+<span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>linked_hash_map::LinkedHashMap;
 
@@ -116,10 +121,14 @@
     </span>}
 }
 
-<span class="kw">fn </span>merge_assigns(assigns: Vec&lt;ir::Assignment&gt;) -&gt; Vec&lt;ir::Assignment&gt; {
+<span class="kw">fn </span>merge_assigns(
+    assigns: Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;,
+) -&gt; Vec&lt;ir::Assignment&lt;Nothing&gt;&gt; {
     <span class="comment">// Map from (dst, src) -&gt; Assignment
-    </span><span class="kw">let </span><span class="kw-2">mut </span>map: LinkedHashMap&lt;(ir::Canonical, ir::Canonical), ir::Assignment&gt; =
-        LinkedHashMap::new();
+    </span><span class="kw">let </span><span class="kw-2">mut </span>map: LinkedHashMap&lt;
+        (ir::Canonical, ir::Canonical),
+        ir::Assignment&lt;Nothing&gt;,
+    &gt; = LinkedHashMap::new();
 
     <span class="kw">for </span>assign <span class="kw">in </span>assigns {
         <span class="kw">let </span>src_key = assign.src.borrow().canonical();
@@ -145,12 +154,11 @@
         _ctx: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
+        <span class="macro">assert!</span>(
+            comp.static_groups.is_empty(),
+            <span class="string">&quot;static groups should have been compiled away&quot;
+        </span>);
         <span class="kw">for </span>group <span class="kw">in </span>comp.get_groups().iter() {
-            <span class="kw">let </span>assigns = group.borrow_mut().assignments.drain(..).collect();
-            <span class="kw">let </span>merged = merge_assigns(assigns);
-            group.borrow_mut().assignments = merged;
-        }
-        <span class="kw">for </span>group <span class="kw">in </span>comp.get_static_groups().iter() {
             <span class="kw">let </span>assigns = group.borrow_mut().assignments.drain(..).collect();
             <span class="kw">let </span>merged = merge_assigns(assigns);
             group.borrow_mut().assignments = merged;

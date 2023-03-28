@@ -591,12 +591,12 @@
     }
 
     <span class="doccomment">/// Construct an assignment.
-    </span><span class="kw">pub fn </span>build_assignment(
+    </span><span class="kw">pub fn </span>build_assignment&lt;T&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         dst: RRC&lt;ir::Port&gt;,
         src: RRC&lt;ir::Port&gt;,
-        guard: ir::Guard,
-    ) -&gt; ir::Assignment {
+        guard: ir::Guard&lt;T&gt;,
+    ) -&gt; ir::Assignment&lt;T&gt; {
         <span class="comment">// Valid the ports if required.
         </span><span class="kw">if </span><span class="self">self</span>.validate {
             <span class="self">self</span>.is_port_well_formed(<span class="kw-2">&amp;</span>dst.borrow());

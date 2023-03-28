@@ -605,12 +605,25 @@
 <span id="605">605</span>
 <span id="606">606</span>
 <span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{
     <span class="self">self </span><span class="kw">as </span>ir, CellType, Component, GetAttributes, LibrarySignatures,
     RESERVED_NAMES,
 };
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, WithPos};
+<span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>linked_hash_map::LinkedHashMap;
 <span class="kw">use </span>std::collections::HashMap;
@@ -619,13 +632,13 @@
 <span class="attribute">#[derive(Default)]
 </span><span class="kw">struct </span>ActiveAssignments {
     <span class="comment">// Set of currently active assignments
-    </span>assigns: Vec&lt;ir::Assignment&gt;,
+    </span>assigns: Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;,
     <span class="comment">// Stack representing the number of assignments added at each level
     </span>num_assigns: Vec&lt;usize&gt;,
 }
 <span class="kw">impl </span>ActiveAssignments {
     <span class="doccomment">/// Push a set of assignments to the stack.
-    </span><span class="kw">pub fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, assign: <span class="kw-2">&amp;</span>[ir::Assignment]) {
+    </span><span class="kw">pub fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, assign: <span class="kw-2">&amp;</span>[ir::Assignment&lt;Nothing&gt;]) {
         <span class="kw">let </span>prev_size = <span class="self">self</span>.assigns.len();
         <span class="self">self</span>.assigns.extend(assign.iter().cloned());
         <span class="comment">// Number of assignments added at this level
@@ -638,7 +651,7 @@
         <span class="self">self</span>.assigns.truncate(<span class="self">self</span>.assigns.len() - num_assigns);
     }
 
-    <span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span>ir::Assignment&gt; {
+    <span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span>ir::Assignment&lt;Nothing&gt;&gt; {
         <span class="self">self</span>.assigns.iter()
     }
 }
@@ -749,9 +762,11 @@
 
 <span class="doccomment">/// Returns an error if the assignments are obviously conflicting. This happens when two
 /// assignments assign to the same port unconditionally.
-</span><span class="kw">fn </span>obvious_conflicts&lt;<span class="lifetime">&#39;a</span>, I&gt;(assigns: I) -&gt; CalyxResult&lt;()&gt;
+</span><span class="kw">fn </span>obvious_conflicts&lt;<span class="lifetime">&#39;a</span>, I, T: <span class="lifetime">&#39;a </span>+ Clone + ToString&gt;(
+    assigns: I,
+) -&gt; CalyxResult&lt;()&gt;
 <span class="kw">where
-    </span>I: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&gt;,
+    </span>I: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt;,
 {
     <span class="kw">let </span>dst_grps = assigns
         .filter(|a| a.guard.is_true())
@@ -1159,6 +1174,15 @@
     ) -&gt; VisResult {
         <span class="comment">// Go signals of groups mentioned in other groups are considered used
         </span>comp.for_each_assignment(|assign| {
+            assign.for_each_port(|pr| {
+                <span class="kw">let </span>port = pr.borrow();
+                <span class="kw">if </span>port.is_hole() &amp;&amp; port.name == <span class="string">&quot;go&quot; </span>{
+                    <span class="self">self</span>.used_groups.insert(port.get_parent_name());
+                }
+                <span class="prelude-val">None
+            </span>})
+        });
+        comp.for_each_static_assignment(|assign| {
             assign.for_each_port(|pr| {
                 <span class="kw">let </span>port = pr.borrow();
                 <span class="kw">if </span>port.is_hole() &amp;&amp; port.name == <span class="string">&quot;go&quot; </span>{

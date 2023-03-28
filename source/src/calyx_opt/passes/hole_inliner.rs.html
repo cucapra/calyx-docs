@@ -226,10 +226,12 @@
 <span id="226">226</span>
 <span id="227">227</span>
 <span id="228">228</span>
+<span id="229">229</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use crate</span>::{analysis::GraphAnalysis, passes::TopDownCompileControl};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, structure, LibrarySignatures, RRC};
 <span class="kw">use </span>calyx_utils::Error;
+<span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>std::{collections::HashMap, rc::Rc};
 
 <span class="attribute">#[derive(Default)]
@@ -251,7 +253,7 @@
     </span>}
 }
 
-<span class="kw">type </span>Store = HashMap&lt;ir::Canonical, (RRC&lt;ir::Port&gt;, ir::Guard)&gt;;
+<span class="kw">type </span>Store = HashMap&lt;ir::Canonical, (RRC&lt;ir::Port&gt;, ir::Guard&lt;ir::Nothing&gt;)&gt;;
 
 <span class="doccomment">/// Finds the &#39;fixed_point&#39; of a map from Hole names to guards under the
 /// inlining operation. The map contains entries like:
@@ -281,7 +283,7 @@
     </span><span class="kw">let </span><span class="kw-2">mut </span>worklist = Vec::new();
 
     <span class="comment">// helper to check if a guard has holes
-    </span><span class="kw">let </span>has_holes = |guard: <span class="kw-2">&amp;</span>ir::Guard| {
+    </span><span class="kw">let </span>has_holes = |guard: <span class="kw-2">&amp;</span>ir::Guard&lt;Nothing&gt;| {
         guard
             .all_ports()
             .iter()

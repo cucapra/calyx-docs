@@ -274,6 +274,11 @@
 <span id="274">274</span>
 <span id="275">275</span>
 <span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>itertools::Itertools;
@@ -515,6 +520,11 @@
         <span class="comment">// Rewrite assignments
         </span><span class="kw">let </span>rewrites: ir::rewriter::PortRewriteMap = rewrites.into();
         comp.for_each_assignment(|assign| {
+            assign.for_each_port(|port| {
+                rewrites.get(<span class="kw-2">&amp;</span>port.borrow().canonical()).cloned()
+            })
+        });
+        comp.for_each_static_assignment(|assign| {
             assign.for_each_port(|port| {
                 rewrites.get(<span class="kw-2">&amp;</span>port.borrow().canonical()).cloned()
             })

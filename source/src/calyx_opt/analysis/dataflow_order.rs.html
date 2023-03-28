@@ -195,6 +195,9 @@
 <span id="195">195</span>
 <span id="196">196</span>
 <span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::read_write_set::ReadWriteSet;
 <span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
@@ -280,13 +283,16 @@
         <span class="prelude-val">Ok</span>(DataflowOrder { write_map })
     }
 
-    <span class="kw">pub fn </span>dataflow_sort(
+    <span class="kw">pub fn </span>dataflow_sort&lt;T&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        assigns: Vec&lt;ir::Assignment&gt;,
-    ) -&gt; CalyxResult&lt;Vec&lt;ir::Assignment&gt;&gt; {
+        assigns: Vec&lt;ir::Assignment&lt;T&gt;&gt;,
+    ) -&gt; CalyxResult&lt;Vec&lt;ir::Assignment&lt;T&gt;&gt;&gt;
+    <span class="kw">where
+        </span>T: ToString + Clone,
+    {
         <span class="comment">// Construct a graph where a node is an assignment and there is edge between
         // nodes if one should occur before another.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>gr: DiGraph&lt;<span class="prelude-ty">Option</span>&lt;ir::Assignment&gt;, ()&gt; = DiGraph::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>gr: DiGraph&lt;<span class="prelude-ty">Option</span>&lt;ir::Assignment&lt;T&gt;&gt;, ()&gt; = DiGraph::new();
 
         <span class="comment">// Mapping from the index corresponding to an assignment to its read/write sets.
         </span><span class="kw">let </span><span class="kw-2">mut </span>writes: HashMap&lt;ir::Canonical, Vec&lt;NodeIndex&gt;&gt; = HashMap::new();
@@ -294,7 +300,7 @@
             Vec::with_capacity(assigns.len());
 
         <span class="comment">// Assignments to the hole are not considered in the sorting.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>hole_writes: Vec&lt;ir::Assignment&gt; = Vec::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>hole_writes: Vec&lt;ir::Assignment&lt;T&gt;&gt; = Vec::new();
 
         <span class="comment">// Construct the nodes that contain the assignments
         </span><span class="kw">for </span>assign <span class="kw">in </span>assigns {

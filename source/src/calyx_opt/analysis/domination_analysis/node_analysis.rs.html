@@ -283,7 +283,7 @@
 
 <span class="comment">//if the assignment reads only dones, return true. This is used so that we
 //can ignore reads of &quot;done&quot; cells.
-</span><span class="kw">fn </span>reads_only_dones(assignment: <span class="kw-2">&amp;</span>ir::Assignment) -&gt; bool {
+</span><span class="kw">fn </span>reads_only_dones&lt;T&gt;(assignment: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;) -&gt; bool {
     ReadWriteSet::port_reads(assignment).all(|port| done_or_const(<span class="kw-2">&amp;</span>port))
 }
 
@@ -294,10 +294,10 @@
 
 <span class="comment">//Adds the ids of any state_shareable cells that are read from in assignments,
 //excluding reads where the only reads are from &quot;done&quot; ports.
-</span><span class="kw">fn </span>add_assignment_reads(
+</span><span class="kw">fn </span>add_assignment_reads&lt;T&gt;(
     reads: <span class="kw-2">&amp;mut </span>HashSet&lt;ir::Id&gt;,
     share: <span class="kw-2">&amp;</span>ShareSet,
-    assignments: <span class="kw-2">&amp;</span>[ir::Assignment],
+    assignments: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;],
 ) {
     <span class="kw">for </span>cell <span class="kw">in </span>ReadWriteSet::read_set(
         assignments
@@ -428,8 +428,8 @@
     <span class="comment">// Given a vec of assignments, return true if the go port of self.name
     // is guaranteed to be written to in assignments. By &quot;guarantee&quot; we mean
     // the guard is true and the src is constant(1,1).
-    </span><span class="kw">fn </span>go_is_written(<span class="kw-2">&amp;</span><span class="self">self</span>, assignments: <span class="kw-2">&amp;</span>[ir::Assignment]) -&gt; bool {
-        assignments.iter().any(|assign: <span class="kw-2">&amp;</span>ir::Assignment| {
+    </span><span class="kw">fn </span>go_is_written&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, assignments: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;]) -&gt; bool {
+        assignments.iter().any(|assign: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;| {
             <span class="kw">let </span>dst_ref = assign.dst.borrow();
             <span class="kw">if </span>dst_ref.attributes.has(<span class="string">&quot;go&quot;</span>)
                 &amp;&amp; assign.guard.is_true()
