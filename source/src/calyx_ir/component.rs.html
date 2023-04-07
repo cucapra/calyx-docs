@@ -352,11 +352,13 @@
 <span id="352">352</span>
 <span id="353">353</span>
 <span id="354">354</span>
+<span id="355">355</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, Builder, Cell, CellType, CombGroup, Control,
     GetName, Group, Id, PortDef, StaticGroup, RRC,
 };
-<span class="kw">use </span><span class="kw">crate</span>::guard::{Nothing, StaticTiming};
+<span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
+<span class="kw">use </span><span class="kw">crate</span>::Nothing;
 <span class="kw">use </span>calyx_utils::NameGenerator;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>linked_hash_map::LinkedHashMap;

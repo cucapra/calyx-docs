@@ -346,9 +346,21 @@
 <span id="346">346</span>
 <span id="347">347</span>
 <span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
 </pre><pre class="rust"><code><span class="doccomment">//! IR Builder. Provides convience methods to build various parts of the internal
 //! representation.
-</span><span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures, RRC, WRC};
+</span><span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures, Nothing, RRC, WRC};
 <span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::rc::Rc;
 
@@ -400,6 +412,13 @@
         <span class="self">self
     </span>}
 
+    <span class="kw">pub fn </span>add_continuous_assignments(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        assigns: Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;,
+    ) {
+        <span class="self">self</span>.component.continuous_assignments.extend(assigns);
+    }
+
     <span class="doccomment">/// Construct a new group and add it to the Component.
     /// The group is guaranteed to start with `prefix`.
     /// Returns a reference to the group.
@@ -438,7 +457,11 @@
     <span class="doccomment">/// Construct a new static group and add it to the Component.
     /// The group is guaranteed to start with `prefix`.
     /// Returns a reference to the group.
-    </span><span class="kw">pub fn </span>add_static_group&lt;S&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, prefix: S) -&gt; RRC&lt;ir::StaticGroup&gt;
+    </span><span class="kw">pub fn </span>add_static_group&lt;S&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        prefix: S,
+        latency: u64,
+    ) -&gt; RRC&lt;ir::StaticGroup&gt;
     <span class="kw">where
         </span>S: Into&lt;ir::Id&gt;,
     {
@@ -450,19 +473,20 @@
         <span class="kw">let </span>name = <span class="self">self</span>.component.generate_name(prefix);
 
         <span class="comment">// Check if there is a group with the same name.
-        </span><span class="kw">let </span>group = Rc::new(RefCell::new(ir::StaticGroup::new(name)));
+        </span><span class="kw">let </span>group = Rc::new(RefCell::new(ir::StaticGroup::new(name, latency)));
 
         <span class="comment">// Add default holes to the group.
-        </span><span class="kw">for </span>(name, width) <span class="kw">in </span><span class="kw-2">&amp;</span>[(<span class="string">&quot;go&quot;</span>, <span class="number">1</span>), (<span class="string">&quot;done&quot;</span>, <span class="number">1</span>)] {
-            <span class="kw">let </span>hole = Rc::new(RefCell::new(ir::Port {
-                name: ir::Id::from(<span class="kw-2">*</span>name),
-                width: <span class="kw-2">*</span>width,
-                direction: ir::Direction::Inout,
-                parent: ir::PortParent::StaticGroup(WRC::from(<span class="kw-2">&amp;</span>group)),
-                attributes: ir::Attributes::default(),
-            }));
-            group.borrow_mut().holes.push(hole);
-        }
+        // Static Groups don&#39;t need a done hole.
+        // May be beneficial to have a go hole, though (although maybe not)
+        </span><span class="kw">let </span>(name, width) = (<span class="string">&quot;go&quot;</span>, <span class="number">1</span>);
+        <span class="kw">let </span>hole = Rc::new(RefCell::new(ir::Port {
+            name: ir::Id::from(name),
+            width,
+            direction: ir::Direction::Inout,
+            parent: ir::PortParent::StaticGroup(WRC::from(<span class="kw-2">&amp;</span>group)),
+            attributes: ir::Attributes::default(),
+        }));
+        group.borrow_mut().holes.push(hole);
 
         <span class="comment">// Add the group to the component.
         </span><span class="self">self</span>.component

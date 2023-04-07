@@ -584,6 +584,14 @@
 <span id="584">584</span>
 <span id="585">585</span>
 <span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a formatter for the in-memory representation of Components.
 //! The printing operation clones inner nodes and doesn&#39;t perform any mutation
 //! to the Component.
@@ -836,7 +844,7 @@
     }
 
     <span class="doccomment">/// Format and write an assignment.
-    </span><span class="kw">pub fn </span>write_assignment&lt;F: io::Write, T: Clone + ToString&gt;(
+    </span><span class="kw">pub fn </span>write_assignment&lt;F: io::Write, T: Clone + ToString + Eq&gt;(
         assign: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;,
         indent_level: usize,
         f: <span class="kw-2">&amp;mut </span>F,
@@ -853,7 +861,7 @@
     <span class="doccomment">/// Convinience method to get string representation of [ir::Assignment].
     </span><span class="kw">pub fn </span>assignment_to_str&lt;T&gt;(assign: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;) -&gt; String
     <span class="kw">where
-        </span>T: ToString + Clone,
+        </span>T: ToString + Clone + Eq,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::new();
         <span class="self">Self</span>::write_assignment(assign, <span class="number">0</span>, <span class="kw-2">&amp;mut </span>buf).ok();
@@ -914,7 +922,12 @@
         f: <span class="kw-2">&amp;mut </span>F,
     ) -&gt; io::Result&lt;()&gt; {
         <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))<span class="question-mark">?</span>;
-        <span class="macro">write!</span>(f, <span class="string">&quot;group {}&quot;</span>, group.name().id)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(
+            f,
+            <span class="string">&quot;static group {}&lt;{}&gt;&quot;</span>,
+            group.name().id,
+            group.get_latency()
+        )<span class="question-mark">?</span>;
         <span class="kw">if </span>!group.attributes.is_empty() {
             <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_attributes(<span class="kw-2">&amp;</span>group.attributes))<span class="question-mark">?</span>;
         }
@@ -1073,7 +1086,10 @@
     }
 
     <span class="doccomment">/// Generate a String-based representation for a guard.
-    </span><span class="kw">pub fn </span>guard_str&lt;T: ToString&gt;(guard: <span class="kw-2">&amp;</span>ir::Guard&lt;T&gt;) -&gt; String {
+    </span><span class="kw">pub fn </span>guard_str&lt;T: ToString&gt;(guard: <span class="kw-2">&amp;</span>ir::Guard&lt;T&gt;) -&gt; String
+    <span class="kw">where
+        </span>T: Eq,
+    {
         <span class="kw">match </span><span class="kw-2">&amp;</span>guard {
             ir::Guard::And(l, r) | ir::Guard::Or(l, r) =&gt; {
                 <span class="kw">let </span>left = <span class="kw">if </span><span class="kw-2">&amp;**</span>l &gt; guard {

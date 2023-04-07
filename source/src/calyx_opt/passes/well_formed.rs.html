@@ -617,6 +617,34 @@
 <span id="617">617</span>
 <span id="618">618</span>
 <span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{
     <span class="self">self </span><span class="kw">as </span>ir, CellType, Component, GetAttributes, LibrarySignatures,
@@ -624,6 +652,7 @@
 };
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, WithPos};
 <span class="kw">use </span>ir::Nothing;
+<span class="kw">use </span>ir::StaticTiming;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>linked_hash_map::LinkedHashMap;
 <span class="kw">use </span>std::collections::HashMap;
@@ -762,7 +791,7 @@
 
 <span class="doccomment">/// Returns an error if the assignments are obviously conflicting. This happens when two
 /// assignments assign to the same port unconditionally.
-</span><span class="kw">fn </span>obvious_conflicts&lt;<span class="lifetime">&#39;a</span>, I, T: <span class="lifetime">&#39;a </span>+ Clone + ToString&gt;(
+</span><span class="kw">fn </span>obvious_conflicts&lt;<span class="lifetime">&#39;a</span>, I, T: <span class="lifetime">&#39;a </span>+ Clone + ToString + Eq&gt;(
     assigns: I,
 ) -&gt; CalyxResult&lt;()&gt;
 <span class="kw">where
@@ -921,42 +950,28 @@
             }
         }
 
-        <span class="comment">// For each non-combinational group, check if there is at least one write to the done
-        // signal of that group and that the write is to the group&#39;s done signal.
+        <span class="comment">// Don&#39;t need to check done condition for static groups. Instead, just
+        // checking that the static timing intervals are well formed.
         </span><span class="kw">for </span>gr <span class="kw">in </span>comp.get_static_groups().iter() {
             <span class="kw">let </span>group = gr.borrow();
-            <span class="kw">let </span>gname = group.name();
-            <span class="kw">let </span><span class="kw-2">mut </span>has_done = <span class="bool-val">false</span>;
-            <span class="comment">// Find an assignment writing to this group&#39;s done condition.
+            <span class="comment">// Check that for each interval %[beg, end], end &gt; beg.
             </span><span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group.assignments {
-                <span class="kw">let </span>dst = assign.dst.borrow();
-                <span class="kw">if </span>dst.is_hole() &amp;&amp; dst.name == <span class="string">&quot;done&quot; </span>{
-                    <span class="comment">// Group has multiple done conditions
-                    </span><span class="kw">if </span>has_done {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
-                            <span class="string">&quot;Group `{}` has multiple done conditions&quot;</span>,
-                            gname
-                        ))
-                        .with_pos(<span class="kw-2">&amp;</span>assign.attributes));
-                    } <span class="kw">else </span>{
-                        has_done = <span class="bool-val">true</span>;
-                    }
-                    <span class="comment">// Group uses another group&#39;s done condition
-                    </span><span class="kw">if </span>gname != dst.get_parent_name() {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
-                            <span class="macro">format!</span>(<span class="string">&quot;Group `{}` refers to the done condition of another group (`{}`).&quot;</span>,
-                            gname,
-                            dst.get_parent_name())).with_pos(<span class="kw-2">&amp;</span>dst.attributes));
-                    }
-                }
-            }
-
-            <span class="comment">// Group does not have a done condition
-            </span><span class="kw">if </span>!has_done {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
-                    <span class="string">&quot;No writes to the `done&#39; hole for group `{gname}&#39;&quot;</span>,
-                ))
-                .with_pos(<span class="kw-2">&amp;</span>group.attributes));
+                assign.guard.check_for_each_interval(
+                    <span class="kw-2">&amp;mut </span>|static_timing: <span class="kw-2">&amp;</span>StaticTiming| {
+                        <span class="kw">if </span>static_timing.get_interval().<span class="number">0
+                            </span>&gt;= static_timing.get_interval().<span class="number">1
+                        </span>{
+                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                                <span class="string">&quot;Static Timing Guard has improper interval: `%[{},{}]`&quot;</span>,
+                                static_timing.get_interval().<span class="number">0</span>,
+                                static_timing.get_interval().<span class="number">1
+                            </span>))
+                            .with_pos(<span class="kw-2">&amp;</span>assign.attributes));
+                        } <span class="kw">else </span>{
+                            <span class="prelude-val">Ok</span>(())
+                        }
+                    },
+                )<span class="question-mark">?</span>;
             }
         }
 
@@ -973,6 +988,47 @@
         }
 
         <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
+    <span class="kw">fn </span>static_enable(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::StaticEnable,
+        _comp: <span class="kw-2">&amp;mut </span>Component,
+        _ctx: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="self">self</span>.used_groups.insert(s.group.borrow().name());
+
+        <span class="kw">let </span>group = s.group.borrow();
+
+        <span class="comment">// A group with &quot;static&quot;=0 annotation
+        </span><span class="kw">if </span>group
+            .attributes
+            .get(<span class="string">&quot;static&quot;</span>)
+            .map(|v| <span class="kw-2">*</span>v == <span class="number">0</span>)
+            .unwrap_or(<span class="bool-val">false</span>)
+        {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="string">&quot;Group with annotation \&quot;static\&quot;=0 is invalid. Use `comb group` instead to define a combinational group or if the group&#39;s done condition is not constant, provide the correct \&quot;static\&quot; annotation.&quot;</span>).with_pos(<span class="kw-2">&amp;</span>group.attributes));
+        }
+
+        <span class="comment">// // Check if the group has obviously conflicting assignments with the continuous assignments and the active combinational groups
+        // obvious_conflicts(
+        //     group
+        //         .assignments
+        //         .iter()
+        //         .chain(comp.continuous_assignments.iter())
+        //         .chain(self.active_comb.iter()),
+        // )
+        // .map_err(|err| {
+        //     let msg = s
+        //         .attributes
+        //         .copy_span()
+        //         .into_option()
+        //         .map(|s| s.format(&quot;Assigments activated by group enable&quot;));
+        //     err.with_post_msg(msg)
+        // })?;
+
+        </span><span class="prelude-val">Ok</span>(Action::Continue)
     }
 
     <span class="kw">fn </span>enable(

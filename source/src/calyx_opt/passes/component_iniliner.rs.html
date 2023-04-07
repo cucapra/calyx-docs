@@ -560,6 +560,7 @@
 <span id="560">560</span>
 <span id="561">561</span>
 <span id="562">562</span>
+<span id="563">563</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
@@ -765,7 +766,8 @@
         gr: <span class="kw-2">&amp;</span>RRC&lt;ir::StaticGroup&gt;,
     ) -&gt; (ir::Id, RRC&lt;ir::StaticGroup&gt;) {
         <span class="kw">let </span>group = gr.borrow();
-        <span class="kw">let </span>new_group = builder.add_static_group(group.name());
+        <span class="kw">let </span>new_group =
+            builder.add_static_group(group.name(), group.get_latency());
         new_group.borrow_mut().attributes = group.attributes.clone();
 
         <span class="comment">// Rewrite assignments

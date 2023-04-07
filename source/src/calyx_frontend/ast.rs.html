@@ -305,6 +305,51 @@
 <span id="305">305</span>
 <span id="306">306</span>
 <span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx
 </span><span class="kw">use </span><span class="kw">super</span>::parser;
 <span class="kw">use crate</span>::{Attributes, PortDef, Primitive};
@@ -353,6 +398,8 @@
     </span><span class="kw">pub </span>cells: Vec&lt;Cell&gt;,
     <span class="doccomment">/// List of groups
     </span><span class="kw">pub </span>groups: Vec&lt;Group&gt;,
+    <span class="doccomment">/// List of StaticGroups
+    </span><span class="kw">pub </span>static_groups: Vec&lt;StaticGroup&gt;,
     <span class="doccomment">/// List of continuous assignments
     </span><span class="kw">pub </span>continuous_assignments: Vec&lt;Wire&gt;,
     <span class="doccomment">/// Single control statement for this component.
@@ -373,6 +420,7 @@
             signature,
             cells: Vec::new(),
             groups: Vec::new(),
+            static_groups: Vec::new(),
             continuous_assignments: Vec::new(),
             control: Control::empty(),
             attributes: Attributes::default(),
@@ -436,8 +484,22 @@
     </span>And(Box&lt;GuardExpr&gt;, Box&lt;GuardExpr&gt;),
     Or(Box&lt;GuardExpr&gt;, Box&lt;GuardExpr&gt;),
     Not(Box&lt;GuardExpr&gt;),
-    CompOp(GuardComp, Atom, Atom),
+    CompOp(CompGuard),
     Atom(Atom),
+}
+
+<span class="doccomment">/// Guard Comparison Type
+</span><span class="kw">pub type </span>CompGuard = (GuardComp, Atom, Atom);
+
+<span class="doccomment">/// The AST for StaticGuardExprs
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub enum </span>StaticGuardExpr {
+    And(Box&lt;StaticGuardExpr&gt;, Box&lt;StaticGuardExpr&gt;),
+    Or(Box&lt;StaticGuardExpr&gt;, Box&lt;StaticGuardExpr&gt;),
+    Not(Box&lt;StaticGuardExpr&gt;),
+    CompOp(CompGuard),
+    Atom(Atom),
+    StaticInfo((u64, u64)),
 }
 
 <span class="doccomment">/// Possible comparison operators for guards.
@@ -455,6 +517,13 @@
 </span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Guard {
     <span class="kw">pub </span>guard: <span class="prelude-ty">Option</span>&lt;GuardExpr&gt;,
+    <span class="kw">pub </span>expr: Atom,
+}
+
+<span class="doccomment">/// Guards `expr` using the optional guard condition `guard`.
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>StaticGuard {
+    <span class="kw">pub </span>guard: <span class="prelude-ty">Option</span>&lt;StaticGuardExpr&gt;,
     <span class="kw">pub </span>expr: Atom,
 }
 
@@ -514,11 +583,32 @@
     <span class="kw">pub </span>is_comb: bool,
 }
 
+<span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>StaticGroup {
+    <span class="kw">pub </span>name: Id,
+    <span class="kw">pub </span>wires: Vec&lt;StaticWire&gt;,
+    <span class="kw">pub </span>attributes: Attributes,
+    <span class="kw">pub </span>latency: u64,
+}
+
 <span class="doccomment">/// Data for the `-&gt;` structure statement.
 </span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Wire {
     <span class="doccomment">/// Source of the wire.
     </span><span class="kw">pub </span>src: Guard,
+
+    <span class="doccomment">/// Guarded destinations of the wire.
+    </span><span class="kw">pub </span>dest: Port,
+
+    <span class="doccomment">/// Attributes for this assignment
+    </span><span class="kw">pub </span>attributes: Attributes,
+}
+
+<span class="doccomment">/// Data for the `-&gt;` structure statement.
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>StaticWire {
+    <span class="doccomment">/// Source of the wire.
+    </span><span class="kw">pub </span>src: StaticGuard,
 
     <span class="doccomment">/// Guarded destinations of the wire.
     </span><span class="kw">pub </span>dest: Port,

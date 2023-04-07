@@ -288,7 +288,7 @@
         assigns: Vec&lt;ir::Assignment&lt;T&gt;&gt;,
     ) -&gt; CalyxResult&lt;Vec&lt;ir::Assignment&lt;T&gt;&gt;&gt;
     <span class="kw">where
-        </span>T: ToString + Clone,
+        </span>T: ToString + Clone + Eq,
     {
         <span class="comment">// Construct a graph where a node is an assignment and there is edge between
         // nodes if one should occur before another.

@@ -153,15 +153,16 @@
 <span id="153">153</span>
 <span id="154">154</span>
 <span id="155">155</span>
+<span id="156">156</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
-    CompileEmpty, CompileInvoke, CompileRef, CompileSync, ComponentInliner,
-    DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, Externalize,
-    GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner, InferShare,
-    InferStaticTiming, LowerGuards, MergeAssign, MergeStaticPar, Papercut,
-    ParToSeq, RegisterUnsharing, RemoveCombGroups, RemoveIds, ResetInsertion,
-    StaticParConv, SynthesisPapercut, TopDownCompileControl,
+    CompileEmpty, CompileInvoke, CompileRef, CompileStatic, CompileSync,
+    ComponentInliner, DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval,
+    Externalize, GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner,
+    InferShare, InferStaticTiming, LowerGuards, MergeAssign, MergeStaticPar,
+    Papercut, ParToSeq, RegisterUnsharing, RemoveCombGroups, RemoveIds,
+    ResetInsertion, StaticParConv, SynthesisPapercut, TopDownCompileControl,
     TopDownStaticTiming, UnrollBounded, WellFormed, WireInliner,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::Named;
@@ -194,7 +195,8 @@
         pm.register_pass::&lt;StaticParConv&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">// Compilation passes
-        </span>pm.register_pass::&lt;CompileInvoke&gt;()<span class="question-mark">?</span>;
+        </span>pm.register_pass::&lt;CompileStatic&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;CompileInvoke&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;RemoveCombGroups&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;TopDownStaticTiming&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;TopDownCompileControl&gt;()<span class="question-mark">?</span>;
@@ -248,7 +250,7 @@
         <span class="macro">register_alias!</span>(
             pm,
             <span class="string">&quot;compile&quot;</span>,
-            [TopDownStaticTiming, TopDownCompileControl]
+            [CompileStatic, TopDownStaticTiming, TopDownCompileControl]
         );
         <span class="macro">register_alias!</span>(
             pm,

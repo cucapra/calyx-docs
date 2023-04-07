@@ -622,13 +622,132 @@
 <span id="622">622</span>
 <span id="623">623</span>
 <span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Canonical, CellType,
     Component, Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
     LibrarySignatures, Port, PortDef, RESERVED_NAMES, RRC,
 };
-<span class="kw">use </span><span class="kw">crate</span>::guard::Nothing;
-<span class="kw">use </span><span class="kw">crate</span>::PortComp;
+<span class="kw">use crate</span>::{Nothing, PortComp, StaticTiming};
 <span class="kw">use </span>calyx_frontend::{ast, Workspace};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, GPosIdx, NameGenerator, WithPos};
 <span class="kw">use </span>std::cell::RefCell;
@@ -864,6 +983,10 @@
         .into_iter()
         .try_for_each(|g| add_group(g, <span class="kw-2">&amp;mut </span>builder))<span class="question-mark">?</span>;
 
+    comp.static_groups
+        .into_iter()
+        .try_for_each(|g| add_static_group(g, <span class="kw-2">&amp;mut </span>builder))<span class="question-mark">?</span>;
+
     <span class="kw">let </span>continuous_assignments =
         build_assignments(comp.continuous_assignments, <span class="kw-2">&amp;mut </span>builder)<span class="question-mark">?</span>;
     builder.component.continuous_assignments = continuous_assignments;
@@ -936,6 +1059,21 @@
     <span class="prelude-val">Ok</span>(())
 }
 
+<span class="doccomment">/// Build an [super::StaticGroup] from an [ast::StaticGroup] and attach it to the [Component]
+/// associated with the [Builder]
+</span><span class="kw">fn </span>add_static_group(
+    group: ast::StaticGroup,
+    builder: <span class="kw-2">&amp;mut </span>Builder,
+) -&gt; CalyxResult&lt;()&gt; {
+    <span class="kw">let </span>ir_group = builder.add_static_group(group.name, group.latency);
+    <span class="kw">let </span>assigns = build_static_assignments(group.wires, builder)<span class="question-mark">?</span>;
+
+    ir_group.borrow_mut().attributes = group.attributes;
+    ir_group.borrow_mut().assignments = assigns;
+
+    <span class="prelude-val">Ok</span>(())
+}
+
 <span class="comment">///////////////// Assignment Construction /////////////////////////
 
 </span><span class="doccomment">/// Get the pointer to the Port represented by `port`.
@@ -952,12 +1090,18 @@
                 Error::undefined(port, <span class="string">&quot;component port&quot;</span>.to_string())
             })
         }
-        ast::Port::Hole { group, name: port } =&gt; comp
-            .find_group(group)
-            .ok_or_else(|| Error::undefined(group, <span class="string">&quot;group&quot;</span>.to_string()))<span class="question-mark">?
-            </span>.borrow()
-            .find(port)
-            .ok_or_else(|| Error::undefined(port, <span class="string">&quot;hole&quot;</span>.to_string())),
+        ast::Port::Hole { group, name: port } =&gt; <span class="kw">match </span>comp.find_group(group) {
+            <span class="prelude-val">Some</span>(g) =&gt; g
+                .borrow()
+                .find(port)
+                .ok_or_else(|| Error::undefined(port, <span class="string">&quot;hole&quot;</span>.to_string())),
+            <span class="prelude-val">None </span>=&gt; comp
+                .find_static_group(group)
+                .ok_or_else(|| Error::undefined(group, <span class="string">&quot;group&quot;</span>.to_string()))<span class="question-mark">?
+                </span>.borrow()
+                .find(port)
+                .ok_or_else(|| Error::undefined(port, <span class="string">&quot;hole&quot;</span>.to_string())),
+        },
     }
 }
 
@@ -1032,6 +1176,38 @@
     <span class="prelude-val">Ok</span>(assign)
 }
 
+<span class="doccomment">/// Build an ir::StaticAssignment from ast::StaticWire.
+/// The Assignment contains pointers to the relevant ports.
+</span><span class="kw">fn </span>build_static_assignment(
+    wire: ast::StaticWire,
+    builder: <span class="kw-2">&amp;mut </span>Builder,
+) -&gt; CalyxResult&lt;Assignment&lt;StaticTiming&gt;&gt; {
+    <span class="kw">let </span>src_port: RRC&lt;Port&gt; = ensure_direction(
+        atom_to_port(wire.src.expr, builder)<span class="question-mark">?</span>,
+        Direction::Output,
+    )<span class="question-mark">?</span>;
+    <span class="kw">let </span>dst_port: RRC&lt;Port&gt; = ensure_direction(
+        get_port_ref(wire.dest, builder.component)<span class="question-mark">?</span>,
+        Direction::Input,
+    )<span class="question-mark">?</span>;
+    <span class="kw">if </span>src_port.borrow().width != dst_port.borrow().width {
+        <span class="kw">let </span>msg = <span class="macro">format!</span>(
+            <span class="string">&quot;Mismatched port widths. Source has size {} while destination requires {}.&quot;</span>,
+            src_port.borrow().width,
+            dst_port.borrow().width,
+        );
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(msg).with_pos(<span class="kw-2">&amp;</span>wire.attributes));
+    }
+    <span class="kw">let </span>guard = <span class="kw">match </span>wire.src.guard {
+        <span class="prelude-val">Some</span>(g) =&gt; build_static_guard(g, builder)<span class="question-mark">?</span>,
+        <span class="prelude-val">None </span>=&gt; Guard::True,
+    };
+
+    <span class="kw">let </span><span class="kw-2">mut </span>assign = builder.build_assignment(dst_port, src_port, guard);
+    assign.attributes = wire.attributes;
+    <span class="prelude-val">Ok</span>(assign)
+}
+
 <span class="kw">fn </span>build_assignments(
     assigns: Vec&lt;ast::Wire&gt;,
     builder: <span class="kw-2">&amp;mut </span>Builder,
@@ -1041,6 +1217,20 @@
         .map(|w| {
             <span class="kw">let </span>attrs = w.attributes.clone();
             build_assignment(w, builder).map_err(|err| err.with_pos(<span class="kw-2">&amp;</span>attrs))
+        })
+        .collect::&lt;CalyxResult&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;&gt;()
+}
+
+<span class="kw">fn </span>build_static_assignments(
+    assigns: Vec&lt;ast::StaticWire&gt;,
+    builder: <span class="kw-2">&amp;mut </span>Builder,
+) -&gt; CalyxResult&lt;Vec&lt;Assignment&lt;StaticTiming&gt;&gt;&gt; {
+    assigns
+        .into_iter()
+        .map(|w| {
+            <span class="kw">let </span>attrs = w.attributes.clone();
+            build_static_assignment(w, builder)
+                .map_err(|err| err.with_pos(<span class="kw-2">&amp;</span>attrs))
         })
         .collect::&lt;CalyxResult&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;&gt;()
 }
@@ -1064,7 +1254,47 @@
         GE::Or(l, r) =&gt; Guard::or(build_guard(<span class="kw-2">*</span>l, bd)<span class="question-mark">?</span>, build_guard(<span class="kw-2">*</span>r, bd)<span class="question-mark">?</span>),
         GE::And(l, r) =&gt; Guard::and(build_guard(<span class="kw-2">*</span>l, bd)<span class="question-mark">?</span>, build_guard(<span class="kw-2">*</span>r, bd)<span class="question-mark">?</span>),
         GE::Not(g) =&gt; Guard::Not(into_box_guard(g, bd)<span class="question-mark">?</span>),
-        GE::CompOp(op, l, r) =&gt; {
+        GE::CompOp((op, l, r)) =&gt; {
+            <span class="kw">let </span>nl = ensure_direction(atom_to_port(l, bd)<span class="question-mark">?</span>, Direction::Output)<span class="question-mark">?</span>;
+            <span class="kw">let </span>nr = ensure_direction(atom_to_port(r, bd)<span class="question-mark">?</span>, Direction::Output)<span class="question-mark">?</span>;
+            <span class="kw">let </span>nop = <span class="kw">match </span>op {
+                ast::GuardComp::Eq =&gt; PortComp::Eq,
+                ast::GuardComp::Neq =&gt; PortComp::Neq,
+                ast::GuardComp::Gt =&gt; PortComp::Gt,
+                ast::GuardComp::Lt =&gt; PortComp::Lt,
+                ast::GuardComp::Geq =&gt; PortComp::Geq,
+                ast::GuardComp::Leq =&gt; PortComp::Leq,
+            };
+            Guard::CompOp(nop, nl, nr)
+        }
+    })
+}
+
+<span class="doccomment">/// Transform an ast::GuardExpr to an ir::Guard.
+</span><span class="kw">fn </span>build_static_guard(
+    guard: ast::StaticGuardExpr,
+    bd: <span class="kw-2">&amp;mut </span>Builder,
+) -&gt; CalyxResult&lt;Guard&lt;StaticTiming&gt;&gt; {
+    <span class="kw">use </span>ast::StaticGuardExpr <span class="kw">as </span>SGE;
+
+    <span class="kw">let </span>into_box_guard = |g: Box&lt;SGE&gt;, bd: <span class="kw-2">&amp;mut </span>Builder| -&gt; CalyxResult&lt;<span class="kw">_</span>&gt; {
+        <span class="prelude-val">Ok</span>(Box::new(build_static_guard(<span class="kw-2">*</span>g, bd)<span class="question-mark">?</span>))
+    };
+
+    <span class="prelude-val">Ok</span>(<span class="kw">match </span>guard {
+        SGE::StaticInfo(interval) =&gt; Guard::Info(StaticTiming::new(interval)),
+        SGE::Atom(atom) =&gt; Guard::port(ensure_direction(
+            atom_to_port(atom, bd)<span class="question-mark">?</span>,
+            Direction::Output,
+        )<span class="question-mark">?</span>),
+        SGE::Or(l, r) =&gt; {
+            Guard::or(build_static_guard(<span class="kw-2">*</span>l, bd)<span class="question-mark">?</span>, build_static_guard(<span class="kw-2">*</span>r, bd)<span class="question-mark">?</span>)
+        }
+        SGE::And(l, r) =&gt; {
+            Guard::and(build_static_guard(<span class="kw-2">*</span>l, bd)<span class="question-mark">?</span>, build_static_guard(<span class="kw-2">*</span>r, bd)<span class="question-mark">?</span>)
+        }
+        SGE::Not(g) =&gt; Guard::Not(into_box_guard(g, bd)<span class="question-mark">?</span>),
+        SGE::CompOp((op, l, r)) =&gt; {
             <span class="kw">let </span>nl = ensure_direction(atom_to_port(l, bd)<span class="question-mark">?</span>, Direction::Output)<span class="question-mark">?</span>;
             <span class="kw">let </span>nr = ensure_direction(atom_to_port(r, bd)<span class="question-mark">?</span>, Direction::Output)<span class="question-mark">?</span>;
             <span class="kw">let </span>nop = <span class="kw">match </span>op {
@@ -1091,16 +1321,26 @@
         ast::Control::Enable {
             comp: component,
             attributes,
-        } =&gt; {
-            <span class="kw">let </span><span class="kw-2">mut </span>en = Control::enable(Rc::clone(
-                <span class="kw-2">&amp;</span>builder.component.find_group(component).ok_or_else(|| {
-                    Error::undefined(component, <span class="string">&quot;group&quot;</span>.to_string())
-                        .with_pos(<span class="kw-2">&amp;</span>attributes)
-                })<span class="question-mark">?</span>,
-            ));
-            <span class="kw-2">*</span>en.get_mut_attributes() = attributes;
-            en
-        }
+        } =&gt; <span class="kw">match </span>builder.component.find_group(component) {
+            <span class="prelude-val">Some</span>(g) =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>en = Control::enable(Rc::clone(<span class="kw-2">&amp;</span>g));
+                <span class="kw-2">*</span>en.get_mut_attributes() = attributes;
+                en
+            }
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>en = Control::static_enable(Rc::clone(
+                    <span class="kw-2">&amp;</span>builder
+                        .component
+                        .find_static_group(component)
+                        .ok_or_else(|| {
+                            Error::undefined(component, <span class="string">&quot;group&quot;</span>.to_string())
+                                .with_pos(<span class="kw-2">&amp;</span>attributes)
+                        })<span class="question-mark">?</span>,
+                ));
+                <span class="kw-2">*</span>en.get_mut_attributes() = attributes;
+                en
+            }
+        },
         ast::Control::Invoke {
             comp: component,
             inputs,

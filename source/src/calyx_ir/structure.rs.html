@@ -678,14 +678,10 @@
 <span id="678">678</span>
 <span id="679">679</span>
 <span id="680">680</span>
-<span id="681">681</span>
-<span id="682">682</span>
-<span id="683">683</span>
-<span id="684">684</span>
-<span id="685">685</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::guard::{Nothing, StaticTiming};
+</span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
+<span class="kw">use </span><span class="kw">crate</span>::Nothing;
 
 <span class="kw">use super</span>::{
     Attributes, Direction, GetAttributes, Guard, Id, PortDef, RRC, WRC,
@@ -733,6 +729,7 @@
     <span class="doccomment">/// Checks if this port is a hole
     </span><span class="kw">pub fn </span>is_hole(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.parent, PortParent::Group(<span class="kw">_</span>))
+            || <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.parent, PortParent::StaticGroup(<span class="kw">_</span>))
     }
 
     <span class="doccomment">/// Returns the parent of the [Port] which must be [Cell]. Throws an error
@@ -1141,6 +1138,17 @@
     }
 }
 
+<span class="kw">impl</span>&lt;StaticTiming&gt; Assignment&lt;StaticTiming&gt; {
+    <span class="doccomment">/// Apply function `f` to each port contained within the assignment and
+    /// replace the port with the generated value if not None.
+    </span><span class="kw">pub fn </span>for_each_interval&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F)
+    <span class="kw">where
+        </span>F: FnMut(<span class="kw-2">&amp;mut </span>StaticTiming) -&gt; <span class="prelude-ty">Option</span>&lt;Guard&lt;StaticTiming&gt;&gt;,
+    {
+        <span class="self">self</span>.guard.for_each_interval(<span class="kw-2">&amp;mut </span>|interval| f(interval))
+    }
+}
+
 <span class="doccomment">/// A Group of assignments that perform a logical action.
 </span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Group {
@@ -1242,17 +1250,25 @@
 
     <span class="doccomment">/// Attributes for this group.
     </span><span class="kw">pub </span>attributes: Attributes,
+
+    <span class="doccomment">/// Latency of static group
+    </span><span class="kw">pub </span>latency: u64,
 }
 
 <span class="doccomment">///implement the StaticGroup struct
 </span><span class="kw">impl </span>StaticGroup {
-    <span class="kw">pub fn </span>new(name: Id) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(name: Id, latency: u64) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             name,
             assignments: <span class="macro">vec!</span>[],
             holes: <span class="macro">smallvec!</span>[],
             attributes: Attributes::default(),
+            latency,
         }
+    }
+
+    <span class="kw">pub fn </span>get_latency(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+        <span class="self">self</span>.latency
     }
 
     <span class="doccomment">/// Get a reference to the named hole if it exists.
@@ -1276,32 +1292,6 @@
         <span class="self">self</span>.find(name.clone()).unwrap_or_else(|| {
             <span class="macro">panic!</span>(<span class="string">&quot;Hole `{name}&#39; not found on group `{}&#39;&quot;</span>, <span class="self">self</span>.name)
         })
-    }
-
-    <span class="doccomment">/// Returns the index to the done assignment in the group.
-    </span><span class="kw">fn </span>find_done_cond(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.assignments
-            .iter()
-            .position(|assign| {
-                <span class="kw">let </span>dst = assign.dst.borrow();
-                dst.is_hole() &amp;&amp; dst.name == <span class="string">&quot;done&quot;
-            </span>})
-            .unwrap_or_else(|| {
-                <span class="macro">panic!</span>(<span class="string">&quot;Group `{}&#39; has no done condition&quot;</span>, <span class="self">self</span>.name)
-            })
-    }
-
-    <span class="doccomment">/// Returns a reference to the assignment in the group that writes to the done condition.
-    </span><span class="kw">pub fn </span>done_cond(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Assignment&lt;StaticTiming&gt; {
-        <span class="kw">let </span>idx = <span class="self">self</span>.find_done_cond();
-        <span class="kw-2">&amp;</span><span class="self">self</span>.assignments[idx]
-    }
-
-    <span class="doccomment">/// Returns a mutable reference to the assignment in the group that writes to the done
-    /// condition.
-    </span><span class="kw">pub fn </span>done_cond_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Assignment&lt;StaticTiming&gt; {
-        <span class="kw">let </span>idx = <span class="self">self</span>.find_done_cond();
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>.assignments[idx]
     }
 
     <span class="doccomment">/// The name of this group.
