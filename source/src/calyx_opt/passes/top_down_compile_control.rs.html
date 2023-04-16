@@ -1088,8 +1088,8 @@
             }));
         },
         ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`invoke` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileInvoke::name()),
-        ir::Control::StaticEnable(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`static enable` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::TopDownStaticTiming::name()),
         ir::Control::Par(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
+        ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot; static control should have been compiled away. Run the static compilation passes before this pass&quot;</span>)
     }
 }
 
@@ -1217,7 +1217,7 @@
         }
         ir::Control::Empty(<span class="kw">_</span>) =&gt; cur_state,
         ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`invoke` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileInvoke::name()),
-        ir::Control::StaticEnable(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`static enable` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::TopDownStaticTiming::name()),
+        ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;static control should have been compiled away. Run the static compilation passes before this pass&quot;</span>)
     }
 }
 
@@ -1468,7 +1468,7 @@
         ir::Control::Par(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
         ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`invoke` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileInvoke::name()),
         ir::Control::Empty(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`empty` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileEmpty::name()),
-        ir::Control::StaticEnable(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`static enable` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::TopDownStaticTiming::name()),
+        ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;static control should have been compiled away. Run the static compilation passes before this pass&quot;</span>)
     }
     }
 

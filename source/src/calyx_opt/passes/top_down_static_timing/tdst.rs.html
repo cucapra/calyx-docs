@@ -922,65 +922,6 @@
 <span id="922">922</span>
 <span id="923">923</span>
 <span id="924">924</span>
-<span id="925">925</span>
-<span id="926">926</span>
-<span id="927">927</span>
-<span id="928">928</span>
-<span id="929">929</span>
-<span id="930">930</span>
-<span id="931">931</span>
-<span id="932">932</span>
-<span id="933">933</span>
-<span id="934">934</span>
-<span id="935">935</span>
-<span id="936">936</span>
-<span id="937">937</span>
-<span id="938">938</span>
-<span id="939">939</span>
-<span id="940">940</span>
-<span id="941">941</span>
-<span id="942">942</span>
-<span id="943">943</span>
-<span id="944">944</span>
-<span id="945">945</span>
-<span id="946">946</span>
-<span id="947">947</span>
-<span id="948">948</span>
-<span id="949">949</span>
-<span id="950">950</span>
-<span id="951">951</span>
-<span id="952">952</span>
-<span id="953">953</span>
-<span id="954">954</span>
-<span id="955">955</span>
-<span id="956">956</span>
-<span id="957">957</span>
-<span id="958">958</span>
-<span id="959">959</span>
-<span id="960">960</span>
-<span id="961">961</span>
-<span id="962">962</span>
-<span id="963">963</span>
-<span id="964">964</span>
-<span id="965">965</span>
-<span id="966">966</span>
-<span id="967">967</span>
-<span id="968">968</span>
-<span id="969">969</span>
-<span id="970">970</span>
-<span id="971">971</span>
-<span id="972">972</span>
-<span id="973">973</span>
-<span id="974">974</span>
-<span id="975">975</span>
-<span id="976">976</span>
-<span id="977">977</span>
-<span id="978">978</span>
-<span id="979">979</span>
-<span id="980">980</span>
-<span id="981">981</span>
-<span id="982">982</span>
-<span id="983">983</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::compute_states::{END, START};
 <span class="kw">use </span><span class="kw">crate</span>::analysis::WithStatic;
 <span class="kw">use </span><span class="kw">crate</span>::passes::top_down_static_timing::{ComputeStates, Normalize};
@@ -1332,9 +1273,6 @@
             ir::Control::Enable(e) =&gt; {
                 <span class="self">self</span>.enable_calculate_states(e, preds)
             }
-            ir::Control::StaticEnable(e) =&gt; {
-                <span class="self">self</span>.static_enable_calculate_states(e, preds)
-            }
             ir::Control::Seq(s) =&gt; {
                 <span class="self">self</span>.seq_calculate_states(s, preds)
             }
@@ -1346,6 +1284,11 @@
             }
             ir::Control::Par(par) =&gt; {
                 <span class="self">self</span>.par_calculate_states(par, preds)
+            }
+            ir::Control::Static(<span class="kw">_</span>) =&gt; {
+                <span class="macro">unimplemented!</span>(
+                <span class="string">&quot;TDST doesn&#39;t support `static` statements (Eventually we want to rewrite static compilation as to render TDST obselete)&quot;
+                </span>)
             }
             ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
                 <span class="string">&quot;`invoke` statements should have been compiled away. Run `{}` before this pass.&quot;</span>,
@@ -1363,67 +1306,6 @@
     </span><span class="kw">fn </span>enable_calculate_states(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         con: <span class="kw-2">&amp;</span>ir::Enable,
-        preds: Vec&lt;PredEdge&gt;,
-    ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
-        <span class="kw">let </span>time_option = con.attributes.get(<span class="string">&quot;static&quot;</span>);
-        <span class="kw">let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>time) = time_option <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::pass_assumption(
-        TopDownStaticTiming::name(),
-            <span class="string">&quot;enable is missing @static annotation. This happens when the enclosing control program has a @static annotation but the enable is missing one.&quot;</span>.to_string(),
-            ).with_pos(<span class="kw-2">&amp;</span>con.attributes));
-        };
-
-        <span class="kw">let </span>cur_st = con.attributes[ID];
-
-        <span class="comment">// Enable the group during the transition. Note that this is similar to
-        // what tdcc does the early transitions flag. However, unlike tdcc, we
-        // know that transitions do not use groups&#39; done signals.
-        </span>preds.clone().into_iter().for_each(|(st, g)| {
-            <span class="kw">let </span>group = <span class="kw-2">&amp;</span>con.group;
-            <span class="macro">structure!</span>(<span class="self">self</span>.builder;
-                <span class="kw">let </span>signal_on = constant(<span class="number">1</span>, <span class="number">1</span>);
-            );
-            <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
-                group[<span class="string">&quot;go&quot;</span>] = g <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
-            );
-            <span class="comment">// We only enable this in the state when the transition starts
-            </span><span class="self">self</span>.add_enables(st, st + <span class="number">1</span>, assigns);
-        });
-
-        <span class="comment">// Transition from all predecessors to the start state
-        </span><span class="self">self</span>.add_transitions(preds.into_iter().map(|(st, g)| (st, cur_st, g)));
-
-        <span class="comment">// Activate the group during the latency. Subtract one because the group
-        // is also active during the transition when not in the start state.
-        </span><span class="kw">let </span>last_st = cur_st + time - <span class="number">1</span>;
-        <span class="comment">// Add additional transitions if the group&#39;s latency is not 1
-        </span><span class="kw">if </span>time != <span class="number">1 </span>{
-            <span class="kw">let </span>group = <span class="kw-2">&amp;</span>con.group;
-            <span class="macro">structure!</span>(<span class="self">self</span>.builder;
-                <span class="kw">let </span>signal_on = constant(<span class="number">1</span>, <span class="number">1</span>);
-            );
-            <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
-                group[<span class="string">&quot;go&quot;</span>] = <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
-            );
-            <span class="self">self</span>.add_enables(cur_st, last_st, assigns);
-
-            <span class="comment">// Add any necessary internal transitions. In the case time is 1 and there
-            // is a single transition, it is taken care of by the parent.
-            </span><span class="self">self</span>.add_transitions(
-                (cur_st..last_st).map(|s| (s, s + <span class="number">1</span>, ir::Guard::True)),
-            );
-        }
-
-        <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(last_st, ir::Guard::True)])
-    }
-
-    <span class="doccomment">/// Generate transitions from all predecessors to the enable and keep it
-    /// active for its specified static time.
-    /// The start state of the enable is computed by taking the max of all
-    /// predecessors states.
-    </span><span class="kw">fn </span>static_enable_calculate_states(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        con: <span class="kw-2">&amp;</span>ir::StaticEnable,
         preds: Vec&lt;PredEdge&gt;,
     ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
         <span class="kw">let </span>time_option = con.attributes.get(<span class="string">&quot;static&quot;</span>);
@@ -1862,7 +1744,7 @@
                 }
                 ir::Control::Enable(<span class="kw">_</span>)
                 | ir::Control::Invoke(<span class="kw">_</span>)
-                | ir::Control::StaticEnable(<span class="kw">_</span>)
+                | ir::Control::Static(<span class="kw">_</span>)
                 | ir::Control::Empty(<span class="kw">_</span>) =&gt; {}
             }
         }

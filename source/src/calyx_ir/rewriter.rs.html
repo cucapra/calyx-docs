@@ -201,7 +201,62 @@
 <span id="201">201</span>
 <span id="202">202</span>
 <span id="203">203</span>
-</pre><pre class="rust"><code><span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::control::StaticInvoke;
+<span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
 
@@ -318,6 +373,62 @@
             });
     }
 
+    <span class="doccomment">/// Rewrite a `static invoke` node using a [RewriteMap&lt;ir::Cell&gt;] and a [RewriteMap&lt;ir::CombGroup&gt;]
+    </span><span class="kw">pub fn </span>rewrite_static_invoke(<span class="kw-2">&amp;</span><span class="self">self</span>, inv: <span class="kw-2">&amp;mut </span>StaticInvoke) {
+        <span class="comment">// Rewrite the name of the cell
+        </span><span class="kw">let </span>name = inv.comp.borrow().name();
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(new_cell) = <span class="kw-2">&amp;</span><span class="self">self</span>.get_cell_rewrite(<span class="kw-2">&amp;</span>name) {
+            inv.comp = Rc::clone(new_cell);
+        }
+
+        <span class="comment">// Rewrite the parameters
+        </span>inv.inputs
+            .iter_mut()
+            .chain(inv.outputs.iter_mut())
+            .for_each(|(<span class="kw">_</span>, port)| {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(new_port) = <span class="self">self</span>.get(<span class="kw-2">&amp;*</span>port) {
+                    <span class="kw-2">*</span>port = new_port;
+                }
+            });
+    }
+
+    <span class="doccomment">/// Given a control program, rewrite all uses of cells, groups, and comb groups using the given
+    /// rewrite maps.
+    </span><span class="kw">pub fn </span>rewrite_static_control(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        sc: <span class="kw-2">&amp;mut </span>ir::StaticControl,
+        static_group_map: <span class="kw-2">&amp;</span>RewriteMap&lt;ir::StaticGroup&gt;,
+    ) {
+        <span class="kw">match </span>sc {
+            ir::StaticControl::Empty(<span class="kw">_</span>) =&gt; (),
+            ir::StaticControl::Enable(sen) =&gt; {
+                <span class="kw">let </span>g = <span class="kw-2">&amp;</span>sen.group.borrow().name();
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(new_group) = static_group_map.get(g) {
+                    sen.group = Rc::clone(new_group);
+                }
+            }
+            ir::StaticControl::Repeat(rep) =&gt; {
+                <span class="self">self</span>.rewrite_static_control(<span class="kw-2">&amp;mut </span>rep.body, static_group_map)
+            }
+            ir::StaticControl::Seq(ir::StaticSeq { stmts, .. })
+            | ir::StaticControl::Par(ir::StaticPar { stmts, .. }) =&gt; stmts
+                .iter_mut()
+                .for_each(|c| <span class="self">self</span>.rewrite_static_control(c, static_group_map)),
+            ir::StaticControl::If(sif) =&gt; {
+                <span class="comment">// Rewrite port use
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(new_port) = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>sif.port) {
+                    sif.port = new_port;
+                }
+                <span class="comment">// rewrite branches
+                </span><span class="self">self</span>.rewrite_static_control(<span class="kw-2">&amp;mut </span>sif.tbranch, static_group_map);
+                <span class="self">self</span>.rewrite_static_control(<span class="kw-2">&amp;mut </span>sif.fbranch, static_group_map);
+            }
+            ir::StaticControl::Invoke(sin) =&gt; {
+                <span class="self">self</span>.rewrite_static_invoke(sin);
+            }
+        }
+    }
+
     <span class="doccomment">/// Given a control program, rewrite all uses of cells, groups, and comb groups using the given
     /// rewrite maps.
     </span><span class="kw">pub fn </span>rewrite_control(
@@ -332,12 +443,6 @@
             ir::Control::Enable(en) =&gt; {
                 <span class="kw">let </span>g = <span class="kw-2">&amp;</span>en.group.borrow().name();
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(new_group) = group_map.get(g) {
-                    en.group = Rc::clone(new_group);
-                }
-            }
-            ir::Control::StaticEnable(en) =&gt; {
-                <span class="kw">let </span>g = <span class="kw-2">&amp;</span>en.group.borrow().name();
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(new_group) = static_group_map.get(g) {
                     en.group = Rc::clone(new_group);
                 }
             }
@@ -400,6 +505,9 @@
             }
             ir::Control::Invoke(inv) =&gt; {
                 <span class="self">self</span>.rewrite_invoke(inv, comb_group_map)
+            }
+            ir::Control::Static(s) =&gt; {
+                <span class="self">self</span>.rewrite_static_control(s, static_group_map)
             }
         }
     }

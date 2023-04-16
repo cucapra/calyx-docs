@@ -155,6 +155,53 @@
 <span id="155">155</span>
 <span id="156">156</span>
 <span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::{
@@ -207,11 +254,79 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="kw">const </span>INVOKE_MAP: bool&gt; ControlPorts&lt;INVOKE_MAP&gt; {
+    <span class="comment">// handles the invoke pattern match in construct_static: meant to handle
+    // inputs, outputs =  inputs,outputs of the invoke that we&#39;re analzing
+    // comp = comp of invoke
+    // comb group = comb group of invoke, if it exists
+    // either dynamic or static invokes
+    // updates self.cg_to_port to account for comb_group of the invoke
+    // updates self.invoke_map to account for the invoke
+    </span><span class="kw">fn </span>handle_invoke(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        inputs: <span class="kw-2">&amp;</span>[(ir::Id, ir::RRC&lt;ir::Port&gt;)],
+        outputs: <span class="kw-2">&amp;</span>[(ir::Id, ir::RRC&lt;ir::Port&gt;)],
+        comp: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::Cell&gt;,
+        comb_group: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;ir::RRC&lt;ir::CombGroup&gt;&gt;,
+    ) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = comb_group {
+            <span class="kw">let </span>cells =
+                <span class="kw">super</span>::ReadWriteSet::uses(c.borrow().assignments.iter())
+                    .map(|cell| cell.borrow().name())
+                    .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();
+            <span class="comment">// Only add ports that come from cells used in this comb group.
+            </span><span class="kw">let </span>ports =
+                inputs
+                    .iter()
+                    .map(|(<span class="kw">_</span>, port)| Rc::clone(port))
+                    .filter(|port| {
+                        cells.contains(<span class="kw-2">&amp;</span>port.borrow().get_parent_name())
+                    });
+            <span class="self">self</span>.cg_to_port
+                .entry(c.borrow().name())
+                .or_default()
+                .extend(ports);
+        }
+        <span class="kw">if </span>INVOKE_MAP {
+            <span class="kw">let </span>name = comp.borrow().name();
+            <span class="kw">let </span>bindings =
+                inputs.iter().chain(outputs.iter()).cloned().collect_vec();
+            <span class="self">self</span>.invoke_map.entry(name).or_default().push(bindings);
+        }
+    }
+
+    <span class="comment">// currently does nothing since there are no invokes nor comb groups in
+    // static control. However, we might want to add them, so we are keeping this
+    </span><span class="doccomment">/// (currenlty pointless) function here
+    </span><span class="kw">fn </span>construct_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, scon: <span class="kw-2">&amp;</span>ir::StaticControl) {
+        <span class="kw">match </span>scon {
+            ir::StaticControl::Empty(<span class="kw">_</span>) | ir::StaticControl::Enable(<span class="kw">_</span>) =&gt; (),
+            ir::StaticControl::Repeat(ir::StaticRepeat { body, .. }) =&gt; {
+                <span class="self">self</span>.construct_static(body)
+            }
+            ir::StaticControl::Seq(ir::StaticSeq { stmts, .. })
+            | ir::StaticControl::Par(ir::StaticPar { stmts, .. }) =&gt; {
+                stmts.iter().for_each(|stmt| <span class="self">self</span>.construct_static(stmt));
+            }
+            ir::StaticControl::If(ir::StaticIf {
+                tbranch, fbranch, ..
+            }) =&gt; {
+                <span class="self">self</span>.construct_static(tbranch);
+                <span class="self">self</span>.construct_static(fbranch);
+            }
+            ir::StaticControl::Invoke(ir::StaticInvoke {
+                comp,
+                inputs,
+                outputs,
+                ..
+            }) =&gt; {
+                <span class="self">self</span>.handle_invoke(inputs, outputs, comp, <span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
+            }
+        }
+    }
+
     <span class="kw">fn </span>construct(<span class="kw-2">&amp;mut </span><span class="self">self</span>, con: <span class="kw-2">&amp;</span>ir::Control) {
         <span class="kw">match </span>con {
-            ir::Control::Enable(<span class="kw">_</span>)
-            | ir::Control::Empty(<span class="kw">_</span>)
-            | ir::Control::StaticEnable(<span class="kw">_</span>) =&gt; {}
+            ir::Control::Enable(<span class="kw">_</span>) | ir::Control::Empty(<span class="kw">_</span>) =&gt; {}
             ir::Control::Invoke(ir::Invoke {
                 comp,
                 comb_group,
@@ -219,33 +334,7 @@
                 outputs,
                 ..
             }) =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = comb_group {
-                    <span class="kw">let </span>cells = <span class="kw">super</span>::ReadWriteSet::uses(
-                        c.borrow().assignments.iter(),
-                    )
-                    .map(|cell| cell.borrow().name())
-                    .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();
-                    <span class="comment">// Only add ports that come from cells used in this comb group.
-                    </span><span class="kw">let </span>ports = inputs
-                        .iter()
-                        .map(|(<span class="kw">_</span>, port)| Rc::clone(port))
-                        .filter(|port| {
-                            cells.contains(<span class="kw-2">&amp;</span>port.borrow().get_parent_name())
-                        });
-                    <span class="self">self</span>.cg_to_port
-                        .entry(c.borrow().name())
-                        .or_default()
-                        .extend(ports);
-                }
-                <span class="kw">if </span>INVOKE_MAP {
-                    <span class="kw">let </span>name = comp.borrow().name();
-                    <span class="kw">let </span>bindings = inputs
-                        .iter()
-                        .chain(outputs.iter())
-                        .cloned()
-                        .collect_vec();
-                    <span class="self">self</span>.invoke_map.entry(name).or_default().push(bindings);
-                }
+                <span class="self">self</span>.handle_invoke(inputs, outputs, comp, comb_group);
             }
             ir::Control::If(ir::If {
                 cond,
@@ -278,6 +367,11 @@
             ir::Control::Seq(ir::Seq { stmts, .. })
             | ir::Control::Par(ir::Par { stmts, .. }) =&gt; {
                 stmts.iter().for_each(|con| <span class="self">self</span>.construct(con));
+            }
+            ir::Control::Static(sc) =&gt;
+            <span class="comment">// don&#39;t need self, because no comb groups in static controls
+            </span>{
+                <span class="self">self</span>.construct_static(sc)
             }
         }
     }

@@ -218,6 +218,55 @@
 <span id="218">218</span>
 <span id="219">219</span>
 <span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::{iter, rc::Rc};
@@ -341,6 +390,60 @@
 
 <span class="kw">impl </span>ReadWriteSet {
     <span class="doccomment">/// Returns the ports that are read by the given control program.
+    </span><span class="kw">pub fn </span>control_port_read_write_set_static(
+        scon: <span class="kw-2">&amp;</span>ir::StaticControl,
+    ) -&gt; (Vec&lt;RRC&lt;ir::Port&gt;&gt;, Vec&lt;RRC&lt;ir::Port&gt;&gt;) {
+        <span class="kw">match </span>scon {
+            ir::StaticControl::Empty(<span class="kw">_</span>) =&gt; (<span class="macro">vec!</span>[], <span class="macro">vec!</span>[]),
+            ir::StaticControl::Enable(ir::StaticEnable { group, .. }) =&gt; (
+                <span class="self">Self</span>::port_read_set(group.borrow().assignments.iter())
+                    .collect(),
+                <span class="self">Self</span>::port_write_set(group.borrow().assignments.iter())
+                    .collect(),
+            ),
+            ir::StaticControl::Repeat(ir::StaticRepeat { body, .. }) =&gt; {
+                <span class="self">Self</span>::control_port_read_write_set_static(body)
+            }
+            ir::StaticControl::Seq(ir::StaticSeq { stmts, .. })
+            | ir::StaticControl::Par(ir::StaticPar { stmts, .. }) =&gt; {
+                <span class="kw">let </span>(<span class="kw-2">mut </span>reads, <span class="kw-2">mut </span>writes) = (<span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
+                <span class="kw">for </span>stmt <span class="kw">in </span>stmts {
+                    <span class="kw">let </span>(<span class="kw-2">mut </span>read, <span class="kw-2">mut </span>write) =
+                        <span class="self">Self</span>::control_port_read_write_set_static(stmt);
+                    reads.append(<span class="kw-2">&amp;mut </span>read);
+                    writes.append(<span class="kw-2">&amp;mut </span>write);
+                }
+                (reads, writes)
+            }
+            ir::StaticControl::If(ir::StaticIf {
+                port,
+                tbranch,
+                fbranch,
+                ..
+            }) =&gt; {
+                <span class="kw">let </span>(<span class="kw-2">mut </span>treads, <span class="kw-2">mut </span>twrites) =
+                    <span class="self">Self</span>::control_port_read_write_set_static(tbranch);
+                <span class="kw">let </span>(<span class="kw-2">mut </span>freads, <span class="kw-2">mut </span>fwrites) =
+                    <span class="self">Self</span>::control_port_read_write_set_static(fbranch);
+                treads.append(<span class="kw-2">&amp;mut </span>freads);
+                treads.push(Rc::clone(port));
+                twrites.append(<span class="kw-2">&amp;mut </span>fwrites);
+
+                (treads, twrites)
+            }
+            ir::StaticControl::Invoke(ir::StaticInvoke {
+                inputs,
+                outputs,
+                ..
+            }) =&gt; {
+                <span class="kw">let </span>inps = inputs.iter().map(|(<span class="kw">_</span>, p)| p).cloned();
+                <span class="kw">let </span>outs = outputs.iter().map(|(<span class="kw">_</span>, p)| p).cloned();
+                (inps.collect(), outs.collect())
+            }
+        }
+    }
+
+    <span class="doccomment">/// Returns the ports that are read by the given control program.
     </span><span class="kw">pub fn </span>control_port_read_write_set(
         con: <span class="kw-2">&amp;</span>ir::Control,
     ) -&gt; (Vec&lt;RRC&lt;ir::Port&gt;&gt;, Vec&lt;RRC&lt;ir::Port&gt;&gt;) {
@@ -352,18 +455,14 @@
                 <span class="self">Self</span>::port_write_set(group.borrow().assignments.iter())
                     .collect(),
             ),
-            ir::Control::StaticEnable(ir::StaticEnable { group, .. }) =&gt; (
-                <span class="comment">// Will have to change when we implement static assignments
-                </span><span class="self">Self</span>::port_read_set(group.borrow().assignments.iter())
-                    .collect(),
-                <span class="self">Self</span>::port_write_set(group.borrow().assignments.iter())
-                    .collect(),
-            ),
             ir::Control::Invoke(ir::Invoke {
-                inputs, comb_group, ..
+                inputs,
+                outputs,
+                comb_group,
+                ..
             }) =&gt; {
                 <span class="kw">let </span>inps = inputs.iter().map(|(<span class="kw">_</span>, p)| p).cloned();
-                <span class="kw">let </span>outs = inputs.iter().map(|(<span class="kw">_</span>, p)| p).cloned();
+                <span class="kw">let </span>outs = outputs.iter().map(|(<span class="kw">_</span>, p)| p).cloned();
                 <span class="kw">match </span>comb_group {
                     <span class="prelude-val">Some</span>(cgr) =&gt; {
                         <span class="kw">let </span>cg = cgr.borrow();
@@ -378,7 +477,6 @@
                     <span class="prelude-val">None </span>=&gt; (inps.collect(), outs.collect()),
                 }
             }
-
             ir::Control::Seq(ir::Seq { stmts, .. })
             | ir::Control::Par(ir::Par { stmts, .. }) =&gt; {
                 <span class="kw">let </span>(<span class="kw-2">mut </span>reads, <span class="kw-2">mut </span>writes) = (<span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
@@ -397,26 +495,23 @@
                 fbranch,
                 ..
             }) =&gt; {
-                <span class="kw">let </span>(<span class="kw-2">mut </span>reads, <span class="kw-2">mut </span>writes) = (<span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
                 <span class="kw">let </span>(<span class="kw-2">mut </span>treads, <span class="kw-2">mut </span>twrites) =
                     <span class="self">Self</span>::control_port_read_write_set(tbranch);
                 <span class="kw">let </span>(<span class="kw-2">mut </span>freads, <span class="kw-2">mut </span>fwrites) =
                     <span class="self">Self</span>::control_port_read_write_set(fbranch);
-                reads.append(<span class="kw-2">&amp;mut </span>treads);
-                reads.append(<span class="kw-2">&amp;mut </span>freads);
-                reads.push(Rc::clone(port));
-                writes.append(<span class="kw-2">&amp;mut </span>twrites);
-                writes.append(<span class="kw-2">&amp;mut </span>fwrites);
+                treads.append(<span class="kw-2">&amp;mut </span>freads);
+                treads.push(Rc::clone(port));
+                twrites.append(<span class="kw-2">&amp;mut </span>fwrites);
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(cg) = cond {
-                    reads.extend(<span class="self">Self</span>::port_read_set(
+                    treads.extend(<span class="self">Self</span>::port_read_set(
                         cg.borrow().assignments.iter(),
                     ));
-                    writes.extend(<span class="self">Self</span>::port_write_set(
+                    twrites.extend(<span class="self">Self</span>::port_write_set(
                         cg.borrow().assignments.iter(),
                     ));
                 }
-                (reads, writes)
+                (treads, twrites)
             }
             ir::Control::While(ir::While {
                 port, cond, body, ..
@@ -434,6 +529,9 @@
                     ));
                 }
                 (reads, writes)
+            }
+            ir::Control::Static(sc) =&gt; {
+                <span class="self">Self</span>::control_port_read_write_set_static(sc)
             }
         }
     }

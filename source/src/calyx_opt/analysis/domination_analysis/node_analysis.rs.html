@@ -245,6 +245,101 @@
 <span id="245">245</span>
 <span id="246">246</span>
 <span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{DominatorMap, ReadWriteSet, ShareSet};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>std::collections::HashSet;
@@ -265,6 +360,29 @@
 </span><span class="kw">fn </span>not_end_id(c: <span class="kw-2">&amp;</span>ir::Control, id: u64) -&gt; bool {
     <span class="kw">match </span>c {
         ir::Control::If(if_control) =&gt; {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>begin) = if_control.attributes.get(BEGIN_ID) {
+                <span class="kw">if </span>begin == id {
+                    <span class="kw">return </span><span class="bool-val">true</span>;
+                }
+            }
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>end) = if_control.attributes.get(END_ID) {
+                <span class="kw">if </span>end == id {
+                    <span class="kw">return </span><span class="bool-val">false</span>;
+                }
+            }
+            <span class="macro">unreachable!</span>(<span class="string">&quot;id should match either beginning or ending id&quot;</span>)
+        }
+        <span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,
+    }
+}
+
+<span class="comment">// Inputs are a control statement c and a u64 id. If control is an if statment, then
+// the id should refer to either the begin or end id of stmt c. Returns true if id refers
+// to the begin id and false if it refers to the end id. If it is not an if statement
+// return true.
+</span><span class="kw">fn </span>not_end_id_static(c: <span class="kw-2">&amp;</span>ir::StaticControl, id: u64) -&gt; bool {
+    <span class="kw">match </span>c {
+        ir::StaticControl::If(if_control) =&gt; {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>begin) = if_control.attributes.get(BEGIN_ID) {
                 <span class="kw">if </span>begin == id {
                     <span class="kw">return </span><span class="bool-val">true</span>;
@@ -337,15 +455,15 @@
         state_shareable: <span class="kw-2">&amp;</span>ShareSet,
     ) -&gt; HashSet&lt;ir::Id&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>reads: HashSet&lt;ir::Id&gt; = HashSet::new();
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(c) =
-            DominatorMap::get_control(<span class="kw-2">*</span>node, <span class="kw-2">&amp;</span>comp.control.borrow())
-        {
-            <span class="kw">match </span>c {
+        <span class="kw">match </span>DominatorMap::get_control(<span class="kw-2">*</span>node, <span class="kw-2">&amp;</span>comp.control.borrow()) {
+            <span class="prelude-val">None </span>=&gt; (),
+            <span class="prelude-val">Some</span>(ir::GenericControl::Dynamic(c)) =&gt; <span class="kw">match </span>c {
                 ir::Control::Empty(<span class="kw">_</span>)
                 | ir::Control::Seq(<span class="kw">_</span>)
-                | ir::Control::Par(<span class="kw">_</span>) =&gt; {
+                | ir::Control::Par(<span class="kw">_</span>)
+                | ir::Control::Static(<span class="kw">_</span>) =&gt; {
                     <span class="macro">unreachable!</span>(
-                        <span class="string">&quot;no empty/seqs/pars should be in domination map&quot;
+                        <span class="string">&quot;no empty/seqs/pars/static should be in domination map&quot;
                     </span>)
                 }
                 ir::Control::If(ir::If { port, cond, .. })
@@ -364,15 +482,6 @@
                             );
                         }
                     }
-                }
-                ir::Control::StaticEnable(ir::StaticEnable {
-                    group, ..
-                }) =&gt; {
-                    add_assignment_reads(
-                        <span class="kw-2">&amp;mut </span>reads,
-                        state_shareable,
-                        <span class="kw-2">&amp;</span>group.borrow().assignments,
-                    );
                 }
                 ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
                     add_assignment_reads(
@@ -408,7 +517,52 @@
                         );
                     }
                 }
-            }
+            },
+            <span class="prelude-val">Some</span>(ir::GenericControl::Static(sc)) =&gt; <span class="kw">match </span>sc {
+                ir::StaticControl::Invoke(ir::StaticInvoke {
+                    comp,
+                    inputs,
+                    outputs,
+                    ..
+                }) =&gt; {
+                    <span class="kw">for </span>(<span class="kw">_</span>, port) <span class="kw">in </span>inputs.iter() {
+                        add_parent_if_shareable(
+                            <span class="kw-2">&amp;mut </span>reads,
+                            state_shareable,
+                            port,
+                        );
+                    }
+                    <span class="kw">if </span>!outputs.is_empty()
+                        &amp;&amp; state_shareable.is_shareable_component(comp)
+                    {
+                        reads.insert(comp.borrow().name());
+                    }
+                }
+                ir::StaticControl::Enable(ir::StaticEnable {
+                    group, ..
+                }) =&gt; {
+                    add_assignment_reads(
+                        <span class="kw-2">&amp;mut </span>reads,
+                        state_shareable,
+                        <span class="kw-2">&amp;</span>group.borrow().assignments,
+                    );
+                }
+                ir::StaticControl::If(ir::StaticIf { port, .. }) =&gt; {
+                    <span class="kw">if </span>not_end_id_static(sc, <span class="kw-2">*</span>node) {
+                        add_parent_if_shareable(
+                            <span class="kw-2">&amp;mut </span>reads,
+                            state_shareable,
+                            port,
+                        );
+                    }
+                }
+                ir::StaticControl::Empty(<span class="kw">_</span>)
+                | ir::StaticControl::Par(<span class="kw">_</span>)
+                | ir::StaticControl::Seq(<span class="kw">_</span>)
+                | ir::StaticControl::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;static emptys/repeats/seqs/pars shouldn&#39;t be in domination map&quot;
+                </span>),
+            },
         }
         reads
     }
@@ -443,6 +597,24 @@
         </span>})
     }
 
+    <span class="comment">// returns true if outputs or comp indicates that cell named self.name was
+    // written to, false otherwise
+    </span><span class="kw">fn </span>is_written_invoke(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        outputs: <span class="kw-2">&amp;</span>[(ir::Id, ir::RRC&lt;ir::Port&gt;)],
+        comp: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::Cell&gt;,
+    ) -&gt; bool {
+        <span class="kw">for </span>(<span class="kw">_</span>, port) <span class="kw">in </span>outputs.iter() {
+            <span class="kw">if </span>port.borrow().get_parent_name() == <span class="self">self</span>.name {
+                <span class="kw">return </span><span class="bool-val">true</span>;
+            }
+        }
+        <span class="kw">if </span>comp.borrow().name() == <span class="self">self</span>.name {
+            <span class="kw">return </span><span class="bool-val">true</span>;
+        }
+        <span class="bool-val">false
+    </span>}
+
     <span class="comment">//Returns true if any of the control statements in dominators write to a cell
     //with self&#39;s name.
     </span><span class="kw">pub fn </span>is_written_guaranteed(
@@ -451,23 +623,17 @@
         comp: <span class="kw-2">&amp;mut </span>ir::Component,
     ) -&gt; bool {
         <span class="kw">let </span>main_control = comp.control.borrow();
-        <span class="kw">let </span>dominator_controls =
+        <span class="kw">let </span>(dominator_controls, dominator_static_controls) =
             DominatorMap::get_control_nodes(dominators, <span class="kw-2">&amp;</span>main_control);
         <span class="kw">for </span>c <span class="kw">in </span>dominator_controls {
             <span class="kw">match </span>c {
                 ir::Control::Empty(<span class="kw">_</span>)
                 | ir::Control::Seq(<span class="kw">_</span>)
-                | ir::Control::Par(<span class="kw">_</span>) =&gt; {
+                | ir::Control::Par(<span class="kw">_</span>)
+                | ir::Control::Static(<span class="kw">_</span>) =&gt; {
                     <span class="macro">unreachable!</span>(
-                        <span class="string">&quot;no empty/seqs/pars should be in domination map&quot;
+                        <span class="string">&quot;no empty/seqs/pars/static should be in domination map&quot;
                     </span>)
-                }
-                ir::Control::StaticEnable(ir::StaticEnable {
-                    group, ..
-                }) =&gt; {
-                    <span class="kw">if </span><span class="self">self</span>.go_is_written(<span class="kw-2">&amp;</span>group.borrow().assignments) {
-                        <span class="kw">return </span><span class="bool-val">true</span>;
-                    }
                 }
                 ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
                     <span class="kw">if </span><span class="self">self</span>.go_is_written(<span class="kw-2">&amp;</span>group.borrow().assignments) {
@@ -478,15 +644,39 @@
                 //combinational group.
                 </span>ir::Control::While(<span class="kw">_</span>) | ir::Control::If(<span class="kw">_</span>) =&gt; (),
                 ir::Control::Invoke(ir::Invoke { comp, outputs, .. }) =&gt; {
-                    <span class="kw">for </span>(<span class="kw">_</span>, port) <span class="kw">in </span>outputs.iter() {
-                        <span class="kw">if </span>port.borrow().get_parent_name() == <span class="self">self</span>.name {
-                            <span class="kw">return </span><span class="bool-val">true</span>;
-                        }
-                    }
-                    <span class="kw">if </span>comp.borrow().name() == <span class="self">self</span>.name {
+                    <span class="kw">if </span><span class="self">self</span>.is_written_invoke(outputs, comp) {
                         <span class="kw">return </span><span class="bool-val">true</span>;
                     }
                 }
+            }
+        }
+        <span class="kw">for </span>sc <span class="kw">in </span>dominator_static_controls {
+            <span class="kw">match </span>sc {
+                ir::StaticControl::Empty(<span class="kw">_</span>)
+                | ir::StaticControl::Seq(<span class="kw">_</span>)
+                | ir::StaticControl::Par(<span class="kw">_</span>)
+                | ir::StaticControl::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;no static repeats/seqs/pars should be in domination map&quot;
+                </span>),
+                ir::StaticControl::Invoke(ir::StaticInvoke {
+                    comp,
+                    outputs,
+                    ..
+                }) =&gt; {
+                    <span class="kw">if </span><span class="self">self</span>.is_written_invoke(outputs, comp) {
+                        <span class="kw">return </span><span class="bool-val">true</span>;
+                    }
+                }
+                ir::StaticControl::Enable(ir::StaticEnable {
+                    group, ..
+                }) =&gt; {
+                    <span class="kw">if </span><span class="self">self</span>.go_is_written(<span class="kw-2">&amp;</span>group.borrow().assignments) {
+                        <span class="kw">return </span><span class="bool-val">true</span>;
+                    }
+                }
+                <span class="comment">// &quot;if nodes&quot; (which are really just the guard) do not write to components
+                // therefore, we should return false
+                </span>ir::StaticControl::If(<span class="kw">_</span>) =&gt; (),
             }
         }
         <span class="bool-val">false
