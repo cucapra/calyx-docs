@@ -197,14 +197,16 @@ Calyx standard library:</p>
 </code></pre>
 <p>The primitive defines one parameter called <code>WIDTH</code>, which describes the sizes for
 the <code>in</code> and the <code>out</code> ports.</p>
+<h3 id="inlined-primitives"><a class="header" href="#inlined-primitives">Inlined Primitives</a></h3>
 <p><em>Inlined primitives</em> do not have a corresponding Verilog file, and are defined within Calyx. The Calyx backend then converts these definitions into Verilog.</p>
 <p>For example, the <code>std_unsyn_mult</code> primitive is inlined:</p>
 <pre><code>comb primitive std_unsyn_mult&lt;&quot;share&quot;=1&gt;[WIDTH](left: WIDTH, right: WIDTH) -&gt; (out: WIDTH) {
   assign out = left * right;
 };
 </code></pre>
+<p>This can be useful when a frontend needs to generate both Calyx and Verilog code at the same time. The backend ensures that the generated Verilog module has the correct signature.</p>
 <h2 id="calyx-components"><a class="header" href="#calyx-components">Calyx Components</a></h2>
-<p><code>component</code>s are the primary encapsulation unit of a Calyx program.
+<p>Components are the primary encapsulation unit of a Calyx program.
 They look like this:</p>
 <pre><code>component name&lt;attributes&gt;(ports) -&gt; (ports) {
   cells { ... }
@@ -216,6 +218,23 @@ They look like this:</p>
 Unlike <code>primitive</code>s, <code>component</code> definitions do not have parameters; ports must have a concrete (integer) width.
 A component encapsulates the control and the hardware structure that implements
 a hardware module.</p>
+<blockquote>
+<p><strong>Well-formedness</strong>: The <code>control</code> program of a component must take at least one cycle to finish executing.</p>
+</blockquote>
+<h3 id="combinational-components"><a class="header" href="#combinational-components">Combinational Components</a></h3>
+<p>Using the <code>comb</code> keyword before a component definition marks it as a purely combinational component:</p>
+<pre><code>comb component add(left: 32, right: 32) -&gt; (out: 32) {
+  cells {
+    a = std_add(32);
+  }
+  wires {
+    a.left = left;
+    a.right = right;
+    out = a.out;
+  }
+}
+</code></pre>
+<p>A combinational component does not have a <code>control</code> section, can only use other <code>comb</code> components or primitives, and performs its computation combinationally.</p>
 <h3 id="ports"><a class="header" href="#ports">Ports</a></h3>
 <p>A port definition looks like this:</p>
 <pre><code>[@&lt;attr&gt;...] &lt;name&gt;: &lt;width&gt;
