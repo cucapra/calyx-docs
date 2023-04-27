@@ -580,6 +580,27 @@
 <span id="580">580</span>
 <span id="581">581</span>
 <span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{Port, RRC};
 <span class="kw">use </span>calyx_utils::Error;
 <span class="kw">use </span>std::fmt::Debug;
@@ -633,7 +654,7 @@
     </span>Info(T),
 }
 
-<span class="attribute">#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+<span class="attribute">#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 </span><span class="kw">pub struct </span>StaticTiming {
     interval: (u64, u64),
 }
@@ -649,12 +670,19 @@
 }
 
 <span class="kw">impl </span>StaticTiming {
-    <span class="kw">pub fn </span>new(interval: (u64, u64)) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// creates a new `StaticTiming` struct
+    </span><span class="kw">pub fn </span>new(interval: (u64, u64)) -&gt; <span class="self">Self </span>{
         StaticTiming { interval }
     }
 
-    <span class="kw">pub fn </span>get_interval(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (u64, u64) {
+    <span class="doccomment">/// returns the (u64, u64) interval for `struct`
+    </span><span class="kw">pub fn </span>get_interval(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (u64, u64) {
         <span class="self">self</span>.interval
+    }
+
+    <span class="doccomment">/// overwrites the current `interval` to be `new_interval`
+    </span><span class="kw">pub fn </span>set_interval(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_interval: (u64, u64)) {
+        <span class="self">self</span>.interval = new_interval;
     }
 }
 
@@ -940,12 +968,13 @@
                 </span>{}
         }
     }
-}
 
-<span class="kw">impl</span>&lt;StaticTiming&gt; Guard&lt;StaticTiming&gt; {
-    <span class="kw">pub fn </span>for_each_interval&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>F)
+    <span class="doccomment">/// runs f(interval) on each interval in `guard`.
+    /// if `f(interval)` = Some(result)` replaces interval with result.
+    /// if `f(interval)` = None` does nothing.
+    </span><span class="kw">pub fn </span>for_each_interval&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>F)
     <span class="kw">where
-        </span>F: FnMut(<span class="kw-2">&amp;mut </span>StaticTiming) -&gt; <span class="prelude-ty">Option</span>&lt;Guard&lt;StaticTiming&gt;&gt;,
+        </span>F: FnMut(<span class="kw-2">&amp;mut </span>T) -&gt; <span class="prelude-ty">Option</span>&lt;Guard&lt;T&gt;&gt;,
     {
         <span class="kw">match </span><span class="self">self </span>{
             Guard::And(l, r) | Guard::Or(l, r) =&gt; {
@@ -964,9 +993,12 @@
         }
     }
 
-    <span class="kw">pub fn </span>check_for_each_interval&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>F) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt;
+    <span class="doccomment">/// runs f(interval) on each interval in `guard`.
+    /// f should return Result&lt;(), Error&gt;, meaning that it essentially does
+    /// nothing if the `f` returns OK(()), but returns an appropraite error otherwise
+    </span><span class="kw">pub fn </span>check_for_each_interval&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>F) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt;
     <span class="kw">where
-        </span>F: Fn(<span class="kw-2">&amp;</span>StaticTiming) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt;,
+        </span>F: Fn(<span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt;,
     {
         <span class="kw">match </span><span class="self">self </span>{
             Guard::And(l, r) | Guard::Or(l, r) =&gt; {
@@ -981,6 +1013,16 @@
             Guard::True | Guard::Port(<span class="kw">_</span>) | Guard::CompOp(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),
             Guard::Info(timing_interval) =&gt; f(timing_interval),
         }
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; Guard&lt;T&gt;
+<span class="kw">where
+    </span>T: Eq,
+{
+    <span class="doccomment">/// updates self -&gt; self &amp; interval
+    </span><span class="kw">pub fn </span>add_interval(<span class="kw-2">&amp;mut </span><span class="self">self</span>, interval: T) {
+        <span class="self">self</span>.update(|g| g.and(Guard::Info(interval)));
     }
 }
 

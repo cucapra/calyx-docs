@@ -633,6 +633,32 @@
 <span id="633">633</span>
 <span id="634">634</span>
 <span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a visitor for `ir::Control` programs.
 //! Program passes implemented as the Visitor are directly invoked on
 //! [`ir::Context`] to compile every [`ir::Component`] using the pass.
@@ -954,6 +980,28 @@
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
+    <span class="doccomment">/// Executed before visiting the contents of an [ir::StaticControl] node.
+    </span><span class="kw">fn </span>start_static_control(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        _s: <span class="kw-2">&amp;mut </span>ir::StaticControl,
+        _comp: <span class="kw-2">&amp;mut </span>Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
+    <span class="doccomment">/// Executed after visiting the conetnts of an [ir::StaticControl] node.
+    </span><span class="kw">fn </span>finish_static_control(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        _s: <span class="kw-2">&amp;mut </span>ir::StaticControl,
+        _comp: <span class="kw-2">&amp;mut </span>Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
     <span class="doccomment">/// Executed at an [ir::Enable] node.
     </span><span class="kw">fn </span>enable(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1157,9 +1205,13 @@
             Control::Enable(ctrl) =&gt; {
                 visitor.enable(ctrl, component, sigs, comps)<span class="question-mark">?
             </span>}
-            Control::Static(sctrl) =&gt; {
-                sctrl.visit(visitor, component, sigs, comps)<span class="question-mark">?
-            </span>}
+            Control::Static(sctrl) =&gt; visitor
+                .start_static_control(sctrl, component, sigs, comps)<span class="question-mark">?
+                </span>.and_then(|| sctrl.visit(visitor, component, sigs, comps))<span class="question-mark">?
+                </span>.pop()
+                .and_then(|| {
+                    visitor.finish_static_control(sctrl, component, sigs, comps)
+                })<span class="question-mark">?</span>,
             Control::Empty(ctrl) =&gt; {
                 visitor.empty(ctrl, component, sigs, comps)<span class="question-mark">?
             </span>}

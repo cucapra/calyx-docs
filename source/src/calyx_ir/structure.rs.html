@@ -678,6 +678,20 @@
 <span id="678">678</span>
 <span id="679">679</span>
 <span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
@@ -1234,6 +1248,13 @@
     </span><span class="kw">pub fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Attributes&gt; {
         <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.attributes)
     }
+
+    <span class="kw">pub fn </span>remove_attribute&lt;I&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: I)
+    <span class="kw">where
+        </span>I: Into&lt;Id&gt;,
+    {
+        <span class="self">self</span>.attributes.remove(attr);
+    }
 }
 
 <span class="doccomment">/// A Group of assignments that perform a logical action.
@@ -1304,6 +1325,13 @@
     </span><span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Attributes&gt; {
         <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.attributes)
+    }
+
+    <span class="kw">pub fn </span>remove_attribute&lt;I&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: I)
+    <span class="kw">where
+        </span>I: Into&lt;Id&gt;,
+    {
+        <span class="self">self</span>.attributes.remove(attr);
     }
 }
 

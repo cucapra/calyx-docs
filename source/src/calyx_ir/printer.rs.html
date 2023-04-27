@@ -774,9 +774,6 @@
 <span id="774">774</span>
 <span id="775">775</span>
 <span id="776">776</span>
-<span id="777">777</span>
-<span id="778">778</span>
-<span id="779">779</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a formatter for the in-memory representation of Components.
 //! The printing operation clones inner nodes and doesn&#39;t perform any mutation
 //! to the Component.
@@ -1174,22 +1171,16 @@
                 attributes,
             }) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
-                <span class="macro">writeln!</span>(
-                    f,
-                    <span class="string">&quot;&lt;{}&gt;{};&quot;</span>,
-                    group.borrow().latency,
-                    group.borrow().name().id
-                )
+                <span class="macro">writeln!</span>(f, <span class="string">&quot;{};&quot;</span>, group.borrow().name().id)
             }
             ir::StaticControl::Repeat(ir::StaticRepeat {
                 num_repeats,
                 attributes,
                 body,
-                latency,
                 ..
             }) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
-                <span class="macro">writeln!</span>(f, <span class="string">&quot;static&lt;{}&gt; repeat {} &quot;</span>, latency, num_repeats)<span class="question-mark">?</span>;
+                <span class="macro">writeln!</span>(f, <span class="string">&quot;static repeat {} &quot;</span>, num_repeats)<span class="question-mark">?</span>;
                 <span class="macro">writeln!</span>(f, <span class="string">&quot;{{&quot;</span>)<span class="question-mark">?</span>;
                 <span class="self">Self</span>::write_static_control(body, indent_level + <span class="number">2</span>, f)<span class="question-mark">?</span>;
                 <span class="macro">writeln!</span>(f, <span class="string">&quot;{}}}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))
@@ -1200,7 +1191,7 @@
                 latency,
             }) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
-                <span class="macro">writeln!</span>(f, <span class="string">&quot;static&lt;{}&gt; seq {{&quot;</span>, latency)<span class="question-mark">?</span>;
+                <span class="macro">writeln!</span>(f, <span class="string">&quot;static seq &lt;{}&gt; {{&quot;</span>, latency)<span class="question-mark">?</span>;
                 <span class="kw">for </span>stmt <span class="kw">in </span>stmts {
                     <span class="self">Self</span>::write_static_control(stmt, indent_level + <span class="number">2</span>, f)<span class="question-mark">?</span>;
                 }
@@ -1212,7 +1203,7 @@
                 latency,
             }) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
-                <span class="macro">writeln!</span>(f, <span class="string">&quot;static&lt;{}&gt; par {{&quot;</span>, latency)<span class="question-mark">?</span>;
+                <span class="macro">writeln!</span>(f, <span class="string">&quot;static par &lt;{}&gt; {{&quot;</span>, latency)<span class="question-mark">?</span>;
                 <span class="kw">for </span>stmt <span class="kw">in </span>stmts {
                     <span class="self">Self</span>::write_static_control(stmt, indent_level + <span class="number">2</span>, f)<span class="question-mark">?</span>;
                 }
@@ -1235,7 +1226,7 @@
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
                 <span class="macro">write!</span>(
                     f,
-                    <span class="string">&quot;static&lt;{}&gt; if {} &quot;</span>,
+                    <span class="string">&quot;static if &lt;{}&gt; {} &quot;</span>,
                     latency,
                     <span class="self">Self</span>::port_to_str(<span class="kw-2">&amp;</span>port.borrow()),
                 )<span class="question-mark">?</span>;
@@ -1320,7 +1311,10 @@
         indent_level: usize,
         f: <span class="kw-2">&amp;mut </span>F,
     ) -&gt; io::Result&lt;()&gt; {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))<span class="question-mark">?</span>;
+        <span class="comment">// write_static_control will indent already so we don&#39;t want to indent twice
+        </span><span class="kw">if </span>!<span class="macro">matches!</span>(control, ir::Control::Static(<span class="kw">_</span>)) {
+            <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))<span class="question-mark">?</span>;
+        }
         <span class="kw">match </span>control {
             ir::Control::Enable(ir::Enable { group, attributes }) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;

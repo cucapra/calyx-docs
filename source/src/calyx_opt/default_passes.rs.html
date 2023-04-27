@@ -155,6 +155,12 @@
 <span id="155">155</span>
 <span id="156">156</span>
 <span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
@@ -163,7 +169,7 @@
     Externalize, GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner,
     InferShare, InferStaticTiming, LowerGuards, MergeAssign, MergeStaticPar,
     Papercut, ParToSeq, RegisterUnsharing, RemoveIds, ResetInsertion,
-    SimplifyWithControl, StaticParConv, SynthesisPapercut,
+    SimplifyWithControl, StaticInliner, StaticParConv, SynthesisPapercut,
     TopDownCompileControl, TopDownStaticTiming, UnrollBounded, WellFormed,
     WireInliner,
 };
@@ -197,7 +203,8 @@
         pm.register_pass::&lt;StaticParConv&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">// Compilation passes
-        </span>pm.register_pass::&lt;CompileStatic&gt;()<span class="question-mark">?</span>;
+        </span>pm.register_pass::&lt;StaticInliner&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;CompileStatic&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileInvoke&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;SimplifyWithControl&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;TopDownStaticTiming&gt;()<span class="question-mark">?</span>;
@@ -252,7 +259,12 @@
         <span class="macro">register_alias!</span>(
             pm,
             <span class="string">&quot;compile&quot;</span>,
-            [CompileStatic, TopDownStaticTiming, TopDownCompileControl]
+            [
+                StaticInliner,
+                CompileStatic,
+                TopDownStaticTiming,
+                TopDownCompileControl
+            ]
         );
         <span class="macro">register_alias!</span>(
             pm,

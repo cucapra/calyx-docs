@@ -689,6 +689,77 @@
 <span id="689">689</span>
 <span id="690">690</span>
 <span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::StaticGroup;
 <span class="kw">use </span>std::rc::Rc;
 
@@ -906,6 +977,16 @@
     }
 }
 
+<span class="kw">impl </span>StaticEnable {
+    <span class="doccomment">/// Returns the value of an attribute if present
+    </span><span class="kw">pub fn </span>get_attribute&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: S) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
+    <span class="kw">where
+        </span>S: Into&lt;Id&gt;,
+    {
+        <span class="self">self</span>.get_attributes().get(attr).copied()
+    }
+}
+
 <span class="kw">type </span>PortMap = Vec&lt;(Id, RRC&lt;Port&gt;)&gt;;
 <span class="kw">type </span>CellMap = Vec&lt;(Id, RRC&lt;Cell&gt;)&gt;;
 
@@ -1010,6 +1091,27 @@
 <span class="kw">impl </span>From&lt;Enable&gt; <span class="kw">for </span>Control {
     <span class="kw">fn </span>from(en: Enable) -&gt; <span class="self">Self </span>{
         Control::Enable(en)
+    }
+}
+
+<span class="kw">impl </span>From&lt;StaticControl&gt; <span class="kw">for </span>Control {
+    <span class="kw">fn </span>from(sc: StaticControl) -&gt; <span class="self">Self </span>{
+        Control::Static(sc)
+    }
+}
+
+<span class="kw">impl </span>From&lt;StaticEnable&gt; <span class="kw">for </span>StaticControl {
+    <span class="kw">fn </span>from(se: StaticEnable) -&gt; <span class="self">Self </span>{
+        StaticControl::Enable(se)
+    }
+}
+
+<span class="kw">impl </span>From&lt;RRC&lt;StaticGroup&gt;&gt; <span class="kw">for </span>StaticControl {
+    <span class="kw">fn </span>from(sgroup: RRC&lt;StaticGroup&gt;) -&gt; <span class="self">Self </span>{
+        StaticControl::Enable(StaticEnable {
+            group: sgroup,
+            attributes: Attributes::default(),
+        })
     }
 }
 
@@ -1118,14 +1220,6 @@
         })
     }
 
-    <span class="doccomment">/// Convience constructor for static enable.
-    </span><span class="kw">pub fn </span>static_enable(group: RRC&lt;StaticGroup&gt;) -&gt; <span class="self">Self </span>{
-        Control::Static(StaticControl::Enable(StaticEnable {
-            group,
-            attributes: Attributes::default(),
-        }))
-    }
-
     <span class="doccomment">/// Convience constructor for invoke.
     </span><span class="kw">pub fn </span>invoke(comp: RRC&lt;Cell&gt;, inputs: PortMap, outputs: PortMap) -&gt; <span class="self">Self </span>{
         Control::Invoke(Invoke {
@@ -1173,7 +1267,7 @@
     <span class="kw">where
         </span>S: Into&lt;Id&gt;,
     {
-        <span class="self">self</span>.get_attributes().get(attr).cloned()
+        <span class="self">self</span>.get_attributes().get(attr).copied()
     }
 
     <span class="doccomment">/// Returns true if the node has a specific attribute
@@ -1191,12 +1285,60 @@
         StaticControl::Empty(Empty::default())
     }
 
+    <span class="doccomment">/// Convience constructor for static enable.
+    </span><span class="kw">pub fn </span>seq(stmts: Vec&lt;StaticControl&gt;, latency: u64) -&gt; <span class="self">Self </span>{
+        StaticControl::Seq(StaticSeq {
+            stmts,
+            attributes: Attributes::default(),
+            latency,
+        })
+    }
+
+    <span class="doccomment">/// Convience constructor for static enable.
+    </span><span class="kw">pub fn </span>par(stmts: Vec&lt;StaticControl&gt;, latency: u64) -&gt; <span class="self">Self </span>{
+        StaticControl::Par(StaticPar {
+            stmts,
+            attributes: Attributes::default(),
+            latency,
+        })
+    }
+
+    <span class="doccomment">/// Convience constructor for static if
+    </span><span class="kw">pub fn </span>static_if(
+        port: RRC&lt;Port&gt;,
+        tbranch: Box&lt;StaticControl&gt;,
+        fbranch: Box&lt;StaticControl&gt;,
+        latency: u64,
+    ) -&gt; <span class="self">Self </span>{
+        StaticControl::If(StaticIf {
+            port,
+            tbranch,
+            fbranch,
+            attributes: Attributes::default(),
+            latency,
+        })
+    }
+
+    <span class="doccomment">/// Convience constructor for static if
+    </span><span class="kw">pub fn </span>repeat(
+        num_repeats: u64,
+        latency: u64,
+        body: Box&lt;StaticControl&gt;,
+    ) -&gt; <span class="self">Self </span>{
+        StaticControl::Repeat(StaticRepeat {
+            body,
+            num_repeats,
+            latency,
+            attributes: Attributes::default(),
+        })
+    }
+
     <span class="doccomment">/// Returns the value of an attribute if present
     </span><span class="kw">pub fn </span>get_attribute&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: S) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
     <span class="kw">where
         </span>S: Into&lt;Id&gt;,
     {
-        <span class="self">self</span>.get_attributes().get(attr).cloned()
+        <span class="self">self</span>.get_attributes().get(attr).copied()
     }
 
     <span class="doccomment">/// Returns the value of an attribute if present
