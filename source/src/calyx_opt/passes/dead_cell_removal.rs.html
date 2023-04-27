@@ -171,6 +171,8 @@
 <span id="171">171</span>
 <span id="172">172</span>
 <span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>std::collections::HashSet;
@@ -194,6 +196,33 @@
     <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
         <span class="string">&quot;removes cells that are never used inside a component&quot;
     </span>}
+}
+
+<span class="kw">impl </span>DeadCellRemoval {
+    <span class="doccomment">/// Retain the write if the destination is a hole or if the parent of the
+    /// destination is read from.
+    </span><span class="kw">fn </span>retain_write&lt;T: Clone + Eq + ToString&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        wire_reads: <span class="kw-2">&amp;</span>HashSet&lt;ir::Id&gt;,
+        asgn: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;,
+    ) -&gt; bool {
+        <span class="kw">let </span>dst = asgn.dst.borrow();
+        <span class="kw">if </span>dst.is_hole() {
+            <span class="bool-val">true
+        </span>} <span class="kw">else </span>{
+            <span class="kw">let </span>parent = <span class="kw-2">&amp;</span>dst.get_parent_name();
+            <span class="kw">let </span>out =
+                <span class="self">self</span>.all_reads.contains(parent) || wire_reads.contains(parent);
+            <span class="kw">if </span>!out {
+                <span class="macro">log::debug!</span>(
+                    <span class="string">&quot;`{}&#39; because `{}&#39; is unused&quot;</span>,
+                    ir::Printer::assignment_to_str(asgn),
+                    parent
+                )
+            }
+            out
+        }
+    }
 }
 
 <span class="kw">impl </span>Visitor <span class="kw">for </span>DeadCellRemoval {
@@ -280,48 +309,23 @@
 
             <span class="comment">// Remove writes to ports on unused cells.
             </span><span class="kw">for </span>gr <span class="kw">in </span>comp.get_groups().iter() {
-                gr.borrow_mut().assignments.retain(|asgn| {
-                    <span class="kw">let </span>dst = asgn.dst.borrow();
-                    <span class="kw">if </span>dst.is_hole() {
-                        <span class="bool-val">true
-                    </span>} <span class="kw">else </span>{
-                        <span class="kw">let </span>parent = <span class="kw-2">&amp;</span>dst.get_parent_name();
-                        <span class="self">self</span>.all_reads.contains(parent)
-                            || wire_reads.contains(parent)
-                    }
-                })
+                gr.borrow_mut()
+                    .assignments
+                    .retain(|asgn| <span class="self">self</span>.retain_write(<span class="kw-2">&amp;</span>wire_reads, asgn))
             }
             <span class="comment">// Remove writes to ports on unused cells.
             </span><span class="kw">for </span>gr <span class="kw">in </span>comp.get_static_groups().iter() {
-                gr.borrow_mut().assignments.retain(|asgn| {
-                    <span class="kw">let </span>dst = asgn.dst.borrow();
-                    <span class="kw">if </span>dst.is_hole() {
-                        <span class="bool-val">true
-                    </span>} <span class="kw">else </span>{
-                        <span class="kw">let </span>parent = <span class="kw-2">&amp;</span>dst.get_parent_name();
-                        <span class="self">self</span>.all_reads.contains(parent)
-                            || wire_reads.contains(parent)
-                    }
-                })
+                gr.borrow_mut()
+                    .assignments
+                    .retain(|asgn| <span class="self">self</span>.retain_write(<span class="kw-2">&amp;</span>wire_reads, asgn))
             }
             <span class="kw">for </span>cgr <span class="kw">in </span>comp.comb_groups.iter() {
-                cgr.borrow_mut().assignments.retain(|asgn| {
-                    <span class="kw">let </span>dst = asgn.dst.borrow();
-                    <span class="kw">let </span>parent = <span class="kw-2">&amp;</span>dst.get_parent_name();
-                    <span class="self">self</span>.all_reads.contains(parent)
-                        || wire_reads.contains(parent)
-                })
+                cgr.borrow_mut()
+                    .assignments
+                    .retain(|asgn| <span class="self">self</span>.retain_write(<span class="kw-2">&amp;</span>wire_reads, asgn))
             }
-            comp.continuous_assignments.retain(|asgn| {
-                <span class="kw">let </span>dst = asgn.dst.borrow();
-                <span class="kw">if </span>dst.is_hole() {
-                    <span class="bool-val">true
-                </span>} <span class="kw">else </span>{
-                    <span class="kw">let </span>parent = <span class="kw-2">&amp;</span>dst.get_parent_name();
-                    <span class="self">self</span>.all_reads.contains(parent)
-                        || wire_reads.contains(parent)
-                }
-            });
+            comp.continuous_assignments
+                .retain(|asgn| <span class="self">self</span>.retain_write(<span class="kw-2">&amp;</span>wire_reads, asgn));
 
             <span class="comment">// Remove unused cells
             </span><span class="kw">let </span>removed = comp.cells.retain(|c| {

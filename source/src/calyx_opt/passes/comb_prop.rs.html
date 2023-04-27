@@ -275,17 +275,11 @@
 <span id="275">275</span>
 <span id="276">276</span>
 <span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
-
-<span class="kw">const </span>VISIBLE: <span class="kw-2">&amp;</span>str = <span class="string">&quot;_comb_prop_output&quot;</span>;
 
 <span class="doccomment">/// A data structure to track rewrites of ports with added functionality to declare
 /// two wires to be &quot;equal&quot; when they are connected together.
@@ -442,6 +436,29 @@
     }
 }
 
+<span class="kw">impl </span>CombProp {
+    <span class="doccomment">/// Mark assignments for removal
+    </span><span class="kw">fn </span>remove_rewritten(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        rewritten: Vec&lt;<span class="kw-2">&amp;</span>RRC&lt;ir::Port&gt;&gt;,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+    ) {
+        <span class="comment">// Remove writes to all the ports that show up in write position
+        </span><span class="kw">if </span><span class="self">self</span>.do_not_eliminate {
+            <span class="comment">// If elimination is disabled, mark the assignments with the @dead attribute.
+            </span><span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;mut </span>comp.continuous_assignments {
+                <span class="kw">if </span>rewritten.iter().any(|v| Rc::ptr_eq(v, <span class="kw-2">&amp;</span>assign.dst)) {
+                    assign.attributes.insert(<span class="string">&quot;dead&quot;</span>, <span class="number">1</span>)
+                }
+            }
+        } <span class="kw">else </span>{
+            comp.continuous_assignments.retain_mut(|assign| {
+                !rewritten.iter().any(|v| Rc::ptr_eq(v, <span class="kw-2">&amp;</span>assign.dst))
+            });
+        }
+    }
+}
+
 <span class="kw">impl </span>Visitor <span class="kw">for </span>CombProp {
     <span class="kw">fn </span>start(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -494,16 +511,6 @@
                 <span class="kw">let </span>old_v =
                     rewrites.insert(Rc::clone(<span class="kw-2">&amp;</span>port), Rc::clone(<span class="kw-2">&amp;</span>assign.dst));
 
-                <span class="comment">// If the destination port is externall visible, then we need to
-                // make sure that this assignment is not removed.
-                </span><span class="kw">if let </span>ir::PortParent::Cell(cell_wref) = <span class="kw-2">&amp;</span>dst.parent {
-                    <span class="kw">let </span>cr = cell_wref.upgrade();
-                    <span class="kw">let </span>cell = cr.borrow();
-                    <span class="kw">if </span>cell.is_this() {
-                        assign.attributes.insert(VISIBLE, <span class="number">1</span>);
-                    }
-                }
-
                 <span class="comment">// If the insertion process found an old key, we have something like:
                 // ```
                 // x.in = wire.out;
@@ -519,6 +526,9 @@
 
         <span class="comment">// Rewrite assignments
         </span><span class="kw">let </span>rewrites: ir::rewriter::PortRewriteMap = rewrites.into();
+        <span class="kw">let </span>rewritten = rewrites.values().collect_vec();
+        <span class="self">self</span>.remove_rewritten(rewritten, comp);
+
         comp.for_each_assignment(|assign| {
             assign.for_each_port(|port| {
                 rewrites.get(<span class="kw-2">&amp;</span>port.borrow().canonical()).cloned()
@@ -539,25 +549,7 @@
             <span class="kw-2">&amp;</span>HashMap::new(),
         );
 
-        <span class="comment">// Remove writes to all the ports that show up in write position
-        </span><span class="kw">let </span>rewritten = rewrites.into_values().collect_vec();
-        <span class="kw">if </span><span class="self">self</span>.do_not_eliminate {
-            <span class="comment">// If elimination is disabled, mark the assignments with the @dead attribute.
-            </span><span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;mut </span>comp.continuous_assignments {
-                <span class="kw">if </span>rewritten.iter().any(|v| Rc::ptr_eq(v, <span class="kw-2">&amp;</span>assign.dst))
-                    &amp;&amp; !assign.attributes.has(VISIBLE)
-                {
-                    assign.attributes.insert(<span class="string">&quot;dead&quot;</span>, <span class="number">1</span>)
-                }
-            }
-        } <span class="kw">else </span>{
-            comp.continuous_assignments.retain_mut(|assign| {
-                !rewritten.iter().any(|v| Rc::ptr_eq(v, <span class="kw-2">&amp;</span>assign.dst))
-                    || assign.attributes.remove(VISIBLE).is_some()
-            });
-        }
-
-        <span class="prelude-val">Ok</span>(Action::Continue)
+        <span class="prelude-val">Ok</span>(Action::Stop)
     }
 }
 </code></pre></div>
