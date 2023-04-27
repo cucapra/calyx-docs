@@ -961,12 +961,12 @@
                         <span class="kw">if </span>static_timing.get_interval().<span class="number">0
                             </span>&gt;= static_timing.get_interval().<span class="number">1
                         </span>{
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                            <span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
                                 <span class="string">&quot;Static Timing Guard has improper interval: `%[{},{}]`&quot;</span>,
                                 static_timing.get_interval().<span class="number">0</span>,
                                 static_timing.get_interval().<span class="number">1
                             </span>))
-                            .with_pos(<span class="kw-2">&amp;</span>assign.attributes));
+                            .with_pos(<span class="kw-2">&amp;</span>assign.attributes))
                         } <span class="kw">else </span>{
                             <span class="prelude-val">Ok</span>(())
                         }

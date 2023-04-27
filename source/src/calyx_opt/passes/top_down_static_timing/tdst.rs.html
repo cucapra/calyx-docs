@@ -1437,7 +1437,7 @@
                     TopDownStaticTiming::name(),
                      <span class="macro">format!</span>(
                         <span class="string">&quot;if-with construct should have been compiled away. Run `{}` before this pass.&quot;</span>,
-                        passes::RemoveCombGroups::name()))
+                        passes::SimplifyWithControl::name()))
             .with_pos(<span class="kw-2">&amp;</span>con.attributes));
         }
 
@@ -1542,7 +1542,7 @@
             TopDownStaticTiming::name(),
             <span class="macro">format!</span>(
                 <span class="string">&quot;while-with construct should have been compiled away. Run `{}` before this pass.&quot;</span>,
-                passes::RemoveCombGroups::name())
+                passes::SimplifyWithControl::name())
             ).with_pos(<span class="kw-2">&amp;</span>wh.attributes));
         }
 

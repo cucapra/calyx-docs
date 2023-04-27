@@ -742,6 +742,41 @@
 <span id="742">742</span>
 <span id="743">743</span>
 <span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a formatter for the in-memory representation of Components.
 //! The printing operation clones inner nodes and doesn&#39;t perform any mutation
 //! to the Component.
@@ -804,18 +839,6 @@
             .join(<span class="string">&quot;, &quot;</span>)
     }
 
-    <span class="doccomment">/// Formats and writes extern statements.
-    </span><span class="kw">pub fn </span>write_extern&lt;F: io::Write&gt;(
-        (path, prims): (<span class="kw-2">&amp;</span>Path, <span class="kw-2">&amp;</span>[ir::Primitive]),
-        f: <span class="kw-2">&amp;mut </span>F,
-    ) -&gt; io::Result&lt;()&gt; {
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;extern \&quot;{}\&quot; {{&quot;</span>, path.to_string_lossy())<span class="question-mark">?</span>;
-        <span class="kw">for </span>prim <span class="kw">in </span>prims {
-            <span class="self">Self</span>::write_primitive(prim, <span class="number">2</span>, f)<span class="question-mark">?</span>;
-        }
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;}}&quot;</span>)
-    }
-
     <span class="kw">fn </span>format_port_def&lt;W: std::fmt::Display&gt;(
         port_defs: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>ir::PortDef&lt;W&gt;],
     ) -&gt; String {
@@ -831,6 +854,53 @@
             })
             .collect_vec()
             .join(<span class="string">&quot;, &quot;</span>)
+    }
+
+    <span class="doccomment">/// Prints out the program context.
+    /// `skip_primitives` controls whether the primitives are printed out.
+    </span><span class="kw">pub fn </span>write_context&lt;F: io::Write&gt;(
+        ctx: <span class="kw-2">&amp;</span>ir::Context,
+        skip_primitives: bool,
+        f: <span class="kw-2">&amp;mut </span>F,
+    ) -&gt; io::Result&lt;()&gt; {
+        <span class="kw">if </span>!skip_primitives {
+            <span class="kw">for </span>(path, prims) <span class="kw">in </span>ctx.lib.all_prims() {
+                <span class="kw">match </span>path {
+                    <span class="prelude-val">Some</span>(p) =&gt; {
+                        ir::Printer::write_externs(
+                            (<span class="kw-2">&amp;</span>p, prims.into_iter().map(|(<span class="kw">_</span>, v)| v)),
+                            f,
+                        )<span class="question-mark">?</span>;
+                    }
+                    <span class="prelude-val">None </span>=&gt; {
+                        <span class="kw">for </span>(<span class="kw">_</span>, prim) <span class="kw">in </span>prims {
+                            ir::Printer::write_primitive(prim, <span class="number">2</span>, f)<span class="question-mark">?</span>;
+                        }
+                    }
+                }
+            }
+        }
+        <span class="kw">for </span>comp <span class="kw">in </span><span class="kw-2">&amp;</span>ctx.components {
+            ir::Printer::write_component(comp, f)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(f)<span class="question-mark">?
+        </span>}
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, ir::Printer::format_metadata(<span class="kw-2">&amp;</span>ctx.metadata))
+    }
+
+    <span class="doccomment">/// Formats and writes extern statements.
+    </span><span class="kw">pub fn </span>write_externs&lt;<span class="lifetime">&#39;a</span>, F, I&gt;(
+        (path, prims): (<span class="kw-2">&amp;</span>Path, I),
+        f: <span class="kw-2">&amp;mut </span>F,
+    ) -&gt; io::Result&lt;()&gt;
+    <span class="kw">where
+        </span>F: io::Write,
+        I: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Primitive&gt;,
+    {
+        <span class="macro">writeln!</span>(f, <span class="string">&quot;extern \&quot;{}\&quot; {{&quot;</span>, path.to_string_lossy())<span class="question-mark">?</span>;
+        <span class="kw">for </span>prim <span class="kw">in </span>prims {
+            <span class="self">Self</span>::write_primitive(prim, <span class="number">2</span>, f)<span class="question-mark">?</span>;
+        }
+        <span class="macro">writeln!</span>(f, <span class="string">&quot;}}&quot;</span>)
     }
 
     <span class="kw">pub fn </span>write_primitive&lt;F: io::Write&gt;(

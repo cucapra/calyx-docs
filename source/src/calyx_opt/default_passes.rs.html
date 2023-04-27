@@ -154,6 +154,7 @@
 <span id="154">154</span>
 <span id="155">155</span>
 <span id="156">156</span>
+<span id="157">157</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
@@ -161,9 +162,10 @@
     ComponentInliner, DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval,
     Externalize, GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner,
     InferShare, InferStaticTiming, LowerGuards, MergeAssign, MergeStaticPar,
-    Papercut, ParToSeq, RegisterUnsharing, RemoveCombGroups, RemoveIds,
-    ResetInsertion, StaticParConv, SynthesisPapercut, TopDownCompileControl,
-    TopDownStaticTiming, UnrollBounded, WellFormed, WireInliner,
+    Papercut, ParToSeq, RegisterUnsharing, RemoveIds, ResetInsertion,
+    SimplifyWithControl, StaticParConv, SynthesisPapercut,
+    TopDownCompileControl, TopDownStaticTiming, UnrollBounded, WellFormed,
+    WireInliner,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::Named;
 <span class="kw">use crate</span>::{pass_manager::PassManager, register_alias};
@@ -197,7 +199,7 @@
         <span class="comment">// Compilation passes
         </span>pm.register_pass::&lt;CompileStatic&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileInvoke&gt;()<span class="question-mark">?</span>;
-        pm.register_pass::&lt;RemoveCombGroups&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;SimplifyWithControl&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;TopDownStaticTiming&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;TopDownCompileControl&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileRef&gt;()<span class="question-mark">?</span>;
@@ -238,7 +240,7 @@
                 </span>ComponentInliner,
                 CombProp,
                 CellShare, <span class="comment">// LiveRangeAnalaysis should handle comb groups
-                </span>RemoveCombGroups, <span class="comment">// Must run before infer-static-timing
+                </span>SimplifyWithControl, <span class="comment">// Must run before infer-static-timing
                 </span>InferStaticTiming,
                 CompileInvoke,    <span class="comment">// creates dead comb groups
                 </span>StaticParConv, <span class="comment">// Must be before collapse-control and merge-static-par
@@ -284,7 +286,7 @@
                 <span class="string">&quot;validate&quot;</span>,
                 CompileSync,
                 CompileRef,
-                RemoveCombGroups,
+                SimplifyWithControl,
                 CompileInvoke,
                 <span class="string">&quot;compile&quot;</span>,
                 <span class="string">&quot;lower&quot;

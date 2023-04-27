@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx-opt/src/passes/remove_comb_groups.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>remove_comb_groups.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx_opt/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx-opt/src/passes/simplify_with_control.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>simplify_with_control.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx_opt/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -275,76 +275,20 @@
 <span id="275">275</span>
 <span id="276">276</span>
 <span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
-<span id="296">296</span>
-<span id="297">297</span>
-<span id="298">298</span>
-<span id="299">299</span>
-<span id="300">300</span>
-<span id="301">301</span>
-<span id="302">302</span>
-<span id="303">303</span>
-<span id="304">304</span>
-<span id="305">305</span>
-<span id="306">306</span>
-<span id="307">307</span>
-<span id="308">308</span>
-<span id="309">309</span>
-<span id="310">310</span>
-<span id="311">311</span>
-<span id="312">312</span>
-<span id="313">313</span>
-<span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
-<span id="318">318</span>
-<span id="319">319</span>
-<span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
-<span id="329">329</span>
-<span id="330">330</span>
-<span id="331">331</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{
     <span class="self">self </span><span class="kw">as </span>ir, guard, structure, GetAttributes, LibrarySignatures, RRC,
 };
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
-<span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
 
 <span class="attribute">#[derive(Default)]
-</span><span class="doccomment">/// Transforms combinational groups, which have a constant done condition,
-/// into proper groups by registering the values read from the ports of cells
-/// used within the combinational group.
+</span><span class="doccomment">/// Transforms combinational groups into normal groups by registering the values
+/// read from the ports of cells used within the combinational group.
 ///
-/// It also transforms (invoke,if,while)-with into semantically equivalent control programs that
+/// It also transforms (if,while)-with into semantically equivalent control programs that
 /// first enable a group that calculates and registers the ports defined by the combinational group
 /// execute the respective cond group and then execute the control operator.
 ///
@@ -358,7 +302,6 @@
 ///     comb_cond[done] = 1&#39;d1;
 /// }
 /// control {
-///     invoke comp(left = lt.out, ..)(..) with comb_cond;
 ///     if lt.out with comb_cond {
 ///         ...
 ///     }
@@ -383,10 +326,6 @@
 /// control {
 ///     seq {
 ///       comb_cond;
-///       invoke comp(left = lt_reg.out, ..)(..);
-///     }
-///     seq {
-///       comb_cond;
 ///       if lt_reg.out {
 ///           ...
 ///       }
@@ -400,7 +339,7 @@
 ///     }
 /// }
 /// ```
-</span><span class="kw">pub struct </span>RemoveCombGroups {
+</span><span class="kw">pub struct </span>SimplifyWithControl {
     <span class="comment">// Mapping from (group_name, (cell_name, port_name)) -&gt; (port, group).
     </span>port_rewrite: HashMap&lt;PortInGroup, (RRC&lt;ir::Port&gt;, RRC&lt;ir::Group&gt;)&gt;,
 }
@@ -408,17 +347,17 @@
 <span class="doccomment">/// Represents (group_name, (cell_name, port_name))
 </span><span class="kw">type </span>PortInGroup = (ir::Id, ir::Canonical);
 
-<span class="kw">impl </span>Named <span class="kw">for </span>RemoveCombGroups {
+<span class="kw">impl </span>Named <span class="kw">for </span>SimplifyWithControl {
     <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
-        <span class="string">&quot;remove-comb-groups&quot;
+        <span class="string">&quot;simplify-with-control&quot;
     </span>}
 
     <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
-        <span class="string">&quot;Transforms all groups with a constant done condition&quot;
+        <span class="string">&quot;Transforms if-with and while-with to if and while&quot;
     </span>}
 }
 
-<span class="kw">impl </span>Visitor <span class="kw">for </span>RemoveCombGroups {
+<span class="kw">impl </span>Visitor <span class="kw">for </span>SimplifyWithControl {
     <span class="kw">fn </span>start(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         comp: <span class="kw-2">&amp;mut </span>ir::Component,
@@ -433,13 +372,13 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Stop);
         }
 
+        <span class="comment">// Detach the combinational groups from the component
+        </span><span class="kw">let </span>comb_groups = std::mem::take(<span class="kw-2">&amp;mut </span>comp.comb_groups);
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
 
         <span class="comment">// Groups generated by transforming combinational groups
-        </span><span class="kw">let </span>groups = builder
-            .component
-            .comb_groups
-            .drain()
+        </span><span class="kw">let </span>groups = comb_groups
+            .iter()
             .map(|cg_ref| {
                 <span class="kw">let </span>name = cg_ref.borrow().name();
                 <span class="comment">// Register the ports read by the combinational group&#39;s usages.
@@ -454,8 +393,7 @@
                 </span><span class="kw">let </span>group_ref = builder.add_group(name);
                 <span class="kw">let </span><span class="kw-2">mut </span>group = group_ref.borrow_mut();
                 <span class="comment">// Attach assignmens from comb group
-                </span>group.assignments =
-                    cg_ref.borrow_mut().assignments.drain(..).collect();
+                </span>group.assignments = cg_ref.borrow_mut().assignments.clone();
 
                 <span class="comment">// Registers to save value for the group
                 </span><span class="kw">let </span><span class="kw-2">mut </span>save_regs = Vec::with_capacity(used_ports.len());
@@ -519,56 +457,10 @@
             comp.get_groups_mut().add(group)
         }
 
-        <span class="prelude-val">Ok</span>(Action::Continue)
-    }
+        <span class="comment">// Restore the combinational groups
+        </span>comp.comb_groups = comb_groups;
 
-    <span class="kw">fn </span>invoke(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        s: <span class="kw-2">&amp;mut </span>ir::Invoke,
-        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
-        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
-        _comps: <span class="kw-2">&amp;</span>[ir::Component],
-    ) -&gt; VisResult {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = <span class="kw-2">&amp;</span>s.comb_group {
-            <span class="kw">let </span><span class="kw-2">mut </span>new_group = <span class="prelude-val">None</span>;
-            <span class="comment">// Calculate the new input arguments for the invoke statement.
-            </span><span class="kw">let </span>new_inputs = s
-                .inputs
-                .drain(..)
-                .map(|(arg, port)| {
-                    <span class="kw">let </span>key = (c.borrow().name(), port.borrow().canonical());
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>((new_port, gr)) = <span class="self">self</span>.port_rewrite.get(<span class="kw-2">&amp;</span>key) {
-                        new_group = <span class="prelude-val">Some</span>(gr);
-                        (arg, Rc::clone(new_port))
-                    } <span class="kw">else </span>{
-                        <span class="comment">// Don&#39;t rewrite if the port is not defined by the combinational group.
-                        </span>(arg, port)
-                    }
-                })
-                .collect_vec();
-            <span class="kw">if </span>new_group.is_none() {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
-                    <span class="string">&quot;Ports from combinational group `{}` attached to invoke-with clause are not used.&quot;</span>,
-                    c.borrow().name()
-                )));
-            }
-            <span class="comment">// New invoke statement with rewritten inputs.
-            </span><span class="kw">let </span><span class="kw-2">mut </span>invoke = ir::Control::invoke(
-                Rc::clone(<span class="kw-2">&amp;</span>s.comp),
-                new_inputs,
-                s.outputs.drain(..).collect(),
-            );
-            <span class="kw">let </span>attrs = invoke.get_mut_attributes();
-            <span class="kw-2">*</span>attrs = std::mem::take(<span class="kw-2">&amp;mut </span>s.attributes);
-            <span class="comment">// Seq to run the rewritten comb group first and then the invoke.
-            </span><span class="kw">let </span>seq = ir::Control::seq(<span class="macro">vec!</span>[
-                ir::Control::enable(Rc::clone(new_group.unwrap())),
-                invoke,
-            ]);
-            <span class="prelude-val">Ok</span>(Action::change(seq))
-        } <span class="kw">else </span>{
-            <span class="prelude-val">Ok</span>(Action::Continue)
-        }
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
     <span class="kw">fn </span>finish_while(
@@ -651,7 +543,7 @@
         _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">if </span>comp.attributes.get(<span class="string">&quot;static&quot;</span>).is_some() {
+        <span class="kw">if </span>comp.is_static() {
             <span class="kw">let </span>msg =
                 <span class="macro">format!</span>(<span class="string">&quot;Component {} has both a top-level \&quot;static\&quot; annotations and combinational groups which is not supported&quot;</span>, comp.name);
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::pass_assumption(<span class="self">Self</span>::name(), msg)

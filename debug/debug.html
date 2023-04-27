@@ -166,7 +166,7 @@ To identify which optimization pass is wrong, add back individual passes and see
 when the execution fails.
 The <code>calyx/src/default_passes.rs</code> file defines the compilation pipeline. Start by incrementally
 adding passes to this flag invocation:</p>
-<pre><code>-p validate -p remove-comb-groups -p &lt;PASS 1&gt; ... -p &lt;PASS N&gt; -p compile -p lower
+<pre><code>-p validate -p simplify-with-control -p &lt;PASS 1&gt; ... -p &lt;PASS N&gt; -p compile -p lower
 </code></pre>
 <h2 id="reducing-test-files"><a class="header" href="#reducing-test-files">Reducing Test Files</a></h2>
 <p>It is often possible to reduce the size of the example program that is

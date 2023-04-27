@@ -580,11 +580,6 @@
 <span id="580">580</span>
 <span id="581">581</span>
 <span id="582">582</span>
-<span id="583">583</span>
-<span id="584">584</span>
-<span id="585">585</span>
-<span id="586">586</span>
-<span id="587">587</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{Port, RRC};
 <span class="kw">use </span>calyx_utils::Error;
 <span class="kw">use </span>std::fmt::Debug;
@@ -619,7 +614,7 @@
 }
 
 <span class="doccomment">/// An assignment guard which has pointers to the various ports from which it reads.
-</span><span class="attribute">#[derive(Debug, Clone)]
+</span><span class="attribute">#[derive(Debug, Clone, Default)]
 </span><span class="kw">pub enum </span>Guard&lt;T&gt; {
     <span class="doccomment">/// Represents `c1 || c2`.
     </span>Or(Box&lt;Guard&lt;T&gt;&gt;, Box&lt;Guard&lt;T&gt;&gt;),
@@ -627,7 +622,8 @@
     </span>And(Box&lt;Guard&lt;T&gt;&gt;, Box&lt;Guard&lt;T&gt;&gt;),
     <span class="doccomment">/// Represents `!c1`
     </span>Not(Box&lt;Guard&lt;T&gt;&gt;),
-    <span class="doccomment">/// The constant true
+    <span class="attribute">#[default]
+    </span><span class="doccomment">/// The constant true
     </span>True,
     <span class="doccomment">/// Comparison operator.
     </span>CompOp(PortComp, RRC&lt;Port&gt;, RRC&lt;Port&gt;),
@@ -635,12 +631,6 @@
     </span>Port(RRC&lt;Port&gt;),
     <span class="doccomment">/// Other types of information.
     </span>Info(T),
-}
-
-<span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>Guard&lt;T&gt; {
-    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        Guard::True
-    }
 }
 
 <span class="attribute">#[derive(Debug, Clone, Copy, PartialEq, Eq)]

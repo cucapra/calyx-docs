@@ -218,6 +218,14 @@
 <span id="218">218</span>
 <span id="219">219</span>
 <span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Define the PassManager structure that is used to construct and run pass
 //! passes.
 </span><span class="kw">use </span><span class="kw">crate</span>::traversal;
@@ -381,6 +389,7 @@
         ctx: <span class="kw-2">&amp;mut </span>ir::Context,
         incl: <span class="kw-2">&amp;</span>[String],
         excl: <span class="kw-2">&amp;</span>[String],
+        dump_ir: bool,
     ) -&gt; CalyxResult&lt;()&gt; {
         <span class="kw">let </span>(passes, excl_set) = <span class="self">self</span>.create_plan(incl, excl)<span class="question-mark">?</span>;
 
@@ -395,6 +404,13 @@
                 <span class="kw">if </span>!excl_set.contains(<span class="kw-2">&amp;</span>name) {
                     <span class="kw">let </span>start = Instant::now();
                     pass(ctx)<span class="question-mark">?</span>;
+                    <span class="kw">if </span>dump_ir {
+                        ir::Printer::write_context(
+                            ctx,
+                            <span class="bool-val">true</span>,
+                            <span class="kw-2">&amp;mut </span>std::io::stdout(),
+                        )<span class="question-mark">?</span>;
+                    }
                     <span class="kw">let </span>elapsed = start.elapsed();
                     <span class="comment">// Warn if pass takes more than 3 seconds.
                     </span><span class="kw">if </span>elapsed.as_secs() &gt; <span class="number">5 </span>{
