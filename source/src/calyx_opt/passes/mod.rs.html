@@ -80,6 +80,7 @@
 <span id="80">80</span>
 <span id="81">81</span>
 <span id="82">82</span>
+<span id="83">83</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
@@ -90,7 +91,6 @@
 <span class="kw">mod </span>compile_invoke;
 <span class="kw">mod </span>compile_ref;
 <span class="kw">mod </span>compile_static;
-<span class="kw">mod </span>compile_sync;
 <span class="kw">mod </span>component_iniliner;
 <span class="kw">mod </span>dead_assignment_removal;
 <span class="kw">mod </span>dead_cell_removal;
@@ -113,6 +113,7 @@
 <span class="kw">mod </span>remove_ids;
 <span class="kw">mod </span>reset_insertion;
 <span class="kw">mod </span>static_inliner;
+<span class="kw">mod </span>sync;
 <span class="comment">// mod simplify_guards;
 </span><span class="kw">mod </span>simplify_with_control;
 <span class="kw">mod </span>static_par_conv;
@@ -132,7 +133,6 @@
 <span class="kw">pub use </span>compile_invoke::CompileInvoke;
 <span class="kw">pub use </span>compile_ref::CompileRef;
 <span class="kw">pub use </span>compile_static::CompileStatic;
-<span class="kw">pub use </span>compile_sync::CompileSync;
 <span class="kw">pub use </span>component_iniliner::ComponentInliner;
 <span class="kw">pub use </span>dead_assignment_removal::DeadAssignmentRemoval;
 <span class="kw">pub use </span>dead_cell_removal::DeadCellRemoval;
@@ -154,6 +154,8 @@
 <span class="kw">pub use </span>reset_insertion::ResetInsertion;
 <span class="kw">pub use </span>simplify_with_control::SimplifyWithControl;
 <span class="kw">pub use </span>static_inliner::StaticInliner;
+<span class="kw">pub use </span>sync::CompileSync;
+<span class="kw">pub use </span>sync::CompileSyncWithoutSyncReg;
 <span class="comment">// pub use simplify_guards::SimplifyGuards;
 </span><span class="kw">pub use </span>static_par_conv::StaticParConv;
 <span class="kw">pub use </span>synthesis_papercut::SynthesisPapercut;

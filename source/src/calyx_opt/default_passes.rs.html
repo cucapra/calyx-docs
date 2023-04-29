@@ -161,17 +161,18 @@
 <span id="161">161</span>
 <span id="162">162</span>
 <span id="163">163</span>
+<span id="164">164</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
     CompileEmpty, CompileInvoke, CompileRef, CompileStatic, CompileSync,
-    ComponentInliner, DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval,
-    Externalize, GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner,
-    InferShare, InferStaticTiming, LowerGuards, MergeAssign, MergeStaticPar,
-    Papercut, ParToSeq, RegisterUnsharing, RemoveIds, ResetInsertion,
-    SimplifyWithControl, StaticInliner, StaticParConv, SynthesisPapercut,
-    TopDownCompileControl, TopDownStaticTiming, UnrollBounded, WellFormed,
-    WireInliner,
+    CompileSyncWithoutSyncReg, ComponentInliner, DeadAssignmentRemoval,
+    DeadCellRemoval, DeadGroupRemoval, Externalize, GoInsertion, GroupToInvoke,
+    GroupToSeq, HoleInliner, InferShare, InferStaticTiming, LowerGuards,
+    MergeAssign, MergeStaticPar, Papercut, ParToSeq, RegisterUnsharing,
+    RemoveIds, ResetInsertion, SimplifyWithControl, StaticInliner,
+    StaticParConv, SynthesisPapercut, TopDownCompileControl,
+    TopDownStaticTiming, UnrollBounded, WellFormed, WireInliner,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::Named;
 <span class="kw">use crate</span>::{pass_manager::PassManager, register_alias};
@@ -211,6 +212,7 @@
         pm.register_pass::&lt;TopDownCompileControl&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileRef&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileSync&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;CompileSyncWithoutSyncReg&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">// Lowering passes
         </span>pm.register_pass::&lt;GoInsertion&gt;()<span class="question-mark">?</span>;
@@ -238,7 +240,7 @@
             pm,
             <span class="string">&quot;pre-opt&quot;</span>,
             [
-                CompileSync,
+                CompileSyncWithoutSyncReg,
                 GroupToSeq,
                 DeadAssignmentRemoval,
                 GroupToInvoke, <span class="comment">// Creates Dead Groups potentially
