@@ -448,7 +448,7 @@
             <span class="comment">// If elimination is disabled, mark the assignments with the @dead attribute.
             </span><span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;mut </span>comp.continuous_assignments {
                 <span class="kw">if </span>rewritten.iter().any(|v| Rc::ptr_eq(v, <span class="kw-2">&amp;</span>assign.dst)) {
-                    assign.attributes.insert(<span class="string">&quot;dead&quot;</span>, <span class="number">1</span>)
+                    assign.attributes.insert(ir::InternalAttr::DEAD, <span class="number">1</span>)
                 }
             }
         } <span class="kw">else </span>{

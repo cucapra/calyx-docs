@@ -116,6 +116,11 @@
 <span id="116">116</span>
 <span id="117">117</span>
 <span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::structure;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Attributes, LibrarySignatures};
@@ -166,7 +171,8 @@
         <span class="kw">let </span>name = cell.name();
 
         <span class="comment">// Get the go port
-        </span><span class="kw">let </span><span class="kw-2">mut </span>go_ports = cell.find_all_with_attr(<span class="string">&quot;go&quot;</span>).collect_vec();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>go_ports =
+            cell.find_all_with_attr(ir::NumAttr::Go).collect_vec();
         <span class="kw">if </span>go_ports.len() &gt; <span class="number">1 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(<span class="string">&quot;Invoked component `{name}` defines multiple @go signals. Cannot compile the invoke&quot;</span>)));
         } <span class="kw">else if </span>go_ports.is_empty() {
@@ -174,7 +180,8 @@
         }
 
         <span class="comment">// Get the done ports
-        </span><span class="kw">let </span><span class="kw-2">mut </span>done_ports = cell.find_all_with_attr(<span class="string">&quot;done&quot;</span>).collect_vec();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>done_ports =
+            cell.find_all_with_attr(ir::NumAttr::Done).collect_vec();
         <span class="kw">if </span>done_ports.len() &gt; <span class="number">1 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(<span class="string">&quot;Invoked component `{name}` defines multiple @done signals. Cannot compile the invoke&quot;</span>)));
         } <span class="kw">else if </span>done_ports.is_empty() {
@@ -219,16 +226,19 @@
         }
 
         <span class="comment">// Copy &quot;static&quot; annotation from the `invoke` statement if present
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(time) = s.attributes.get(<span class="string">&quot;static&quot;</span>) {
-            invoke_group.borrow_mut().attributes.insert(<span class="string">&quot;static&quot;</span>, <span class="kw-2">*</span>time);
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(time) = s.attributes.get(ir::NumAttr::Static) {
+            invoke_group
+                .borrow_mut()
+                .attributes
+                .insert(ir::NumAttr::Static, time);
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>en = ir::Enable {
             group: invoke_group,
             attributes: Attributes::default(),
         };
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = s.attributes.get(<span class="string">&quot;static&quot;</span>) {
-            en.attributes.insert(<span class="string">&quot;static&quot;</span>, <span class="kw-2">*</span>time);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = s.attributes.get(ir::NumAttr::Static) {
+            en.attributes.insert(ir::NumAttr::Static, time);
         }
 
         <span class="prelude-val">Ok</span>(Action::change(ir::Control::Enable(en)))

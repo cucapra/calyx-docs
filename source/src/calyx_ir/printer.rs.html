@@ -773,14 +773,12 @@
 <span id="773">773</span>
 <span id="774">774</span>
 <span id="775">775</span>
-<span id="776">776</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a formatter for the in-memory representation of Components.
 //! The printing operation clones inner nodes and doesn&#39;t perform any mutation
 //! to the Component.
-</span><span class="kw">use </span>itertools::Itertools;
-
-<span class="kw">use </span><span class="kw">crate</span>::control::StaticInvoke;
+</span><span class="kw">use </span><span class="kw">crate</span>::control::StaticInvoke;
 <span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
+<span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::io;
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::rc::Rc;
@@ -792,13 +790,15 @@
     <span class="doccomment">/// Format attributes of the form `@static(1)`.
     /// Returns the empty string if the `attrs` is empty.
     </span><span class="kw">fn </span>format_at_attributes(attrs: <span class="kw-2">&amp;</span>ir::Attributes) -&gt; String {
-        <span class="kw">let </span><span class="kw-2">mut </span>buf = String::new();
-        <span class="kw">for </span>(name, val) <span class="kw">in </span>attrs {
-            <span class="kw">if </span><span class="kw-2">*</span>val == <span class="number">1 </span>{
-                buf.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;@{name} &quot;</span>));
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = attrs.to_string_with(<span class="string">&quot; &quot;</span>, |name, val| {
+            <span class="kw">if </span>val == <span class="number">1 </span>{
+                <span class="macro">format!</span>(<span class="string">&quot;@{}&quot;</span>, name)
             } <span class="kw">else </span>{
-                buf.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;@{name}({val}) &quot;</span>));
+                <span class="macro">format!</span>(<span class="string">&quot;@{}({val})&quot;</span>, name)
             }
+        });
+        <span class="kw">if </span>!attrs.is_empty() {
+            buf.push(<span class="string">&#39; &#39;</span>);
         }
         buf
     }
@@ -811,11 +811,9 @@
         } <span class="kw">else </span>{
             <span class="macro">format!</span>(
                 <span class="string">&quot;&lt;{}&gt;&quot;</span>,
-                attrs
-                    .into_iter()
-                    .map(|(k, v)| { <span class="macro">format!</span>(<span class="string">&quot;\&quot;{}\&quot;={}&quot;</span>, k, v) })
-                    .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
-                    .join(<span class="string">&quot;, &quot;</span>)
+                attrs.to_string_with(<span class="string">&quot;, &quot;</span>, |name, val| {
+                    <span class="macro">format!</span>(<span class="string">&quot;\&quot;{}\&quot;={}&quot;</span>, name, val)
+                })
             )
         }
     }

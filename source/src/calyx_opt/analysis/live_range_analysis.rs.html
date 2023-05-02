@@ -1431,13 +1431,13 @@
             }
 
             <span class="comment">// checking cell.go = !cell.done! 1&#39;d1
-            </span>asgn.dst.borrow().attributes.has(<span class="string">&quot;go&quot;</span>)
+            </span>asgn.dst.borrow().attributes.has(ir::NumAttr::Go)
                 &amp;&amp; asgn.guard.is_not_done(
                     <span class="kw-2">&amp;</span>asgn.dst.borrow().cell_parent().borrow().name(),
                 )
                 &amp;&amp; asgn.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>)
         }))
-        .filter(|port| port.borrow().attributes.has(<span class="string">&quot;go&quot;</span>))
+        .filter(|port| port.borrow().attributes.has(ir::NumAttr::Go))
         .map(|port| Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent()))
         .collect();
 
@@ -1446,7 +1446,7 @@
     </span>assigns
         .flat_map(ReadWriteSet::port_reads)
         .filter(<span class="kw">move </span>|port| {
-            <span class="kw">if </span>port.borrow().attributes.has(<span class="string">&quot;done&quot;</span>) {
+            <span class="kw">if </span>port.borrow().attributes.has(ir::NumAttr::Done) {
                 <span class="kw">let </span>done_parent = Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent());
                 go_writes
                     .iter()
@@ -2746,7 +2746,7 @@
 
                 <span class="comment">// we can only inlcude the kills if we know the while loop executes
                 // at least once
-                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(val) = c.get_attribute(<span class="string">&quot;bound&quot;</span>) {
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(val) = c.get_attribute(ir::NumAttr::Bound) {
                     <span class="kw">if </span>val &gt; <span class="number">0 </span>{
                         <span class="kw">return </span>(alive, gens, kills);
                     }

@@ -202,7 +202,10 @@
 <span id="202">202</span>
 <span id="203">203</span>
 <span id="204">204</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::Attributes;
+<span id="205">205</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::Attribute;
+
+<span class="kw">use </span><span class="kw">super</span>::Attributes;
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, GetName, Id};
 <span class="kw">use </span>linked_hash_map::LinkedHashMap;
 <span class="kw">use </span>smallvec::SmallVec;
@@ -271,17 +274,16 @@
     }
 
     <span class="doccomment">/// Return all ports that have the attribute `attr`.
-    </span><span class="kw">pub fn </span>find_all_with_attr&lt;S&gt;(
+    </span><span class="kw">pub fn </span>find_all_with_attr&lt;A&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        attr: S,
+        attr: A,
     ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span>PortDef&lt;Width&gt;&gt;
     <span class="kw">where
-        </span>S: Into&lt;Id&gt;,
+        </span>A: Into&lt;Attribute&gt; + Copy,
     {
-        <span class="kw">let </span>key = attr.into();
         <span class="self">self</span>.signature
             .iter()
-            .filter(<span class="kw">move </span>|<span class="kw-2">&amp;</span>g| g.attributes.has(key))
+            .filter(<span class="kw">move </span>|<span class="kw-2">&amp;</span>g| g.attributes.has(attr))
     }
 }
 

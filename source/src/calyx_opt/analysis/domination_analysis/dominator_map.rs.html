@@ -679,6 +679,8 @@
 <span id="679">679</span>
 <span id="680">680</span>
 <span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     domination_analysis::node_analysis::{NodeReads, NodeSearch},
     ControlId, ShareSet,
@@ -688,9 +690,11 @@
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::fmt::Debug;
 
-<span class="kw">const </span>NODE_ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;NODE_ID&quot;</span>;
-<span class="kw">const </span>BEGIN_ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;BEGIN_ID&quot;</span>;
-<span class="kw">const </span>END_ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;END_ID&quot;</span>;
+<span class="kw">const </span>NODE_ID: ir::Attribute =
+    ir::Attribute::Internal(ir::InternalAttr::NODE_ID);
+<span class="kw">const </span>BEGIN_ID: ir::Attribute =
+    ir::Attribute::Internal(ir::InternalAttr::BEGIN_ID);
+<span class="kw">const </span>END_ID: ir::Attribute = ir::Attribute::Internal(ir::InternalAttr::END_ID);
 
 <span class="doccomment">/// Builds a Domination Map for the control program. It maps nodes to sets of
 /// nodes. Here is what is included as a &quot;node&quot; in the domination map:

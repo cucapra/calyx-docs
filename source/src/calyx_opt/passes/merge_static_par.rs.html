@@ -198,7 +198,7 @@
             mem::take(<span class="kw-2">&amp;mut </span>s.stmts).into_iter().partition(|stmt| {
                 <span class="kw">if let </span>ir::Control::Enable(en) = stmt {
                     <span class="macro">matches!</span>(
-                        en.group.borrow().attributes.get(<span class="string">&quot;static&quot;</span>),
+                        en.group.borrow().attributes.get(ir::NumAttr::Static),
                         <span class="prelude-val">Some</span>(<span class="kw">_</span>)
                     )
                 } <span class="kw">else </span>{
@@ -212,13 +212,13 @@
             <span class="kw">if let </span>ir::Control::Enable(data) = stmt {
                 <span class="kw">let </span>group = <span class="kw-2">&amp;</span>data.group;
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(static_time) =
-                    group.borrow().attributes.get(<span class="string">&quot;static&quot;</span>)
+                    group.borrow().attributes.get(ir::NumAttr::Static)
                 {
-                    <span class="kw">if </span>!static_group.contains_key(static_time) {
-                        static_group.insert(<span class="kw-2">*</span>static_time, Vec::new());
+                    <span class="kw">if </span>!static_group.contains_key(<span class="kw-2">&amp;</span>static_time) {
+                        static_group.insert(static_time, Vec::new());
                     }
                     static_group
-                        .get_mut(static_time)
+                        .get_mut(<span class="kw-2">&amp;</span>static_time)
                         .unwrap()
                         .push(Rc::clone(group));
                 }
@@ -260,21 +260,21 @@
 
                 grp.borrow_mut().assignments.push(done_asmt);
 
-                grp.borrow_mut().attributes.insert(<span class="string">&quot;static&quot;</span>, key);
+                grp.borrow_mut().attributes.insert(ir::NumAttr::Static, key);
                 comp.get_groups_mut().add(Rc::clone(<span class="kw-2">&amp;</span>grp));
 
                 <span class="kw">let </span><span class="kw-2">mut </span>enable: ir::Enable = Enable {
                     group: Rc::clone(<span class="kw-2">&amp;</span>grp),
                     attributes: Attributes::default(),
                 };
-                enable.attributes.insert(<span class="string">&quot;static&quot;</span>, key);
+                enable.attributes.insert(ir::NumAttr::Static, key);
                 s.stmts.push(ir::Control::Enable(enable));
             } <span class="kw">else </span>{
                 <span class="kw">let </span><span class="kw-2">mut </span>enable: ir::Enable = Enable {
                     group: Rc::clone(<span class="kw-2">&amp;</span>value[<span class="number">0</span>]),
                     attributes: Attributes::default(),
                 };
-                enable.attributes.insert(<span class="string">&quot;static&quot;</span>, key);
+                enable.attributes.insert(ir::NumAttr::Static, key);
                 s.stmts.push(ir::Control::Enable(enable));
             }
         }

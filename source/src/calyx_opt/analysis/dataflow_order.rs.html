@@ -198,6 +198,9 @@
 <span id="198">198</span>
 <span id="199">199</span>
 <span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::read_write_set::ReadWriteSet;
 <span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
@@ -231,7 +234,7 @@
     // @stable or is an interface port in which case it does not depend on any inputs.
     </span><span class="kw">for </span>port <span class="kw">in </span><span class="kw-2">&amp;</span>prim.signature {
         <span class="kw">let </span>attrs = <span class="kw-2">&amp;</span>port.attributes;
-        <span class="kw">if </span>attrs.get(<span class="string">&quot;read_together&quot;</span>).is_some() {
+        <span class="kw">if </span>attrs.get(ir::NumAttr::ReadTogether).is_some() {
             <span class="kw">continue</span>;
         }
         <span class="kw">match </span>port.direction {
@@ -240,7 +243,10 @@
             }
             ir::Direction::Output =&gt; outputs.push((
                 port.name,
-                attrs.get(<span class="string">&quot;stable&quot;</span>).or_else(|| attrs.get(<span class="string">&quot;done&quot;</span>)).is_some(),
+                attrs
+                    .get(ir::BoolAttr::Stable)
+                    .or_else(|| attrs.get(ir::NumAttr::Done))
+                    .is_some(),
             )),
             ir::Direction::Inout =&gt; {
                 <span class="macro">unreachable!</span>(<span class="string">&quot;Primitive ports should not be inout&quot;</span>)

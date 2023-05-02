@@ -352,11 +352,11 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>asgns = <span class="macro">vec!</span>[
             builder.build_assignment(
                 top_level.borrow().get(<span class="string">&quot;go&quot;</span>),
-                this_comp.borrow().get_with_attr(<span class="string">&quot;go&quot;</span>),
+                this_comp.borrow().get_with_attr(ir::NumAttr::Go),
                 ir::Guard::True,
             ),
             builder.build_assignment(
-                this_comp.borrow().get_with_attr(<span class="string">&quot;done&quot;</span>),
+                this_comp.borrow().get_with_attr(ir::NumAttr::Done),
                 top_level.borrow().get(<span class="string">&quot;done&quot;</span>),
                 ir::Guard::True,
             ),

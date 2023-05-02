@@ -756,11 +756,9 @@
 <span id="756">756</span>
 <span id="757">757</span>
 <span id="758">758</span>
-<span id="759">759</span>
-<span id="760">760</span>
-<span id="761">761</span>
-<span id="762">762</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::StaticGroup;
+</pre><pre class="rust"><code><span class="kw">use </span>calyx_frontend::Attribute;
+
+<span class="kw">use </span><span class="kw">super</span>::StaticGroup;
 <span class="kw">use </span>std::rc::Rc;
 
 <span class="kw">use super</span>::{Attributes, Cell, CombGroup, GetAttributes, Group, Id, Port, RRC};
@@ -979,11 +977,8 @@
 
 <span class="kw">impl </span>StaticEnable {
     <span class="doccomment">/// Returns the value of an attribute if present
-    </span><span class="kw">pub fn </span>get_attribute&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: S) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
-    <span class="kw">where
-        </span>S: Into&lt;Id&gt;,
-    {
-        <span class="self">self</span>.get_attributes().get(attr).copied()
+    </span><span class="kw">pub fn </span>get_attribute(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: Attribute) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="self">self</span>.get_attributes().get(attr)
     }
 }
 
@@ -1263,17 +1258,17 @@
     }
 
     <span class="doccomment">/// Returns the value of an attribute if present
-    </span><span class="kw">pub fn </span>get_attribute&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: S) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
+    </span><span class="kw">pub fn </span>get_attribute&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
     <span class="kw">where
-        </span>S: Into&lt;Id&gt;,
+        </span>A: Into&lt;Attribute&gt;,
     {
-        <span class="self">self</span>.get_attributes().get(attr).copied()
+        <span class="self">self</span>.get_attributes().get(attr)
     }
 
     <span class="doccomment">/// Returns true if the node has a specific attribute
-    </span><span class="kw">pub fn </span>has_attribute&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: S) -&gt; bool
+    </span><span class="kw">pub fn </span>has_attribute&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; bool
     <span class="kw">where
-        </span>S: Into&lt;Id&gt;,
+        </span>A: Into&lt;Attribute&gt;,
     {
         <span class="self">self</span>.get_attributes().has(attr)
     }
@@ -1334,11 +1329,8 @@
     }
 
     <span class="doccomment">/// Returns the value of an attribute if present
-    </span><span class="kw">pub fn </span>get_attribute&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: S) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
-    <span class="kw">where
-        </span>S: Into&lt;Id&gt;,
-    {
-        <span class="self">self</span>.get_attributes().get(attr).copied()
+    </span><span class="kw">pub fn </span>get_attribute(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: Attribute) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="self">self</span>.get_attributes().get(attr)
     }
 
     <span class="doccomment">/// Returns the value of an attribute if present

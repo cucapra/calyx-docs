@@ -925,7 +925,7 @@
                 </span><span class="kw">if </span><span class="self">self</span>.always_inline {
                     cell.is_component()
                 } <span class="kw">else </span>{
-                    cell.get_attribute(<span class="string">&quot;inline&quot;</span>).is_some()
+                    cell.get_attribute(ir::BoolAttr::Inline).is_some()
                 }
             });
         comp.cells.append(cells.into_iter());
@@ -1116,7 +1116,7 @@
         </span><span class="kw">let </span>cell = s.comp.borrow();
         <span class="kw">if let </span><span class="prelude-val">Some</span>(con) = <span class="self">self</span>.control_map.get_mut(<span class="kw-2">&amp;</span>cell.name()) {
             <span class="kw">if </span><span class="self">self</span>.new_fsms {
-                con.get_mut_attributes().insert(<span class="string">&quot;new_fsm&quot;</span>, <span class="number">1</span>);
+                con.get_mut_attributes().insert(ir::BoolAttr::NewFSM, <span class="number">1</span>);
             }
             <span class="prelude-val">Ok</span>(Action::change(ir::Cloner::control(con)))
         } <span class="kw">else </span>{

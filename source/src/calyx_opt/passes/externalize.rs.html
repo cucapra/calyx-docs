@@ -153,7 +153,7 @@
 
 <span class="kw">fn </span>has_external_attribute(cr: <span class="kw-2">&amp;</span>RRC&lt;ir::Cell&gt;) -&gt; bool {
     <span class="kw">let </span>cell = cr.borrow();
-    cell.get_attribute(<span class="string">&quot;external&quot;</span>).is_some()
+    cell.get_attribute(ir::BoolAttr::External).is_some()
 }
 
 <span class="kw">impl </span>Visitor <span class="kw">for </span>Externalize {

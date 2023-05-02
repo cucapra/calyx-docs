@@ -717,7 +717,7 @@
             RESERVED_NAMES.iter().map(|s| ir::Id::from(<span class="kw-2">*</span>s)).collect();
 
         <span class="kw">for </span>prim <span class="kw">in </span>ctx.lib.signatures() {
-            <span class="kw">if </span>prim.attributes.has(<span class="string">&quot;static&quot;</span>) {
+            <span class="kw">if </span>prim.attributes.has(ir::NumAttr::Static) {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Primitive `{}`: Defining @static attributes on components is deprecated. Place the @static attribute on the port marked as @go&quot;</span>, prim.name)));
             }
         }
@@ -725,7 +725,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>ref_cell_types = HashMap::new();
         <span class="kw">for </span>comp <span class="kw">in </span>ctx.components.iter() {
             <span class="comment">// Defining @static on the component is meaningless
-            </span><span class="kw">if </span>comp.attributes.has(<span class="string">&quot;static&quot;</span>) {
+            </span><span class="kw">if </span>comp.attributes.has(ir::NumAttr::Static) {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}`: Defining @static attributes on components is deprecated. Place the @static attribute on the port marked as @go&quot;</span>, comp.name)));
             }
 
@@ -748,7 +748,7 @@
                 .filter_map(|cr| {
                     <span class="kw">let </span>cell = cr.borrow();
                     <span class="comment">// Make sure @external cells are not defined in non-entrypoint components
-                    </span><span class="kw">if </span>cell.attributes.has(<span class="string">&quot;external&quot;</span>)
+                    </span><span class="kw">if </span>cell.attributes.has(ir::BoolAttr::External)
                         &amp;&amp; comp.name != ctx.entrypoint
                     {
                         <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(Error::malformed_structure(<span class="string">&quot;Cell cannot be marked `@external` in non-entrypoint component&quot;</span>).with_pos(<span class="kw-2">&amp;</span>cell.attributes)))
@@ -1004,8 +1004,8 @@
         <span class="comment">// A group with &quot;static&quot;=0 annotation
         </span><span class="kw">if </span>group
             .attributes
-            .get(<span class="string">&quot;static&quot;</span>)
-            .map(|v| <span class="kw-2">*</span>v == <span class="number">0</span>)
+            .get(ir::NumAttr::Static)
+            .map(|v| v == <span class="number">0</span>)
             .unwrap_or(<span class="bool-val">false</span>)
         {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="string">&quot;Group with annotation \&quot;static\&quot;=0 is invalid. Use `comb group` instead to define a combinational group or if the group&#39;s done condition is not constant, provide the correct \&quot;static\&quot; annotation.&quot;</span>).with_pos(<span class="kw-2">&amp;</span>group.attributes));
@@ -1052,8 +1052,8 @@
         <span class="comment">// A group with &quot;static&quot;=0 annotation
         </span><span class="kw">if </span>group
             .attributes
-            .get(<span class="string">&quot;static&quot;</span>)
-            .map(|v| <span class="kw-2">*</span>v == <span class="number">0</span>)
+            .get(ir::NumAttr::Static)
+            .map(|v| v == <span class="number">0</span>)
             .unwrap_or(<span class="bool-val">false</span>)
         {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="string">&quot;Group with annotation \&quot;static\&quot;=0 is invalid. Use `comb group` instead to define a combinational group or if the group&#39;s done condition is not constant, provide the correct \&quot;static\&quot; annotation.&quot;</span>).with_pos(<span class="kw-2">&amp;</span>group.attributes));

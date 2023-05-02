@@ -186,16 +186,22 @@
 <span id="186">186</span>
 <span id="187">187</span>
 <span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::passes::math_utilities::get_bit_width_from;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, guard, structure, RRC};
 <span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>std::rc::Rc;
 
 <span class="doccomment">/// Name of the attributes added by this pass.
-</span><span class="kw">pub const </span>ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;ST_ID&quot;</span>;
-<span class="kw">pub const </span>LOOP: <span class="kw-2">&amp;</span>str = <span class="string">&quot;LOOP&quot;</span>;
-<span class="kw">pub const </span>START: <span class="kw-2">&amp;</span>str = <span class="string">&quot;START&quot;</span>;
-<span class="kw">pub const </span>END: <span class="kw-2">&amp;</span>str = <span class="string">&quot;END&quot;</span>;
+</span><span class="kw">pub const </span>ID: ir::Attribute = ir::Attribute::Internal(ir::InternalAttr::ST_ID);
+<span class="kw">pub const </span>LOOP: ir::Attribute = ir::Attribute::Internal(ir::InternalAttr::LOOP);
+<span class="kw">pub const </span>START: ir::Attribute =
+    ir::Attribute::Internal(ir::InternalAttr::START);
+<span class="kw">pub const </span>END: ir::Attribute = ir::Attribute::Internal(ir::InternalAttr::END);
 
 <span class="doccomment">/// Computes the states associated with control nodes in a static program.
 /// Each enable statement gets a number corresponding to the FSM state when it
@@ -234,8 +240,8 @@
         <span class="kw">match </span>con {
             ir::Control::Enable(en) =&gt; {
                 <span class="macro">debug_assert!</span>(en.attributes.get(ID).is_none());
-                en.attributes[ID] = <span class="self">self</span>.cur_st;
-                <span class="kw">let </span>time = en.attributes[<span class="string">&quot;static&quot;</span>];
+                en.attributes.insert(ID, <span class="self">self</span>.cur_st);
+                <span class="kw">let </span>time = en.attributes.get(ir::NumAttr::Static).unwrap();
                 <span class="self">self</span>.cur_st += time;
             }
             ir::Control::Static(<span class="kw">_</span>) =&gt; {
@@ -254,17 +260,17 @@
             }
             ir::Control::While(wh) =&gt; <span class="self">self</span>.compute_while(wh, builder),
             ir::Control::Par(par) =&gt; {
-                par.attributes[ID] = <span class="self">self</span>.cur_st;
+                par.attributes.insert(ID, <span class="self">self</span>.cur_st);
                 <span class="comment">// All statements should only contain enables and get the same
                 // start state as the `par` block.
                 </span><span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;mut </span>par.stmts {
                     <span class="kw">if let </span>ir::Control::Enable(en) = stmt {
-                        en.attributes[ID] = <span class="self">self</span>.cur_st;
+                        en.attributes.insert(ID, <span class="self">self</span>.cur_st);
                     } <span class="kw">else </span>{
                         <span class="macro">unreachable!</span>(<span class="string">&quot;Par should only contain enables&quot;</span>)
                     }
                 }
-                <span class="kw">let </span>time = par.attributes[<span class="string">&quot;static&quot;</span>];
+                <span class="kw">let </span>time = par.attributes.get(ir::NumAttr::Static).unwrap();
                 <span class="self">self</span>.cur_st += time;
             }
             ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
@@ -278,8 +284,8 @@
 
     <span class="kw">fn </span>compute_while(<span class="kw-2">&amp;mut </span><span class="self">self</span>, wh: <span class="kw-2">&amp;mut </span>ir::While, builder: <span class="kw-2">&amp;mut </span>ir::Builder) {
         <span class="comment">// Compute START, END, and LOOP index attributes
-        </span>wh.attributes[START] = <span class="self">self</span>.cur_st;
-        <span class="kw">let </span>body_time = wh.attributes[<span class="string">&quot;static&quot;</span>];
+        </span>wh.attributes.insert(START, <span class="self">self</span>.cur_st);
+        <span class="kw">let </span>body_time = wh.attributes.get(ir::NumAttr::Static).unwrap();
         <span class="comment">// Instantiate the indexing variable for this while loop
         </span><span class="kw">let </span>size = get_bit_width_from(body_time + <span class="number">1</span>);
         <span class="macro">structure!</span>(builder;
@@ -288,10 +294,10 @@
         <span class="self">self</span>.indices.push(idx);
         <span class="kw">let </span>idx_pos = <span class="self">self</span>.indices.len() - <span class="number">1</span>;
         <span class="comment">// Add attribute to track the loop counter
-        </span>wh.attributes[LOOP] = idx_pos <span class="kw">as </span>u64;
+        </span>wh.attributes.insert(LOOP, idx_pos <span class="kw">as </span>u64);
         <span class="self">self</span>.recur(<span class="kw-2">&amp;mut </span>wh.body, builder);
         <span class="comment">// Mark the end state of the body
-        </span>wh.attributes[END] = <span class="self">self</span>.cur_st;
+        </span>wh.attributes.insert(END, <span class="self">self</span>.cur_st);
     }
 
     <span class="doccomment">/// Computes the outgoing edges from the control programs.
@@ -305,14 +311,18 @@
     ) {
         <span class="kw">match </span>con {
             ir::Control::Enable(en) =&gt; {
-                <span class="kw">let </span>st = en.attributes[ID] + en.attributes[<span class="string">&quot;static&quot;</span>] - <span class="number">1</span>;
+                <span class="kw">let </span>st = en.attributes.get(ID).unwrap()
+                    + en.attributes.get(ir::NumAttr::Static).unwrap()
+                    - <span class="number">1</span>;
                 exits.push((st, ir::Guard::True));
             }
             ir::Control::Static(<span class="kw">_</span>) =&gt; {
                 <span class="macro">panic!</span>(<span class="string">&quot;Static behavior on tdst TBD&quot;</span>)
             }
             ir::Control::Par(par) =&gt; {
-                <span class="kw">let </span>st = par.attributes[ID] + par.attributes[<span class="string">&quot;static&quot;</span>] - <span class="number">1</span>;
+                <span class="kw">let </span>st = par.attributes.get(ID).unwrap()
+                    + par.attributes.get(ir::NumAttr::Static).unwrap()
+                    - <span class="number">1</span>;
                 exits.push((st, ir::Guard::True))
             }
             ir::Control::Seq(s) =&gt; {
@@ -359,12 +369,12 @@
         wh: <span class="kw-2">&amp;</span>ir::While,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
     ) -&gt; (RRC&lt;ir::Cell&gt;, RRC&lt;ir::Cell&gt;) {
-        <span class="kw">let </span>max_count = wh.attributes[<span class="string">&quot;static&quot;</span>];
+        <span class="kw">let </span>max_count = wh.attributes.get(ir::NumAttr::Static).unwrap();
         <span class="kw">let </span>size = get_bit_width_from(max_count + <span class="number">1</span>);
         <span class="macro">structure!</span>(builder;
             <span class="kw">let </span>max = constant(max_count, size);
         );
-        <span class="kw">let </span>idx_pos = wh.attributes[LOOP] <span class="kw">as </span>usize;
+        <span class="kw">let </span>idx_pos = wh.attributes.get(LOOP).unwrap() <span class="kw">as </span>usize;
         <span class="kw">let </span>idx = Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.indices[idx_pos]);
         (idx, max)
     }

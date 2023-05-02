@@ -52,6 +52,7 @@
 <span id="52">52</span>
 <span id="53">53</span>
 <span id="54">54</span>
+<span id="55">55</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Internal representation for the [Calyx compiler](https://calyxir.org).
 //!
 //! The representation is generated from the frontend AST.
@@ -98,7 +99,8 @@
 
 <span class="comment">// Re-export types from the frontend.
 </span><span class="kw">pub use </span>calyx_frontend::{
-    Attributes, Direction, GetAttributes, PortDef, Primitive, Width,
+    Attribute, Attributes, BoolAttr, Direction, GetAttributes, InternalAttr,
+    NumAttr, PortDef, Primitive, Width, DEPRECATED_ATTRIBUTES,
 };
 
 <span class="doccomment">/// Module to transform AST programs into IR.

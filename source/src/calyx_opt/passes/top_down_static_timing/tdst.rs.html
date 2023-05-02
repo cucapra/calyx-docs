@@ -922,6 +922,8 @@
 <span id="922">922</span>
 <span id="923">923</span>
 <span id="924">924</span>
+<span id="925">925</span>
+<span id="926">926</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::compute_states::{END, START};
 <span class="kw">use </span><span class="kw">crate</span>::analysis::WithStatic;
 <span class="kw">use </span><span class="kw">crate</span>::passes::top_down_static_timing::{ComputeStates, Normalize};
@@ -1308,15 +1310,15 @@
         con: <span class="kw-2">&amp;</span>ir::Enable,
         preds: Vec&lt;PredEdge&gt;,
     ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
-        <span class="kw">let </span>time_option = con.attributes.get(<span class="string">&quot;static&quot;</span>);
-        <span class="kw">let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>time) = time_option <span class="kw">else </span>{
+        <span class="kw">let </span>time_option = con.attributes.get(ir::NumAttr::Static);
+        <span class="kw">let </span><span class="prelude-val">Some</span>(time) = time_option <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::pass_assumption(
         TopDownStaticTiming::name(),
             <span class="string">&quot;enable is missing @static annotation. This happens when the enclosing control program has a @static annotation but the enable is missing one.&quot;</span>.to_string(),
             ).with_pos(<span class="kw-2">&amp;</span>con.attributes));
         };
 
-        <span class="kw">let </span>cur_st = con.attributes[ID];
+        <span class="kw">let </span>cur_st = con.attributes.get(ID).unwrap();
 
         <span class="comment">// Enable the group during the transition. Note that this is similar to
         // what tdcc does the early transitions flag. However, unlike tdcc, we
@@ -1393,7 +1395,9 @@
             }
         }
         <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(
-            con.attributes[ID] + con.attributes[<span class="string">&quot;static&quot;</span>] - <span class="number">1</span>,
+            con.attributes.get(ID).unwrap()
+                + con.attributes.get(ir::NumAttr::Static).unwrap()
+                - <span class="number">1</span>,
             ir::Guard::True,
         )])
     }
@@ -1547,7 +1551,7 @@
         }
 
         <span class="comment">// Construct the index and incrementing logic.
-        </span><span class="kw">let </span>bound = wh.attributes[<span class="string">&quot;bound&quot;</span>];
+        </span><span class="kw">let </span>bound = wh.attributes.get(ir::NumAttr::Bound).unwrap();
         <span class="comment">// Loop bound should not be less than 1.
         </span><span class="kw">if </span>bound &lt; <span class="number">1 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
@@ -1585,8 +1589,8 @@
         );
         <span class="comment">// Even though the assignments are active during [cur_state, body_nxt), we expect only `bound*body` number of
         // states will actually be traversed internally.
-        </span><span class="kw">let </span>cur_state = wh.attributes[START];
-        <span class="kw">let </span>body_nxt = wh.attributes[END];
+        </span><span class="kw">let </span>cur_state = wh.attributes.get(START).unwrap();
+        <span class="kw">let </span>body_nxt = wh.attributes.get(END).unwrap();
         <span class="self">self</span>.add_enables(
             cur_state,
             body_nxt,
@@ -1628,7 +1632,7 @@
         dump_fsm: bool,
     ) -&gt; CalyxResult&lt;RRC&lt;ir::Group&gt;&gt; {
         <span class="macro">debug_assert!</span>(
-            con.get_attribute(<span class="string">&quot;static&quot;</span>).is_some(),
+            con.get_attribute(ir::NumAttr::Static).is_some(),
             <span class="string">&quot;Attempted to compile non-static program&quot;
         </span>);
         <span class="comment">// Normalize the program
@@ -1720,10 +1724,10 @@
         </span><span class="kw">if </span><span class="macro">matches!</span>(con, ir::Control::Enable(<span class="kw">_</span>) | ir::Control::Empty(<span class="kw">_</span>)) {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = con.get_attribute(<span class="string">&quot;static&quot;</span>) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = con.get_attribute(ir::NumAttr::Static) {
             <span class="kw">let </span>group = Schedule::compile(con, builder, dump_fsm)<span class="question-mark">?</span>;
             <span class="kw">let </span><span class="kw-2">mut </span>en = ir::Control::enable(group);
-            en.get_mut_attributes()[<span class="string">&quot;static&quot;</span>] = time;
+            en.get_mut_attributes().insert(ir::NumAttr::Static, time);
             <span class="kw-2">*</span>con = en;
         } <span class="kw">else </span>{
             <span class="kw">match </span>con {
@@ -1759,7 +1763,7 @@
             comp.cells.iter().any(|c| c.borrow().is_component());
         <span class="kw">if </span>has_subcomponents {
             <span class="prelude-val">Some</span>(<span class="string">&quot;Subcomponents with static timing not supported&quot;</span>.to_string())
-        } <span class="kw">else if </span>!comp.control.borrow().has_attribute(<span class="string">&quot;static&quot;</span>) {
+        } <span class="kw">else if </span>!comp.control.borrow().has_attribute(ir::NumAttr::Static) {
             <span class="prelude-val">Some</span>(
                 <span class="string">&quot;Mixed static-dynamic control programs are not supported&quot;
                     </span>.to_string(),
@@ -1782,7 +1786,7 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Stop);
         }
 
-        <span class="kw">if </span>!con.has_attribute(<span class="string">&quot;static&quot;</span>) {
+        <span class="kw">if </span>!con.has_attribute(ir::NumAttr::Static) {
             <span class="macro">unreachable!</span>(<span class="string">&quot;Entire program must be static&quot;</span>);
         }
 
@@ -1797,7 +1801,7 @@
         sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">if </span>!con.attributes.has(<span class="string">&quot;static&quot;</span>) {
+        <span class="kw">if </span>!con.attributes.has(ir::NumAttr::Static) {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
         }
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
@@ -1806,11 +1810,11 @@
             <span class="kw">match </span>stmt {
                 ir::Control::Enable(<span class="kw">_</span>) =&gt; {}
                 con =&gt; {
-                    <span class="kw">let </span>time = con.get_attribute(<span class="string">&quot;static&quot;</span>).unwrap();
+                    <span class="kw">let </span>time = con.get_attribute(ir::NumAttr::Static).unwrap();
                     <span class="kw">let </span>group =
                         Schedule::compile(con, <span class="kw-2">&amp;mut </span>builder, <span class="self">self</span>.dump_fsm)<span class="question-mark">?</span>;
                     <span class="kw">let </span><span class="kw-2">mut </span>en = ir::Control::enable(group);
-                    en.get_mut_attributes()[<span class="string">&quot;static&quot;</span>] = time;
+                    en.get_mut_attributes().insert(ir::NumAttr::Static, time);
                     <span class="kw-2">*</span>con = en;
                 }
             }

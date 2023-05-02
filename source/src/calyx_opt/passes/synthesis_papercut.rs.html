@@ -94,6 +94,7 @@
 <span id="94">94</span>
 <span id="95">95</span>
 <span id="96">96</span>
+<span id="97">97</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::GraphAnalysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures};
@@ -146,7 +147,8 @@
                 <span class="kw">let </span>cell = <span class="kw-2">&amp;</span>cell.borrow();
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>parent) = cell.type_name() {
                     <span class="kw">if </span><span class="self">self</span>.memories.contains(parent) {
-                        <span class="kw">let </span>has_external = cell.get_attribute(<span class="string">&quot;external&quot;</span>);
+                        <span class="kw">let </span>has_external =
+                            cell.get_attribute(ir::BoolAttr::External);
                         <span class="kw">if </span>has_external.is_none() {
                             <span class="kw">return </span><span class="prelude-val">Some</span>(cell.name());
                         }
@@ -174,7 +176,7 @@
             <span class="kw">if </span>analysis.reads_from(<span class="kw-2">&amp;</span>read_port.borrow()).next().is_none() {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::papercut(
                     <span class="macro">format!</span>(
-                        <span class="string">&quot;Only writes performed on memory `{mem}&#39;. Synthesis tools will remove this memory. Add @external(1) to cell to turn this into an interface memory.&quot;</span>,
+                        <span class="string">&quot;Only writes performed on memory `{mem}&#39;. Synthesis tools will remove this memory. Add @external to cell to turn this into an interface memory.&quot;</span>,
                     ),
                 ));
             }
@@ -182,7 +184,7 @@
             <span class="kw">if </span>analysis.writes_to(<span class="kw-2">&amp;</span>write_port.borrow()).next().is_none() {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::papercut(
                     <span class="macro">format!</span>(
-                        <span class="string">&quot;Only reads performed on memory `{mem}&#39;. Synthesis tools will remove this memory. Add @external(1) to cell to turn this into an interface memory.&quot;</span>,
+                        <span class="string">&quot;Only reads performed on memory `{mem}&#39;. Synthesis tools will remove this memory. Add @external to cell to turn this into an interface memory.&quot;</span>,
                     ),
                 ));
             }

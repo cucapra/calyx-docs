@@ -173,6 +173,8 @@
 <span id="173">173</span>
 <span id="174">174</span>
 <span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>std::collections::HashSet;
@@ -278,7 +280,9 @@
         </span><span class="self">self</span>.all_reads.extend(
             comp.cells
                 .iter()
-                .filter(|c| c.borrow().attributes.get(<span class="string">&quot;external&quot;</span>).is_some())
+                .filter(|c| {
+                    c.borrow().attributes.get(ir::BoolAttr::External).is_some()
+                })
                 .map(|c| c.borrow().name()),
         );
         <span class="comment">// Add component signature

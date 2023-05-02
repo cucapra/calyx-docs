@@ -111,6 +111,9 @@
 <span id="111">111</span>
 <span id="112">112</span>
 <span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes};
 <span class="kw">use </span>std::{cmp, iter};
 
@@ -127,16 +130,19 @@
     /// **Requires**: The control program has a static attribute.
     </span><span class="kw">pub fn </span>apply(con: <span class="kw-2">&amp;mut </span>ir::Control, builder: <span class="kw-2">&amp;mut </span>ir::Builder) {
         <span class="macro">debug_assert!</span>(
-            con.get_attribute(<span class="string">&quot;static&quot;</span>).is_some(),
+            con.get_attribute(ir::NumAttr::Static).is_some(),
             <span class="string">&quot;Attempting to normalize non-static program&quot;
         </span>);
         <span class="kw">let </span>balance = builder.add_group(<span class="string">&quot;balance&quot;</span>);
-        balance.borrow_mut().attributes[<span class="string">&quot;static&quot;</span>] = <span class="number">1</span>;
+        balance
+            .borrow_mut()
+            .attributes
+            .insert(ir::NumAttr::Static, <span class="number">1</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>balance = ir::Enable {
             group: balance,
             attributes: ir::Attributes::default(),
         };
-        balance.attributes[<span class="string">&quot;static&quot;</span>] = <span class="number">1</span>;
+        balance.attributes.insert(ir::NumAttr::Static, <span class="number">1</span>);
         <span class="kw">let </span>norm = Normalize { balance };
         norm.recur(con);
     }
@@ -152,8 +158,8 @@
             }) =&gt; {
                 <span class="self">self</span>.recur(tbranch);
                 <span class="self">self</span>.recur(fbranch);
-                <span class="kw">let </span>ttime = tbranch.get_attribute(<span class="string">&quot;static&quot;</span>).unwrap();
-                <span class="kw">let </span>ftime = fbranch.get_attribute(<span class="string">&quot;static&quot;</span>).unwrap();
+                <span class="kw">let </span>ttime = tbranch.get_attribute(ir::NumAttr::Static).unwrap();
+                <span class="kw">let </span>ftime = fbranch.get_attribute(ir::NumAttr::Static).unwrap();
                 <span class="kw">let </span>max_time = cmp::max(ttime, ftime);
                 <span class="self">self</span>.extend_control(tbranch, max_time, <span class="kw-2">&amp;</span><span class="self">self</span>.balance);
                 <span class="self">self</span>.extend_control(fbranch, max_time, <span class="kw-2">&amp;</span><span class="self">self</span>.balance);
@@ -177,7 +183,7 @@
         time: u64,
         balance: <span class="kw-2">&amp;</span>ir::Enable,
     ) {
-        <span class="kw">let </span>cur_time = con.get_attribute(<span class="string">&quot;static&quot;</span>).unwrap();
+        <span class="kw">let </span>cur_time = con.get_attribute(ir::NumAttr::Static).unwrap();
 
         <span class="kw">if </span>cur_time &lt; time {
             <span class="kw">let </span>bal = ir::Control::Enable(ir::Cloner::enable(balance));
@@ -188,7 +194,7 @@
             } <span class="kw">else </span>{
                 ir::Control::seq(iter::once(inner).chain(extra).collect())
             };
-            seq.get_mut_attributes().insert(<span class="string">&quot;static&quot;</span>, time);
+            seq.get_mut_attributes().insert(ir::NumAttr::Static, time);
             <span class="kw-2">*</span>con = Box::new(seq);
         }
     }
@@ -211,17 +217,17 @@
     </span><span class="kw">fn </span>denest_loop(wh: <span class="kw-2">&amp;mut </span>ir::While) {
         <span class="kw">let </span><span class="kw-2">mut </span>body =
             std::mem::replace(<span class="kw-2">&amp;mut </span>wh.body, Box::new(ir::Control::empty()));
-        <span class="kw">let </span><span class="kw-2">mut </span>bound = wh.attributes[<span class="string">&quot;bound&quot;</span>];
-        <span class="kw">let </span><span class="kw-2">mut </span>body_time = body.get_attribute(<span class="string">&quot;static&quot;</span>).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>bound = wh.attributes.get(ir::NumAttr::Bound).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>body_time = body.get_attribute(ir::NumAttr::Static).unwrap();
 
         <span class="kw">while let </span>ir::Control::While(inner) = <span class="kw-2">*</span>body {
-            bound <span class="kw-2">*</span>= inner.attributes[<span class="string">&quot;bound&quot;</span>];
+            bound <span class="kw-2">*</span>= inner.attributes.get(ir::NumAttr::Bound).unwrap();
             body = inner.body;
-            body_time = body.get_attribute(<span class="string">&quot;static&quot;</span>).unwrap();
+            body_time = body.get_attribute(ir::NumAttr::Static).unwrap();
         }
         wh.body = body;
-        wh.attributes[<span class="string">&quot;bound&quot;</span>] = bound;
-        wh.attributes[<span class="string">&quot;static&quot;</span>] = body_time * bound;
+        wh.attributes.insert(ir::NumAttr::Bound, bound);
+        wh.attributes.insert(ir::NumAttr::Static, body_time * bound);
     }
 }
 </code></pre></div>

@@ -460,6 +460,7 @@
 <span id="460">460</span>
 <span id="461">461</span>
 <span id="462">462</span>
+<span id="463">463</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ReadWriteSet;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
@@ -596,7 +597,7 @@
         .filter(|port_ref| port_ref.borrow().get_parent_name() == name)
         .all(|port_ref| {
             <span class="kw">let </span>atts = <span class="kw-2">&amp;</span>port_ref.borrow().attributes;
-            atts.has(<span class="string">&quot;stable&quot;</span>) || atts.has(<span class="string">&quot;done&quot;</span>)
+            atts.has(ir::BoolAttr::Stable) || atts.has(ir::NumAttr::Done)
         })
 }
 
@@ -813,8 +814,8 @@
                     ir::PortParent::Cell(dst_cell),
                 ) =&gt; {
                     <span class="comment">// a.go = b.done case
-                    </span><span class="kw">if </span>src.attributes.has(<span class="string">&quot;done&quot;</span>)
-                        &amp;&amp; dst.attributes.has(<span class="string">&quot;go&quot;</span>)
+                    </span><span class="kw">if </span>src.attributes.has(ir::NumAttr::Done)
+                        &amp;&amp; dst.attributes.has(ir::NumAttr::Go)
                         &amp;&amp; comp_or_non_comb(<span class="kw-2">&amp;</span>src_cell.upgrade())
                         &amp;&amp; comp_or_non_comb(<span class="kw-2">&amp;</span>dst_cell.upgrade())
                     {
@@ -827,7 +828,7 @@
                 (ir::PortParent::Cell(src_cell), ir::PortParent::Group(<span class="kw">_</span>)) =&gt; {
                     <span class="comment">// group[done] = c.done case
                     </span><span class="kw">if </span>dst.name == <span class="string">&quot;done&quot;
-                        </span>&amp;&amp; src.attributes.has(<span class="string">&quot;done&quot;</span>)
+                        </span>&amp;&amp; src.attributes.has(ir::NumAttr::Done)
                         &amp;&amp; comp_or_non_comb(<span class="kw-2">&amp;</span>src_cell.upgrade())
                     {
                         last = <span class="prelude-val">Some</span>(src_cell.upgrade().borrow().name())
@@ -848,7 +849,8 @@
         <span class="kw">let </span>dst = asmt.dst.borrow();
         <span class="kw">match </span>(<span class="kw-2">&amp;</span>src.parent, <span class="kw-2">&amp;</span>dst.parent) {
             (ir::PortParent::Cell(<span class="kw">_</span>), ir::PortParent::Cell(<span class="kw">_</span>)) =&gt; {
-                src.attributes.has(<span class="string">&quot;done&quot;</span>) &amp;&amp; dst.attributes.has(<span class="string">&quot;go&quot;</span>)
+                src.attributes.has(ir::NumAttr::Done)
+                    &amp;&amp; dst.attributes.has(ir::NumAttr::Go)
             }
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         }
@@ -859,7 +861,7 @@
     </span><span class="kw">pub fn </span>is_specific_go(asmt: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;, cell: <span class="kw-2">&amp;</span>ir::Id) -&gt; bool {
         <span class="kw">let </span>dst = asmt.dst.borrow();
         <span class="comment">// checks cell.go =
-        </span>dst.get_parent_name() == cell  &amp;&amp; dst.attributes.has(<span class="string">&quot;go&quot;</span>)
+        </span>dst.get_parent_name() == cell  &amp;&amp; dst.attributes.has(ir::NumAttr::Go)
         <span class="comment">// checks !cell.done ?
         </span>&amp;&amp; asmt.guard.is_not_done(cell)
         <span class="comment">// checks 1&#39;d1
@@ -913,7 +915,7 @@
 //         let group = builder.add_static_group(prefix, 0);
 //         let mut group_asmts = self.assignments;
 //         let done_asmt = builder.build_assignment(
-//             group.borrow().get(&quot;done&quot;),
+//             group.borrow().get(ir::NumAttr::Done),
 //             self.done_src,
 //             self.done_guard,
 //         );

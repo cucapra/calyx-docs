@@ -143,6 +143,10 @@
 <span id="143">143</span>
 <span id="144">144</span>
 <span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::dump_ports;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
@@ -265,8 +269,12 @@
         <span class="kw">let </span>comp_name = s.comp.borrow().type_name().unwrap();
         <span class="kw">for </span>(in_cell, cell) <span class="kw">in </span>s.ref_cells.drain(..) {
             <span class="kw">for </span>port <span class="kw">in </span>cell.borrow().ports.iter() {
-                <span class="kw">if </span>port.borrow().attributes.get(<span class="string">&quot;clk&quot;</span>).is_none()
-                    &amp;&amp; port.borrow().attributes.get(<span class="string">&quot;reset&quot;</span>).is_none()
+                <span class="kw">if </span>port.borrow().attributes.get(ir::BoolAttr::Clk).is_none()
+                    &amp;&amp; port
+                        .borrow()
+                        .attributes
+                        .get(ir::BoolAttr::Reset)
+                        .is_none()
                 {
                     <span class="kw">let </span>canon = Canonical(in_cell, port.borrow().name);
                     <span class="kw">let </span>port_name =

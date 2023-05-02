@@ -679,19 +679,6 @@
 <span id="679">679</span>
 <span id="680">680</span>
 <span id="681">681</span>
-<span id="682">682</span>
-<span id="683">683</span>
-<span id="684">684</span>
-<span id="685">685</span>
-<span id="686">686</span>
-<span id="687">687</span>
-<span id="688">688</span>
-<span id="689">689</span>
-<span id="690">690</span>
-<span id="691">691</span>
-<span id="692">692</span>
-<span id="693">693</span>
-<span id="694">694</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
@@ -700,6 +687,7 @@
 <span class="kw">use super</span>::{
     Attributes, Direction, GetAttributes, Guard, Id, PortDef, RRC, WRC,
 };
+<span class="kw">use </span>calyx_frontend::Attribute;
 <span class="kw">use </span>calyx_utils::GetName;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>smallvec::{smallvec, SmallVec};
@@ -955,29 +943,29 @@
     }
 
     <span class="doccomment">/// Get a reference to the first port that has the attribute `attr`.
-    </span><span class="kw">pub fn </span>find_with_attr&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;
+    </span><span class="kw">pub fn </span>find_with_attr&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;
     <span class="kw">where
-        </span>S: Into&lt;Id&gt;,
+        </span>A: Into&lt;Attribute&gt;,
     {
-        <span class="kw">let </span>key = attr.into();
+        <span class="kw">let </span>attr = attr.into();
         <span class="self">self</span>.ports
             .iter()
-            .find(|<span class="kw-2">&amp;</span>g| g.borrow().attributes.has(key))
+            .find(|<span class="kw-2">&amp;</span>g| g.borrow().attributes.has(attr))
             .map(Rc::clone)
     }
 
     <span class="doccomment">/// Return all ports that have the attribute `attr`.
-    </span><span class="kw">pub fn </span>find_all_with_attr&lt;S&gt;(
+    </span><span class="kw">pub fn </span>find_all_with_attr&lt;A&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        attr: S,
+        attr: A,
     ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;Port&gt;&gt; + <span class="lifetime">&#39;_
     </span><span class="kw">where
-        </span>S: Into&lt;Id&gt;,
+        </span>A: Into&lt;Attribute&gt;,
     {
-        <span class="kw">let </span>key = attr.into();
+        <span class="kw">let </span>attr = attr.into();
         <span class="self">self</span>.ports
             .iter()
-            .filter(<span class="kw">move </span>|<span class="kw-2">&amp;</span>p| p.borrow().attributes.has(key))
+            .filter(<span class="kw">move </span>|<span class="kw-2">&amp;</span>p| p.borrow().attributes.has(attr))
             .map(Rc::clone)
     }
 
@@ -1026,15 +1014,14 @@
 
     <span class="doccomment">/// Get a reference to the first port with the attribute `attr` and throw an error if none
     /// exist.
-    </span><span class="kw">pub fn </span>get_with_attr&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: S) -&gt; RRC&lt;Port&gt;
+    </span><span class="kw">pub fn </span>get_with_attr&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; RRC&lt;Port&gt;
     <span class="kw">where
-        </span>S: Into&lt;Id&gt;,
+        </span>A: Into&lt;Attribute&gt; + std::fmt::Display + Copy,
     {
-        <span class="kw">let </span>key = attr.into();
-        <span class="self">self</span>.find_with_attr(key).unwrap_or_else(|| {
+        <span class="self">self</span>.find_with_attr(attr).unwrap_or_else(|| {
             <span class="macro">panic!</span>(
-                <span class="string">&quot;Port with attribute `{}&#39; not found on cell `{}&#39;&quot;</span>,
-                key, <span class="self">self</span>.name,
+                <span class="string">&quot;Port with attribute `{attr}&#39; not found on cell `{}&#39;&quot;</span>,
+                <span class="self">self</span>.name,
             )
         })
     }
@@ -1067,19 +1054,12 @@
     }
 
     <span class="doccomment">/// Return the value associated with this attribute key.
-    </span><span class="kw">pub fn </span>get_attribute&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: S) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>u64&gt;
-    <span class="kw">where
-        </span>S: Into&lt;Id&gt;,
-    {
-        <span class="kw">let </span>key = attr.into();
-        <span class="self">self</span>.attributes.get(key)
+    </span><span class="kw">pub fn </span>get_attribute&lt;A: Into&lt;Attribute&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="self">self</span>.attributes.get(attr.into())
     }
 
     <span class="doccomment">/// Add a new attribute to the group.
-    </span><span class="kw">pub fn </span>add_attribute&lt;S&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: S, value: u64)
-    <span class="kw">where
-        </span>S: Into&lt;String&gt;,
-    {
+    </span><span class="kw">pub fn </span>add_attribute&lt;A: Into&lt;Attribute&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: A, value: u64) {
         <span class="self">self</span>.attributes.insert(attr.into(), value);
     }
 
@@ -1249,10 +1229,7 @@
         <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.attributes)
     }
 
-    <span class="kw">pub fn </span>remove_attribute&lt;I&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: I)
-    <span class="kw">where
-        </span>I: Into&lt;Id&gt;,
-    {
+    <span class="kw">pub fn </span>remove_attribute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: Attribute) {
         <span class="self">self</span>.attributes.remove(attr);
     }
 }
@@ -1327,10 +1304,7 @@
         <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.attributes)
     }
 
-    <span class="kw">pub fn </span>remove_attribute&lt;I&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: I)
-    <span class="kw">where
-        </span>I: Into&lt;Id&gt;,
-    {
+    <span class="kw">pub fn </span>remove_attribute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: Attribute) {
         <span class="self">self</span>.attributes.remove(attr);
     }
 }

@@ -1223,6 +1223,7 @@
 <span id="1223">1223</span>
 <span id="1224">1224</span>
 <span id="1225">1225</span>
+<span id="1226">1226</span>
 </pre><pre class="rust"><code><span class="attribute">#![allow(clippy::upper_case_acronyms)]
 
 </span><span class="doccomment">//! Parser for Calyx programs.
@@ -1230,7 +1231,7 @@
     <span class="self">self</span>, BitNum, Control, GuardComp <span class="kw">as </span>GC, GuardExpr, NumType, StaticGuardExpr,
 };
 <span class="kw">use </span><span class="kw">super</span>::Attributes;
-<span class="kw">use crate</span>::{Direction, PortDef, Primitive, Width};
+<span class="kw">use crate</span>::{Attribute, Direction, PortDef, Primitive, Width};
 <span class="kw">use </span>calyx_utils::{<span class="self">self</span>, CalyxResult, Id};
 <span class="kw">use </span>calyx_utils::{FileIdx, GPosIdx, GlobalPositionTable};
 <span class="kw">use </span>pest::pratt_parser::{Assoc, Op, PrattParser};
@@ -1239,6 +1240,7 @@
 <span class="kw">use </span>std::fs;
 <span class="kw">use </span>std::io::Read;
 <span class="kw">use </span>std::path::Path;
+<span class="kw">use </span>std::str::FromStr;
 
 <span class="kw">type </span>ParseResult&lt;T&gt; = <span class="prelude-ty">Result</span>&lt;T, Error&lt;Rule&gt;&gt;;
 <span class="kw">type </span>ComponentDef = ast::ComponentDef;
@@ -1538,11 +1540,11 @@
     }
 
     <span class="comment">// ================ Attributes =====================
-    </span><span class="kw">fn </span>attribute(input: Node) -&gt; ParseResult&lt;(Id, u64)&gt; {
-        <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
-            input.into_children();
-            [string_lit(key), bitwidth(num)] =&gt; (Id::from(key), num)
-        ))
+    </span><span class="kw">fn </span>attribute(input: Node) -&gt; ParseResult&lt;(Attribute, u64)&gt; {
+        <span class="macro">match_nodes!</span>(
+            input.clone().into_children();
+            [string_lit(key), bitwidth(num)] =&gt; Attribute::from_str(<span class="kw-2">&amp;</span>key).map(|attr| (attr, num)).map_err(|e| input.error(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, e)))
+        )
     }
     <span class="kw">fn </span>attributes(input: Node) -&gt; ParseResult&lt;Attributes&gt; {
         <span class="macro">match_nodes!</span>(
@@ -1588,12 +1590,12 @@
         }
     }
 
-    <span class="kw">fn </span>at_attribute(input: Node) -&gt; ParseResult&lt;(Id, u64)&gt; {
-        <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
-            input.into_children();
-            [identifier(key), attr_val(num)] =&gt; (key, num),
-            [identifier(key)] =&gt; (key, <span class="number">1</span>)
-        ))
+    <span class="kw">fn </span>at_attribute(input: Node) -&gt; ParseResult&lt;(Attribute, u64)&gt; {
+        <span class="macro">match_nodes!</span>(
+            input.clone().into_children();
+            [identifier(key), attr_val(num)] =&gt; Attribute::from_str(key.as_ref()).map_err(|e| input.error(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, e))).map(|attr| (attr, num)),
+            [identifier(key)] =&gt; Attribute::from_str(key.as_ref()).map_err(|e| input.error(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, e))).map(|attr| (attr, <span class="number">1</span>)),
+        )
     }
 
     <span class="kw">fn </span>at_attributes(input: Node) -&gt; ParseResult&lt;Attributes&gt; {

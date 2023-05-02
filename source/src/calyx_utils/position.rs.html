@@ -223,6 +223,12 @@
 <span id="223">223</span>
 <span id="224">224</span>
 <span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Definitions for tracking source position information of Calyx programs
 
 </span><span class="kw">use </span>itertools::Itertools;
@@ -352,6 +358,12 @@
 <span class="attribute">#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 </span><span class="doccomment">/// A position index backed by a global [PositionTable]
 </span><span class="kw">pub struct </span>GPosIdx(<span class="kw">pub </span>PosIdx);
+
+<span class="kw">impl </span>Default <span class="kw">for </span>GPosIdx {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::UNKNOWN
+    }
+}
 
 <span class="kw">impl </span>GPosIdx {
     <span class="doccomment">/// Symbol for the unknown position

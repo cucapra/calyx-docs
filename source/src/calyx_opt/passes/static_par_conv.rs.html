@@ -234,6 +234,8 @@
 <span id="234">234</span>
 <span id="235">235</span>
 <span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>std::cmp::Ordering;
@@ -298,8 +300,8 @@
     <span class="kw">let </span><span class="kw-2">mut </span>counter = <span class="number">0</span>;
 
     <span class="kw">while let </span>(<span class="prelude-val">Some</span>(c1), <span class="prelude-val">Some</span>(c2)) = (long_val, short_val) {
-        <span class="kw">let </span>x1 = c1.get_attribute(<span class="string">&quot;static&quot;</span>)<span class="question-mark">?</span>;
-        <span class="kw">let </span>x2 = c2.get_attribute(<span class="string">&quot;static&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>x1 = c1.get_attribute(ir::NumAttr::Static)<span class="question-mark">?</span>;
+        <span class="kw">let </span>x2 = c2.get_attribute(ir::NumAttr::Static)<span class="question-mark">?</span>;
         <span class="kw">if </span>x2 &lt;= x1 {
             short_val = short_iter.next();
             index_counter.push(counter);
@@ -317,7 +319,7 @@
 <span class="comment">// Returns a default Attribute with &quot;static&quot; set to v
 </span><span class="kw">fn </span>attribute_with_static(v: u64) -&gt; ir::Attributes {
     <span class="kw">let </span><span class="kw-2">mut </span>atts = ir::Attributes::default();
-    atts.insert(<span class="string">&quot;static&quot;</span>, v);
+    atts.insert(ir::NumAttr::Static, v);
     atts
 }
 
@@ -327,7 +329,7 @@
 </span><span class="kw">fn </span>get_static_sum(seq: <span class="kw-2">&amp;</span>ir::Seq) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>count = <span class="number">0</span>;
     <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;</span>seq.stmts {
-        count += stmt.get_attribute(<span class="string">&quot;static&quot;</span>)<span class="question-mark">?</span>;
+        count += stmt.get_attribute(ir::NumAttr::Static)<span class="question-mark">?</span>;
     }
     <span class="prelude-val">Some</span>(count)
 }
@@ -429,7 +431,9 @@
                 .map(|stmts| {
                     stmts
                         .iter()
-                        .map(|stmt| stmt.get_attribute(<span class="string">&quot;static&quot;</span>).unwrap())
+                        .map(|stmt| {
+                            stmt.get_attribute(ir::NumAttr::Static).unwrap()
+                        })
                         .max()
                 })
                 .collect::&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u64&gt;&gt;&gt;()

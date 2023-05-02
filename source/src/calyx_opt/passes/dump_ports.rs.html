@@ -106,8 +106,8 @@
             .filter(|pr| {
                 <span class="kw">let </span>p = pr.borrow();
                 <span class="kw">if </span>remove_signals {
-                    p.attributes.get(<span class="string">&quot;clk&quot;</span>).is_none()
-                        &amp;&amp; p.attributes.get(<span class="string">&quot;reset&quot;</span>).is_none()
+                    p.attributes.get(ir::BoolAttr::Clk).is_none()
+                        &amp;&amp; p.attributes.get(ir::BoolAttr::Reset).is_none()
                 } <span class="kw">else </span>{
                     <span class="bool-val">true
                 </span>}

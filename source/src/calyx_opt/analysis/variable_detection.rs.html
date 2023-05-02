@@ -103,7 +103,7 @@
         // if guard is empty, because if it isn&#39;t this would show up as
         // a write
         </span><span class="kw">let </span>graph = GraphAnalysis::from(<span class="kw-2">&amp;*</span>group);
-        <span class="kw">let </span>go_port = cell.find_with_attr(<span class="string">&quot;go&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>go_port = cell.find_with_attr(ir::NumAttr::Go)<span class="question-mark">?</span>;
         <span class="kw">let </span>activation = graph
             .writes_to(<span class="kw-2">&amp;</span>go_port.borrow())
             .map(|src| src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>))

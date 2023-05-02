@@ -385,7 +385,7 @@
         </span><span class="kw">let </span>blacklist = ctx
             .lib
             .signatures()
-            .filter(|p| p.find_all_with_attr(<span class="string">&quot;go&quot;</span>).count() &gt; <span class="number">1</span>)
+            .filter(|p| p.find_all_with_attr(ir::NumAttr::Go).count() &gt; <span class="number">1</span>)
             .map(|p| p.name)
             .collect();
 
@@ -456,7 +456,7 @@
         // inputs. we can ignore the cell.go assignment, since that is not
         // going to be part of the `invoke`.
         </span><span class="kw">else if </span>parent_is_cell(<span class="kw-2">&amp;</span>assign.dst.borrow())
-            &amp;&amp; assign.dst != comp.borrow().get_with_attr(<span class="string">&quot;go&quot;</span>)
+            &amp;&amp; assign.dst != comp.borrow().get_with_attr(ir::NumAttr::Go)
         {
             <span class="kw">let </span>name = assign.dst.borrow().name;
             <span class="kw">if </span>assign.guard.is_true() {
@@ -548,7 +548,7 @@
                 &amp;mut builder,
                 g.borrow().name(),
                 &amp;g.borrow().assignments,
-                &amp;g.borrow().get(&quot;done&quot;),
+                &amp;g.borrow().get(ir::NumAttr::Done),
             )
         }*/
 
@@ -611,20 +611,20 @@
             ir::CellType::ThisComponent =&gt; <span class="kw">return</span>,
             <span class="kw">_ </span>=&gt; {}
         }
-        <span class="kw">if </span>cell.is_reference() || cell.attributes.has(<span class="string">&quot;external&quot;</span>) {
+        <span class="kw">if </span>cell.is_reference() || cell.attributes.has(ir::BoolAttr::External) {
             <span class="kw">return</span>;
         }
 
         <span class="comment">// Component must define a @go/@done interface
-        </span><span class="kw">let </span>maybe_go_port = cell.find_with_attr(<span class="string">&quot;go&quot;</span>);
-        <span class="kw">let </span>maybe_done_port = cell.find_with_attr(<span class="string">&quot;done&quot;</span>);
+        </span><span class="kw">let </span>maybe_go_port = cell.find_with_attr(ir::NumAttr::Go);
+        <span class="kw">let </span>maybe_done_port = cell.find_with_attr(ir::NumAttr::Done);
         <span class="kw">if </span>maybe_go_port.is_none() || maybe_done_port.is_none() {
             <span class="kw">return</span>;
         }
 
         <span class="comment">// Component must have a single @go/@done pair
-        </span><span class="kw">let </span>go_ports = cell.find_all_with_attr(<span class="string">&quot;go&quot;</span>).count();
-        <span class="kw">let </span>done_ports = cell.find_all_with_attr(<span class="string">&quot;done&quot;</span>).count();
+        </span><span class="kw">let </span>go_ports = cell.find_all_with_attr(ir::NumAttr::Go).count();
+        <span class="kw">let </span>done_ports = cell.find_all_with_attr(ir::NumAttr::Done).count();
         <span class="kw">if </span>go_ports &gt; <span class="number">1 </span>|| done_ports &gt; <span class="number">1 </span>{
             <span class="kw">return</span>;
         }

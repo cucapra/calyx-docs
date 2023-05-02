@@ -133,7 +133,6 @@
 <span id="133">133</span>
 <span id="134">134</span>
 <span id="135">135</span>
-<span id="136">136</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes};
 <span class="kw">use </span>std::collections::HashMap;
 
@@ -159,7 +158,7 @@
     /// **Ensures**: All sub-programs of the type will also be updated.
     </span><span class="kw">fn </span>update_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extra: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = <span class="self">self</span>.compute_static(extra) {
-            <span class="self">self</span>.get_mut_attributes().insert(<span class="string">&quot;static&quot;</span>, time);
+            <span class="self">self</span>.get_mut_attributes().insert(ir::NumAttr::Static, time);
             <span class="prelude-val">Some</span>(time)
         } <span class="kw">else </span>{
             <span class="prelude-val">None
@@ -205,16 +204,15 @@
         <span class="comment">// Attempt to get the latency from the attribute on the enable first, or
         // failing that, from the group.
         </span><span class="self">self</span>.attributes
-            .get(<span class="string">&quot;static&quot;</span>)
-            .cloned()
-            .or_else(|| <span class="self">self</span>.group.borrow().attributes.get(<span class="string">&quot;static&quot;</span>).cloned())
+            .get(ir::NumAttr::Static)
+            .or_else(|| <span class="self">self</span>.group.borrow().attributes.get(ir::NumAttr::Static))
     }
 }
 
 <span class="kw">impl </span>WithStatic <span class="kw">for </span>ir::Invoke {
     <span class="kw">type </span>Info = CompTime;
     <span class="kw">fn </span>compute_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extra: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
-        <span class="self">self</span>.attributes.get(<span class="string">&quot;static&quot;</span>).cloned().or_else(|| {
+        <span class="self">self</span>.attributes.get(ir::NumAttr::Static).or_else(|| {
             <span class="kw">let </span>comp = <span class="self">self</span>.comp.borrow().type_name()<span class="question-mark">?</span>;
             extra.get(<span class="kw-2">&amp;</span>comp).cloned()
         })
@@ -266,7 +264,7 @@
             <span class="macro">log::debug!</span>(<span class="string">&quot;Cannot compute latency for while-with&quot;</span>);
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
-        <span class="kw">let </span>bound = <span class="self">self</span>.attributes.get(<span class="string">&quot;bound&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>bound = <span class="self">self</span>.attributes.get(ir::NumAttr::Bound)<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(bound * b_time)
     }
 }

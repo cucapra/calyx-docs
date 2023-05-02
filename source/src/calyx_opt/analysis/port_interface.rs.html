@@ -90,6 +90,9 @@
 <span id="90">90</span>
 <span id="91">91</span>
 <span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
 <span class="kw">use </span>itertools::Itertools;
@@ -118,9 +121,12 @@
         <span class="kw">let </span><span class="kw-2">mut </span>write_together = HashMap::new();
         <span class="kw">for </span>prim <span class="kw">in </span>primitives {
             <span class="kw">let </span>writes: Vec&lt;HashSet&lt;ir::Id&gt;&gt; = prim
-                .find_all_with_attr(<span class="string">&quot;write_together&quot;</span>)
+                .find_all_with_attr(ir::NumAttr::WriteTogether)
                 .map(|pd| {
-                    (pd.attributes.get(<span class="string">&quot;write_together&quot;</span>).unwrap(), pd.name)
+                    (
+                        pd.attributes.get(ir::NumAttr::WriteTogether).unwrap(),
+                        pd.name,
+                    )
                 })
                 .into_group_map()
                 .into_values()
@@ -143,8 +149,8 @@
         prim: <span class="kw-2">&amp;</span>ir::Primitive,
     ) -&gt; CalyxResult&lt;Vec&lt;ReadTogether&gt;&gt; {
         prim
-                .find_all_with_attr(<span class="string">&quot;read_together&quot;</span>)
-                .map(|pd| (pd.attributes.get(<span class="string">&quot;read_together&quot;</span>).unwrap(), pd))
+                .find_all_with_attr(ir::NumAttr::ReadTogether)
+                .map(|pd| (pd.attributes.get(ir::NumAttr::ReadTogether).unwrap(), pd))
                 .into_group_map()
                 .into_values()
                 .map(|ports| {

@@ -358,9 +358,11 @@
 <span id="358">358</span>
 <span id="359">359</span>
 <span id="360">360</span>
+<span id="361">361</span>
 </pre><pre class="rust"><code><span class="doccomment">//! IR Builder. Provides convience methods to build various parts of the internal
 //! representation.
 </span><span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures, Nothing, RRC, WRC};
+<span class="kw">use </span>calyx_frontend::BoolAttr;
 <span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::rc::Rc;
 
@@ -582,7 +584,7 @@
             ports,
         );
         <span class="kw">if </span><span class="self">self</span>.generated {
-            cell.borrow_mut().add_attribute(<span class="string">&quot;generated&quot;</span>, <span class="number">1</span>);
+            cell.borrow_mut().add_attribute(BoolAttr::Generated, <span class="number">1</span>);
         }
         <span class="self">self</span>.component.cells.add(Rc::clone(<span class="kw-2">&amp;</span>cell));
         cell
@@ -608,7 +610,7 @@
             sig,
         );
         <span class="kw">if </span><span class="self">self</span>.generated {
-            cell.borrow_mut().add_attribute(<span class="string">&quot;generated&quot;</span>, <span class="number">1</span>);
+            cell.borrow_mut().add_attribute(BoolAttr::Generated, <span class="number">1</span>);
         }
         <span class="self">self</span>.component.cells.add(Rc::clone(<span class="kw-2">&amp;</span>cell));
         cell

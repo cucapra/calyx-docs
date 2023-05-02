@@ -239,7 +239,7 @@
                 }
             }
         }
-        comp.attributes.insert(<span class="string">&quot;state_share&quot;</span>, <span class="number">1</span>);
+        comp.attributes.insert(ir::BoolAttr::StateShare, <span class="number">1</span>);
         <span class="self">self</span>.state_shareable.add(comp.name);
         <span class="prelude-val">Ok</span>(Action::Stop)
     }

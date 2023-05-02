@@ -340,12 +340,15 @@
 <span id="340">340</span>
 <span id="341">341</span>
 <span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{DominatorMap, ReadWriteSet, ShareSet};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>std::collections::HashSet;
 
-<span class="kw">const </span>BEGIN_ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;BEGIN_ID&quot;</span>;
-<span class="kw">const </span>END_ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;END_ID&quot;</span>;
+<span class="kw">const </span>BEGIN_ID: ir::Attribute =
+    ir::Attribute::Internal(ir::InternalAttr::BEGIN_ID);
+<span class="kw">const </span>END_ID: ir::Attribute = ir::Attribute::Internal(ir::InternalAttr::END_ID);
 
 <span class="comment">// This file contains analysis that reasons about reads and writes to given &quot;nodes&quot;
 // of control statements. In other words, it reasons about control statements,
@@ -360,12 +363,12 @@
 </span><span class="kw">fn </span>not_end_id(c: <span class="kw-2">&amp;</span>ir::Control, id: u64) -&gt; bool {
     <span class="kw">match </span>c {
         ir::Control::If(if_control) =&gt; {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>begin) = if_control.attributes.get(BEGIN_ID) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(begin) = if_control.attributes.get(BEGIN_ID) {
                 <span class="kw">if </span>begin == id {
                     <span class="kw">return </span><span class="bool-val">true</span>;
                 }
             }
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>end) = if_control.attributes.get(END_ID) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(end) = if_control.attributes.get(END_ID) {
                 <span class="kw">if </span>end == id {
                     <span class="kw">return </span><span class="bool-val">false</span>;
                 }
@@ -383,12 +386,12 @@
 </span><span class="kw">fn </span>not_end_id_static(c: <span class="kw-2">&amp;</span>ir::StaticControl, id: u64) -&gt; bool {
     <span class="kw">match </span>c {
         ir::StaticControl::If(if_control) =&gt; {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>begin) = if_control.attributes.get(BEGIN_ID) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(begin) = if_control.attributes.get(BEGIN_ID) {
                 <span class="kw">if </span>begin == id {
                     <span class="kw">return </span><span class="bool-val">true</span>;
                 }
             }
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>end) = if_control.attributes.get(END_ID) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(end) = if_control.attributes.get(END_ID) {
                 <span class="kw">if </span>end == id {
                     <span class="kw">return </span><span class="bool-val">false</span>;
                 }
@@ -407,7 +410,8 @@
 
 <span class="comment">// Returns true if port is a &quot;done&quot; port or is a constant
 </span><span class="kw">fn </span>done_or_const(port: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::Port&gt;) -&gt; bool {
-    port.borrow().attributes.has(<span class="string">&quot;done&quot;</span>) || port.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>)
+    port.borrow().attributes.has(ir::NumAttr::Done)
+        || port.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>)
 }
 
 <span class="comment">//Adds the ids of any state_shareable cells that are read from in assignments,
@@ -585,7 +589,7 @@
     </span><span class="kw">fn </span>go_is_written&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, assignments: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;]) -&gt; bool {
         assignments.iter().any(|assign: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;| {
             <span class="kw">let </span>dst_ref = assign.dst.borrow();
-            <span class="kw">if </span>dst_ref.attributes.has(<span class="string">&quot;go&quot;</span>)
+            <span class="kw">if </span>dst_ref.attributes.has(ir::NumAttr::Go)
                 &amp;&amp; assign.guard.is_true()
                 &amp;&amp; assign.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>)
             {

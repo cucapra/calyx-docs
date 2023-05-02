@@ -80,12 +80,12 @@
 
         <span class="kw">for </span>cell_ref <span class="kw">in </span>builder.component.cells.iter() {
             <span class="kw">let </span>cell = cell_ref.borrow();
-            <span class="kw">if </span>cell.get_attribute(<span class="string">&quot;external&quot;</span>).is_some() {
+            <span class="kw">if </span>cell.get_attribute(ir::BoolAttr::External).is_some() {
                 <span class="comment">// External cells should not have their state reset,
                 // since we assume they may be initialized.
                 </span><span class="kw">continue</span>;
             }
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = cell.find_with_attr(<span class="string">&quot;reset&quot;</span>) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = cell.find_with_attr(ir::BoolAttr::Reset) {
                 builder.component.continuous_assignments.push(
                     builder.build_assignment(
                         port,
@@ -93,7 +93,7 @@
                             .component
                             .signature
                             .borrow()
-                            .get_with_attr(<span class="string">&quot;reset&quot;</span>),
+                            .get_with_attr(ir::BoolAttr::Reset),
                         ir::Guard::True,
                     ),
                 )

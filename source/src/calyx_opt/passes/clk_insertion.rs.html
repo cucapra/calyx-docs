@@ -75,7 +75,7 @@
 
         <span class="kw">for </span>cell_ref <span class="kw">in </span>builder.component.cells.iter() {
             <span class="kw">let </span>cell = cell_ref.borrow();
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = cell.find_with_attr(<span class="string">&quot;clk&quot;</span>) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = cell.find_with_attr(ir::BoolAttr::Clk) {
                 builder.component.continuous_assignments.push(
                     builder.build_assignment(
                         port,
@@ -83,7 +83,7 @@
                             .component
                             .signature
                             .borrow()
-                            .get_with_attr(<span class="string">&quot;clk&quot;</span>),
+                            .get_with_attr(ir::BoolAttr::Clk),
                         ir::Guard::True,
                     ),
                 )

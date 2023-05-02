@@ -491,6 +491,13 @@
 <span id="491">491</span>
 <span id="492">492</span>
 <span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphAnalysis, ReadWriteSet, WithStatic};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
@@ -541,17 +548,17 @@
 <span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>ir::Primitive&gt; <span class="kw">for </span>GoDone {
     <span class="kw">fn </span>from(prim: <span class="kw-2">&amp;</span>ir::Primitive) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>done_ports: HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; = prim
-            .find_all_with_attr(<span class="string">&quot;done&quot;</span>)
-            .map(|pd| (pd.attributes[<span class="string">&quot;done&quot;</span>], pd.name))
+            .find_all_with_attr(ir::NumAttr::Done)
+            .map(|pd| (pd.attributes.get(ir::NumAttr::Done), pd.name))
             .collect();
 
         <span class="kw">let </span>go_ports = prim
-            .find_all_with_attr(<span class="string">&quot;go&quot;</span>)
+            .find_all_with_attr(ir::NumAttr::Go)
             .filter_map(|pd| {
-                pd.attributes.get(<span class="string">&quot;static&quot;</span>).and_then(|st| {
+                pd.attributes.get(ir::NumAttr::Static).and_then(|st| {
                     done_ports
-                        .get(<span class="kw-2">&amp;</span>pd.attributes[<span class="string">&quot;go&quot;</span>])
-                        .map(|done_port| (pd.name, <span class="kw-2">*</span>done_port, <span class="kw-2">*</span>st))
+                        .get(<span class="kw-2">&amp;</span>pd.attributes.get(ir::NumAttr::Go))
+                        .map(|done_port| (pd.name, <span class="kw-2">*</span>done_port, st))
                 })
             })
             .collect_vec();
@@ -562,21 +569,21 @@
 <span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>ir::Cell&gt; <span class="kw">for </span>GoDone {
     <span class="kw">fn </span>from(cell: <span class="kw-2">&amp;</span>ir::Cell) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>done_ports: HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; = cell
-            .find_all_with_attr(<span class="string">&quot;done&quot;</span>)
+            .find_all_with_attr(ir::NumAttr::Done)
             .map(|pr| {
                 <span class="kw">let </span>port = pr.borrow();
-                (port.attributes[<span class="string">&quot;done&quot;</span>], port.name)
+                (port.attributes.get(ir::NumAttr::Done), port.name)
             })
             .collect();
 
         <span class="kw">let </span>go_ports = cell
-            .find_all_with_attr(<span class="string">&quot;go&quot;</span>)
+            .find_all_with_attr(ir::NumAttr::Go)
             .filter_map(|pr| {
                 <span class="kw">let </span>port = pr.borrow();
-                port.attributes.get(<span class="string">&quot;static&quot;</span>).and_then(|st| {
+                port.attributes.get(ir::NumAttr::Static).and_then(|st| {
                     done_ports
-                        .get(<span class="kw-2">&amp;</span>port.attributes[<span class="string">&quot;go&quot;</span>])
-                        .map(|done_port| (port.name, <span class="kw-2">*</span>done_port, <span class="kw-2">*</span>st))
+                        .get(<span class="kw-2">&amp;</span>port.attributes.get(ir::NumAttr::Go))
+                        .map(|done_port| (port.name, <span class="kw-2">*</span>done_port, st))
                 })
             })
             .collect_vec();
@@ -607,17 +614,17 @@
         <span class="comment">// Construct latency_data for each primitive
         </span><span class="kw">for </span>prim <span class="kw">in </span>ctx.lib.signatures() {
             <span class="kw">let </span>done_ports: HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; = prim
-                .find_all_with_attr(<span class="string">&quot;done&quot;</span>)
-                .map(|pd| (pd.attributes[<span class="string">&quot;done&quot;</span>], pd.name))
+                .find_all_with_attr(ir::NumAttr::Done)
+                .map(|pd| (pd.attributes.get(ir::NumAttr::Done), pd.name))
                 .collect();
 
             <span class="kw">let </span>go_ports = prim
-                .find_all_with_attr(<span class="string">&quot;go&quot;</span>)
+                .find_all_with_attr(ir::NumAttr::Go)
                 .filter_map(|pd| {
-                    pd.attributes.get(<span class="string">&quot;static&quot;</span>).and_then(|st| {
+                    pd.attributes.get(ir::NumAttr::Static).and_then(|st| {
                         done_ports
-                            .get(<span class="kw-2">&amp;</span>pd.attributes[<span class="string">&quot;go&quot;</span>])
-                            .map(|done_port| (pd.name, <span class="kw-2">*</span>done_port, <span class="kw-2">*</span>st))
+                            .get(<span class="kw-2">&amp;</span>pd.attributes.get(ir::NumAttr::Go))
+                            .map(|done_port| (pd.name, <span class="kw-2">*</span>done_port, st))
                     })
                 })
                 .collect_vec();
@@ -781,7 +788,7 @@
                     }
                 }
 
-                ir::PortParent::StaticGroup(<span class="kw">_</span>) =&gt; <span class="comment">// done ports of static groups should clearly NOT have static latencies  
+                ir::PortParent::StaticGroup(<span class="kw">_</span>) =&gt; <span class="comment">// done ports of static groups should clearly NOT have static latencies
                 </span><span class="macro">panic!</span>(<span class="string">&quot;Have not decided how to handle static groups in infer-static-timing&quot;</span>),
             }
         }
@@ -896,9 +903,10 @@
         </span><span class="kw">for </span>group <span class="kw">in </span>comp.get_groups().iter() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = <span class="self">self</span>.infer_latency(<span class="kw-2">&amp;</span>group.borrow()) {
                 <span class="kw">let </span>grp = group.borrow();
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(curr_lat) = grp.attributes.get(<span class="string">&quot;static&quot;</span>) {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(curr_lat) = grp.attributes.get(ir::NumAttr::Static)
+                {
                     <span class="comment">// Inferred latency is not the same as the provided latency annotation.
-                    </span><span class="kw">if </span><span class="kw-2">*</span>curr_lat != latency {
+                    </span><span class="kw">if </span>curr_lat != latency {
                         <span class="kw">let </span>msg1 = <span class="macro">format!</span>(<span class="string">&quot;Annotated latency: {}&quot;</span>, curr_lat);
                         <span class="kw">let </span>msg2 = <span class="macro">format!</span>(<span class="string">&quot;Inferred latency: {}&quot;</span>, latency);
                         <span class="kw">let </span>msg = <span class="macro">format!</span>(
@@ -918,7 +926,10 @@
 
             <span class="kw">match </span>latency_result {
                 <span class="prelude-val">Some</span>(res) =&gt; {
-                    group.borrow_mut().attributes.insert(<span class="string">&quot;static&quot;</span>, res);
+                    group
+                        .borrow_mut()
+                        .attributes
+                        .insert(ir::NumAttr::Static, res);
                 }
                 <span class="prelude-val">None </span>=&gt; <span class="kw">continue</span>,
             }
@@ -941,7 +952,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>go_ports = comp
                 .signature
                 .borrow()
-                .find_all_with_attr(<span class="string">&quot;go&quot;</span>)
+                .find_all_with_attr(ir::NumAttr::Go)
                 .collect_vec();
 
             <span class="comment">// Add the latency information for the component if the control program
@@ -949,7 +960,7 @@
             </span><span class="kw">if </span>go_ports.len() == <span class="number">1 </span>{
                 <span class="kw">let </span>go_port = go_ports.pop().unwrap();
                 <span class="kw">let </span>mb_time =
-                    go_port.borrow().attributes.get(<span class="string">&quot;static&quot;</span>).cloned();
+                    go_port.borrow().attributes.get(ir::NumAttr::Static);
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(go_time) = mb_time {
                     <span class="kw">if </span>go_time != time {
@@ -965,7 +976,10 @@
                             .with_pos(<span class="kw-2">&amp;</span>go_port.borrow().attributes));
                     }
                 } <span class="kw">else </span>{
-                    go_port.borrow_mut().attributes.insert(<span class="string">&quot;static&quot;</span>, time);
+                    go_port
+                        .borrow_mut()
+                        .attributes
+                        .insert(ir::NumAttr::Static, time);
                 }
                 <span class="macro">log::info!</span>(
                     <span class="string">&quot;Component `{}` has static time {}&quot;</span>,

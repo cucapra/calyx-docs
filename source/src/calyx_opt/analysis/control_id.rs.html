@@ -291,11 +291,21 @@
 <span id="291">291</span>
 <span id="292">292</span>
 <span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 
-<span class="kw">const </span>NODE_ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;NODE_ID&quot;</span>;
-<span class="kw">const </span>BEGIN_ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;BEGIN_ID&quot;</span>;
-<span class="kw">const </span>END_ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;END_ID&quot;</span>;
+<span class="kw">const </span>NODE_ID: ir::Attribute =
+    ir::Attribute::Internal(ir::InternalAttr::NODE_ID);
+<span class="kw">const </span>BEGIN_ID: ir::Attribute =
+    ir::Attribute::Internal(ir::InternalAttr::BEGIN_ID);
+<span class="kw">const </span>END_ID: ir::Attribute = ir::Attribute::Internal(ir::InternalAttr::END_ID);
 
 <span class="doccomment">/// Adding &quot;NODE_ID&quot;, &quot;BEGIN_ID&quot;, and &quot;END_ID&quot; attribute to control statement
 </span><span class="kw">pub struct </span>ControlId;
@@ -473,19 +483,25 @@
 
     <span class="comment">// Gets attribute s from c, panics otherwise. Should be used when you know
     // that c has attribute s.
-    </span><span class="kw">pub fn </span>get_guaranteed_attribute(c: <span class="kw-2">&amp;</span>ir::Control, s: <span class="kw-2">&amp;</span>str) -&gt; u64 {
-        c.get_attribute(s).unwrap_or_else(||<span class="macro">unreachable!</span>(
+    </span><span class="kw">pub fn </span>get_guaranteed_attribute&lt;A&gt;(c: <span class="kw-2">&amp;</span>ir::Control, attr: A) -&gt; u64
+    <span class="kw">where
+        </span>A: Into&lt;ir::Attribute&gt;,
+    {
+        c.get_attribute(attr.into()).unwrap_or_else(||<span class="macro">unreachable!</span>(
           <span class="string">&quot;called get_guaranteed_attribute, meaning we had to be sure it had the attribute&quot;
       </span>))
     }
 
     <span class="comment">// Gets attribute s from c, panics otherwise. Should be used when you know
     // that c has attribute s.
-    </span><span class="kw">pub fn </span>get_guaranteed_attribute_static(
+    </span><span class="kw">pub fn </span>get_guaranteed_attribute_static&lt;A&gt;(
         sc: <span class="kw-2">&amp;</span>ir::StaticControl,
-        s: <span class="kw-2">&amp;</span>str,
-    ) -&gt; u64 {
-        sc.get_attribute(s).unwrap_or_else(||<span class="macro">unreachable!</span>(
+        attr: A,
+    ) -&gt; u64
+    <span class="kw">where
+        </span>A: Into&lt;ir::Attribute&gt;,
+    {
+        sc.get_attribute(attr.into()).unwrap_or_else(||<span class="macro">unreachable!</span>(
           <span class="string">&quot;called get_guaranteed_attribute_static, meaning we had to be sure it had the attribute&quot;
       </span>))
     }

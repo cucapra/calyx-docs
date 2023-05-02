@@ -1,3 +1,0 @@
-(function() {var implementors = {
-"calyx_frontend":[["impl&lt;S&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.66.0/core/ops/index/trait.Index.html\" title=\"trait core::ops::index::Index\">Index</a>&lt;S&gt; for <a class=\"struct\" href=\"calyx_frontend/struct.Attributes.html\" title=\"struct calyx_frontend::Attributes\">Attributes</a><span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;S: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.66.0/core/convert/trait.Into.html\" title=\"trait core::convert::Into\">Into</a>&lt;Id&gt;,</span>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

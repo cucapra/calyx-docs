@@ -446,7 +446,7 @@
                 group.assignments.push(done_assign);
 
                 <span class="comment">// Add a &quot;static&quot; attribute
-                </span>group.attributes.insert(<span class="string">&quot;static&quot;</span>, <span class="number">1</span>);
+                </span>group.attributes.insert(ir::NumAttr::Static, <span class="number">1</span>);
                 drop(group);
 
                 <span class="prelude-val">Ok</span>(group_ref)
