@@ -121,6 +121,17 @@
 <span id="121">121</span>
 <span id="122">122</span>
 <span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{DominatorMap, ShareSet};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
@@ -135,6 +146,7 @@
 /// by building a domination map. If so, component is state shareable.
 </span><span class="kw">pub struct </span>InferShare {
     print_dmap: bool,
+    print_static_analysis: bool,
     state_shareable: ShareSet,
     shareable: ShareSet,
     <span class="comment">//name of main (so we can skip it)
@@ -151,7 +163,13 @@
     </span>}
 
     <span class="kw">fn </span>opts() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str)] {
-        <span class="kw-2">&amp;</span>[(<span class="string">&quot;print-dmap&quot;</span>, <span class="string">&quot;Print the domination map&quot;</span>)]
+        <span class="kw-2">&amp;</span>[
+            (<span class="string">&quot;print-dmap&quot;</span>, <span class="string">&quot;Print the domination map&quot;</span>),
+            (
+                <span class="string">&quot;print-static-analysis&quot;</span>,
+                <span class="string">&quot;Prints the domination analysis for static dmaps&quot;</span>,
+            ),
+        ]
     }
 }
 
@@ -167,6 +185,7 @@
 
         <span class="prelude-val">Ok</span>(InferShare {
             print_dmap: opts[<span class="number">0</span>],
+            print_static_analysis: opts[<span class="number">1</span>],
             state_shareable,
             shareable,
             main: ctx.entrypoint,
@@ -206,7 +225,7 @@
                 || <span class="self">self</span>.state_shareable.is_shareable_component(cell)
         };
 
-        <span class="comment">// cannot contain any ref cells, or any cells of a &quot;non-shareable&quot; type
+        <span class="comment">// cannot contain any external cells, or any cells of a &quot;non-shareable&quot; type
         // (i.e. not shareable, state_shareable, const or This component)
         </span><span class="kw">if </span>comp.cells.iter().any(|cell| {
             !type_is_shareable(cell) &amp;&amp; !cell.borrow().is_reference()
@@ -221,6 +240,9 @@
         <span class="comment">// print the domination map if command line argument says so
         </span><span class="kw">if </span><span class="self">self</span>.print_dmap {
             <span class="macro">println!</span>(<span class="string">&quot;{dmap:?}&quot;</span>);
+        }
+        <span class="kw">if </span><span class="self">self</span>.print_static_analysis {
+            <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, dmap.static_par_domination);
         }
 
         <span class="kw">for </span>(node, dominators) <span class="kw">in </span>dmap.map.iter_mut() {

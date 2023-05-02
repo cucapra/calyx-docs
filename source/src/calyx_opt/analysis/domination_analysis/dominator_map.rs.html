@@ -681,8 +681,44 @@
 <span id="681">681</span>
 <span id="682">682</span>
 <span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
-    domination_analysis::node_analysis::{NodeReads, NodeSearch},
+    domination_analysis::{
+        node_analysis::{NodeReads, NodeSearch},
+        static_par_domination::StaticParDomination,
+    },
     ControlId, ShareSet,
 };
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
@@ -772,7 +808,7 @@
 /// see how it will dominate the end node.
 </span><span class="attribute">#[derive(Default)]
 </span><span class="kw">pub struct </span>DominatorMap {
-    <span class="doccomment">/// Map from group names to the name of groups that dominate it
+    <span class="doccomment">/// Map from node (either invokes, enables, or if/while ports) ids to the ids of nodes that dominate it
     </span><span class="kw">pub </span>map: HashMap&lt;u64, HashSet&lt;u64&gt;&gt;,
     <span class="doccomment">/// Maps ids of control stmts, to the &quot;last&quot; nodes in them. By &quot;last&quot; is meant
     /// the final node that will be executed in them. For invokes and enables, it
@@ -780,6 +816,10 @@
     /// and for if statements it will be the &quot;if&quot; nods. For pars in seqs, you
     /// have to look inside the children to see what their &quot;last&quot; nodes are.
     </span><span class="kw">pub </span>exits_map: HashMap&lt;u64, HashSet&lt;u64&gt;&gt;,
+    <span class="doccomment">/// an analysis to help domination across static pars
+    /// static pars give us more precise timing guarantees and therefore allow
+    /// us to more aggresively assign dominators
+    </span><span class="kw">pub </span>static_par_domination: StaticParDomination,
     <span class="kw">pub </span>component_name: ir::Id,
 }
 
@@ -810,7 +850,16 @@
 
 <span class="attribute">#[inline]
 </span><span class="kw">fn </span>get_id_static&lt;<span class="kw">const </span>BEGIN: bool&gt;(c: <span class="kw-2">&amp;</span>ir::StaticControl) -&gt; u64 {
-    <span class="kw">let </span>v = c.get_attribute(NODE_ID);
+    <span class="kw">let </span>v = <span class="kw">match </span>c {
+        ir::StaticControl::If(<span class="kw">_</span>) =&gt; {
+            <span class="kw">if </span>BEGIN {
+                c.get_attribute(BEGIN_ID)
+            } <span class="kw">else </span>{
+                c.get_attribute(END_ID)
+            }
+        }
+        <span class="kw">_ </span>=&gt; c.get_attribute(NODE_ID),
+    };
     v.unwrap_or_else(|| <span class="macro">unreachable!</span>(
             <span class="string">&quot;get_id() shouldn&#39;t be called on control stmts that don&#39;t have id numbering&quot;
     </span>))
@@ -929,6 +978,10 @@
         <span class="kw">let </span><span class="kw-2">mut </span>map = DominatorMap {
             map: HashMap::new(),
             exits_map: HashMap::new(),
+            static_par_domination: StaticParDomination::new(
+                control,
+                component_name,
+            ),
             component_name,
         };
         map.build_exit_map(control);
@@ -1012,12 +1065,25 @@
 
     <span class="comment">// Builds the domination map by running update_map() until the map
     // stops changing.
-    </span><span class="kw">fn </span>build_map(<span class="kw-2">&amp;mut </span><span class="self">self</span>, main_c: <span class="kw-2">&amp;</span>ir::Control) {
+    </span><span class="kw">fn </span>build_map(<span class="kw-2">&amp;mut </span><span class="self">self</span>, main_c: <span class="kw-2">&amp;mut </span>ir::Control) {
         <span class="kw">let </span><span class="kw-2">mut </span>og_map = <span class="self">self</span>.map.clone();
         <span class="self">self</span>.update_map(main_c, <span class="number">0</span>, <span class="kw-2">&amp;</span>HashSet::new());
         <span class="kw">while </span>og_map != <span class="self">self</span>.map {
             og_map = <span class="self">self</span>.map.clone();
             <span class="self">self</span>.update_map(main_c, <span class="number">0</span>, <span class="kw-2">&amp;</span>HashSet::new());
+        }
+        <span class="self">self</span>.update_static_dominators();
+    }
+
+    <span class="comment">// updates static dominators based on self.static_par_domination
+    // this can more aggresively add dominators to the map by
+    // using the timing guarantees of static par
+    </span><span class="kw">fn </span>update_static_dominators(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">let </span>new_static_domminators =
+            <span class="self">self</span>.static_par_domination.get_static_dominators();
+        <span class="kw">for </span>(node_id, node_dominators) <span class="kw">in </span>new_static_domminators {
+            <span class="kw">let </span>cur_dominators = <span class="self">self</span>.map.entry(node_id).or_default();
+            cur_dominators.extend(node_dominators);
         }
     }
 

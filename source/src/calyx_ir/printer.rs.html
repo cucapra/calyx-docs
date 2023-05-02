@@ -1178,7 +1178,7 @@
                 ..
             }) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
-                <span class="macro">writeln!</span>(f, <span class="string">&quot;static repeat {} &quot;</span>, num_repeats)<span class="question-mark">?</span>;
+                <span class="macro">write!</span>(f, <span class="string">&quot;static repeat {} &quot;</span>, num_repeats)<span class="question-mark">?</span>;
                 <span class="macro">writeln!</span>(f, <span class="string">&quot;{{&quot;</span>)<span class="question-mark">?</span>;
                 <span class="self">Self</span>::write_static_control(body, indent_level + <span class="number">2</span>, f)<span class="question-mark">?</span>;
                 <span class="macro">writeln!</span>(f, <span class="string">&quot;{}}}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))
