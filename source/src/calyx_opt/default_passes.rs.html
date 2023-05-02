@@ -162,6 +162,8 @@
 <span id="162">162</span>
 <span id="163">163</span>
 <span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
@@ -170,8 +172,8 @@
     DeadCellRemoval, DeadGroupRemoval, Externalize, GoInsertion, GroupToInvoke,
     GroupToSeq, HoleInliner, InferShare, InferStaticTiming, LowerGuards,
     MergeAssign, MergeStaticPar, Papercut, ParToSeq, RegisterUnsharing,
-    RemoveIds, ResetInsertion, SimplifyWithControl, StaticInliner,
-    StaticParConv, SynthesisPapercut, TopDownCompileControl,
+    RemoveIds, ResetInsertion, SimplifyStaticGuards, SimplifyWithControl,
+    StaticInliner, StaticParConv, SynthesisPapercut, TopDownCompileControl,
     TopDownStaticTiming, UnrollBounded, WellFormed, WireInliner,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::Named;
@@ -201,6 +203,7 @@
         pm.register_pass::&lt;CellShare&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;InferStaticTiming&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;MergeStaticPar&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;SimplifyStaticGuards&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;StaticParConv&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">// Compilation passes
@@ -263,6 +266,7 @@
             <span class="string">&quot;compile&quot;</span>,
             [
                 StaticInliner,
+                SimplifyStaticGuards,
                 CompileStatic,
                 TopDownStaticTiming,
                 TopDownCompileControl

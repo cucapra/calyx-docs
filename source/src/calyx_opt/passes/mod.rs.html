@@ -81,6 +81,8 @@
 <span id="81">81</span>
 <span id="82">82</span>
 <span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
@@ -112,6 +114,7 @@
 <span class="kw">mod </span>register_unsharing;
 <span class="kw">mod </span>remove_ids;
 <span class="kw">mod </span>reset_insertion;
+<span class="kw">mod </span>simplify_static_guards;
 <span class="kw">mod </span>static_inliner;
 <span class="kw">mod </span>sync;
 <span class="comment">// mod simplify_guards;
@@ -152,6 +155,7 @@
 <span class="kw">pub use </span>register_unsharing::RegisterUnsharing;
 <span class="kw">pub use </span>remove_ids::RemoveIds;
 <span class="kw">pub use </span>reset_insertion::ResetInsertion;
+<span class="kw">pub use </span>simplify_static_guards::SimplifyStaticGuards;
 <span class="kw">pub use </span>simplify_with_control::SimplifyWithControl;
 <span class="kw">pub use </span>static_inliner::StaticInliner;
 <span class="kw">pub use </span>sync::CompileSync;

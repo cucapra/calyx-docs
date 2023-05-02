@@ -956,7 +956,7 @@
             <span class="kw">let </span>group = gr.borrow();
             <span class="comment">// Check that for each interval %[beg, end], end &gt; beg.
             </span><span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group.assignments {
-                assign.guard.check_for_each_interval(
+                assign.guard.check_for_each_info(
                     <span class="kw-2">&amp;mut </span>|static_timing: <span class="kw-2">&amp;</span>StaticTiming| {
                         <span class="kw">if </span>static_timing.get_interval().<span class="number">0
                             </span>&gt;= static_timing.get_interval().<span class="number">1

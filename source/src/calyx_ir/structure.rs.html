@@ -1139,7 +1139,7 @@
     <span class="kw">where
         </span>F: FnMut(<span class="kw-2">&amp;mut </span>StaticTiming) -&gt; <span class="prelude-ty">Option</span>&lt;Guard&lt;StaticTiming&gt;&gt;,
     {
-        <span class="self">self</span>.guard.for_each_interval(<span class="kw-2">&amp;mut </span>|interval| f(interval))
+        <span class="self">self</span>.guard.for_each_info(<span class="kw-2">&amp;mut </span>|interval| f(interval))
     }
 }
 
