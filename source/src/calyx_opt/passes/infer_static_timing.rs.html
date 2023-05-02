@@ -897,41 +897,43 @@
         _lib: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="comment">// Compute latencies for all groups.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>latency_result: <span class="prelude-ty">Option</span>&lt;u64&gt;;
+        <span class="comment">// If there are no groups in this component or if the control program is
+        // empty, we&#39;re done.
+        </span><span class="kw">if </span>comp.get_groups().is_empty()
+            || <span class="macro">matches!</span>(<span class="kw-2">&amp;*</span>comp.control.borrow(), ir::Control::Empty(<span class="kw">_</span>))
+        {
+            <span class="macro">log::info!</span>(<span class="string">&quot;Skipping component `{}&#39; because it has no groups or control program&quot;</span>, comp.name);
+            <span class="comment">// Add latency information for the component if present.
+            </span><span class="kw">let </span>sig = <span class="kw-2">&amp;*</span>comp.signature.borrow();
+            <span class="kw">let </span>ports: GoDone = sig.into();
+            <span class="self">self</span>.latency_data.insert(comp.name, ports);
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Stop);
+        }
+
         <span class="comment">// don&#39;t need to do all this work for static groups
         </span><span class="kw">for </span>group <span class="kw">in </span>comp.get_groups().iter() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = <span class="self">self</span>.infer_latency(<span class="kw-2">&amp;</span>group.borrow()) {
-                <span class="kw">let </span>grp = group.borrow();
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(curr_lat) = grp.attributes.get(ir::NumAttr::Static)
-                {
-                    <span class="comment">// Inferred latency is not the same as the provided latency annotation.
-                    </span><span class="kw">if </span>curr_lat != latency {
-                        <span class="kw">let </span>msg1 = <span class="macro">format!</span>(<span class="string">&quot;Annotated latency: {}&quot;</span>, curr_lat);
-                        <span class="kw">let </span>msg2 = <span class="macro">format!</span>(<span class="string">&quot;Inferred latency: {}&quot;</span>, latency);
-                        <span class="kw">let </span>msg = <span class="macro">format!</span>(
+            <span class="kw">let </span><span class="prelude-val">Some</span>(latency) = <span class="self">self</span>.infer_latency(<span class="kw-2">&amp;</span>group.borrow()) <span class="kw">else </span>{ <span class="kw">continue </span>};
+            <span class="kw">let </span>grp = group.borrow();
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(curr_lat) = grp.attributes.get(ir::NumAttr::Static) {
+                <span class="comment">// Inferred latency is not the same as the provided latency annotation.
+                </span><span class="kw">if </span>curr_lat != latency {
+                    <span class="kw">let </span>msg1 = <span class="macro">format!</span>(<span class="string">&quot;Annotated latency: {}&quot;</span>, curr_lat);
+                    <span class="kw">let </span>msg2 = <span class="macro">format!</span>(<span class="string">&quot;Inferred latency: {}&quot;</span>, latency);
+                    <span class="kw">let </span>msg = <span class="macro">format!</span>(
                             <span class="string">&quot;Invalid \&quot;static\&quot; latency annotation for group {}.\n{}\n{}&quot;</span>,
                             grp.name(),
                             msg1,
                             msg2
                         );
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(msg)
-                            .with_pos(<span class="kw-2">&amp;</span>grp.attributes));
-                    }
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(msg)
+                        .with_pos(<span class="kw-2">&amp;</span>grp.attributes));
                 }
-                latency_result = <span class="prelude-val">Some</span>(latency);
             } <span class="kw">else </span>{
-                latency_result = <span class="prelude-val">None</span>;
-            }
-
-            <span class="kw">match </span>latency_result {
-                <span class="prelude-val">Some</span>(res) =&gt; {
-                    group
-                        .borrow_mut()
-                        .attributes
-                        .insert(ir::NumAttr::Static, res);
-                }
-                <span class="prelude-val">None </span>=&gt; <span class="kw">continue</span>,
+                drop(grp);
+                group
+                    .borrow_mut()
+                    .attributes
+                    .insert(ir::NumAttr::Static, latency);
             }
         }
 
@@ -967,7 +969,7 @@
                         <span class="kw">let </span>msg1 = <span class="macro">format!</span>(<span class="string">&quot;Annotated latency: {}&quot;</span>, go_time);
                         <span class="kw">let </span>msg2 = <span class="macro">format!</span>(<span class="string">&quot;Inferred latency: {}&quot;</span>, time);
                         <span class="kw">let </span>msg = <span class="macro">format!</span>(
-                        <span class="string">&quot;Impossible \&quot;static\&quot; latency annotation for component {}.\n{}\n{}&quot;</span>,
+                        <span class="string">&quot;Invalid \&quot;static\&quot; latency annotation for component {}.\n{}\n{}&quot;</span>,
                         comp.name,
                         msg1,
                         msg2
@@ -987,14 +989,12 @@
                     time
                 );
             }
-
-            <span class="comment">// Add all go-done latencies to the context
-            </span><span class="kw">let </span>sig = <span class="kw-2">&amp;*</span>comp.signature.borrow();
-            <span class="kw">let </span>ports: GoDone = sig.into();
-
-            <span class="self">self</span>.latency_data.insert(comp.name, ports);
         }
 
+        <span class="comment">// Add all go-done latencies for the component to the context
+        </span><span class="kw">let </span>sig = <span class="kw-2">&amp;*</span>comp.signature.borrow();
+        <span class="kw">let </span>ports: GoDone = sig.into();
+        <span class="self">self</span>.latency_data.insert(comp.name, ports);
         <span class="prelude-val">Ok</span>(Action::Stop)
     }
 }
