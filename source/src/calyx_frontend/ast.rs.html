@@ -400,6 +400,22 @@
 <span id="400">400</span>
 <span id="401">401</span>
 <span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx
 </span><span class="kw">use </span><span class="kw">super</span>::parser;
 <span class="kw">use crate</span>::{Attributes, PortDef, Primitive};
@@ -799,6 +815,22 @@
     <span class="kw">pub fn </span>empty() -&gt; Control {
         Control::Empty {
             attributes: Attributes::default(),
+        }
+    }
+
+    <span class="kw">pub fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
+        <span class="kw">match </span><span class="self">self </span>{
+            Control::Seq { attributes, .. } =&gt; attributes,
+            Control::Par { attributes, .. } =&gt; attributes,
+            Control::If { attributes, .. } =&gt; attributes,
+            Control::While { attributes, .. } =&gt; attributes,
+            Control::Enable { attributes, .. } =&gt; attributes,
+            Control::Invoke { attributes, .. } =&gt; attributes,
+            Control::Empty { attributes, .. } =&gt; attributes,
+            Control::StaticSeq { attributes, .. } =&gt; attributes,
+            Control::StaticPar { attributes, .. } =&gt; attributes,
+            Control::StaticIf { attributes, .. } =&gt; attributes,
+            Control::StaticRepeat { attributes, .. } =&gt; attributes,
         }
     }
 }

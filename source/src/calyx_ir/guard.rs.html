@@ -598,6 +598,16 @@
 <span id="598">598</span>
 <span id="599">599</span>
 <span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{NumAttr, Port, RRC};
 <span class="kw">use </span>calyx_utils::Error;
 <span class="kw">use </span>std::fmt::Debug;
@@ -711,11 +721,21 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; Guard&lt;T&gt; {
-    <span class="doccomment">/// Returns true if this is a `Guard::True`.
+    <span class="doccomment">/// Returns true definitely `Guard::True`.
+    /// Returning false does not mean that the guard is not true.
     </span><span class="kw">pub fn </span>is_true(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
             Guard::True =&gt; <span class="bool-val">true</span>,
             Guard::Port(p) =&gt; p.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>),
+            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
+        }
+    }
+
+    <span class="doccomment">/// Checks if the guard is always false.
+    /// Returning false does not mean that the guard is not false.
+    </span><span class="kw">pub fn </span>is_false(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="kw">match </span><span class="self">self </span>{
+            Guard::Not(g) =&gt; g.is_true(),
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         }
     }

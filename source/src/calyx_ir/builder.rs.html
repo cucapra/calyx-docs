@@ -359,6 +359,13 @@
 <span id="359">359</span>
 <span id="360">360</span>
 <span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
 </pre><pre class="rust"><code><span class="doccomment">//! IR Builder. Provides convience methods to build various parts of the internal
 //! representation.
 </span><span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures, Nothing, RRC, WRC};
@@ -522,6 +529,13 @@
     /// pair, building and adding it to the component if needed..
     /// If the constant does not exist, it is added to the Context.
     </span><span class="kw">pub fn </span>add_constant(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: u64, width: u64) -&gt; RRC&lt;ir::Cell&gt; {
+        <span class="comment">// Ensure that the value can fit within the width
+        </span><span class="macro">assert!</span>(
+            val &lt; (<span class="number">1 </span>&lt;&lt; width),
+            <span class="string">&quot;Constant value {} cannot fit in {} bits&quot;</span>,
+            val,
+            width
+        );
         <span class="kw">let </span>name = ir::Cell::constant_name(val, width);
         <span class="comment">// If this constant has already been instantiated, return the relevant
         // cell.

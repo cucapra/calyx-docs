@@ -1146,7 +1146,7 @@
         <span class="kw">let </span>builder = <span class="self">self</span>.builder;
         <span class="kw">let </span>(unconditional, conditional) =
             <span class="self">Self</span>::calculate_runs(<span class="self">self</span>.transitions.into_iter());
-        <span class="kw">let </span>fsm_size = get_bit_width_from(last + <span class="number">1</span>);
+        <span class="kw">let </span>fsm_size = get_bit_width_from(last) + <span class="number">1</span>;
 
         <span class="macro">structure!</span>(builder;
            <span class="kw">let </span>st_fsm = prim std_reg(fsm_size);

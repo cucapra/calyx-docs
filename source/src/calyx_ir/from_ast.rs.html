@@ -957,6 +957,8 @@
 <span id="957">957</span>
 <span id="958">958</span>
 <span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Canonical, CellType,
     Component, Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
@@ -1636,19 +1638,20 @@
 ) -&gt; CalyxResult&lt;StaticControl&gt; {
     <span class="kw">let </span>sc = <span class="kw">match </span>control {
         ast::Control::Enable {
-            comp: component,
+            comp: group,
             attributes,
         } =&gt; {
-            <span class="kw">if </span>builder.component.find_group(component).is_some() {
+            <span class="kw">if </span>builder.component.find_group(group).is_some() {
                 <span class="comment">// dynamic group called in build_static_control
                 </span><span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(
                     <span class="string">&quot;found dynamic group in static context&quot;</span>.to_string(),
-                ));
+                )
+                .with_pos(<span class="kw-2">&amp;</span>attributes));
             };
             <span class="kw">let </span><span class="kw-2">mut </span>en = StaticControl::from(Rc::clone(
-                <span class="kw-2">&amp;</span>builder.component.find_static_group(component).ok_or_else(
+                <span class="kw-2">&amp;</span>builder.component.find_static_group(group).ok_or_else(
                     || {
-                        Error::undefined(component, <span class="string">&quot;group&quot;</span>.to_string())
+                        Error::undefined(group, <span class="string">&quot;group&quot;</span>.to_string())
                             .with_pos(<span class="kw-2">&amp;</span>attributes)
                     },
                 )<span class="question-mark">?</span>,
@@ -1690,7 +1693,8 @@
         | ast::Control::Seq { .. } =&gt; {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(
                 <span class="string">&quot;found dynamic control in static context&quot;</span>.to_string(),
-            ));
+            )
+            .with_pos(control.get_attributes()));
         }
         ast::Control::Empty { attributes } =&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>emp = StaticControl::empty();
