@@ -1928,7 +1928,7 @@
         <span class="kw">let </span>span = <span class="self">Self</span>::get_span(<span class="kw-2">&amp;</span>input);
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             input.into_children();
-            [static_word(<span class="kw">_</span>), name_with_attribute((name, attrs)), bitwidth(latency), static_wire(wire)..] =&gt; ast::StaticGroup {
+            [static_word(<span class="kw">_</span>), latency_annotation(latency), name_with_attribute((name, attrs)), static_wire(wire)..] =&gt; ast::StaticGroup {
                 name,
                 attributes: attrs.add_span(span),
                 wires: wire.collect(),

@@ -1282,12 +1282,12 @@
     group: ast::StaticGroup,
     builder: <span class="kw-2">&amp;mut </span>Builder,
 ) -&gt; CalyxResult&lt;()&gt; {
-    <span class="kw">if </span>group.latency == <span class="number">0 </span>{
+    <span class="kw">if </span>group.latency.get() == <span class="number">0 </span>{
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
             <span class="string">&quot;static group with 0 latency&quot;</span>.to_string(),
         ));
     }
-    <span class="kw">let </span>ir_group = builder.add_static_group(group.name, group.latency);
+    <span class="kw">let </span>ir_group = builder.add_static_group(group.name, group.latency.get());
     <span class="kw">let </span>assigns = build_static_assignments(group.wires, builder)<span class="question-mark">?</span>;
 
     ir_group.borrow_mut().attributes = group.attributes;

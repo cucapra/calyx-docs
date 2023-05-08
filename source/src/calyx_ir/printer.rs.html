@@ -1140,9 +1140,9 @@
         <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))<span class="question-mark">?</span>;
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;static group {}&lt;{}&gt;&quot;</span>,
+            <span class="string">&quot;static&lt;{}&gt; group {}&quot;</span>,
+            group.get_latency(),
             group.name().id,
-            group.get_latency()
         )<span class="question-mark">?</span>;
         <span class="kw">if </span>!group.attributes.is_empty() {
             <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_attributes(<span class="kw-2">&amp;</span>group.attributes))<span class="question-mark">?</span>;
@@ -1189,7 +1189,7 @@
                 latency,
             }) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
-                <span class="macro">writeln!</span>(f, <span class="string">&quot;static seq &lt;{}&gt; {{&quot;</span>, latency)<span class="question-mark">?</span>;
+                <span class="macro">writeln!</span>(f, <span class="string">&quot;static&lt;{}&gt; seq  {{&quot;</span>, latency)<span class="question-mark">?</span>;
                 <span class="kw">for </span>stmt <span class="kw">in </span>stmts {
                     <span class="self">Self</span>::write_static_control(stmt, indent_level + <span class="number">2</span>, f)<span class="question-mark">?</span>;
                 }
@@ -1201,7 +1201,7 @@
                 latency,
             }) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
-                <span class="macro">writeln!</span>(f, <span class="string">&quot;static par &lt;{}&gt; {{&quot;</span>, latency)<span class="question-mark">?</span>;
+                <span class="macro">writeln!</span>(f, <span class="string">&quot;static&lt;{}&gt; par {{&quot;</span>, latency)<span class="question-mark">?</span>;
                 <span class="kw">for </span>stmt <span class="kw">in </span>stmts {
                     <span class="self">Self</span>::write_static_control(stmt, indent_level + <span class="number">2</span>, f)<span class="question-mark">?</span>;
                 }
@@ -1224,7 +1224,7 @@
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
                 <span class="macro">write!</span>(
                     f,
-                    <span class="string">&quot;static if &lt;{}&gt; {} &quot;</span>,
+                    <span class="string">&quot;static&lt;{}&gt; if  {} &quot;</span>,
                     latency,
                     <span class="self">Self</span>::port_to_str(<span class="kw-2">&amp;</span>port.borrow()),
                 )<span class="question-mark">?</span>;
@@ -1250,7 +1250,7 @@
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(attributes))<span class="question-mark">?</span>;
                 <span class="macro">write!</span>(
                     f,
-                    <span class="string">&quot;static invoke&lt;{}&gt; {}&quot;</span>,
+                    <span class="string">&quot;static&lt;{}&gt; invoke {}&quot;</span>,
                     latency,
                     comp.borrow().name()
                 )<span class="question-mark">?</span>;
