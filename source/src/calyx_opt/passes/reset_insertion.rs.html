@@ -46,11 +46,6 @@
 <span id="46">46</span>
 <span id="47">47</span>
 <span id="48">48</span>
-<span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures};
 
@@ -80,11 +75,6 @@
 
         <span class="kw">for </span>cell_ref <span class="kw">in </span>builder.component.cells.iter() {
             <span class="kw">let </span>cell = cell_ref.borrow();
-            <span class="kw">if </span>cell.get_attribute(ir::BoolAttr::External).is_some() {
-                <span class="comment">// External cells should not have their state reset,
-                // since we assume they may be initialized.
-                </span><span class="kw">continue</span>;
-            }
             <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = cell.find_with_attr(ir::BoolAttr::Reset) {
                 builder.component.continuous_assignments.push(
                     builder.build_assignment(
