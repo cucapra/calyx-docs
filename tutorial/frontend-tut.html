@@ -163,7 +163,7 @@ In the above example, the <code>map</code> expression multiplies the values of <
 In the above code snippet, we add together all the elements of <code>prodvec</code> and place them in a register named <code>dot</code>.
 Since the <code>reduce</code> parallelism factor is also 1, the reduction is performed sequentially.</p>
 <h2 id="run-a-mrxl-program"><a class="header" href="#run-a-mrxl-program">Run a MrXL Program</a></h2>
-<p>Once we have <a href="https://github.com/cucapra/futil/tree/master/frontends/mrxl">installed the mrxl command line tool</a>, we can run MrXL programs using <a href="../fud/index.html"><code>fud</code></a>.</p>
+<p>Once we have <a href="https://github.com/cucapra/calyx/tree/master/frontends/mrxl">installed the mrxl command line tool</a>, we can run MrXL programs using <a href="../fud/index.html"><code>fud</code></a>.</p>
 <p>To provide MrXL program with input values, we use fud's <a href="https://www.json.org/json-en.html">JSON</a>-based <a href="../lang/data-format.html">data format</a>.
 Let's try to run this program, which has a parallelism factor of two:</p>
 <pre><code>input foo: int[4]
@@ -220,7 +220,7 @@ Take a look at <a href="./language-tut.html">Calyx tutorial</a> if you need a re
 <p>You can find our <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_futil.py">complete implementation</a> in the Calyx repository.</p>
 </blockquote>
 <h3 id="parse-mrxl-into-an-ast"><a class="header" href="#parse-mrxl-into-an-ast">Parse MrXL into an AST</a></h3>
-<p>To start, we'll parse this MrXL program into a Python AST representation. We chose to represent <a href="https://github.com/cucapra/futil/blob/mrxl/mrxl/mrxl/ast.py">AST</a> nodes with Python <code>dataclass</code>.
+<p>To start, we'll parse this MrXL program into a Python AST representation. We chose to represent <a href="https://github.com/cucapra/calyx/blob/mrxl/mrxl/mrxl/ast.py">AST</a> nodes with Python <code>dataclass</code>.
 A program is a sequence of array declarations followed by computation statements:</p>
 <pre><code class="language-python">@dataclass
 class Prog:

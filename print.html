@@ -1559,7 +1559,7 @@ incomplete yet daunting list of CLI tools used by Calyx is:</p>
 <li>Waveform viewers to see the results of simulation</li>
 </ul>
 <p><code>fud</code> aims to provide a simple interface for using these toolchains and executing them in a pipeline.
-The source for fud is <a href="https://github.com/cucapra/futil/tree/master/fud">here</a>.</p>
+The source for fud is <a href="https://github.com/cucapra/calyx/tree/master/fud">here</a>.</p>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <blockquote>
 <p>Fud requires Python 3.9 or higher to work correctly.</p>
@@ -3253,7 +3253,7 @@ In the above example, the <code>map</code> expression multiplies the values of <
 In the above code snippet, we add together all the elements of <code>prodvec</code> and place them in a register named <code>dot</code>.
 Since the <code>reduce</code> parallelism factor is also 1, the reduction is performed sequentially.</p>
 <h2 id="run-a-mrxl-program"><a class="header" href="#run-a-mrxl-program">Run a MrXL Program</a></h2>
-<p>Once we have <a href="https://github.com/cucapra/futil/tree/master/frontends/mrxl">installed the mrxl command line tool</a>, we can run MrXL programs using <a href="tutorial/../fud/index.html"><code>fud</code></a>.</p>
+<p>Once we have <a href="https://github.com/cucapra/calyx/tree/master/frontends/mrxl">installed the mrxl command line tool</a>, we can run MrXL programs using <a href="tutorial/../fud/index.html"><code>fud</code></a>.</p>
 <p>To provide MrXL program with input values, we use fud's <a href="https://www.json.org/json-en.html">JSON</a>-based <a href="tutorial/../lang/data-format.html">data format</a>.
 Let's try to run this program, which has a parallelism factor of two:</p>
 <pre><code>input foo: int[4]
@@ -3310,7 +3310,7 @@ Take a look at <a href="tutorial/./language-tut.html">Calyx tutorial</a> if you 
 <p>You can find our <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_futil.py">complete implementation</a> in the Calyx repository.</p>
 </blockquote>
 <h3 id="parse-mrxl-into-an-ast"><a class="header" href="#parse-mrxl-into-an-ast">Parse MrXL into an AST</a></h3>
-<p>To start, we'll parse this MrXL program into a Python AST representation. We chose to represent <a href="https://github.com/cucapra/futil/blob/mrxl/mrxl/mrxl/ast.py">AST</a> nodes with Python <code>dataclass</code>.
+<p>To start, we'll parse this MrXL program into a Python AST representation. We chose to represent <a href="https://github.com/cucapra/calyx/blob/mrxl/mrxl/mrxl/ast.py">AST</a> nodes with Python <code>dataclass</code>.
 A program is a sequence of array declarations followed by computation statements:</p>
 <pre><code class="language-python">@dataclass
 class Prog:
@@ -3867,7 +3867,7 @@ ln -s &lt;calyx root directory&gt;/tools/vscode calyx.calyx-0.0.1
 <li><a href="https://jpramos.me">Jan-Paul Ramos</a></li>
 <li>Jiaxuan (Crystal) Hu</li>
 </ul>
-<p>If you're missing from this list, please <a href="https://github.com/cucapra/futil/edit/master/docs/contributors.md">add yourself</a>!</p>
+<p>If you're missing from this list, please <a href="https://github.com/cucapra/calyx/edit/master/docs/contributors.md">add yourself</a>!</p>
 
                     </main>
 
