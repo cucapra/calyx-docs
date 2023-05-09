@@ -239,6 +239,37 @@
 <span id="239">239</span>
 <span id="240">240</span>
 <span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     ast::{ComponentDef, NamespaceDef},
     parser,
@@ -250,6 +281,10 @@
     collections::HashSet,
     path::{Path, PathBuf},
 };
+
+<span class="doccomment">/// String representing the basic compilation primitives that need to be present
+/// to support compilation.
+</span><span class="kw">const </span>COMPILE_LIB: <span class="kw-2">&amp;</span>str = <span class="macro">include_str!</span>(<span class="string">&quot;../../primitives/compile.futil&quot;</span>);
 
 <span class="doccomment">/// A Workspace represents all Calyx files transitively discovered while trying to compile a
 /// top-level file.
@@ -339,13 +374,41 @@
         )))
     }
 
+    <span class="doccomment">/// Construct a new workspace using the `compile.futil` library which
+    /// contains the core primitives needed for compilation.
+    </span><span class="kw">pub fn </span>from_compile_lib() -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>ns = NamespaceDef::construct_from_str(COMPILE_LIB)<span class="question-mark">?</span>;
+        <span class="comment">// No imports allowed
+        </span><span class="macro">assert!</span>(
+            ns.imports.is_empty(),
+            <span class="string">&quot;core library should not contain any imports&quot;
+        </span>);
+        <span class="comment">// No metadata allowed
+        </span><span class="macro">assert!</span>(
+            ns.metadata.is_none(),
+            <span class="string">&quot;core library should not contain any metadata&quot;
+        </span>);
+        <span class="comment">// Only inline externs are allowed
+        </span><span class="macro">assert!</span>(
+            ns.externs.len() == <span class="number">1 </span>&amp;&amp; ns.externs[<span class="number">0</span>].<span class="number">0</span>.is_none(),
+            <span class="string">&quot;core library should only contain inline externs&quot;
+        </span>);
+        <span class="kw">let </span>(<span class="kw">_</span>, externs) = ns.externs.pop().unwrap();
+        <span class="kw">let </span>ws = Workspace {
+            components: ns.components,
+            externs: LinkedHashMap::from_iter(<span class="prelude-val">Some</span>((<span class="prelude-val">None</span>, externs))),
+            ..Default::default()
+        };
+        <span class="prelude-val">Ok</span>(ws)
+    }
+
     <span class="doccomment">/// Construct a new workspace from an input stream representing a Calyx
     /// program.
     </span><span class="kw">pub fn </span>construct(
         file: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
         lib_path: <span class="kw-2">&amp;</span>Path,
     ) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
-        <span class="self">Self</span>::construct_with_all_deps(file, lib_path, <span class="bool-val">false</span>)
+        <span class="self">Self</span>::construct_with_all_deps::&lt;<span class="bool-val">false</span>&gt;(file, lib_path)
     }
 
     <span class="doccomment">/// Construct the Workspace using the given [NamespaceDef] and ignore all
@@ -354,7 +417,7 @@
         file: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
         lib_path: <span class="kw-2">&amp;</span>Path,
     ) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
-        <span class="self">Self</span>::construct_with_all_deps(file, lib_path, <span class="bool-val">true</span>)
+        <span class="self">Self</span>::construct_with_all_deps::&lt;<span class="bool-val">true</span>&gt;(file, lib_path)
     }
 
     <span class="kw">fn </span>get_parent(p: <span class="kw-2">&amp;</span>Path) -&gt; PathBuf {
@@ -373,11 +436,10 @@
 
     <span class="doccomment">/// Construct the Workspace by transitively parsing all `import`ed Calyx
     /// files.
-    </span><span class="kw">fn </span>construct_with_all_deps(
+    /// If SHALLOW is true, then parse imported cmoponents as declarations
+    </span><span class="kw">fn </span>construct_with_all_deps&lt;<span class="kw">const </span>SHALLOW: bool&gt;(
         file: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
         lib_path: <span class="kw-2">&amp;</span>Path,
-        <span class="comment">// Parse imported components as declarations
-        </span>shallow: bool,
     ) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
         <span class="comment">// Construct initial namespace.
         </span><span class="kw">let </span>namespace = NamespaceDef::construct(file)<span class="question-mark">?</span>;
@@ -472,7 +534,7 @@
             <span class="kw">let </span>ns = parser::CalyxParser::parse_file(<span class="kw-2">&amp;</span>p)<span class="question-mark">?</span>;
             <span class="kw">let </span>parent = <span class="self">Self</span>::get_parent(<span class="kw-2">&amp;</span>p);
 
-            <span class="kw">let </span><span class="kw-2">mut </span>deps = merge_into_ws(ns, <span class="kw-2">&amp;</span>parent, shallow)<span class="question-mark">?</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>deps = merge_into_ws(ns, <span class="kw-2">&amp;</span>parent, SHALLOW)<span class="question-mark">?</span>;
             dependencies.append(<span class="kw-2">&amp;mut </span>deps);
 
             already_imported.insert(p);

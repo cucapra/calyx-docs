@@ -185,15 +185,7 @@ or one of the parameter names.</li>
 </ul>
 <p>For example, the following is the signature of the <code>std_reg</code> primitive from the
 Calyx standard library:</p>
-<pre><code>  primitive std_reg&lt;&quot;state_share&quot;=1&gt;[WIDTH](
-    @write_together(1) in: WIDTH,
-    @write_together(1) @static(1) @go write_en: 1,
-    @clk clk: 1,
-    @reset reset: 1
-  ) -&gt; (
-    @stable out: WIDTH,
-    @done done: 1
-  );
+<pre><code>
 </code></pre>
 <p>The primitive defines one parameter called <code>WIDTH</code>, which describes the sizes for
 the <code>in</code> and the <code>out</code> ports.</p>

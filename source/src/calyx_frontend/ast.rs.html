@@ -416,6 +416,13 @@
 <span id="416">416</span>
 <span id="417">417</span>
 <span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx
 </span><span class="kw">use </span><span class="kw">super</span>::parser;
 <span class="kw">use crate</span>::{Attributes, PortDef, Primitive};
@@ -437,7 +444,9 @@
 }
 
 <span class="kw">impl </span>NamespaceDef {
-    <span class="kw">pub fn </span>construct(file: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;PathBuf&gt;) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
+    <span class="doccomment">/// Construct a namespace from a file or the input stream.
+    /// If no file is provided, the input stream must be a TTY.
+    </span><span class="kw">pub fn </span>construct(file: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;PathBuf&gt;) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
         <span class="kw">match </span>file {
             <span class="prelude-val">Some</span>(file) =&gt; parser::CalyxParser::parse_file(file),
             <span class="prelude-val">None </span>=&gt; {
@@ -450,6 +459,11 @@
                 }
             }
         }
+    }
+
+    <span class="doccomment">/// Construct a namespace from a definition using a string.
+    </span><span class="kw">pub fn </span>construct_from_str(inp: <span class="kw-2">&amp;</span>str) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
+        parser::CalyxParser::parse(inp.as_bytes())
     }
 }
 
