@@ -656,6 +656,13 @@
 <span id="656">656</span>
 <span id="657">657</span>
 <span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{
     <span class="self">self </span><span class="kw">as </span>ir, CellType, Component, GetAttributes, LibrarySignatures,
@@ -976,6 +983,7 @@
         // checking that the static timing intervals are well formed.
         </span><span class="kw">for </span>gr <span class="kw">in </span>comp.get_static_groups().iter() {
             <span class="kw">let </span>group = gr.borrow();
+            <span class="kw">let </span>group_latency = group.get_latency();
             <span class="comment">// Check that for each interval %[beg, end], end &gt; beg.
             </span><span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group.assignments {
                 assign.guard.check_for_each_info(
@@ -984,10 +992,16 @@
                             </span>&gt;= static_timing.get_interval().<span class="number">1
                         </span>{
                             <span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
-                                <span class="string">&quot;Static Timing Guard has improper interval: `%[{},{}]`&quot;</span>,
-                                static_timing.get_interval().<span class="number">0</span>,
-                                static_timing.get_interval().<span class="number">1
-                            </span>))
+                                <span class="string">&quot;Static Timing Guard has improper interval: `{}`&quot;</span>,
+                                static_timing.to_string()
+                            ))
+                            .with_pos(<span class="kw-2">&amp;</span>assign.attributes))
+                        } <span class="kw">else if </span>static_timing.get_interval().<span class="number">1 </span>&gt; group_latency {
+                            <span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                                <span class="string">&quot;Static Timing Guard has interval `{}`, which is out of bounds since its static group has latency {}&quot;</span>,
+                                static_timing.to_string(),
+                                group_latency
+                            ))
                             .with_pos(<span class="kw-2">&amp;</span>assign.attributes))
                         } <span class="kw">else </span>{
                             <span class="prelude-val">Ok</span>(())
