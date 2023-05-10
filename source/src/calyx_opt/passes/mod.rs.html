@@ -83,6 +83,8 @@
 <span id="83">83</span>
 <span id="84">84</span>
 <span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
@@ -118,7 +120,8 @@
 <span class="kw">mod </span>static_inliner;
 <span class="kw">mod </span>sync;
 <span class="comment">// mod simplify_guards;
-</span><span class="kw">mod </span>simplify_with_control;
+</span><span class="kw">mod </span>data_path_infer;
+<span class="kw">mod </span>simplify_with_control;
 <span class="kw">mod </span>static_par_conv;
 <span class="kw">mod </span>synthesis_papercut;
 <span class="kw">mod </span>top_down_compile_control;
@@ -161,7 +164,8 @@
 <span class="kw">pub use </span>sync::CompileSync;
 <span class="kw">pub use </span>sync::CompileSyncWithoutSyncReg;
 <span class="comment">// pub use simplify_guards::SimplifyGuards;
-</span><span class="kw">pub use </span>static_par_conv::StaticParConv;
+</span><span class="kw">pub use </span>data_path_infer::DataPathInfer;
+<span class="kw">pub use </span>static_par_conv::StaticParConv;
 <span class="kw">pub use </span>synthesis_papercut::SynthesisPapercut;
 <span class="kw">pub use </span>top_down_compile_control::TopDownCompileControl;
 <span class="kw">pub use </span>top_down_static_timing::TopDownStaticTiming;

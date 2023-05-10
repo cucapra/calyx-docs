@@ -170,17 +170,21 @@
 <span id="170">170</span>
 <span id="171">171</span>
 <span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
     CompileEmpty, CompileInvoke, CompileRef, CompileStatic, CompileSync,
-    CompileSyncWithoutSyncReg, ComponentInliner, DeadAssignmentRemoval,
-    DeadCellRemoval, DeadGroupRemoval, Externalize, GoInsertion, GroupToInvoke,
-    GroupToSeq, HoleInliner, InferShare, InferStaticTiming, LowerGuards,
-    MergeAssign, MergeStaticPar, Papercut, ParToSeq, RegisterUnsharing,
-    RemoveIds, ResetInsertion, SimplifyStaticGuards, SimplifyWithControl,
-    StaticInliner, StaticParConv, SynthesisPapercut, TopDownCompileControl,
-    TopDownStaticTiming, UnrollBounded, WellFormed, WireInliner,
+    CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
+    DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, Externalize,
+    GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner, InferShare,
+    InferStaticTiming, LowerGuards, MergeAssign, MergeStaticPar, Papercut,
+    ParToSeq, RegisterUnsharing, RemoveIds, ResetInsertion,
+    SimplifyStaticGuards, SimplifyWithControl, StaticInliner, StaticParConv,
+    SynthesisPapercut, TopDownCompileControl, TopDownStaticTiming,
+    UnrollBounded, WellFormed, WireInliner,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::Named;
 <span class="kw">use crate</span>::{pass_manager::PassManager, register_alias};
@@ -211,6 +215,7 @@
         pm.register_pass::&lt;MergeStaticPar&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;SimplifyStaticGuards&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;StaticParConv&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;DataPathInfer&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">// Compilation passes
         </span>pm.register_pass::&lt;StaticInliner&gt;()<span class="question-mark">?</span>;
@@ -249,6 +254,7 @@
             pm,
             <span class="string">&quot;pre-opt&quot;</span>,
             [
+                DataPathInfer,
                 CompileSyncWithoutSyncReg,
                 GroupToSeq,
                 DeadAssignmentRemoval,

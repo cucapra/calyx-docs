@@ -196,16 +196,37 @@
 <span id="196">196</span>
 <span id="197">197</span>
 <span id="198">198</span>
-</pre><pre class="rust"><code><span class="kw">use </span>std::str::FromStr;
-
-<span class="kw">use </span>calyx_utils::{CalyxResult, Error, Id};
-<span class="kw">use </span>strum_macros::{AsRefStr, EnumString, FromRepr};
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+</pre><pre class="rust"><code><span class="kw">use </span>calyx_utils::{CalyxResult, Error, Id};
+<span class="kw">use </span>std::str::FromStr;
+<span class="kw">use </span>strum::EnumCount;
+<span class="kw">use </span>strum_macros::{AsRefStr, EnumCount, EnumString, FromRepr};
 
 <span class="doccomment">/// Attributes that have been deprecated.
 </span><span class="kw">pub const </span>DEPRECATED_ATTRIBUTES: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str] = <span class="kw-2">&amp;</span>[];
 
 <span class="attribute">#[derive(
-    FromRepr, AsRefStr, EnumString, Clone, Copy, Hash, PartialEq, Eq, Debug,
+    EnumCount,
+    FromRepr,
+    AsRefStr,
+    EnumString,
+    Clone,
+    Copy,
+    Hash,
+    PartialEq,
+    Eq,
+    Debug,
 )]
 #[repr(u8)]
 </span><span class="doccomment">/// Attributes that are only allowed to take boolean values.
@@ -229,8 +250,11 @@
     </span><span class="doccomment">/// Is the port connected to a state element
     </span>Stable,
     <span class="attribute">#[strum(serialize = <span class="string">&quot;data&quot;</span>)]
-    </span><span class="doccomment">/// This is a data path component
+    </span><span class="doccomment">/// This is a data path instance
     </span>Data,
+    <span class="attribute">#[strum(serialize = <span class="string">&quot;control&quot;</span>)]
+    </span><span class="doccomment">/// This is a control path instance
+    </span>Control,
     <span class="attribute">#[strum(serialize = <span class="string">&quot;share&quot;</span>)]
     </span><span class="doccomment">/// Is this component shareable
     </span>Share,
@@ -385,7 +409,7 @@
 
     <span class="doccomment">/// Returns an iterator over the attributes in the set
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = BoolAttr&gt; + <span class="lifetime">&#39;_ </span>{
-        (<span class="number">0</span>..<span class="number">14</span>).filter_map(|idx| {
+        (<span class="number">0</span>..(BoolAttr::COUNT <span class="kw">as </span>u8)).filter_map(|idx| {
             <span class="kw">if </span><span class="self">self</span>.attrs &amp; (<span class="number">1 </span>&lt;&lt; idx) != <span class="number">0 </span>{
                 <span class="prelude-val">Some</span>(BoolAttr::from_repr(idx).unwrap())
             } <span class="kw">else </span>{
