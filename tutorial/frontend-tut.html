@@ -166,25 +166,18 @@ Since the <code>reduce</code> parallelism factor is also 1, the reduction is per
 <p>Once we have <a href="https://github.com/cucapra/calyx/tree/master/frontends/mrxl">installed the mrxl command line tool</a>, we can run MrXL programs using <a href="../fud/index.html"><code>fud</code></a>.</p>
 <p>To provide MrXL program with input values, we use fud's <a href="https://www.json.org/json-en.html">JSON</a>-based <a href="../lang/data-format.html">data format</a>.
 Let's try to run this program, which has a parallelism factor of two:</p>
-<pre><code>input foo: int[4]
-output baz: int[4]
-baz := map 2 (a &lt;- foo) { a + 5 }
+<pre><code>input in_a: int[4]
+input in_b: int[4]
+output out: int[4]
+
+out := map 2 (a &lt;- in_a, b &lt;- in_b) { a + b }
 </code></pre>
 <p>In order to take advantage of the parallelism in the program, the MrXL compiler automatically partitions the input memory <code>foo</code> into two different <em>physical banks</em>: <code>foo_b0</code> and <code>foo_b1</code>.
 Therefore, we split up our logical <code>foo</code> input of <code>[1, 2, 3, 4]</code> into <code>[1,2]</code> and <code>[3,4]</code>:</p>
-<pre><code class="language-json">  &quot;foo_b0&quot;: {
+<pre><code class="language-json">  &quot;in_a&quot;: {
     &quot;data&quot;: [
       1,
-      2
-    ],
-    &quot;format&quot;: {
-      &quot;numeric_type&quot;: &quot;bitnum&quot;,
-      &quot;is_signed&quot;: false,
-      &quot;width&quot;: 32
-    }
-  },
-  &quot;foo_b1&quot;: {
-    &quot;data&quot;: [
+      2,
       3,
       4
     ],
@@ -194,6 +187,15 @@ Therefore, we split up our logical <code>foo</code> input of <code>[1, 2, 3, 4]<
       &quot;width&quot;: 32
     }
   },
+  &quot;in_b&quot;: {
+    &quot;data&quot;: [
+      5,
+      6,
+      7,
+      8
+    ],
+    &quot;format&quot;: {
+      &quot;numeric_type&quot;: &quot;bitnum&quot;,
 </code></pre>
 <p>Our complete data file similarly splits up the input for <code>baz</code>.</p>
 <p>Run the program with the complete data by typing:</p>

@@ -145,47 +145,50 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="mrxl"><a class="header" href="#mrxl">MrXL</a></h1>
-<blockquote>
-<p>The MrXL frontend is a toy frontend developed for the <a href="../tutorial/frontend-tut.html">frontend tutorial</a>. As such, it is less rigorously tested and might have bugs.</p>
-</blockquote>
-<p>MrXL is an example DSL for demonstrating Calyx. MrXL programs consist of <code>map</code> and <code>reduce</code> operations on arrays. For example, this is a dot product implementation:</p>
+<p>MrXL is an example DSL developed for the <a href="../tutorial/frontend-tut.html">frontend tutorial</a>.
+MrXL programs consist of <code>map</code> and <code>reduce</code> operations on arrays. 
+For example, here is a dot product implementation:</p>
 <pre><code>input avec: int[1024]
 input bvec: int[1024]
 output dot: int
 prodvec := map 16 (a &lt;- avec, b &lt;- bvec) { a * b }
 dot := reduce 4 (a, b &lt;- prodvec) 0 { a + b }
 </code></pre>
-<p>The numbers that come right after <code>map</code> and <code>reduce</code> are parallelism factors that guide the generation of hardware.</p>
+<p>The numbers that come right after <code>map</code> and <code>reduce</code> (16 and 4 respectively) are &quot;parallelism factors&quot; that guide the generation of hardware.</p>
 <h2 id="install"><a class="header" href="#install">Install</a></h2>
 <p>Install the <a href="../calyx-py.html">calyx-py</a> library.</p>
 <p>The MrXL implementation is in Python and uses <a href="https://flit.readthedocs.io/en/latest/index.html">Flit</a>.
 First, <a href="https://flit.readthedocs.io/en/latest/index.html">install flit</a> (<code>pip install flit</code> or similar), and then type the
-following inside <code>frontend/mrxl</code>:</p>
+following after changing your directory to <code>frontend/mrxl</code>:</p>
 <pre><code>flit install --symlink
 </code></pre>
-<p>This creates a symbolic link the mrxl directory and installs the <code>mrxl</code> command
-line tool.</p>
+<p>This creates a symbolic link to the present directory and installs the <code>mrxl</code> command line tool.</p>
 <p>By default, <a href="../fud">fud</a> looks for the <code>mrxl</code> executable to enable
 the <code>mrxl</code> compilation stage.
 Type <code>fud check</code> to make sure <code>fud</code> reports that the <code>mrxl</code> compiler has been
-found.</p>
-<h2 id="interpreter"><a class="header" href="#interpreter">Interpreter</a></h2>
-<p>To run the interpreter, do this:</p>
+found. If it does not, run the following while still in <code>frontend/mrxl</code>.</p>
+<pre><code>fud register mrxl -p fud/mrxl.py
+</code></pre>
+<p>Run <code>fud check</code> again to ensure that <code>fud</code> sees <code>mrxl</code>.</p>
+<h2 id="interpreting-mrxl"><a class="header" href="#interpreting-mrxl">Interpreting MrXL</a></h2>
+<p>To run the program through the MrXL interpreter, execute:</p>
 <pre><code>mrxl &lt;program&gt; --data &lt;indata&gt; --interpret
 </code></pre>
-<p>where <code>&lt;program&gt;</code> is a MrXL source code file and <code>&lt;indata&gt;</code> is a JSON file containing values for all the variables declared as <code>input</code> in the program. The interpreter dumps the <code>output</code> variables as JSON to stdout.</p>
-<p>You can try this, for example:</p>
-<pre><code>mrxl test/dot.mrxl --data test/dot.json --interpret
+<p>where <code>&lt;program&gt;</code> is a MrXL source code file and <code>&lt;indata&gt;</code> is a JSON file containing values for all the variables declared as <code>input</code>s in the MrXL program. The interpreter dumps the <code>output</code> variables, in a JSON format, to stdout.</p>
+<p>You could try, for example:</p>
+<pre><code>mrxl test/dot.mrxl --data test/dot.mrxl.data --interpret
 </code></pre>
+<p>This is just a baby version of the dot produce implementation we showed at the very top.
+We also provide <code>add.mrxl</code> and <code>sum.mrxl</code>, along with sample <code>&lt;indata&gt;</code> files, under <code>test/</code>. Try playing with the inputs and the operations!</p>
 <h2 id="compiling-to-calyx"><a class="header" href="#compiling-to-calyx">Compiling to Calyx</a></h2>
-<p>To run the compiler, leave off the <code>--interpret</code> and <code>--data</code> flags:</p>
+<p>To run the compiler and see the Calyx code your MrXL program generates, just leave off the <code>--data</code> and <code>--interpret</code> flags. For instance:</p>
 <pre><code>mrxl test/dot.mrxl
 </code></pre>
 <p>In order to run the compiler through <code>fud</code>, pass the <code>--from mrxl</code> flag:</p>
 <pre><code>fud e --from mrxl &lt;mrxl file&gt; --to futil
 </code></pre>
-<p>To simulate the Verilog generated from the mrxl compiler, set the <code>-s verilog.data</code> as usual:</p>
-<pre><code>fud e --from mrxl &lt;mrxl file&gt; --to dat -s verilog.data &lt;data file&gt;
+<p>To simulate the Verilog generated from the mrxl compiler, set the <code>-s verilog.data</code>:</p>
+<pre><code>fud e --from mrxl &lt;mrxl file&gt; --to dat --through verilog -s verilog.data &lt;data file&gt;
 </code></pre>
 
                     </main>
