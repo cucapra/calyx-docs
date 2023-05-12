@@ -679,6 +679,32 @@
 <span id="679">679</span>
 <span id="680">680</span>
 <span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
@@ -777,6 +803,32 @@
     <span class="doccomment">/// Get the canonical representation for this Port.
     </span><span class="kw">pub fn </span>canonical(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Canonical {
         Canonical(<span class="self">self</span>.get_parent_name(), <span class="self">self</span>.name)
+    }
+
+    <span class="doccomment">/// Returns the value of an attribute if present
+    </span><span class="kw">pub fn </span>get_attribute&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
+    <span class="kw">where
+        </span>A: Into&lt;Attribute&gt;,
+    {
+        <span class="self">self</span>.get_attributes().get(attr)
+    }
+
+    <span class="doccomment">/// Returns true if the node has a specific attribute
+    </span><span class="kw">pub fn </span>has_attribute&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; bool
+    <span class="kw">where
+        </span>A: Into&lt;Attribute&gt;,
+    {
+        <span class="self">self</span>.get_attributes().has(attr)
+    }
+}
+
+<span class="kw">impl </span>GetAttributes <span class="kw">for </span>Port {
+    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
+    }
+
+    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
     }
 }
 
