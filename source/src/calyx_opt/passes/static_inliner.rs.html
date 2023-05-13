@@ -341,6 +341,7 @@
 <span id="341">341</span>
 <span id="342">342</span>
 <span id="343">343</span>
+<span id="344">344</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>calyx_ir::structure;
@@ -660,7 +661,8 @@
             ir::StaticControl::Empty(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
                 <span class="string">&quot;should not call inline_static_control on empty stmt&quot;
             </span>),
-            ir::StaticControl::Invoke(<span class="kw">_</span>) =&gt; {
+            ir::StaticControl::Invoke(inv) =&gt; {
+                <span class="macro">dbg!</span>(inv.comp.borrow().name());
                 <span class="macro">todo!</span>(<span class="string">&quot;implement static inlining for invokes&quot;</span>)
             }
         }

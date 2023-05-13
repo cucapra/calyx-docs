@@ -705,6 +705,8 @@
 <span id="705">705</span>
 <span id="706">706</span>
 <span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
@@ -888,6 +890,8 @@
         </span>param_binding: Box&lt;Binding&gt;,
         <span class="doccomment">/// True iff this is a combinational primitive
         </span>is_comb: bool,
+        <span class="doccomment">/// (Optional) latency of the primitive
+        </span>latency: <span class="prelude-ty">Option</span>&lt;std::num::NonZeroU64&gt;,
     },
     <span class="doccomment">/// Cell constructed using a Calyx component
     </span>Component {

@@ -348,6 +348,16 @@
 <span id="348">348</span>
 <span id="349">349</span>
 <span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::LiveRangeAnalysis;
 <span class="kw">use </span><span class="kw">crate</span>::analysis::ControlId;
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
@@ -596,9 +606,19 @@
                     <span class="prelude-val">None </span>=&gt; cur_state,
                 }
             }
-            ir::StaticControl::Invoke(<span class="kw">_</span>) =&gt; {
-                <span class="macro">todo!</span>(<span class="string">&quot;static invokes currently undefined&quot;</span>)
-            }
+            ir::StaticControl::Invoke(inv) =&gt; <span class="kw">match </span>cur_state {
+                <span class="prelude-val">Some</span>(cur_state_unwrapped) =&gt; {
+                    <span class="kw">let </span>invoke_id = ControlId::get_guaranteed_id_static(sc);
+                    <span class="kw">let </span>latency = inv.latency;
+                    <span class="prelude-val">Some</span>(<span class="self">self</span>.update_invoke_enable(
+                        invoke_id,
+                        latency,
+                        live,
+                        cur_state_unwrapped,
+                    ))
+                }
+                <span class="prelude-val">None </span>=&gt; cur_state,
+            },
             ir::StaticControl::Repeat(ir::StaticRepeat {
                 body,
                 num_repeats,

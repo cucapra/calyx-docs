@@ -304,6 +304,17 @@
 <span id="304">304</span>
 <span id="305">305</span>
 <span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ControlId;
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>std::{
@@ -329,7 +340,7 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
         <span class="macro">writeln!</span>(
             f,
-            <span class="string">&quot;This maps ids of par blocks to \&quot;node timing maps\&quot;, which map node ids to the first interval (i,j) that the node (i.e., enable or if conditional) is active for, \n relative to the start of the given par block&quot;
+            <span class="string">&quot;This maps ids of par blocks to \&quot;node timing maps\&quot;, which map node ids to the first interval (i,j) that the node (i.e., enable/invoke/if conditional) is active for, \n relative to the start of the given par block&quot;
         </span>)<span class="question-mark">?</span>;
         <span class="macro">write!</span>(
             f,
@@ -499,6 +510,20 @@
                     cur_state
                 }
             }
+            ir::StaticControl::Invoke(inv) =&gt; {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(cur_state_unwrapped) = cur_state {
+                    <span class="kw">let </span>invoke_id = ControlId::get_guaranteed_id_static(sc);
+                    <span class="kw">let </span>latency = inv.latency;
+                    <span class="prelude-val">Some</span>(<span class="self">self</span>.update_node(
+                        invoke_id,
+                        latency,
+                        cur_state_unwrapped,
+                        guaranteed_execution,
+                    ))
+                } <span class="kw">else </span>{
+                    cur_state
+                }
+            }
             ir::StaticControl::If(ir::StaticIf {
                 tbranch, fbranch, ..
             }) =&gt; {
@@ -522,9 +547,6 @@
                 cur_state.map(|(parent_par, cur_clock)| {
                     (parent_par, cur_clock + sc.get_latency())
                 })
-            }
-            ir::StaticControl::Invoke(<span class="kw">_</span>) =&gt; {
-                <span class="macro">todo!</span>(<span class="string">&quot;static invokes currently undefined&quot;</span>)
             }
             ir::StaticControl::Repeat(ir::StaticRepeat { body, .. }) =&gt; {
                 <span class="comment">// we only need to look thru the body once either way, since we only

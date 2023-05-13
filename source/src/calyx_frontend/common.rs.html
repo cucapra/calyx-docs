@@ -203,6 +203,8 @@
 <span id="203">203</span>
 <span id="204">204</span>
 <span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::Attribute;
 
 <span class="kw">use </span><span class="kw">super</span>::Attributes;
@@ -235,6 +237,8 @@
     </span><span class="kw">pub </span>attributes: Attributes,
     <span class="doccomment">/// True iff this is a combinational primitive
     </span><span class="kw">pub </span>is_comb: bool,
+    <span class="doccomment">/// (Optional) latency; for static primitives
+    </span><span class="kw">pub </span>latency: <span class="prelude-ty">Option</span>&lt;std::num::NonZeroU64&gt;,
     <span class="doccomment">/// body of the string, if it is an inlined primitive
     </span><span class="kw">pub </span>body: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }

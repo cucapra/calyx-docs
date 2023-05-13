@@ -773,6 +773,15 @@
 <span id="773">773</span>
 <span id="774">774</span>
 <span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a formatter for the in-memory representation of Components.
 //! The printing operation clones inner nodes and doesn&#39;t perform any mutation
 //! to the Component.
@@ -907,6 +916,9 @@
         <span class="kw">if </span>prim.is_comb {
             <span class="macro">write!</span>(f, <span class="string">&quot;comb &quot;</span>)<span class="question-mark">?</span>;
         }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency_val) = prim.latency {
+            <span class="macro">write!</span>(f, <span class="string">&quot;static&lt;{}&gt; &quot;</span>, latency_val)<span class="question-mark">?</span>;
+        }
         <span class="macro">write!</span>(
             f,
             <span class="string">&quot;primitive {}{}&quot;</span>,
@@ -956,7 +968,13 @@
                 </span><span class="macro">matches!</span>(p.borrow().direction, ir::Direction::Output)
             });
 
-        <span class="kw">let </span>pre = <span class="kw">if </span>comp.is_comb { <span class="string">&quot;comb &quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;&quot; </span>};
+        <span class="kw">let </span>pre = <span class="kw">if </span>comp.is_comb {
+            <span class="string">&quot;comb &quot;</span>.to_string()
+        } <span class="kw">else if </span>comp.latency.is_some() {
+            <span class="macro">format!</span>(<span class="string">&quot;static&lt;{}&gt; &quot;</span>, comp.latency.unwrap())
+        } <span class="kw">else </span>{
+            <span class="string">&quot;&quot;</span>.to_string()
+        };
 
         <span class="macro">writeln!</span>(
             f,
