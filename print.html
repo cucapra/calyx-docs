@@ -3239,7 +3239,7 @@ generate their code.</p>
 <p>MrXL provides constructs to create arrays, and perform <code>map</code> and <code>reduce</code> operations on those arrays. Here's an example of a dot product implementation in MrXL:</p>
 <pre><code>input avec: int[4]
 input bvec: int[4]
-output dot: int[4]
+output dot: int
 prodvec := map 1 (a &lt;- avec, b &lt;- bvec) { a * b }
 dot := reduce 1 (a, b &lt;- prodvec) 0 { a + b }
 </code></pre>
