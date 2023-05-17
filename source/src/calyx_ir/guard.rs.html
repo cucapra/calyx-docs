@@ -608,6 +608,38 @@
 <span id="608">608</span>
 <span id="609">609</span>
 <span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{NumAttr, Port, RRC};
 <span class="kw">use </span>calyx_utils::Error;
 <span class="kw">use </span>std::fmt::Debug;
@@ -716,6 +748,38 @@
             }
             Guard::True =&gt; {}
             Guard::Info(i) =&gt; i.to_string().hash(state),
+        }
+    }
+}
+
+<span class="kw">impl </span>From&lt;Guard&lt;Nothing&gt;&gt; <span class="kw">for </span>Guard&lt;StaticTiming&gt; {
+    <span class="doccomment">/// Turns a normal guard into a static guard
+    </span><span class="kw">fn </span>from(g: Guard&lt;Nothing&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>g {
+            Guard::Or(left, right) =&gt; {
+                <span class="kw">let </span>l = <span class="self">Self</span>::from(<span class="kw-2">*</span>left);
+                <span class="kw">let </span>r = <span class="self">Self</span>::from(<span class="kw-2">*</span>right);
+                Guard::Or(Box::new(l), Box::new(r))
+            }
+            Guard::And(left, right) =&gt; {
+                <span class="kw">let </span>l = <span class="self">Self</span>::from(<span class="kw-2">*</span>left);
+                <span class="kw">let </span>r = <span class="self">Self</span>::from(<span class="kw-2">*</span>right);
+                Guard::And(Box::new(l), Box::new(r))
+            }
+            Guard::Not(c) =&gt; {
+                <span class="kw">let </span>inside = <span class="self">Self</span>::from(<span class="kw-2">*</span>c);
+                Guard::Not(Box::new(inside))
+            }
+            Guard::True =&gt; Guard::True,
+            Guard::CompOp(pc, left, right) =&gt; Guard::CompOp(pc, left, right),
+            Guard::Port(p) =&gt; Guard::Port(p),
+            Guard::Info(<span class="kw">_</span>) =&gt; {
+                <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;{:?}: Guard&lt;Nothing&gt; should not be of the
+                info variant type&quot;</span>,
+                    g
+                )
+            }
         }
     }
 }

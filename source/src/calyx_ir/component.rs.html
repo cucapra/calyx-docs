@@ -373,19 +373,12 @@
 <span id="373">373</span>
 <span id="374">374</span>
 <span id="375">375</span>
-<span id="376">376</span>
-<span id="377">377</span>
-<span id="378">378</span>
-<span id="379">379</span>
-<span id="380">380</span>
-<span id="381">381</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, Builder, Cell, CellType, CombGroup, Control,
     GetName, Group, Id, PortDef, StaticGroup, RRC,
 };
 <span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
 <span class="kw">use </span><span class="kw">crate</span>::Nothing;
-<span class="kw">use </span>calyx_frontend::NumAttr;
 <span class="kw">use </span>calyx_utils::NameGenerator;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>linked_hash_map::LinkedHashMap;
@@ -555,14 +548,9 @@
     }
 
     <span class="doccomment">/// Check whether this is a static component.
-    /// A static component is a component that has at least one static go-done path.
+    /// A static component is a component which has a latency field.
     </span><span class="kw">pub fn </span>is_static(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">let </span>sig = <span class="self">self</span>.signature.borrow();
-        <span class="kw">let </span><span class="kw-2">mut </span>go_ports = sig.find_all_with_attr(NumAttr::Go);
-        go_ports.any(|p| {
-            <span class="kw">let </span>port = p.borrow();
-            port.attributes.has(NumAttr::Static)
-        })
+        <span class="self">self</span>.latency.is_some()
     }
 
     <span class="doccomment">/// Apply function to all assignments within static groups.

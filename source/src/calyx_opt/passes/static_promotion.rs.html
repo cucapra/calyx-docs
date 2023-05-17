@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx-opt/src/passes/infer_static_timing.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>infer_static_timing.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx_opt/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx-opt/src/passes/static_promotion.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>static_promotion.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../calyx_opt/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -498,7 +498,107 @@
 <span id="498">498</span>
 <span id="499">499</span>
 <span id="500">500</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphAnalysis, ReadWriteSet, WithStatic};
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphAnalysis, IntoStatic, ReadWriteSet};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
 };
@@ -506,6 +606,8 @@
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::num::NonZeroU64;
+<span class="kw">use </span>std::rc::Rc;
 
 <span class="doccomment">/// Struct to store information about the go-done interfaces defined by a primitive.
 </span><span class="attribute">#[derive(Default, Debug)]
@@ -600,18 +702,18 @@
 /// annotation in a group that differs from an inferred value, this
 /// pass will throw an error. If a group&#39;s `done` signal relies on signals
 /// that are not only `done` signals, this pass will ignore that group.
-</span><span class="kw">pub struct </span>InferStaticTiming {
+</span><span class="kw">pub struct </span>StaticPromotion {
     <span class="doccomment">/// component name -&gt; vec&lt;(go signal, done signal, latency)&gt;
     </span>latency_data: HashMap&lt;ir::Id, GoDone&gt;,
 }
 
 <span class="comment">// Override constructor to build latency_data information from the primitives
 // library.
-</span><span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>InferStaticTiming {
+</span><span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>StaticPromotion {
     <span class="kw">fn </span>from(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>latency_data = HashMap::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>comp_latency = HashMap::new();
-        <span class="comment">// Construct latency_data for each primitive
+        <span class="comment">//let mut comp_latency = HashMap::new();
+        // Construct latency_data for each primitive
         </span><span class="kw">for </span>prim <span class="kw">in </span>ctx.lib.signatures() {
             <span class="kw">let </span>done_ports: HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; = prim
                 .find_all_with_attr(ir::NumAttr::Done)
@@ -632,11 +734,11 @@
             <span class="comment">// If this primitive has exactly one (go, done, static) pair, we
             // can infer the latency of its invokes.
             </span><span class="kw">if </span>go_ports.len() == <span class="number">1 </span>{
-                comp_latency.insert(prim.name, go_ports[<span class="number">0</span>].<span class="number">2</span>);
-            }
+                <span class="comment">//comp_latency.insert(prim.name, go_ports[0].2);
+            </span>}
             latency_data.insert(prim.name, GoDone::new(go_ports));
         }
-        <span class="prelude-val">Ok</span>(InferStaticTiming { latency_data })
+        <span class="prelude-val">Ok</span>(StaticPromotion { latency_data })
     }
 
     <span class="comment">// This pass shared information between components
@@ -645,17 +747,17 @@
     </span>}
 }
 
-<span class="kw">impl </span>Named <span class="kw">for </span>InferStaticTiming {
+<span class="kw">impl </span>Named <span class="kw">for </span>StaticPromotion {
     <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
-        <span class="string">&quot;infer-static-timing&quot;
+        <span class="string">&quot;static-promotion&quot;
     </span>}
 
     <span class="kw">fn </span>description() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
-        <span class="string">&quot;infers and annotates static timing for groups when possible&quot;
+        <span class="string">&quot;promote groups and controls whose latency can be inferred to static groups and controls&quot;
     </span>}
 }
 
-<span class="kw">impl </span>InferStaticTiming {
+<span class="kw">impl </span>StaticPromotion {
     <span class="doccomment">/// Return true if the edge (`src`, `dst`) meet one these criteria, and false otherwise:
     ///   - `src` is an &quot;out&quot; port of a constant, and `dst` is a &quot;go&quot; port
     ///   - `src` is a &quot;done&quot; port, and `dst` is a &quot;go&quot; port
@@ -884,36 +986,60 @@
     }
 }
 
-<span class="kw">impl </span>Visitor <span class="kw">for </span>InferStaticTiming {
+<span class="kw">impl </span>Visitor <span class="kw">for </span>StaticPromotion {
     <span class="comment">// Require post order traversal of components to ensure `invoke` nodes
     // get timing information for components.
     </span><span class="kw">fn </span>iteration_order() -&gt; Order {
         Order::Post
     }
 
-    <span class="kw">fn </span>start(
+    <span class="kw">fn </span>finish(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         comp: <span class="kw-2">&amp;mut </span>ir::Component,
         _lib: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="comment">// If there are no groups in this component or if the control program is
-        // empty, we&#39;re done.
-        </span><span class="kw">if </span>comp.get_groups().is_empty()
-            || <span class="macro">matches!</span>(<span class="kw-2">&amp;*</span>comp.control.borrow(), ir::Control::Empty(<span class="kw">_</span>))
-        {
-            <span class="macro">log::info!</span>(<span class="string">&quot;Skipping component `{}&#39; because it has no groups or control program&quot;</span>, comp.name);
-            <span class="comment">// Add latency information for the component if present.
-            </span><span class="kw">let </span>sig = <span class="kw-2">&amp;*</span>comp.signature.borrow();
-            <span class="kw">let </span>ports: GoDone = sig.into();
-            <span class="self">self</span>.latency_data.insert(comp.name, ports);
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Stop);
+        <span class="kw">if </span>comp.control.borrow().is_static() {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(lat) = comp.control.borrow().get_latency() {
+                comp.latency = <span class="prelude-val">Some</span>(NonZeroU64::new(lat).unwrap());
+                <span class="kw">let </span>comp_sig = comp.signature.borrow();
+                <span class="kw">let </span><span class="kw-2">mut </span>done_ports: Vec&lt;<span class="kw">_</span>&gt; =
+                    comp_sig.find_all_with_attr(ir::NumAttr::Done).collect();
+                <span class="kw">let </span><span class="kw-2">mut </span>go_ports: Vec&lt;<span class="kw">_</span>&gt; =
+                    comp_sig.find_all_with_attr(ir::NumAttr::Go).collect();
+                <span class="kw">if </span>done_ports.len() == <span class="number">1 </span>&amp;&amp; go_ports.len() == <span class="number">1 </span>{
+                    <span class="kw">let </span>go_done = GoDone::new(<span class="macro">vec!</span>[(
+                        go_ports.pop().unwrap().borrow().name,
+                        done_ports.pop().unwrap().borrow().name,
+                        lat,
+                    )]);
+                    <span class="self">self</span>.latency_data.insert(comp.name, go_done);
+                }
+            }
         }
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
 
-        <span class="comment">// don&#39;t need to do all this work for static groups
-        </span><span class="kw">for </span>group <span class="kw">in </span>comp.get_groups().iter() {
-            <span class="kw">let </span><span class="prelude-val">Some</span>(latency) = <span class="self">self</span>.infer_latency(<span class="kw-2">&amp;</span>group.borrow()) <span class="kw">else </span>{ <span class="kw">continue </span>};
-            <span class="kw">let </span>grp = group.borrow();
+    <span class="kw">fn </span>enable(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::Enable,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+        <span class="kw">let </span>latency_result: <span class="prelude-ty">Option</span>&lt;u64&gt;;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = <span class="self">self</span>.infer_latency(<span class="kw-2">&amp;</span>s.group.borrow()) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(sg) =
+                builder.component.find_static_group(s.group.borrow().name())
+            {
+                <span class="kw">let </span>s_enable = ir::StaticControl::Enable(ir::StaticEnable {
+                    group: Rc::clone(<span class="kw-2">&amp;</span>sg),
+                    attributes: s.attributes.clone(),
+                });
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::change(ir::Control::Static(s_enable)));
+            }
+            <span class="kw">let </span>grp = s.group.borrow();
             <span class="kw">if let </span><span class="prelude-val">Some</span>(curr_lat) = grp.attributes.get(ir::NumAttr::Static) {
                 <span class="comment">// Inferred latency is not the same as the provided latency annotation.
                 </span><span class="kw">if </span>curr_lat != latency {
@@ -928,74 +1054,148 @@
                     <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(msg)
                         .with_pos(<span class="kw-2">&amp;</span>grp.attributes));
                 }
-            } <span class="kw">else </span>{
-                drop(grp);
-                group
-                    .borrow_mut()
-                    .attributes
-                    .insert(ir::NumAttr::Static, latency);
             }
+            latency_result = <span class="prelude-val">Some</span>(latency);
+        } <span class="kw">else </span>{
+            latency_result = <span class="prelude-val">None</span>;
         }
 
-        <span class="comment">// Compute the latency of the control-program.
-        </span><span class="kw">let </span>comp_lat: HashMap&lt;ir::Id, u64&gt; = <span class="self">self
-            </span>.latency_data
-            .iter()
-            .filter_map(|(comp, go_done)| {
-                <span class="kw">if </span>go_done.ports.len() == <span class="number">1 </span>{
-                    <span class="prelude-val">Some</span>((<span class="kw-2">*</span>comp, go_done.ports[<span class="number">0</span>].<span class="number">2</span>))
-                } <span class="kw">else </span>{
-                    <span class="prelude-val">None
-                </span>}
-            })
-            .collect();
-
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = comp.control.borrow_mut().update_static(<span class="kw-2">&amp;</span>comp_lat) {
-            <span class="kw">let </span><span class="kw-2">mut </span>go_ports = comp
-                .signature
-                .borrow()
-                .find_all_with_attr(ir::NumAttr::Go)
-                .collect_vec();
-
-            <span class="comment">// Add the latency information for the component if the control program
-            // is completely static and there is exactly one go port.
-            </span><span class="kw">if </span>go_ports.len() == <span class="number">1 </span>{
-                <span class="kw">let </span>go_port = go_ports.pop().unwrap();
-                <span class="kw">let </span>mb_time =
-                    go_port.borrow().attributes.get(ir::NumAttr::Static);
-
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(go_time) = mb_time {
-                    <span class="kw">if </span>go_time != time {
-                        <span class="kw">let </span>msg1 = <span class="macro">format!</span>(<span class="string">&quot;Annotated latency: {}&quot;</span>, go_time);
-                        <span class="kw">let </span>msg2 = <span class="macro">format!</span>(<span class="string">&quot;Inferred latency: {}&quot;</span>, time);
-                        <span class="kw">let </span>msg = <span class="macro">format!</span>(
-                        <span class="string">&quot;Invalid \&quot;static\&quot; latency annotation for component {}.\n{}\n{}&quot;</span>,
-                        comp.name,
-                        msg1,
-                        msg2
-                    );
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(msg)
-                            .with_pos(<span class="kw-2">&amp;</span>go_port.borrow().attributes));
-                    }
-                } <span class="kw">else </span>{
-                    go_port
-                        .borrow_mut()
-                        .attributes
-                        .insert(ir::NumAttr::Static, time);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(res) = latency_result {
+            builder
+                .component
+                .get_groups_mut()
+                .remove(s.group.borrow().name());
+            <span class="kw">let </span>sg = builder.add_static_group(s.group.borrow().name(), res);
+            <span class="kw">for </span>assignment <span class="kw">in </span>s.group.borrow().assignments.iter() {
+                <span class="kw">if </span>!(assignment.dst.borrow().is_hole()
+                    &amp;&amp; assignment.dst.borrow().name == <span class="string">&quot;done&quot;</span>)
+                {
+                    <span class="kw">let </span>static_s = ir::Assignment::from(assignment.clone());
+                    sg.borrow_mut().assignments.push(static_s);
                 }
-                <span class="macro">log::info!</span>(
-                    <span class="string">&quot;Component `{}` has static time {}&quot;</span>,
-                    comp.name,
-                    time
-                );
+            }
+            <span class="kw">let </span>s_enable = ir::StaticControl::Enable(ir::StaticEnable {
+                group: Rc::clone(<span class="kw-2">&amp;</span>sg),
+                attributes: s.attributes.clone(),
+            });
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::change(ir::Control::Static(s_enable)));
+        }
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
+    <span class="kw">fn </span>invoke(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::Invoke,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">if </span>s.comp.borrow().is_component() {
+            <span class="kw">let </span>name = s.comp.borrow().type_name().unwrap();
+            <span class="kw">for </span>c <span class="kw">in </span>comps {
+                <span class="kw">if </span>c.name == name &amp;&amp; c.is_static() {
+                    <span class="kw">let </span>emp = ir::Invoke {
+                        comp: Rc::clone(<span class="kw-2">&amp;</span>s.comp),
+                        inputs: Vec::new(),
+                        outputs: Vec::new(),
+                        attributes: ir::Attributes::default(),
+                        comb_group: <span class="prelude-val">None</span>,
+                        ref_cells: Vec::new(),
+                    };
+                    <span class="kw">let </span>actual_invoke = std::mem::replace(s, emp);
+                    <span class="kw">let </span>s_inv = ir::StaticInvoke {
+                        comp: Rc::clone(<span class="kw-2">&amp;</span>actual_invoke.comp),
+                        inputs: actual_invoke.inputs,
+                        outputs: actual_invoke.outputs,
+                        latency: c.latency.unwrap().get(),
+                        attributes: ir::Attributes::default(),
+                        ref_cells: actual_invoke.ref_cells,
+                    };
+                    <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::change(ir::Control::Static(
+                        ir::StaticControl::Invoke(s_inv),
+                    )));
+                }
             }
         }
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
 
-        <span class="comment">// Add all go-done latencies for the component to the context
-        </span><span class="kw">let </span>sig = <span class="kw-2">&amp;*</span>comp.signature.borrow();
-        <span class="kw">let </span>ports: GoDone = sig.into();
-        <span class="self">self</span>.latency_data.insert(comp.name, ports);
-        <span class="prelude-val">Ok</span>(Action::Stop)
+    <span class="kw">fn </span>finish_seq(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::Seq,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(sseq) = s.make_static() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::change(ir::Control::Static(
+                ir::StaticControl::Seq(sseq),
+            )));
+        }
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
+    <span class="kw">fn </span>finish_par(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::Par,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(spar) = s.make_static() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::change(ir::Control::Static(
+                ir::StaticControl::Par(spar),
+            )));
+        }
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
+    <span class="kw">fn </span>finish_if(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::If,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(sif) = s.make_static() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::change(ir::Control::Static(
+                ir::StaticControl::If(sif),
+            )));
+        }
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
+    <span class="comment">// upgrades @bound while loops to static repeats
+    </span><span class="kw">fn </span>finish_while(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::While,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">if </span>s.body.is_static() {
+            <span class="comment">// checks body is static and we have an @bound annotation
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(num_repeats) = s.attributes.get(ir::NumAttr::Bound) {
+                <span class="comment">// need to do this weird thing to get the while body
+                </span><span class="kw">let </span>empty = Box::new(ir::Control::empty());
+                <span class="kw">let </span>while_body = std::mem::replace(<span class="kw-2">&amp;mut </span>s.body, empty);
+                <span class="kw">if let </span>ir::Control::Static(sc) = <span class="kw-2">*</span>while_body {
+                    <span class="kw">let </span>static_repeat =
+                        ir::StaticControl::Repeat(ir::StaticRepeat {
+                            latency: num_repeats * sc.get_latency(),
+                            attributes: s.attributes.clone(),
+                            body: Box::new(sc),
+                            num_repeats,
+                        });
+                    <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Change(Box::new(ir::Control::Static(
+                        static_repeat,
+                    ))));
+                } <span class="kw">else </span>{
+                    <span class="macro">unreachable!</span>(<span class="string">&quot;already checked that body is static&quot;</span>);
+                }
+            }
+        }
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 }
 </code></pre></div>

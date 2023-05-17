@@ -175,14 +175,14 @@
 <span id="175">175</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
-    Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
-    CompileEmpty, CompileInvoke, CompileRef, CompileStatic, CompileSync,
-    CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
+    AttributePromotion, Canonicalize, CellShare, ClkInsertion, CollapseControl,
+    CombProp, CompileEmpty, CompileInvoke, CompileRef, CompileStatic,
+    CompileSync, CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
     DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, Externalize,
     GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner, InferShare,
-    InferStaticTiming, LowerGuards, MergeAssign, MergeStaticPar, Papercut,
-    ParToSeq, RegisterUnsharing, RemoveIds, ResetInsertion,
-    SimplifyStaticGuards, SimplifyWithControl, StaticInliner, StaticParConv,
+    LowerGuards, MergeAssign, MergeStaticPar, Papercut, ParToSeq,
+    RegisterUnsharing, RemoveIds, ResetInsertion, SimplifyStaticGuards,
+    SimplifyWithControl, StaticInliner, StaticParConv, StaticPromotion,
     SynthesisPapercut, TopDownCompileControl, TopDownStaticTiming,
     UnrollBounded, WellFormed, WireInliner,
 };
@@ -211,9 +211,10 @@
         pm.register_pass::&lt;GroupToSeq&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;InferShare&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CellShare&gt;()<span class="question-mark">?</span>;
-        pm.register_pass::&lt;InferStaticTiming&gt;()<span class="question-mark">?</span>;
-        pm.register_pass::&lt;MergeStaticPar&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;StaticPromotion&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;AttributePromotion&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;SimplifyStaticGuards&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;MergeStaticPar&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;StaticParConv&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;DataPathInfer&gt;()<span class="question-mark">?</span>;
 
@@ -265,11 +266,10 @@
                 CombProp,
                 CellShare, <span class="comment">// LiveRangeAnalaysis should handle comb groups
                 </span>SimplifyWithControl, <span class="comment">// Must run before infer-static-timing
-                </span>InferStaticTiming,
-                CompileInvoke,    <span class="comment">// creates dead comb groups
-                </span>StaticParConv, <span class="comment">// Must be before collapse-control and merge-static-par
-                </span>MergeStaticPar, <span class="comment">// creates dead groups potentially
-                </span>DeadGroupRemoval, <span class="comment">// Since previous passes potentially create dead groups
+                </span>CompileInvoke, <span class="comment">// creates dead comb groups
+                </span>AttributePromotion,
+                StaticPromotion,
+                DeadGroupRemoval, <span class="comment">// Since previous passes potentially create dead groups
                 </span>CollapseControl,
             ]
         );

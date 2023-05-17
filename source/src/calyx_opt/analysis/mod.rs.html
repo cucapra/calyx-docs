@@ -35,6 +35,7 @@
 <span id="35">35</span>
 <span id="36">36</span>
 <span id="37">37</span>
+<span id="38">38</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Analysis for Calyx programs.
 //!
 //! The analyses construct data-structures that make answering certain queries
@@ -57,6 +58,7 @@
 <span class="kw">mod </span>static_par_timing;
 <span class="kw">mod </span>variable_detection;
 
+<span class="kw">pub use </span>compute_static::IntoStatic;
 <span class="kw">pub use </span>compute_static::WithStatic;
 <span class="kw">pub use </span>control_id::ControlId;
 <span class="kw">pub use </span>control_order::ControlOrder;

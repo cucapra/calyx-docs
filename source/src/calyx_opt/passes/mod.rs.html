@@ -85,8 +85,11 @@
 <span id="85">85</span>
 <span id="86">86</span>
 <span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
-</span><span class="kw">mod </span>canonical;
+</span><span class="kw">mod </span>attribute_promotion;
+<span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
 <span class="kw">mod </span>clk_insertion;
 <span class="kw">mod </span>collapse_control;
@@ -106,7 +109,6 @@
 <span class="kw">mod </span>group_to_seq;
 <span class="kw">mod </span>hole_inliner;
 <span class="kw">mod </span>infer_share;
-<span class="kw">mod </span>infer_static_timing;
 <span class="kw">mod </span>lower_guards;
 <span class="kw">mod </span>math_utilities;
 <span class="kw">mod </span>merge_assign;
@@ -118,6 +120,7 @@
 <span class="kw">mod </span>reset_insertion;
 <span class="kw">mod </span>simplify_static_guards;
 <span class="kw">mod </span>static_inliner;
+<span class="kw">mod </span>static_promotion;
 <span class="kw">mod </span>sync;
 <span class="comment">// mod simplify_guards;
 </span><span class="kw">mod </span>data_path_infer;
@@ -130,6 +133,7 @@
 <span class="kw">mod </span>well_formed;
 <span class="kw">mod </span>wire_inliner;
 
+<span class="kw">pub use </span>attribute_promotion::AttributePromotion;
 <span class="kw">pub use </span>canonical::Canonicalize;
 <span class="kw">pub use </span>cell_share::CellShare;
 <span class="kw">pub use </span>clk_insertion::ClkInsertion;
@@ -149,7 +153,6 @@
 <span class="kw">pub use </span>group_to_seq::GroupToSeq;
 <span class="kw">pub use </span>hole_inliner::HoleInliner;
 <span class="kw">pub use </span>infer_share::InferShare;
-<span class="kw">pub use </span>infer_static_timing::InferStaticTiming;
 <span class="kw">pub use </span>lower_guards::LowerGuards;
 <span class="kw">pub use </span>merge_assign::MergeAssign;
 <span class="kw">pub use </span>merge_static_par::MergeStaticPar;
@@ -161,6 +164,7 @@
 <span class="kw">pub use </span>simplify_static_guards::SimplifyStaticGuards;
 <span class="kw">pub use </span>simplify_with_control::SimplifyWithControl;
 <span class="kw">pub use </span>static_inliner::StaticInliner;
+<span class="kw">pub use </span>static_promotion::StaticPromotion;
 <span class="kw">pub use </span>sync::CompileSync;
 <span class="kw">pub use </span>sync::CompileSyncWithoutSyncReg;
 <span class="comment">// pub use simplify_guards::SimplifyGuards;
