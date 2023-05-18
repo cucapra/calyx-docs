@@ -174,28 +174,19 @@ out := map 2 (a &lt;- in_a, b &lt;- in_b) { a + b }
 </code></pre>
 <p>In order to take advantage of the parallelism in the program, the MrXL compiler automatically partitions the input memory <code>foo</code> into two different <em>physical banks</em>: <code>foo_b0</code> and <code>foo_b1</code>.
 Therefore, we split up our logical <code>foo</code> input of <code>[1, 2, 3, 4]</code> into <code>[1,2]</code> and <code>[3,4]</code>:</p>
-<pre><code class="language-json">  &quot;in_a&quot;: {
-    &quot;data&quot;: [
-      1,
-      2,
-      3,
-      4
-    ],
-    &quot;format&quot;: {
-      &quot;numeric_type&quot;: &quot;bitnum&quot;,
-      &quot;is_signed&quot;: false,
-      &quot;width&quot;: 32
-    }
-  },
-  &quot;in_b&quot;: {
-    &quot;data&quot;: [
-      5,
-      6,
-      7,
-      8
-    ],
-    &quot;format&quot;: {
-      &quot;numeric_type&quot;: &quot;bitnum&quot;,
+<pre><code class="language-json">  &quot;in_a&quot;: [
+    1,
+    2,
+    3,
+    4
+  ],
+  &quot;in_b&quot;: [
+    5,
+    6,
+    7,
+    8
+  ]
+}
 </code></pre>
 <p>Our complete data file similarly splits up the input for <code>baz</code>.</p>
 <p>Run the program with the complete data by typing:</p>

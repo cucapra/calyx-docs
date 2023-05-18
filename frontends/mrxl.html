@@ -146,8 +146,8 @@
                     <main>
                         <h1 id="mrxl"><a class="header" href="#mrxl">MrXL</a></h1>
 <p>MrXL is an example DSL developed for the <a href="../tutorial/frontend-tut.html">frontend tutorial</a>.
-MrXL programs consist of <code>map</code> and <code>reduce</code> operations on arrays. 
-For example, here is a dot product implementation:</p>
+MrXL programs consist of <code>map</code> and <code>reduce</code> operations on arrays.
+For example, here is a dot-product implementation:</p>
 <pre><code>input avec: int[1024]
 input bvec: int[1024]
 output dot: int
@@ -172,23 +172,38 @@ found. If it does not, run the following while still in <code>frontend/mrxl</cod
 <p>Run <code>fud check</code> again to ensure that <code>fud</code> sees <code>mrxl</code>.</p>
 <h2 id="interpreting-mrxl"><a class="header" href="#interpreting-mrxl">Interpreting MrXL</a></h2>
 <p>To run the program through the MrXL interpreter, execute:</p>
-<pre><code>mrxl &lt;program&gt; --data &lt;indata&gt; --interpret
+<pre><code>mrxl &lt;prog.mrxl&gt; --data &lt;prog.mrxl.data&gt; --interpret
 </code></pre>
-<p>where <code>&lt;program&gt;</code> is a MrXL source code file and <code>&lt;indata&gt;</code> is a JSON file containing values for all the variables declared as <code>input</code>s in the MrXL program. The interpreter dumps the <code>output</code> variables, in a JSON format, to stdout.</p>
+<p>where <code>&lt;prog.mrxl&gt;</code> is a file containing MrXL source code and <code>&lt;prog.mrxl.data&gt;</code> is a file containing values for all the variables declared as <code>input</code>s in the MrXL program. The interpreter dumps the <code>output</code> variables, in JSON, to stdout.</p>
 <p>You could try, for example:</p>
 <pre><code>mrxl test/dot.mrxl --data test/dot.mrxl.data --interpret
 </code></pre>
-<p>This is just a baby version of the dot produce implementation we showed at the very top.
+<p>This is just a baby version of the dot-product implementation we showed at the very top; we have just shortened the input array so you can easily see it in full.
 We also provide <code>add.mrxl</code> and <code>sum.mrxl</code>, along with sample <code>&lt;indata&gt;</code> files, under <code>test/</code>. Try playing with the inputs and the operations!</p>
 <h2 id="compiling-to-calyx"><a class="header" href="#compiling-to-calyx">Compiling to Calyx</a></h2>
 <p>To run the compiler and see the Calyx code your MrXL program generates, just leave off the <code>--data</code> and <code>--interpret</code> flags. For instance:</p>
 <pre><code>mrxl test/dot.mrxl
 </code></pre>
 <p>In order to run the compiler through <code>fud</code>, pass the <code>--from mrxl</code> flag:</p>
-<pre><code>fud e --from mrxl &lt;mrxl file&gt; --to futil
+<pre><code>fud e --from mrxl &lt;prog.mrxl&gt; --to futil
 </code></pre>
-<p>To simulate the Verilog generated from the mrxl compiler, set the <code>-s verilog.data</code>:</p>
-<pre><code>fud e --from mrxl &lt;mrxl file&gt; --to dat --through verilog -s verilog.data &lt;data file&gt;
+<p>Of course, what we <em>really</em> want to do is see what Verilog would make of this Calyx code.
+To simulate Verilog's output, we need to first take a step back and beef up the <code>mrxl.data</code> files with information that Verilog requires.</p>
+<p>Run:</p>
+<pre><code>mrxl &lt;prog.mrxl&gt; --data &lt;prog.mrxl.data&gt; --convert
+</code></pre>
+<p>The output dumped to stdout is exactly this beefed-up data.
+The changes it makes are:</p>
+<ol>
+<li>It adds some boilerplate about the <code>format</code> of the data.</li>
+<li>It infers the <code>output</code> variables required by the program and adds data fields for them.</li>
+<li>It infers, for each memory, the parallelism factor requested by the program, and then divides the relevant data entries into <em>memory banks</em>.</li>
+</ol>
+<p>Save this new data file:</p>
+<pre><code>mrxl &lt;prog.mrxl&gt; --data &lt;prog.mrxl.data&gt; --convert &gt; &lt;prog.data&gt;
+</code></pre>
+<p>And now you can simulate Verilog with:</p>
+<pre><code>fud e --from mrxl &lt;prog.mrxl&gt; --to dat --through verilog -s verilog.data &lt;prog.data&gt;
 </code></pre>
 
                     </main>

@@ -157,8 +157,11 @@ external stage with:</p>
 </code></pre>
 <p>The following defines a stage that transforms <a href="../frontends/mrxl.html">MrXL</a> programs to Calyx
 programs.</p>
-<pre><code class="language-python">from fud.stages import Stage, SourceType
+<pre><code class="language-python">from fud.stages import Stage, SourceType, Source
 from fud.utils import shell
+from pathlib import Path
+
+from fud.errors import MissingDynamicConfiguration
 
 
 class MrXLStage(Stage):
@@ -215,8 +218,72 @@ class MrXLStage(Stage):
         return run_mrxl(input)
 
 
+class MrXLDataStage(Stage):
+    &quot;&quot;&quot;
+    Stage that invokes the MrXL data converter.
+    &quot;&quot;&quot;
+
+    name = &quot;mrxl-data&quot;
+
+    def __init__(self):
+        &quot;&quot;&quot;
+        Initialize this stage. Initializing a stage *does not* construct its
+        computation graph.
+        &quot;&quot;&quot;
+        super().__init__(
+            src_state=&quot;mrxl-data&quot;,
+            target_state=&quot;verilog-data&quot;,
+            input_type=SourceType.Path,
+            output_type=SourceType.Stream,
+            description=&quot;Compiles MrXL-native input to Calyx-native input.&quot;,
+        )
+
+    @staticmethod
+    def pre_install():
+        pass
+
+    @staticmethod
+    def defaults():
+        &quot;&quot;&quot;
+        Specify defaults that should be added to fud's configuration file when
+        this stage is registered.
+        &quot;&quot;&quot;
+        return {&quot;exec&quot;: &quot;mrxl-data&quot;}
+
+    def _define_steps(self, input, builder, config):
+        &quot;&quot;&quot;
+        Define the steps that will execute in this stage. Each step represents
+        a delayed computation that will occur when the stage is executed.
+        &quot;&quot;&quot;
+
+        # Commands at the top-level are evaluated when the computation is being
+        # staged
+        cmd = config[&quot;stages&quot;, &quot;mrxl&quot;, &quot;exec&quot;]
+        mrxl_prog = config.get([&quot;stages&quot;, &quot;mrxl&quot;, &quot;prog&quot;])
+
+        # Computations within a step are delayed from being executed until
+        # the full execution pipeline is generated.
+        @builder.step()
+        def convert_mrxl_data_to_calyx_data(
+            data_path: SourceType.Path, mrxl_prog: SourceType.Path
+        ) -&gt; SourceType.Stream:
+            &quot;&quot;&quot;
+            Converts MrXL input into calyx input
+            &quot;&quot;&quot;
+            return shell(f&quot;{cmd} {str(mrxl_prog)} --data {data_path} --convert&quot;)
+
+        # Define a schedule using the steps.
+        # A schedule *looks* like an imperative program but actually represents
+        # a computation graph that is executed later on.
+        if mrxl_prog is None:
+            raise MissingDynamicConfiguration(&quot;mrxl.prog&quot;)
+        return convert_mrxl_data_to_calyx_data(
+            input, Source(Path(mrxl_prog), SourceType.Path)
+        )
+
+
 # Export the defined stages to fud
-__STAGES__ = [MrXLStage]
+__STAGES__ = [MrXLStage, MrXLDataStage]
 </code></pre>
 <p>External stages <em>must</em> define default values for configuration keys using the
 <code>Stage.defaults()</code> static method and the name of the stage using the static
