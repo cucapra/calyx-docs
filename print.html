@@ -31,6 +31,8 @@
 
         <!-- Custom theme stylesheets -->
 
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     </head>
     <body>
     <div id="body-container">
@@ -3301,97 +3303,213 @@ generate their code.</p>
 <pre><code>python calyx-py/test/example.py
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="building-a-frontend-for-calyx"><a class="header" href="#building-a-frontend-for-calyx">Building a Frontend for Calyx</a></h1>
-<p>In this tutorial, we're going to build a compiler for a small language called MrXL.</p>
-<h2 id="mrxl-overview"><a class="header" href="#mrxl-overview">MrXL Overview</a></h2>
-<p>MrXL provides constructs to create arrays, and perform <code>map</code> and <code>reduce</code> operations on those arrays. Here's an example of a dot product implementation in MrXL:</p>
+<blockquote>
+<p>This tutorial assumes that you have already worked through the <a href="tutorial/./language-tut.html">Calyx tutorial</a>. You won't get very much out of it by itself!</p>
+</blockquote>
+<p>In the <a href="tutorial/./language-tut.html">Calyx tutorial</a> you wrote Calyx code by hand.
+This is (probably) a good way to build character, but it's no way to live.
+Indeed, Calyx was <em>designed</em> to be a compiler IL, and not a human-facing language.</p>
+<p>In this tutorial, we're going to learn all about this by building a DSL-to-hardware compiler for a toy language that we wish to accelerate.
+We will compile the DSL to Calyx, and then let Calyx take us to hardware.</p>
+<p>Change your directory to <code>frontends/mrxl/</code>.</p>
+<h1 id="mrxl-overview"><a class="header" href="#mrxl-overview">MrXL Overview</a></h1>
+<p>Meet MrXL, our toy DSL.
+MrXL lets you define arrays and registers and then perform <code>map</code> and <code>reduce</code> operations.</p>
+<h2 id="example-sum-of-squares"><a class="header" href="#example-sum-of-squares">Example: sum of squares</a></h2>
+<p>Here's a MrXL program that squares and then sums the values of an input array:</p>
 <pre><code>input avec: int[4]
-input bvec: int[4]
-output dot: int
-prodvec := map 1 (a &lt;- avec, b &lt;- bvec) { a * b }
-dot := reduce 1 (a, b &lt;- prodvec) 0 { a + b }
+output sos: int
+squares := map 1 (a &lt;- avec) { a * a }
+sos := reduce 1 (acc, i &lt;- squares) 0 { acc + i }
 </code></pre>
-<p>We define the interface of program by specifying <code>input</code> and <code>output</code> arrays.
-Input arrays have their values populated by an external harness while the output arrays must be computed using the program.</p>
-<p>A <code>map</code> expression iterates over multiple arrays of the same element and produces a new vector using the function provided in the body.
-In the above example, the <code>map</code> expression multiplies the values of <code>avec</code> and <code>bvec</code>.
-<code>map 1</code> states that the operation has a <em>parallelism factor</em> of 1 which means that the loop iterations are performed sequentially.</p>
-<p><code>reduce</code> expressions walk over memories and accumulate a result into a register.
-In the above code snippet, we add together all the elements of <code>prodvec</code> and place them in a register named <code>dot</code>.
-Since the <code>reduce</code> parallelism factor is also 1, the reduction is performed sequentially.</p>
-<h2 id="run-a-mrxl-program"><a class="header" href="#run-a-mrxl-program">Run a MrXL Program</a></h2>
-<p>Once we have <a href="https://github.com/cucapra/calyx/tree/master/frontends/mrxl">installed the mrxl command line tool</a>, we can run MrXL programs using <a href="tutorial/../fud/index.html"><code>fud</code></a>.</p>
-<p>To provide MrXL program with input values, we use fud's <a href="https://www.json.org/json-en.html">JSON</a>-based <a href="tutorial/../lang/data-format.html">data format</a>.
-Let's try to run this program, which has a parallelism factor of two:</p>
-<pre><code>input in_a: int[4]
-input in_b: int[4]
-output out: int[4]
-
-out := map 2 (a &lt;- in_a, b &lt;- in_b) { a + b }
+<p>This short program shows off all of MrXL's features, so let's pick it apart line by line:</p>
+<ol>
+<li>We specify an array, <code>avec</code>, which will have four integers. The <code>input</code> keyword means that an external harness will populate the array.</li>
+<li>We specify <code>sos</code>, a register. The <code>output</code> keyword means that we will populate <code>sos</code> in our program.</li>
+<li>The <code>map</code> operation gets the values of <code>avec</code> and raises each to the second power. We stash the result in a new array, <code>squares</code>. The number <code>1</code> denotes a <em>parallelism factor</em> of 1, meaning that the operation is performed sequentially. We will improve this shortly.</li>
+<li>The <code>reduce</code> operation walks over <code>squares</code> and accumulates the result into a register. The parallelism factor is again <code>1</code>.</li>
+</ol>
+<h2 id="running-our-example"><a class="header" href="#running-our-example">Running our example</a></h2>
+<p>To begin, we will install the MrXL command line tool:</p>
+<ol>
+<li>Install <a href="https://flit.readthedocs.io/en/latest/index.html"><code>flit</code></a>: <code>pip install flit</code> or similar.</li>
+<li>Install the <code>calyx-py</code> library: <code>cd ../../calyx-py &amp;&amp; flit install -s &amp;&amp; cd -</code>.</li>
+<li>Run <code>flit install -s</code>.</li>
+<li>Run <code>fud register mrxl -p fud/mrxl.py</code>.</li>
+<li>Run <code>fud check</code> and ensure that <code>fud</code> sees <code>mrxl</code>.</li>
+</ol>
+<p>Now change directories to <code>calyx/frontends/mrxl</code> and run:</p>
+<pre><code>mrxl test/sos.mrxl --data test/sos.mrxl.data --interpret
 </code></pre>
-<p>In order to take advantage of the parallelism in the program, the MrXL compiler automatically partitions the input memory <code>foo</code> into two different <em>physical banks</em>: <code>foo_b0</code> and <code>foo_b1</code>.
-Therefore, we split up our logical <code>foo</code> input of <code>[1, 2, 3, 4]</code> into <code>[1,2]</code> and <code>[3,4]</code>:</p>
-<pre><code class="language-json">  &quot;in_a&quot;: [
+<p>Why <code>42</code>? Because we populated <code>avec</code> with:</p>
+<pre><code class="language-json">{
+  &quot;avec&quot;: [
+    0,
     1,
-    2,
-    3,
-    4
-  ],
-  &quot;in_b&quot;: [
-    5,
-    6,
-    7,
-    8
+    4,
+    5
   ]
 }
 </code></pre>
-<p>Our complete data file similarly splits up the input for <code>baz</code>.</p>
-<p>Run the program with the complete data by typing:</p>
-<pre><code>fud exec frontends/mrxl/test/add.mrxl \
-    --from mrxl \
-    --to vcd -s verilog.data frontends/mrxl/test/add.mrxl.data
+<p>and \( 0^2 + 1^2 + 4^2 + 5^2 = 42 \).</p>
+<h2 id="compiling-our-example-into-calyx"><a class="header" href="#compiling-our-example-into-calyx">Compiling our example into Calyx</a></h2>
+<p>Above, we merely <em>interpreted</em> MrXL code in software using a simple, pre-written interpreter implemented in Python.
+Our goal in this tutorial is to build a compiler from MrXL to hardware by translating it to the Calyx IL.
+The Calyx IL code generated by compiling this program looks more like:</p>
+<details>
+<summary>Click to expand 103 lines.</summary>
+<pre><code>import &quot;primitives/core.futil&quot;;
+import &quot;primitives/binary_operators.futil&quot;;
+component main() -&gt; () {
+  cells {
+    @external avec_b0 = std_mem_d1(32, 4, 32);
+    @external sos = std_mem_d1(32, 1, 32);
+    sos_reg = std_reg(32);
+    squares_b0 = std_mem_d1(32, 4, 32);
+    idx_b0_0 = std_reg(32);
+    incr_b0_0 = std_add(32);
+    lt_b0_0 = std_lt(32);
+    mul_b0_0 = std_mult_pipe(32);
+    idx1 = std_reg(32);
+    incr_1 = std_add(32);
+    lt_1 = std_lt(32);
+    add_1 = std_add(32);
+  }
+  wires {
+    group sos_reg2mem {
+      sos.addr0 = 32'd0;
+      sos.write_data = sos_reg.out;
+      sos.write_en = 1'd1;
+      sos_reg2mem[done] = sos.done;
+    }
+    group incr_idx_b0_0 {
+      incr_b0_0.left = idx_b0_0.out;
+      incr_b0_0.right = 32'd1;
+      idx_b0_0.in = incr_b0_0.out;
+      idx_b0_0.write_en = 1'd1;
+      incr_idx_b0_0[done] = idx_b0_0.done;
+    }
+    comb group cond_b0_0 {
+      lt_b0_0.left = idx_b0_0.out;
+      lt_b0_0.right = 32'd4;
+    }
+    group eval_body_b0_0 {
+      avec_b0.addr0 = idx_b0_0.out;
+      mul_b0_0.left = avec_b0.read_data;
+      mul_b0_0.right = avec_b0.read_data;
+      squares_b0.addr0 = idx_b0_0.out;
+      squares_b0.write_data = mul_b0_0.out;
+      mul_b0_0.go = 1'd1;
+      squares_b0.write_en = mul_b0_0.done;
+      eval_body_b0_0[done] = squares_b0.done;
+    }
+    group init_idx_1 {
+      idx1.in = 32'd0;
+      idx1.write_en = 1'd1;
+      init_idx_1[done] = idx1.done;
+    }
+    group incr_idx_1 {
+      incr_1.left = idx1.out;
+      incr_1.right = 32'd1;
+      idx1.in = incr_1.out;
+      idx1.write_en = 1'd1;
+      incr_idx_1[done] = idx1.done;
+    }
+    comb group cond_1 {
+      lt_1.left = idx1.out;
+      lt_1.right = 32'd4;
+    }
+    group init_1 {
+      sos_reg.in = 32'd0;
+      sos_reg.write_en = 1'd1;
+      init_1[done] = sos_reg.done;
+    }
+    group reduce1 {
+      squares_b0.addr0 = idx1.out;
+      add_1.left = sos_reg.out;
+      add_1.right = squares_b0.read_data;
+      sos_reg.in = add_1.out;
+      sos_reg.write_en = 1'd1;
+      reduce1[done] = sos_reg.done;
+    }
+  }
+  control {
+    seq {
+      par {
+        while lt_b0_0.out with cond_b0_0 {
+          seq {
+            eval_body_b0_0;
+            incr_idx_b0_0;
+          }
+        }
+      }
+      seq {
+        par {
+          init_1;
+          init_idx_1;
+        }
+        while lt_1.out with cond_1 {
+          seq {
+            reduce1;
+            incr_idx_1;
+          }
+        }
+      }
+      par {
+        sos_reg2mem;
+      }
+    }
+  }
+}
 </code></pre>
-<h2 id="compiling-mrxl-to-calyx"><a class="header" href="#compiling-mrxl-to-calyx">Compiling MrXL to Calyx</a></h2>
-<p>This guide will walk you through the steps to build a Python program that compiles MrXL programs to Calyx code.
-The guide assumes some basic familiarity with Calyx.
-Take a look at <a href="tutorial/./language-tut.html">Calyx tutorial</a> if you need a refresher.</p>
-<p>To simplify things, we'll make a few assumptions about MrXL programs:</p>
-<ul>
-<li>Every array in a MrXL program has the same length.</li>
-<li>Every integer in our generated hardware will be 32 bits.</li>
-<li>Every <code>map</code> and <code>reduce</code> body will be either a multiplication or addition of either an array element or an integer.</li>
-</ul>
-<p>The following sections will outline these two high level tasks:</p>
+</details>
+<p>Generate it for yourself! Run:</p>
+<pre><code>mrxl test/sos.mrxl
+</code></pre>
+<h1 id="compiling-mrxl-into-calyx"><a class="header" href="#compiling-mrxl-into-calyx">Compiling MrXL into Calyx</a></h1>
+<p>Any frontend can support new commands that are relevant to the domain of interest, so long as those commands can themselves be compiled into Calyx.
+We will now step back from our example and study <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_futil.py">the MrXL-to-Calyx compiler</a>, written in Python.</p>
+<p>We have placed a few simplifying restrictions on MrXL programs:</p>
 <ol>
-<li>Parse MrXL into a representation we can process with Python</li>
-<li>Generate Calyx code</li>
+<li>Every array in a MrXL program has the same length.</li>
+<li>Every integer in our generated hardware is 32 bits long.</li>
+<li>The bodies of <code>map</code> and <code>reduce</code> operations must be binary <code>+</code> or <code>*</code> operations involving array elements or integers.</li>
+<li>If repeated <code>map</code>/<code>reduce</code> operations are performed on the same array, each of those operations must have the same parallelism factor.</li>
+<li>All <code>reduce</code> operations must be formed sequentially, i.e., with parallelism factor <code>1</code>.</li>
 </ol>
-<blockquote>
-<p>You can find our <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_futil.py">complete implementation</a> in the Calyx repository.</p>
-</blockquote>
-<h3 id="parse-mrxl-into-an-ast"><a class="header" href="#parse-mrxl-into-an-ast">Parse MrXL into an AST</a></h3>
-<p>To start, we'll parse this MrXL program into a Python AST representation. We chose to represent <a href="https://github.com/cucapra/calyx/blob/mrxl/mrxl/mrxl/ast.py">AST</a> nodes with Python <code>dataclass</code>.
-A program is a sequence of array declarations followed by computation statements:</p>
+<p>These restrictions can be lifted or relaxed via commensurate changes to the compiler.</p>
+<p>The compilation process breaks into two steps:</p>
+<ol>
+<li>Parsing MrXL into a representation we can process in Python.</li>
+<li>Generating Calyx code.</li>
+</ol>
+<h2 id="parsing-mrxl-into-an-ast"><a class="header" href="#parsing-mrxl-into-an-ast">Parsing MrXL into an AST</a></h2>
+<p>To start, we'll parse the MrXL program into a Python AST representation.
+We choose to represent <a href="https://github.com/cucapra/calyx/blob/mrxl/mrxl/mrxl/ast.py">AST</a> nodes with Python <code>dataclass</code>es.
+A program is a sequence of array/register declarations followed by computation statements:</p>
 <pre><code class="language-python">@dataclass
 class Prog:
     decls: List[Decl] # Memory declarations
     stmts: List[Stmt] # Map and reduce statements
 </code></pre>
-<p><code>Decl</code> nodes correspond to array declarations like <code>input avec: int[1024]</code>, and carry data about whether they're an <code>input</code> or <code>output</code> array, their name, and their type:</p>
+<p><code>Decl</code> nodes correspond to array declarations such as <code>input avec: int[4]</code>.
+They carry information about whether the array is an <code>input</code> or <code>output</code>, the array's name, and the type of the array's elements:</p>
 <pre><code class="language-python">@dataclass
 class Decl:
     input: bool  # Otherwise, output.
     name: str
     type: Type
 </code></pre>
-<p><code>Stmt</code> nodes represent statements such as <code>dot := reduce 4 (a, b &lt;- prodvec) 0 { a + b }</code>, and contain more nested nodes representing their function header and body, and type of operation.</p>
+<p><code>Stmt</code> nodes represent statements such as <code>sos := reduce 1 (acc, i &lt;- squares) 0 { acc + i }</code>.
+They contain further nested nodes representing the function-header and -body, and the type of operation:</p>
 <pre><code class="language-python">@dataclass
 class Stmt:
     dest: str
     op: Union[Map, Reduce]
 </code></pre>
-<p><a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/ast.py">The complete AST</a> defines the remaining AST nodes required to represent a MrXL program.</p>
-<h3 id="generate-calyx-code"><a class="header" href="#generate-calyx-code">Generate Calyx Code</a></h3>
-<p>The skeleton of a Calyx program has three sections, and looks like this:</p>
+<p>We elide further details, but point you to the <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/ast.py">AST</a>, which defines all the nodes we need to represent a MrXL program.</p>
+<h2 id="generating-calyx-code"><a class="header" href="#generating-calyx-code">Generating Calyx code</a></h2>
+<p><a href="tutorial/./language-tut.html">As you know</a>, the skeleton of a Calyx program has three sections:</p>
 <pre><code>component main() -&gt; {
   cells {}
   wires {}
@@ -3400,17 +3518,17 @@ class Stmt:
 </code></pre>
 <p>The <a href="tutorial/../lang/ref.html#cells">cells section</a> instantiates hardware units like adders, memories and registers.
 The <a href="tutorial/../lang/ref.html#the-wires-section">wires section</a> contains <a href="tutorial/../lang/ref.html#group-definitions">groups</a> that connect
-together hardware instances to perform some logical task such as incrementing a specific register.
+hardware instances to perform some logical task (e.g, incrementing a register).
 Finally, the <a href="tutorial/../lang/ref.html#the-control-operators">control section</a> <em>schedules</em> the execution of groups using control operators such as <code>seq</code>, <code>par</code>, and <code>while</code>.</p>
-<p>We perform syntax-directed compilation by walking over nodes in the above AST and generating <code>cells</code>, <code>wires</code>, and <code>control</code> operations.</p>
-<h4 id="calyx-embedded-dsl"><a class="header" href="#calyx-embedded-dsl">Calyx Embedded DSL</a></h4>
-<p>To make it easy to generate the hardware, we'll use Calyx's <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/builder_example.py"><code>builder</code> module</a> in Python:</p>
+<p>We perform syntax-directed compilation by walking over the nodes of the AST and generating <code>cells</code>, <code>wires</code>, and <code>control</code> operations.</p>
+<h3 id="calyx-embedded-dsl"><a class="header" href="#calyx-embedded-dsl">Calyx-Embedded DSL</a></h3>
+<p>To make it easy to generate hardware, we'll use Calyx's <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/builder_example.py"><code>builder</code> module</a> written in Python:</p>
 <pre><code class="language-python">import calyx.builder as cb
 
 prog = cb.Builder() # A Calyx program
 main = prog.component(&quot;main&quot;) # Create a component named &quot;main&quot;
 </code></pre>
-<h4 id="decl-nodes"><a class="header" href="#decl-nodes"><code>Decl</code> nodes</a></h4>
+<h3 id="decl-nodes"><a class="header" href="#decl-nodes"><code>Decl</code> nodes</a></h3>
 <p><code>Decl</code> nodes instantiate new memories and registers.
 We need these to be instantiated in the <code>cells</code> section of our Calyx output.
 We use Calyx's <code>std_reg</code> and <code>std_mem_d1</code> primitives to represent registers and memories:</p>
@@ -3419,14 +3537,14 @@ We use Calyx's <code>std_reg</code> and <code>std_mem_d1</code> primitives to re
 component main() -&gt; () {
   cells {
     // A memory with 4 32-bit elements. Indexed using a 6-bit value.
-    foo = std_mem_d1(32, 4, 6);
+    avec = std_mem_d1(32, 4, 6);
     // A register that contains a 32-bit value
-    r = std_reg(32);
+    sos = std_reg(32);
   }
   ...
 }
 </code></pre>
-<p>For each <code>Decl</code> node, we need to determine if we're instantiating a memory or a register, and then translate that to a corresponding Calyx declaration and place that inside the <code>cells</code> section of our generated program.</p>
+<p>For each <code>Decl</code> node, we need to determine if we're instantiating a memory or a register, translate the node into a corresponding Calyx declaration, and place the declaration inside the <code>cells</code> section of our generated program.</p>
 <p>If a memory is used in a parallel <code>map</code> or <code>reduce</code>, we might need to create different physical banks for it.
 We define a function to walk over the AST and compute the parallelism factor for each memory:</p>
 <pre><code class="language-python">    # Collect banking factors.
@@ -3438,8 +3556,8 @@ We define a function to walk over the AST and compute the parallelism factor for
 </code></pre>
 <p>The <code>main.mem_d1</code> call is a function defined by the Calyx builder module to instantiate memories for a component.
 By setting <code>is_external=True</code>, we're indicating that a memory declaration is a part of the program's input-output interface.</p>
-<h3 id="compiling-map-operations"><a class="header" href="#compiling-map-operations">Compiling <code>Map</code> Operations</a></h3>
-<p>For every map or reduce node, we need to generate Calyx code that iterates over an array, performs some kind of computation, and then stores the result of that computation.
+<h2 id="compiling-map-operations"><a class="header" href="#compiling-map-operations">Compiling <code>map</code> operations</a></h2>
+<p>For every <code>map</code> or <code>reduce</code> node, we need to generate Calyx code that iterates over an array, performs some kind of computation, and then stores the result of that computation.
 For <code>map</code> operations, we'll perform a computation on an element of an input array, and then store the result in a result array.
 We can use Calyx's <a href="tutorial/../lang/ref.html#while">while loops</a> to iterate over an input array, perform the map's computation, and store the final value.
 At a high level, we want to generate the following pieces of hardware:</p>
@@ -3447,10 +3565,10 @@ At a high level, we want to generate the following pieces of hardware:</p>
 <li>A register to store the current value of the loop index.</li>
 <li>A comparator to check of the loop index is less than the array size.</li>
 <li>An adder to increment the value of the index.</li>
-<li>Hardware needed to implement the loop body computation.</li>
+<li>Whatever hardware is needed to implement the loop body computation.</li>
 </ol>
-<h4 id="loop-condition"><a class="header" href="#loop-condition">Loop Condition</a></h4>
-<p>We define a <a href="tutorial/../lang/ref.html#comb-group-definitions">combinational group</a> to perform the comparison <code>idx &lt; arr_size</code> that uses an <code>lt</code> cell.</p>
+<h3 id="loop-condition"><a class="header" href="#loop-condition">Loop condition</a></h3>
+<p>We define a <a href="tutorial/../lang/ref.html#comb-group-definitions">combinational group</a> to perform the comparison <code>idx &lt; arr_size</code> that uses an <code>lt</code> cell:</p>
 <pre><code class="language-python">    group_name = f&quot;cond_{suffix}&quot;
     cell = f&quot;lt_{suffix}&quot;
     lt = comp.cell(cell, Stdlib.op(&quot;lt&quot;, 32, signed=False))
@@ -3458,7 +3576,8 @@ At a high level, we want to generate the following pieces of hardware:</p>
         lt.left = idx.out
         lt.right = cb.const(32, arr_size)
 </code></pre>
-<h4 id="index-increment"><a class="header" href="#index-increment">Index Increment</a></h4>
+<h3 id="index-increment"><a class="header" href="#index-increment">Index increment</a></h3>
+<p>The loop index increment is implemented using a <a href="tutorial/../lang/ref.html#group-definitions">group</a> and an <code>adder</code>:</p>
 <pre><code class="language-python">    group_name = f&quot;incr_idx_{suffix}&quot;
     adder = comp.add(f&quot;incr_{suffix}&quot;, 32)
     with comp.group(group_name) as incr:
@@ -3468,10 +3587,10 @@ At a high level, we want to generate the following pieces of hardware:</p>
         idx.write_en = 1
         incr.done = idx.done
 </code></pre>
-<p>The loop index increment is implemented using a [group][lf-group] and an adder (<code>adder</code>).
-We provide the index's previous value and the constant 1 to the adder and write the adder's output into the register.
-Because we're performing a stateful update of the register, we must wait for the register to state that it's committed the write by setting the group's done condition to the register's <code>done</code> signal.</p>
-<h4 id="body-computation"><a class="header" href="#body-computation">Body Computation</a></h4>
+<p>We provide the index's previous value and the constant <code>1</code> to the adder, and write the adder's output into the register.
+Because we're performing a stateful update of the register, we must wait for the register to state that it has committed the write.
+We do this by setting the group's <code>done</code> condition to track the register's <code>done</code> signal.</p>
+<h3 id="body-computation"><a class="header" href="#body-computation">Body computation</a></h3>
 <p>The final piece of the puzzle is the body's computation.
 The corresponding group indexes into the input memories:</p>
 <pre><code class="language-python">        with comp.group(f&quot;eval_body_{suffix}&quot;) as ev:
@@ -3487,7 +3606,7 @@ The corresponding group indexes into the input memories:</p>
             op.left = expr_to_port(body.lhs)
             op.right = expr_to_port(body.rhs)
 </code></pre>
-<p>And writes the value from the operation into the output memory:</p>
+<p>and writes the value from the operation into the output memory:</p>
 <pre><code class="language-py">            out_mem = comp.get_cell(f&quot;{dest}_b{bank}&quot;)
             out_mem.addr0 = idx.out
             out_mem.write_data = op.out
@@ -3499,12 +3618,12 @@ The corresponding group indexes into the input memories:</p>
                 out_mem.write_en = 1
             ev.done = out_mem.done
 </code></pre>
-<p>This final operation is complex because we must account for whether we're using an adder or a multiplier.
+<p>This final operation is complicated because we must account for whether we're using an adder or a multiplier.
 Adders are <em>combinational</em>–they produce their output immediately–while multipliers are <em>sequential</em> and require multiple cycles to produce its output.</p>
 <p>When using a mutliplier, we need to explicitly set its <code>go</code> signal to one and only write the output from the multiplier into the memory when its <code>done</code> signal is asserted.
 We do this by assigning the memory's <code>write_en</code> (write enable) signal to the multiplier's done signal.
 Finally, the group's computation is done when the memory write is committed.</p>
-<h4 id="generating-control"><a class="header" href="#generating-control">Generating Control</a></h4>
+<h3 id="generating-control"><a class="header" href="#generating-control">Generating control</a></h3>
 <p>Once we have generated the hardware needed for our computation, we can schedule its computation using <a href="tutorial/../lang/ref.html#the-control-operators">control operators</a>:</p>
 <pre><code class="language-py">            While(
                 CompPort(CompVar(port), &quot;out&quot;),
@@ -3519,32 +3638,143 @@ Finally, the group's computation is done when the memory write is committed.</p>
 </code></pre>
 <p>We generate a while loop that checks that the index is less than the array size.
 Then, it sequentially executes the computation for the body and increments the loop index.</p>
-<h3 id="add-parallelization"><a class="header" href="#add-parallelization">Add Parallelization</a></h3>
-<p>MrXL allows you to parallelize your <code>map</code> and <code>reduce</code> operations. Let's revisit the <code>map</code> example from earlier:</p>
-<pre><code>input foo: int[4]
-output baz: int[4]
-baz := map 4 (a &lt;- foo) { a + 5 }
+<h2 id="adding-parallelization"><a class="header" href="#adding-parallelization">Adding parallelization</a></h2>
+<p>MrXL allows us to parallelize our <code>map</code> operations.</p>
+<p>Consider a variation on our prior example:</p>
+<pre><code>input avec: int[4]
+output squares: int[4]
+squares := map 2 (a &lt;- avec) { a * a }
 </code></pre>
-<p>The number 4 specifies that four copies of the loop bodies should be executed in parallel.
-Our implementation already creates <a href="tutorial/frontend-tut.html#decl-nodes">memory banks</a> to allow for parallel accesses.
-At a high-level, we can change the compilation for the <code>map</code> operation to produce <code>n</code> copies of the hardware we generate above and generate a control program that looks like this:</p>
+<p>The noteworthy change is the parallelism factor of the <code>map</code> operation.
+The parallelism factor <code>2</code> specifies that two copies of the loop bodies should be executed in parallel.
+Our implementation automatically generates code that takes advantage of <a href="tutorial/frontend-tut.html#decl-nodes">memory banking</a> in the supplied data.
+This allows for parallel accesses.
+It also creates an obligation on the data-supply side; we will show how to discharge this shortly.</p>
+<p>At a high level, we can change the compilation of the <code>map</code> operation to produce two copies of the hardware we generated above.
+We can generate a control program that looks like:</p>
 <pre><code>par {
   while le_b0.out with cond_b0 { seq { eval_body_b0; incr_idx_b0; } }
   while le_b1.out with cond_b1 { seq { eval_body_b1; incr_idx_b1; } }
-  while le_b2.out with cond_b2 { seq { eval_body_b2; incr_idx_b2; } }
-  while le_b3.out with cond_b3 { seq { eval_body_b3; incr_idx_b3; } }
 }
 </code></pre>
 <p>The <a href="tutorial/../lang/ref.html#par"><code>par</code> operator</a> executes all the loops in parallel.
-The <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_futil.py">full implementation</a> shows the necessary code to accomplish this which simply creates an outer loop to generate distinct hardware for each copy of the loop.</p>
-<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>Hopefully this should be enough to get you started with writing your own MrXL compiler. Some more follow-up tasks you could try if you're interested:</p>
-<ul>
-<li>Read the code for compiling <code>reduce</code> statements and extend to support parallel reductions using <a href="http://www.cs.ucr.edu/~nael/217-f15/lectures/217-lec10.pdf">reduction trees</a>.</li>
-<li>Implement code generation that allows memories that differ from one another in size.</li>
-<li>Implement complex function body expressions. We only support binary operations with two operands, like <code>a + 5</code>.</li>
-<li>Add a new <code>filter</code> operation to MrXL.</li>
-</ul>
+The <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_futil.py">complete implementation</a> shows the necessary code to accomplish this which simply creates an outer loop to generate distinct hardware for each copy of the loop.</p>
+<h1 id="supplying-data-to-mrxl-programs"><a class="header" href="#supplying-data-to-mrxl-programs">Supplying data to MrXL programs</a></h1>
+<p>You may have noticed that the data files that we pass to MrXL programs are lighter-weight than those we pass to Calyx programs.
+They are lighter in two ways.</p>
+<h2 id="boilerplate"><a class="header" href="#boilerplate">Boilerplate</a></h2>
+<p>Calyx requires cells to be allocated for the output cells.
+Instead of asking the user to supply zeroed-out arrays and registers for output cells, we can infer the need for these output cells from the source code.
+We can then add these on to the MrXL-native data files to make them amenable to Calyx.</p>
+<p>Additionally, because MrXL supports only a few kinds of data, some interesting parameters of Calyx-native data files turn into &quot;just boilerplate&quot; in MrXL-native data.
+We can keep MrXL-native data files relatively light and add this <code>format</code> information automatically.</p>
+<h2 id="memory-banking"><a class="header" href="#memory-banking">Memory banking</a></h2>
+<p>Let us look back at our example featuring a parallel <code>map</code>:</p>
+<pre><code>input avec: int[4]
+output squares: int[4]
+squares := map 2 (a &lt;- avec) { a * a }
+</code></pre>
+<p>Interpret this with:</p>
+<pre><code>mrxl test/squares.mrxl --data test/squares.mrxl.data --interpret
+</code></pre>
+<p>But more interestingly, compile this to Calyx IL with:</p>
+<pre><code>mrxl test/squares.mrxl
+</code></pre>
+<p>There's a lot going on, but the thing to focus on is this.
+To take advantage of the parallelism in the program, the MrXL compiler assumes that the input memory <code>avec</code> is split into two <em>banks</em>, <code>avec_b0</code> and <code>avec_b1</code>.
+Look for these in the Calyx code.</p>
+<p>When it comes time to populating the memories of this Calyx code, we can no longer just supply values for a memory <code>avec</code>.
+We need to also bank the data that we supply, i.e., we must populate <code>avec_b0</code> and <code>avec_b1</code>.</p>
+<p>Though nontrivial, this data-banking can also be handled automatically; all the necessary information is in the MrXL source program.</p>
+<h2 id="example-squaresmrxldata"><a class="header" href="#example-squaresmrxldata">Example: <code>squares.mrxl.data</code></a></h2>
+<p>Let us look at these changes in practice.</p>
+<p>We write <code>avec</code>'s values as a straightforward array:</p>
+<pre><code class="language-json">{
+	&quot;avec&quot;: [
+			0,
+			1,
+			4,
+			5
+		]
+}
+</code></pre>
+<p>but under the hood, the <em>Calyx IL version</em> of <code>squares.mrxl</code> comes to expect something of the form:</p>
+<pre><code class="language-json">{
+    &quot;avec_b0&quot;: {
+        &quot;data&quot;: [
+            0,
+            1
+        ],
+        &quot;format&quot;: {
+            &quot;is_signed&quot;: false,
+            &quot;numeric_type&quot;: &quot;bitnum&quot;,
+            &quot;width&quot;: 32
+        }
+    },
+    &quot;avec_b1&quot;: {
+        &quot;data&quot;: [
+            4,
+            5
+        ],
+        &quot;format&quot;: {
+            &quot;is_signed&quot;: false,
+            &quot;numeric_type&quot;: &quot;bitnum&quot;,
+            &quot;width&quot;: 32
+        }
+    },
+    &quot;squares_b0&quot;: {
+        &quot;data&quot;: [
+            0,
+            0
+        ],
+        &quot;format&quot;: {
+            &quot;is_signed&quot;: false,
+            &quot;numeric_type&quot;: &quot;bitnum&quot;,
+            &quot;width&quot;: 32
+        }
+    },
+    &quot;squares_b1&quot;: {
+        &quot;data&quot;: [
+            0,
+            0
+        ],
+        &quot;format&quot;: {
+            &quot;is_signed&quot;: false,
+            &quot;numeric_type&quot;: &quot;bitnum&quot;,
+            &quot;width&quot;: 32
+        }
+    }
+}
+</code></pre>
+<p>And we can generate this automatically. Try it yourself:</p>
+<pre><code>mrxl test/squares.mrxl --data test/squares.mrxl.data --convert
+</code></pre>
+<p>This transformation is achieved using a <a href="tutorial/../fud/index.html"><code>fud</code></a> pass that converts MrXL-native data files into Calyx-native data files.</p>
+<h1 id="further-steps"><a class="header" href="#further-steps">Further Steps</a></h1>
+<p>Congratulations, you know about as much about MrXL as we do!
+The small size of the language makes it a nice sandbox for you to play in.
+We mentioned that the restrictions placed on the language can be lifted by beefing up the compiler, and here's your chance to give it a whirl!</p>
+<p>As a warmup, you could try lifting one of the following restrictions:</p>
+<blockquote>
+<ol>
+<li>Every array in a MrXL program has the same length.</li>
+<li>Every integer in our generated hardware is 32 bits long.</li>
+<li>The bodies of <code>map</code> and <code>reduce</code> operations must be binary <code>+</code> or <code>*</code> operations involving array elements or integers.</li>
+</ol>
+</blockquote>
+<p>If you're looking for a more serious challenge, try:</p>
+<blockquote>
+<ol start="4">
+<li>If repeated <code>map</code>/<code>reduce</code> operations are performed on the same array, each of those operations must have the same parallelism factor.</li>
+</ol>
+</blockquote>
+<p>Or, for something completely different:</p>
+<ol start="5">
+<li>Add support for a new <code>filter</code> operation in MrXL.</li>
+</ol>
+<p>A big gap in MrXL at present is that all <code>reduce</code> operations must be performed sequentially.
+This restriction can also be lifted, but hold that thought for a moment!
+We'd like to tell you a little about reduction trees.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="frontend-compilers"><a class="header" href="#frontend-compilers">Frontend Compilers</a></h1>
 <p>Several compiler generate Calyx programs from other high-level languages.</p>
 <ul>
@@ -3983,7 +4213,9 @@ ln -s &lt;calyx root directory&gt;/tools/vscode calyx.calyx-0.0.1
 
         <script>
         window.addEventListener('load', function() {
-            window.setTimeout(window.print, 100);
+            MathJax.Hub.Register.StartupHook('End', function() {
+                window.setTimeout(window.print, 100);
+            });
         });
         </script>
 
