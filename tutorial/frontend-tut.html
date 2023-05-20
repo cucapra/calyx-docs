@@ -333,14 +333,16 @@ We choose to represent <a href="https://github.com/cucapra/calyx/blob/mrxl/mrxl/
 A program is a sequence of array/register declarations followed by computation statements:</p>
 <pre><code class="language-python">@dataclass
 class Prog:
-    decls: List[Decl] # Memory declarations
-    stmts: List[Stmt] # Map and reduce statements
+    &quot;&quot;&quot;A MrXL program.&quot;&quot;&quot;
+    decls: List[Decl]  # Memory declarations
+    stmts: List[Stmt]  # Map and reduce statements
 </code></pre>
 <p><code>Decl</code> nodes correspond to array declarations such as <code>input avec: int[4]</code>.
 They carry information about whether the array is an <code>input</code> or <code>output</code>, the array's name, and the type of the array's elements:</p>
 <pre><code class="language-python">@dataclass
 class Decl:
-    input: bool  # Otherwise, output.
+    &quot;&quot;&quot;Declaration of a memory.&quot;&quot;&quot;
+    input: bool  # If `False`, this is an `output`.
     name: str
     type: Type
 </code></pre>
@@ -348,8 +350,9 @@ class Decl:
 They contain further nested nodes representing the function-header and -body, and the type of operation:</p>
 <pre><code class="language-python">@dataclass
 class Stmt:
-    dest: str
-    op: Union[Map, Reduce]
+    &quot;&quot;&quot;A statement in the program.&quot;&quot;&quot;
+    dst: str
+    operation: Union[Map, Reduce]
 </code></pre>
 <p>We elide further details, but point you to the <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/ast.py">AST</a>, which defines all the nodes we need to represent a MrXL program.</p>
 <h2 id="generating-calyx-code"><a class="header" href="#generating-calyx-code">Generating Calyx code</a></h2>
@@ -391,12 +394,10 @@ component main() -&gt; () {
 <p>For each <code>Decl</code> node, we need to determine if we're instantiating a memory or a register, translate the node into a corresponding Calyx declaration, and place the declaration inside the <code>cells</code> section of our generated program.</p>
 <p>If a memory is used in a parallel <code>map</code> or <code>reduce</code>, we might need to create different physical banks for it.
 We define a function to walk over the AST and compute the parallelism factor for each memory:</p>
-<pre><code class="language-python">    # Collect banking factors.
-    par_factor = compute_par_factors(prog.stmts)
+<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:compute_par_factors}}
 </code></pre>
 <p>Using this information, we can instantiate registers and memories for our inputs and outputs:</p>
-<pre><code class="language-python">            for i in range(par):
-                main.mem_d1(f&quot;{name}_b{i}&quot;, 32, arr_size // par, 32, is_external=True)
+<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:collect-decls}}
 </code></pre>
 <p>The <code>main.mem_d1</code> call is a function defined by the Calyx builder module to instantiate memories for a component.
 By setting <code>is_external=True</code>, we're indicating that a memory declaration is a part of the program's input-output interface.</p>
@@ -413,23 +414,11 @@ At a high level, we want to generate the following pieces of hardware:</p>
 </ol>
 <h3 id="loop-condition"><a class="header" href="#loop-condition">Loop condition</a></h3>
 <p>We define a <a href="../lang/ref.html#comb-group-definitions">combinational group</a> to perform the comparison <code>idx &lt; arr_size</code> that uses an <code>lt</code> cell:</p>
-<pre><code class="language-python">    group_name = f&quot;cond_{suffix}&quot;
-    cell = f&quot;lt_{suffix}&quot;
-    lt = comp.cell(cell, Stdlib.op(&quot;lt&quot;, 32, signed=False))
-    with comp.comb_group(group_name):
-        lt.left = idx.out
-        lt.right = cb.const(32, arr_size)
+<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:cond_group}}
 </code></pre>
 <h3 id="index-increment"><a class="header" href="#index-increment">Index increment</a></h3>
 <p>The loop index increment is implemented using a <a href="../lang/ref.html#group-definitions">group</a> and an <code>adder</code>:</p>
-<pre><code class="language-python">    group_name = f&quot;incr_idx_{suffix}&quot;
-    adder = comp.add(f&quot;incr_{suffix}&quot;, 32)
-    with comp.group(group_name) as incr:
-        adder.left = idx.out
-        adder.right = 1
-        idx.in_ = adder.out
-        idx.write_en = 1
-        incr.done = idx.done
+<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:incr_group}}
 </code></pre>
 <p>We provide the index's previous value and the constant <code>1</code> to the adder, and write the adder's output into the register.
 Because we're performing a stateful update of the register, we must wait for the register to state that it has committed the write.
@@ -437,30 +426,14 @@ We do this by setting the group's <code>done</code> condition to track the regis
 <h3 id="body-computation"><a class="header" href="#body-computation">Body computation</a></h3>
 <p>The final piece of the puzzle is the body's computation.
 The corresponding group indexes into the input memories:</p>
-<pre><code class="language-python">        with comp.group(f&quot;eval_body_{suffix}&quot;) as ev:
-            # Index each array
-            for bind in stmt.bind:
-                # Map bindings have exactly one dest
-                mem = comp.get_cell(f&quot;{name2arr[bind.dest[0]]}&quot;)
-                mem.addr0 = idx.out
+<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:map_inputs}}
 </code></pre>
 <p>Because the builder module is an embedded DSL, we can simply use Python's <code>for</code> loop to generate all the required assignments for indexing.</p>
 <p>This code instantiates an adder or a multiplier depending on the computation needed using the <code>expr_to_port</code> helper function:</p>
-<pre><code class="language-python">            # Provide inputs to the op
-            op.left = expr_to_port(body.lhs)
-            op.right = expr_to_port(body.rhs)
+<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:map_op}}
 </code></pre>
 <p>and writes the value from the operation into the output memory:</p>
-<pre><code class="language-py">            out_mem = comp.get_cell(f&quot;{dest}_b{bank}&quot;)
-            out_mem.addr0 = idx.out
-            out_mem.write_data = op.out
-            # Multipliers are sequential so we need to manipulate go/done signals
-            if body.op == &quot;mul&quot;:
-                op.go = 1
-                out_mem.write_en = op.done
-            else:
-                out_mem.write_en = 1
-            ev.done = out_mem.done
+<pre><code class="language-py">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:map_write}}
 </code></pre>
 <p>This final operation is complicated because we must account for whether we're using an adder or a multiplier.
 Adders are <em>combinational</em>–they produce their output immediately–while multipliers are <em>sequential</em> and require multiple cycles to produce its output.</p>
@@ -469,16 +442,7 @@ We do this by assigning the memory's <code>write_en</code> (write enable) signal
 Finally, the group's computation is done when the memory write is committed.</p>
 <h3 id="generating-control"><a class="header" href="#generating-control">Generating control</a></h3>
 <p>Once we have generated the hardware needed for our computation, we can schedule its computation using <a href="../lang/ref.html#the-control-operators">control operators</a>:</p>
-<pre><code class="language-py">            While(
-                CompPort(CompVar(port), &quot;out&quot;),
-                CompVar(cond),
-                SeqComp(
-                    [
-                        Enable(f&quot;eval_body_{suffix}&quot;),
-                        Enable(incr),
-                    ]
-                ),
-            )
+<pre><code class="language-py">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:map_loop}}
 </code></pre>
 <p>We generate a while loop that checks that the index is less than the array size.
 Then, it sequentially executes the computation for the body and increments the loop index.</p>
