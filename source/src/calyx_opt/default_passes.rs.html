@@ -173,14 +173,15 @@
 <span id="173">173</span>
 <span id="174">174</span>
 <span id="175">175</span>
+<span id="176">176</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     AttributePromotion, Canonicalize, CellShare, ClkInsertion, CollapseControl,
     CombProp, CompileEmpty, CompileInvoke, CompileRef, CompileStatic,
     CompileSync, CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
-    DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, Externalize,
-    GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner, InferShare,
-    LowerGuards, MergeAssign, MergeStaticPar, Papercut, ParToSeq,
+    DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, DiscoverExternal,
+    Externalize, GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner,
+    InferShare, LowerGuards, MergeAssign, MergeStaticPar, Papercut, ParToSeq,
     RegisterUnsharing, RemoveIds, ResetInsertion, SimplifyStaticGuards,
     SimplifyWithControl, StaticInliner, StaticParConv, StaticPromotion,
     SynthesisPapercut, TopDownCompileControl, TopDownStaticTiming,
@@ -241,7 +242,8 @@
         pm.register_pass::&lt;Externalize&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">// Disabled by default
-        </span>pm.register_pass::&lt;UnrollBounded&gt;()<span class="question-mark">?</span>;
+        </span>pm.register_pass::&lt;DiscoverExternal&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;UnrollBounded&gt;()<span class="question-mark">?</span>;
         <span class="comment">// pm.register_pass::&lt;SimplifyGuards&gt;()?;
         </span>pm.register_pass::&lt;RegisterUnsharing&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;GroupToInvoke&gt;()<span class="question-mark">?</span>;
