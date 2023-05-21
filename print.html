@@ -3494,7 +3494,7 @@ component main() -&gt; () {
 </code></pre>
 <h1 id="compiling-mrxl-into-calyx"><a class="header" href="#compiling-mrxl-into-calyx">Compiling MrXL into Calyx</a></h1>
 <p>Any frontend can support new commands that are relevant to the domain of interest, so long as those commands can themselves be compiled into Calyx.
-We will now step back from our example and study <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_futil.py">the MrXL-to-Calyx compiler</a>, written in Python.</p>
+We will now step back from our example and study <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_calyx.py">the MrXL-to-Calyx compiler</a>, written in Python.</p>
 <p>We have placed a few simplifying restrictions on MrXL programs:</p>
 <ol>
 <li>Every array in a MrXL program has the same length.</li>
@@ -3576,10 +3576,12 @@ component main() -&gt; () {
 <p>For each <code>Decl</code> node, we need to determine if we're instantiating a memory or a register, translate the node into a corresponding Calyx declaration, and place the declaration inside the <code>cells</code> section of our generated program.</p>
 <p>If a memory is used in a parallel <code>map</code> or <code>reduce</code>, we might need to create different physical banks for it.
 We define a function to walk over the AST and compute the parallelism factor for each memory:</p>
-<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:compute_par_factors}}
+<pre><code class="language-python">    # Collect banking factors.
+    par_factor = compute_par_factors(prog.stmts)
 </code></pre>
 <p>Using this information, we can instantiate registers and memories for our inputs and outputs:</p>
-<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:collect-decls}}
+<pre><code class="language-python">            for i in range(par):
+                main.mem_d1(f&quot;{name}_b{i}&quot;, 32, arr_size // par, 32, is_external=True)
 </code></pre>
 <p>The <code>main.mem_d1</code> call is a function defined by the Calyx builder module to instantiate memories for a component.
 By setting <code>is_external=True</code>, we're indicating that a memory declaration is a part of the program's input-output interface.</p>
@@ -3596,11 +3598,23 @@ At a high level, we want to generate the following pieces of hardware:</p>
 </ol>
 <h3 id="loop-condition"><a class="header" href="#loop-condition">Loop condition</a></h3>
 <p>We define a <a href="tutorial/../lang/ref.html#comb-group-definitions">combinational group</a> to perform the comparison <code>idx &lt; arr_size</code> that uses an <code>lt</code> cell:</p>
-<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:cond_group}}
+<pre><code class="language-python">    group_name = f&quot;cond_{suffix}&quot;
+    cell = f&quot;lt_{suffix}&quot;
+    less_than = comp.cell(cell, Stdlib.op(&quot;lt&quot;, 32, signed=False))
+    with comp.comb_group(group_name):
+        less_than.left = idx.out
+        less_than.right = cb.const(32, arr_size)
 </code></pre>
 <h3 id="index-increment"><a class="header" href="#index-increment">Index increment</a></h3>
 <p>The loop index increment is implemented using a <a href="tutorial/../lang/ref.html#group-definitions">group</a> and an <code>adder</code>:</p>
-<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:incr_group}}
+<pre><code class="language-python">    group_name = f&quot;incr_idx_{suffix}&quot;
+    adder = comp.add(f&quot;incr_{suffix}&quot;, 32)
+    with comp.group(group_name) as incr:
+        adder.left = idx.out
+        adder.right = 1
+        idx.in_ = adder.out
+        idx.write_en = 1
+        incr.done = idx.done
 </code></pre>
 <p>We provide the index's previous value and the constant <code>1</code> to the adder, and write the adder's output into the register.
 Because we're performing a stateful update of the register, we must wait for the register to state that it has committed the write.
@@ -3608,14 +3622,30 @@ We do this by setting the group's <code>done</code> condition to track the regis
 <h3 id="body-computation"><a class="header" href="#body-computation">Body computation</a></h3>
 <p>The final piece of the puzzle is the body's computation.
 The corresponding group indexes into the input memories:</p>
-<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:map_inputs}}
+<pre><code class="language-python">        with comp.group(f&quot;eval_body_{suffix}&quot;) as evl:
+            # Index each array
+            for bind in stmt.binds:
+                # Map bindings have exactly one dest
+                mem = comp.get_cell(f&quot;{name2arr[bind.dst[0]]}&quot;)
+                mem.addr0 = idx.out
 </code></pre>
 <p>Because the builder module is an embedded DSL, we can simply use Python's <code>for</code> loop to generate all the required assignments for indexing.</p>
 <p>This code instantiates an adder or a multiplier depending on the computation needed using the <code>expr_to_port</code> helper function:</p>
-<pre><code class="language-python">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:map_op}}
+<pre><code class="language-python">            # Provide inputs to the op
+            operation.left = expr_to_port(body.lhs)
+            operation.right = expr_to_port(body.rhs)
 </code></pre>
 <p>and writes the value from the operation into the output memory:</p>
-<pre><code class="language-py">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:map_write}}
+<pre><code class="language-py">            out_mem = comp.get_cell(f&quot;{dest}_b{bank}&quot;)
+            out_mem.addr0 = idx.out
+            out_mem.write_data = operation.out
+            # Multipliers are sequential so we need to manipulate go/done signals
+            if body.operation == &quot;mul&quot;:
+                operation.go = 1
+                out_mem.write_en = operation.done
+            else:
+                out_mem.write_en = 1
+            evl.done = out_mem.done
 </code></pre>
 <p>This final operation is complicated because we must account for whether we're using an adder or a multiplier.
 Adders are <em>combinational</em>–they produce their output immediately–while multipliers are <em>sequential</em> and require multiple cycles to produce its output.</p>
@@ -3624,7 +3654,16 @@ We do this by assigning the memory's <code>write_en</code> (write enable) signal
 Finally, the group's computation is done when the memory write is committed.</p>
 <h3 id="generating-control"><a class="header" href="#generating-control">Generating control</a></h3>
 <p>Once we have generated the hardware needed for our computation, we can schedule its computation using <a href="tutorial/../lang/ref.html#the-control-operators">control operators</a>:</p>
-<pre><code class="language-py">{{#include ../../frontends/mrxl/mrxl/gen_futil.py:map_loop}}
+<pre><code class="language-py">            While(
+                CompPort(CompVar(port), &quot;out&quot;),
+                CompVar(cond),
+                SeqComp(
+                    [
+                        Enable(f&quot;eval_body_{suffix}&quot;),
+                        Enable(incr),
+                    ]
+                ),
+            )
 </code></pre>
 <p>We generate a while loop that checks that the index is less than the array size.
 Then, it sequentially executes the computation for the body and increments the loop index.</p>
@@ -3648,7 +3687,7 @@ We can generate a control program that looks like:</p>
 }
 </code></pre>
 <p>The <a href="tutorial/../lang/ref.html#par"><code>par</code> operator</a> executes all the loops in parallel.
-The <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_futil.py">complete implementation</a> shows the necessary code to accomplish this which simply creates an outer loop to generate distinct hardware for each copy of the loop.</p>
+The <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_calyx.py">complete implementation</a> shows the necessary code to accomplish this which simply creates an outer loop to generate distinct hardware for each copy of the loop.</p>
 <h1 id="supplying-data-to-mrxl-programs"><a class="header" href="#supplying-data-to-mrxl-programs">Supplying data to MrXL programs</a></h1>
 <p>You may have noticed that the data files that we pass to MrXL programs are lighter-weight than those we pass to Calyx programs.
 They are lighter in two ways.</p>
