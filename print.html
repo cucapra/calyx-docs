@@ -1441,11 +1441,10 @@ Adding this attribute disables this behavior.</p>
 <p>The <code>external</code> attribute has meaning when it is attached to a cell.
 It has two meanings:</p>
 <ol>
-<li>If the <code>externalize</code> pass is enabled, the cell is turned into an &quot;external&quot;
+<li>If the <code>externalize</code> compiler alias is enabled, the cell is turned into an &quot;external&quot;
 cell by exposing all its ports through the current component and rewriting
-assignments to the use the ports. See the documentation on
-<a href="https://docs.calyxir.org/source/calyx/passes/struct.Externalize.html" title="Externalize Pass">externalize</a> for more information.</li>
-<li>If the cell is a memory and has an <code>external</code> attribute on it, the verilog backend (<code>-b verilog</code>) generates code to read <code>&lt;cell_name&gt;.dat</code> to initialize the memory state and dumps out its final value after execution.</li>
+assignments to the use the ports. See the documentation on <a href="https://docs.rs/calyx-opt/latest/calyx_opt/passes/struct.Externalize.html">externalize</a> for more information.</li>
+<li>If the cell is a memory and has an <code>external</code> attribute on it, the Verilog backend (<code>-b verilog</code>) generates code to read <code>&lt;cell_name&gt;.dat</code> to initialize the memory state and dumps out its final value after execution.</li>
 </ol>
 <h3 id="staticn"><a class="header" href="#staticn"><code>static(n)</code></a></h3>
 <p>Can be attached to components, groups, and control statements. They indicate how
@@ -1504,7 +1503,7 @@ instantiate <code>c1</code>                        instantiate <code>c2</code>
 <p>Used in <code>infer-static-timing</code> and <code>static-timing</code> when the number of iterations
 of a <code>While</code> control is known statically, as indicated by <code>n</code>.</p>
 <h3 id="generated"><a class="header" href="#generated"><code>generated</code></a></h3>
-<p>Added by <a href="https://docs.calyxir.org/source/calyx/ir/struct.Builder.html"><code>ir::Builder</code></a> to denote that the cell was added by a pass.</p>
+<p>Added by <a href="https://docs.rs/calyx-ir/latest/calyx_ir/struct.Builder.html"><code>ir::Builder</code></a> to denote that the cell was added by a pass.</p>
 <h3 id="clk"><a class="header" href="#clk"><code>clk</code></a></h3>
 <p>Marks the special clock signal inserted by the <code>clk-insertion</code> pass, which helps with lowering to RTL languages that require an explicit clock.</p>
 <h3 id="write_togethern"><a class="header" href="#write_togethern"><code>write_together(n)</code></a></h3>
@@ -2333,8 +2332,7 @@ For example, to fully lower the Calyx program before interpreting it:</p>
     interp/tests/control/if.futil
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="the-calyx-compiler"><a class="header" href="#the-calyx-compiler">The Calyx Compiler</a></h1>
-<p>The source code documentation for the compiler can be <a href="https://docs.calyxir.org/source/calyx/">found here</a>.
-The Calyx compiler has several command line options to control the execution of
+<p>The Calyx compiler has several command line options to control the execution of
 various passes and backends.</p>
 <h2 id="controlling-passes"><a class="header" href="#controlling-passes">Controlling Passes</a></h2>
 <p>The compiler is organized as a sequence of passes that are run when the compiler
@@ -2409,7 +2407,7 @@ To add a new pass, we need to do a couple of things:</p>
 </span><span class="boring">fn main() {
 </span>pub struct NewPass;
 <span class="boring">}</span></code></pre></pre>
-<p>A pass needs to implement the <a href="https://docs.calyxir.org/source/calyx/ir/traversal/trait.Named.html"><code>Named</code></a> and <a href="https://docs.calyxir.org/source/calyx/ir/traversal/trait.Visitor.html"><code>Visitor</code></a> traits.
+<p>A pass needs to implement the <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/traversal/trait.Named.html"><code>Named</code></a> and <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/traversal/trait.Visitor.html"><code>Visitor</code></a> traits.
 The former defines the name, description, and <a href="./compiler.html#providing-pass-options">pass-specific options</a> of the pass.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -2425,7 +2423,7 @@ impl Visitor for NewPass { ... }
 The visitor visits each <a href="./lang/ref.html#the-control-operators">control operator</a> in each component and performs some action.
 Furthermore, it also allows us to control the order in which components are visited.</p>
 <h3 id="component-iteration-order"><a class="header" href="#component-iteration-order">Component Iteration Order</a></h3>
-<p>The <a href="https://docs.calyxir.org/source/calyx/ir/traversal/enum.Order.html"><code>Order</code></a> struct allows us to control the order in which components are visited:</p>
+<p>The <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/traversal/enum.Order.html"><code>Order</code></a> struct allows us to control the order in which components are visited:</p>
 <ul>
 <li><code>Post</code>: Iterate the subcomponents of a component before the component itself.</li>
 <li><code>Pre</code>: Iterate the subcomponents of a component after the component itself.</li>
@@ -2454,11 +2452,11 @@ The <code>Visitor</code> trait is flexible enough to allow all of these patterns
 - finish
 </code></pre>
 <p>Each non-leaf control operator defines both a <code>start_*</code> and <code>finish_*</code> method which allows us to encode top-down and bottom-up traversal patterns.</p>
-<p>Each method returns an <a href="https://docs.calyxir.org/source/calyx/ir/traversal/enum.Action.html"><code>Action</code></a> value which allows us to control the traversal of the program.
+<p>Each method returns an <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/traversal/enum.Action.html"><code>Action</code></a> value which allows us to control the traversal of the program.
 For example, <code>Action::Stop</code> will immediately stop the traversal of the program while <code>Action::SkipChildren</code> will skip the traversal of the children of the current control operator.</p>
 <h2 id="registering-the-pass"><a class="header" href="#registering-the-pass">Registering the Pass</a></h2>
 <p>The final step is to register the pass in the compiler.
-We use the <a href="https://docs.calyxir.org/source/calyx/pass_manager/struct.PassManager.html"><code>PassManager</code></a> to register the pass defined in the <code>default_passes.rs</code> file.</p>
+We use the <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/pass_manager/struct.PassManager.html"><code>PassManager</code></a> to register the pass defined in the <code>default_passes.rs</code> file.</p>
 <p>Registering a pass is as simple as calling the register pass:</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -2474,10 +2472,10 @@ For example, if <code>NewPass</code> needs to run before the compilation passes,
 <h2 id="some-useful-links"><a class="header" href="#some-useful-links">Some Useful Links</a></h2>
 <p>The compiler has a ton of shared infrastructure that can be useful:</p>
 <ul>
-<li><a href="https://docs.calyxir.org/source/calyx/ir/struct.Context.html"><code>ir::Context</code></a>: The top-level data structure that holds a complete Calyx program.</li>
-<li><a href="https://docs.calyxir.org/source/calyx/ir/rewriter/struct.Rewriter.html">Rewriter</a>: Helps with consistent renaming of ports, cells, groups, and comb groups in a component.</li>
-<li><a href="https://docs.calyxir.org/source/calyx/analysis/index.html"><code>analysis</code></a>: Provides a number of useful analysis that can be used within a pass.</li>
-<li>IR macros: Macros useful for adding cells (<a href="https://docs.calyxir.org/source/calyx/macro.structure.html"><code>structure!</code></a>), guards (<a href="https://docs.calyxir.org/source/calyx/macro.guard.html"><code>guard!</code></a>) and assignments (<a href="https://docs.calyxir.org/source/calyx/macro.build_assignments.html"><code>build_assignments!</code></a>) to component.</li>
+<li><a href="https://docs.rs/calyx-ir/latest/calyx_ir/struct.Context.html"><code>ir::Context</code></a>: The top-level data structure that holds a complete Calyx program.</li>
+<li><a href="https://docs.rs/calyx-ir/latest/calyx_ir/rewriter/index.html">Rewriter</a>: Helps with consistent renaming of ports, cells, groups, and comb groups in a component.</li>
+<li><a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/analysis/index.html"><code>analysis</code></a>: Provides a number of useful analysis that can be used within a pass.</li>
+<li>IR macros: Macros useful for adding cells (<a href="https://docs.rs/calyx-ir/latest/calyx_ir/macro.structure.html"><code>structure!</code></a>), guards (<a href="https://docs.rs/calyx-ir/latest/calyx_ir/macro.guard.html"><code>guard!</code></a>) and assignments (<a href="https://docs.rs/calyx-ir/latest/calyx_ir/macro.build_assignments.html"><code>build_assignments!</code></a>) to component.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="core-library"><a class="header" href="#core-library">Core Library</a></h1>
 <p>This library defines a standard set of components used in most Calyx programs
@@ -2806,12 +2804,12 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <li><code>read_data: WIDTH</code> - The value stored at <code>mem[addr0][addr1][addr2][addr3]</code>. This value is combinational with respect to <code>addr0</code>, <code>addr1</code>, <code>addr2</code>, and <code>addr3</code>.</li>
 <li><code>done: 1</code>: The done signal for the memory. This signal goes high for one cycle after finishing a write to the memory.</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="the-calyx-library"><a class="header" href="#the-calyx-library">The calyx Library</a></h1>
-<p>The implementation of the compiler separates the frontend from the internal data structures.
-This allows developers to use the compiler as a library.
-The <code>calyx</code> library exports all the data structures used by the compiler and can be used to design new
-tools that make use of Calyx.</p>
-<p>See the <a href="https://docs.calyxir.org/source/calyx/">library documentation</a> for an example of how to use the <code>calyx</code> library.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="calyx-compiler-as-a-library"><a class="header" href="#calyx-compiler-as-a-library">Calyx Compiler as a Library</a></h1>
+<p>The Calyx compiler is separated into <a href="https://docs.rs/releases/search?query=calyx">multiple crates</a> that can be used independently.
+If you're interested in adding a new pass to the Calyx compiler or build a tool using it, your best bet is to <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/">take a look at the example in the <code>calyx-opt</code></a> library.</p>
+<p>The <code>calyx</code> implements the compiler driver and plumbs together all the other crates.
+You mostly likely want to include the <code>calyx-opt</code> crate if you're working passes or just the <code>calyx-ir</code> crate if you're working with the IR.
+You'll also need <code>calyx-frontend</code> and <code>calyx-utils</code> if you're parsing frontend code.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="dataflow-optimizations"><a class="header" href="#dataflow-optimizations">Dataflow Optimizations</a></h1>
 <p>In general, dataflow analysis uses the control and data flow of a program to compute
 various properties (liveness, reaching definitions, ...) at each point in a program.</p>
@@ -3207,7 +3205,7 @@ variable which might cause infinite loops.</p>
 <p>By default, the compiler will complain if the program contains a <code>group</code> that
 is not used in the control program which can get in the way of minimizing
 programs.
-To get around this, run the <a href="https://docs.calyxir.org/source/calyx/passes/struct.DeadGroupRemoval.html"><code>dead-group-removal</code></a> pass before the validation
+To get around this, run the <a href="https://docs.rs/calyx-opt/latest/calyx_opt/passes/struct.DeadGroupRemoval.html"><code>dead-group-removal</code></a> pass before the validation
 passes:</p>
 <pre><code>futil -p dead-group-removal -p validate ...
 </code></pre>

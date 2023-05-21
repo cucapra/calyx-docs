@@ -146,12 +146,12 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="the-calyx-library"><a class="header" href="#the-calyx-library">The calyx Library</a></h1>
-<p>The implementation of the compiler separates the frontend from the internal data structures.
-This allows developers to use the compiler as a library.
-The <code>calyx</code> library exports all the data structures used by the compiler and can be used to design new
-tools that make use of Calyx.</p>
-<p>See the <a href="https://docs.calyxir.org/source/calyx/">library documentation</a> for an example of how to use the <code>calyx</code> library.</p>
+                        <h1 id="calyx-compiler-as-a-library"><a class="header" href="#calyx-compiler-as-a-library">Calyx Compiler as a Library</a></h1>
+<p>The Calyx compiler is separated into <a href="https://docs.rs/releases/search?query=calyx">multiple crates</a> that can be used independently.
+If you're interested in adding a new pass to the Calyx compiler or build a tool using it, your best bet is to <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/">take a look at the example in the <code>calyx-opt</code></a> library.</p>
+<p>The <code>calyx</code> implements the compiler driver and plumbs together all the other crates.
+You mostly likely want to include the <code>calyx-opt</code> crate if you're working passes or just the <code>calyx-ir</code> crate if you're working with the IR.
+You'll also need <code>calyx-frontend</code> and <code>calyx-utils</code> if you're parsing frontend code.</p>
 
                     </main>
 

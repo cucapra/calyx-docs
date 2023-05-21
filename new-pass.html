@@ -163,7 +163,7 @@ To add a new pass, we need to do a couple of things:</p>
 </span><span class="boring">fn main() {
 </span>pub struct NewPass;
 <span class="boring">}</span></code></pre></pre>
-<p>A pass needs to implement the <a href="https://docs.calyxir.org/source/calyx/ir/traversal/trait.Named.html"><code>Named</code></a> and <a href="https://docs.calyxir.org/source/calyx/ir/traversal/trait.Visitor.html"><code>Visitor</code></a> traits.
+<p>A pass needs to implement the <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/traversal/trait.Named.html"><code>Named</code></a> and <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/traversal/trait.Visitor.html"><code>Visitor</code></a> traits.
 The former defines the name, description, and <a href="./compiler.html#providing-pass-options">pass-specific options</a> of the pass.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -179,7 +179,7 @@ impl Visitor for NewPass { ... }
 The visitor visits each <a href="./lang/ref.html#the-control-operators">control operator</a> in each component and performs some action.
 Furthermore, it also allows us to control the order in which components are visited.</p>
 <h3 id="component-iteration-order"><a class="header" href="#component-iteration-order">Component Iteration Order</a></h3>
-<p>The <a href="https://docs.calyxir.org/source/calyx/ir/traversal/enum.Order.html"><code>Order</code></a> struct allows us to control the order in which components are visited:</p>
+<p>The <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/traversal/enum.Order.html"><code>Order</code></a> struct allows us to control the order in which components are visited:</p>
 <ul>
 <li><code>Post</code>: Iterate the subcomponents of a component before the component itself.</li>
 <li><code>Pre</code>: Iterate the subcomponents of a component after the component itself.</li>
@@ -208,11 +208,11 @@ The <code>Visitor</code> trait is flexible enough to allow all of these patterns
 - finish
 </code></pre>
 <p>Each non-leaf control operator defines both a <code>start_*</code> and <code>finish_*</code> method which allows us to encode top-down and bottom-up traversal patterns.</p>
-<p>Each method returns an <a href="https://docs.calyxir.org/source/calyx/ir/traversal/enum.Action.html"><code>Action</code></a> value which allows us to control the traversal of the program.
+<p>Each method returns an <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/traversal/enum.Action.html"><code>Action</code></a> value which allows us to control the traversal of the program.
 For example, <code>Action::Stop</code> will immediately stop the traversal of the program while <code>Action::SkipChildren</code> will skip the traversal of the children of the current control operator.</p>
 <h2 id="registering-the-pass"><a class="header" href="#registering-the-pass">Registering the Pass</a></h2>
 <p>The final step is to register the pass in the compiler.
-We use the <a href="https://docs.calyxir.org/source/calyx/pass_manager/struct.PassManager.html"><code>PassManager</code></a> to register the pass defined in the <code>default_passes.rs</code> file.</p>
+We use the <a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/pass_manager/struct.PassManager.html"><code>PassManager</code></a> to register the pass defined in the <code>default_passes.rs</code> file.</p>
 <p>Registering a pass is as simple as calling the register pass:</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -228,10 +228,10 @@ For example, if <code>NewPass</code> needs to run before the compilation passes,
 <h2 id="some-useful-links"><a class="header" href="#some-useful-links">Some Useful Links</a></h2>
 <p>The compiler has a ton of shared infrastructure that can be useful:</p>
 <ul>
-<li><a href="https://docs.calyxir.org/source/calyx/ir/struct.Context.html"><code>ir::Context</code></a>: The top-level data structure that holds a complete Calyx program.</li>
-<li><a href="https://docs.calyxir.org/source/calyx/ir/rewriter/struct.Rewriter.html">Rewriter</a>: Helps with consistent renaming of ports, cells, groups, and comb groups in a component.</li>
-<li><a href="https://docs.calyxir.org/source/calyx/analysis/index.html"><code>analysis</code></a>: Provides a number of useful analysis that can be used within a pass.</li>
-<li>IR macros: Macros useful for adding cells (<a href="https://docs.calyxir.org/source/calyx/macro.structure.html"><code>structure!</code></a>), guards (<a href="https://docs.calyxir.org/source/calyx/macro.guard.html"><code>guard!</code></a>) and assignments (<a href="https://docs.calyxir.org/source/calyx/macro.build_assignments.html"><code>build_assignments!</code></a>) to component.</li>
+<li><a href="https://docs.rs/calyx-ir/latest/calyx_ir/struct.Context.html"><code>ir::Context</code></a>: The top-level data structure that holds a complete Calyx program.</li>
+<li><a href="https://docs.rs/calyx-ir/latest/calyx_ir/rewriter/index.html">Rewriter</a>: Helps with consistent renaming of ports, cells, groups, and comb groups in a component.</li>
+<li><a href="https://docs.rs/calyx-opt/0.2.1/calyx_opt/analysis/index.html"><code>analysis</code></a>: Provides a number of useful analysis that can be used within a pass.</li>
+<li>IR macros: Macros useful for adding cells (<a href="https://docs.rs/calyx-ir/latest/calyx_ir/macro.structure.html"><code>structure!</code></a>), guards (<a href="https://docs.rs/calyx-ir/latest/calyx_ir/macro.guard.html"><code>guard!</code></a>) and assignments (<a href="https://docs.rs/calyx-ir/latest/calyx_ir/macro.build_assignments.html"><code>build_assignments!</code></a>) to component.</li>
 </ul>
 
                     </main>

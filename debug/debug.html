@@ -214,7 +214,7 @@ variable which might cause infinite loops.</p>
 <p>By default, the compiler will complain if the program contains a <code>group</code> that
 is not used in the control program which can get in the way of minimizing
 programs.
-To get around this, run the <a href="https://docs.calyxir.org/source/calyx/passes/struct.DeadGroupRemoval.html"><code>dead-group-removal</code></a> pass before the validation
+To get around this, run the <a href="https://docs.rs/calyx-opt/latest/calyx_opt/passes/struct.DeadGroupRemoval.html"><code>dead-group-removal</code></a> pass before the validation
 passes:</p>
 <pre><code>futil -p dead-group-removal -p validate ...
 </code></pre>

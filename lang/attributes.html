@@ -197,11 +197,10 @@ Adding this attribute disables this behavior.</p>
 <p>The <code>external</code> attribute has meaning when it is attached to a cell.
 It has two meanings:</p>
 <ol>
-<li>If the <code>externalize</code> pass is enabled, the cell is turned into an &quot;external&quot;
+<li>If the <code>externalize</code> compiler alias is enabled, the cell is turned into an &quot;external&quot;
 cell by exposing all its ports through the current component and rewriting
-assignments to the use the ports. See the documentation on
-<a href="https://docs.calyxir.org/source/calyx/passes/struct.Externalize.html" title="Externalize Pass">externalize</a> for more information.</li>
-<li>If the cell is a memory and has an <code>external</code> attribute on it, the verilog backend (<code>-b verilog</code>) generates code to read <code>&lt;cell_name&gt;.dat</code> to initialize the memory state and dumps out its final value after execution.</li>
+assignments to the use the ports. See the documentation on <a href="https://docs.rs/calyx-opt/latest/calyx_opt/passes/struct.Externalize.html">externalize</a> for more information.</li>
+<li>If the cell is a memory and has an <code>external</code> attribute on it, the Verilog backend (<code>-b verilog</code>) generates code to read <code>&lt;cell_name&gt;.dat</code> to initialize the memory state and dumps out its final value after execution.</li>
 </ol>
 <h3 id="staticn"><a class="header" href="#staticn"><code>static(n)</code></a></h3>
 <p>Can be attached to components, groups, and control statements. They indicate how
@@ -260,7 +259,7 @@ instantiate <code>c1</code>                        instantiate <code>c2</code>
 <p>Used in <code>infer-static-timing</code> and <code>static-timing</code> when the number of iterations
 of a <code>While</code> control is known statically, as indicated by <code>n</code>.</p>
 <h3 id="generated"><a class="header" href="#generated"><code>generated</code></a></h3>
-<p>Added by <a href="https://docs.calyxir.org/source/calyx/ir/struct.Builder.html"><code>ir::Builder</code></a> to denote that the cell was added by a pass.</p>
+<p>Added by <a href="https://docs.rs/calyx-ir/latest/calyx_ir/struct.Builder.html"><code>ir::Builder</code></a> to denote that the cell was added by a pass.</p>
 <h3 id="clk"><a class="header" href="#clk"><code>clk</code></a></h3>
 <p>Marks the special clock signal inserted by the <code>clk-insertion</code> pass, which helps with lowering to RTL languages that require an explicit clock.</p>
 <h3 id="write_togethern"><a class="header" href="#write_togethern"><code>write_together(n)</code></a></h3>
