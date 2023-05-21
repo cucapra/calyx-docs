@@ -89,6 +89,7 @@
 <span id="89">89</span>
 <span id="90">90</span>
 <span id="91">91</span>
+<span id="92">92</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>attribute_promotion;
 <span class="kw">mod </span>canonical;
@@ -135,6 +136,7 @@
 <span class="kw">mod </span>unroll_bound;
 <span class="kw">mod </span>well_formed;
 <span class="kw">mod </span>wire_inliner;
+<span class="kw">mod </span>wrap_main;
 
 <span class="kw">pub use </span>attribute_promotion::AttributePromotion;
 <span class="kw">pub use </span>canonical::Canonicalize;
@@ -147,9 +149,11 @@
 <span class="kw">pub use </span>compile_ref::CompileRef;
 <span class="kw">pub use </span>compile_static::CompileStatic;
 <span class="kw">pub use </span>component_iniliner::ComponentInliner;
+<span class="kw">pub use </span>data_path_infer::DataPathInfer;
 <span class="kw">pub use </span>dead_assignment_removal::DeadAssignmentRemoval;
 <span class="kw">pub use </span>dead_cell_removal::DeadCellRemoval;
 <span class="kw">pub use </span>dead_group_removal::DeadGroupRemoval;
+<span class="kw">pub use </span>discover_external::DiscoverExternal;
 <span class="kw">pub use </span>externalize::Externalize;
 <span class="kw">pub use </span>go_insertion::GoInsertion;
 <span class="kw">pub use </span>group_to_invoke::GroupToInvoke;
@@ -167,18 +171,16 @@
 <span class="kw">pub use </span>simplify_static_guards::SimplifyStaticGuards;
 <span class="kw">pub use </span>simplify_with_control::SimplifyWithControl;
 <span class="kw">pub use </span>static_inliner::StaticInliner;
+<span class="kw">pub use </span>static_par_conv::StaticParConv;
 <span class="kw">pub use </span>static_promotion::StaticPromotion;
 <span class="kw">pub use </span>sync::CompileSync;
 <span class="kw">pub use </span>sync::CompileSyncWithoutSyncReg;
-<span class="comment">// pub use simplify_guards::SimplifyGuards;
-</span><span class="kw">pub use </span>data_path_infer::DataPathInfer;
-<span class="kw">pub use </span>discover_external::DiscoverExternal;
-<span class="kw">pub use </span>static_par_conv::StaticParConv;
 <span class="kw">pub use </span>synthesis_papercut::SynthesisPapercut;
 <span class="kw">pub use </span>top_down_compile_control::TopDownCompileControl;
 <span class="kw">pub use </span>top_down_static_timing::TopDownStaticTiming;
 <span class="kw">pub use </span>unroll_bound::UnrollBounded;
 <span class="kw">pub use </span>well_formed::WellFormed;
 <span class="kw">pub use </span>wire_inliner::WireInliner;
+<span class="kw">pub use </span>wrap_main::WrapMain;
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx_opt" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

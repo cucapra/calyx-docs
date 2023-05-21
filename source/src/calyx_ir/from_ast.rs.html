@@ -1177,34 +1177,6 @@
 <span id="1177">1177</span>
 <span id="1178">1178</span>
 <span id="1179">1179</span>
-<span id="1180">1180</span>
-<span id="1181">1181</span>
-<span id="1182">1182</span>
-<span id="1183">1183</span>
-<span id="1184">1184</span>
-<span id="1185">1185</span>
-<span id="1186">1186</span>
-<span id="1187">1187</span>
-<span id="1188">1188</span>
-<span id="1189">1189</span>
-<span id="1190">1190</span>
-<span id="1191">1191</span>
-<span id="1192">1192</span>
-<span id="1193">1193</span>
-<span id="1194">1194</span>
-<span id="1195">1195</span>
-<span id="1196">1196</span>
-<span id="1197">1197</span>
-<span id="1198">1198</span>
-<span id="1199">1199</span>
-<span id="1200">1200</span>
-<span id="1201">1201</span>
-<span id="1202">1202</span>
-<span id="1203">1203</span>
-<span id="1204">1204</span>
-<span id="1205">1205</span>
-<span id="1206">1206</span>
-<span id="1207">1207</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Canonical, Cell, CellType,
     Component, Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
@@ -1212,8 +1184,8 @@
     RESERVED_NAMES, RRC,
 };
 <span class="kw">use crate</span>::{Nothing, PortComp, StaticTiming};
-<span class="kw">use </span>calyx_frontend::{ast, ast::Atom, Attribute, BoolAttr, NumAttr, Workspace};
-<span class="kw">use </span>calyx_utils::{CalyxResult, Error, GPosIdx, NameGenerator, WithPos};
+<span class="kw">use </span>calyx_frontend::{ast, ast::Atom, BoolAttr, Workspace};
+<span class="kw">use </span>calyx_utils::{CalyxResult, Error, GPosIdx, WithPos};
 <span class="kw">use </span>std::cell::RefCell;
 
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
@@ -1332,35 +1304,6 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="doccomment">/// Definition of special interface ports.
-</span><span class="kw">const </span>INTERFACE_PORTS: [(Attribute, u64, Direction); <span class="number">4</span>] = [
-    (Attribute::Num(NumAttr::Go), <span class="number">1</span>, Direction::Input),
-    (Attribute::Bool(BoolAttr::Clk), <span class="number">1</span>, Direction::Input),
-    (Attribute::Bool(BoolAttr::Reset), <span class="number">1</span>, Direction::Input),
-    (Attribute::Num(NumAttr::Done), <span class="number">1</span>, Direction::Output),
-];
-
-<span class="doccomment">/// Extend the signature with magical ports.
-</span><span class="kw">fn </span>extend_signature(sig: <span class="kw-2">&amp;mut </span>Vec&lt;PortDef&lt;u64&gt;&gt;) {
-    <span class="kw">let </span>port_names: HashSet&lt;<span class="kw">_</span>&gt; = sig.iter().map(|pd| pd.name).collect();
-    <span class="kw">let </span><span class="kw-2">mut </span>namegen = NameGenerator::with_prev_defined_names(port_names);
-    <span class="kw">for </span>(attr, width, direction) <span class="kw">in </span>INTERFACE_PORTS.iter() {
-        <span class="comment">// Check if there is already another interface port defined for the
-        // component
-        </span><span class="kw">if </span>!sig.iter().any(|pd| pd.attributes.has(<span class="kw-2">*</span>attr)) {
-            <span class="kw">let </span><span class="kw-2">mut </span>attributes = Attributes::default();
-            attributes.insert(<span class="kw-2">*</span>attr, <span class="number">1</span>);
-            <span class="kw">let </span>name = Id::from(attr.to_string());
-            sig.push(PortDef {
-                name: namegen.gen_name(name.to_string()),
-                width: <span class="kw-2">*</span>width,
-                direction: direction.clone(),
-                attributes,
-            });
-        }
-    }
-}
-
 <span class="doccomment">/// Construct an IR representation using a parsed AST and command line options.
 </span><span class="kw">pub fn </span>ast_to_ir(<span class="kw-2">mut </span>workspace: Workspace) -&gt; CalyxResult&lt;Context&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>all_names: HashSet&lt;<span class="kw-2">&amp;</span>Id&gt; = HashSet::with_capacity(
@@ -1400,7 +1343,7 @@
         check_signature(<span class="kw-2">&amp;*</span>sig)<span class="question-mark">?</span>;
         <span class="comment">// extend the signature if the component does not have the @nointerface attribute.
         </span><span class="kw">if </span>!comp.attributes.has(BoolAttr::NoInterface) &amp;&amp; !comp.is_comb {
-            extend_signature(sig);
+            Component::extend_signature(sig);
         }
         sig_ctx
             .comp_sigs
@@ -1504,6 +1447,7 @@
     <span class="kw">let </span><span class="kw-2">mut </span>ir_component = Component::new(
         comp.name,
         comp.signature,
+        !comp.attributes.has(BoolAttr::NoInterface) &amp;&amp; !comp.is_comb,
         comp.is_comb,
         <span class="comment">// we may change latency from None to Some(inferred latency)
         // after we iterate thru the control of the Component

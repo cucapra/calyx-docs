@@ -222,6 +222,26 @@ component main(@go go: 1, @clk clk: 1, @reset reset: 1) -&gt; (out: 1, @done don
 <pre><code class="language-sh">fud exec tests/backend/mlir/simple.futil --to mlir
 </code></pre>
 <p>This should emit the Calyx dialect once again.</p>
+<h2 id="using-native-tools-with-mlir-generated-calyx"><a class="header" href="#using-native-tools-with-mlir-generated-calyx">Using Native Tools with MLIR-Generated Calyx</a></h2>
+<p>The native infrastructure, such as <a href="../fud"><code>fud</code></a>, <a href="../interpreter.html">the calyx debugger</a>, our <a href="../fud/xilinx.html#synthesis-only">synthesis scripts</a>, and the <a href="../fud/axi-gen.html">AXI generator</a> all make certain assumptions that are violated by MLIR-generated code.
+Specifically, the tools often require that:</p>
+<ol>
+<li>The interface memories are marked with the <a href="../lang/attributes.html?highlight=external#external"><code>@external</code></a> attribute. This allows our testbench to generate the code needed by <a href="../fud"><code>fud</code></a> to simulate designs with the convenient data format. It is also used by the <a href="../fud/axi-gen.html">AXI generator</a> to generate AXI interfaces for memories.</li>
+<li>The <code>toplevel</code> component is named <code>main</code>. This is used by the <a href="../fud/xilinx.html#synthesis-only">synthesis scripts</a> to generate resource usage numbers and the test bench to simulate the design.</li>
+</ol>
+<p>While we're working on addressing these problems directly, in the meantime, if you'd like to use the native tools with MLIR-generated code, you can use the following two passes:</p>
+<ol>
+<li><code>discover-external</code> which transforms MLIR's representation of interface memories into <code>@external</code> memories.</li>
+<li><code>wrap-main</code> which adds a <code>main</code> component to the program and makes it the entrypoint component. This pass is enabled by default.</li>
+</ol>
+<p>An example invocation of these passes is:</p>
+<pre><code class="language-sh">calyx &lt;file&gt; -p validate -p discover-external -p all -x discover-external:default=4
+</code></pre>
+<p>The <code>-p discover-external</code> flag enables the pass to transform ports into interface memories. Unfortunately, this process is not fully automatic.
+For example, it is not possible for the pass to infer the size of your memories by just looking at the signals provided to the top-level component.
+We provide <code>-x discover-external:default=&lt;size&gt;</code> which tells the pass that when you cannot infer the size parameter of a memory, use <code>&lt;size&gt;</code> as the default.
+A limitation of this approach is that the pass does not support discovering interface memories with different sizes.
+If you desperately need this, please <a href="https://github.com/cucapra/calyx/issues/new">open an issue</a>, and we'll try to prioritize it.</p>
 
                     </main>
 

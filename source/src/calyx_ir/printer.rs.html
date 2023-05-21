@@ -782,6 +782,24 @@
 <span id="782">782</span>
 <span id="783">783</span>
 <span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a formatter for the in-memory representation of Components.
 //! The printing operation clones inner nodes and doesn&#39;t perform any mutation
 //! to the Component.
@@ -987,14 +1005,28 @@
         )<span class="question-mark">?</span>;
 
         <span class="comment">// Add the cells
-        </span><span class="macro">writeln!</span>(f, <span class="string">&quot;  cells {{&quot;</span>)<span class="question-mark">?</span>;
+        </span><span class="macro">write!</span>(f, <span class="string">&quot;  cells {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">if </span>!comp.cells.is_empty() {
+            <span class="macro">writeln!</span>(f)<span class="question-mark">?</span>;
+        }
         <span class="kw">for </span>cell <span class="kw">in </span>comp.cells.iter() {
             <span class="self">Self</span>::write_cell(<span class="kw-2">&amp;</span>cell.borrow(), <span class="number">4</span>, f)<span class="question-mark">?</span>;
         }
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;  }}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">if </span>!comp.cells.is_empty() {
+            <span class="macro">writeln!</span>(f, <span class="string">&quot;  }}&quot;</span>)<span class="question-mark">?</span>;
+        } <span class="kw">else </span>{
+            <span class="macro">writeln!</span>(f, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+        }
 
         <span class="comment">// Add the wires
-        </span><span class="macro">writeln!</span>(f, <span class="string">&quot;  wires {{&quot;</span>)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>empty_wires = comp.groups.is_empty()
+            &amp;&amp; comp.static_groups.is_empty()
+            &amp;&amp; comp.comb_groups.is_empty()
+            &amp;&amp; comp.continuous_assignments.is_empty();
+        <span class="macro">write!</span>(f, <span class="string">&quot;  wires {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">if </span>!empty_wires {
+            <span class="macro">writeln!</span>(f)<span class="question-mark">?</span>;
+        }
         <span class="kw">for </span>group <span class="kw">in </span>comp.get_groups().iter() {
             <span class="self">Self</span>::write_group(<span class="kw-2">&amp;</span>group.borrow(), <span class="number">4</span>, f)<span class="question-mark">?</span>;
             <span class="macro">writeln!</span>(f)<span class="question-mark">?</span>;
@@ -1012,7 +1044,11 @@
             <span class="self">Self</span>::write_assignment(assign, <span class="number">4</span>, f)<span class="question-mark">?</span>;
             <span class="macro">writeln!</span>(f)<span class="question-mark">?</span>;
         }
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;  }}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">if </span>!empty_wires {
+            <span class="macro">writeln!</span>(f, <span class="string">&quot;  }}&quot;</span>)<span class="question-mark">?</span>;
+        } <span class="kw">else </span>{
+            <span class="macro">writeln!</span>(f, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+        }
 
         <span class="comment">// Add the control program.
         // Since the syntax doesn&#39;t allow combinational components to have a control block, the attributes will always be empty
@@ -1022,10 +1058,10 @@
                 ir::Control::Empty(ir::Empty { attributes })
                     <span class="kw">if </span>attributes.is_empty() =&gt;
                 {
-                    <span class="macro">writeln!</span>(f, <span class="string">&quot;\n  control {{}}&quot;</span>)<span class="question-mark">?</span>;
+                    <span class="macro">writeln!</span>(f, <span class="string">&quot;  control {{}}&quot;</span>)<span class="question-mark">?</span>;
                 }
                 <span class="kw">_ </span>=&gt; {
-                    <span class="macro">writeln!</span>(f, <span class="string">&quot;\n  control {{&quot;</span>)<span class="question-mark">?</span>;
+                    <span class="macro">writeln!</span>(f, <span class="string">&quot;  control {{&quot;</span>)<span class="question-mark">?</span>;
                     <span class="self">Self</span>::write_control(<span class="kw-2">&amp;</span>comp.control.borrow(), <span class="number">4</span>, f)<span class="question-mark">?</span>;
                     <span class="macro">writeln!</span>(f, <span class="string">&quot;  }}&quot;</span>)<span class="question-mark">?</span>;
                 }
