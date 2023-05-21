@@ -281,7 +281,7 @@ Add one line to activate <code>the_answer</code> and then finish:</p>
 <p>If you execute this program, it should do the same thing as the original group-free version: <code>mem</code> ends up with 42 in it.
 But now we're controlling things with an execution schedule.</p>
 <p>If you're curious to see how the Calyx compiler lowers this program to a Verilog-like structural form of Calyx, you can do this:</p>
-<pre><code>fud exec language-tutorial-mem.futil --to futil-lowered
+<pre><code>fud exec language-tutorial-mem.futil --to calyx-lowered
 </code></pre>
 <p>Notably, you'll see <code>control {}</code> in the output, meaning that the compiler has eliminated all the control statements and replaced them with continuous assignments in <code>wires</code>.</p>
 <blockquote>

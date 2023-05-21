@@ -172,10 +172,10 @@ make heavy use of control operators, to fully lowered Calyx programs.
     tests/correctness/while.futil
 </code></pre>
 <p>By default, fud will not transform the Calyx code before feeding it to the interpreter.
-To run passes before the interpreter, use the <code>futil.flags</code> variable in conjunction with the <code>-p</code> flag.
+To run passes before the interpreter, use the <code>calyx.flags</code> variable in conjunction with the <code>-p</code> flag.
 For example, to fully lower the Calyx program before interpreting it:</p>
 <pre><code>fud e --to interpreter-out \
-    -s futil.flags '-p all' \
+    -s calyx.flags '-p all' \
     interp/tests/control/if.futil
 </code></pre>
 

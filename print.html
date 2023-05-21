@@ -213,7 +213,7 @@ backends to simplify running Calyx programs.</p>
 <pre><code>flit -f fud/pyproject.toml install -s --deps production
 </code></pre>
 <p>Configure <code>fud</code>:</p>
-<pre><code>fud config global.futil_directory &lt;full path to Calyx repository&gt;
+<pre><code>fud config global.root &lt;full path to Calyx repository&gt;
 </code></pre>
 <p>Check the <code>fud</code> configuration:</p>
 <pre><code>fud check
@@ -386,7 +386,7 @@ Add one line to activate <code>the_answer</code> and then finish:</p>
 <p>If you execute this program, it should do the same thing as the original group-free version: <code>mem</code> ends up with 42 in it.
 But now we're controlling things with an execution schedule.</p>
 <p>If you're curious to see how the Calyx compiler lowers this program to a Verilog-like structural form of Calyx, you can do this:</p>
-<pre><code>fud exec language-tutorial-mem.futil --to futil-lowered
+<pre><code>fud exec language-tutorial-mem.futil --to calyx-lowered
 </code></pre>
 <p>Notably, you'll see <code>control {}</code> in the output, meaning that the compiler has eliminated all the control statements and replaced them with continuous assignments in <code>wires</code>.</p>
 <blockquote>
@@ -1585,7 +1585,7 @@ The source for fud is <a href="https://github.com/cucapra/calyx/tree/master/fud"
 pip3 install dist/fud-0.1.0-py3-none-any.whl
 </code></pre>
 <p>Finally, point <code>fud</code> to the root of the repository:</p>
-<pre><code>fud config global.futil_directory &lt;full path to Calyx repository&gt;
+<pre><code>fud config global.root &lt;full path to Calyx repository&gt;
 </code></pre>
 <h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
 <p>Fud uses a global configuration file to locate tool paths and default values.
@@ -1598,12 +1598,12 @@ certain variables. Perform this check with:</p>
 <p><strong>Viewing keys.</strong>
 To view the current value of a key, use <code>fud config key</code>. For example, the
 following shows the path to the Calyx compiler.</p>
-<pre><code class="language-bash">fud config stages.futil.exec
+<pre><code class="language-bash">fud config stages.calyx.exec
 </code></pre>
 <p><strong>Updating keys.</strong>
 Keys can be updated using <code>fud config key value</code>.
 For example, the following command updates the path to the Calyx compiler.</p>
-<pre><code class="language-bash">fud config stages.futil.exec ./target/debug/calyx
+<pre><code class="language-bash">fud config stages.calyx.exec ./target/debug/calyx
 </code></pre>
 <h2 id="adding-backends"><a class="header" href="#adding-backends">Adding Backends</a></h2>
 <p><code>fud</code> wraps both frontends and backends for Calyx.
@@ -1755,7 +1755,7 @@ steps using the <code>--dry-run</code> option.</p>
 <pre><code class="language-bash"># Dry run of compiling the Dahlia dot product file
 # to Calyx. As expected, this will *only* print
 # the stages that will be run.
-fud exec examples/dahlia/dot-product.fuse --to futil --dry-run
+fud exec examples/dahlia/dot-product.fuse --to calyx --dry-run
 </code></pre>
 <p><strong>Simulating Calyx.</strong>
 Fud can compile a Calyx program to Verilog and simulate it using Verilator.</p>
@@ -2063,7 +2063,7 @@ class MrXLStage(Stage):
         &quot;&quot;&quot;
         super().__init__(
             src_state=&quot;mrxl&quot;,
-            target_state=&quot;futil&quot;,
+            target_state=&quot;calyx&quot;,
             input_type=SourceType.Path,
             output_type=SourceType.Stream,
             description=&quot;Compiles MrXL to Calyx.&quot;,
@@ -2302,7 +2302,7 @@ component main(@go go: 1, @clk clk: 1, @reset reset: 1) -&gt; (out: 1, @done don
 <p>The native infrastructure, such as <a href="fud/../fud"><code>fud</code></a>, <a href="fud/../interpreter.html">the calyx debugger</a>, our <a href="fud/../fud/xilinx.html#synthesis-only">synthesis scripts</a>, and the <a href="fud/../fud/axi-gen.html">AXI generator</a> all make certain assumptions that are violated by MLIR-generated code.
 Specifically, the tools often require that:</p>
 <ol>
-<li>The interface memories are marked with the <a href="fud/../lang/attributes.html?highlight=external#external"><code>@external</code></a> attribute. This allows our testbench to generate the code needed by <a href="fud/../fud"><code>fud</code></a> to simulate designs with the convenient data format. It is also used by the <a href="fud/../fud/axi-gen.html">AXI generator</a> to generate AXI interfaces for memories.</li>
+<li>The interface memories are marked with the <a href="fud/../lang/attributes.html#external"><code>@external</code></a> attribute. This allows our testbench to generate the code needed by <a href="fud/../fud"><code>fud</code></a> to simulate designs with the convenient data format. It is also used by the <a href="fud/../fud/axi-gen.html">AXI generator</a> to generate AXI interfaces for memories.</li>
 <li>The <code>toplevel</code> component is named <code>main</code>. This is used by the <a href="fud/../fud/xilinx.html#synthesis-only">synthesis scripts</a> to generate resource usage numbers and the test bench to simulate the design.</li>
 </ol>
 <p>While we're working on addressing these problems directly, in the meantime, if you'd like to use the native tools with MLIR-generated code, you can use the following two passes:</p>
@@ -2353,10 +2353,10 @@ make heavy use of control operators, to fully lowered Calyx programs.
     tests/correctness/while.futil
 </code></pre>
 <p>By default, fud will not transform the Calyx code before feeding it to the interpreter.
-To run passes before the interpreter, use the <code>futil.flags</code> variable in conjunction with the <code>-p</code> flag.
+To run passes before the interpreter, use the <code>calyx.flags</code> variable in conjunction with the <code>-p</code> flag.
 For example, to fully lower the Calyx program before interpreting it:</p>
 <pre><code>fud e --to interpreter-out \
-    -s futil.flags '-p all' \
+    -s calyx.flags '-p all' \
     interp/tests/control/if.futil
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="the-calyx-compiler"><a class="header" href="#the-calyx-compiler">The Calyx Compiler</a></h1>
@@ -3173,7 +3173,7 @@ produces the correct values with the <a href="debug/../interpreter.html">Calyx I
 <p>To disable the passes, add the flag <code>-p no-opt</code> to compiler invocation:</p>
 <ol>
 <li>For the compiler: <code>futil &lt;filename&gt; -p no-opt</code>.</li>
-<li>For <code>fud</code>: <code>fud ... -s futil.flags &quot; -p no-opt&quot;</code>.</li>
+<li>For <code>fud</code>: <code>fud ... -s calyx.flags &quot; -p no-opt&quot;</code>.</li>
 </ol>
 <p>If the output is still incorrect then one of the core compilation passes is incorrect.
 Our best bet at this point is to reduce the test file such that the output from the
@@ -3840,7 +3840,7 @@ version.</p>
 compiler from its repository.</p>
 <h2 id="compiling-dahlia-to-calyx"><a class="header" href="#compiling-dahlia-to-calyx">Compiling Dahlia to Calyx</a></h2>
 <p>Dahlia programs can be compiled to Calyx using:</p>
-<pre><code>fud e --from dahlia &lt;input file&gt; --to futil
+<pre><code>fud e --from dahlia &lt;input file&gt; --to calyx
 </code></pre>
 <p>The Dahlia backed for Calyx is neither <em>complete</em> nor <em>stable</em>. If you find
 a confusing error or wrong program, please open an <a href="https://github.com/cucapra/dahlia/issues">issue</a>.</p>
@@ -4049,7 +4049,7 @@ We also provide <code>add.mrxl</code> and <code>sum.mrxl</code>, along with samp
 <pre><code>mrxl test/dot.mrxl
 </code></pre>
 <p>In order to run the compiler through <code>fud</code>, pass the <code>--from mrxl</code> flag:</p>
-<pre><code>fud e --from mrxl &lt;prog.mrxl&gt; --to futil
+<pre><code>fud e --from mrxl &lt;prog.mrxl&gt; --to calyx
 </code></pre>
 <p>Of course, what we <em>really</em> want to do is see what Verilog would make of this Calyx code.
 To simulate Verilog's output, we need to first take a step back and beef up the <code>mrxl.data</code> files with information that Verilog requires.</p>

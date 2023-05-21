@@ -174,7 +174,7 @@ The source for fud is <a href="https://github.com/cucapra/calyx/tree/master/fud"
 pip3 install dist/fud-0.1.0-py3-none-any.whl
 </code></pre>
 <p>Finally, point <code>fud</code> to the root of the repository:</p>
-<pre><code>fud config global.futil_directory &lt;full path to Calyx repository&gt;
+<pre><code>fud config global.root &lt;full path to Calyx repository&gt;
 </code></pre>
 <h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
 <p>Fud uses a global configuration file to locate tool paths and default values.
@@ -187,12 +187,12 @@ certain variables. Perform this check with:</p>
 <p><strong>Viewing keys.</strong>
 To view the current value of a key, use <code>fud config key</code>. For example, the
 following shows the path to the Calyx compiler.</p>
-<pre><code class="language-bash">fud config stages.futil.exec
+<pre><code class="language-bash">fud config stages.calyx.exec
 </code></pre>
 <p><strong>Updating keys.</strong>
 Keys can be updated using <code>fud config key value</code>.
 For example, the following command updates the path to the Calyx compiler.</p>
-<pre><code class="language-bash">fud config stages.futil.exec ./target/debug/calyx
+<pre><code class="language-bash">fud config stages.calyx.exec ./target/debug/calyx
 </code></pre>
 <h2 id="adding-backends"><a class="header" href="#adding-backends">Adding Backends</a></h2>
 <p><code>fud</code> wraps both frontends and backends for Calyx.

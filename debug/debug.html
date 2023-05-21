@@ -154,7 +154,7 @@ produces the correct values with the <a href="../interpreter.html">Calyx Interpr
 <p>To disable the passes, add the flag <code>-p no-opt</code> to compiler invocation:</p>
 <ol>
 <li>For the compiler: <code>futil &lt;filename&gt; -p no-opt</code>.</li>
-<li>For <code>fud</code>: <code>fud ... -s futil.flags &quot; -p no-opt&quot;</code>.</li>
+<li>For <code>fud</code>: <code>fud ... -s calyx.flags &quot; -p no-opt&quot;</code>.</li>
 </ol>
 <p>If the output is still incorrect then one of the core compilation passes is incorrect.
 Our best bet at this point is to reduce the test file such that the output from the

@@ -226,7 +226,7 @@ component main(@go go: 1, @clk clk: 1, @reset reset: 1) -&gt; (out: 1, @done don
 <p>The native infrastructure, such as <a href="../fud"><code>fud</code></a>, <a href="../interpreter.html">the calyx debugger</a>, our <a href="../fud/xilinx.html#synthesis-only">synthesis scripts</a>, and the <a href="../fud/axi-gen.html">AXI generator</a> all make certain assumptions that are violated by MLIR-generated code.
 Specifically, the tools often require that:</p>
 <ol>
-<li>The interface memories are marked with the <a href="../lang/attributes.html?highlight=external#external"><code>@external</code></a> attribute. This allows our testbench to generate the code needed by <a href="../fud"><code>fud</code></a> to simulate designs with the convenient data format. It is also used by the <a href="../fud/axi-gen.html">AXI generator</a> to generate AXI interfaces for memories.</li>
+<li>The interface memories are marked with the <a href="../lang/attributes.html#external"><code>@external</code></a> attribute. This allows our testbench to generate the code needed by <a href="../fud"><code>fud</code></a> to simulate designs with the convenient data format. It is also used by the <a href="../fud/axi-gen.html">AXI generator</a> to generate AXI interfaces for memories.</li>
 <li>The <code>toplevel</code> component is named <code>main</code>. This is used by the <a href="../fud/xilinx.html#synthesis-only">synthesis scripts</a> to generate resource usage numbers and the test bench to simulate the design.</li>
 </ol>
 <p>While we're working on addressing these problems directly, in the meantime, if you'd like to use the native tools with MLIR-generated code, you can use the following two passes:</p>
