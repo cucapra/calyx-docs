@@ -256,6 +256,10 @@
 <span id="256">256</span>
 <span id="257">257</span>
 <span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, Visitor};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>calyx_utils::CalyxResult;
@@ -339,7 +343,8 @@
         <span class="comment">// Group ports by longest common prefix
         // NOTE(rachit): This is an awfully inefficient representation. We really
         // want a TrieMap here.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>prefix_map: HashMap&lt;String, HashSet&lt;ir::Id&gt;&gt; = HashMap::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>prefix_map: LinkedHashMap&lt;String, HashSet&lt;ir::Id&gt;&gt; =
+            LinkedHashMap::new();
         <span class="kw">for </span>port <span class="kw">in </span>comp.signature.borrow().ports() {
             <span class="kw">let </span>name = port.borrow().name;
             <span class="kw">let </span><span class="kw-2">mut </span>prefix = String::new();
@@ -360,7 +365,8 @@
         }
 
         <span class="comment">// For all cells in the library, build a set of port names.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>prim_ports: HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt; = HashMap::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>prim_ports: LinkedHashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt; =
+            LinkedHashMap::new();
         <span class="kw">for </span>prim <span class="kw">in </span>sigs.signatures() {
             <span class="kw">let </span>hs = prim
                 .signature
@@ -377,7 +383,8 @@
 
         <span class="comment">// For all prefixes, check if there is a primitive that matches the
         // prefix. If there is, then we have an external cell.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>pre_to_prim: HashMap&lt;String, ir::Id&gt; = HashMap::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>pre_to_prim: LinkedHashMap&lt;String, ir::Id&gt; =
+            LinkedHashMap::new();
         <span class="kw">for </span>(prefix, ports) <span class="kw">in </span>prefix_map.iter() {
             <span class="kw">for </span>(<span class="kw-2">&amp;</span>prim, prim_ports) <span class="kw">in </span>prim_ports.iter() {
                 <span class="kw">if </span>prim_ports == ports {
@@ -387,7 +394,8 @@
         }
 
         <span class="comment">// Collect all ports associated with a specific prefix
-        </span><span class="kw">let </span><span class="kw-2">mut </span>port_map: HashMap&lt;String, Vec&lt;RRC&lt;ir::Port&gt;&gt;&gt; = HashMap::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>port_map: LinkedHashMap&lt;String, Vec&lt;RRC&lt;ir::Port&gt;&gt;&gt; =
+            LinkedHashMap::new();
         <span class="lifetime">&#39;outer</span>: <span class="kw">for </span>port <span class="kw">in </span><span class="kw-2">&amp;</span>comp.signature.borrow().ports {
             <span class="comment">// If this matches a prefix, add it to the corresponding port map
             </span><span class="kw">for </span>pre <span class="kw">in </span>pre_to_prim.keys() {
@@ -399,7 +407,7 @@
         }
 
         <span class="comment">// Add external cells for all matching prefixes
-        </span><span class="kw">let </span><span class="kw-2">mut </span>pre_to_cells = HashMap::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>pre_to_cells = LinkedHashMap::new();
         <span class="kw">for </span>(pre, <span class="kw-2">&amp;</span>prim) <span class="kw">in </span><span class="kw-2">&amp;</span>pre_to_prim {
             <span class="macro">log::info!</span>(<span class="string">&quot;Prefix {} matches primitive {}&quot;</span>, pre, prim);
             <span class="comment">// Attempt to infer the parameters for the external cell
