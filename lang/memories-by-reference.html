@@ -208,46 +208,47 @@ the invoker has six memories of size 4 each, but needs to pretend, sometimes sim
 <p>We will do up two components that are designed to receive memories by reference:</p>
 <pre><code>component wrap2(i: 32, j: 32) -&gt; () {
   cells {
+    // Six memories that will be passed by reference.
     ref mem1 = std_mem_d1(32, 4, 32);
-    ref mem2 = std_mem_d1(32, 4, 32);
-    ref mem3 = std_mem_d1(32, 4, 32);
-    ref mem4 = std_mem_d1(32, 4, 32);
-    ref mem5 = std_mem_d1(32, 4, 32);
+    // ...
     ref mem6 = std_mem_d1(32, 4, 32);
+    // An answer cell, also passed by reference.
     ref ans = std_mem_d1(32, 1, 32);
-    ...
+  }
+  wires { ... }
+  control { ... }
 }
-wires { ... }
-control { ... }
 </code></pre>
 <p>and</p>
 <pre><code>component wrap3(i: 32, j: 32) -&gt; () {
   cells {
+    // Six memories that will be passed by reference.
     ref mem1 = std_mem_d1(32, 4, 32);
-    ref mem2 = std_mem_d1(32, 4, 32);
-    ref mem3 = std_mem_d1(32, 4, 32);
-    ref mem4 = std_mem_d1(32, 4, 32);
-    ref mem5 = std_mem_d1(32, 4, 32);
+    // ...
     ref mem6 = std_mem_d1(32, 4, 32);
+    // An answer cell, also passed by reference.
     ref ans = std_mem_d1(32, 1, 32);
-    ...
+  }
+  wires { ... }
+  control { ... }
 }
-wires { ... }
-control { ... }
 </code></pre>
-<p>That is, they have the <em>same</em> signature including <code>input</code> ports, <code>output</code> ports, and <code>ref</code> cells.
-We have elided the logic, but feel free to explore the <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/arb_6_as_3_or_2.futil">source code</a>.</p>
-<p>Now the invoker is able to wrap the <em>same</em> memories two different ways, and then maintain two different fictional indexing systems at the same time.</p>
+<p>That is, they have the same signature including <code>input</code> ports, <code>output</code> ports, and <code>ref</code> cells.
+We have elided the logic, but feel free to explore the <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/arbiter_6.futil">source code</a>.</p>
+<p>Now the invoker has six locally defined memories.
+By passing these memories to the components above, the invoker is able to wrap the same six memories two different ways, and then maintain two different fictional indexing systems at the same time.</p>
 <pre><code>component main() -&gt; () {
   cells {
+    // Six memories that will pass by reference.
     @external A = std_mem_d1(32, 4, 32);
-    @external B = std_mem_d1(32, 4, 32);
-    @external C = std_mem_d1(32, 4, 32);
-    @external D = std_mem_d1(32, 4, 32);
-    @external E = std_mem_d1(32, 4, 32);
+    //...
     @external F = std_mem_d1(32, 4, 32);
+
+    // Two answer cells that we will also pass.
     @external out2 = std_mem_d1(32, 1, 32);
     @external out3 = std_mem_d1(32, 1, 32);
+
+    // Preparing to invoke the components above.
     together2 = wrap2();
     together3 = wrap3();
   }
