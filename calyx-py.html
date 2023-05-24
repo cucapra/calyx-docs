@@ -147,15 +147,88 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="emitting-calyx-from-python"><a class="header" href="#emitting-calyx-from-python">Emitting Calyx from Python</a></h1>
-<p>Our frontends are written in Python3 and make use of the <code>calyx</code> library to
-generate their code.</p>
+<p>The <code>calyx</code> builder library can be used to generate Calyx code in Python.</p>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <p>To install the library, run the following from the repository root (requires
 <a href="https://flit.readthedocs.io/en/latest/">flit</a> installation):</p>
 <pre><code>cd calyx-py &amp;&amp; flit install -s
 </code></pre>
-<p>The library provides an example:</p>
-<pre><code>python calyx-py/test/example.py
+<h2 id="using-the-calyx-builder"><a class="header" href="#using-the-calyx-builder">Using the <code>calyx</code> builder</a></h2>
+<p>The <code>calyx</code> library provides a builder to generate Calyx code. Let's walk through the file <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/builder_example.py"><code>builder_example.py</code></a>. This Calyx program initializes two registers with the numbers 1 and 41, adds them together, and stores the result in a register.</p>
+<p>The <code>add_main_component(prog)</code> method will, as the name suggests, add a main component to our program. We can define components for our Calyx program <code>prog</code> with <code>prog.component</code>. Here's a defininition of a <code>main</code> component with a 32-bit input <code>in</code> and output <code>out</code>:</p>
+<pre><code class="language-python">def add_main_component(prog):
+
+    main = prog.component(&quot;main&quot;)
+    main.input(&quot;in&quot;, 32)
+    main.output(&quot;out&quot;, 32)
 </code></pre>
+<p>Technically, we didn't need to assign <code>prog.component(&quot;main&quot;)</code> to a variable; the component <code>main</code> would have been added to <code>prog</code> regardless. However, it will often prove useful to store handles to components, registers, or other objects you'd like to use later.</p>
+<p>We then instantiate our cells: three 32-bit registers and one 32-bit adder.</p>
+<pre><code class="language-python">    lhs = main.reg(&quot;lhs&quot;, 32)
+    rhs = main.reg(&quot;rhs&quot;, 32)
+    sum = main.reg(&quot;sum&quot;, 32)
+    add = main.add(&quot;add&quot;, 32)
+</code></pre>
+<p>As with adding components to a program, we don't need to assign <code>main.reg(...)</code> to a variable, but it'll be useful to be able to quickly refer to these cells.</p>
+<p>Next, we'll define our groups of assignments. The syntax for defining a group looks like <code>with {component}.group(&quot;group_name&quot;) as group_variable</code>, as we do below:</p>
+<pre><code class="language-python">    with main.group(&quot;update_operands&quot;) as update_operands:
+</code></pre>
+<p>Now, we'll initialize our registers. You can access cell ports using dot notation. Notably, port names that are also reserved keywords in Python such as <code>in</code> are followed by an underscore.</p>
+<pre><code class="language-python">        # Directly index cell ports using dot notation
+        lhs.write_en = 1
+        # Builder attempts to infer the bitwidth of the constant
+        rhs.write_en = 1
+        # `in` is a reserved keyword, so we use `in_` instead
+        lhs.in_ = 1
+</code></pre>
+<p>As mentioned in the comments above, the Calyx builder will try to infer the bitwidth of constants. In case this doesn't work and you run into problems with this, you can provide the constant's size like so:</p>
+<pre><code class="language-python">        # Explicilty sized constants when bitwidth inference may not work
+        rhs.in_ = const(32, 41)
+</code></pre>
+<p>Calyx groups use a <a href="https://docs.calyxir.org/lang/ref.html#the-go-done-interface">latency-insensitive go/done interface</a>. When the <code>done</code> signal of a component is <code>1</code>, it signals that the component has finished executing. Oftentimes, computing this signal is conditional. We use <a href="https://docs.calyxir.org/lang/ref.html#guarded-assignments">guarded assignements</a> to a group's done signal in order to express this. Writing a group's done condition with the builder is pretty similar to doing so in Calyx, except that the <code>?</code> used for guarded assignments is now <code>@</code> (due to conflicting usage of <code>?</code> in Python).</p>
+<pre><code class="language-python">        # Guards are specified using the `@` syntax
+        update_operands.done = (lhs.done &amp; rhs.done) @ 1
+</code></pre>
+<p>In order to use the ports of cells in our <code>main</code> component within the code for our component, we'll expose the adder's output port by explicitly constructing it using the <code>calyx-py</code> AST.</p>
+<pre><code class="language-python">    # Bare name of the cell
+    add_out = ast.CompPort(ast.CompVar(&quot;add&quot;), &quot;out&quot;)
+</code></pre>
+<p>Now, when we want to use the output port of our adder, we can do so easily:</p>
+<pre><code class="language-python">        sum.in_ = add_out
+</code></pre>
+<p>In order to add <a href="https://docs.calyxir.org/lang/ref.html?highlight=continuous#continuous-assignments">continuous assignments</a> to your program, use the construct <code>with {component}.continuous:</code>.</p>
+<pre><code class="language-python">    with main.continuous:
+        this.out = sum.out
+</code></pre>
+<p>To access a component's ports while defining it, like we did above, we use the method <code>this()</code>.</p>
+<pre><code class="language-python">    # Use `this()` method to access the ports on the current component
+    this = main.this()
+</code></pre>
+<p>Lastly, we'll construct the control portion of this Calyx program. It's pretty simple; we're running two groups in sequence. Sequences of groups are just Python lists:</p>
+<pre><code class="language-python">    main.control += [{update_operands, compute_sum}]
+</code></pre>
+<p>You can also use the builder to generate parallel control blocks. One way to do this is simply to add a set with the parallel groups (say, <code>A</code>, <code>B</code>, and <code>C</code>) to the component's control block. Another way to do this is to use the <code>par</code> keyword. For instance, the above code with some parallel groups in it might look like</p>
+<pre><code class="language-python">    main.control += [
+        update_operands,
+        compute_sum,
+        # could also be par(A, B, C)
+        {A, B, C}
+    ]
+</code></pre>
+<p>After making our modifications to the <code>main</code> component, we'll build the program using the <code>build()</code> method. We use the <code>Builder</code> object to construct <code>prog</code>, and then return the generated program.</p>
+<pre><code class="language-python">def build():
+    prog = Builder()
+    add_main_component(prog)
+    return prog.program
+</code></pre>
+<p>Finally, we can emit the program we built.</p>
+<pre><code class="language-python">if __name__ == &quot;__main__&quot;:
+    build().emit()
+</code></pre>
+<p>That's about it for getting started with the <code>calyx-py</code> builder library! You can inspect the generated Calyx code yourself by running:</p>
+<pre><code class="language-python">python calyx-py/test/builder_example.py
+</code></pre>
+<p>Other examples using the builder can also be found in the <code>calyx-py</code> <a href="https://github.com/cucapra/calyx/tree/master/calyx-py/test/">test directory</a>. All of our frontends were also written using this library, in case you'd like even more examples!</p>
 
                     </main>
 
