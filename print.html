@@ -2115,10 +2115,13 @@ external stage with:</p>
 <p>The following defines a stage that transforms <a href="fud/../frontends/mrxl.html">MrXL</a> programs to Calyx
 programs.</p>
 <pre><code class="language-python">from fud.stages import Stage, SourceType, Source
-from fud.utils import shell
+from fud.utils import shell, TmpDir
+from fud.errors import MissingDynamicConfiguration
+
 from pathlib import Path
 
-from fud.errors import MissingDynamicConfiguration
+# The temporary filename used for converting mrxl.data to verilog.data 
+_DATA_FILE = &quot;data.json&quot;
 
 
 class MrXLStage(Stage):
@@ -2165,6 +2168,28 @@ class MrXLStage(Stage):
 
         # Computations within a step are delayed from being executed until
         # the full execution pipeline is generated.
+        @builder.step()
+        def mktmp() -&gt; SourceType.Directory:
+            &quot;&quot;&quot;
+            Make temporary directory to store Verilator build files.
+            &quot;&quot;&quot;
+            return TmpDir()
+
+        @builder.step(description=&quot;Set stages.mrxl.prog as `input`&quot;)
+        def set_mrxl_prog(mrxl_prog: SourceType.Path):
+            config[&quot;stages&quot;, &quot;mrxl&quot;, &quot;prog&quot;] = str(mrxl_prog)
+
+        @builder.step(description=&quot;Save verilog.data in `tmpdir` and update stages.verilog.data&quot;)
+        def save_data(
+            tmpdir: SourceType.Directory, verilog_data: SourceType.String
+        ):
+            save_loc = Path(tmpdir.name) / _DATA_FILE
+
+            with open(save_loc, 'w') as out:
+                out.write(verilog_data)
+
+            config[&quot;stages&quot;, &quot;verilog&quot;, &quot;data&quot;] = save_loc
+
         @builder.step(description=cmd)
         def run_mrxl(mrxl_prog: SourceType.Path) -&gt; SourceType.Stream:
             return shell(f&quot;{cmd} {str(mrxl_prog)}&quot;)
@@ -2172,6 +2197,23 @@ class MrXLStage(Stage):
         # Define a schedule using the steps.
         # A schedule *looks* like an imperative program but actually represents
         # a computation graph that is executed later on.
+        mrxl_data = config.get([&quot;stages&quot;, &quot;mrxl&quot;, &quot;data&quot;])
+
+        if mrxl_data is not None:
+            tmpdir = mktmp()
+
+            set_mrxl_prog(input)
+            mrxl_data_stage = MrXLDataStage()
+            mrxl_data_stage_input = Source.path(mrxl_data)
+
+            builder.ctx.append(&quot;mrxl-data&quot;)
+            verilog_data = builder.also_do(
+                mrxl_data_stage_input, mrxl_data_stage, config
+            )
+            builder.ctx.pop()
+            verilog_data = builder.convert_source_to(verilog_data, SourceType.String)
+
+            save_data(tmpdir, verilog_data)
         return run_mrxl(input)
 
 
@@ -2216,10 +2258,13 @@ class MrXLDataStage(Stage):
         # Commands at the top-level are evaluated when the computation is being
         # staged
         cmd = config[&quot;stages&quot;, &quot;mrxl&quot;, &quot;exec&quot;]
-        mrxl_prog = config.get([&quot;stages&quot;, &quot;mrxl&quot;, &quot;prog&quot;])
 
         # Computations within a step are delayed from being executed until
         # the full execution pipeline is generated.
+        @builder.step(description=&quot;Dynamically retrieve the value of stages.mrxl.prog&quot;)
+        def get_mrxl_prog() -&gt; SourceType.Path:
+            return Source(Path(config.get([&quot;stages&quot;, &quot;mrxl&quot;, &quot;prog&quot;])), SourceType.Path)
+        
         @builder.step()
         def convert_mrxl_data_to_calyx_data(
             data_path: SourceType.Path, mrxl_prog: SourceType.Path
@@ -2227,15 +2272,21 @@ class MrXLDataStage(Stage):
             &quot;&quot;&quot;
             Converts MrXL input into calyx input
             &quot;&quot;&quot;
-            return shell(f&quot;{cmd} {str(mrxl_prog)} --data {data_path} --convert&quot;)
+            return shell(
+                f&quot;{cmd} {str(mrxl_prog.data)} --data {data_path} --convert&quot;
+            )
 
         # Define a schedule using the steps.
         # A schedule *looks* like an imperative program but actually represents
         # a computation graph that is executed later on.
+
+        mrxl_prog = get_mrxl_prog()
+
         if mrxl_prog is None:
             raise MissingDynamicConfiguration(&quot;mrxl.prog&quot;)
         return convert_mrxl_data_to_calyx_data(
-            input, Source(Path(mrxl_prog), SourceType.Path)
+            input,
+            mrxl_prog
         )
 
 
@@ -3564,6 +3615,11 @@ component main() -&gt; () {
 <p>Generate it for yourself! Run:</p>
 <pre><code>mrxl test/sos.mrxl
 </code></pre>
+<h2 id="simulating-our-example-with-verilog"><a class="header" href="#simulating-our-example-with-verilog">Simulating our example with Verilog</a></h2>
+<p>Finally, let us go the whole hog: we will compile our MrXL code into Calyx and then simulate the Calyx code in Verilog.</p>
+<p>Run:</p>
+<pre><code>fud e --from mrxl test/sos.mrxl --to dat --through verilog -s mrxl.data test/sos.mrxl.data
+</code></pre>
 <h1 id="compiling-mrxl-into-calyx"><a class="header" href="#compiling-mrxl-into-calyx">Compiling MrXL into Calyx</a></h1>
 <p>Any frontend can support new commands that are relevant to the domain of interest, so long as those commands can themselves be compiled into Calyx.
 We will now step back from our example and study <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_calyx.py">the MrXL-to-Calyx compiler</a>, written in Python.</p>
@@ -4108,25 +4164,30 @@ found. If it does not, run the following while still in <code>frontend/mrxl</cod
 <p>Run <code>fud check</code> again to ensure that <code>fud</code> sees <code>mrxl</code>.</p>
 <h2 id="interpreting-mrxl"><a class="header" href="#interpreting-mrxl">Interpreting MrXL</a></h2>
 <p>To run the program through the MrXL interpreter, execute:</p>
-<pre><code>mrxl &lt;prog.mrxl&gt; --data &lt;prog.mrxl.data&gt; --interpret
+<pre><code>mrxl &lt;prog&gt;.mrxl --data &lt;prog&gt;.mrxl.data --interpret
 </code></pre>
-<p>where <code>&lt;prog.mrxl&gt;</code> is a file containing MrXL source code and <code>&lt;prog.mrxl.data&gt;</code> is a file containing values for all the variables declared as <code>input</code>s in the MrXL program. The interpreter dumps the <code>output</code> variables, in JSON, to stdout.</p>
+<p>where <code>&lt;prog&gt;.mrxl</code> is a file containing MrXL source code and <code>&lt;prog&gt;.mrxl.data</code> is a file containing values for all the variables declared as <code>input</code>s in the MrXL program. The interpreter dumps the <code>output</code> variables, in JSON, to stdout.</p>
 <p>You could try, for example:</p>
 <pre><code>mrxl test/dot.mrxl --data test/dot.mrxl.data --interpret
 </code></pre>
 <p>This is just a baby version of the dot-product implementation we showed at the very top; we have just shortened the input array so you can easily see it in full.
-We also provide <code>add.mrxl</code> and <code>sum.mrxl</code>, along with sample <code>&lt;indata&gt;</code> files, under <code>test/</code>. Try playing with the inputs and the operations!</p>
+We also provide <code>add.mrxl</code> and <code>sum.mrxl</code>, along with sample <code>&lt;prog&gt;.mrxl.data</code> files, under <code>test/</code>. Try playing with the inputs and the operations!</p>
 <h2 id="compiling-to-calyx"><a class="header" href="#compiling-to-calyx">Compiling to Calyx</a></h2>
-<p>To run the compiler and see the Calyx code your MrXL program generates, just leave off the <code>--data</code> and <code>--interpret</code> flags. For instance:</p>
+<p>To run the compiler and see the Calyx code your MrXL program generates, just drop the <code>--data</code> and <code>--interpret</code> flags. For instance:</p>
 <pre><code>mrxl test/dot.mrxl
 </code></pre>
-<p>In order to run the compiler through <code>fud</code>, pass the <code>--from mrxl</code> flag:</p>
+<p>In order to run the compiler through <code>fud</code>, pass the <code>--from mrxl</code> and <code>--to futil</code> flags:</p>
 <pre><code>fud e --from mrxl &lt;prog.mrxl&gt; --to calyx
 </code></pre>
-<p>Of course, what we <em>really</em> want to do is see what Verilog would make of this Calyx code.
-To simulate Verilog's output, we need to first take a step back and beef up the <code>mrxl.data</code> files with information that Verilog requires.</p>
-<p>Run:</p>
-<pre><code>mrxl &lt;prog.mrxl&gt; --data &lt;prog.mrxl.data&gt; --convert
+<p>And finally, the real prize.
+In order to compile MrXL to Calyx and then simulate the Calyx code in Verilog, run:</p>
+<pre><code>fud e --from mrxl &lt;prog&gt;.mrxl --to dat --through verilog -s mrxl.data &lt;prog&gt;.mrxl.data
+</code></pre>
+<p>An aside: MrXL permits a simplified data format, which is what we have been looking at in our <code>&lt;prog&gt;.mrxl.data</code> files.
+Files of this form need to be beefed up with additional information so that Verilog (and similar simulators) can work with them.
+We did this beefing up &quot;on the fly&quot; in the incantation above, but it is interesting to see the changes we made.</p>
+<p>See this with:</p>
+<pre><code>mrxl &lt;prog&gt;.mrxl --data &lt;prog&gt;.mrxl.data --convert
 </code></pre>
 <p>The output dumped to stdout is exactly this beefed-up data.
 The changes it makes are:</p>
@@ -4135,12 +4196,6 @@ The changes it makes are:</p>
 <li>It infers the <code>output</code> variables required by the program and adds data fields for them.</li>
 <li>It infers, for each memory, the parallelism factor requested by the program, and then divides the relevant data entries into <em>memory banks</em>.</li>
 </ol>
-<p>Save this new data file:</p>
-<pre><code>mrxl &lt;prog.mrxl&gt; --data &lt;prog.mrxl.data&gt; --convert &gt; &lt;prog.data&gt;
-</code></pre>
-<p>And now you can simulate Verilog with:</p>
-<pre><code>fud e --from mrxl &lt;prog.mrxl&gt; --to dat --through verilog -s verilog.data &lt;prog.data&gt;
-</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="runt"><a class="header" href="#runt">Runt</a></h1>
 <p>Runt (Run Tests) is the expectation testing framework for Calyx. It organizes
 collections of tests into test suites and specifies configuration for them.</p>

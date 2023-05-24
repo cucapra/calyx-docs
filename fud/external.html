@@ -160,10 +160,13 @@ external stage with:</p>
 <p>The following defines a stage that transforms <a href="../frontends/mrxl.html">MrXL</a> programs to Calyx
 programs.</p>
 <pre><code class="language-python">from fud.stages import Stage, SourceType, Source
-from fud.utils import shell
+from fud.utils import shell, TmpDir
+from fud.errors import MissingDynamicConfiguration
+
 from pathlib import Path
 
-from fud.errors import MissingDynamicConfiguration
+# The temporary filename used for converting mrxl.data to verilog.data 
+_DATA_FILE = &quot;data.json&quot;
 
 
 class MrXLStage(Stage):
@@ -210,6 +213,28 @@ class MrXLStage(Stage):
 
         # Computations within a step are delayed from being executed until
         # the full execution pipeline is generated.
+        @builder.step()
+        def mktmp() -&gt; SourceType.Directory:
+            &quot;&quot;&quot;
+            Make temporary directory to store Verilator build files.
+            &quot;&quot;&quot;
+            return TmpDir()
+
+        @builder.step(description=&quot;Set stages.mrxl.prog as `input`&quot;)
+        def set_mrxl_prog(mrxl_prog: SourceType.Path):
+            config[&quot;stages&quot;, &quot;mrxl&quot;, &quot;prog&quot;] = str(mrxl_prog)
+
+        @builder.step(description=&quot;Save verilog.data in `tmpdir` and update stages.verilog.data&quot;)
+        def save_data(
+            tmpdir: SourceType.Directory, verilog_data: SourceType.String
+        ):
+            save_loc = Path(tmpdir.name) / _DATA_FILE
+
+            with open(save_loc, 'w') as out:
+                out.write(verilog_data)
+
+            config[&quot;stages&quot;, &quot;verilog&quot;, &quot;data&quot;] = save_loc
+
         @builder.step(description=cmd)
         def run_mrxl(mrxl_prog: SourceType.Path) -&gt; SourceType.Stream:
             return shell(f&quot;{cmd} {str(mrxl_prog)}&quot;)
@@ -217,6 +242,23 @@ class MrXLStage(Stage):
         # Define a schedule using the steps.
         # A schedule *looks* like an imperative program but actually represents
         # a computation graph that is executed later on.
+        mrxl_data = config.get([&quot;stages&quot;, &quot;mrxl&quot;, &quot;data&quot;])
+
+        if mrxl_data is not None:
+            tmpdir = mktmp()
+
+            set_mrxl_prog(input)
+            mrxl_data_stage = MrXLDataStage()
+            mrxl_data_stage_input = Source.path(mrxl_data)
+
+            builder.ctx.append(&quot;mrxl-data&quot;)
+            verilog_data = builder.also_do(
+                mrxl_data_stage_input, mrxl_data_stage, config
+            )
+            builder.ctx.pop()
+            verilog_data = builder.convert_source_to(verilog_data, SourceType.String)
+
+            save_data(tmpdir, verilog_data)
         return run_mrxl(input)
 
 
@@ -261,10 +303,13 @@ class MrXLDataStage(Stage):
         # Commands at the top-level are evaluated when the computation is being
         # staged
         cmd = config[&quot;stages&quot;, &quot;mrxl&quot;, &quot;exec&quot;]
-        mrxl_prog = config.get([&quot;stages&quot;, &quot;mrxl&quot;, &quot;prog&quot;])
 
         # Computations within a step are delayed from being executed until
         # the full execution pipeline is generated.
+        @builder.step(description=&quot;Dynamically retrieve the value of stages.mrxl.prog&quot;)
+        def get_mrxl_prog() -&gt; SourceType.Path:
+            return Source(Path(config.get([&quot;stages&quot;, &quot;mrxl&quot;, &quot;prog&quot;])), SourceType.Path)
+        
         @builder.step()
         def convert_mrxl_data_to_calyx_data(
             data_path: SourceType.Path, mrxl_prog: SourceType.Path
@@ -272,15 +317,21 @@ class MrXLDataStage(Stage):
             &quot;&quot;&quot;
             Converts MrXL input into calyx input
             &quot;&quot;&quot;
-            return shell(f&quot;{cmd} {str(mrxl_prog)} --data {data_path} --convert&quot;)
+            return shell(
+                f&quot;{cmd} {str(mrxl_prog.data)} --data {data_path} --convert&quot;
+            )
 
         # Define a schedule using the steps.
         # A schedule *looks* like an imperative program but actually represents
         # a computation graph that is executed later on.
+
+        mrxl_prog = get_mrxl_prog()
+
         if mrxl_prog is None:
             raise MissingDynamicConfiguration(&quot;mrxl.prog&quot;)
         return convert_mrxl_data_to_calyx_data(
-            input, Source(Path(mrxl_prog), SourceType.Path)
+            input,
+            mrxl_prog
         )
 
 
