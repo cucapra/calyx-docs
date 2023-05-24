@@ -157,7 +157,6 @@
 <p>The <code>calyx</code> library provides a builder to generate Calyx code. Let's walk through the file <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/builder_example.py"><code>builder_example.py</code></a>. This Calyx program initializes two registers with the numbers 1 and 41, adds them together, and stores the result in a register.</p>
 <p>The <code>add_main_component(prog)</code> method will, as the name suggests, add a main component to our program. We can define components for our Calyx program <code>prog</code> with <code>prog.component</code>. Here's a defininition of a <code>main</code> component with a 32-bit input <code>in</code> and output <code>out</code>:</p>
 <pre><code class="language-python">def add_main_component(prog):
-
     main = prog.component(&quot;main&quot;)
     main.input(&quot;in&quot;, 32)
     main.output(&quot;out&quot;, 32)
@@ -205,7 +204,7 @@
     this = main.this()
 </code></pre>
 <p>Lastly, we'll construct the control portion of this Calyx program. It's pretty simple; we're running two groups in sequence. Sequences of groups are just Python lists:</p>
-<pre><code class="language-python">    main.control += [{update_operands, compute_sum}]
+<pre><code class="language-python">    main.control = ast.ParComp([update_operands.as_enable(), compute_sum.as_enable()])
 </code></pre>
 <p>You can also use the builder to generate parallel control blocks. One way to do this is simply to add a set with the parallel groups (say, <code>A</code>, <code>B</code>, and <code>C</code>) to the component's control block. Another way to do this is to use the <code>par</code> keyword. For instance, the above code with some parallel groups in it might look like</p>
 <pre><code class="language-python">    main.control += [
