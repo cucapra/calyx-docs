@@ -3551,7 +3551,7 @@ sos := reduce 1 (acc, i &lt;- squares) 0 { acc + i }
 <li>The <code>reduce</code> operation walks over <code>squares</code> and accumulates the result into a register. The parallelism factor is again <code>1</code>.</li>
 </ol>
 <h2 id="running-our-example"><a class="header" href="#running-our-example">Running our example</a></h2>
-<p>First, install the <a href="tutorial/../calyx-py.html"><code>calyx-py</code> library</a> by typing the following command from the repository root:</p>
+<p>First, install the <a href="tutorial/../calyx-py.html"><code>builder</code> library</a> by typing the following command from the repository root:</p>
 <pre><code>cd calyx-py &amp;&amp; flit install -s &amp;&amp; cd -
 </code></pre>
 <p>Next, install the <code>mrxl</code> binary:</p>
@@ -3755,7 +3755,7 @@ hardware instances to perform some logical task (e.g, incrementing a register).
 Finally, the <a href="tutorial/../lang/ref.html#the-control-operators">control section</a> <em>schedules</em> the execution of groups using control operators such as <code>seq</code>, <code>par</code>, and <code>while</code>.</p>
 <p>We perform syntax-directed compilation by walking over the nodes of the AST and generating <code>cells</code>, <code>wires</code>, and <code>control</code> operations.</p>
 <h3 id="calyx-embedded-dsl"><a class="header" href="#calyx-embedded-dsl">Calyx-Embedded DSL</a></h3>
-<p>To make it easy to generate hardware, we'll use Calyx's <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/builder_example.py"><code>builder</code> module</a> written in Python:</p>
+<p>To make it easy to generate hardware, we'll use Calyx's <a href="tutorial/../calyx-py.html"><code>builder</code> module</a> written in Python:</p>
 <pre><code class="language-python">import calyx.builder as cb
 
 prog = cb.Builder() # A Calyx program
