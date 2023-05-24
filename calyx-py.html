@@ -204,14 +204,16 @@
     this = main.this()
 </code></pre>
 <p>Lastly, we'll construct the control portion of this Calyx program. It's pretty simple; we're running two groups in sequence. Sequences of groups are just Python lists:</p>
-<pre><code class="language-python">    main.control = ast.ParComp([update_operands.as_enable(), compute_sum.as_enable()])
-</code></pre>
-<p>You can also use the builder to generate parallel control blocks. One way to do this is simply to add a set with the parallel groups (say, <code>A</code>, <code>B</code>, and <code>C</code>) to the component's control block. Another way to do this is to use the <code>par</code> keyword. For instance, the above code with some parallel groups in it might look like</p>
 <pre><code class="language-python">    main.control += [
         update_operands,
         compute_sum,
-        # could also be par(A, B, C)
-        {A, B, C}
+    ]
+</code></pre>
+<p>You can also use the builder to generate parallel control blocks. To do this, use the <code>par</code> keyword. For instance, the above code with some parallel groups in it might look like</p>
+<pre><code class="language-python">    main.control += [
+        update_operands,
+        compute_sum,
+        par(A, B, C)
     ]
 </code></pre>
 <p>After making our modifications to the <code>main</code> component, we'll build the program using the <code>build()</code> method. We use the <code>Builder</code> object to construct <code>prog</code>, and then return the generated program.</p>
