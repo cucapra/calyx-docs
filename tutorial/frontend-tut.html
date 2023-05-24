@@ -328,7 +328,7 @@ We will now step back from our example and study <a href="https://github.com/cuc
 <li>Every integer in our generated hardware is 32 bits long.</li>
 <li>The bodies of <code>map</code> and <code>reduce</code> operations must be binary <code>+</code> or <code>*</code> operations involving array elements or integers.</li>
 <li>If repeated <code>map</code>/<code>reduce</code> operations are performed on the same array, each of those operations must have the same parallelism factor.</li>
-<li>All <code>reduce</code> operations must be formed sequentially, i.e., with parallelism factor <code>1</code>.</li>
+<li>All <code>reduce</code> operations must be performed sequentially, i.e., with parallelism factor <code>1</code>.</li>
 </ol>
 <p>These restrictions can be lifted or relaxed via commensurate changes to the compiler.</p>
 <p>The compilation process breaks into two steps:</p>
@@ -560,32 +560,43 @@ As specified by the language specification, <a href="../lang/ref.html#par">confl
 <p>The <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_calyx.py">complete implementation</a> shows the necessary code to create physical memory banks and create an outer loop to generate distinct hardware for each copy of the loop.</p>
 </blockquote>
 <h1 id="further-steps"><a class="header" href="#further-steps">Further Steps</a></h1>
-<p><strong>TODO(rachit)</strong>: Add more information for users to attempt one of these extensions (see <a href="https://github.com/cucapra/calyx/issues/1516">#1516</a>).</p>
 <p>Congratulations, you know about as much about MrXL as we do!
 The small size of the language makes it a nice sandbox for you to play in.
 We mentioned that the restrictions placed on the language can be lifted by beefing up the compiler, and here's your chance to give it a whirl!</p>
-<p>As a warmup, you could try lifting one of the following restrictions:</p>
-<blockquote>
+<p>Here are some of those restrictions again, along with pointers about how to lift them.</p>
 <ol>
-<li>Every array in a MrXL program has the same length. (<strong>Breadcrumb</strong>: ???)</li>
-<li>We only support 32-bit integers and computations over them. (<strong>Breadcrumb</strong>: Fixed-point primitives)</li>
-<li>The bodies of <code>map</code> and <code>reduce</code> operations must be binary <code>+</code> or <code>*</code> operations involving array elements or integers. (<strong>Breadcrumb</strong>: Other binary operators)</li>
-</ol>
-</blockquote>
-<p>If you're looking for a more serious challenge, try:</p>
+<li>
 <blockquote>
-<ol start="4">
-<li>If repeated <code>map</code>/<code>reduce</code> operations are performed on the same array, each of those operations must have the same parallelism factor. You will very likely need to think about <em>arbitration logic</em>, so we provide a toy implementation using the <code>builder</code> <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/arbiter_6.py">here</a>.</li>
-</ol>
+<p>The bodies of <code>map</code> and <code>reduce</code> operations must be binary <code>+</code> or <code>*</code> operations involving array elements or integers.</p>
 </blockquote>
-<p>Or, for something completely different:</p>
-<ol start="5">
-<li>Add support for a new <code>filter</code> operation in MrXL.</li>
+<p>Say you wanted to add subtraction and division to the mix.
+We have set you up for success: the MrXL parser already parses <code>-</code> and <code>/</code> into <code>sub</code> and <code>div</code> respectively.
+Now, in <code>gen_calyx.py</code>, you need to check for &quot;sub&quot; and &quot;div&quot; as possible binary operations, and then invoke the appropriate cell-builders of the <code>builder</code> library. 
+For reference, see how the <code>+</code> and <code>*</code> operations are handled at present.
+For &quot;fun&quot;, take a look at how Calyx implements <a href="https://github.com/cucapra/calyx/blob/master/primitives/binary_operators.sv#L27-L45">multiplication</a>, and how that maps to the existing invocation to create a 32-bit multiplication cell using the <code>builder</code>!</p>
+</li>
+<li>
+<blockquote>
+<p>All <code>reduce</code> operations must be performed sequentially, i.e., with parallelism factor <code>1</code>.</p>
+</blockquote>
+<p>This is a big gap!
+One way to perform reductions in parallel is using <em>reduction trees</em>.
+To get you started, we provide a toy implementation using the <code>builder</code> <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/reduction_tree.py">here</a>.
+That example is rather brittle: it takes exactly 16 inputs, banked into four arrays, and adds their values together.
+Try incorporating this brittle version into your MrXL-to-Calyx compiler at first, and you can later think about generalizing it to any (commutative) operation, memories of any length, and any parallelism factor.</p>
+</li>
+<li>
+<blockquote>
+<p>If repeated <code>map</code>/<code>reduce</code> operations are performed on the same array, each of those operations must have the same parallelism factor.</p>
+</blockquote>
+<p>The heart of the issue is figuring out how to bank the underlying array.
+How do we bank it two different ways at the same time?
+The answer is to bank the array a little finer than you think, and to then use <em>arbitration logic</em> to provide two fictional banking setups at the same time.
+We provide a toy implementation using the <code>builder</code> <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/arbiter_6.py">here</a>.
+There, a 24-cell array has been split into <em>six</em> banks, but then we allow the user to pretend, simulatneously, that it is split into <em>two</em> banks or <em>three</em> banks.</p>
+</li>
 </ol>
-<p>A big gap in MrXL at present is that all <code>reduce</code> operations must be performed sequentially.
-This restriction can also be lifted, but hold that thought for a moment!
-We'd like to tell you a little about reduction trees. Again, we provide a toy implementation using the <code>builder</code> <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/reduction_tree.py">here</a>.</p>
-<h1 id="supplying-data-to-mrxl-programs"><a class="header" href="#supplying-data-to-mrxl-programs">Supplying data to MrXL programs</a></h1>
+<h1 id="aside-supplying-data-to-mrxl-programs"><a class="header" href="#aside-supplying-data-to-mrxl-programs">Aside: supplying data to MrXL programs</a></h1>
 <p>You may have noticed that the data files that we pass to MrXL programs are lighter-weight than those we pass to Calyx programs.
 They are lighter in two ways.</p>
 <h2 id="boilerplate"><a class="header" href="#boilerplate">Boilerplate</a></h2>
