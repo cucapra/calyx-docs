@@ -176,9 +176,9 @@ docker run -it --rm ghcr.io/cucapra/calyx:latest
 <p>Then build the compiler:</p>
 <pre><code>cargo build
 </code></pre>
-<p>You can invoke the compiler in one of two ways:</p>
-<pre><code>cargo run -- --help # Rebuilds the compiler if the sources changed
-./target/debug/calyx --help # Default debug build of the compiler
+<p>You can build and run the compiler with:</p>
+<pre><code>cargo build # Builds the compiler
+./target/debug/calyx --help # Executes the compiler binary
 </code></pre>
 <h2 id="running-core-tests"><a class="header" href="#running-core-tests">Running Core Tests</a></h2>
 <p>The core test suites tests the Calyx compiler passes.
@@ -212,7 +212,7 @@ backends to simplify running Calyx programs.</p>
 <pre><code>flit -f fud/pyproject.toml install -s --deps production
 </code></pre>
 <p>Configure <code>fud</code>:</p>
-<pre><code>fud config global.root &lt;full path to Calyx repository&gt;
+<pre><code>fud config global.root --create &lt;full path to Calyx repository&gt;
 </code></pre>
 <p>Check the <code>fud</code> configuration:</p>
 <pre><code>fud check
