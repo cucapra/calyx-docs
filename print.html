@@ -1951,6 +1951,12 @@ device = &quot;xilinx_u50_gen3x16_xdma_201920_3&quot;
 </code></pre>
 <p>The options for <code>mode</code> are <code>hw_emu</code> (simulation) and <code>hw</code> (on-FPGA execution).
 The device string above is for the <a href="https://www.xilinx.com/products/boards-and-kits/alveo/u50.html">Alveo U50</a> card, which we have at Cornell. The installed Xilinx card would typically be found under the directory <code>/opt/xilinx/platforms</code>, where one would be able to find a device name of interest.</p>
+<p>To run simulations (or on real FPGAs), you will also need to configure the <code>fpga</code> stage to point to your installations of <a href="https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html">Vitis</a> and <a href="https://xilinx.github.io/XRT/">XRT</a>:</p>
+<pre><code>[stages.fpga]
+xilinx_location = &quot;/scratch/opt/Xilinx/Vitis/2020.2&quot;
+xrt_location = &quot;/scratch/opt/xilinx/xrt&quot;
+</code></pre>
+<p>Those are the paths on Cornell's havarti server.</p>
 <h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
 <p>The first step in the Xilinx toolchain is to generate <a href="https://xilinx.github.io/XRT/2021.2/html/formats.html#xclbin">an <code>xclbin</code> executable file</a>.
 Here's an example of going all the way from a Calyx program to that:</p>
@@ -1963,28 +1969,10 @@ To instead keep the sandbox directory, use <code>-s xclbin.save_temps true</code
 You can then find the results in a directory named <code>fud-out-N</code> for some number <code>N</code>.</p>
 <h3 id="execute"><a class="header" href="#execute">Execute</a></h3>
 <p>Now that you have an <code>xclbin</code>, the next step is to run it.
-Roughly speaking, the command you need is just a <code>fud</code> invocation that goes from the <code>xclbin</code> stage to the <code>fpga</code> stage:</p>
+Here's a fud invocation that goes from the <code>xclbin</code> stage to the <code>fpga</code> stage:</p>
 <pre><code>fud e foo.xclbin --from xclbin --to fpga -s fpga.data examples/dahlia/dot-product.fuse.data
 </code></pre>
-<p>Contrary to the name, the <code>fpga</code> stage works for both emulation and on-FPGA execution---fud's <code>mode</code> config option for this stage chooses which to use.
-The <code>fpga.data</code> config option provides a normal fud-style JSON data input file for the run.</p>
-<p>Currently, you will need to have a bunch of environment variables set up to point to the Xilinx tools <em>before running this fud command</em>.
-For example, on our group's havarti server, you can do this:</p>
-<pre><code>source /scratch/opt/Xilinx/Vitis/2020.2/settings64.sh
-source /opt/xilinx/xrt/setup.sh
-export EMCONFIG_PATH=`pwd`
-</code></pre>
-<p>To prepare for hardware emulation of an xclbin compiled appropriately, run:</p>
-<pre><code>export XCL_EMULATION_MODE=hw_emu
-</code></pre>
-<p>If preparing for actual hardware execution, ensure the <code>XCL_EMULATION_MODE</code> environment variable is unset:</p>
-<pre><code>unset XCL_EMULATION_MODE
-</code></pre>
-<p>These steps source the setup scripts for both <a href="https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html">Vitis</a> and <a href="https://xilinx.github.io/XRT/">XRT</a>,
-and set a special <code>EMCONFIG_PATH</code> to your current directory so that fud can generate a <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/emconfigutil-Utility">special JSON configuration file for Xilinx emulation</a>.
-You also need to tell PYNQ whether you want <code>hw_emu</code> (emulation) or the default on-device execution to occur by exporting or unsetting the <code>XCL_EMULATION_MODE</code> environment variable.
-Of course, it would be better if all this could come from fud's configuration itself instead of requiring you to set it up ahead of time;
-<a href="https://github.com/cucapra/calyx/issues/872">issue #872</a> covers this work.</p>
+<p>fud will print out JSON memory contents in the same format as for other RTL simulators.</p>
 <h4 id="waveform-debugging"><a class="header" href="#waveform-debugging">Waveform Debugging</a></h4>
 <p>In emulation mode, this stage can produce a waveform trace in Xilinx's proprietary <a href="https://support.xilinx.com/s/article/64000?language=en_US">WDB</a> file format as well as a standard <a href="https://en.wikipedia.org/wiki/Value_change_dump">VCD</a> file.</p>
 <p>Use the fud options <code>-s fpga.waveform true -s fpga.save_temps true</code> when emulating your program.
@@ -2032,7 +2020,7 @@ Nothing from the newer Vitis package currently appears capable of producing <cod
 and <code>component.xml</code>, a much longer and more complicated <a href="https://en.wikipedia.org/wiki/IP-XACT">IP-XACT</a> file that also has to do with the interface to the RTL.
 We currently generate <code>kernel.xml</code> ourselves (with the <code>xilinx-xml</code> backend described above) and then use Vivado, via a Tcl script, to generate the IP-XACT file.</p>
 <p>In the future, we could consider trying to route around using Vivado by generating the IP-XACT file ourselves, using a tool such as <a href="https://github.com/sifive/duh">DUH</a>.</p>
-<h4 id="our-workflow"><a class="header" href="#our-workflow">Our Workflow</a></h4>
+<h4 id="our-completion-workflow"><a class="header" href="#our-completion-workflow">Our Completion Workflow</a></h4>
 <p>The first step is to produce an <code>.xo</code> file.
 We also use <a href="https://github.com/cucapra/calyx/blob/master/fud/bitstream/gen_xo.tcl">a static Tcl script, <code>gen_xo.tcl</code>,</a> which is a simplified version of <a href="https://github.com/Xilinx/Vitis-Tutorials/blob/2021.1/Hardware_Acceleration/Feature_Tutorials/01-rtl_kernel_workflow/reference-files/scripts/package_kernel.tcl">a script from Xilinx's Vitis tutorials</a>.
 The gist of this script is that it creates a Vivado project, adds the source files, twiddles some settings, and then uses the <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/package_xo-Command"><code>package_xo</code> command</a> to read stuff from this project as an &quot;IP directory&quot; and produce an <code>.xo</code> file.
@@ -2045,6 +2033,19 @@ This step uses the <code>v++</code> tool, with a command line that looks like th
 <pre><code>v++ -g -t hw_emu --platform xilinx_u50_gen3x16_xdma_201920_3 --save-temps --profile.data all:all:all --profile.exec all:all:all -lo xclbin/kernel.xclbin xclbin/kernel.xo
 </code></pre>
 <p>Fortunately, the <code>v++</code> tool doesn't need any Tcl to drive it; all the action happens on the command line.</p>
+<h4 id="execution-via-xclrun"><a class="header" href="#execution-via-xclrun">Execution via <code>xclrun</code></a></h4>
+<p>Now that we have an <code>.xclbin</code> file, we need a way to execute it (either in simulation or on a real FPGA).
+We have a tool called <code>xclrun</code> that just executes a given <code>.xclbin</code> bitstream, supplying it with data in a fud-style JSON format and formatting the results in the same way.
+In fact, it's possible to use it directly---it's invokable with <code>python -m fud.xclrun</code>.
+However, it's somewhat annoying to use directly because you have to carefully set up your environment first---this setup stage appears to be unavoidable when using the Xilinx runtime libraries.
+So an invocation of <code>xclrun</code> actually looks something like this:</p>
+<pre><code>EMCONFIG_PATH=`pwd` XCL_EMULATION_MODE=hw_emu XRT_INI_PATH=`pwd`/xrt.ini \
+    bash -c 'source /scratch/opt/Xilinx/Vitis/2020.2/settings64.sh ; source /scratch/opt/xilinx/xrt/setup.sh ; python3.9 -m fud.xclrun foo.xclbin examples/tutorial/data.json'
+</code></pre>
+<p>This monster of a command first sets three environment variables that XRT and the simulation process will need, and then it <code>source</code>s the relevant setup scripts before finally launching <code>xclrun</code>.
+The two actual arguments to the tool are just the <code>.xclbin</code> executable itself and the JSON input data; the tool prints the output data to stdout by default.</p>
+<p>fud's <code>execute</code> stage is just a big wrapper around launching <code>xclrun</code>.
+It sets up the necessary input files and constructs a command line that looks much like the above example.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="axi-interface-generation"><a class="header" href="#axi-interface-generation">AXI Interface Generation</a></h1>
 <p>Calyx currently generates a fairly complex AXI interface that can be daunting
 to deal with if confronting for the first time.
