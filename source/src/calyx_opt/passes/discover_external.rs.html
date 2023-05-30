@@ -260,6 +260,29 @@
 <span id="260">260</span>
 <span id="261">261</span>
 <span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, Visitor};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>calyx_utils::CalyxResult;
@@ -271,7 +294,10 @@
 <span class="doccomment">/// A pass to detect cells that have been inlined into the top-level component
 /// and turn them into real cells marked with [ir::BoolAttr::External].
 </span><span class="kw">pub struct </span>DiscoverExternal {
-    default: u64,
+    <span class="doccomment">/// The default value used for parameters that cannot be inferred.
+    </span>default: u64,
+    <span class="doccomment">/// The suffix to be remove from the inferred names
+    </span>suffix: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>Named <span class="kw">for </span>DiscoverExternal {
@@ -304,22 +330,36 @@
             })
             .collect();
 
-        <span class="comment">// Search for the &quot;default=&lt;n&gt;&quot; option
-        </span><span class="kw">let </span><span class="kw-2">mut </span>default = <span class="prelude-val">None</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>default = <span class="prelude-val">None</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>suffix = <span class="prelude-val">None</span>;
         <span class="kw">for </span>opt <span class="kw">in </span>given_opts {
             <span class="kw">let </span><span class="kw-2">mut </span>splits = opt.split(<span class="string">&#39;=&#39;</span>);
-            <span class="kw">if </span>splits.next() == <span class="prelude-val">Some</span>(<span class="string">&quot;default&quot;</span>) {
+            <span class="kw">let </span>spl = splits.next();
+            <span class="comment">// Search for the &quot;default=&lt;n&gt;&quot; option
+            </span><span class="kw">if </span>spl == <span class="prelude-val">Some</span>(<span class="string">&quot;default&quot;</span>) {
                 <span class="kw">let </span><span class="prelude-val">Some</span>(val) = splits.next().and_then(|v| v.parse().ok()) <span class="kw">else </span>{
                     <span class="macro">log::warn!</span>(<span class="string">&quot;Failed to parse default value. Please specify using -x {}:default=&lt;n&gt;&quot;</span>, n);
                     <span class="kw">continue</span>;
                 };
+                <span class="macro">log::info!</span>(<span class="string">&quot;Setting default value to {}&quot;</span>, val);
 
                 default = <span class="prelude-val">Some</span>(val);
+            }
+            <span class="comment">// Search for &quot;strip-suffix=&lt;str&gt;&quot; option
+            </span><span class="kw">else if </span>spl == <span class="prelude-val">Some</span>(<span class="string">&quot;strip-suffix&quot;</span>) {
+                <span class="kw">let </span><span class="prelude-val">Some</span>(suff) = splits.next() <span class="kw">else </span>{
+                    <span class="macro">log::warn!</span>(<span class="string">&quot;Failed to parse suffix. Please specify using -x {}:strip-suffix=&lt;str&gt;&quot;</span>, n);
+                    <span class="kw">continue</span>;
+                };
+                <span class="macro">log::info!</span>(<span class="string">&quot;Setting suffix to {}&quot;</span>, suff);
+
+                suffix = <span class="prelude-val">Some</span>(suff.to_string());
             }
         }
 
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             default: default.unwrap_or(<span class="number">32</span>),
+            suffix,
         })
     }
 
@@ -471,7 +511,13 @@
                 .collect_vec();
 
             <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
-            <span class="kw">let </span>cell = builder.add_primitive(pre.clone(), prim, <span class="kw-2">&amp;</span>param_values);
+            <span class="comment">// Remove the suffix from the cell name
+            </span><span class="kw">let </span>name = <span class="kw">if let </span><span class="prelude-val">Some</span>(suf) = <span class="kw-2">&amp;</span><span class="self">self</span>.suffix {
+                pre.strip_suffix(suf).unwrap_or(pre)
+            } <span class="kw">else </span>{
+                pre
+            };
+            <span class="kw">let </span>cell = builder.add_primitive(name, prim, <span class="kw-2">&amp;</span>param_values);
             cell.borrow_mut()
                 .attributes
                 .insert(ir::BoolAttr::External, <span class="number">1</span>);
