@@ -138,6 +138,15 @@
 <span id="138">138</span>
 <span id="139">139</span>
 <span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 
@@ -217,6 +226,7 @@
     /// by &quot;combining: %[2:8] &amp; %[5:10]
     </span><span class="kw">fn </span>simplify_guard(
         guard: ir::Guard&lt;ir::StaticTiming&gt;,
+        group_latency: u64,
     ) -&gt; ir::Guard&lt;ir::StaticTiming&gt; {
         <span class="comment">// get the rest of the guard and the &quot;anded intervals&quot;
         </span><span class="kw">let </span><span class="kw-2">mut </span>anded_intervals = Vec::new();
@@ -241,7 +251,10 @@
                     <span class="comment">// if the vec was something like %[2:3] &amp; %[4:5], then this is always false
                     // if max_beg &gt;= min_end, then guard is always false
                     </span><span class="kw">return </span>ir::Guard::Not(Box::new(ir::Guard::True));
-                } <span class="kw">else </span>{
+                } <span class="kw">else if </span>max_beg == <span class="number">0 </span>&amp;&amp; min_end == group_latency {
+                    <span class="comment">// if guard will just be [0:group_latency] then it&#39;s not necessary
+                    </span><span class="prelude-val">None
+                </span>} <span class="kw">else </span>{
                     <span class="comment">// otherwise return the single interval as the &quot;new&quot; interval
                     </span><span class="prelude-val">Some</span>(ir::Guard::Info(ir::StaticTiming::new((
                         max_beg, min_end,
@@ -252,9 +265,9 @@
 
         <span class="comment">// now based on `rest_guard` and `replacing_interval` we create the final guard
         </span><span class="kw">match </span>(rest_guard, replacing_interval) {
-            (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;rest_guard and replacing_interval are empty, meaning guard would have been empty, which is impossible&quot;</span>), 
+            (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; ir::Guard::True,
             (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(g)) | (<span class="prelude-val">Some</span>(g), <span class="prelude-val">None</span>) =&gt; g,
-            (<span class="prelude-val">Some</span>(rg), <span class="prelude-val">Some</span>(ig)) =&gt; ir::Guard::And(Box::new(rg), Box::new(ig))
+            (<span class="prelude-val">Some</span>(rg), <span class="prelude-val">Some</span>(ig)) =&gt; ir::Guard::And(Box::new(rg), Box::new(ig)),
         }
     }
 }
@@ -267,11 +280,16 @@
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
         <span class="kw">for </span>group <span class="kw">in </span>comp.get_static_groups().iter() {
+            <span class="kw">let </span>group_latency = group.borrow().get_latency();
             group
                 .borrow_mut()
                 .assignments
                 .iter_mut()
-                .for_each(|assign| assign.guard.update(<span class="self">Self</span>::simplify_guard));
+                .for_each(|assign| {
+                    assign.guard.update(|guard| {
+                        <span class="self">Self</span>::simplify_guard(guard, group_latency)
+                    })
+                });
         }
 
         <span class="comment">// we don&#39;t need to traverse control
