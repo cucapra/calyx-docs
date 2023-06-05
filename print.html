@@ -3964,11 +3964,11 @@ component main() -&gt; () {
 <pre><code>mrxl frontends/mrxl/test/sos.mrxl
 </code></pre>
 <h2 id="simulating-our-example-with-verilog"><a class="header" href="#simulating-our-example-with-verilog">Simulating our example with Verilog</a></h2>
-<p>Finally, let us go the whole hog: we will compile our MrXL code into Calyx and then simulate the Calyx code in Verilog.</p>
+<p>Finally, let us go the whole hog: we compile our MrXL program to Calyx, which is then compiled to Verilog, and simulated by <a href="https://www.veripool.org/wiki/verilator">Verilator</a>.</p>
 <p>Run:</p>
-<pre><code>fud e --from mrxl frontends/mrxl/test/sos.mrxl --to dat --through verilog -s mrxl.data frontends/mrxl/test/sos.mrxl.data  
+<pre><code>fud e --from mrxl frontends/mrxl/test/sos.mrxl --to dat --through verilog -s mrxl.data frontends/mrxl/test/sos.mrxl.data
 </code></pre>
-<p>The above command takes a MrXL program, <code>sos.mrxl</code>, and generates results with Verilator using the MrXL data <code>sos.mrxl.data</code>.</p>
+<p>The above command takes a MrXL program, <code>sos.mrxl</code>, and generates results with Verilator using the MrXL data file <code>sos.mrxl.data</code>.</p>
 <h1 id="compiling-mrxl-into-calyx"><a class="header" href="#compiling-mrxl-into-calyx">Compiling MrXL into Calyx</a></h1>
 <p>Any frontend can support new commands that are relevant to the domain of interest, so long as those commands can themselves be compiled into Calyx.
 We will now step back from our example and study <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_calyx.py">the MrXL-to-Calyx compiler</a>, written in Python.</p>
@@ -4257,7 +4257,7 @@ We mentioned that the restrictions placed on the language can be lifted by beefi
 </blockquote>
 <p>Say you wanted to add subtraction and division to the mix.
 We have set you up for success: the MrXL parser already parses <code>-</code> and <code>/</code> into <code>sub</code> and <code>div</code> respectively.
-Now, in <code>gen_calyx.py</code>, you need to check for &quot;sub&quot; and &quot;div&quot; as possible binary operations, and then invoke the appropriate cell-builders of the <code>builder</code> library. 
+Now, in <code>gen_calyx.py</code>, you need to check for &quot;sub&quot; and &quot;div&quot; as possible binary operations, and then invoke the appropriate cell-builders of the <code>builder</code> library.
 For reference, see how the <code>+</code> and <code>*</code> operations are handled at present.
 For &quot;fun&quot;, take a look at how Calyx implements <a href="https://github.com/cucapra/calyx/blob/master/primitives/binary_operators.sv#L27-L45">multiplication</a>, and how that maps to the existing invocation to create a 32-bit multiplication cell using the <code>builder</code>!</p>
 </li>
