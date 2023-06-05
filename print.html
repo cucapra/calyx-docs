@@ -3535,7 +3535,6 @@ This is (probably) a good way to build character, but it's no way to live.
 Indeed, Calyx was <em>designed</em> to be a compiler IL, and not a human-facing language.</p>
 <p>In this tutorial, we're going to learn all about this by building a DSL-to-hardware compiler for a toy language that we wish to accelerate.
 We will compile the DSL to Calyx, and then let Calyx take us to hardware.</p>
-<p>Change your directory to <code>frontends/mrxl/</code>.</p>
 <h1 id="mrxl-overview"><a class="header" href="#mrxl-overview">MrXL Overview</a></h1>
 <p>Meet MrXL, our toy DSL.
 MrXL lets you define arrays and registers and then perform <code>map</code> and <code>reduce</code> operations.</p>
@@ -3564,8 +3563,8 @@ sos := reduce 1 (acc, i &lt;- squares) 0 { acc + i }
 <pre><code>fud register mrxl -p frontends/mrxl/fud/mrxl.py
 </code></pre>
 <p>Now, running <code>fud check</code> should report that the <code>mrxl</code> binary is correctly installed.</p>
-<p>Now change directories to <code>frontends/mrxl</code> and run:</p>
-<pre><code>mrxl test/sos.mrxl --data test/sos.mrxl.data --interpret
+<p>Finally, run:</p>
+<pre><code>mrxl frontends/mrxl/test/sos.mrxl --data frontends/mrxl/test/sos.mrxl.data --interpret
 </code></pre>
 <p>Why <code>42</code>? Because we populated <code>avec</code> with:</p>
 <pre><code class="language-json">{
@@ -3689,16 +3688,15 @@ component main() -&gt; () {
 }
 </code></pre>
 </details>
-<p>Generate it for yourself! From <code>frontends/mrxl</code>, run:</p>
-<pre><code>mrxl test/sos.mrxl
+<p>Generate it for yourself! Run:</p>
+<pre><code>mrxl frontends/mrxl/test/sos.mrxl
 </code></pre>
 <h2 id="simulating-our-example-with-verilog"><a class="header" href="#simulating-our-example-with-verilog">Simulating our example with Verilog</a></h2>
 <p>Finally, let us go the whole hog: we will compile our MrXL code into Calyx and then simulate the Calyx code in Verilog.</p>
 <p>Run:</p>
-<pre><code class="language-sh">fud e --from mrxl test/sos.mrxl \     # Start with MrXL code.
-      --to dat --through verilog \    # Generate results using Verilator
-      -s mrxl.data test/sos.mrxl.data # Set the data file
+<pre><code>fud e --from mrxl frontends/mrxl/test/sos.mrxl --to dat --through verilog -s mrxl.data frontends/mrxl/test/sos.mrxl.data  
 </code></pre>
+<p>The above command takes a MrXL program, <code>sos.mrxl</code>, and generates results with Verilator using the MrXL data <code>sos.mrxl.data</code>.</p>
 <h1 id="compiling-mrxl-into-calyx"><a class="header" href="#compiling-mrxl-into-calyx">Compiling MrXL into Calyx</a></h1>
 <p>Any frontend can support new commands that are relevant to the domain of interest, so long as those commands can themselves be compiled into Calyx.
 We will now step back from our example and study <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_calyx.py">the MrXL-to-Calyx compiler</a>, written in Python.</p>
@@ -3908,12 +3906,12 @@ squares := map 2 (a <- avec) { a * a }
 
 Interpret this with:
 ```
-mrxl test/squares.mrxl --data test/squares.mrxl.data --interpret
+mrxl frontends/mrxl/test/squares.mrxl --data frontends/mrxl/test/squares.mrxl.data --interpret
 ```
 
 But more interestingly, compile this to Calyx IL with:
 ```
-mrxl test/squares.mrxl
+mrxl frontends/mrxl/test/squares.mrxl
 ``` -->
 <p>There's a lot going on, but the thing to focus on is this.
 To take advantage of the parallelism in the program, the MrXL compiler assumes that the input memory <code>avec</code> is split into two <em>banks</em>, <code>avec_b0</code> and <code>avec_b1</code>.
@@ -4046,7 +4044,7 @@ We can keep MrXL-native data files relatively light and add this <code>format</c
 }
 </code></pre>
 <p>And we can generate this automatically. Try it yourself:</p>
-<pre><code>mrxl test/squares.mrxl --data test/squares.mrxl.data --convert
+<pre><code>mrxl frontends/mrxl/test/squares.mrxl --data frontends/mrxl/test/squares.mrxl.data --convert
 </code></pre>
 <p>This transformation is achieved using a <a href="tutorial/../fud/index.html"><code>fud</code></a> pass that converts MrXL-native data files into Calyx-native data files.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="frontend-compilers"><a class="header" href="#frontend-compilers">Frontend Compilers</a></h1>
