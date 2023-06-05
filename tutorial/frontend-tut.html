@@ -421,6 +421,42 @@ At a high level, we want to generate the following pieces of hardware:</p>
 <li>An adder to increment the value of the index.</li>
 <li>Whatever hardware is needed to implement the loop body computation.</li>
 </ol>
+<p>As an extra challenge to the reader, we have left an empty function body in
+<code>gen_calyx.py</code>.</p>
+<pre><code class="language-python">def my_map_impl(
+    comp: cb.ComponentBuilder,
+    dest: str,
+    stmt: ast.Map,
+    arr_size: int,
+    bank_factor: int,
+    s_idx: int,
+):
+    &quot;&quot;&quot;
+    Returns a dictionary containing Calyx cells, wires and
+    control needed to implement a `map` statement.
+    See gen_stmt_impl for format of the dictionary.
+
+    Generates these groups:
+      - a group that implements the body of the `map` statement
+      - a group that increments an index to access the `map` input array
+      - a group that implements the loop condition, checking if the index
+        has reached the end of the input array
+    &quot;&quot;&quot;
+    # TODO: Implement map!
+    return Empty()
+</code></pre>
+<p>You are invited to try implementing map yourself according to the outline given
+in the description by filling in the body of this function.</p>
+<p>To run <code>mrxl</code> with <code>my_map_impl</code> instead of our map implementation pass the
+<code>--my-map</code> flag. This can be done with <code>fud</code> as follows:</p>
+<pre><code class="language-sh">fud e --from mrxl test/sos.mrxl \     # Start with MrXL code.
+      --to dat --through verilog \    # Generate results using Verilator
+      -s mrxl.flags &quot;--my-map &quot;  \    # NEW (!!)
+      -s mrxl.data test/sos.mrxl.data # Set the data file
+</code></pre>
+<p>If you are satisfied with your map implementation you may skip to
+<a href="#adding-parallelization">the next section</a>! If you'd like to read through the
+details of our implementation---or build yours in tandem---continue on with the rest of this section.</p>
 <h3 id="loop-condition"><a class="header" href="#loop-condition">Loop condition</a></h3>
 <p>We define a <a href="../lang/ref.html#comb-group-definitions">combinational group</a> to perform the comparison <code>idx &lt; arr_size</code> that uses an <code>lt</code> cell:</p>
 <pre><code class="language-python">    group_name = f&quot;cond_{suffix}&quot;

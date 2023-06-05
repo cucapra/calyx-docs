@@ -2121,7 +2121,7 @@ from fud.errors import MissingDynamicConfiguration
 
 from pathlib import Path
 
-# The temporary filename used for converting mrxl.data to verilog.data 
+# The temporary filename used for converting mrxl.data to verilog.data
 _DATA_FILE = &quot;data.json&quot;
 
 
@@ -2155,7 +2155,7 @@ class MrXLStage(Stage):
         Specify defaults that should be added to fud's configuration file when
         this stage is registered.
         &quot;&quot;&quot;
-        return {&quot;exec&quot;: &quot;mrxl&quot;}
+        return {&quot;exec&quot;: &quot;mrxl&quot;, &quot;flags&quot;: &quot;&quot;}
 
     def _define_steps(self, input, builder, config):
         &quot;&quot;&quot;
@@ -2166,6 +2166,7 @@ class MrXLStage(Stage):
         # Commands at the top-level are evaluated when the computation is being
         # staged
         cmd = config[&quot;stages&quot;, self.name, &quot;exec&quot;]
+        flags = config.get((&quot;stages&quot;, self.name, &quot;flags&quot;)) or &quot;&quot;
 
         # Computations within a step are delayed from being executed until
         # the full execution pipeline is generated.
@@ -2180,20 +2181,20 @@ class MrXLStage(Stage):
         def set_mrxl_prog(mrxl_prog: SourceType.Path):
             config[&quot;stages&quot;, &quot;mrxl&quot;, &quot;prog&quot;] = str(mrxl_prog)
 
-        @builder.step(description=&quot;Save verilog.data in `tmpdir` and update stages.verilog.data&quot;)
-        def save_data(
-            tmpdir: SourceType.Directory, verilog_data: SourceType.String
-        ):
+        @builder.step(
+            description=&quot;Save verilog.data in `tmpdir` and update stages.verilog.data&quot;
+        )
+        def save_data(tmpdir: SourceType.Directory, verilog_data: SourceType.String):
             save_loc = Path(tmpdir.name) / _DATA_FILE
 
-            with open(save_loc, 'w') as out:
+            with open(save_loc, &quot;w&quot;) as out:
                 out.write(verilog_data)
 
             config[&quot;stages&quot;, &quot;verilog&quot;, &quot;data&quot;] = save_loc
 
         @builder.step(description=cmd)
         def run_mrxl(mrxl_prog: SourceType.Path) -&gt; SourceType.Stream:
-            return shell(f&quot;{cmd} {str(mrxl_prog)}&quot;)
+            return shell(f&quot;{cmd} {str(mrxl_prog)} {flags}&quot;)
 
         # Define a schedule using the steps.
         # A schedule *looks* like an imperative program but actually represents
@@ -2265,7 +2266,7 @@ class MrXLDataStage(Stage):
         @builder.step(description=&quot;Dynamically retrieve the value of stages.mrxl.prog&quot;)
         def get_mrxl_prog() -&gt; SourceType.Path:
             return Source(Path(config.get([&quot;stages&quot;, &quot;mrxl&quot;, &quot;prog&quot;])), SourceType.Path)
-        
+
         @builder.step()
         def convert_mrxl_data_to_calyx_data(
             data_path: SourceType.Path, mrxl_prog: SourceType.Path
@@ -2273,9 +2274,7 @@ class MrXLDataStage(Stage):
             &quot;&quot;&quot;
             Converts MrXL input into calyx input
             &quot;&quot;&quot;
-            return shell(
-                f&quot;{cmd} {str(mrxl_prog.data)} --data {data_path} --convert&quot;
-            )
+            return shell(f&quot;{cmd} {str(mrxl_prog.data)} --data {data_path} --convert&quot;)
 
         # Define a schedule using the steps.
         # A schedule *looks* like an imperative program but actually represents
@@ -2285,10 +2284,7 @@ class MrXLDataStage(Stage):
 
         if mrxl_prog is None:
             raise MissingDynamicConfiguration(&quot;mrxl.prog&quot;)
-        return convert_mrxl_data_to_calyx_data(
-            input,
-            mrxl_prog
-        )
+        return convert_mrxl_data_to_calyx_data(input, mrxl_prog)
 
 
 # Export the defined stages to fud
@@ -4077,6 +4073,42 @@ At a high level, we want to generate the following pieces of hardware:</p>
 <li>An adder to increment the value of the index.</li>
 <li>Whatever hardware is needed to implement the loop body computation.</li>
 </ol>
+<p>As an extra challenge to the reader, we have left an empty function body in
+<code>gen_calyx.py</code>.</p>
+<pre><code class="language-python">def my_map_impl(
+    comp: cb.ComponentBuilder,
+    dest: str,
+    stmt: ast.Map,
+    arr_size: int,
+    bank_factor: int,
+    s_idx: int,
+):
+    &quot;&quot;&quot;
+    Returns a dictionary containing Calyx cells, wires and
+    control needed to implement a `map` statement.
+    See gen_stmt_impl for format of the dictionary.
+
+    Generates these groups:
+      - a group that implements the body of the `map` statement
+      - a group that increments an index to access the `map` input array
+      - a group that implements the loop condition, checking if the index
+        has reached the end of the input array
+    &quot;&quot;&quot;
+    # TODO: Implement map!
+    return Empty()
+</code></pre>
+<p>You are invited to try implementing map yourself according to the outline given
+in the description by filling in the body of this function.</p>
+<p>To run <code>mrxl</code> with <code>my_map_impl</code> instead of our map implementation pass the
+<code>--my-map</code> flag. This can be done with <code>fud</code> as follows:</p>
+<pre><code class="language-sh">fud e --from mrxl test/sos.mrxl \     # Start with MrXL code.
+      --to dat --through verilog \    # Generate results using Verilator
+      -s mrxl.flags &quot;--my-map &quot;  \    # NEW (!!)
+      -s mrxl.data test/sos.mrxl.data # Set the data file
+</code></pre>
+<p>If you are satisfied with your map implementation you may skip to
+<a href="tutorial/frontend-tut.html#adding-parallelization">the next section</a>! If you'd like to read through the
+details of our implementation---or build yours in tandem---continue on with the rest of this section.</p>
 <h3 id="loop-condition"><a class="header" href="#loop-condition">Loop condition</a></h3>
 <p>We define a <a href="tutorial/../lang/ref.html#comb-group-definitions">combinational group</a> to perform the comparison <code>idx &lt; arr_size</code> that uses an <code>lt</code> cell:</p>
 <pre><code class="language-python">    group_name = f&quot;cond_{suffix}&quot;

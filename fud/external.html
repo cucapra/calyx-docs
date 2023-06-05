@@ -165,7 +165,7 @@ from fud.errors import MissingDynamicConfiguration
 
 from pathlib import Path
 
-# The temporary filename used for converting mrxl.data to verilog.data 
+# The temporary filename used for converting mrxl.data to verilog.data
 _DATA_FILE = &quot;data.json&quot;
 
 
@@ -199,7 +199,7 @@ class MrXLStage(Stage):
         Specify defaults that should be added to fud's configuration file when
         this stage is registered.
         &quot;&quot;&quot;
-        return {&quot;exec&quot;: &quot;mrxl&quot;}
+        return {&quot;exec&quot;: &quot;mrxl&quot;, &quot;flags&quot;: &quot;&quot;}
 
     def _define_steps(self, input, builder, config):
         &quot;&quot;&quot;
@@ -210,6 +210,7 @@ class MrXLStage(Stage):
         # Commands at the top-level are evaluated when the computation is being
         # staged
         cmd = config[&quot;stages&quot;, self.name, &quot;exec&quot;]
+        flags = config.get((&quot;stages&quot;, self.name, &quot;flags&quot;)) or &quot;&quot;
 
         # Computations within a step are delayed from being executed until
         # the full execution pipeline is generated.
@@ -224,20 +225,20 @@ class MrXLStage(Stage):
         def set_mrxl_prog(mrxl_prog: SourceType.Path):
             config[&quot;stages&quot;, &quot;mrxl&quot;, &quot;prog&quot;] = str(mrxl_prog)
 
-        @builder.step(description=&quot;Save verilog.data in `tmpdir` and update stages.verilog.data&quot;)
-        def save_data(
-            tmpdir: SourceType.Directory, verilog_data: SourceType.String
-        ):
+        @builder.step(
+            description=&quot;Save verilog.data in `tmpdir` and update stages.verilog.data&quot;
+        )
+        def save_data(tmpdir: SourceType.Directory, verilog_data: SourceType.String):
             save_loc = Path(tmpdir.name) / _DATA_FILE
 
-            with open(save_loc, 'w') as out:
+            with open(save_loc, &quot;w&quot;) as out:
                 out.write(verilog_data)
 
             config[&quot;stages&quot;, &quot;verilog&quot;, &quot;data&quot;] = save_loc
 
         @builder.step(description=cmd)
         def run_mrxl(mrxl_prog: SourceType.Path) -&gt; SourceType.Stream:
-            return shell(f&quot;{cmd} {str(mrxl_prog)}&quot;)
+            return shell(f&quot;{cmd} {str(mrxl_prog)} {flags}&quot;)
 
         # Define a schedule using the steps.
         # A schedule *looks* like an imperative program but actually represents
@@ -309,7 +310,7 @@ class MrXLDataStage(Stage):
         @builder.step(description=&quot;Dynamically retrieve the value of stages.mrxl.prog&quot;)
         def get_mrxl_prog() -&gt; SourceType.Path:
             return Source(Path(config.get([&quot;stages&quot;, &quot;mrxl&quot;, &quot;prog&quot;])), SourceType.Path)
-        
+
         @builder.step()
         def convert_mrxl_data_to_calyx_data(
             data_path: SourceType.Path, mrxl_prog: SourceType.Path
@@ -317,9 +318,7 @@ class MrXLDataStage(Stage):
             &quot;&quot;&quot;
             Converts MrXL input into calyx input
             &quot;&quot;&quot;
-            return shell(
-                f&quot;{cmd} {str(mrxl_prog.data)} --data {data_path} --convert&quot;
-            )
+            return shell(f&quot;{cmd} {str(mrxl_prog.data)} --data {data_path} --convert&quot;)
 
         # Define a schedule using the steps.
         # A schedule *looks* like an imperative program but actually represents
@@ -329,10 +328,7 @@ class MrXLDataStage(Stage):
 
         if mrxl_prog is None:
             raise MissingDynamicConfiguration(&quot;mrxl.prog&quot;)
-        return convert_mrxl_data_to_calyx_data(
-            input,
-            mrxl_prog
-        )
+        return convert_mrxl_data_to_calyx_data(input, mrxl_prog)
 
 
 # Export the defined stages to fud
