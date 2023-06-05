@@ -12,21 +12,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
-        <link rel="icon" href="favicon.svg">
-        <link rel="shortcut icon" href="favicon.png">
-        <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-        <link rel="stylesheet" href="css/print.css" media="print">
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="highlight.css">
-        <link rel="stylesheet" href="tomorrow-night.css">
-        <link rel="stylesheet" href="ayu-highlight.css">
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
@@ -37,7 +37,7 @@
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
-            var path_to_root = "";
+            var path_to_root = "../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
@@ -85,7 +85,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">Getting Started</a></li><li class="chapter-item expanded affix "><li class="part-title">Calyx Language</li><li class="chapter-item expanded "><a href="tutorial/language-tut.html"><strong aria-hidden="true">1.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lang/multi-component.html"><strong aria-hidden="true">1.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="lang/memories-by-reference.html"><strong aria-hidden="true">1.2.</strong> Passing Memories by Reference</a></li></ol></li><li class="chapter-item expanded "><a href="lang/ref.html"><strong aria-hidden="true">2.</strong> Language Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lang/data-format.html"><strong aria-hidden="true">2.1.</strong> Data Format</a></li><li class="chapter-item expanded "><a href="lang/static.html"><strong aria-hidden="true">2.2.</strong> Static Timing</a></li><li class="chapter-item expanded "><a href="lang/sync.html"><strong aria-hidden="true">2.3.</strong> Experimental: Synchronization</a></li><li class="chapter-item expanded "><a href="lang/undefined.html"><strong aria-hidden="true">2.4.</strong> Undefined Behaviors</a></li></ol></li><li class="chapter-item expanded "><a href="lang/attributes.html"><strong aria-hidden="true">3.</strong> Attributes</a></li><li class="chapter-item expanded affix "><li class="part-title">Running Calyx Programs</li><li class="chapter-item expanded "><a href="fud/index.html"><strong aria-hidden="true">4.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="fud/examples.html"><strong aria-hidden="true">4.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="fud/xilinx.html"><strong aria-hidden="true">4.2.</strong> Xilinx Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="fud/axi-gen.html"><strong aria-hidden="true">4.2.1.</strong> AXI Generation</a></li></ol></li><li class="chapter-item expanded "><a href="fud/external.html"><strong aria-hidden="true">4.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="fud/multiple-paths.html"><strong aria-hidden="true">4.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="fud/circt.html"><strong aria-hidden="true">4.5.</strong> CIRCT</a></li><li class="chapter-item expanded "><a href="fud/resource-estimation.html"><strong aria-hidden="true">4.6.</strong> Resource Estimation</a></li></ol></li><li class="chapter-item expanded "><a href="interpreter.html"><strong aria-hidden="true">5.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded affix "><li class="part-title">Compile Development Guide</li><li class="chapter-item expanded "><a href="compiler.html"><strong aria-hidden="true">6.</strong> The Calyx Compiler</a></li><li class="chapter-item expanded "><a href="new-pass.html"><strong aria-hidden="true">7.</strong> Adding a New Pass</a></li><li class="chapter-item expanded "><a href="libraries/core.html"><strong aria-hidden="true">8.</strong> Primitive Library</a></li><li class="chapter-item expanded "><a href="compiler-as-library.html"><strong aria-hidden="true">9.</strong> The calyx Library</a></li><li class="chapter-item expanded "><a href="optimizations/dataflow.html"><strong aria-hidden="true">10.</strong> Dataflow Analysis</a></li><li class="chapter-item expanded "><a href="debug/index.html"><strong aria-hidden="true">11.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="debug/cider.html"><strong aria-hidden="true">11.1.</strong> Logical Bugs</a></li><li class="chapter-item expanded "><a href="debug/debug.html"><strong aria-hidden="true">11.2.</strong> Compilation Bugs</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Generating Calyx</li><li class="chapter-item expanded "><a href="calyx-py.html" class="active"><strong aria-hidden="true">12.</strong> Emitting Calyx from Python</a></li><li class="chapter-item expanded "><a href="tutorial/frontend-tut.html"><strong aria-hidden="true">13.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="frontends/index.html"><strong aria-hidden="true">14.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="frontends/dahlia.html"><strong aria-hidden="true">14.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="frontends/systolic-array.html"><strong aria-hidden="true">14.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="frontends/tvm-relay.html"><strong aria-hidden="true">14.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="frontends/ntt.html"><strong aria-hidden="true">14.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="frontends/mrxl.html"><strong aria-hidden="true">14.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="tools/runt.html"><strong aria-hidden="true">15.</strong> Runt</a></li><li class="chapter-item expanded "><a href="tools/data-gen.html"><strong aria-hidden="true">16.</strong> Data Gen</a></li><li class="chapter-item expanded "><a href="tools/exp-generator.html"><strong aria-hidden="true">17.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="tools/editor-highlighting.html"><strong aria-hidden="true">18.</strong> Editor Highlighting</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="contributors.html">Contributors</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Getting Started</a></li><li class="chapter-item expanded affix "><li class="part-title">Calyx Language</li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">1.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">1.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">1.2.</strong> Passing Memories by Reference</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/ref.html"><strong aria-hidden="true">2.</strong> Language Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/data-format.html"><strong aria-hidden="true">2.1.</strong> Data Format</a></li><li class="chapter-item expanded "><a href="../lang/static.html"><strong aria-hidden="true">2.2.</strong> Static Timing</a></li><li class="chapter-item expanded "><a href="../lang/sync.html"><strong aria-hidden="true">2.3.</strong> Experimental: Synchronization</a></li><li class="chapter-item expanded "><a href="../lang/undefined.html"><strong aria-hidden="true">2.4.</strong> Undefined Behaviors</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">3.</strong> Attributes</a></li><li class="chapter-item expanded affix "><li class="part-title">Running Calyx Programs</li><li class="chapter-item expanded "><a href="../fud/index.html"><strong aria-hidden="true">4.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/examples.html"><strong aria-hidden="true">4.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../fud/xilinx.html"><strong aria-hidden="true">4.2.</strong> Xilinx Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../fud/axi-gen.html"><strong aria-hidden="true">4.2.1.</strong> AXI Generation</a></li></ol></li><li class="chapter-item expanded "><a href="../fud/external.html"><strong aria-hidden="true">4.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../fud/multiple-paths.html"><strong aria-hidden="true">4.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../fud/circt.html"><strong aria-hidden="true">4.5.</strong> CIRCT</a></li><li class="chapter-item expanded "><a href="../fud/resource-estimation.html"><strong aria-hidden="true">4.6.</strong> Resource Estimation</a></li></ol></li><li class="chapter-item expanded "><a href="../interpreter.html"><strong aria-hidden="true">5.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded affix "><li class="part-title">Compile Development Guide</li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">6.</strong> The Calyx Compiler</a></li><li class="chapter-item expanded "><a href="../new-pass.html"><strong aria-hidden="true">7.</strong> Adding a New Pass</a></li><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">8.</strong> Primitive Library</a></li><li class="chapter-item expanded "><a href="../compiler-as-library.html"><strong aria-hidden="true">9.</strong> The calyx Library</a></li><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">10.</strong> Dataflow Analysis</a></li><li class="chapter-item expanded "><a href="../debug/index.html"><strong aria-hidden="true">11.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../debug/cider.html"><strong aria-hidden="true">11.1.</strong> Logical Bugs</a></li><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">11.2.</strong> Compilation Bugs</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Generating Calyx</li><li class="chapter-item expanded "><a href="../builder/calyx-py.html" class="active"><strong aria-hidden="true">12.</strong> Emitting Calyx from Python</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../builder/ref.html"><strong aria-hidden="true">12.1.</strong> calyx-py Builder Reference</a></li></ol></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">13.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">14.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">14.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">14.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">14.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">14.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">14.5.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">15.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/data-gen.html"><strong aria-hidden="true">16.</strong> Data Gen</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">17.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">18.</strong> Editor Highlighting</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -117,7 +117,7 @@
                     <h1 class="menu-title">Calyx Documentation</h1>
 
                     <div class="right-buttons">
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -154,7 +154,8 @@
 <pre><code>cd calyx-py &amp;&amp; flit install -s
 </code></pre>
 <h2 id="using-the-calyx-builder"><a class="header" href="#using-the-calyx-builder">Using the <code>calyx</code> builder</a></h2>
-<p>The <code>calyx</code> library provides a builder to generate Calyx code. Let's walk through the file <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/builder_example.py"><code>builder_example.py</code></a>. This Calyx program initializes two registers with the numbers 1 and 41, adds them together, and stores the result in a register.</p>
+<p>The <code>calyx</code> library provides a builder to generate Calyx code. The <a href="ref.html">library reference</a> documents most builder methods and constructs.</p>
+<p>We will also walk through the file <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/builder_example.py"><code>builder_example.py</code></a> to demonstrate how the builder library is used. This Calyx program initializes two registers with the numbers 1 and 41, adds them together, and stores the result in a register.</p>
 <p>The <code>add_main_component(prog)</code> method will, as the name suggests, add a main component to our program. We can define components for our Calyx program <code>prog</code> with <code>prog.component</code>. Here's a defininition of a <code>main</code> component with a 32-bit input <code>in</code> and output <code>out</code>:</p>
 <pre><code class="language-python">def add_main_component(prog):
     main = prog.component(&quot;main&quot;)
@@ -184,7 +185,7 @@
 <pre><code class="language-python">        # Explicilty sized constants when bitwidth inference may not work
         rhs.in_ = const(32, 41)
 </code></pre>
-<p>Calyx groups use a <a href="https://docs.calyxir.org/lang/ref.html#the-go-done-interface">latency-insensitive go/done interface</a>. When the <code>done</code> signal of a component is <code>1</code>, it signals that the component has finished executing. Oftentimes, computing this signal is conditional. We use <a href="https://docs.calyxir.org/lang/ref.html#guarded-assignments">guarded assignements</a> to a group's done signal in order to express this. Writing a group's done condition with the builder is pretty similar to doing so in Calyx, except that the <code>?</code> used for guarded assignments is now <code>@</code> (due to conflicting usage of <code>?</code> in Python).</p>
+<p>Calyx groups use a <a href="..lang/ref.html#the-go-done-interface">latency-insensitive go/done interface</a>. When the <code>done</code> signal of a component is <code>1</code>, it signals that the component has finished executing. Oftentimes, computing this signal is conditional. We use <a href="../lang/ref.html#guarded-assignments">guarded assignements</a> to a group's done signal in order to express this. Writing a group's done condition with the builder is pretty similar to doing so in Calyx, except that the <code>?</code> used for guarded assignments is now <code>@</code> (due to conflicting usage of <code>?</code> in Python).</p>
 <pre><code class="language-python">        # Guards are specified using the `@` syntax
         update_operands.done = (lhs.done &amp; rhs.done) @ 1
 </code></pre>
@@ -195,7 +196,7 @@
 <p>Now, when we want to use the output port of our adder, we can do so easily:</p>
 <pre><code class="language-python">        sum.in_ = add_out
 </code></pre>
-<p>In order to add <a href="https://docs.calyxir.org/lang/ref.html?highlight=continuous#continuous-assignments">continuous assignments</a> to your program, use the construct <code>with {component}.continuous:</code>.</p>
+<p>In order to add <a href="../lang/ref.html#continuous-assignments">continuous assignments</a> to your program, use the construct <code>with {component}.continuous:</code>.</p>
 <pre><code class="language-python">    with main.continuous:
         this.out = sum.out
 </code></pre>
@@ -235,11 +236,11 @@
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="debug/debug.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../debug/debug.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="tutorial/frontend-tut.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../builder/ref.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -249,11 +250,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="debug/debug.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../debug/debug.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="tutorial/frontend-tut.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../builder/ref.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -268,13 +269,13 @@
         </script>
 
 
-        <script src="elasticlunr.min.js"></script>
-        <script src="mark.min.js"></script>
-        <script src="searcher.js"></script>
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
 
-        <script src="clipboard.min.js"></script>
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
 
