@@ -3970,8 +3970,8 @@ component main() -&gt; () {
 </code></pre>
 <p>The above command takes a MrXL program, <code>sos.mrxl</code>, and generates results with Verilator using the MrXL data file <code>sos.mrxl.data</code>.</p>
 <h1 id="compiling-mrxl-into-calyx"><a class="header" href="#compiling-mrxl-into-calyx">Compiling MrXL into Calyx</a></h1>
-<p>Any frontend can support new commands that are relevant to the domain of interest, so long as those commands can themselves be compiled into Calyx.
-We will now step back from our example and study <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_calyx.py">the MrXL-to-Calyx compiler</a>, written in Python.</p>
+<p>Calyx is an infrastructure for designing <em>domain-specific languages</em> (DSL) which can generate efficient hardware.
+The rest of the tutorial will show you how to implement such a DSL by studying <a href="https://github.com/cucapra/calyx/blob/master/frontends/mrxl/mrxl/gen_calyx.py">the MrXL-to-Calyx compiler</a>, written in Python.</p>
 <p>We have placed a few simplifying restrictions on MrXL programs:</p>
 <ol>
 <li>Every array in a MrXL program has the same length.</li>
