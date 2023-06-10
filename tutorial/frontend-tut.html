@@ -537,7 +537,7 @@ Finally, the group's computation is done when the memory write is committed.</p>
 Then, it sequentially executes the computation for the body and increments the loop index.</p>
 <blockquote>
 <p>Take a breather! You now understand the basics of compiling DSLs to Calyx.
-However, we're not done yet; we build hardware because we want things to be fast and efficient so the next part will teach you how to parallelize MrXL programs.</p>
+However, we're not done yet; we build hardware because we want things to be fast and efficient, so the next part will teach you how to parallelize MrXL programs.</p>
 </blockquote>
 <h2 id="adding-parallelization"><a class="header" href="#adding-parallelization">Adding parallelization</a></h2>
 <p>MrXL allows us to parallelize our <code>map</code> operations.</p>
@@ -594,7 +594,7 @@ Though nontrivial, this data-banking can also be <a href="#aside-supplying-data-
 As specified by the language specification, <a href="../lang/ref.html#par">conflicting resource usage is undefined behavior</a>.</p>
 <p>You can use <code>fud</code> to compile the MrXL program and run it with some data:</p>
 <pre><code>fud e --from mrxl --to dat \
-      --through verilator \
+      --through verilog \
       -s mrxl.data frontends/mrxl/test/squares.mrxl.data \
       frontends/mrxl/test/squares.mrxl
 </code></pre>
@@ -636,7 +636,7 @@ Try incorporating this brittle version into your MrXL-to-Calyx compiler at first
 How do we bank it two different ways at the same time?
 The answer is to bank the array a little finer than you think, and to then use <em>arbitration logic</em> to provide two fictional banking setups at the same time.
 We provide a toy implementation using the <code>builder</code> <a href="https://github.com/cucapra/calyx/blob/master/calyx-py/test/arbiter_6.py">here</a>.
-There, a 24-cell array has been split into <em>six</em> banks, but then we allow the user to pretend, simulatneously, that it is split into <em>two</em> banks or <em>three</em> banks.</p>
+There, a 24-cell array has been split into <em>six</em> banks, but then we allow the user to pretend, simultaneously, that it is split into <em>two</em> banks or <em>three</em> banks.</p>
 </li>
 </ol>
 <h1 id="aside-supplying-data-to-mrxl-programs"><a class="header" href="#aside-supplying-data-to-mrxl-programs">Aside: supplying data to MrXL programs</a></h1>
