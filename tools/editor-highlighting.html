@@ -160,14 +160,16 @@ Add the following to your vim plug configuration:</p>
 <h2 id="emacs"><a class="header" href="#emacs">Emacs</a></h2>
 <p><code>futil-mode</code> is implements highlighting for <code>.futil</code> files in emacs.
 It is located in <code>&lt;repo&gt;/tools/emacs/futil-mode</code>.</p>
-<p>Clone the repository, add the above path to your <a href="http://www.emacswiki.org/emacs/LoadPath">load path</a>, and require
-<code>futil-mode</code>.
-If you use <a href="https://www.spacemacs.org/">Spacemacs</a>, this looks like adding the following lines to
-<code>dotspacemacs/user-config</code> in your <code>.spacemacs</code> file:</p>
-<pre><code class="language-elisp">(push &quot;~/.emacs.d/private/local/fuse-mode&quot; load-path)
-(require 'fuse-mode)
+<p>The <code>highlight-numbers</code> package is required as part of <code>futil-mode</code>, install it:</p>
+<pre><code>M-x package-install RET highlight-numbers RET
 </code></pre>
-<p>I imagine it looks very similar for pure emacs, but haven't actually tried it myself.</p>
+<p>Clone the repository, add the above path to your <a href="http://www.emacswiki.org/emacs/LoadPath">load path</a>, and require
+<code>futil-mode</code> in your <code>.emacs</code> file:</p>
+<pre><code class="language-elisp">(push &quot;~/.emacs.d/private/local/futil-mode&quot; load-path)
+(require 'futil-mode)
+</code></pre>
+<p>If you use <a href="https://www.spacemacs.org/">Spacemacs</a>, you would add this to <code>dotspacemacs/user-config</code>
+in your <code>.spacemacs</code>.</p>
 <h2 id="visual-studio-code"><a class="header" href="#visual-studio-code">Visual Studio Code</a></h2>
 <p>Add a link to the Calyx VSCode extension directory to your VSCode extensions directory.</p>
 <pre><code>cd $HOME/.vscode/extensions
