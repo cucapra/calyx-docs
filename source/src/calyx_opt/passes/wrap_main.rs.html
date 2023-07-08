@@ -73,10 +73,34 @@
 <span id="73">73</span>
 <span id="74">74</span>
 <span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
 </pre><pre class="rust"><code><span class="kw">use </span>std::borrow::BorrowMut;
 
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
+<span class="kw">use </span>ir::build_assignments;
 
 <span class="attribute">#[derive(Default)]
 </span><span class="doccomment">/// If the top-level component is not named `main`, adds a new `main` component
@@ -129,6 +153,11 @@
             );
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Stop);
         }
+        <span class="kw">let </span>entry_name = entry.name;
+        <span class="kw">let </span><span class="kw-2">mut </span>ports = sig.get_signature();
+        ports
+            .iter_mut()
+            .for_each(|pd| pd.direction = pd.direction.reverse());
         drop(sig);
 
         <span class="comment">// Remove top-level attribute from previous component
@@ -141,7 +170,24 @@
         main.borrow_mut()
             .attributes
             .insert(ir::BoolAttr::TopLevel, <span class="number">1</span>);
-        ctx.entrypoint = main.name;
+
+        <span class="comment">// Add the original top-level component as a cell to the main component.
+        </span>{
+            <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(<span class="kw-2">&amp;mut </span>main, <span class="kw-2">&amp;</span>ctx.lib);
+            <span class="kw">let </span>comp = builder.add_component(entry_name, entry_name, ports);
+            <span class="kw">let </span>main_sig = builder.component.signature.clone();
+            <span class="kw">let </span>cont_assigns = <span class="macro">build_assignments!</span>(builder;
+                comp[<span class="string">&quot;go&quot;</span>] = <span class="question-mark">? </span>main_sig[<span class="string">&quot;go&quot;</span>];
+                main_sig[<span class="string">&quot;done&quot;</span>] = <span class="question-mark">? </span>comp[<span class="string">&quot;done&quot;</span>];
+            );
+            builder
+                .component
+                .continuous_assignments
+                .extend(cont_assigns);
+        }
+
+        <span class="comment">// Update the context entrypoint to be the main component
+        </span>ctx.entrypoint = main.name;
         ctx.components.push(main);
 
         <span class="comment">// Purely context directed pass
