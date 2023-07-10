@@ -175,8 +175,8 @@ For example, if you register the <a href="./index.html#icarus-verilog">Icarus Ve
 paths can be used to generate VCD files from Dahlia programs:</p>
 <pre><code>% fud e --from dahlia --to vcd
 [fud] ERROR: Multiple stage pipelines can transform dahlia to vcd:
-dahlia → futil → verilog → vcd
-dahlia → futil → icarus-verilog → vcd
+dahlia → calyx → verilog → vcd
+dahlia → calyx → icarus-verilog → vcd
 Use the --through flag to select an intermediate stage
 </code></pre>
 <p><code>fud</code> says that both the <code>verilog</code> and <code>icarus-verilog</code> stages can be used to
