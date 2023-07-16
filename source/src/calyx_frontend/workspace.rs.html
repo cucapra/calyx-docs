@@ -270,6 +270,13 @@
 <span id="270">270</span>
 <span id="271">271</span>
 <span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     ast::{ComponentDef, NamespaceDef},
     parser,
@@ -408,7 +415,10 @@
         file: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
         lib_path: <span class="kw-2">&amp;</span>Path,
     ) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
-        <span class="self">Self</span>::construct_with_all_deps::&lt;<span class="bool-val">false</span>&gt;(file, lib_path)
+        <span class="self">Self</span>::construct_with_all_deps::&lt;<span class="bool-val">false</span>&gt;(
+            file.iter().cloned().collect(),
+            lib_path,
+        )
     }
 
     <span class="doccomment">/// Construct the Workspace using the given [NamespaceDef] and ignore all
@@ -417,7 +427,10 @@
         file: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
         lib_path: <span class="kw-2">&amp;</span>Path,
     ) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
-        <span class="self">Self</span>::construct_with_all_deps::&lt;<span class="bool-val">true</span>&gt;(file, lib_path)
+        <span class="self">Self</span>::construct_with_all_deps::&lt;<span class="bool-val">true</span>&gt;(
+            file.iter().cloned().collect(),
+            lib_path,
+        )
     }
 
     <span class="kw">fn </span>get_parent(p: <span class="kw-2">&amp;</span>Path) -&gt; PathBuf {
@@ -434,22 +447,23 @@
         }
     }
 
-    <span class="doccomment">/// Construct the Workspace by transitively parsing all `import`ed Calyx
-    /// files.
-    /// If SHALLOW is true, then parse imported cmoponents as declarations
-    </span><span class="kw">fn </span>construct_with_all_deps&lt;<span class="kw">const </span>SHALLOW: bool&gt;(
-        file: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
+    <span class="doccomment">/// Construct the Workspace using the given files and all their dependencies.
+    /// If SHALLOW is true, then parse imported components as declarations and not added to the workspace components.
+    /// If in doubt, set SHALLOW to false.
+    </span><span class="kw">pub fn </span>construct_with_all_deps&lt;<span class="kw">const </span>SHALLOW: bool&gt;(
+        <span class="kw-2">mut </span>files: Vec&lt;PathBuf&gt;,
         lib_path: <span class="kw-2">&amp;</span>Path,
     ) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
-        <span class="comment">// Construct initial namespace.
-        </span><span class="kw">let </span>namespace = NamespaceDef::construct(file)<span class="question-mark">?</span>;
-        <span class="kw">let </span>parent_path = file
+        <span class="comment">// Construct initial namespace. If `files` is empty, then we&#39;re reading from the standard input.
+        </span><span class="kw">let </span>first = files.pop();
+        <span class="kw">let </span>namespace = NamespaceDef::construct(<span class="kw-2">&amp;</span>first)<span class="question-mark">?</span>;
+        <span class="kw">let </span>parent_path = first
             .as_ref()
             .map(|p| <span class="self">Self</span>::get_parent(p))
             .unwrap_or_else(|| PathBuf::from(<span class="string">&quot;.&quot;</span>));
 
         <span class="comment">// Set of current dependencies
-        </span><span class="kw">let </span><span class="kw-2">mut </span>dependencies: Vec&lt;PathBuf&gt; = Vec::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>dependencies: Vec&lt;PathBuf&gt; = files;
         <span class="comment">// Set of imports that have already been parsed once.
         </span><span class="kw">let </span><span class="kw-2">mut </span>already_imported: HashSet&lt;PathBuf&gt; = HashSet::new();
 
