@@ -1662,7 +1662,7 @@
     <span class="kw">fn </span>block_string(input: Node) -&gt; ParseResult&lt;String&gt; {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             input.into_children();
-            [block_char(c)..] =&gt; c.collect::&lt;String&gt;()
+            [block_char(c)..] =&gt; c.collect::&lt;String&gt;().trim().to_string()
         ))
     }
 

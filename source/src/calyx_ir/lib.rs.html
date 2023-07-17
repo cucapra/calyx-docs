@@ -53,6 +53,7 @@
 <span id="53">53</span>
 <span id="54">54</span>
 <span id="55">55</span>
+<span id="56">56</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Internal representation for the [Calyx compiler](https://calyxir.org).
 //!
 //! The representation is generated from the frontend AST.
@@ -81,7 +82,7 @@
 <span class="kw">pub use </span>calyx_utils::{GetName, Id};
 <span class="kw">pub use </span>common::{RRC, WRC};
 <span class="kw">pub use </span>component::{Component, IdList};
-<span class="kw">pub use </span>context::{BackendConf, Context, LibrarySignatures};
+<span class="kw">pub use </span>context::{BackendConf, Context};
 <span class="kw">pub use </span>control::{
     Cloner, Control, Empty, Enable, GenericControl, If, Invoke, Par, Seq,
     StaticControl, StaticEnable, StaticIf, StaticInvoke, StaticPar,
@@ -100,7 +101,8 @@
 <span class="comment">// Re-export types from the frontend.
 </span><span class="kw">pub use </span>calyx_frontend::{
     Attribute, Attributes, BoolAttr, Direction, GetAttributes, InternalAttr,
-    NumAttr, PortDef, Primitive, Width, DEPRECATED_ATTRIBUTES,
+    LibrarySignatures, NumAttr, PortDef, Primitive, PrimitiveInfo, Width,
+    DEPRECATED_ATTRIBUTES,
 };
 
 <span class="doccomment">/// Module to transform AST programs into IR.
