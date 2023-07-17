@@ -191,6 +191,12 @@
 <span id="191">191</span>
 <span id="192">192</span>
 <span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::passes::math_utilities::get_bit_width_from;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, guard, structure, RRC};
 <span class="kw">use </span>ir::Nothing;
@@ -276,6 +282,9 @@
             ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
                 <span class="string">&quot;Invoke statements should have been compiled away.&quot;
             </span>),
+            ir::Control::Repeat(<span class="kw">_</span>) =&gt; {
+                <span class="macro">unreachable!</span>(<span class="string">&quot;Repeats should&#39;ve been compiled away.&quot;</span>)
+            }
             ir::Control::Empty(<span class="kw">_</span>) =&gt; {
                 <span class="macro">unreachable!</span>(<span class="string">&quot;Empty blocks should have been compiled away&quot;</span>)
             }
@@ -354,6 +363,9 @@
             }
             ir::Control::Invoke(<span class="kw">_</span>) =&gt; {
                 <span class="macro">unreachable!</span>(<span class="string">&quot;Invoke should have been compiled away&quot;</span>)
+            }
+            ir::Control::Repeat(<span class="kw">_</span>) =&gt; {
+                <span class="macro">unreachable!</span>(<span class="string">&quot;Repeat should have been compiled away&quot;</span>)
             }
             ir::Control::Empty(<span class="kw">_</span>) =&gt; {
                 <span class="macro">unreachable!</span>(<span class="string">&quot;Empty block in control_exits&quot;</span>)

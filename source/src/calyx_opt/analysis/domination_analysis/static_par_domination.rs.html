@@ -315,6 +315,7 @@
 <span id="315">315</span>
 <span id="316">316</span>
 <span id="317">317</span>
+<span id="318">318</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ControlId;
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>std::{
@@ -623,7 +624,8 @@
                 <span class="self">self</span>.build_time_map(tbranch);
                 <span class="self">self</span>.build_time_map(fbranch);
             }
-            ir::Control::While(ir::While { body, .. }) =&gt; {
+            ir::Control::While(ir::While { body, .. })
+            | ir::Control::Repeat(ir::Repeat { body, .. }) =&gt; {
                 <span class="self">self</span>.build_time_map(body);
             }
             ir::Control::Static(sc) =&gt; {

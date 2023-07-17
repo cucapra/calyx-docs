@@ -1175,6 +1175,19 @@
 <span id="1175">1175</span>
 <span id="1176">1176</span>
 <span id="1177">1177</span>
+<span id="1178">1178</span>
+<span id="1179">1179</span>
+<span id="1180">1180</span>
+<span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
+<span id="1184">1184</span>
+<span id="1185">1185</span>
+<span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
+<span id="1189">1189</span>
+<span id="1190">1190</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Canonical, Cell, CellType,
     Component, Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
@@ -2069,6 +2082,7 @@
         | ast::Control::If { .. }
         | ast::Control::While { .. }
         | ast::Control::Seq { .. }
+        | ast::Control::Repeat { .. }
         | ast::Control::Invoke { .. } =&gt; {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(
                 <span class="string">&quot;found dynamic control in static context&quot;</span>.to_string(),
@@ -2339,6 +2353,18 @@
                     Direction::Output,
                 )<span class="question-mark">?</span>,
                 group,
+                Box::new(build_control(<span class="kw-2">*</span>body, sig_ctx, builder)<span class="question-mark">?</span>),
+            );
+            <span class="kw-2">*</span>con.get_mut_attributes() = attributes;
+            con
+        }
+        ast::Control::Repeat {
+            num_repeats,
+            body,
+            attributes,
+        } =&gt; {
+            <span class="kw">let </span><span class="kw-2">mut </span>con = Control::repeat(
+                num_repeats,
                 Box::new(build_control(<span class="kw-2">*</span>body, sig_ctx, builder)<span class="question-mark">?</span>),
             );
             <span class="kw-2">*</span>con.get_mut_attributes() = attributes;

@@ -641,6 +641,16 @@
 <span id="641">641</span>
 <span id="642">642</span>
 <span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Calculate the reaching definitions in a control program.
 </span><span class="kw">use </span><span class="kw">crate</span>::analysis::ReadWriteSet;
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
@@ -1033,6 +1043,7 @@
 
             (<span class="kw-2">&amp;</span>final_def | <span class="kw-2">&amp;</span>post_cond2_def, final_kill)
         }
+
         ir::StaticControl::Seq(ir::StaticSeq { stmts, .. }) =&gt; stmts
             .iter()
             .fold((reach, killed), |(acc, killed), inner_c| {
@@ -1129,6 +1140,49 @@
     }
 }
 
+<span class="comment">// Handles both `repeat` and `while` bodies when building reaching defs.
+</span><span class="kw">fn </span>handle_repeat_while_body(
+    body: <span class="kw-2">&amp;</span>ir::Control,
+    reach: DefSet,
+    killed: KilledSet,
+    rd: <span class="kw-2">&amp;mut </span>ReachingDefinitionAnalysis,
+    counter: <span class="kw-2">&amp;mut </span>u64,
+) -&gt; (DefSet, KilledSet) {
+    <span class="kw">let </span>(post_cond_def, post_cond_killed) = build_reaching_def(
+        <span class="kw-2">&amp;</span>ir::Control::empty(),
+        reach.clone(),
+        killed,
+        rd,
+        counter,
+    );
+
+    <span class="kw">let </span>(round_1_def, <span class="kw-2">mut </span>round_1_killed) =
+        build_reaching_def(body, post_cond_def, post_cond_killed, rd, counter);
+
+    remove_entries_defined_by(<span class="kw-2">&amp;mut </span>round_1_killed, <span class="kw-2">&amp;</span>reach);
+
+    <span class="kw">let </span>(post_cond2_def, post_cond2_killed) = build_reaching_def(
+        <span class="kw-2">&amp;</span>ir::Control::empty(),
+        <span class="kw-2">&amp;</span>round_1_def | <span class="kw-2">&amp;</span>reach,
+        round_1_killed,
+        rd,
+        counter,
+    );
+    <span class="comment">// Run the analysis a second time to get the fixed point of the
+    // while loop using the defsets calculated during the first iteration
+    </span><span class="kw">let </span>(final_def, <span class="kw-2">mut </span>final_kill) = build_reaching_def(
+        body,
+        post_cond2_def.clone(),
+        post_cond2_killed,
+        rd,
+        counter,
+    );
+
+    remove_entries_defined_by(<span class="kw-2">&amp;mut </span>final_kill, <span class="kw-2">&amp;</span>post_cond2_def);
+
+    (<span class="kw-2">&amp;</span>final_def | <span class="kw-2">&amp;</span>post_cond2_def, final_kill)
+}
+
 <span class="kw">fn </span>build_reaching_def(
     c: <span class="kw-2">&amp;</span>ir::Control,
     reach: DefSet,
@@ -1198,44 +1252,7 @@
             (<span class="kw-2">&amp;</span>t_case_def | <span class="kw-2">&amp;</span>f_case_def, <span class="kw-2">&amp;</span>t_case_killed | <span class="kw-2">&amp;</span>f_case_killed)
         }
         ir::Control::While(ir::While { body, .. }) =&gt; {
-            <span class="kw">let </span>(post_cond_def, post_cond_killed) = build_reaching_def(
-                <span class="kw-2">&amp;</span>ir::Control::empty(),
-                reach.clone(),
-                killed,
-                rd,
-                counter,
-            );
-
-            <span class="kw">let </span>(round_1_def, <span class="kw-2">mut </span>round_1_killed) = build_reaching_def(
-                body,
-                post_cond_def,
-                post_cond_killed,
-                rd,
-                counter,
-            );
-
-            remove_entries_defined_by(<span class="kw-2">&amp;mut </span>round_1_killed, <span class="kw-2">&amp;</span>reach);
-
-            <span class="kw">let </span>(post_cond2_def, post_cond2_killed) = build_reaching_def(
-                <span class="kw-2">&amp;</span>ir::Control::empty(),
-                <span class="kw-2">&amp;</span>round_1_def | <span class="kw-2">&amp;</span>reach,
-                round_1_killed,
-                rd,
-                counter,
-            );
-            <span class="comment">// Run the analysis a second time to get the fixed point of the
-            // while loop using the defsets calculated during the first iteration
-            </span><span class="kw">let </span>(final_def, <span class="kw-2">mut </span>final_kill) = build_reaching_def(
-                body,
-                post_cond2_def.clone(),
-                post_cond2_killed,
-                rd,
-                counter,
-            );
-
-            remove_entries_defined_by(<span class="kw-2">&amp;mut </span>final_kill, <span class="kw-2">&amp;</span>post_cond2_def);
-
-            (<span class="kw-2">&amp;</span>final_def | <span class="kw-2">&amp;</span>post_cond2_def, final_kill)
+            handle_repeat_while_body(body, reach, killed, rd, counter)
         }
         ir::Control::Invoke(invoke) =&gt; {
             <span class="kw-2">*</span>counter += <span class="number">1</span>;
@@ -1279,6 +1296,9 @@
             en.group.borrow().name(),
         ),
         ir::Control::Empty(<span class="kw">_</span>) =&gt; (reach, killed),
+        ir::Control::Repeat(ir::Repeat { body, .. }) =&gt; {
+            handle_repeat_while_body(body, reach, killed, rd, counter)
+        }
         ir::Control::Static(sc) =&gt; {
             build_reaching_def_static(sc, reach, killed, rd, counter)
         }

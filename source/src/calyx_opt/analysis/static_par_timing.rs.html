@@ -358,6 +358,7 @@
 <span id="358">358</span>
 <span id="359">359</span>
 <span id="360">360</span>
+<span id="361">361</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::LiveRangeAnalysis;
 <span class="kw">use </span><span class="kw">crate</span>::analysis::ControlId;
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
@@ -709,7 +710,8 @@
                 <span class="self">self</span>.build_time_map(tbranch, live);
                 <span class="self">self</span>.build_time_map(fbranch, live);
             }
-            ir::Control::While(ir::While { body, .. }) =&gt; {
+            ir::Control::While(ir::While { body, .. })
+            | ir::Control::Repeat(ir::Repeat { body, .. }) =&gt; {
                 <span class="self">self</span>.build_time_map(body, live);
             }
             ir::Control::Static(sc) =&gt; {

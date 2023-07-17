@@ -675,6 +675,35 @@
 <span id="675">675</span>
 <span id="676">676</span>
 <span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a visitor for `ir::Control` programs.
 //! Program passes implemented as the Visitor are directly invoked on
 //! [`ir::Context`] to compile every [`ir::Component`] using the pass.
@@ -1012,6 +1041,28 @@
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
+    <span class="doccomment">/// Executed before visiting the children of a [ir::Repeat] node.
+    </span><span class="kw">fn </span>start_repeat(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        _s: <span class="kw-2">&amp;mut </span>ir::Repeat,
+        _comp: <span class="kw-2">&amp;mut </span>Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
+    <span class="doccomment">/// Executed after visiting the children of a [ir::Repeat] node.
+    </span><span class="kw">fn </span>finish_repeat(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        _s: <span class="kw-2">&amp;mut </span>ir::Repeat,
+        _comp: <span class="kw-2">&amp;mut </span>Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
     <span class="doccomment">/// Executed before visiting the contents of an [ir::StaticControl] node.
     </span><span class="kw">fn </span>start_static_control(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1233,6 +1284,13 @@
                 </span>.pop()
                 .and_then(|| {
                     visitor.finish_while(ctrl, component, sigs, comps)
+                })<span class="question-mark">?</span>,
+            Control::Repeat(ctrl) =&gt; visitor
+                .start_repeat(ctrl, component, sigs, comps)<span class="question-mark">?
+                </span>.and_then(|| ctrl.body.visit(visitor, component, sigs, comps))<span class="question-mark">?
+                </span>.pop()
+                .and_then(|| {
+                    visitor.finish_repeat(ctrl, component, sigs, comps)
                 })<span class="question-mark">?</span>,
             Control::Enable(ctrl) =&gt; {
                 visitor.enable(ctrl, component, sigs, comps)<span class="question-mark">?

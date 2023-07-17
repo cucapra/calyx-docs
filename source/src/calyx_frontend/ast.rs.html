@@ -447,6 +447,18 @@
 <span id="447">447</span>
 <span id="448">448</span>
 <span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx
 </span><span class="kw">use </span><span class="kw">super</span>::parser;
 <span class="kw">use crate</span>::{Attributes, PortDef, Primitive};
@@ -780,6 +792,17 @@
         <span class="doccomment">/// Attributes
         </span>attributes: Attributes,
     },
+    <span class="doccomment">/// Static Repeat (essentially a bounded while loop w/o a condition)
+    </span>Repeat {
+        <span class="doccomment">/// Control for the true branch.
+        </span>num_repeats: u64,
+
+        <span class="doccomment">/// Control for the true branch.
+        </span>body: Box&lt;Control&gt;,
+
+        <span class="doccomment">/// Attributes
+        </span>attributes: Attributes,
+    },
     <span class="doccomment">/// Runs the control for a list of subcomponents.
     </span>Enable {
         <span class="doccomment">/// Group to be enabled
@@ -885,6 +908,7 @@
             Control::Par { attributes, .. } =&gt; attributes,
             Control::If { attributes, .. } =&gt; attributes,
             Control::While { attributes, .. } =&gt; attributes,
+            Control::Repeat { attributes, .. } =&gt; attributes,
             Control::Enable { attributes, .. } =&gt; attributes,
             Control::Invoke { attributes, .. } =&gt; attributes,
             Control::Empty { attributes, .. } =&gt; attributes,

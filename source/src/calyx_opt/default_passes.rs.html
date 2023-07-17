@@ -173,14 +173,17 @@
 <span id="173">173</span>
 <span id="174">174</span>
 <span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     AttributePromotion, Canonicalize, CellShare, ClkInsertion, CollapseControl,
-    CombProp, CompileEmpty, CompileInvoke, CompileRef, CompileStatic,
-    CompileSync, CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
-    DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, DiscoverExternal,
-    Externalize, GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner,
-    InferShare, LowerGuards, MergeAssign, Papercut, ParToSeq,
+    CombProp, CompileEmpty, CompileInvoke, CompileRef, CompileRepeat,
+    CompileStatic, CompileSync, CompileSyncWithoutSyncReg, ComponentInliner,
+    DataPathInfer, DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval,
+    DiscoverExternal, Externalize, GoInsertion, GroupToInvoke, GroupToSeq,
+    HoleInliner, InferShare, LowerGuards, MergeAssign, Papercut, ParToSeq,
     RegisterUnsharing, RemoveIds, ResetInsertion, SimplifyStaticGuards,
     SimplifyWithControl, StaticInliner, StaticPromotion, SynthesisPapercut,
     TopDownCompileControl, TopDownStaticTiming, UnrollBounded, WellFormed,
@@ -220,6 +223,7 @@
         </span>pm.register_pass::&lt;StaticInliner&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileStatic&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileInvoke&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;CompileRepeat&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;SimplifyWithControl&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;TopDownStaticTiming&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;TopDownCompileControl&gt;()<span class="question-mark">?</span>;
@@ -255,7 +259,8 @@
             <span class="string">&quot;pre-opt&quot;</span>,
             [
                 DataPathInfer,
-                CompileSyncWithoutSyncReg,
+                CollapseControl, <span class="comment">// Run it twice: once at beginning of pre-opt, once at end.
+                </span>CompileSyncWithoutSyncReg,
                 GroupToSeq,
                 DeadAssignmentRemoval,
                 GroupToInvoke, <span class="comment">// Creates Dead Groups potentially
@@ -268,6 +273,7 @@
                 </span>CompileInvoke, <span class="comment">// creates dead comb groups
                 </span>AttributePromotion,
                 StaticPromotion,
+                CompileRepeat,
                 DeadGroupRemoval, <span class="comment">// Since previous passes potentially create dead groups
                 </span>CollapseControl,
             ]

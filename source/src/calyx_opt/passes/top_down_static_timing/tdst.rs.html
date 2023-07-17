@@ -924,6 +924,10 @@
 <span id="924">924</span>
 <span id="925">925</span>
 <span id="926">926</span>
+<span id="927">927</span>
+<span id="928">928</span>
+<span id="929">929</span>
+<span id="930">930</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::compute_states::{END, START};
 <span class="kw">use </span><span class="kw">crate</span>::analysis::WithStatic;
 <span class="kw">use </span><span class="kw">crate</span>::passes::top_down_static_timing::{ComputeStates, Normalize};
@@ -1295,6 +1299,9 @@
             ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
                 <span class="string">&quot;`invoke` statements should have been compiled away. Run `{}` before this pass.&quot;</span>,
                 passes::CompileInvoke::name()),
+            ir::Control::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;`repeat` statements should have been compiled away. Run `{}` before this pass.&quot;</span>,
+                    passes::CompileRepeat::name()),
             ir::Control::Empty(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
                 <span class="string">&quot;`empty` statements should have been compiled away. Run `{}` before this pass.&quot;</span>,
                 passes::CompileEmpty::name()),
@@ -1749,6 +1756,7 @@
                 ir::Control::Enable(<span class="kw">_</span>)
                 | ir::Control::Invoke(<span class="kw">_</span>)
                 | ir::Control::Static(<span class="kw">_</span>)
+                | ir::Control::Repeat(<span class="kw">_</span>)
                 | ir::Control::Empty(<span class="kw">_</span>) =&gt; {}
             }
         }

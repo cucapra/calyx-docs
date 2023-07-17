@@ -267,6 +267,9 @@
 <span id="267">267</span>
 <span id="268">268</span>
 <span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::{iter, rc::Rc};
@@ -529,6 +532,9 @@
                     ));
                 }
                 (reads, writes)
+            }
+            ir::Control::Repeat(ir::Repeat { body, .. }) =&gt; {
+                <span class="self">Self</span>::control_port_read_write_set(body)
             }
             ir::Control::Static(sc) =&gt; {
                 <span class="self">Self</span>::control_port_read_write_set_static(sc)

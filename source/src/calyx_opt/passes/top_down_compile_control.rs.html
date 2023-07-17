@@ -1017,6 +1017,9 @@
 <span id="1017">1017</span>
 <span id="1018">1018</span>
 <span id="1019">1019</span>
+<span id="1020">1020</span>
+<span id="1021">1021</span>
+<span id="1022">1022</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::passes;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
@@ -1089,6 +1092,7 @@
                 (s, g &amp; !ir::Guard::from(port.clone()))
             }));
         },
+        ir::Control::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`repeat` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileRepeat::name()),
         ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`invoke` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileInvoke::name()),
         ir::Control::Par(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
         ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot; static control should have been compiled away. Run the static compilation passes before this pass&quot;</span>)
@@ -1218,6 +1222,7 @@
             }
         }
         ir::Control::Empty(<span class="kw">_</span>) =&gt; cur_state,
+        ir::Control::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`repeat` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileRepeat::name()),
         ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`invoke` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileInvoke::name()),
         ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;static control should have been compiled away. Run the static compilation passes before this pass&quot;</span>)
     }
@@ -1468,6 +1473,7 @@
             <span class="self">self</span>.calc_while_recur(while_stmt, preds, early_transitions)
         }
         ir::Control::Par(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
+        ir::Control::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`repeat` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileRepeat::name()),
         ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`invoke` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileInvoke::name()),
         ir::Control::Empty(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;`empty` statements should have been compiled away. Run `{}` before this pass.&quot;</span>, passes::CompileEmpty::name()),
         ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;static control should have been compiled away. Run the static compilation passes before this pass&quot;</span>)

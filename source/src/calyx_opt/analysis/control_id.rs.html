@@ -299,6 +299,10 @@
 <span id="299">299</span>
 <span id="300">300</span>
 <span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 
 <span class="kw">const </span>NODE_ID: ir::Attribute =
@@ -469,6 +473,9 @@
             }
             ir::Control::While(ir::While {
                 body, attributes, ..
+            })
+            | ir::Control::Repeat(ir::Repeat {
+                body, attributes, ..
             }) =&gt; {
                 attributes.insert(NODE_ID, cur_state);
                 cur_state += <span class="number">1</span>;
@@ -583,7 +590,8 @@
                 new_state = <span class="self">Self</span>::add_static_enable_ids(fbranch, cur_state);
                 new_state
             }
-            ir::Control::While(ir::While { body, .. }) =&gt; {
+            ir::Control::While(ir::While { body, .. })
+            | ir::Control::Repeat(ir::Repeat { body, .. }) =&gt; {
                 <span class="self">Self</span>::add_static_enable_ids(body, cur_state)
             }
             ir::Control::Static(s) =&gt; {

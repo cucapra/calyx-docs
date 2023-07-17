@@ -469,6 +469,13 @@ value of <code>port</code>.</p>
 <p><strong>Well-formedness</strong>: The combinational group is considered active during the execution of the while
 loop and therefore should not have conflicting assignments with <code>body_c</code>.</p>
 </blockquote>
+<h3 id="repeat"><a class="header" href="#repeat"><code>repeat</code></a></h3>
+<p>The syntax is:</p>
+<pre><code>repeat &lt;num_repeats&gt; {
+  body_c
+}
+</code></pre>
+<p>Repeatedly executes the control program <code>body_c</code> <code>num_repeat</code> times in a row. </p>
 <h2 id="the-go-done-interface"><a class="header" href="#the-go-done-interface">The <code>go</code>-<code>done</code> Interface</a></h2>
 <p>By default, Calyx components implement a one-sided ready-valid interface called
 <em>the <code>go</code>-<code>done</code> interface</em>.

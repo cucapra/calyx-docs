@@ -114,6 +114,7 @@
 <span id="114">114</span>
 <span id="115">115</span>
 <span id="116">116</span>
+<span id="117">117</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes};
 <span class="kw">use </span>std::{cmp, iter};
 
@@ -171,6 +172,7 @@
             ir::Control::Invoke(<span class="kw">_</span>)
             | ir::Control::Enable(<span class="kw">_</span>)
             | ir::Control::Static(<span class="kw">_</span>)
+            | ir::Control::Repeat(<span class="kw">_</span>)
             | ir::Control::Empty(<span class="kw">_</span>) =&gt; {}
         }
     }

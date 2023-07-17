@@ -1285,6 +1285,11 @@
 <span id="1285">1285</span>
 <span id="1286">1286</span>
 <span id="1287">1287</span>
+<span id="1288">1288</span>
+<span id="1289">1289</span>
+<span id="1290">1290</span>
+<span id="1291">1291</span>
+<span id="1292">1292</span>
 </pre><pre class="rust"><code><span class="attribute">#![allow(clippy::upper_case_acronyms)]
 
 </span><span class="doccomment">//! Parser for Calyx programs.
@@ -2280,6 +2285,11 @@
         <span class="kw">let </span>span = <span class="self">Self</span>::get_span(<span class="kw-2">&amp;</span>input);
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             input.into_children();
+            [at_attributes(attrs), bitwidth(num_repeats) , block(stmt)] =&gt; ast::Control::Repeat {
+                num_repeats,
+                body: Box::new(stmt),
+                attributes: attrs.add_span(span),
+            },
             [at_attributes(attrs), static_word(<span class="kw">_</span>), bitwidth(num_repeats) , block(stmt)] =&gt; ast::Control::StaticRepeat {
                 num_repeats,
                 body: Box::new(stmt),

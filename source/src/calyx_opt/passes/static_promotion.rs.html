@@ -776,6 +776,27 @@
 <span id="776">776</span>
 <span id="777">777</span>
 <span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphAnalysis, IntoStatic, ReadWriteSet};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
@@ -1532,24 +1553,45 @@
         <span class="kw">if </span>s.body.is_static() {
             <span class="comment">// checks body is static and we have an @bound annotation
             </span><span class="kw">if let </span><span class="prelude-val">Some</span>(num_repeats) = s.attributes.get(ir::NumAttr::Bound) {
-                <span class="comment">// need to do this weird thing to get the while body
-                </span><span class="kw">let </span>empty = Box::new(ir::Control::empty());
-                <span class="kw">let </span>while_body = std::mem::replace(<span class="kw-2">&amp;mut </span>s.body, empty);
-                <span class="kw">if let </span>ir::Control::Static(sc) = <span class="kw-2">*</span>while_body {
-                    <span class="kw">let </span>static_repeat =
-                        ir::StaticControl::Repeat(ir::StaticRepeat {
-                            latency: num_repeats * sc.get_latency(),
-                            attributes: s.attributes.clone(),
-                            body: Box::new(sc),
-                            num_repeats,
-                        });
-                    <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Change(Box::new(ir::Control::Static(
-                        static_repeat,
-                    ))));
-                } <span class="kw">else </span>{
+                <span class="kw">let </span>ir::Control::Static(sc) = s.body.take_control() <span class="kw">else </span>{
                     <span class="macro">unreachable!</span>(<span class="string">&quot;already checked that body is static&quot;</span>);
-                }
+                };
+                <span class="kw">let </span>static_repeat =
+                    ir::StaticControl::Repeat(ir::StaticRepeat {
+                        latency: num_repeats * sc.get_latency(),
+                        attributes: s.attributes.clone(),
+                        body: Box::new(sc),
+                        num_repeats,
+                    });
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Change(Box::new(ir::Control::Static(
+                    static_repeat,
+                ))));
             }
+        }
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
+    <span class="comment">// upgrades repeats with static bodies to static repeats
+    </span><span class="kw">fn </span>finish_repeat(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::Repeat,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">if </span>s.body.is_static() {
+            <span class="kw">let </span>ir::Control::Static(sc) = s.body.take_control() <span class="kw">else </span>{
+                <span class="macro">unreachable!</span>(<span class="string">&quot;already checked that body is static&quot;</span>);
+            };
+            <span class="kw">let </span>static_repeat = ir::StaticControl::Repeat(ir::StaticRepeat {
+                latency: s.num_repeats * sc.get_latency(),
+                attributes: s.attributes.clone(),
+                body: Box::new(sc),
+                num_repeats: s.num_repeats,
+            });
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Change(Box::new(ir::Control::Static(
+                static_repeat,
+            ))));
         }
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
