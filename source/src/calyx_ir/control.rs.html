@@ -830,6 +830,22 @@
 <span id="830">830</span>
 <span id="831">831</span>
 <span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_frontend::Attribute;
 
 <span class="kw">use </span><span class="kw">super</span>::StaticGroup;
@@ -841,6 +857,7 @@
 
 <span class="doccomment">/// Data for the `seq` control statement.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>Seq {
     <span class="doccomment">/// List of `Control` statements to run in sequence.
     </span><span class="kw">pub </span>stmts: Vec&lt;Control&gt;,
@@ -858,6 +875,7 @@
 
 <span class="doccomment">/// Data for the `static seq` control statement.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>StaticSeq {
     <span class="doccomment">/// List of `StaticControl` statements to run in sequence.
     </span><span class="kw">pub </span>stmts: Vec&lt;StaticControl&gt;,
@@ -877,6 +895,7 @@
 
 <span class="doccomment">/// Data for the `par` control statement.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>Par {
     <span class="doccomment">/// List of `Control` statements to run in parallel.
     </span><span class="kw">pub </span>stmts: Vec&lt;Control&gt;,
@@ -894,6 +913,7 @@
 
 <span class="comment">// Data for the `static par` control statement.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>StaticPar {
     <span class="doccomment">/// List of `StaticControl` statements to run in parallel.
     </span><span class="kw">pub </span>stmts: Vec&lt;StaticControl&gt;,
@@ -913,6 +933,7 @@
 
 <span class="doccomment">/// Data for the `if` control statement.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>If {
     <span class="doccomment">/// Port that connects the conditional check.
     </span><span class="kw">pub </span>port: RRC&lt;Port&gt;,
@@ -941,6 +962,7 @@
 
 <span class="doccomment">/// Data for the `static if` control statement.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>StaticIf {
     <span class="doccomment">/// Port that connects the conditional check.
     </span><span class="kw">pub </span>port: RRC&lt;Port&gt;,
@@ -971,6 +993,7 @@
 
 <span class="doccomment">/// Data for the `while` control statement.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>While {
     <span class="doccomment">/// Port that connects the conditional check.
     </span><span class="kw">pub </span>port: RRC&lt;Port&gt;,
@@ -994,6 +1017,7 @@
 <span class="doccomment">/// Data for the Dynamic `Repeat` control statement. Repeats the body of the loop
 /// a given number times.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>Repeat {
     <span class="doccomment">/// Attributes
     </span><span class="kw">pub </span>attributes: Attributes,
@@ -1014,6 +1038,7 @@
 
 <span class="doccomment">/// Data for the `StaticRepeat` control statement. Essentially a static while loop.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>StaticRepeat {
     <span class="doccomment">/// Attributes
     </span><span class="kw">pub </span>attributes: Attributes,
@@ -1036,6 +1061,7 @@
 
 <span class="doccomment">/// Data for the `enable` control statement.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>Enable {
     <span class="doccomment">/// List of components to run.
     </span><span class="kw">pub </span>group: RRC&lt;Group&gt;,
@@ -1054,6 +1080,7 @@
 
 <span class="doccomment">/// Data for the `enable` control for a static group.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>StaticEnable {
     <span class="doccomment">/// List of components to run.
     </span><span class="kw">pub </span>group: RRC&lt;StaticGroup&gt;,
@@ -1082,6 +1109,7 @@
 
 <span class="doccomment">/// Data for an `invoke` control statement.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>Invoke {
     <span class="doccomment">/// Cell that is being invoked.
     </span><span class="kw">pub </span>comp: RRC&lt;Cell&gt;,
@@ -1108,6 +1136,7 @@
 
 <span class="doccomment">/// Data for a `StaticInvoke` control statement
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>StaticInvoke {
     <span class="doccomment">/// Cell that is being invoked.
     </span><span class="kw">pub </span>comp: RRC&lt;Cell&gt;,
@@ -1134,12 +1163,14 @@
 
 <span class="doccomment">/// Data for the `empty` control statement.
 </span><span class="attribute">#[derive(Debug, Default)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>Empty {
     <span class="kw">pub </span>attributes: Attributes,
 }
 
 <span class="doccomment">/// Control AST nodes.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub enum </span>Control {
     <span class="doccomment">/// Represents sequential composition of control statements.
     </span>Seq(Seq),
@@ -1163,6 +1194,7 @@
 
 <span class="doccomment">/// Control AST nodes.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub enum </span>StaticControl {
     <span class="doccomment">/// Essentially a Static While Loop
     </span>Repeat(StaticRepeat),

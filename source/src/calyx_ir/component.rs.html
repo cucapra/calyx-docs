@@ -414,6 +414,8 @@
 <span id="414">414</span>
 <span id="415">415</span>
 <span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attribute, Attributes, BoolAttr, Builder, Cell, CellType,
     CombGroup, Control, Direction, GetName, Group, Id, NumAttr, PortDef,
@@ -444,6 +446,7 @@
 
 <span class="doccomment">/// In memory representation of a Component.
 </span><span class="attribute">#[derive(Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>Component {
     <span class="doccomment">/// Name of the component.
     </span><span class="kw">pub </span>name: Id,
@@ -472,6 +475,7 @@
     <span class="comment">///// Internal structures
     </span><span class="doccomment">/// Namegenerator that contains the names currently defined in this
     /// component (cell and group names).
+    </span><span class="attribute">#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, serde(skip))]
     </span>namegen: NameGenerator,
 }
 

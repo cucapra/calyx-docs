@@ -211,6 +211,20 @@
 <span id="211">211</span>
 <span id="212">212</span>
 <span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_utils::{CalyxResult, Error, Id};
 <span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>strum::EnumCount;
@@ -231,6 +245,7 @@
     Eq,
     Debug,
 )]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 #[repr(u8)]
 </span><span class="doccomment">/// Attributes that are only allowed to take boolean values.
 </span><span class="kw">pub enum </span>BoolAttr {
@@ -286,6 +301,7 @@
 }
 
 <span class="attribute">#[derive(AsRefStr, EnumString, Clone, Copy, Hash, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="doccomment">/// Attributes that can take numeric values
 </span><span class="kw">pub enum </span>NumAttr {
     <span class="comment">// ============ numeric attributes ============
@@ -327,6 +343,7 @@
 }
 
 <span class="attribute">#[derive(AsRefStr, Clone, Copy, Hash, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 #[allow(non_camel_case_types)]
 </span><span class="doccomment">/// Internal attributes that cannot be parsed back from the IL.
 </span><span class="kw">pub enum </span>InternalAttr {
@@ -346,6 +363,7 @@
 }
 
 <span class="attribute">#[derive(Clone, Copy, Hash, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="doccomment">/// Defines the known attributes that can be attached to IR nodes.
 /// All caps names represent attributes that are internal to the compiler and
 /// cannot be parsed back.
@@ -422,6 +440,16 @@
                 <span class="prelude-val">None
             </span>}
         })
+    }
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;serialize&quot;</span>)]
+</span><span class="kw">impl </span>serde::Serialize <span class="kw">for </span>InlineAttributes {
+    <span class="kw">fn </span>serialize&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, ser: S) -&gt; <span class="prelude-ty">Result</span>&lt;S::Ok, S::Error&gt;
+    <span class="kw">where
+        </span>S: serde::Serializer,
+    {
+        <span class="self">self</span>.to_owned().attrs.serialize(ser)
     }
 }
 </code></pre></div>

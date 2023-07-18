@@ -145,6 +145,17 @@
 <span id="145">145</span>
 <span id="146">146</span>
 <span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::Attribute;
 <span class="kw">use </span><span class="kw">crate</span>::InlineAttributes;
 <span class="kw">use </span>calyx_utils::{CalyxResult, GPosIdx, WithPos};
@@ -160,6 +171,7 @@
 
 <span class="doccomment">/// Attributes associated with a specific IR structure.
 </span><span class="attribute">#[derive(Default, Debug, Clone)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>Attributes {
     <span class="doccomment">/// Inlined attributes
     </span>inl: InlineAttributes,
@@ -290,6 +302,16 @@
             .chain(<span class="self">self</span>.inl.iter().map(|k| fmt(k.as_ref().to_string(), <span class="number">1</span>)))
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
             .join(sep)
+    }
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;serialize&quot;</span>)]
+</span><span class="kw">impl </span>serde::Serialize <span class="kw">for </span>HeapAttrInfo {
+    <span class="kw">fn </span>serialize&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, ser: S) -&gt; <span class="prelude-ty">Result</span>&lt;S::Ok, S::Error&gt;
+    <span class="kw">where
+        </span>S: serde::Serializer,
+    {
+        ser.collect_map(<span class="self">self</span>.to_owned().attrs.iter())
     }
 }
 </code></pre></div>

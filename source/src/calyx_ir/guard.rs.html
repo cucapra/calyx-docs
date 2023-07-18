@@ -640,6 +640,10 @@
 <span id="640">640</span>
 <span id="641">641</span>
 <span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{NumAttr, Port, RRC};
 <span class="kw">use </span>calyx_utils::Error;
 <span class="kw">use </span>std::fmt::Debug;
@@ -648,6 +652,7 @@
 <span class="kw">use </span>std::{cmp::Ordering, hash::Hash, rc::Rc};
 
 <span class="attribute">#[derive(Debug, Clone, Default, Eq, PartialEq)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>Nothing;
 
 <span class="kw">impl </span>ToString <span class="kw">for </span>Nothing {
@@ -658,6 +663,7 @@
 
 <span class="doccomment">/// Comparison operations that can be performed between ports by [Guard::CompOp].
 </span><span class="attribute">#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub enum </span>PortComp {
     <span class="doccomment">/// p1 == p2
     </span>Eq,
@@ -675,6 +681,7 @@
 
 <span class="doccomment">/// An assignment guard which has pointers to the various ports from which it reads.
 </span><span class="attribute">#[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub enum </span>Guard&lt;T&gt; {
     <span class="doccomment">/// Represents `c1 || c2`.
     </span>Or(Box&lt;Guard&lt;T&gt;&gt;, Box&lt;Guard&lt;T&gt;&gt;),
@@ -694,6 +701,7 @@
 }
 
 <span class="attribute">#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>StaticTiming {
     interval: (u64, u64),
 }

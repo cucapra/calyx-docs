@@ -204,6 +204,7 @@
 <span id="204">204</span>
 <span id="205">205</span>
 <span id="206">206</span>
+<span id="207">207</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::Attributes;
 <span class="kw">use </span><span class="kw">crate</span>::Attribute;
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, GetName, Id};
@@ -391,6 +392,7 @@
 
 <span class="doccomment">/// Direction of a port on a cell.
 </span><span class="attribute">#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub enum </span>Direction {
     <span class="doccomment">/// Input port.
     </span>Input,
