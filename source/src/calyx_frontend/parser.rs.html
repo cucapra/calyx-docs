@@ -1290,6 +1290,35 @@
 <span id="1290">1290</span>
 <span id="1291">1291</span>
 <span id="1292">1292</span>
+<span id="1293">1293</span>
+<span id="1294">1294</span>
+<span id="1295">1295</span>
+<span id="1296">1296</span>
+<span id="1297">1297</span>
+<span id="1298">1298</span>
+<span id="1299">1299</span>
+<span id="1300">1300</span>
+<span id="1301">1301</span>
+<span id="1302">1302</span>
+<span id="1303">1303</span>
+<span id="1304">1304</span>
+<span id="1305">1305</span>
+<span id="1306">1306</span>
+<span id="1307">1307</span>
+<span id="1308">1308</span>
+<span id="1309">1309</span>
+<span id="1310">1310</span>
+<span id="1311">1311</span>
+<span id="1312">1312</span>
+<span id="1313">1313</span>
+<span id="1314">1314</span>
+<span id="1315">1315</span>
+<span id="1316">1316</span>
+<span id="1317">1317</span>
+<span id="1318">1318</span>
+<span id="1319">1319</span>
+<span id="1320">1320</span>
+<span id="1321">1321</span>
 </pre><pre class="rust"><code><span class="attribute">#![allow(clippy::upper_case_acronyms)]
 
 </span><span class="doccomment">//! Parser for Calyx programs.
@@ -1494,6 +1523,17 @@
 
     <span class="kw">fn </span>semi(_input: Node) -&gt; ParseResult&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn </span>comma_req(_input: Node) -&gt; ParseResult&lt;()&gt; {
+        <span class="prelude-val">Ok</span>(())
+    }
+    <span class="kw">fn </span>comma(input: Node) -&gt; ParseResult&lt;()&gt; {
+        <span class="macro">match_nodes!</span>(
+            input.clone().into_children();
+            [comma_req(<span class="kw">_</span>)] =&gt; <span class="prelude-val">Ok</span>(()),
+            [] =&gt; <span class="prelude-val">Err</span>(input.error(<span class="string">&quot;expected comma&quot;</span>))
+        )
     }
 
     <span class="kw">fn </span>comb(_input: Node) -&gt; ParseResult&lt;()&gt; {
@@ -1734,10 +1774,19 @@
     <span class="kw">fn </span>inputs(input: Node) -&gt; ParseResult&lt;Vec&lt;PortDef&lt;Width&gt;&gt;&gt; {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             input.into_children();
-            [io_port(ins)..] =&gt; {
-                ins.map(|(name, width, attributes)| PortDef {
+            [io_port((name, width, attributes))] =&gt; {
+                <span class="kw">let </span>pd = PortDef {
                     name, width, direction: Direction::Input, attributes
-                }).collect()
+                };
+                <span class="macro">vec!</span>[pd]
+            },
+            [io_port((name, width, attributes)), comma(<span class="kw">_</span>), inputs(rest)] =&gt; {
+                <span class="kw">let </span>pd = PortDef {
+                    name, width, direction: Direction::Input, attributes
+                };
+                <span class="kw">let </span><span class="kw-2">mut </span>v = <span class="macro">vec!</span>[pd];
+                v.extend(rest);
+                v
             }
         ))
     }
@@ -1745,10 +1794,19 @@
     <span class="kw">fn </span>outputs(input: Node) -&gt; ParseResult&lt;Vec&lt;PortDef&lt;Width&gt;&gt;&gt; {
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             input.into_children();
-            [io_port(outs)..] =&gt; {
-                outs.map(|(name, width, attributes)| PortDef {
+            [io_port((name, width, attributes))] =&gt; {
+                <span class="kw">let </span>pd = PortDef {
                     name, width, direction: Direction::Output, attributes
-                }).collect()
+                };
+                <span class="macro">vec!</span>[pd]
+            },
+            [io_port((name, width, attributes)), comma(<span class="kw">_</span>), outputs(rest)] =&gt; {
+                <span class="kw">let </span>pd = PortDef {
+                    name, width, direction: Direction::Output, attributes
+                };
+                <span class="kw">let </span><span class="kw-2">mut </span>v = <span class="macro">vec!</span>[pd];
+                v.extend(rest);
+                v
             }
         ))
     }
