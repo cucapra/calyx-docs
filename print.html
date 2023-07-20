@@ -626,7 +626,7 @@ The component executes the two groups in-order.</p>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="passing-cells-by-reference"><a class="header" href="#passing-cells-by-reference">Passing Cells by Reference</a></h1>
 <p>One question that may arise when using Calyx as a backend is how to
-pass a memory &quot;by reference&quot; between components. In C++, this might look like:</p>
+pass a cell &quot;by reference&quot; between components. In C++, this might look like:</p>
 <pre><code class="language-C++">#include &lt;array&gt;
 #include &lt;cstdint&gt;
 
@@ -640,11 +640,12 @@ int main() {
   add_one(x); // The value at x[0] is now 1.
 }
 </code></pre>
-<p>There are two steps to passing a memory by reference in Calyx:</p>
+<p>In Calyx, there are two steps to passing a cell by reference:</p>
 <ol>
-<li>Define the component in a manner such that it can accept a memory by reference.</li>
-<li>Pass the desired memory by reference.</li>
+<li>Define the component in a manner such that it can accept a cell by reference.</li>
+<li>Pass the desired cell by reference.</li>
 </ol>
+<p>When we say cell, we mean any cell, including memories of various dimensions and registers.</p>
 <p>The language provides two ways of doing this.</p>
 <h2 id="the-easy-way-ref-cells"><a class="header" href="#the-easy-way-ref-cells">The Easy Way: <code>ref</code> Cells</a></h2>
 <p>Calyx uses the <code>ref</code> keyword to describe cells that are passed by reference:</p>
