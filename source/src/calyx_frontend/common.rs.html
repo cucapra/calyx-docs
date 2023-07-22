@@ -341,7 +341,7 @@
 }
 
 <span class="doccomment">/// Represents an abstract width of a primitive signature.
-</span><span class="attribute">#[derive(Clone, Debug)]
+</span><span class="attribute">#[derive(Clone, Debug, PartialEq)]
 </span><span class="kw">pub enum </span>Width {
     <span class="doccomment">/// The width is a constant.
     </span>Const { value: u64 },
