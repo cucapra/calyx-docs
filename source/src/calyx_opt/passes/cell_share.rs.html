@@ -982,9 +982,9 @@
                                 <span class="kw">let </span>parent_b =
                                     par_thread_map.get(live_b).unwrap();
                                 <span class="kw">if </span>live_a != live_b &amp;&amp; parent_a == parent_b {
-                                    <span class="comment">// we have to check par_timing_map
-                                    // to see whether liveness overlaps
-                                    // for dynamic pars, liveness_overlaps() returns
+                                    <span class="comment">// We have to check par_timing_map
+                                    // to see whether liveness overlaps.
+                                    // For dynamic pars, liveness_overlaps() returns
                                     // true no matter what.
                                     </span><span class="kw">if </span><span class="self">self</span>.par_timing_map.liveness_overlaps(
                                         parent_a, live_a, live_b, a, b,
@@ -1037,7 +1037,7 @@
             <span class="kw">if </span>graph.has_nodes() {
                 coloring.extend(
                     graph
-                        .color_greedy(<span class="kw-2">*</span>bound)
+                        .color_greedy(<span class="kw-2">*</span>bound, <span class="bool-val">false</span>)
                         .iter()
                         .map(|(a, b)| (<span class="kw-2">*</span>a, comp.find_cell(<span class="kw-2">*</span>b).unwrap())),
                 );

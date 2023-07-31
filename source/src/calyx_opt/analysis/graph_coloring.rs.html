@@ -204,6 +204,12 @@
 <span id="204">204</span>
 <span id="205">205</span>
 <span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_utils::{Idx, WeightGraph};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>petgraph::algo;
@@ -280,7 +286,13 @@
 
     <span class="doccomment">/// Given an `ordering` of `T`s, find a mapping from nodes to `T`s such
     /// that no node has a neighbor with the same `T`.
-    </span><span class="kw">pub fn </span>color_greedy(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bound: <span class="prelude-ty">Option</span>&lt;i64&gt;) -&gt; HashMap&lt;T, T&gt; {
+    /// `keep_self_color` indicates whether to keep the mapping of the node to
+    /// itself in the returned HashMap (since nodes are &quot;colors&quot;)
+    </span><span class="kw">pub fn </span>color_greedy(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        bound: <span class="prelude-ty">Option</span>&lt;i64&gt;,
+        keep_self_color: bool,
+    ) -&gt; HashMap&lt;T, T&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>all_colors: BTreeMap&lt;Idx, i64&gt; = BTreeMap::new();
         <span class="kw">let </span><span class="kw-2">mut </span>coloring: HashMap&lt;Idx, Idx&gt; = HashMap::new();
         <span class="kw">let </span>always_share = bound.is_none();
@@ -365,7 +377,7 @@
         coloring
             .into_iter()
             .map(|(n1, n2)| (rev_map[<span class="kw-2">&amp;</span>n1].clone(), rev_map[<span class="kw-2">&amp;</span>n2].clone()))
-            .filter(|(a, b)| a != b)
+            .filter(|(a, b)| (a != b) || keep_self_color)
             .collect()
     }
 

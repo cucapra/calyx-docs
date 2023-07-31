@@ -176,6 +176,7 @@
 <span id="176">176</span>
 <span id="177">177</span>
 <span id="178">178</span>
+<span id="179">179</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     AttributePromotion, Canonicalize, CellShare, ClkInsertion, CollapseControl,
@@ -284,6 +285,7 @@
             [
                 StaticInliner,
                 MergeAssign, <span class="comment">// Static inliner generates lots of assigns
+                </span>DeadGroupRemoval, <span class="comment">// Static inliner generates lots of dead groups
                 </span>SimplifyStaticGuards,
                 CompileStatic,
                 TopDownStaticTiming,

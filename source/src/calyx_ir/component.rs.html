@@ -416,6 +416,19 @@
 <span id="416">416</span>
 <span id="417">417</span>
 <span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attribute, Attributes, BoolAttr, Builder, Cell, CellType,
     CombGroup, Control, Direction, GetName, Group, Id, NumAttr, PortDef,
@@ -623,6 +636,19 @@
         </span>S: Into&lt;Id&gt;,
     {
         <span class="self">self</span>.cells.find(name)
+    }
+
+    <span class="doccomment">/// Return a reference to the cell with `name` if present.
+    </span><span class="kw">pub fn </span>find_guaranteed_cell&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; RRC&lt;Cell&gt;
+    <span class="kw">where
+        </span>S: Into&lt;Id&gt; + std::fmt::Debug + Copy,
+    {
+        <span class="self">self</span>.cells.find(name).unwrap_or_else(|| {
+            <span class="macro">unreachable!</span>(
+                <span class="string">&quot;called find_certain_cell on {:?} but it wasn&#39;t found&quot;</span>,
+                name
+            )
+        })
     }
 
     <span class="doccomment">/// Construct a non-conflicting name using the Component&#39;s namegenerator.
