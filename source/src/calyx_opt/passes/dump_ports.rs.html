@@ -68,10 +68,17 @@
 <span id="68">68</span>
 <span id="69">69</span>
 <span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::passes::compile_ref::RefPortMap;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC, WRC};
 <span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>std::rc::Rc;
+<span class="kw">use </span>std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 <span class="doccomment">/// Formats name of a port given the id of the cell and the port
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>format_port_name(canon: <span class="kw-2">&amp;</span>ir::Canonical) -&gt; ir::Id {
@@ -88,55 +95,62 @@
     cell_filter: <span class="kw">fn</span>(<span class="kw-2">&amp;</span>RRC&lt;ir::Cell&gt;) -&gt; bool,
     remove_signals: bool,
     port_names: <span class="kw-2">&amp;mut </span>RefPortMap,
-) {
+    removed: <span class="kw-2">&amp;mut </span>HashMap&lt;ir::Canonical, RRC&lt;ir::Port&gt;&gt;,
+) -&gt; Vec&lt;RRC&lt;ir::Cell&gt;&gt; {
     <span class="kw">let </span>comp_name = component.name;
     <span class="kw">let </span>(ext_cells, cells): (Vec&lt;<span class="kw">_</span>&gt;, Vec&lt;<span class="kw">_</span>&gt;) =
         component.cells.drain().partition(cell_filter);
     component.cells.append(cells.into_iter());
 
-    <span class="kw">for </span>cell_ref <span class="kw">in </span>ext_cells {
-        <span class="kw">let </span><span class="kw-2">mut </span>cell = cell_ref.borrow_mut();
+    <span class="kw">for </span>cell_ref <span class="kw">in </span><span class="kw-2">&amp;</span>ext_cells {
+        <span class="kw">let </span>cell = cell_ref.borrow();
+        <span class="macro">log::debug!</span>(<span class="string">&quot;`{}&#39; is matches predictate&quot;</span>, cell.name());
 
         <span class="comment">// If we do not eliminate the @clk and @reset ports, we may
         // get signals conflicting the original @clk and @reset signals of
         // the component, see https://github.com/cucapra/calyx/issues/1034
         </span><span class="kw">let </span>ports_inline = cell
             .ports
-            .drain(..)
+            .iter()
             .filter(|pr| {
                 <span class="kw">let </span>p = pr.borrow();
                 <span class="kw">if </span>remove_signals {
-                    p.attributes.get(ir::BoolAttr::Clk).is_none()
-                        &amp;&amp; p.attributes.get(ir::BoolAttr::Reset).is_none()
+                    !p.attributes.has(ir::BoolAttr::Clk)
+                        &amp;&amp; !p.attributes.has(ir::BoolAttr::Reset)
                 } <span class="kw">else </span>{
                     <span class="bool-val">true
                 </span>}
             })
+            .map(Rc::clone)
             .collect_vec();
-        <span class="comment">// Explicitly drop `cell` otherwise call to `canonical` will panic
-        </span>drop(cell);
 
         <span class="kw">for </span>port_ref <span class="kw">in </span>ports_inline {
             <span class="kw">let </span>canon = port_ref.borrow().canonical();
-            <span class="kw">let </span>port = <span class="kw-2">&amp;mut </span>port_ref.borrow_mut();
-            <span class="comment">// Change the name and the parent of this port.
-            </span>port.name = component.generate_name(format_port_name(<span class="kw-2">&amp;</span>canon));
-            <span class="comment">// Point to the signature cell as its parent
-            </span>port.parent = ir::PortParent::Cell(WRC::from(<span class="kw-2">&amp;</span>component.signature));
-            <span class="comment">// Remove any attributes from this cell port.
-            </span>port.attributes = ir::Attributes::default();
+            <span class="kw">let </span>port = port_ref.borrow();
+            <span class="kw">let </span>new_port = Rc::new(RefCell::new(ir::Port {
+                name: component.generate_name(format_port_name(<span class="kw-2">&amp;</span>canon)),
+                width: port.width,
+                direction: port.direction.clone(),
+                parent: ir::PortParent::Cell(WRC::from(<span class="kw-2">&amp;</span>component.signature)),
+                attributes: ir::Attributes::default(),
+            }));
             component
                 .signature
                 .borrow_mut()
                 .ports
-                .push(Rc::clone(<span class="kw-2">&amp;</span>port_ref));
+                .push(Rc::clone(<span class="kw-2">&amp;</span>new_port));
+
+            <span class="comment">// Record the port as removed
+            </span>removed.insert(canon.clone(), Rc::clone(<span class="kw-2">&amp;</span>new_port));
+
             <span class="comment">// Record the port to add to cells
             </span>port_names
                 .entry(comp_name)
                 .or_default()
-                .insert(canon, Rc::clone(<span class="kw-2">&amp;</span>port_ref));
+                .insert(canon, Rc::clone(<span class="kw-2">&amp;</span>new_port));
         }
     }
+    ext_cells
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx_opt" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

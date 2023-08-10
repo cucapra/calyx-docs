@@ -264,8 +264,46 @@
 <span id="264">264</span>
 <span id="265">265</span>
 <span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::control::StaticInvoke;
 <span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
+<span class="kw">use </span>std::borrow::BorrowMut;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
 
@@ -348,6 +386,42 @@
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, port_ref: <span class="kw-2">&amp;</span>RRC&lt;ir::Port&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;ir::Port&gt;&gt; {
         <span class="self">self</span>.get_port_rewrite(port_ref)
             .or_else(|| <span class="self">self</span>.get_cell_port_rewrite(port_ref))
+    }
+
+    <span class="doccomment">/// Rewrite assignments in a guard
+    </span><span class="kw">pub fn </span>rewrite_guard&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, guard: <span class="kw-2">&amp;mut </span>ir::Guard&lt;T&gt;) {
+        <span class="kw">match </span>guard {
+            ir::Guard::And(l, r) | ir::Guard::Or(l, r) =&gt; {
+                <span class="self">self</span>.rewrite_guard(l.borrow_mut());
+                <span class="self">self</span>.rewrite_guard(r.borrow_mut())
+            }
+            ir::Guard::Not(g) =&gt; <span class="self">self</span>.rewrite_guard(g.borrow_mut()),
+            ir::Guard::CompOp(<span class="kw">_</span>, l, r) =&gt; {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(nl) = <span class="self">self</span>.get(l) {
+                    <span class="kw-2">*</span>l = nl;
+                }
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(nr) = <span class="self">self</span>.get(r) {
+                    <span class="kw-2">*</span>r = nr;
+                }
+            }
+            ir::Guard::Port(p) =&gt; {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(np) = <span class="self">self</span>.get(p) {
+                    <span class="kw-2">*</span>p = np;
+                }
+            }
+            ir::Guard::Info(<span class="kw">_</span>) | ir::Guard::True =&gt; (),
+        }
+    }
+
+    <span class="doccomment">/// Rewrite an assignment
+    </span><span class="kw">pub fn </span>rewrite_assign&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, assign: <span class="kw-2">&amp;mut </span>ir::Assignment&lt;T&gt;) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(dst) = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>assign.dst) {
+            assign.dst = dst;
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(src) = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>assign.src) {
+            assign.src = src;
+        }
+        <span class="self">self</span>.rewrite_guard(<span class="kw-2">&amp;mut </span>assign.guard);
     }
 
     <span class="comment">// =========== Control Rewriting Methods =============
