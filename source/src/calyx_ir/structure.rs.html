@@ -726,6 +726,8 @@
 <span id="726">726</span>
 <span id="727">727</span>
 <span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
@@ -1169,6 +1171,8 @@
 
     <span class="comment">// returns true if cell is comb, false otherwise
     // note that this component/component cannot be combinational
+    // XXX(rachit): Combinational components are now supported so this function returns
+    // the wrong answer when the parent is a combinational component
     </span><span class="kw">pub fn </span>is_comb_cell(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self</span>.prototype {
             CellType::Primitive { is_comb, .. } =&gt; is_comb,

@@ -116,12 +116,39 @@
 <span id="116">116</span>
 <span id="117">117</span>
 <span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 
-<span class="comment">// maps combinational combinational components to set of all combinational components that it reads from
-// so the entries are (comb comp, &lt;set of comb components that write to comb comp&gt;)
+<span class="comment">// Construct map from combinational instances to all the combinational instances that write to them.
+// So the entries are (comb comp, &lt;set of comb components that write to comb comp&gt;)
 </span><span class="kw">fn </span>get_comb_dependence_map&lt;T&gt;(
     assigns: <span class="kw-2">&amp;</span>Vec&lt;ir::Assignment&lt;T&gt;&gt;,
 ) -&gt; HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt; {
@@ -192,46 +219,73 @@
     </span>}
 }
 
+<span class="doccomment">/// Saturate the combinational dependence map by repeatedly adding used cells till we reach a fixed point.
+</span><span class="kw">fn </span>saturate_dep_maps(
+    <span class="kw-2">mut </span>comb_dep_map: HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt;,
+    <span class="kw-2">mut </span>non_comb_writes: Vec&lt;ir::Id&gt;,
+) -&gt; HashSet&lt;ir::Id&gt; {
+    <span class="comment">// To be a used_comb, must
+    // a) be a non_comb_write
+    // b) writes to a used_comb
+    </span><span class="kw">let </span><span class="kw-2">mut </span>used_combs = HashSet::new();
+    <span class="comment">// while loop is bound by size of comb_dependence_map, which is bound
+    // in size by number of ports in the group&#39;s assignments
+    </span><span class="kw">while </span>!(non_comb_writes.is_empty()) {
+        <span class="kw">let </span>used = non_comb_writes.pop().unwrap();
+        <span class="comment">// add all writes to used to non_comb_writes
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(write_to_used) = comb_dep_map.remove(<span class="kw-2">&amp;</span>used) {
+            <span class="kw">for </span>write <span class="kw">in </span>write_to_used {
+                non_comb_writes.push(write);
+            }
+        }
+        <span class="comment">// add used to used_combs
+        </span>used_combs.insert(used);
+    }
+
+    used_combs
+}
+
 <span class="kw">impl </span>Visitor <span class="kw">for </span>DeadAssignmentRemoval {
-    <span class="kw">fn </span>enable(
+    <span class="kw">fn </span>start(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        s: <span class="kw-2">&amp;mut </span>ir::Enable,
-        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
         _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">let </span><span class="kw-2">mut </span>comb_dependence_map: HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt; =
-            get_comb_dependence_map(<span class="kw-2">&amp;</span>s.group.borrow().assignments);
-        <span class="kw">let </span><span class="kw-2">mut </span>non_comb_writes: Vec&lt;ir::Id&gt; =
-            get_non_comb_writes(<span class="kw-2">&amp;</span>s.group.borrow().assignments);
-        <span class="comment">// To be a used_comb, must
-        // a) be a non_comb_write
-        // b) writes to a used_comb
-        </span><span class="kw">let </span><span class="kw-2">mut </span>used_combs: HashSet&lt;ir::Id&gt; = HashSet::new();
-        <span class="comment">// while loop is bound by size of comb_dependence_map, which is bound
-        // in size by number of ports in the group&#39;s assignments
-        </span><span class="kw">while </span>!(non_comb_writes.is_empty()) {
-            <span class="kw">let </span>used = non_comb_writes.pop().unwrap();
-            <span class="comment">// add all writes to used to non_comb_writes
-            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(write_to_used) = comb_dependence_map.remove(<span class="kw-2">&amp;</span>used) {
-                <span class="kw">for </span>write <span class="kw">in </span>write_to_used {
-                    non_comb_writes.push(write);
+        <span class="kw">let </span>cont_comb_dep_map =
+            get_comb_dependence_map(<span class="kw-2">&amp;</span>comp.continuous_assignments);
+        <span class="kw">let </span>cont_non_comb_writes =
+            get_non_comb_writes(<span class="kw-2">&amp;</span>comp.continuous_assignments);
+
+        <span class="kw">for </span>gr <span class="kw">in </span>comp.groups.iter() {
+            <span class="kw">let </span>group = gr.borrow();
+
+            <span class="comment">// Construct the dependence maps from the group assignments and extend using the continuous assignments
+            </span><span class="kw">let </span><span class="kw-2">mut </span>comb_dependence_map =
+                get_comb_dependence_map(<span class="kw-2">&amp;</span>group.assignments);
+            comb_dependence_map.extend(cont_comb_dep_map.clone());
+
+            <span class="kw">let </span><span class="kw-2">mut </span>non_comb_writes = get_non_comb_writes(<span class="kw-2">&amp;</span>group.assignments);
+            non_comb_writes.extend(cont_non_comb_writes.clone());
+
+            <span class="kw">let </span>used_combs =
+                saturate_dep_maps(comb_dependence_map, non_comb_writes);
+
+            <span class="comment">// Explicit drop so we don&#39;t get already borrowed error from mutable borrow.
+            </span>drop(group);
+
+            gr.borrow_mut().assignments.retain(|assign| {
+                <span class="kw">let </span>dst = assign.dst.borrow();
+                <span class="comment">// if dst is a combinational component, must be used
+                </span><span class="kw">if </span>dst.parent_is_comb() {
+                    <span class="kw">return </span>used_combs.contains(<span class="kw-2">&amp;</span>dst.get_parent_name());
                 }
-            }
-            <span class="comment">// add used to used_combs
-            </span>used_combs.insert(used);
+                <span class="comment">// Make sure that the assignment&#39;s guard it not false
+                </span>!assign.guard.is_false()
+            });
         }
 
-        s.group.borrow_mut().assignments.retain(|assign| {
-            <span class="kw">let </span>dst = assign.dst.borrow();
-            <span class="comment">// if dst is a combinational component, must be used
-            </span><span class="kw">if </span>dst.parent_is_comb() {
-                <span class="kw">return </span>used_combs.contains(<span class="kw-2">&amp;</span>dst.get_parent_name());
-            }
-            <span class="comment">// Make sure that the assignment&#39;s guard it not false
-            </span>!assign.guard.is_false()
-        });
-        <span class="prelude-val">Ok</span>(Action::Continue)
+        <span class="prelude-val">Ok</span>(Action::Stop)
     }
 }
 </code></pre></div>
