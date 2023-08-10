@@ -220,10 +220,10 @@
     </span><span class="doccomment">/// Mark the cell associated with the port as a part of the control path.
     </span><span class="kw">fn </span>mark_port_control(<span class="kw-2">&amp;mut </span><span class="self">self</span>, port: <span class="kw-2">&amp;</span>ir::Port) {
         <span class="kw">if </span><span class="self">Self</span>::always_safe_src(port) || port.is_hole() {
-            <span class="macro">log::info!</span>(<span class="string">&quot;`{}&#39;: safe port&quot;</span>, port.canonical());
+            <span class="macro">log::debug!</span>(<span class="string">&quot;`{}&#39;: safe port&quot;</span>, port.canonical());
             <span class="kw">return</span>;
         }
-        <span class="macro">log::info!</span>(<span class="string">&quot;`{}&#39;: control port&quot;</span>, port.canonical());
+        <span class="macro">log::debug!</span>(<span class="string">&quot;`{}&#39;: control port&quot;</span>, port.canonical());
         <span class="self">self</span>.control_cells.insert(port.get_parent_name());
     }
 

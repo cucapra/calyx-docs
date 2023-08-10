@@ -206,6 +206,21 @@
 <span id="206">206</span>
 <span id="207">207</span>
 <span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::{
@@ -214,7 +229,7 @@
 };
 
 <span class="kw">type </span>PortMap = HashMap&lt;ir::Id, Vec&lt;RRC&lt;ir::Port&gt;&gt;&gt;;
-<span class="kw">type </span>Binding = Vec&lt;(ir::Id, RRC&lt;ir::Port&gt;)&gt;;
+<span class="kw">type </span>Binding = (Vec&lt;(ir::Id, RRC&lt;ir::Cell&gt;)&gt;, Vec&lt;(ir::Id, RRC&lt;ir::Port&gt;)&gt;);
 <span class="kw">type </span>InvokeMap = HashMap&lt;ir::Id, Vec&lt;Binding&gt;&gt;;
 
 <span class="doccomment">/// Contains a mapping from name of [ir::CombGroup] to the ports read by the control program
@@ -223,7 +238,7 @@
 </span><span class="kw">pub struct </span>ControlPorts&lt;<span class="kw">const </span>INVOKE_MAP: bool&gt; {
     <span class="comment">// Map name of combinational group to the ports read by the control program.
     </span>cg_to_port: PortMap,
-    <span class="comment">// Mapping from name of invoke instance to the port bindings.
+    <span class="comment">// Mapping from name of invoke instance to the ref cells and port bindings.
     </span>invoke_map: InvokeMap,
 }
 
@@ -269,6 +284,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         inputs: <span class="kw-2">&amp;</span>[(ir::Id, ir::RRC&lt;ir::Port&gt;)],
         outputs: <span class="kw-2">&amp;</span>[(ir::Id, ir::RRC&lt;ir::Port&gt;)],
+        ref_cells: <span class="kw-2">&amp;</span>[(ir::Id, ir::RRC&lt;ir::Cell&gt;)],
         comp: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::Cell&gt;,
         comb_group: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;ir::RRC&lt;ir::CombGroup&gt;&gt;,
     ) {
@@ -294,7 +310,10 @@
             <span class="kw">let </span>name = comp.borrow().name();
             <span class="kw">let </span>bindings =
                 inputs.iter().chain(outputs.iter()).cloned().collect_vec();
-            <span class="self">self</span>.invoke_map.entry(name).or_default().push(bindings);
+            <span class="self">self</span>.invoke_map
+                .entry(name)
+                .or_default()
+                .push((ref_cells.to_vec(), bindings));
         }
     }
 
@@ -321,9 +340,10 @@
                 comp,
                 inputs,
                 outputs,
+                ref_cells,
                 ..
             }) =&gt; {
-                <span class="self">self</span>.handle_invoke(inputs, outputs, comp, <span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
+                <span class="self">self</span>.handle_invoke(inputs, outputs, ref_cells, comp, <span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
             }
         }
     }
@@ -336,9 +356,12 @@
                 comb_group,
                 inputs,
                 outputs,
+                ref_cells,
                 ..
             }) =&gt; {
-                <span class="self">self</span>.handle_invoke(inputs, outputs, comp, comb_group);
+                <span class="self">self</span>.handle_invoke(
+                    inputs, outputs, ref_cells, comp, comb_group,
+                );
             }
             ir::Control::If(ir::If {
                 cond,
@@ -401,12 +424,19 @@
             cp.invoke_map.values_mut().for_each(|v| {
                 <span class="kw-2">*</span>v = v
                     .drain(..)
-                    .unique_by(|binding| {
-                        binding
-                            .clone()
-                            .into_iter()
-                            .map(|(p, v)| (p, v.borrow().canonical()))
-                            .collect_vec()
+                    .unique_by(|(cells, ports)| {
+                        (
+                            cells
+                                .clone()
+                                .into_iter()
+                                .map(|(c, cell)| (c, cell.borrow().name()))
+                                .collect_vec(),
+                            ports
+                                .clone()
+                                .into_iter()
+                                .map(|(p, v)| (p, v.borrow().canonical()))
+                                .collect_vec(),
+                        )
                     })
                     .collect()
             });
