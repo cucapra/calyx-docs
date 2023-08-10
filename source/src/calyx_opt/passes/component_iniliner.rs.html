@@ -590,6 +590,25 @@
 <span id="590">590</span>
 <span id="591">591</span>
 <span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
@@ -982,13 +1001,35 @@
         <span class="comment">// If any invoke has more than one binding, error out:
         </span><span class="kw">for </span>(instance, bindings) <span class="kw">in </span><span class="kw-2">&amp;</span>invoke_bindings {
             <span class="kw">if </span>bindings.len() &gt; <span class="number">1 </span>{
+                <span class="kw">let </span>bindings_str = bindings
+                    .iter()
+                    .map(|(cells, ports)| {
+                        <span class="macro">format!</span>(
+                            <span class="string">&quot;[{}]({})&quot;</span>,
+                            cells
+                                .iter()
+                                .map(|(c, cell)| <span class="macro">format!</span>(
+                                    <span class="string">&quot;{c}={}&quot;</span>,
+                                    cell.borrow().name()
+                                ))
+                                .join(<span class="string">&quot;, &quot;</span>),
+                            ports
+                                .iter()
+                                .map(|(p, port)| <span class="macro">format!</span>(
+                                    <span class="string">&quot;{p}={}&quot;</span>,
+                                    port.borrow().canonical()
+                                ))
+                                .join(<span class="string">&quot;, &quot;</span>)
+                        )
+                    })
+                    .join(<span class="string">&quot;\n&quot;</span>);
                 <span class="kw">return </span><span class="prelude-val">Err</span>(
                     Error::pass_assumption(
                         <span class="self">Self</span>::name(),
                         <span class="macro">format!</span>(
-                            <span class="string">&quot;Instance `{}.{}` invoked with multiple parameters (currently unsupported)&quot;</span>,
+                            <span class="string">&quot;Instance `{}.{instance}` invoked with multiple parameters (currently unsupported):\n{bindings_str}&quot;</span>,
                             comp.name,
-                            instance)));
+                        )));
             }
         }
 
@@ -1075,20 +1116,17 @@
 
         <span class="comment">// Ensure that all invokes use the same parameters and inline the parameter assignments.
         </span><span class="kw">for </span>(instance, <span class="kw-2">mut </span>bindings) <span class="kw">in </span>invoke_bindings {
-            <span class="kw">if </span>bindings.len() &gt; <span class="number">1 </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(
-                    Error::pass_assumption(
-                        <span class="self">Self</span>::name(),
-                        <span class="macro">format!</span>(
-                            <span class="string">&quot;Instance `{}.{}` invoked with multiple parameters (currently unsupported)&quot;</span>,
-                            comp.name,
-                            instance)));
-            }
             <span class="kw">let </span><span class="prelude-val">Some</span>((<span class="kw">_</span>, binding)) = bindings.pop() <span class="kw">else </span>{
                 <span class="macro">unreachable!</span>(<span class="string">&quot;Instance binding is empty&quot;</span>);
             };
             <span class="kw">let </span><span class="kw-2">mut </span>assigns = binding
                 .into_iter()
+                .filter(|(<span class="kw">_</span>, pr)| {
+                    <span class="kw">let </span>port = pr.borrow();
+                    <span class="comment">// Skip clk and reset ports
+                    </span>!port.attributes.has(ir::BoolAttr::Clk)
+                        &amp;&amp; !port.attributes.has(ir::BoolAttr::Reset)
+                })
                 .map(|(name, param)| {
                     <span class="kw">let </span>port = Rc::clone(
                         <span class="kw-2">&amp;</span>interface_rewrites[<span class="kw-2">&amp;</span>ir::Canonical(instance, name)],
