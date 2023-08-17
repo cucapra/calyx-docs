@@ -4616,18 +4616,19 @@ pipeline.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="mrxl"><a class="header" href="#mrxl">MrXL</a></h1>
 <p>MrXL is an example DSL developed for the <a href="frontends/../tutorial/frontend-tut.html">frontend tutorial</a>.
 MrXL programs consist of <code>map</code> and <code>reduce</code> operations on arrays.
-For example, here is a dot-product implementation:</p>
+For example, here is an implementation of dot-products:</p>
 <pre><code>input avec: int[1024]
 input bvec: int[1024]
 output dot: int
 prodvec := map 16 (a &lt;- avec, b &lt;- bvec) { a * b }
 dot := reduce 4 (a, b &lt;- prodvec) 0 { a + b }
 </code></pre>
-<p>The numbers that come right after <code>map</code> and <code>reduce</code> (16 and 4 respectively) are &quot;parallelism factors&quot; that guide the generation of hardware.</p>
+<p>The numbers that come right after <code>map</code> and <code>reduce</code> (<code>16</code> and <code>4</code> respectively) are &quot;parallelism factors&quot; that guide the generation of hardware.
+The explanation on this page is relatively brief; see the <a href="frontends/../tutorial/frontend-tut.html">frontend tutorial</a> for a more detailed explanation of the language. In particular, the <a href="frontends/../tutorial/frontend-tut.html#example-sum-of-squares">sum of squares</a> example is a good place to start.</p>
 <h2 id="install"><a class="header" href="#install">Install</a></h2>
-<p>Install the <a href="frontends/../calyx-py.html">calyx-py</a> library.</p>
+<p>First, install the <a href="frontends/../calyx-py.html">calyx-py</a> library.</p>
 <p>The MrXL implementation is in Python and uses <a href="https://flit.readthedocs.io/en/latest/index.html">Flit</a>.
-First, <a href="https://flit.readthedocs.io/en/latest/index.html">install flit</a> (<code>pip install flit</code> or similar), and then type the
+Install Flit (<code>pip install flit</code> or similar), and then type the
 following after changing your directory to <code>frontend/mrxl</code>:</p>
 <pre><code>flit install --symlink
 </code></pre>
@@ -4643,17 +4644,20 @@ found. If it does not, run the following while still in <code>frontend/mrxl</cod
 <p>To run the program through the MrXL interpreter, execute:</p>
 <pre><code>mrxl &lt;prog&gt;.mrxl --data &lt;prog&gt;.mrxl.data --interpret
 </code></pre>
-<p>where <code>&lt;prog&gt;.mrxl</code> is a file containing MrXL source code and <code>&lt;prog&gt;.mrxl.data</code> is a file containing values for all the variables declared as <code>input</code>s in the MrXL program. The interpreter dumps the <code>output</code> variables, in JSON, to stdout.</p>
+<p>where <code>&lt;prog&gt;.mrxl</code> is a file containing MrXL source code and <code>&lt;prog&gt;.mrxl.data</code> is a file containing values for all the variables declared as <code>input</code>s in the MrXL program. The interpreter dumps the <code>output</code> variables, in JSON format, to stdout.</p>
 <p>You could try, for example:</p>
 <pre><code>mrxl test/dot.mrxl --data test/dot.mrxl.data --interpret
 </code></pre>
 <p>This is just a baby version of the dot-product implementation we showed at the very top; we have just shortened the input array so you can easily see it in full.
-We also provide <code>add.mrxl</code> and <code>sum.mrxl</code>, along with sample <code>&lt;prog&gt;.mrxl.data</code> files, under <code>test/</code>. Try playing with the inputs and the operations!</p>
+Similarly, we also provide <code>add.mrxl</code> and <code>sum.mrxl</code>, along with accompanying <code>&lt;prog&gt;.mrxl.data</code> files, under <code>test/</code>. Try playing with the inputs and the operations!</p>
 <h2 id="compiling-to-calyx"><a class="header" href="#compiling-to-calyx">Compiling to Calyx</a></h2>
+<blockquote>
+<p>The dot-product example above shows off features of MrXL that are not yet supported by the compiler. In particular, the compiler does not yet support <code>reduce</code> with a parallelism factor other than <code>1</code>. This is because MrXL is mostly a pedagogical device, and we want new users of Calyx to try implementing this feature themselves. To learn more about this and other extensions to MrXL, consider working through the <a href="frontends/../tutorial/frontend-tut.html">frontend tutorial</a>.</p>
+</blockquote>
 <p>To run the compiler and see the Calyx code your MrXL program generates, just drop the <code>--data</code> and <code>--interpret</code> flags. For instance:</p>
 <pre><code>mrxl test/dot.mrxl
 </code></pre>
-<p>In order to run the compiler through <code>fud</code>, pass the <code>--from mrxl</code> and <code>--to futil</code> flags:</p>
+<p>In order to run the compiler through <code>fud</code>, pass the <code>--from mrxl</code> and <code>--to calyx</code> flags:</p>
 <pre><code>fud e --from mrxl &lt;prog.mrxl&gt; --to calyx
 </code></pre>
 <p>And finally, the real prize.
