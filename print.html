@@ -3504,7 +3504,7 @@ the <code>fsm</code> register has the value 1 and check to see if the assignment
 <pre><code class="language-python">    lhs = main.reg(&quot;lhs&quot;, 32)
     rhs = main.reg(&quot;rhs&quot;, 32)
     sum = main.reg(&quot;sum&quot;, 32)
-    add = main.add(&quot;add&quot;, 32)
+    add = main.add(32, &quot;add&quot;)
 </code></pre>
 <p>As with adding components to a program, we don't need to assign <code>main.reg(...)</code> to a variable, but it'll be useful to be able to quickly refer to these cells.</p>
 <p>Next, we'll define our groups of assignments. The syntax for defining a group looks like <code>with {component}.group(&quot;group_name&quot;) as group_variable</code>, as we do below:</p>
@@ -4170,7 +4170,7 @@ If you'd like to read through the details of our implementation – or build you
 <h3 id="index-increment"><a class="header" href="#index-increment">Index increment</a></h3>
 <p>The loop index increment is implemented using a <a href="tutorial/../lang/ref.html#group-definitions">group</a> and an <code>adder</code>:</p>
 <pre><code class="language-python">    group_name = f&quot;incr_idx_{suffix}&quot;
-    adder = comp.add(f&quot;incr_{suffix}&quot;, 32)
+    adder = comp.add(32)
     with comp.group(group_name) as incr:
         adder.left = idx.out
         adder.right = 1
@@ -4198,7 +4198,7 @@ The corresponding group indexes into the input memories:</p>
                 f&quot;mul_{suffix}&quot;, Stdlib.op(&quot;mult_pipe&quot;, 32, signed=False)
             )
         else:
-            operation = comp.add(f&quot;add_{suffix}&quot;, 32)
+            operation = comp.add(32, f&quot;add_{suffix}&quot;)
 </code></pre>
 <p>and writes the value from the operation into the output memory:</p>
 <pre><code class="language-py">            out_mem = comp.get_cell(f&quot;{dest}_b{bank}&quot;)

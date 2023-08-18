@@ -495,7 +495,7 @@ If you'd like to read through the details of our implementation – or build you
 <h3 id="index-increment"><a class="header" href="#index-increment">Index increment</a></h3>
 <p>The loop index increment is implemented using a <a href="../lang/ref.html#group-definitions">group</a> and an <code>adder</code>:</p>
 <pre><code class="language-python">    group_name = f&quot;incr_idx_{suffix}&quot;
-    adder = comp.add(f&quot;incr_{suffix}&quot;, 32)
+    adder = comp.add(32)
     with comp.group(group_name) as incr:
         adder.left = idx.out
         adder.right = 1
@@ -523,7 +523,7 @@ The corresponding group indexes into the input memories:</p>
                 f&quot;mul_{suffix}&quot;, Stdlib.op(&quot;mult_pipe&quot;, 32, signed=False)
             )
         else:
-            operation = comp.add(f&quot;add_{suffix}&quot;, 32)
+            operation = comp.add(32, f&quot;add_{suffix}&quot;)
 </code></pre>
 <p>and writes the value from the operation into the output memory:</p>
 <pre><code class="language-py">            out_mem = comp.get_cell(f&quot;{dest}_b{bank}&quot;)
