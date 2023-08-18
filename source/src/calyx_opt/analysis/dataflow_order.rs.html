@@ -239,10 +239,10 @@
         }
         <span class="kw">match </span>port.direction {
             ir::Direction::Input =&gt; {
-                inputs.insert(port.name);
+                inputs.insert(port.name());
             }
             ir::Direction::Output =&gt; outputs.push((
-                port.name,
+                port.name(),
                 attrs
                     .get(ir::BoolAttr::Stable)
                     .or_else(|| attrs.get(ir::NumAttr::Done))

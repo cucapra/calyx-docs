@@ -1775,15 +1775,15 @@
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             input.into_children();
             [io_port((name, width, attributes))] =&gt; {
-                <span class="kw">let </span>pd = PortDef {
-                    name, width, direction: Direction::Input, attributes
-                };
+                <span class="kw">let </span>pd = PortDef::new(
+                    name, width, Direction::Input, attributes
+                );
                 <span class="macro">vec!</span>[pd]
             },
             [io_port((name, width, attributes)), comma(<span class="kw">_</span>), inputs(rest)] =&gt; {
-                <span class="kw">let </span>pd = PortDef {
-                    name, width, direction: Direction::Input, attributes
-                };
+                <span class="kw">let </span>pd = PortDef::new(
+                    name, width, Direction::Input, attributes
+                );
                 <span class="kw">let </span><span class="kw-2">mut </span>v = <span class="macro">vec!</span>[pd];
                 v.extend(rest);
                 v
@@ -1795,15 +1795,15 @@
         <span class="prelude-val">Ok</span>(<span class="macro">match_nodes!</span>(
             input.into_children();
             [io_port((name, width, attributes))] =&gt; {
-                <span class="kw">let </span>pd = PortDef {
-                    name, width, direction: Direction::Output, attributes
-                };
+                <span class="kw">let </span>pd = PortDef::new(
+                    name, width, Direction::Output, attributes
+                );
                 <span class="macro">vec!</span>[pd]
             },
             [io_port((name, width, attributes)), comma(<span class="kw">_</span>), outputs(rest)] =&gt; {
-                <span class="kw">let </span>pd = PortDef {
-                    name, width, direction: Direction::Output, attributes
-                };
+                <span class="kw">let </span>pd = PortDef::new(
+                    name, width, Direction::Output, attributes
+                );
                 <span class="kw">let </span><span class="kw-2">mut </span>v = <span class="macro">vec!</span>[pd];
                 v.extend(rest);
                 v
@@ -2415,14 +2415,14 @@
                     <span class="prelude-val">Err</span>(input.error(<span class="string">&quot;Static Component must have defined control&quot;</span>))<span class="question-mark">?</span>;
                 }
                 <span class="kw">let </span>(continuous_assignments, groups, static_groups) = connections;
-                <span class="kw">let </span>sig = sig.into_iter().map(|PortDef { name, width, direction, attributes }| {
-                    <span class="kw">if let </span>Width::Const { value } = width {
-                        <span class="prelude-val">Ok</span>(PortDef {
-                            name,
-                            width: value,
-                            direction,
-                            attributes
-                        })
+                <span class="kw">let </span>sig = sig.into_iter().map(|pd| {
+                    <span class="kw">if let </span>Width::Const { value } = pd.width {
+                        <span class="prelude-val">Ok</span>(PortDef::new(
+                            pd.name(),
+                            value,
+                            pd.direction,
+                            pd.attributes
+                        ))
                     } <span class="kw">else </span>{
                         <span class="prelude-val">Err</span>(input.error(<span class="string">&quot;Components cannot use parameters&quot;</span>))
                     }
@@ -2448,14 +2448,14 @@
                 control(control)
             ] =&gt; {
                 <span class="kw">let </span>(continuous_assignments, groups, static_groups) = connections;
-                <span class="kw">let </span>sig = sig.into_iter().map(|PortDef { name, width, direction, attributes }| {
-                    <span class="kw">if let </span>Width::Const { value } = width {
-                        <span class="prelude-val">Ok</span>(PortDef {
-                            name,
-                            width: value,
-                            direction,
-                            attributes
-                        })
+                <span class="kw">let </span>sig = sig.into_iter().map(|pd| {
+                    <span class="kw">if let </span>Width::Const { value } = pd.width {
+                        <span class="prelude-val">Ok</span>(PortDef::new(
+                            pd.name(),
+                            value,
+                            pd.direction,
+                            pd.attributes
+                        ))
                     } <span class="kw">else </span>{
                         <span class="prelude-val">Err</span>(input.error(<span class="string">&quot;Components cannot use parameters&quot;</span>))
                     }
@@ -2482,14 +2482,14 @@
                 control(control),
             ] =&gt; {
                 <span class="kw">let </span>(continuous_assignments, groups, static_groups) = connections;
-                <span class="kw">let </span>sig = sig.into_iter().map(|PortDef { name, width, direction, attributes }| {
-                    <span class="kw">if let </span>Width::Const { value } = width {
-                        <span class="prelude-val">Ok</span>(PortDef {
-                            name,
-                            width: value,
-                            direction,
-                            attributes
-                        })
+                <span class="kw">let </span>sig = sig.into_iter().map(|pd| {
+                    <span class="kw">if let </span>Width::Const { value } = pd.width {
+                        <span class="prelude-val">Ok</span>(PortDef::new(
+                            pd.name(),
+                            value,
+                            pd.direction,
+                            pd.attributes
+                        ))
                     } <span class="kw">else </span>{
                         <span class="prelude-val">Err</span>(input.error(<span class="string">&quot;Components cannot use parameters&quot;</span>))
                     }

@@ -1180,14 +1180,6 @@
 <span id="1180">1180</span>
 <span id="1181">1181</span>
 <span id="1182">1182</span>
-<span id="1183">1183</span>
-<span id="1184">1184</span>
-<span id="1185">1185</span>
-<span id="1186">1186</span>
-<span id="1187">1187</span>
-<span id="1188">1188</span>
-<span id="1189">1189</span>
-<span id="1190">1190</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Canonical, Cell, CellType,
     Component, Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
@@ -1258,10 +1250,10 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(prim) = sig_ctx.lib.find_primitive(comp_name) {
             prim.signature
                 .iter()
-                .map(|port_def| port_def.name)
+                .map(|port_def| port_def.name())
                 .collect()
         } <span class="kw">else if let </span><span class="prelude-val">Some</span>((comp_sigs, <span class="kw">_</span>)) = sig_ctx.comp_sigs.get(<span class="kw-2">&amp;</span>comp_name) {
-            comp_sigs.iter().map(|port_def| port_def.name).collect()
+            comp_sigs.iter().map(|port_def| port_def.name()).collect()
         } <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::undefined(
                 comp_name,
@@ -1281,31 +1273,23 @@
 
 <span class="doccomment">/// Validates a component signature to make sure there are not duplicate ports.
 </span><span class="kw">fn </span>check_signature(pds: <span class="kw-2">&amp;</span>[PortDef&lt;u64&gt;]) -&gt; CalyxResult&lt;()&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>ports: HashSet&lt;<span class="kw-2">&amp;</span>Id&gt; = HashSet::new();
-    <span class="kw">for </span>PortDef {
-        name, direction, ..
-    } <span class="kw">in </span>pds
-    {
+    <span class="kw">let </span><span class="kw-2">mut </span>ports: HashSet&lt;Id&gt; = HashSet::new();
+    <span class="kw">for </span>pd <span class="kw">in </span>pds {
+        <span class="kw">let </span>name = pd.name();
         <span class="comment">// check for uniqueness
-        </span><span class="kw">match </span><span class="kw-2">&amp;</span>direction {
+        </span><span class="kw">match </span><span class="kw-2">&amp;</span>pd.direction {
             Direction::Input =&gt; {
                 <span class="kw">if </span>!ports.contains(<span class="kw-2">&amp;</span>name) {
                     ports.insert(name);
                 } <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(
-                        <span class="kw-2">*</span>name,
-                        <span class="string">&quot;port&quot;</span>.to_string(),
-                    ));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(name, <span class="string">&quot;port&quot;</span>.to_string()));
                 }
             }
             Direction::Output =&gt; {
                 <span class="kw">if </span>!ports.contains(<span class="kw-2">&amp;</span>name) {
                     ports.insert(name);
                 } <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(
-                        <span class="kw-2">*</span>name,
-                        <span class="string">&quot;port&quot;</span>.to_string(),
-                    ));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(name, <span class="string">&quot;port&quot;</span>.to_string()));
                 }
             }
             Direction::Inout =&gt; {

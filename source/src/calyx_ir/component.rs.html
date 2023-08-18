@@ -429,6 +429,10 @@
 <span id="429">429</span>
 <span id="430">430</span>
 <span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attribute, Attributes, BoolAttr, Builder, Cell, CellType,
     CombGroup, Control, Direction, GetName, Group, Id, NumAttr, PortDef,
@@ -499,7 +503,7 @@
 </span><span class="kw">impl </span>Component {
     <span class="doccomment">/// Extend the signature with interface ports if they are missing.
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>extend_signature(sig: <span class="kw-2">&amp;mut </span>Vec&lt;PortDef&lt;u64&gt;&gt;) {
-        <span class="kw">let </span>port_names: HashSet&lt;<span class="kw">_</span>&gt; = sig.iter().map(|pd| pd.name).collect();
+        <span class="kw">let </span>port_names: HashSet&lt;<span class="kw">_</span>&gt; = sig.iter().map(|pd| pd.name()).collect();
         <span class="kw">let </span><span class="kw-2">mut </span>namegen = NameGenerator::with_prev_defined_names(port_names);
         <span class="kw">for </span>(attr, width, direction) <span class="kw">in </span>INTERFACE_PORTS.iter() {
             <span class="comment">// Check if there is already another interface port defined for the
@@ -508,12 +512,12 @@
                 <span class="kw">let </span><span class="kw-2">mut </span>attributes = Attributes::default();
                 attributes.insert(<span class="kw-2">*</span>attr, <span class="number">1</span>);
                 <span class="kw">let </span>name = Id::from(attr.to_string());
-                sig.push(PortDef {
-                    name: namegen.gen_name(name.to_string()),
-                    width: <span class="kw-2">*</span>width,
-                    direction: direction.clone(),
+                sig.push(PortDef::new(
+                    namegen.gen_name(name.to_string()),
+                    <span class="kw-2">*</span>width,
+                    direction.clone(),
                     attributes,
-                });
+                ));
             }
         }
     }
@@ -539,7 +543,7 @@
             </span><span class="self">Self</span>::extend_signature(<span class="kw-2">&amp;mut </span>ports);
         }
 
-        <span class="kw">let </span>prev_names: HashSet&lt;<span class="kw">_</span>&gt; = ports.iter().map(|pd| pd.name).collect();
+        <span class="kw">let </span>prev_names: HashSet&lt;<span class="kw">_</span>&gt; = ports.iter().map(|pd| pd.name()).collect();
 
         <span class="kw">let </span>this_sig = Builder::cell_from_signature(
             THIS_ID.into(),
@@ -547,9 +551,13 @@
             ports
                 .into_iter()
                 <span class="comment">// Reverse the port directions inside the component.
-                </span>.map(|pd| PortDef {
-                    direction: pd.direction.reverse(),
-                    ..pd
+                </span>.map(|pd| {
+                    PortDef::new(
+                        pd.name(),
+                        pd.width,
+                        pd.direction.reverse(),
+                        pd.attributes,
+                    )
                 })
                 .collect(),
         );

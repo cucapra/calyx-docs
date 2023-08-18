@@ -125,7 +125,7 @@
                 .map(|pd| {
                     (
                         pd.attributes.get(ir::NumAttr::WriteTogether).unwrap(),
-                        pd.name,
+                        pd.name(),
                     )
                 })
                 .into_group_map()
@@ -164,10 +164,10 @@
                     }
                     <span class="macro">assert!</span>(outputs.len() == <span class="number">1</span>);
                     <span class="prelude-val">Ok</span>((
-                        outputs[<span class="number">0</span>].name,
+                        outputs[<span class="number">0</span>].name(),
                         inputs
                             .into_iter()
-                            .map(|port| port.name)
+                            .map(|port| port.name())
                             .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;(),
                     ))
                 })

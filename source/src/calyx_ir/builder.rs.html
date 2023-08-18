@@ -360,13 +360,6 @@
 <span id="360">360</span>
 <span id="361">361</span>
 <span id="362">362</span>
-<span id="363">363</span>
-<span id="364">364</span>
-<span id="365">365</span>
-<span id="366">366</span>
-<span id="367">367</span>
-<span id="368">368</span>
-<span id="369">369</span>
 </pre><pre class="rust"><code><span class="doccomment">//! IR Builder. Provides convience methods to build various parts of the internal
 //! representation.
 </span><span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures, Nothing, RRC, WRC};
@@ -548,12 +541,12 @@
         </span><span class="kw">let </span>cell = <span class="self">Self</span>::cell_from_signature(
             name,
             ir::CellType::Constant { val, width },
-            <span class="macro">vec!</span>[ir::PortDef {
-                name: <span class="string">&quot;out&quot;</span>.into(),
+            <span class="macro">vec!</span>[ir::PortDef::new(
+                ir::Id::from(<span class="string">&quot;out&quot;</span>),
                 width,
-                direction: ir::Direction::Output,
-                attributes: ir::Attributes::default(),
-            }],
+                ir::Direction::Output,
+                ir::Attributes::default(),
+            )],
         );
 
         <span class="comment">// Add constant to the Component.
@@ -716,23 +709,16 @@
         ports: Vec&lt;ir::PortDef&lt;u64&gt;&gt;,
     ) -&gt; RRC&lt;ir::Cell&gt; {
         <span class="kw">let </span>cell = Rc::new(RefCell::new(ir::Cell::new(name, typ)));
-        ports.into_iter().for_each(
-            |PortDef {
-                 name,
-                 width,
-                 direction,
-                 attributes,
-             }| {
-                <span class="kw">let </span>port = Rc::new(RefCell::new(ir::Port {
-                    name,
-                    width,
-                    direction,
-                    parent: ir::PortParent::Cell(WRC::from(<span class="kw-2">&amp;</span>cell)),
-                    attributes,
-                }));
-                cell.borrow_mut().ports.push(port);
-            },
-        );
+        ports.into_iter().for_each(|pd| {
+            <span class="kw">let </span>port = Rc::new(RefCell::new(ir::Port {
+                name: pd.name(),
+                width: pd.width,
+                direction: pd.direction,
+                parent: ir::PortParent::Cell(WRC::from(<span class="kw-2">&amp;</span>cell)),
+                attributes: pd.attributes,
+            }));
+            cell.borrow_mut().ports.push(port);
+        });
         cell
     }
 }

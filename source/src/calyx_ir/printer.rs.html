@@ -833,7 +833,7 @@
 <span class="kw">impl </span>Printer {
     <span class="doccomment">/// Format attributes of the form `@static(1)`.
     /// Returns the empty string if the `attrs` is empty.
-    </span><span class="kw">fn </span>format_at_attributes(attrs: <span class="kw-2">&amp;</span>ir::Attributes) -&gt; String {
+    </span><span class="kw">pub fn </span>format_at_attributes(attrs: <span class="kw-2">&amp;</span>ir::Attributes) -&gt; String {
         <span class="kw">let </span><span class="kw-2">mut </span>buf = attrs.to_string_with(<span class="string">&quot; &quot;</span>, |name, val| {
             <span class="kw">if </span>val == <span class="number">1 </span>{
                 <span class="macro">format!</span>(<span class="string">&quot;@{}&quot;</span>, name)
@@ -849,7 +849,7 @@
 
     <span class="doccomment">/// Format attributes of the form `&lt;&quot;static&quot;=1&gt;`.
     /// Returns the empty string if the `attrs` is empty.
-    </span><span class="kw">fn </span>format_attributes(attrs: <span class="kw-2">&amp;</span>ir::Attributes) -&gt; String {
+    </span><span class="kw">pub fn </span>format_attributes(attrs: <span class="kw-2">&amp;</span>ir::Attributes) -&gt; String {
         <span class="kw">if </span>attrs.is_empty() {
             <span class="string">&quot;&quot;</span>.to_string()
         } <span class="kw">else </span>{
@@ -863,7 +863,7 @@
     }
 
     <span class="doccomment">/// Formats port definitions in signatures
-    </span><span class="kw">fn </span>format_ports(ports: <span class="kw-2">&amp;</span>[RRC&lt;ir::Port&gt;]) -&gt; String {
+    </span><span class="kw">pub fn </span>format_ports(ports: <span class="kw-2">&amp;</span>[RRC&lt;ir::Port&gt;]) -&gt; String {
         ports
             .iter()
             .map(|p| {
@@ -878,7 +878,7 @@
             .join(<span class="string">&quot;, &quot;</span>)
     }
 
-    <span class="kw">fn </span>format_port_def&lt;W: std::fmt::Display&gt;(
+    <span class="kw">pub fn </span>format_port_def&lt;W: std::fmt::Display&gt;(
         port_defs: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>ir::PortDef&lt;W&gt;],
     ) -&gt; String {
         port_defs
@@ -887,7 +887,7 @@
                 <span class="macro">format!</span>(
                     <span class="string">&quot;{}{}: {}&quot;</span>,
                     <span class="self">Self</span>::format_at_attributes(<span class="kw-2">&amp;</span>pd.attributes),
-                    pd.name,
+                    pd.name(),
                     pd.width
                 )
             })

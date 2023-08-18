@@ -851,7 +851,7 @@
     <span class="kw">fn </span>from(prim: <span class="kw-2">&amp;</span>ir::Primitive) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>done_ports: HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; = prim
             .find_all_with_attr(ir::NumAttr::Done)
-            .map(|pd| (pd.attributes.get(ir::NumAttr::Done), pd.name))
+            .map(|pd| (pd.attributes.get(ir::NumAttr::Done), pd.name()))
             .collect();
 
         <span class="kw">let </span>go_ports = prim
@@ -860,7 +860,7 @@
                 pd.attributes.get(ir::NumAttr::Static).and_then(|st| {
                     done_ports
                         .get(<span class="kw-2">&amp;</span>pd.attributes.get(ir::NumAttr::Go))
-                        .map(|done_port| (pd.name, <span class="kw-2">*</span>done_port, st))
+                        .map(|done_port| (pd.name(), <span class="kw-2">*</span>done_port, st))
                 })
             })
             .collect_vec();
@@ -945,7 +945,7 @@
         </span><span class="kw">for </span>prim <span class="kw">in </span>ctx.lib.signatures() {
             <span class="kw">let </span>done_ports: HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; = prim
                 .find_all_with_attr(ir::NumAttr::Done)
-                .map(|pd| (pd.attributes.get(ir::NumAttr::Done), pd.name))
+                .map(|pd| (pd.attributes.get(ir::NumAttr::Done), pd.name()))
                 .collect();
 
             <span class="kw">let </span>go_ports = prim
@@ -954,7 +954,7 @@
                     pd.attributes.get(ir::NumAttr::Static).and_then(|st| {
                         done_ports
                             .get(<span class="kw-2">&amp;</span>pd.attributes.get(ir::NumAttr::Go))
-                            .map(|done_port| (pd.name, <span class="kw-2">*</span>done_port, st))
+                            .map(|done_port| (pd.name(), <span class="kw-2">*</span>done_port, st))
                     })
                 })
                 .collect_vec();
