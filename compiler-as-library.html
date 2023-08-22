@@ -179,7 +179,7 @@ You'll also need <code>calyx-frontend</code> and <code>calyx-utils</code> if you
 <ol>
 <li>The <a href="https://crates.io/crates/calyx-stdlib"><code>calyx-stdlib</code></a> package pulls in the sources of all the primitives using the Rust <code>include_str!</code> macro.</li>
 <li>The <code>calyx</code> binary defines a build script that depends on <code>calyx-stdlib</code> as a build dependency.</li>
-<li>During build time, the script loads the string representation of all the primitives files and writes them to <code>$OUT_DIR/primitives</code>. The <code>OUT_DIR</code> environment variable is defined by <code>cargo</code>.</li>
+<li>During build time, the script loads the string representation of all the primitives files and writes them to <code>$CALYX_PRIMITIVE_DIR/primitives</code>. If the variable is not set, the location defaults to <code>$HOME/.calyx</code>.</li>
 <li>If (3) succeeds, the build scripts defines the <code>CALYX_PRIMITIVES_LIB</code> environment variable which is used when compiling the <code>calyx</code> crate.</li>
 <li>During compilation, <code>calyx</code> embeds the value of this environment variable as the default argument to the <code>-l</code> flag. If the variable is not defined, the default value of the <code>-l</code> flag is <code>.</code>.</li>
 </ol>
