@@ -342,13 +342,6 @@
 <span id="342">342</span>
 <span id="343">343</span>
 <span id="344">344</span>
-<span id="345">345</span>
-<span id="346">346</span>
-<span id="347">347</span>
-<span id="348">348</span>
-<span id="349">349</span>
-<span id="350">350</span>
-<span id="351">351</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ReadWriteSet;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
@@ -456,7 +449,8 @@
         // inputs. we can ignore the cell.go assignment, since that is not
         // going to be part of the `invoke`.
         </span><span class="kw">else if </span>parent_is_cell(<span class="kw-2">&amp;</span>assign.dst.borrow())
-            &amp;&amp; assign.dst != comp.borrow().get_with_attr(ir::NumAttr::Go)
+            &amp;&amp; assign.dst
+                != comp.borrow().get_unique_with_attr(ir::NumAttr::Go).unwrap()
         {
             <span class="kw">let </span>name = assign.dst.borrow().name;
             <span class="kw">if </span>assign.guard.is_true() {
@@ -615,22 +609,14 @@
             <span class="kw">return</span>;
         }
 
-        <span class="comment">// Component must define a @go/@done interface
-        </span><span class="kw">let </span>maybe_go_port = cell.find_with_attr(ir::NumAttr::Go);
-        <span class="kw">let </span>maybe_done_port = cell.find_with_attr(ir::NumAttr::Done);
-        <span class="kw">if </span>maybe_go_port.is_none() || maybe_done_port.is_none() {
+        <span class="comment">// Component must define exactly one @go/@done interface
+        </span><span class="kw">let </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(go_port)) = cell.find_unique_with_attr(ir::NumAttr::Go) <span class="kw">else </span>{
             <span class="kw">return</span>;
-        }
-
-        <span class="comment">// Component must have a single @go/@done pair
-        </span><span class="kw">let </span>go_ports = cell.find_all_with_attr(ir::NumAttr::Go).count();
-        <span class="kw">let </span>done_ports = cell.find_all_with_attr(ir::NumAttr::Done).count();
-        <span class="kw">if </span>go_ports &gt; <span class="number">1 </span>|| done_ports &gt; <span class="number">1 </span>{
+        };
+        <span class="kw">let </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(done_port)) = cell.find_unique_with_attr(ir::NumAttr::Done) <span class="kw">else </span>{
             <span class="kw">return</span>;
-        }
+        };
 
-        <span class="kw">let </span>go_port = maybe_go_port.unwrap();
-        <span class="kw">let </span>done_port = maybe_done_port.unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>go_wr_cnt = <span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>done_wr_cnt = <span class="number">0</span>;
 
@@ -639,9 +625,9 @@
             </span><span class="kw">if </span>assign.dst == go_port {
                 <span class="kw">if </span>go_wr_cnt &gt; <span class="number">0 </span>{
                     <span class="macro">log::info!</span>(
-                            <span class="string">&quot;Cannot transform `{}` due to multiple writes to @go port&quot;</span>,
-                            group_name,
-                        );
+                        <span class="string">&quot;Cannot transform `{}` due to multiple writes to @go port&quot;</span>,
+                        group_name,
+                    );
                     <span class="kw">return</span>;
                 } <span class="kw">else if </span>!assign.guard.is_true() {
                     <span class="macro">log::info!</span>(

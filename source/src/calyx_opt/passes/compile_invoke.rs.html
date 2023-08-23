@@ -207,6 +207,9 @@
 <span id="207">207</span>
 <span id="208">208</span>
 <span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::structure;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Attributes, LibrarySignatures};
@@ -222,14 +225,17 @@
     <span class="kw">let </span>name = cell.name();
 
     <span class="comment">// Get the go port
-    </span><span class="kw">let </span><span class="kw-2">mut </span>go_ports = cell.find_all_with_attr(ir::NumAttr::Go).collect_vec();
-    <span class="kw">if </span>go_ports.len() &gt; <span class="number">1 </span>{
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(<span class="string">&quot;Invoked component `{name}` defines multiple @go signals. Cannot compile the invoke&quot;</span>)));
-    } <span class="kw">else if </span>go_ports.is_empty() {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(<span class="string">&quot;Invoked component `{name}` does not define a @go signal. Cannot compile the invoke&quot;</span>)));
+    </span><span class="kw">match </span>cell.find_unique_with_attr(ir::NumAttr::Go) {
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(p)) =&gt; <span class="prelude-val">Ok</span>(p),
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
+            <span class="string">&quot;Invoked component `{name}` does not define a @go signal. Cannot compile the invoke&quot;</span>,
+        ))),
+        <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
+            <span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
+                <span class="string">&quot;Invoked component `{name}` defines multiple @go signals. Cannot compile the invoke&quot;</span>,
+            )))
+        }
     }
-
-    <span class="prelude-val">Ok</span>(go_ports.pop().unwrap())
 }
 
 <span class="comment">// given inputs and outputs (of the invoke), and the `enable_assignments` (e.g., invoked_component.go = 1&#39;d1)

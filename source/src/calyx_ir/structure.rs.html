@@ -748,6 +748,20 @@
 <span id="748">748</span>
 <span id="749">749</span>
 <span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
@@ -757,7 +771,7 @@
     Attributes, Direction, GetAttributes, Guard, Id, PortDef, RRC, WRC,
 };
 <span class="kw">use </span>calyx_frontend::Attribute;
-<span class="kw">use </span>calyx_utils::GetName;
+<span class="kw">use </span>calyx_utils::{CalyxResult, Error, GetName};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>smallvec::{smallvec, SmallVec};
 <span class="kw">use </span>std::hash::Hash;
@@ -1042,18 +1056,6 @@
             .map(Rc::clone)
     }
 
-    <span class="doccomment">/// Get a reference to the first port that has the attribute `attr`.
-    </span><span class="kw">pub fn </span>find_with_attr&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;
-    <span class="kw">where
-        </span>A: Into&lt;Attribute&gt;,
-    {
-        <span class="kw">let </span>attr = attr.into();
-        <span class="self">self</span>.ports
-            .iter()
-            .find(|<span class="kw-2">&amp;</span>g| g.borrow().attributes.has(attr))
-            .map(Rc::clone)
-    }
-
     <span class="doccomment">/// Return all ports that have the attribute `attr`.
     </span><span class="kw">pub fn </span>find_all_with_attr&lt;A&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -1067,6 +1069,32 @@
             .iter()
             .filter(<span class="kw">move </span>|<span class="kw-2">&amp;</span>p| p.borrow().attributes.has(attr))
             .map(Rc::clone)
+    }
+
+    <span class="doccomment">/// Return the unique port with the given attribute.
+    /// If multiple ports have the same attribute, then we panic.
+    /// If there are not ports with the give attribute, then we return None.
+    </span><span class="kw">pub fn </span>find_unique_with_attr&lt;A&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        attr: A,
+    ) -&gt; CalyxResult&lt;<span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;&gt;
+    <span class="kw">where
+        </span>A: Into&lt;Attribute&gt;,
+    {
+        <span class="kw">let </span>attr = attr.into();
+        <span class="kw">let </span><span class="kw-2">mut </span>ports = <span class="self">self</span>.find_all_with_attr(attr);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = ports.next() {
+            <span class="kw">if </span>ports.next().is_some() {
+                <span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                    <span class="string">&quot;Multiple ports with attribute `{}` found on cell `{}`&quot;</span>,
+                    attr, <span class="self">self</span>.name
+                )))
+            } <span class="kw">else </span>{
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(port))
+            }
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+        }
     }
 
     <span class="doccomment">/// Get a reference to the named port and throw an error if it doesn&#39;t
@@ -1112,18 +1140,18 @@
         }
     }
 
-    <span class="doccomment">/// Get a reference to the first port with the attribute `attr` and throw an error if none
-    /// exist.
-    </span><span class="kw">pub fn </span>get_with_attr&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; RRC&lt;Port&gt;
+    <span class="doccomment">/// Get the unique port with the given attribute.
+    /// Panic if no port with the attribute is found and returns an error if multiple ports with the attribute are found.
+    </span><span class="kw">pub fn </span>get_unique_with_attr&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; CalyxResult&lt;RRC&lt;Port&gt;&gt;
     <span class="kw">where
         </span>A: Into&lt;Attribute&gt; + std::fmt::Display + Copy,
     {
-        <span class="self">self</span>.find_with_attr(attr).unwrap_or_else(|| {
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.find_unique_with_attr(attr)<span class="question-mark">?</span>.unwrap_or_else(|| {
             <span class="macro">panic!</span>(
                 <span class="string">&quot;Port with attribute `{attr}&#39; not found on cell `{}&#39;&quot;</span>,
                 <span class="self">self</span>.name,
             )
-        })
+        }))
     }
 
     <span class="doccomment">/// Returns the name of the component that is this cells type.
