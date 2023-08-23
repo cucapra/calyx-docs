@@ -608,7 +608,6 @@
 <span id="608">608</span>
 <span id="609">609</span>
 <span id="610">610</span>
-<span id="611">611</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
@@ -901,21 +900,25 @@
 
         <span class="comment">// Rewrites to inline the interface.
         </span><span class="kw">let </span>interface_map = <span class="self">Self</span>::inline_interface(builder, comp, name);
-        <span class="kw">let </span>rewrite = ir::Rewriter::new(<span class="kw-2">&amp;</span>cell_map, <span class="kw-2">&amp;</span>interface_map);
+        <span class="kw">let </span><span class="kw-2">mut </span>rewrite = ir::Rewriter {
+            cell_map,
+            port_map: interface_map,
+            ..Default::default()
+        };
 
         <span class="comment">// For each group, create a new group and rewrite all assignments within
         // it using the `rewrite_map`.
-        </span><span class="kw">let </span>group_map: rewriter::RewriteMap&lt;ir::Group&gt; = comp
+        </span>rewrite.group_map = comp
             .get_groups()
             .iter()
             .map(|gr| <span class="self">Self</span>::inline_group(builder, <span class="kw-2">&amp;</span>rewrite, gr))
             .collect();
-        <span class="kw">let </span>static_group_map: rewriter::RewriteMap&lt;ir::StaticGroup&gt; = comp
+        rewrite.static_group_map = comp
             .get_static_groups()
             .iter()
             .map(|gr| <span class="self">Self</span>::inline_static_group(builder, <span class="kw-2">&amp;</span>rewrite, gr))
             .collect();
-        <span class="kw">let </span>comb_group_map: rewriter::RewriteMap&lt;ir::CombGroup&gt; = comp
+        rewrite.comb_group_map = comp
             .comb_groups
             .iter()
             .map(|gr| <span class="self">Self</span>::inline_comb_group(builder, <span class="kw-2">&amp;</span>rewrite, gr))
@@ -931,17 +934,12 @@
 
         <span class="comment">// Generate a control program associated with this instance
         </span><span class="kw">let </span><span class="kw-2">mut </span>con = ir::Cloner::control(<span class="kw-2">&amp;</span>comp.control.borrow());
-        rewrite.rewrite_control(
-            <span class="kw-2">&amp;mut </span>con,
-            <span class="kw-2">&amp;</span>group_map,
-            <span class="kw-2">&amp;</span>comb_group_map,
-            <span class="kw-2">&amp;</span>static_group_map,
-        );
+        rewrite.rewrite_control(<span class="kw-2">&amp;mut </span>con);
 
         <span class="comment">// Generate interface map for use in the parent cell.
         // Return as an iterator because it&#39;s immediately merged into the global rewrite map.
         </span><span class="kw">let </span>rev_interface_map =
-            interface_map.into_iter().map(<span class="kw">move </span>|(cp, pr)| {
+            rewrite.port_map.into_iter().map(<span class="kw">move </span>|(cp, pr)| {
                 <span class="kw">let </span>ir::Canonical(<span class="kw">_</span>, p) = cp;
                 <span class="kw">let </span>port = pr.borrow();
                 <span class="kw">let </span>np = <span class="kw">match </span>port.name.id.as_str() {

@@ -251,10 +251,6 @@
 <span id="251">251</span>
 <span id="252">252</span>
 <span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::dump_ports;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
@@ -421,13 +417,11 @@
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
         <span class="macro">log::debug!</span>(<span class="string">&quot;compile-ref: {}&quot;</span>, comp.name);
-        <span class="self">self</span>.ref_cells = dump_ports::dump_ports_to_signature(
-            comp,
-            is_external_cell,
-            <span class="bool-val">true</span>,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.port_names,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.removed,
-        );
+        <span class="kw">let </span>dump_ports::DumpResults { cells, rewrites } =
+            dump_ports::dump_ports_to_signature(comp, is_external_cell, <span class="bool-val">true</span>);
+        <span class="self">self</span>.removed.extend(rewrites.clone());
+        <span class="self">self</span>.port_names.insert(comp.name, rewrites);
+        <span class="self">self</span>.ref_cells = cells;
 
         <span class="comment">// For all subcomponents that had a `ref` cell in them, we need to
         // update their cell to have the new ports added from inlining the
@@ -494,21 +488,19 @@
         _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
+        <span class="kw">let </span>port_map = std::mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.removed);
         <span class="comment">// Rewrite all of the ref cell ports
-        </span><span class="kw">let </span>empty = HashMap::new();
-        <span class="kw">let </span>rw = ir::Rewriter::new(<span class="kw-2">&amp;</span>empty, <span class="kw-2">&amp;</span><span class="self">self</span>.removed);
+        </span><span class="kw">let </span>rw = ir::Rewriter {
+            port_map,
+            ..Default::default()
+        };
         comp.for_each_assignment(|assign| {
             rw.rewrite_assign(assign);
         });
         comp.for_each_static_assignment(|assign| {
             rw.rewrite_assign(assign);
         });
-        rw.rewrite_control(
-            <span class="kw-2">&amp;mut </span>comp.control.borrow_mut(),
-            <span class="kw-2">&amp;</span>HashMap::new(),
-            <span class="kw-2">&amp;</span>HashMap::new(),
-            <span class="kw-2">&amp;</span>HashMap::new(),
-        );
+        rw.rewrite_control(<span class="kw-2">&amp;mut </span>comp.control.borrow_mut());
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 }

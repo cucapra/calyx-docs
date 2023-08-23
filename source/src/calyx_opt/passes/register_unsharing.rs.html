@@ -233,6 +233,16 @@
 <span id="233">233</span>
 <span id="234">234</span>
 <span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Pass to unshare registers by analyzing the live ranges of values stored
 //! within them.
 </span><span class="kw">use </span><span class="kw">crate</span>::analysis::reaching_defns::{
@@ -398,8 +408,10 @@
         <span class="kw">for </span>(grp, rename_cells) <span class="kw">in </span>grp_map {
             <span class="kw">let </span>group_ref = comp.find_group(grp).unwrap();
             <span class="kw">let </span><span class="kw-2">mut </span>group = group_ref.borrow_mut();
-            <span class="kw">let </span>empty_map = HashMap::new();
-            <span class="kw">let </span>rewriter = ir::Rewriter::new(<span class="kw-2">&amp;</span>rename_cells, <span class="kw-2">&amp;</span>empty_map);
+            <span class="kw">let </span>rewriter = ir::Rewriter {
+                cell_map: rename_cells,
+                ..Default::default()
+            };
             group
                 .assignments
                 .iter_mut()
@@ -433,14 +445,18 @@
         _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">let </span>book = <span class="kw-2">&amp;</span><span class="self">self</span>.bookkeeper;
+        <span class="kw">let </span>book = <span class="kw-2">&amp;mut </span><span class="self">self</span>.bookkeeper;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = book.analysis.meta.fetch_label(invoke) {
             <span class="comment">// only do rewrites if there is actually rewriting to do
-            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(rename_vec) = book.invoke_map.get(name) {
-                <span class="kw">let </span>empty_map = HashMap::new();
-                <span class="kw">let </span>rewriter = ir::Rewriter::new(rename_vec, <span class="kw-2">&amp;</span>empty_map);
-                rewriter.rewrite_invoke(invoke, <span class="kw-2">&amp;</span>HashMap::new());
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(rename_vec) = book.invoke_map.get_mut(name) {
+                <span class="kw">let </span>cell_map = std::mem::take(rename_vec);
+                <span class="kw">let </span>rewriter = ir::Rewriter {
+                    cell_map,
+                    ..Default::default()
+                };
+                rewriter.rewrite_invoke(invoke);
+                <span class="kw-2">*</span>rename_vec = rewriter.cell_map;
             }
         }
 
@@ -454,14 +470,18 @@
         _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">let </span>book = <span class="kw-2">&amp;</span><span class="self">self</span>.bookkeeper;
+        <span class="kw">let </span>book = <span class="kw-2">&amp;mut </span><span class="self">self</span>.bookkeeper;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = book.analysis.meta.fetch_label_static(invoke) {
             <span class="comment">// only do rewrites if there is actually rewriting to do
-            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(rename_vec) = book.invoke_map.get(name) {
-                <span class="kw">let </span>empty_map = HashMap::new();
-                <span class="kw">let </span>rewriter = ir::Rewriter::new(rename_vec, <span class="kw-2">&amp;</span>empty_map);
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(rename_vec) = book.invoke_map.get_mut(name) {
+                <span class="kw">let </span>cell_map = std::mem::take(rename_vec);
+                <span class="kw">let </span>rewriter = ir::Rewriter {
+                    cell_map,
+                    ..Default::default()
+                };
                 rewriter.rewrite_static_invoke(invoke);
+                <span class="kw-2">*</span>rename_vec = rewriter.cell_map;
             }
         }
 

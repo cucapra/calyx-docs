@@ -75,10 +75,29 @@
 <span id="75">75</span>
 <span id="76">76</span>
 <span id="77">77</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::passes::compile_ref::RefPortMap;
-<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC, WRC};
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+</pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC, WRC};
+<span class="kw">use </span>ir::rewriter;
 <span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>std::{cell::RefCell, collections::HashMap, rc::Rc};
+<span class="kw">use </span>std::{cell::RefCell, rc::Rc};
+
+<span class="attribute">#[derive(Default)]
+</span><span class="doccomment">/// Results generated from the process of dumping out ports.
+</span><span class="kw">pub struct </span>DumpResults {
+    <span class="doccomment">/// The cells that were removed from the component.
+    </span><span class="kw">pub </span>cells: Vec&lt;RRC&lt;ir::Cell&gt;&gt;,
+    <span class="doccomment">/// Rewrites from (cell, port) to the new port.
+    /// Usually consumed by an [`ir::rewriter::Rewriter`].
+    </span><span class="kw">pub </span>rewrites: rewriter::PortRewriteMap,
+}
 
 <span class="doccomment">/// Formats name of a port given the id of the cell and the port
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>format_port_name(canon: <span class="kw-2">&amp;</span>ir::Canonical) -&gt; ir::Id {
@@ -89,15 +108,17 @@
 /// the component and inline all the ports of the removed cells to the component
 /// signature.
 ///
-/// If remove_signals is true, does not inline ports marked with @clk and @reset.
-</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>dump_ports_to_signature(
+/// If `remove_clk_and_reset` is true, does not inline ports marked with @clk and @reset.
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>dump_ports_to_signature&lt;F&gt;(
     component: <span class="kw-2">&amp;mut </span>ir::Component,
-    cell_filter: <span class="kw">fn</span>(<span class="kw-2">&amp;</span>RRC&lt;ir::Cell&gt;) -&gt; bool,
-    remove_signals: bool,
-    port_names: <span class="kw-2">&amp;mut </span>RefPortMap,
-    removed: <span class="kw-2">&amp;mut </span>HashMap&lt;ir::Canonical, RRC&lt;ir::Port&gt;&gt;,
-) -&gt; Vec&lt;RRC&lt;ir::Cell&gt;&gt; {
-    <span class="kw">let </span>comp_name = component.name;
+    cell_filter: F,
+    remove_clk_and_reset: bool,
+) -&gt; DumpResults
+<span class="kw">where
+    </span>F: Fn(<span class="kw-2">&amp;</span>RRC&lt;ir::Cell&gt;) -&gt; bool,
+{
+    <span class="kw">let </span><span class="kw-2">mut </span>removed = rewriter::PortRewriteMap::default();
+
     <span class="kw">let </span>(ext_cells, cells): (Vec&lt;<span class="kw">_</span>&gt;, Vec&lt;<span class="kw">_</span>&gt;) =
         component.cells.drain().partition(cell_filter);
     component.cells.append(cells.into_iter());
@@ -113,8 +134,8 @@
             .ports
             .iter()
             .filter(|pr| {
-                <span class="kw">let </span>p = pr.borrow();
-                <span class="kw">if </span>remove_signals {
+                <span class="kw">if </span>remove_clk_and_reset {
+                    <span class="kw">let </span>p = pr.borrow();
                     !p.attributes.has(ir::BoolAttr::Clk)
                         &amp;&amp; !p.attributes.has(ir::BoolAttr::Reset)
                 } <span class="kw">else </span>{
@@ -142,15 +163,12 @@
 
             <span class="comment">// Record the port as removed
             </span>removed.insert(canon.clone(), Rc::clone(<span class="kw-2">&amp;</span>new_port));
-
-            <span class="comment">// Record the port to add to cells
-            </span>port_names
-                .entry(comp_name)
-                .or_default()
-                .insert(canon, Rc::clone(<span class="kw-2">&amp;</span>new_port));
         }
     }
-    ext_cells
+    DumpResults {
+        cells: ext_cells,
+        rewrites: removed,
+    }
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx_opt" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

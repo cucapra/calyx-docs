@@ -377,14 +377,9 @@
 <span id="377">377</span>
 <span id="378">378</span>
 <span id="379">379</span>
-<span id="380">380</span>
-<span id="381">381</span>
-<span id="382">382</span>
-<span id="383">383</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
 
 <span class="doccomment">/// A data structure to track rewrites of ports with added functionality to declare
@@ -752,14 +747,11 @@
             }
         });
 
-        <span class="kw">let </span>cell_rewrites = HashMap::new();
-        <span class="kw">let </span>rewriter = ir::Rewriter::new(<span class="kw-2">&amp;</span>cell_rewrites, <span class="kw-2">&amp;</span>rewrites);
-        rewriter.rewrite_control(
-            <span class="kw-2">&amp;mut </span>comp.control.borrow_mut(),
-            <span class="kw-2">&amp;</span>HashMap::new(),
-            <span class="kw-2">&amp;</span>HashMap::new(),
-            <span class="kw-2">&amp;</span>HashMap::new(),
-        );
+        <span class="kw">let </span>rewriter = ir::Rewriter {
+            port_map: rewrites,
+            ..Default::default()
+        };
+        rewriter.rewrite_control(<span class="kw-2">&amp;mut </span>comp.control.borrow_mut());
 
         <span class="prelude-val">Ok</span>(Action::Stop)
     }

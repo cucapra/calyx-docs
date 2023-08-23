@@ -535,9 +535,6 @@
 <span id="535">535</span>
 <span id="536">536</span>
 <span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     GraphColoring, LiveRangeAnalysis, ReadWriteSet, ShareSet, StaticParTiming,
 };
@@ -1058,8 +1055,10 @@
         }
 
         <span class="comment">// Rewrite assignments using the coloring generated.
-        </span><span class="kw">let </span>empty_map: ir::rewriter::PortRewriteMap = HashMap::new();
-        <span class="kw">let </span>rewriter = ir::Rewriter::new(<span class="kw-2">&amp;</span>coloring, <span class="kw-2">&amp;</span>empty_map);
+        </span><span class="kw">let </span>rewriter = ir::Rewriter {
+            cell_map: coloring,
+            ..Default::default()
+        };
         comp.for_each_assignment(|assign| {
             assign.for_each_port(|port| rewriter.get(port));
         });
@@ -1068,12 +1067,7 @@
         });
 
         <span class="comment">// Rewrite control uses of ports
-        </span>rewriter.rewrite_control(
-            <span class="kw-2">&amp;mut </span>comp.control.borrow_mut(),
-            <span class="kw-2">&amp;</span>HashMap::new(),
-            <span class="kw-2">&amp;</span>HashMap::new(),
-            <span class="kw-2">&amp;</span>HashMap::new(),
-        );
+        </span>rewriter.rewrite_control(<span class="kw-2">&amp;mut </span>comp.control.borrow_mut());
 
         <span class="prelude-val">Ok</span>(Action::Stop)
     }
