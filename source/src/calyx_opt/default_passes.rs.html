@@ -268,9 +268,9 @@
                 </span>InferShare,
                 ComponentInliner,
                 CombProp,
-                CompileRef, <span class="comment">//Must run before cell-share, and before component-inliner
-                </span>CellShare,  <span class="comment">// LiveRangeAnalaysis should handle comb groups
-                </span>SimplifyWithControl, <span class="comment">// Must run before infer-static-timing
+                CellShare, <span class="comment">// LiveRangeAnalaysis should handle comb groups
+                </span>SimplifyWithControl, <span class="comment">// Must run before compile-invoke
+                </span>CompileRef, <span class="comment">//Must run before cell-share, and before component-inliner
                 </span>CompileInvoke, <span class="comment">// creates dead comb groups
                 </span>AttributePromotion,
                 StaticPromotion,
