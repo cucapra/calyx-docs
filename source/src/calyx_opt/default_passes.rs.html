@@ -174,17 +174,14 @@
 <span id="174">174</span>
 <span id="175">175</span>
 <span id="176">176</span>
-<span id="177">177</span>
-<span id="178">178</span>
-<span id="179">179</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     AttributePromotion, Canonicalize, CellShare, ClkInsertion, CollapseControl,
-    CombProp, CompileEmpty, CompileInvoke, CompileRef, CompileRepeat,
-    CompileStatic, CompileSync, CompileSyncWithoutSyncReg, ComponentInliner,
-    DataPathInfer, DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval,
-    DiscoverExternal, Externalize, GoInsertion, GroupToInvoke, GroupToSeq,
-    HoleInliner, InferShare, LowerGuards, MergeAssign, Papercut, ParToSeq,
+    CombProp, CompileEmpty, CompileInvoke, CompileRepeat, CompileStatic,
+    CompileSync, CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
+    DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, DiscoverExternal,
+    Externalize, GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner,
+    InferShare, LowerGuards, MergeAssign, Papercut, ParToSeq,
     RegisterUnsharing, RemoveIds, ResetInsertion, SimplifyStaticGuards,
     SimplifyWithControl, StaticInliner, StaticPromotion, SynthesisPapercut,
     TopDownCompileControl, TopDownStaticTiming, UnrollBounded, WellFormed,
@@ -228,7 +225,6 @@
         pm.register_pass::&lt;SimplifyWithControl&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;TopDownStaticTiming&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;TopDownCompileControl&gt;()<span class="question-mark">?</span>;
-        pm.register_pass::&lt;CompileRef&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileSync&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileSyncWithoutSyncReg&gt;()<span class="question-mark">?</span>;
 
@@ -270,7 +266,6 @@
                 CombProp,
                 CellShare, <span class="comment">// LiveRangeAnalaysis should handle comb groups
                 </span>SimplifyWithControl, <span class="comment">// Must run before compile-invoke
-                </span>CompileRef, <span class="comment">//Must run before cell-share, and before component-inliner
                 </span>CompileInvoke, <span class="comment">// creates dead comb groups
                 </span>AttributePromotion,
                 StaticPromotion,
@@ -329,7 +324,6 @@
             [
                 <span class="string">&quot;validate&quot;</span>,
                 CompileSync,
-                CompileRef,
                 SimplifyWithControl,
                 CompileInvoke,
                 <span class="string">&quot;compile&quot;</span>,

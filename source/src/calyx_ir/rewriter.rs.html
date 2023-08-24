@@ -258,9 +258,25 @@
 <span id="258">258</span>
 <span id="259">259</span>
 <span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::control::StaticInvoke;
 <span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>std::borrow::BorrowMut;
+<span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
 
@@ -516,6 +532,20 @@
             ir::Control::Invoke(inv) =&gt; <span class="self">self</span>.rewrite_invoke(inv),
             ir::Control::Static(s) =&gt; <span class="self">self</span>.rewrite_static_control(s),
         }
+    }
+
+    <span class="doccomment">/// Rewrite the component using the given maps
+    </span><span class="kw">pub fn </span>rewrite(<span class="kw-2">&amp;</span><span class="self">self</span>, comp: <span class="kw-2">&amp;mut </span>ir::Component) {
+        <span class="comment">// Rewrite all of the ref cell ports
+        </span>comp.for_each_assignment(|assign| {
+            <span class="self">self</span>.rewrite_assign(assign);
+        });
+        comp.for_each_static_assignment(|assign| {
+            <span class="self">self</span>.rewrite_assign(assign);
+        });
+        <span class="self">self</span>.rewrite_control(<span class="kw-2">&amp;mut </span>RefCell::borrow_mut(
+            comp.control.borrow_mut(),
+        ));
     }
 }
 </code></pre></div>

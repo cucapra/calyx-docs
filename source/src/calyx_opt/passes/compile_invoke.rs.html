@@ -210,18 +210,231 @@
 <span id="210">210</span>
 <span id="211">211</span>
 <span id="212">212</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{
+    <span class="self">self</span>, Action, ConstructVisitor, Named, VisResult, Visitor,
+};
 <span class="kw">use </span>calyx_ir::structure;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Attributes, LibrarySignatures};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
+<span class="kw">use </span>ir::{RRC, WRC};
 <span class="kw">use </span>itertools::Itertools;
+<span class="kw">use </span>std::cell::RefCell;
+<span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
+
+<span class="kw">use </span><span class="kw">super</span>::dump_ports;
 
 <span class="comment">// given `cell_ref` returns the `go` port of the cell (if it only has one `go` port),
 // or an error otherwise
 </span><span class="kw">fn </span>get_go_port(cell_ref: ir::RRC&lt;ir::Cell&gt;) -&gt; CalyxResult&lt;ir::RRC&lt;ir::Port&gt;&gt; {
     <span class="kw">let </span>cell = cell_ref.borrow();
-
     <span class="kw">let </span>name = cell.name();
 
     <span class="comment">// Get the go port
@@ -243,7 +456,6 @@
 </span><span class="kw">fn </span>build_assignments&lt;T&gt;(
     inputs: <span class="kw-2">&amp;mut </span>Vec&lt;(ir::Id, ir::RRC&lt;ir::Port&gt;)&gt;,
     outputs: <span class="kw-2">&amp;mut </span>Vec&lt;(ir::Id, ir::RRC&lt;ir::Port&gt;)&gt;,
-    <span class="kw-2">mut </span>enable_assignments: Vec&lt;ir::Assignment&lt;T&gt;&gt;,
     builder: <span class="kw-2">&amp;mut </span>ir::Builder,
     cell: <span class="kw-2">&amp;</span>ir::Cell,
 ) -&gt; Vec&lt;ir::Assignment&lt;T&gt;&gt; {
@@ -255,14 +467,69 @@
         .chain(outputs.drain(..).map(|(out, p)| {
             builder.build_assignment(p, cell.get(out), ir::Guard::True)
         }))
-        .chain(enable_assignments.drain(..))
         .collect()
 }
 
-<span class="doccomment">/// Compiles [`ir::Invoke`](calyx_ir::Invoke) statements into an [`ir::Enable`](calyx_ir::Enable)
-/// that runs the invoked component.
-</span><span class="attribute">#[derive(Default)]
-</span><span class="kw">pub struct </span>CompileInvoke;
+<span class="attribute">#[derive(Default)]
+</span><span class="doccomment">/// Map for storing added ports for each ref cell
+/// level of Hashmap represents:
+/// HashMap&lt;-component name-, Hashmap&lt;(-ref cell name-,-port name-), port&gt;&gt;;
+</span><span class="kw">struct </span>RefPortMap(HashMap&lt;ir::Id, HashMap&lt;ir::Canonical, RRC&lt;ir::Port&gt;&gt;&gt;);
+
+<span class="kw">impl </span>RefPortMap {
+    <span class="kw">fn </span>insert(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        comp_name: ir::Id,
+        ports: HashMap&lt;ir::Canonical, RRC&lt;ir::Port&gt;&gt;,
+    ) {
+        <span class="self">self</span>.<span class="number">0</span>.insert(comp_name, ports);
+    }
+
+    <span class="kw">fn </span>get(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        comp_name: <span class="kw-2">&amp;</span>ir::Id,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>HashMap&lt;ir::Canonical, RRC&lt;ir::Port&gt;&gt;&gt; {
+        <span class="self">self</span>.<span class="number">0</span>.get(comp_name)
+    }
+
+    <span class="doccomment">/// Get all of the newly added ports associated with a component that had
+    /// ref cells
+    </span><span class="kw">fn </span>get_ports(<span class="kw-2">&amp;</span><span class="self">self</span>, comp_name: <span class="kw-2">&amp;</span>ir::Id) -&gt; <span class="prelude-ty">Option</span>&lt;Vec&lt;RRC&lt;ir::Port&gt;&gt;&gt; {
+        <span class="self">self</span>.<span class="number">0
+            </span>.get(comp_name)
+            .map(|map| map.values().cloned().collect())
+    }
+}
+
+<span class="doccomment">/// Compiles [`ir::Invoke`] statements into an [`ir::Enable`] that runs the
+/// invoked component.
+</span><span class="kw">pub struct </span>CompileInvoke {
+    <span class="doccomment">/// Mapping from component to the canonical port name of ref cell o
+    </span>port_names: RefPortMap,
+    <span class="doccomment">/// Mapping from the ports of cells that were removed to the new port on the
+    /// component signature.
+    </span>removed: HashMap&lt;ir::Canonical, ir::RRC&lt;ir::Port&gt;&gt;,
+    <span class="doccomment">/// Ref cells in the component. We hold onto these so that our references don&#39;t get invalidated
+    </span>ref_cells: Vec&lt;ir::RRC&lt;ir::Cell&gt;&gt;,
+}
+
+<span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>CompileInvoke {
+    <span class="kw">fn </span>from(_ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt;
+    <span class="kw">where
+        </span><span class="self">Self</span>: Sized,
+    {
+        <span class="prelude-val">Ok</span>(CompileInvoke {
+            port_names: RefPortMap::default(),
+            removed: HashMap::new(),
+            ref_cells: Vec::new(),
+        })
+    }
+
+    <span class="kw">fn </span>clear_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.removed.clear();
+        <span class="self">self</span>.ref_cells.clear()
+    }
+}
 
 <span class="kw">impl </span>Named <span class="kw">for </span>CompileInvoke {
     <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
@@ -274,7 +541,157 @@
     </span>}
 }
 
+<span class="kw">impl </span>CompileInvoke {
+    <span class="doccomment">/// Given `ref_cells` of an invoke, returns `(inputs, outputs)` where
+    /// inputs are the corresponding inputs to the `invoke` and
+    /// outputs are the corresponding outputs to the `invoke`.
+    ///
+    /// Since this pass eliminates all ref cells in post order, we expect that
+    /// invoked component already had all of its ref cells removed.
+    </span><span class="kw">fn </span>ref_cells_to_ports(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        inv_cell: RRC&lt;ir::Cell&gt;,
+        ref_cells: <span class="kw">impl </span>Iterator&lt;Item = (ir::Id, ir::RRC&lt;ir::Cell&gt;)&gt;,
+    ) -&gt; Vec&lt;ir::Assignment&lt;ir::Nothing&gt;&gt; {
+        <span class="kw">let </span>inv_comp = inv_cell.borrow().type_name().unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>assigns = Vec::new();
+        <span class="kw">for </span>(ref_cell_name, cell) <span class="kw">in </span>ref_cells {
+            <span class="macro">log::debug!</span>(
+                <span class="string">&quot;Removing ref cell `{}` with {} ports&quot;</span>,
+                ref_cell_name,
+                cell.borrow().ports.len()
+            );
+
+            <span class="comment">// Mapping from canonical names of the ports of the ref cell to the
+            // new port defined on the signature of the component
+            </span><span class="kw">let </span><span class="prelude-val">Some</span>(comp_ports) = <span class="self">self</span>.port_names.get(<span class="kw-2">&amp;</span>inv_comp) <span class="kw">else </span>{
+                <span class="macro">unreachable!</span>(<span class="string">&quot;component `{}` invoked but not already visited by the pass&quot;</span>, inv_comp)
+            };
+
+            <span class="comment">// The type of the cell is the same as the ref cell so we can
+            // iterate over its ports and generate bindings for the ref cell.
+            </span><span class="kw">for </span>pr <span class="kw">in </span><span class="kw-2">&amp;</span>cell.borrow().ports {
+                <span class="kw">let </span>port = pr.borrow();
+                <span class="kw">if </span>port.has_attribute(ir::BoolAttr::Clk)
+                    || port.has_attribute(ir::BoolAttr::Reset)
+                {
+                    <span class="kw">continue</span>;
+                }
+
+                <span class="kw">let </span>canon = ir::Canonical(ref_cell_name, port.name);
+                <span class="kw">let </span><span class="prelude-val">Some</span>(comp_port) = comp_ports.get(<span class="kw-2">&amp;</span>canon) <span class="kw">else </span>{
+                    <span class="macro">unreachable!</span>(<span class="string">&quot;port `{}` not found in the signature of {}. Known ports are: {}&quot;</span>,
+                        canon,
+                        inv_comp,
+                        comp_ports.keys().map(|c| c.<span class="number">1</span>.as_ref()).collect_vec().join(<span class="string">&quot;, &quot;</span>)
+                    )
+                };
+                <span class="comment">// Get the port on the new cell with the same name as ref_port
+                </span><span class="kw">let </span>ref_port = inv_cell.borrow().get(comp_port.borrow().name);
+                <span class="macro">log::debug!</span>(<span class="string">&quot;Port `{}` -&gt; `{}`&quot;</span>, canon, ref_port.borrow().name);
+
+                <span class="kw">let </span>old_port = pr.borrow().canonical();
+                <span class="comment">// If the port has been removed already, get the new port from the component&#39;s signature
+                </span><span class="kw">let </span>arg_port = <span class="kw">if let </span><span class="prelude-val">Some</span>(sig_pr) = <span class="self">self</span>.removed.get(<span class="kw-2">&amp;</span>old_port)
+                {
+                    <span class="macro">log::debug!</span>(
+                        <span class="string">&quot;Port `{}` has been removed. Using `{}`&quot;</span>,
+                        old_port,
+                        sig_pr.borrow().name
+                    );
+                    Rc::clone(sig_pr)
+                } <span class="kw">else </span>{
+                    Rc::clone(pr)
+                };
+
+                <span class="kw">match </span>port.direction {
+                    ir::Direction::Output =&gt; {
+                        <span class="macro">log::debug!</span>(
+                            <span class="string">&quot;constructing: {} = {}&quot;</span>,
+                            ref_port.borrow().canonical(),
+                            arg_port.borrow().canonical()
+                        );
+                        assigns.push(ir::Assignment::new(
+                            ref_port.clone(),
+                            arg_port,
+                        ));
+                    }
+                    ir::Direction::Input =&gt; {
+                        <span class="macro">log::debug!</span>(
+                            <span class="string">&quot;constructing: {} = {}&quot;</span>,
+                            arg_port.borrow().canonical(),
+                            ref_port.borrow().canonical(),
+                        );
+                        assigns.push(ir::Assignment::new(
+                            arg_port,
+                            ref_port.clone(),
+                        ));
+                    }
+                    <span class="kw">_ </span>=&gt; {
+                        <span class="macro">unreachable!</span>(<span class="string">&quot;Cell should have inout ports&quot;</span>);
+                    }
+                }
+            }
+        }
+        assigns
+    }
+}
+
 <span class="kw">impl </span>Visitor <span class="kw">for </span>CompileInvoke {
+    <span class="kw">fn </span>iteration_order() -&gt; <span class="kw">crate</span>::traversal::Order
+    <span class="kw">where
+        </span><span class="self">Self</span>: Sized,
+    {
+        traversal::Order::Post
+    }
+
+    <span class="kw">fn </span>start(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="macro">log::debug!</span>(<span class="string">&quot;Visiting `{}`&quot;</span>, comp.name);
+        <span class="comment">// For all subcomponents that had a `ref` cell in them, we need to
+        // update their cell to have the new ports added from inlining the
+        // signatures of all the ref cells.
+        </span><span class="kw">for </span>cell <span class="kw">in </span>comp.cells.iter() {
+            <span class="kw">let </span><span class="kw-2">mut </span>new_ports: Vec&lt;RRC&lt;ir::Port&gt;&gt; = Vec::new();
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = cell.borrow().type_name() {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(vec) = <span class="self">self</span>.port_names.get_ports(<span class="kw-2">&amp;</span>name) {
+                    <span class="macro">log::debug!</span>(
+                        <span class="string">&quot;Updating ports of cell `{}&#39; (type `{name}&#39;)&quot;</span>,
+                        cell.borrow().name()
+                    );
+                    <span class="kw">for </span>p <span class="kw">in </span>vec.iter() {
+                        <span class="kw">let </span>new_port = Rc::new(RefCell::new(ir::Port {
+                            name: p.borrow().name,
+                            width: p.borrow().width,
+                            direction: p.borrow().direction.reverse(),
+                            parent: ir::PortParent::Cell(WRC::from(cell)),
+                            attributes: Attributes::default(),
+                        }));
+                        new_ports.push(new_port);
+                    }
+                }
+            }
+            cell.borrow_mut().ports.extend(new_ports);
+        }
+
+        <span class="kw">let </span>dump_ports::DumpResults { cells, rewrites } =
+            dump_ports::dump_ports_to_signature(
+                comp,
+                |cell| cell.borrow().is_reference(),
+                <span class="bool-val">true</span>,
+            );
+
+        <span class="comment">// Hold onto the cells so they don&#39;t get dropped.
+        </span><span class="self">self</span>.ref_cells = cells;
+        <span class="self">self</span>.removed = rewrites;
+
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
     <span class="kw">fn </span>invoke(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         s: <span class="kw-2">&amp;mut </span>ir::Invoke,
@@ -283,36 +700,20 @@
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, ctx);
-
         <span class="kw">let </span>invoke_group = builder.add_group(<span class="string">&quot;invoke&quot;</span>);
-
-        <span class="kw">if </span>!s.ref_cells.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
-                <span class="string">&quot;Invoke statement contains ref cell. Run {} before this pass&quot;</span>,
-                <span class="kw">super</span>::CompileRef::name()
-            )));
-        }
+        <span class="comment">// Assigns representing the ref cell connections
+        </span>invoke_group.borrow_mut().assignments.extend(
+            <span class="self">self</span>.ref_cells_to_ports(Rc::clone(<span class="kw-2">&amp;</span>s.comp), s.ref_cells.drain(..)),
+        );
 
         <span class="comment">// comp.go = 1&#39;d1;
         // invoke[done] = comp.done;
         </span><span class="macro">structure!</span>(builder;
             <span class="kw">let </span>one = constant(<span class="number">1</span>, <span class="number">1</span>);
         );
-
         <span class="kw">let </span>cell = s.comp.borrow();
-        <span class="kw">let </span>name = cell.name();
-
-        <span class="comment">// Get the go port
-        </span><span class="kw">let </span>go_port = get_go_port(Rc::clone(<span class="kw-2">&amp;</span>s.comp))<span class="question-mark">?</span>;
-
-        <span class="comment">// Get the done ports
-        </span><span class="kw">let </span><span class="kw-2">mut </span>done_ports =
-            cell.find_all_with_attr(ir::NumAttr::Done).collect_vec();
-        <span class="kw">if </span>done_ports.len() &gt; <span class="number">1 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(<span class="string">&quot;Invoked component `{name}` defines multiple @done signals. Cannot compile the invoke&quot;</span>)));
-        } <span class="kw">else if </span>done_ports.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(<span class="string">&quot;Invoked component `{name}` does not define a @done signal. Cannot compile the invoke&quot;</span>)));
-        }
+        <span class="kw">let </span>go_port = get_go_port(Rc::clone(<span class="kw-2">&amp;</span>s.comp))<span class="question-mark">?</span>;
+        <span class="kw">let </span>done_port = cell.find_unique_with_attr(ir::NumAttr::Done)<span class="question-mark">?</span>.unwrap();
 
         <span class="comment">// Build assignemnts
         </span><span class="kw">let </span>go_assign = builder.build_assignment(
@@ -322,21 +723,24 @@
         );
         <span class="kw">let </span>done_assign = builder.build_assignment(
             invoke_group.borrow().get(<span class="string">&quot;done&quot;</span>),
-            done_ports.pop().unwrap(),
+            done_port,
             ir::Guard::True,
         );
-        <span class="kw">let </span>enable_assignments = <span class="macro">vec!</span>[go_assign, done_assign];
+
+        invoke_group
+            .borrow_mut()
+            .assignments
+            .extend(<span class="macro">vec!</span>[go_assign, done_assign]);
 
         <span class="comment">// Generate argument assignments
         </span><span class="kw">let </span>cell = <span class="kw-2">&amp;*</span>s.comp.borrow();
         <span class="kw">let </span>assigns = build_assignments(
             <span class="kw-2">&amp;mut </span>s.inputs,
             <span class="kw-2">&amp;mut </span>s.outputs,
-            enable_assignments,
             <span class="kw-2">&amp;mut </span>builder,
             cell,
         );
-        invoke_group.borrow_mut().assignments = assigns;
+        invoke_group.borrow_mut().assignments.extend(assigns);
 
         <span class="comment">// Add assignments from the attached combinational group
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(cgr) = <span class="kw-2">&amp;</span>s.comb_group {
@@ -377,13 +781,6 @@
 
         <span class="kw">let </span>invoke_group = builder.add_static_group(<span class="string">&quot;static_invoke&quot;</span>, s.latency);
 
-        <span class="kw">if </span>!s.ref_cells.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
-                <span class="string">&quot;Invoke statement contains ref cell. Run {} before this pass&quot;</span>,
-                <span class="kw">super</span>::CompileRef::name()
-            )));
-        }
-
         <span class="comment">// comp.go = 1&#39;d1;
         </span><span class="macro">structure!</span>(builder;
             <span class="kw">let </span>one = constant(<span class="number">1</span>, <span class="number">1</span>);
@@ -393,24 +790,23 @@
         </span><span class="kw">let </span>go_port = get_go_port(Rc::clone(<span class="kw-2">&amp;</span>s.comp))<span class="question-mark">?</span>;
 
         <span class="comment">// Build assignemnts
-        </span><span class="kw">let </span>go_assign = builder.build_assignment(
-            go_port,
-            one.borrow().get(<span class="string">&quot;out&quot;</span>),
-            ir::Guard::True,
-        );
-
-        <span class="kw">let </span>enable_assignments = <span class="macro">vec!</span>[go_assign];
+        </span><span class="kw">let </span>go_assign: ir::Assignment&lt;ir::StaticTiming&gt; = builder
+            .build_assignment(
+                go_port,
+                one.borrow().get(<span class="string">&quot;out&quot;</span>),
+                ir::Guard::True,
+            );
+        invoke_group.borrow_mut().assignments.push(go_assign);
 
         <span class="comment">// Generate argument assignments
         </span><span class="kw">let </span>cell = <span class="kw-2">&amp;*</span>s.comp.borrow();
         <span class="kw">let </span>assigns = build_assignments(
             <span class="kw-2">&amp;mut </span>s.inputs,
             <span class="kw-2">&amp;mut </span>s.outputs,
-            enable_assignments,
             <span class="kw-2">&amp;mut </span>builder,
             cell,
         );
-        invoke_group.borrow_mut().assignments = assigns;
+        invoke_group.borrow_mut().assignments.extend(assigns);
 
         <span class="kw">let </span>en = ir::StaticEnable {
             group: invoke_group,
@@ -420,6 +816,24 @@
         <span class="prelude-val">Ok</span>(Action::StaticChange(Box::new(ir::StaticControl::Enable(
             en,
         ))))
+    }
+
+    <span class="kw">fn </span>finish(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="kw">let </span>port_map = std::mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.removed);
+        <span class="comment">// Add the newly added port to the global port map
+        // Rewrite all of the ref cell ports
+        </span><span class="kw">let </span>rw = ir::Rewriter {
+            port_map,
+            ..Default::default()
+        };
+        rw.rewrite(comp);
+        <span class="self">self</span>.port_names.insert(comp.name, rw.port_map);
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 }
 </code></pre></div>

@@ -125,7 +125,7 @@
 
     <span class="kw">for </span>cell_ref <span class="kw">in </span><span class="kw-2">&amp;</span>ext_cells {
         <span class="kw">let </span>cell = cell_ref.borrow();
-        <span class="macro">log::debug!</span>(<span class="string">&quot;`{}&#39; is matches predictate&quot;</span>, cell.name());
+        <span class="macro">log::debug!</span>(<span class="string">&quot;cell `{}&#39; removed&quot;</span>, cell.name());
 
         <span class="comment">// If we do not eliminate the @clk and @reset ports, we may
         // get signals conflicting the original @clk and @reset signals of
