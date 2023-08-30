@@ -224,6 +224,10 @@
 <span id="224">224</span>
 <span id="225">225</span>
 <span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes};
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
@@ -389,7 +393,9 @@
         }
 
         <span class="kw">for </span>stmt <span class="kw">in </span><span class="self">self</span>.stmts.drain(..) {
-            <span class="kw">let </span>ir::Control::Static(sc) = stmt <span class="kw">else </span>{<span class="macro">unreachable!</span>(<span class="string">&quot;We have already checked that all control statements are static&quot;</span>)};
+            <span class="kw">let </span>ir::Control::Static(sc) = stmt <span class="kw">else </span>{
+                <span class="macro">unreachable!</span>(<span class="string">&quot;We have already checked that all control statements are static&quot;</span>)
+            };
             latency += sc.get_latency();
             static_stmts.push(sc);
         }
@@ -414,7 +420,9 @@
         }
 
         <span class="kw">for </span>stmt <span class="kw">in </span><span class="self">self</span>.stmts.drain(..) {
-            <span class="kw">let </span>ir::Control::Static(sc) = stmt <span class="kw">else </span>{<span class="macro">unreachable!</span>(<span class="string">&quot;We have already checked that all control statements are static&quot;</span>)};
+            <span class="kw">let </span>ir::Control::Static(sc) = stmt <span class="kw">else </span>{
+                <span class="macro">unreachable!</span>(<span class="string">&quot;We have already checked that all control statements are static&quot;</span>)
+            };
             latency = std::cmp::max(latency, sc.get_latency());
             static_stmts.push(sc);
         }
@@ -435,11 +443,11 @@
         <span class="kw">let </span>tb = std::mem::replace(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.tbranch, ir::Control::empty());
         <span class="kw">let </span>fb = std::mem::replace(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.fbranch, ir::Control::empty());
         <span class="kw">let </span>ir::Control::Static(sc_t) = tb <span class="kw">else </span>{
-                    <span class="macro">unreachable!</span>(<span class="string">&quot;we have already checked tbranch to be static&quot;</span>)
-                };
+            <span class="macro">unreachable!</span>(<span class="string">&quot;we have already checked tbranch to be static&quot;</span>)
+        };
         <span class="kw">let </span>ir::Control::Static(sc_f) = fb <span class="kw">else </span>{
-                    <span class="macro">unreachable!</span>(<span class="string">&quot;we have already checker fbranch to be static&quot;</span>)
-                };
+            <span class="macro">unreachable!</span>(<span class="string">&quot;we have already checker fbranch to be static&quot;</span>)
+        };
         <span class="kw">let </span>latency = std::cmp::max(sc_t.get_latency(), sc_f.get_latency());
         <span class="prelude-val">Some</span>(ir::StaticIf {
             tbranch: Box::new(sc_t),

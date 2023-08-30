@@ -342,6 +342,8 @@
 <span id="342">342</span>
 <span id="343">343</span>
 <span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ReadWriteSet;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
@@ -610,10 +612,12 @@
         }
 
         <span class="comment">// Component must define exactly one @go/@done interface
-        </span><span class="kw">let </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(go_port)) = cell.find_unique_with_attr(ir::NumAttr::Go) <span class="kw">else </span>{
+        </span><span class="kw">let </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(go_port)) = cell.find_unique_with_attr(ir::NumAttr::Go)
+        <span class="kw">else </span>{
             <span class="kw">return</span>;
         };
-        <span class="kw">let </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(done_port)) = cell.find_unique_with_attr(ir::NumAttr::Done) <span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(done_port)) = cell.find_unique_with_attr(ir::NumAttr::Done)
+        <span class="kw">else </span>{
             <span class="kw">return</span>;
         };
 

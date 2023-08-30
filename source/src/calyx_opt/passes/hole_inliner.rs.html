@@ -428,7 +428,7 @@
             builder;
             <span class="kw">let </span>signal_on = constant(<span class="number">1</span>, <span class="number">1</span>);
         );
-        assignments.iter_mut().for_each(|<span class="kw-2">mut </span>asgn| {
+        assignments.iter_mut().for_each(|asgn| {
             <span class="kw">if </span>asgn.src.borrow().is_hole() {
                 <span class="kw">let </span>and_guard = ir::Guard::port(Rc::clone(<span class="kw-2">&amp;</span>asgn.src));
                 <span class="kw-2">*</span>asgn.guard &amp;= and_guard;

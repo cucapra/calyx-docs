@@ -142,7 +142,6 @@
 <span id="142">142</span>
 <span id="143">143</span>
 <span id="144">144</span>
-<span id="145">145</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
@@ -230,8 +229,7 @@
     </span><span class="kw">let </span><span class="kw-2">mut </span>used_combs = HashSet::new();
     <span class="comment">// while loop is bound by size of comb_dependence_map, which is bound
     // in size by number of ports in the group&#39;s assignments
-    </span><span class="kw">while </span>!(non_comb_writes.is_empty()) {
-        <span class="kw">let </span>used = non_comb_writes.pop().unwrap();
+    </span><span class="kw">while let </span><span class="prelude-val">Some</span>(used) = non_comb_writes.pop() {
         <span class="comment">// add all writes to used to non_comb_writes
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(write_to_used) = comb_dep_map.remove(<span class="kw-2">&amp;</span>used) {
             <span class="kw">for </span>write <span class="kw">in </span>write_to_used {

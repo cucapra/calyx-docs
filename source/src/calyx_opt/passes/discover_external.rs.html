@@ -283,6 +283,7 @@
 <span id="283">283</span>
 <span id="284">284</span>
 <span id="285">285</span>
+<span id="286">286</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, Visitor};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>calyx_utils::CalyxResult;
@@ -337,7 +338,8 @@
             <span class="kw">let </span>spl = splits.next();
             <span class="comment">// Search for the &quot;default=&lt;n&gt;&quot; option
             </span><span class="kw">if </span>spl == <span class="prelude-val">Some</span>(<span class="string">&quot;default&quot;</span>) {
-                <span class="kw">let </span><span class="prelude-val">Some</span>(val) = splits.next().and_then(|v| v.parse().ok()) <span class="kw">else </span>{
+                <span class="kw">let </span><span class="prelude-val">Some</span>(val) = splits.next().and_then(|v| v.parse().ok())
+                <span class="kw">else </span>{
                     <span class="macro">log::warn!</span>(<span class="string">&quot;Failed to parse default value. Please specify using -x {}:default=&lt;n&gt;&quot;</span>, n);
                     <span class="kw">continue</span>;
                 };

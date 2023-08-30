@@ -1548,7 +1548,7 @@
             )<span class="question-mark">?
         </span>};
 
-        <span class="kw">let </span>prevs = tru_prev.into_iter().chain(fal_prev.into_iter()).collect();
+        <span class="kw">let </span>prevs = tru_prev.into_iter().chain(fal_prev).collect();
         <span class="prelude-val">Ok</span>(prevs)
     }
 
@@ -1595,7 +1595,7 @@
         </span><span class="kw">let </span>not_port_guard = !port_guard;
         <span class="kw">let </span>all_prevs = preds
             .into_iter()
-            .chain(prevs.into_iter())
+            .chain(prevs)
             .map(|(st, guard)| (st, guard &amp; not_port_guard.clone()))
             .collect();
 
