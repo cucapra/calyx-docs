@@ -242,9 +242,9 @@
             post_msg: <span class="prelude-val">None</span>,
         }
     }
-    <span class="kw">pub fn </span>malformed_control(msg: String) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>malformed_control&lt;S: ToString&gt;(msg: S) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            kind: Box::new(ErrorKind::MalformedControl(msg)),
+            kind: Box::new(ErrorKind::MalformedControl(msg.to_string())),
             pos: GPosIdx::UNKNOWN,
             post_msg: <span class="prelude-val">None</span>,
         }
@@ -266,16 +266,16 @@
             post_msg: <span class="prelude-val">None</span>,
         }
     }
-    <span class="kw">pub fn </span>undefined(name: Id, typ: String) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>undefined&lt;S: ToString&gt;(name: Id, typ: S) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            kind: Box::new(ErrorKind::Undefined(name, typ)),
+            kind: Box::new(ErrorKind::Undefined(name, typ.to_string())),
             pos: GPosIdx::UNKNOWN,
             post_msg: <span class="prelude-val">None</span>,
         }
     }
-    <span class="kw">pub fn </span>already_bound(name: Id, typ: String) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>already_bound&lt;S: ToString&gt;(name: Id, typ: S) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            kind: Box::new(ErrorKind::AlreadyBound(name, typ)),
+            kind: Box::new(ErrorKind::AlreadyBound(name, typ.to_string())),
             pos: GPosIdx::UNKNOWN,
             post_msg: <span class="prelude-val">None</span>,
         }
@@ -287,30 +287,30 @@
             post_msg: <span class="prelude-val">None</span>,
         }
     }
-    <span class="kw">pub fn </span>papercut(msg: String) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>papercut&lt;S: ToString&gt;(msg: S) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            kind: Box::new(ErrorKind::Papercut(msg)),
+            kind: Box::new(ErrorKind::Papercut(msg.to_string())),
             pos: GPosIdx::UNKNOWN,
             post_msg: <span class="prelude-val">None</span>,
         }
     }
-    <span class="kw">pub fn </span>misc(msg: String) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>misc&lt;S: ToString&gt;(msg: S) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            kind: Box::new(ErrorKind::Misc(msg)),
+            kind: Box::new(ErrorKind::Misc(msg.to_string())),
             pos: GPosIdx::UNKNOWN,
             post_msg: <span class="prelude-val">None</span>,
         }
     }
-    <span class="kw">pub fn </span>invalid_file(msg: String) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>invalid_file&lt;S: ToString&gt;(msg: S) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            kind: Box::new(ErrorKind::InvalidFile(msg)),
+            kind: Box::new(ErrorKind::InvalidFile(msg.to_string())),
             pos: GPosIdx::UNKNOWN,
             post_msg: <span class="prelude-val">None</span>,
         }
     }
-    <span class="kw">pub fn </span>write_error(msg: String) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>write_error&lt;S: ToString&gt;(msg: S) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            kind: Box::new(ErrorKind::WriteError(msg)),
+            kind: Box::new(ErrorKind::WriteError(msg.to_string())),
             pos: GPosIdx::UNKNOWN,
             post_msg: <span class="prelude-val">None</span>,
         }
