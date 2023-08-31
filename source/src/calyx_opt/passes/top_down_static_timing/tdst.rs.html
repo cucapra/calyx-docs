@@ -923,7 +923,6 @@
 <span id="923">923</span>
 <span id="924">924</span>
 <span id="925">925</span>
-<span id="926">926</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::compute_states::{END, START};
 <span class="kw">use </span><span class="kw">crate</span>::analysis::WithStatic;
 <span class="kw">use </span><span class="kw">crate</span>::passes::top_down_static_timing::{ComputeStates, Normalize};
@@ -936,7 +935,6 @@
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
 <span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::io::Write;
 <span class="kw">use </span>std::iter;
@@ -1836,7 +1834,7 @@
         <span class="self">Self</span>::compile_sub_programs(<span class="kw-2">&amp;mut </span>con, <span class="kw-2">&amp;mut </span>builder, <span class="self">self</span>.dump_fsm)<span class="question-mark">?</span>;
 
         <span class="comment">// Add the control program back.
-        </span>comp.control = Rc::new(RefCell::new(con));
+        </span>comp.control = ir::rrc(con);
 
         <span class="comment">// If the force flag is set, make sure that we only have one group remaining
         </span><span class="kw">if </span><span class="self">self</span>.force

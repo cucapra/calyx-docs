@@ -432,7 +432,6 @@
 <span id="432">432</span>
 <span id="433">433</span>
 <span id="434">434</span>
-<span id="435">435</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attribute, Attributes, BoolAttr, Builder, Cell, CellType,
     CombGroup, Control, Direction, GetName, Group, Id, NumAttr, PortDef,
@@ -443,7 +442,6 @@
 <span class="kw">use </span>calyx_utils::NameGenerator;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>linked_hash_map::LinkedHashMap;
-<span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::iter::Extend;
 <span class="kw">use </span>std::num::NonZeroU64;
@@ -570,7 +568,7 @@
             static_groups: IdList::default(),
             comb_groups: IdList::default(),
             continuous_assignments: <span class="macro">vec!</span>[],
-            control: Rc::new(RefCell::new(Control::empty())),
+            control: <span class="kw">super</span>::rrc(Control::empty()),
             namegen: NameGenerator::with_prev_defined_names(prev_names),
             attributes: Attributes::default(),
             is_comb,

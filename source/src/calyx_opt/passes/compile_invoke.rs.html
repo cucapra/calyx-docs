@@ -416,7 +416,6 @@
 <span id="416">416</span>
 <span id="417">417</span>
 <span id="418">418</span>
-<span id="419">419</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{
     <span class="self">self</span>, Action, ConstructVisitor, Named, VisResult, Visitor,
 };
@@ -425,7 +424,6 @@
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
 <span class="kw">use </span>ir::{RRC, WRC};
 <span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
 
@@ -664,13 +662,13 @@
                         cell.borrow().name()
                     );
                     <span class="kw">for </span>p <span class="kw">in </span>vec.iter() {
-                        <span class="kw">let </span>new_port = Rc::new(RefCell::new(ir::Port {
+                        <span class="kw">let </span>new_port = ir::rrc(ir::Port {
                             name: p.borrow().name,
                             width: p.borrow().width,
                             direction: p.borrow().direction.reverse(),
                             parent: ir::PortParent::Cell(WRC::from(cell)),
                             attributes: Attributes::default(),
-                        }));
+                        });
                         new_ports.push(new_port);
                     }
                 }
