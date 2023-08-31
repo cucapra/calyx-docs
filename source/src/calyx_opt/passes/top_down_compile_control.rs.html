@@ -1019,7 +1019,6 @@
 <span id="1019">1019</span>
 <span id="1020">1020</span>
 <span id="1021">1021</span>
-<span id="1022">1022</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::passes;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
@@ -1330,8 +1329,7 @@
                 .flat_map(|(state, <span class="kw-2">mut </span>assigns)| {
                     <span class="kw">let </span>state_const =
                         <span class="self">self</span>.builder.add_constant(state, fsm_size);
-                    <span class="kw">let </span>state_guard =
-                        <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(state_const[<span class="string">&quot;out&quot;</span>]));
+                    <span class="kw">let </span>state_guard = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] == state_const[<span class="string">&quot;out&quot;</span>]);
                     assigns.iter_mut().for_each(|asgn| {
                         asgn.guard.update(|g| g.and(state_guard.clone()))
                     });
@@ -1348,7 +1346,7 @@
                 );
                 <span class="kw">let </span>ec_borrow = end_const.borrow();
                 <span class="kw">let </span>trans_guard =
-                    <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(start_const[<span class="string">&quot;out&quot;</span>])) &amp; guard;
+                    <span class="macro">guard!</span>((fsm[<span class="string">&quot;out&quot;</span>] == start_const[<span class="string">&quot;out&quot;</span>]) &amp; guard);
 
                 <span class="macro">vec!</span>[
                     <span class="self">self</span>.builder.build_assignment(
@@ -1366,7 +1364,7 @@
         );
 
         <span class="comment">// Done condition for group
-        </span><span class="kw">let </span>last_guard = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(last_state[<span class="string">&quot;out&quot;</span>]));
+        </span><span class="kw">let </span>last_guard = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] == last_state[<span class="string">&quot;out&quot;</span>]);
         <span class="kw">let </span>done_assign = <span class="self">self</span>.builder.build_assignment(
             group.borrow().get(<span class="string">&quot;done&quot;</span>),
             signal_on.borrow().get(<span class="string">&quot;out&quot;</span>),
@@ -1974,7 +1972,7 @@
             </span><span class="macro">structure!</span>(builder;
                 <span class="kw">let </span>pd = prim std_reg(<span class="number">1</span>);
             );
-            <span class="kw">let </span>group_go = !(<span class="macro">guard!</span>(pd[<span class="string">&quot;out&quot;</span>]) | <span class="macro">guard!</span>(group[<span class="string">&quot;done&quot;</span>]));
+            <span class="kw">let </span>group_go = !(<span class="macro">guard!</span>(pd[<span class="string">&quot;out&quot;</span>] | group[<span class="string">&quot;done&quot;</span>]));
             <span class="kw">let </span>group_done = <span class="macro">guard!</span>(group[<span class="string">&quot;done&quot;</span>]);
 
             <span class="comment">// Save the done condition in a register.

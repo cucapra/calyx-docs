@@ -924,10 +924,6 @@
 <span id="924">924</span>
 <span id="925">925</span>
 <span id="926">926</span>
-<span id="927">927</span>
-<span id="928">928</span>
-<span id="929">929</span>
-<span id="930">930</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::compute_states::{END, START};
 <span class="kw">use </span><span class="kw">crate</span>::analysis::WithStatic;
 <span class="kw">use </span><span class="kw">crate</span>::passes::top_down_static_timing::{ComputeStates, Normalize};
@@ -1112,19 +1108,17 @@
         fsm: <span class="kw-2">&amp;</span>RRC&lt;ir::Cell&gt;,
     ) -&gt; ir::Guard&lt;Nothing&gt; {
         <span class="macro">structure!</span>(builder;
-            <span class="kw">let </span>lb_const = constant(s, fsm_size);
-            <span class="kw">let </span>ub_const = constant(e, fsm_size);
+            <span class="kw">let </span>lb = constant(s, fsm_size);
+            <span class="kw">let </span>ub = constant(e, fsm_size);
         );
         <span class="kw">if </span>s == <span class="number">0 </span>{
-            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).lt(<span class="macro">guard!</span>(ub_const[<span class="string">&quot;out&quot;</span>]))
+            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] &lt; ub[<span class="string">&quot;out&quot;</span>])
         } <span class="kw">else if </span>e == s + <span class="number">1 </span>{
-            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(lb_const[<span class="string">&quot;out&quot;</span>]))
+            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] == lb[<span class="string">&quot;out&quot;</span>])
         } <span class="kw">else if </span>e == <span class="number">1 </span>&lt;&lt; fsm_size {
-            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).ge(<span class="macro">guard!</span>(lb_const[<span class="string">&quot;out&quot;</span>]))
+            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] &gt;= lb[<span class="string">&quot;out&quot;</span>])
         } <span class="kw">else </span>{
-            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>])
-                .ge(<span class="macro">guard!</span>(lb_const[<span class="string">&quot;out&quot;</span>]))
-                .and(<span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).lt(<span class="macro">guard!</span>(ub_const[<span class="string">&quot;out&quot;</span>])))
+            <span class="macro">guard!</span>((fsm[<span class="string">&quot;out&quot;</span>] &gt;= lb[<span class="string">&quot;out&quot;</span>]) &amp; (fsm[<span class="string">&quot;out&quot;</span>] &lt; ub[<span class="string">&quot;out&quot;</span>]))
         }
     }
 
@@ -1184,9 +1178,7 @@
                         <span class="kw">let </span>end_const = constant(end, fsm_size);
                     );
 
-                    <span class="kw">let </span>transition_guard = <span class="macro">guard!</span>(st_fsm[<span class="string">&quot;out&quot;</span>])
-                        .eq(<span class="macro">guard!</span>(start_const[<span class="string">&quot;out&quot;</span>]))
-                        .and(guard);
+                    <span class="kw">let </span>transition_guard = <span class="macro">guard!</span>((st_fsm[<span class="string">&quot;out&quot;</span>] == start_const[<span class="string">&quot;out&quot;</span>]) &amp; guard);
 
                     <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
                         st_fsm[<span class="string">&quot;in&quot;</span>] = transition_guard <span class="question-mark">? </span>end_const[<span class="string">&quot;out&quot;</span>];
@@ -1221,11 +1213,11 @@
         <span class="comment">// Done condition for group.
         </span><span class="kw">let </span>(st, g) = out_edges.pop().expect(<span class="string">&quot;No outgoing edges&quot;</span>);
         <span class="kw">let </span>c = builder.add_constant(st, fsm_size);
-        <span class="kw">let </span><span class="kw-2">mut </span>done_guard = <span class="macro">guard!</span>(st_fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(c[<span class="string">&quot;out&quot;</span>])) &amp; g;
+        <span class="kw">let </span><span class="kw-2">mut </span>done_guard = <span class="macro">guard!</span>((st_fsm[<span class="string">&quot;out&quot;</span>] == c[<span class="string">&quot;out&quot;</span>]) &amp; g);
         <span class="kw">for </span>(st, g) <span class="kw">in </span>out_edges {
             <span class="kw">let </span>stc = builder.add_constant(st, fsm_size);
-            <span class="kw">let </span>st_guard = <span class="macro">guard!</span>(st_fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(stc[<span class="string">&quot;out&quot;</span>]));
-            done_guard |= st_guard &amp; g;
+            <span class="kw">let </span>st_guard = <span class="macro">guard!</span>((st_fsm[<span class="string">&quot;out&quot;</span>] == stc[<span class="string">&quot;out&quot;</span>]) &amp; g);
+            done_guard |= st_guard;
         }
         <span class="kw">let </span>done_assign = <span class="macro">build_assignments!</span>(builder;
             group[<span class="string">&quot;done&quot;</span>] = done_guard <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
@@ -1572,7 +1564,7 @@
             <span class="kw">let </span>on = constant(<span class="number">1</span>, <span class="number">1</span>);
         );
         <span class="comment">// Add back edges
-        </span><span class="kw">let </span>enter_guard = <span class="macro">guard!</span>(idx[<span class="string">&quot;out&quot;</span>]).lt(<span class="macro">guard!</span>(total[<span class="string">&quot;out&quot;</span>]));
+        </span><span class="kw">let </span>enter_guard = <span class="macro">guard!</span>(idx[<span class="string">&quot;out&quot;</span>] &lt; total[<span class="string">&quot;out&quot;</span>]);
         <span class="kw">let </span><span class="kw-2">mut </span>exits = <span class="macro">vec!</span>[];
         <span class="self">self</span>.states
             .control_exits(<span class="kw-2">&amp;</span>wh.body, <span class="self">self</span>.builder, <span class="kw-2">&amp;mut </span>exits);
@@ -1611,7 +1603,7 @@
         }
 
         <span class="comment">// Reset the index when exiting the loop
-        </span><span class="kw">let </span>exit = <span class="macro">guard!</span>(idx[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(total[<span class="string">&quot;out&quot;</span>]));
+        </span><span class="kw">let </span>exit = <span class="macro">guard!</span>(idx[<span class="string">&quot;out&quot;</span>] == total[<span class="string">&quot;out&quot;</span>]);
         <span class="kw">let </span>reset_group = <span class="self">self</span>.reset_group(<span class="kw-2">&amp;</span>idx);
         <span class="kw">let </span>reset_activate = <span class="self">self</span>.builder.build_assignment(
             reset_group.borrow().get(<span class="string">&quot;go&quot;</span>),

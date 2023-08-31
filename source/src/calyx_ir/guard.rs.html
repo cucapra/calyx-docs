@@ -644,7 +644,26 @@
 <span id="644">644</span>
 <span id="645">645</span>
 <span id="646">646</span>
-</pre><pre class="rust"><code><span class="kw">use super</span>::{NumAttr, Port, RRC};
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::Printer;
+
+<span class="kw">use super</span>::{NumAttr, Port, RRC};
 <span class="kw">use </span>calyx_utils::Error;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
@@ -903,21 +922,25 @@
 
     <span class="kw">pub fn </span>eq(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>T: Debug,
+        </span>T: Debug + Eq + ToString,
     {
         <span class="kw">match </span>(<span class="self">self</span>, other) {
             (Guard::Port(l), Guard::Port(r)) =&gt; {
                 Guard::CompOp(PortComp::Eq, l, r)
             }
             (l, r) =&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;Cannot build Guard::Eq using {:?} and {:?}&quot;</span>, l, r)
+                <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;Cannot build Guard::Eq using `{}&#39; and `{}&#39;&quot;</span>,
+                    Printer::guard_str(<span class="kw-2">&amp;</span>l),
+                    Printer::guard_str(<span class="kw-2">&amp;</span>r),
+                )
             }
         }
     }
 
     <span class="kw">pub fn </span>neq(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>T: Debug,
+        </span>T: Debug + Eq + ToString,
     {
         <span class="kw">match </span>(<span class="self">self</span>, other) {
             (Guard::Port(l), Guard::Port(r)) =&gt; {
@@ -925,8 +948,9 @@
             }
             (l, r) =&gt; {
                 <span class="macro">unreachable!</span>(
-                    <span class="string">&quot;Cannot build Guard::Neq using {:?} and {:?}&quot;</span>,
-                    l, r
+                    <span class="string">&quot;Cannot build Guard::Eq using `{}&#39; and `{}&#39;&quot;</span>,
+                    Printer::guard_str(<span class="kw-2">&amp;</span>l),
+                    Printer::guard_str(<span class="kw-2">&amp;</span>r),
                 )
             }
         }
@@ -934,7 +958,7 @@
 
     <span class="kw">pub fn </span>le(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>T: Debug,
+        </span>T: Debug + Eq + ToString,
     {
         <span class="kw">match </span>(<span class="self">self</span>, other) {
             (Guard::Port(l), Guard::Port(r)) =&gt; {
@@ -942,8 +966,9 @@
             }
             (l, r) =&gt; {
                 <span class="macro">unreachable!</span>(
-                    <span class="string">&quot;Cannot build Guard::Leq using {:?} and {:?}&quot;</span>,
-                    l, r
+                    <span class="string">&quot;Cannot build Guard::Eq using `{}&#39; and `{}&#39;&quot;</span>,
+                    Printer::guard_str(<span class="kw-2">&amp;</span>l),
+                    Printer::guard_str(<span class="kw-2">&amp;</span>r),
                 )
             }
         }
@@ -951,21 +976,25 @@
 
     <span class="kw">pub fn </span>lt(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>T: Debug,
+        </span>T: Debug + Eq + ToString,
     {
         <span class="kw">match </span>(<span class="self">self</span>, other) {
             (Guard::Port(l), Guard::Port(r)) =&gt; {
                 Guard::CompOp(PortComp::Lt, l, r)
             }
             (l, r) =&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;Cannot build Guard::Lt using {:?} and {:?}&quot;</span>, l, r)
+                <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;Cannot build Guard::Eq using `{}&#39; and `{}&#39;&quot;</span>,
+                    Printer::guard_str(<span class="kw-2">&amp;</span>l),
+                    Printer::guard_str(<span class="kw-2">&amp;</span>r),
+                )
             }
         }
     }
 
     <span class="kw">pub fn </span>ge(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>T: Debug,
+        </span>T: Debug + Eq + ToString,
     {
         <span class="kw">match </span>(<span class="self">self</span>, other) {
             (Guard::Port(l), Guard::Port(r)) =&gt; {
@@ -973,8 +1002,9 @@
             }
             (l, r) =&gt; {
                 <span class="macro">unreachable!</span>(
-                    <span class="string">&quot;Cannot build Guard::Geq using {:?} and {:?}&quot;</span>,
-                    l, r
+                    <span class="string">&quot;Cannot build Guard::Eq using `{}&#39; and `{}&#39;&quot;</span>,
+                    Printer::guard_str(<span class="kw-2">&amp;</span>l),
+                    Printer::guard_str(<span class="kw-2">&amp;</span>r),
                 )
             }
         }
@@ -982,14 +1012,18 @@
 
     <span class="kw">pub fn </span>gt(<span class="self">self</span>, other: Guard&lt;T&gt;) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>T: Debug,
+        </span>T: Debug + Eq + ToString,
     {
         <span class="kw">match </span>(<span class="self">self</span>, other) {
             (Guard::Port(l), Guard::Port(r)) =&gt; {
                 Guard::CompOp(PortComp::Gt, l, r)
             }
             (l, r) =&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;Cannot build Guard::Gt using {:?} and {:?}&quot;</span>, l, r)
+                <span class="macro">unreachable!</span>(
+                    <span class="string">&quot;Cannot build Guard::Eq using `{}&#39; and `{}&#39;&quot;</span>,
+                    Printer::guard_str(<span class="kw-2">&amp;</span>l),
+                    Printer::guard_str(<span class="kw-2">&amp;</span>r),
+                )
             }
         }
     }

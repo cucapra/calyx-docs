@@ -354,7 +354,7 @@
 
                 <span class="comment">// Guard the exit edges for the body with the loop exit condition
                 </span><span class="kw">let </span>(idx, bound) = <span class="self">self</span>.loop_bounds(wh, builder);
-                <span class="kw">let </span>guard = <span class="macro">guard!</span>(idx[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(bound[<span class="string">&quot;out&quot;</span>]));
+                <span class="kw">let </span>guard = <span class="macro">guard!</span>(idx[<span class="string">&quot;out&quot;</span>] == bound[<span class="string">&quot;out&quot;</span>]);
                 exits.extend(
                     loop_exits
                         .into_iter()

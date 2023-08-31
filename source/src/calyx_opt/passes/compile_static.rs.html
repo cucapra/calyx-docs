@@ -938,22 +938,22 @@
             <span class="kw">if </span>beg + <span class="number">1 </span>== end {
                 <span class="comment">// if beg + 1 == end then we only need to check if fsm == beg
                 </span><span class="kw">let </span>interval_const = builder.add_constant(beg, fsm_size);
-                <span class="kw">let </span>g = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(interval_const[<span class="string">&quot;out&quot;</span>]));
+                <span class="kw">let </span>g = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] == interval_const[<span class="string">&quot;out&quot;</span>]);
                 Box::new(g)
             } <span class="kw">else if </span>beg == <span class="number">0 </span>{
                 <span class="comment">// if beg == 0, then we only need to check if fsm &lt; end
                 </span><span class="kw">let </span>end_const = builder.add_constant(end, fsm_size);
                 <span class="kw">let </span>lt: ir::Guard&lt;Nothing&gt; =
-                    <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).lt(<span class="macro">guard!</span>(end_const[<span class="string">&quot;out&quot;</span>]));
+                    <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] &lt; end_const[<span class="string">&quot;out&quot;</span>]);
                 Box::new(lt)
             } <span class="kw">else </span>{
                 <span class="comment">// otherwise, check if fsm &gt;= beg &amp; fsm &lt; end
                 </span><span class="kw">let </span>beg_const = builder.add_constant(beg, fsm_size);
                 <span class="kw">let </span>end_const = builder.add_constant(end, fsm_size);
                 <span class="kw">let </span>beg_guard: ir::Guard&lt;Nothing&gt; =
-                    <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).ge(<span class="macro">guard!</span>(beg_const[<span class="string">&quot;out&quot;</span>]));
+                    <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] &gt;= beg_const[<span class="string">&quot;out&quot;</span>]);
                 <span class="kw">let </span>end_guard: ir::Guard&lt;Nothing&gt; =
-                    <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).lt(<span class="macro">guard!</span>(end_const[<span class="string">&quot;out&quot;</span>]));
+                    <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] &lt; end_const[<span class="string">&quot;out&quot;</span>]);
                 Box::new(ir::Guard::And(
                     Box::new(beg_guard),
                     Box::new(end_guard),
@@ -1054,9 +1054,9 @@
             .collect_vec();
         <span class="comment">// assignments to increment the fsm
         </span><span class="kw">let </span>not_penultimate_state_guard: ir::Guard&lt;ir::Nothing&gt; =
-            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).neq(<span class="macro">guard!</span>(penultimate_state[<span class="string">&quot;out&quot;</span>]));
+            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] != penultimate_state[<span class="string">&quot;out&quot;</span>]);
         <span class="kw">let </span>penultimate_state_guard: ir::Guard&lt;ir::Nothing&gt; =
-            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(penultimate_state[<span class="string">&quot;out&quot;</span>]));
+            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] == penultimate_state[<span class="string">&quot;out&quot;</span>]);
         <span class="kw">let </span>fsm_incr_assigns = <span class="macro">build_assignments!</span>(
           builder;
           <span class="comment">// increments the fsm
@@ -1117,16 +1117,16 @@
         <span class="comment">// make guards
         // fsm.out == 0 ?
         </span><span class="kw">let </span>first_state: ir::Guard&lt;ir::Nothing&gt; =
-            <span class="macro">guard!</span>(early_reset_fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(state_zero[<span class="string">&quot;out&quot;</span>]));
+            <span class="macro">guard!</span>(early_reset_fsm[<span class="string">&quot;out&quot;</span>] == state_zero[<span class="string">&quot;out&quot;</span>]);
         <span class="comment">// signal_reg.out ?
         </span><span class="kw">let </span>signal_reg_guard: ir::Guard&lt;ir::Nothing&gt; =
             <span class="macro">guard!</span>(signal_reg[<span class="string">&quot;out&quot;</span>]);
         <span class="comment">// !signal_reg.out ?
         </span><span class="kw">let </span>not_signal_reg = signal_reg_guard.clone().not();
         <span class="comment">// fsm.out == 0 &amp; signal_reg.out ?
-        </span><span class="kw">let </span>first_state_and_signal = first_state.clone().and(signal_reg_guard);
+        </span><span class="kw">let </span>first_state_and_signal = first_state.clone() &amp; signal_reg_guard;
         <span class="comment">// fsm.out == 0 &amp; ! signal_reg.out ?
-        </span><span class="kw">let </span>first_state_and_not_signal = first_state.and(not_signal_reg);
+        </span><span class="kw">let </span>first_state_and_not_signal = first_state &amp; not_signal_reg;
         <span class="comment">// create the wrapper group for early_reset_group
         </span><span class="kw">let </span><span class="kw-2">mut </span>wrapper_name = group_name.clone().to_string();
         wrapper_name.insert_str(<span class="number">0</span>, <span class="string">&quot;wrapper_&quot;</span>);
@@ -1224,8 +1224,8 @@
 
         <span class="kw">let </span>port_parent = port.borrow().cell_parent();
         <span class="kw">let </span>port_name = port.borrow().name;
-        <span class="kw">let </span>done_guard = (!<span class="macro">guard!</span>(port_parent[port_name]))
-            &amp; <span class="macro">guard!</span>(early_reset_fsm[<span class="string">&quot;out&quot;</span>]).eq(<span class="macro">guard!</span>(time_0[<span class="string">&quot;out&quot;</span>]));
+        <span class="kw">let </span>done_guard = <span class="macro">guard!</span>(port_parent[port_name]).not()
+            &amp; <span class="macro">guard!</span>(early_reset_fsm[<span class="string">&quot;out&quot;</span>] == time_0[<span class="string">&quot;out&quot;</span>]);
 
         <span class="kw">let </span>assignments = <span class="macro">build_assignments!</span>(
             builder;
@@ -1408,7 +1408,7 @@
         vec_color_to_groups
             .sort_by(|(color1, <span class="kw">_</span>), (color2, <span class="kw">_</span>)| color1.cmp(color2));
         vec_color_to_groups.into_iter().map(|(color, group_names)| {
-            <span class="comment">// For each color, build an FSM that has the number of bits required 
+            <span class="comment">// For each color, build an FSM that has the number of bits required
             // for the largest latency in `group_names`
             </span><span class="kw">let </span>max_latency = group_names
                 .iter()

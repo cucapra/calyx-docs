@@ -157,7 +157,7 @@
             );
             <span class="comment">// regs_done is `cond_reg.done &amp; idx.done`
             </span><span class="kw">let </span>regs_done: ir::Guard&lt;ir::Nothing&gt; =
-                <span class="macro">guard!</span>(cond_reg[<span class="string">&quot;done&quot;</span>]).and(<span class="macro">guard!</span>(idx[<span class="string">&quot;done&quot;</span>]));
+                <span class="macro">guard!</span>(cond_reg[<span class="string">&quot;done&quot;</span>] &amp; idx[<span class="string">&quot;done&quot;</span>]);
             <span class="comment">// init_group sets cond_reg to 1 and idx to 0
             </span><span class="kw">let </span>init_group = builder.add_group(<span class="string">&quot;init_repeat&quot;</span>);
             <span class="kw">let </span>init_assigns = <span class="macro">build_assignments!</span>(
