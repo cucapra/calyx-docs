@@ -490,7 +490,7 @@ If you'd like to read through the details of our implementation – or build you
     less_than = comp.cell(cell, Stdlib.op(&quot;lt&quot;, 32, signed=False))
     with comp.comb_group(group_name):
         less_than.left = idx.out
-        less_than.right = cb.const(32, arr_size)
+        less_than.right = arr_size
 </code></pre>
 <h3 id="index-increment"><a class="header" href="#index-increment">Index increment</a></h3>
 <p>The loop index increment is implemented using a <a href="../lang/ref.html#group-definitions">group</a> and an <code>adder</code>:</p>
