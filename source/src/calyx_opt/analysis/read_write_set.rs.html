@@ -270,6 +270,42 @@
 <span id="270">270</span>
 <span id="271">271</span>
 <span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::{iter, rc::Rc};
@@ -437,11 +473,30 @@
             ir::StaticControl::Invoke(ir::StaticInvoke {
                 inputs,
                 outputs,
+                ref_cells,
                 ..
             }) =&gt; {
-                <span class="kw">let </span>inps = inputs.iter().map(|(<span class="kw">_</span>, p)| p).cloned();
-                <span class="kw">let </span>outs = outputs.iter().map(|(<span class="kw">_</span>, p)| p).cloned();
-                (inps.collect(), outs.collect())
+                <span class="kw">let </span><span class="kw-2">mut </span>inps: Vec&lt;RRC&lt;ir::Port&gt;&gt; =
+                    inputs.iter().map(|(<span class="kw">_</span>, p)| p).cloned().collect();
+                <span class="kw">let </span><span class="kw-2">mut </span>outs: Vec&lt;RRC&lt;ir::Port&gt;&gt; =
+                    outputs.iter().map(|(<span class="kw">_</span>, p)| p).cloned().collect();
+                <span class="kw">for </span>(<span class="kw">_</span>, cell) <span class="kw">in </span>ref_cells.iter() {
+                    <span class="kw">for </span>port <span class="kw">in </span>cell.borrow().ports.iter() {
+                        <span class="kw">match </span>port.borrow().direction {
+                            ir::Direction::Input =&gt; {
+                                outs.push(Rc::clone(port));
+                            }
+                            ir::Direction::Output =&gt; {
+                                inps.push(Rc::clone(port));
+                            }
+                            <span class="kw">_ </span>=&gt; {
+                                outs.push(Rc::clone(port));
+                                inps.push(Rc::clone(port));
+                            }
+                        }
+                    }
+                }
+                (inps, outs)
             }
         }
     }
@@ -462,22 +517,39 @@
                 inputs,
                 outputs,
                 comb_group,
+                ref_cells,
                 ..
             }) =&gt; {
                 <span class="kw">let </span>inps = inputs.iter().map(|(<span class="kw">_</span>, p)| p).cloned();
                 <span class="kw">let </span>outs = outputs.iter().map(|(<span class="kw">_</span>, p)| p).cloned();
+                <span class="kw">let </span><span class="kw-2">mut </span>r: Vec&lt;RRC&lt;ir::Port&gt;&gt; = inps.collect();
+                <span class="kw">let </span><span class="kw-2">mut </span>w: Vec&lt;RRC&lt;ir::Port&gt;&gt; = outs.collect();
+
+                <span class="kw">for </span>(<span class="kw">_</span>, cell) <span class="kw">in </span>ref_cells {
+                    <span class="kw">for </span>port <span class="kw">in </span>cell.borrow().ports.iter() {
+                        <span class="kw">match </span>port.borrow().direction {
+                            ir::Direction::Input =&gt; {
+                                w.push(Rc::clone(port));
+                            }
+                            ir::Direction::Output =&gt; {
+                                r.push(Rc::clone(port));
+                            }
+                            <span class="kw">_ </span>=&gt; {
+                                w.push(Rc::clone(port));
+                                r.push(Rc::clone(port));
+                            }
+                        }
+                    }
+                }
                 <span class="kw">match </span>comb_group {
                     <span class="prelude-val">Some</span>(cgr) =&gt; {
                         <span class="kw">let </span>cg = cgr.borrow();
                         <span class="kw">let </span>assigns = cg.assignments.iter();
                         <span class="kw">let </span>reads = <span class="self">Self</span>::port_read_set(assigns.clone());
                         <span class="kw">let </span>writes = <span class="self">Self</span>::port_write_set(assigns);
-                        (
-                            reads.chain(inps).collect(),
-                            writes.chain(outs).collect(),
-                        )
+                        (reads.chain(r).collect(), writes.chain(w).collect())
                     }
-                    <span class="prelude-val">None </span>=&gt; (inps.collect(), outs.collect()),
+                    <span class="prelude-val">None </span>=&gt; (r, w),
                 }
             }
             ir::Control::Seq(ir::Seq { stmts, .. })

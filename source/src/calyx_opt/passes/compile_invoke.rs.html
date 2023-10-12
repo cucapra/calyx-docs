@@ -416,6 +416,10 @@
 <span id="416">416</span>
 <span id="417">417</span>
 <span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{
     <span class="self">self</span>, Action, ConstructVisitor, Named, VisResult, Visitor,
 };
@@ -546,11 +550,11 @@
     ///
     /// Since this pass eliminates all ref cells in post order, we expect that
     /// invoked component already had all of its ref cells removed.
-    </span><span class="kw">fn </span>ref_cells_to_ports(
+    </span><span class="kw">fn </span>ref_cells_to_ports&lt;T&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         inv_cell: RRC&lt;ir::Cell&gt;,
         ref_cells: <span class="kw">impl </span>Iterator&lt;Item = (ir::Id, ir::RRC&lt;ir::Cell&gt;)&gt;,
-    ) -&gt; Vec&lt;ir::Assignment&lt;ir::Nothing&gt;&gt; {
+    ) -&gt; Vec&lt;ir::Assignment&lt;T&gt;&gt; {
         <span class="kw">let </span>inv_comp = inv_cell.borrow().type_name().unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>assigns = Vec::new();
         <span class="kw">for </span>(ref_cell_name, cell) <span class="kw">in </span>ref_cells {
@@ -778,6 +782,10 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, ctx);
 
         <span class="kw">let </span>invoke_group = builder.add_static_group(<span class="string">&quot;static_invoke&quot;</span>, s.latency);
+
+        invoke_group.borrow_mut().assignments.extend(
+            <span class="self">self</span>.ref_cells_to_ports(Rc::clone(<span class="kw-2">&amp;</span>s.comp), s.ref_cells.drain(..)),
+        );
 
         <span class="comment">// comp.go = 1&#39;d1;
         </span><span class="macro">structure!</span>(builder;
