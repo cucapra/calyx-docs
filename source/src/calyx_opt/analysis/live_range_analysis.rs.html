@@ -1383,18 +1383,6 @@
 <span id="1383">1383</span>
 <span id="1384">1384</span>
 <span id="1385">1385</span>
-<span id="1386">1386</span>
-<span id="1387">1387</span>
-<span id="1388">1388</span>
-<span id="1389">1389</span>
-<span id="1390">1390</span>
-<span id="1391">1391</span>
-<span id="1392">1392</span>
-<span id="1393">1393</span>
-<span id="1394">1394</span>
-<span id="1395">1395</span>
-<span id="1396">1396</span>
-<span id="1397">1397</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{ControlId, ReadWriteSet, ShareSet, VariableDetection};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Id, RRC};
 <span class="kw">use </span>itertools::Itertools;
@@ -2250,8 +2238,8 @@
         comp: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::Cell&gt;,
         shareable_components: <span class="kw-2">&amp;</span>ShareSet,
     ) -&gt; (TypeNameSet, TypeNameSet) {
-        <span class="comment">// The writes of the invoke include its outputs. Also, if the input to the invoke
-        // is not empty, we also count the cell being invoked as being written to.
+        <span class="comment">// The writes of the invoke include its outputs. Also, we count the cell
+        // being invoked as being written to.
         </span><span class="kw">let </span><span class="kw-2">mut </span>write_set: TypeNameSet = outputs
             .iter()
             .filter_map(|(<span class="kw">_</span>, src)| {
@@ -2259,21 +2247,18 @@
             })
             .collect();
 
-        <span class="kw">let </span>comp_is_written = !inputs.is_empty()
-            &amp;&amp; shareable_components.is_shareable_component(comp);
-        <span class="kw">if </span>comp_is_written {
+        <span class="kw">if </span>shareable_components.is_shareable_component(comp) {
             write_set.insert((
                 comp.borrow().prototype.clone(),
                 comp.borrow().name(),
             ));
         }
 
-        <span class="comment">// The reads of the invoke include its inputs. Also, if the outputs are
-        // not empty, the cell being invoked will be considered as being read from.
-        // One quick note: if the component is written to, there is no need to include this
+        <span class="comment">// The reads of the invoke include its inputs.
+        // One quick note: since the component is written to, there is no need to include this
         // component as being read from since we know the write to the component
         // precedes the read from it, due to the nature of `invoke` statements.
-        // This is &quot;cheating&quot; in a sense, since the componenet is technically being
+        // This is &quot;cheating&quot; in a sense, since the component is technically being
         // read from. However, since we know that there is a write to the component
         // that that precedes the read from it within the very same invoke statement,
         // it &quot;appears&quot; to all the other control statements in the program that the
@@ -2284,15 +2269,6 @@
                 <span class="self">Self</span>::port_to_cell_name(src, shareable_components)
             })
             .collect();
-        <span class="kw">if </span>!outputs.is_empty()
-            &amp;&amp; !comp_is_written
-            &amp;&amp; shareable_components.is_shareable_component(comp)
-        {
-            read_set.insert((
-                comp.borrow().prototype.clone(),
-                comp.borrow().name(),
-            ));
-        }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(comb_group) = comb_group_info {
             read_set.extend(

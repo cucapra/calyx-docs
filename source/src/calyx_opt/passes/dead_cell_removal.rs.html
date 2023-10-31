@@ -175,6 +175,38 @@
 <span id="175">175</span>
 <span id="176">176</span>
 <span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>std::collections::HashSet;
@@ -225,12 +257,40 @@
             out
         }
     }
+
+    <span class="kw">fn </span>visit_invoke(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        comp: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::Cell&gt;,
+        inputs: <span class="kw-2">&amp;</span>[(ir::Id, ir::RRC&lt;ir::Port&gt;)],
+        outputs: <span class="kw-2">&amp;</span>[(ir::Id, ir::RRC&lt;ir::Port&gt;)],
+        ref_cells: <span class="kw-2">&amp;</span>[(ir::Id, ir::RRC&lt;ir::Cell&gt;)],
+    ) {
+        <span class="kw">let </span>cells = inputs
+            .iter()
+            .map(|(<span class="kw">_</span>, p)| p)
+            .chain(outputs.iter().map(|(<span class="kw">_</span>, p)| p))
+            .map(|p| p.borrow().get_parent_name())
+            .chain(iter::once(comp.borrow().name()))
+            .chain(ref_cells.iter().map(|(<span class="kw">_</span>, c)| c.borrow().name()));
+        <span class="self">self</span>.all_reads.extend(cells);
+    }
 }
 
 <span class="kw">impl </span>Visitor <span class="kw">for </span>DeadCellRemoval {
     <span class="kw">fn </span>start_if(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         s: <span class="kw-2">&amp;mut </span>ir::If,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="self">self</span>.all_reads.insert(s.port.borrow().get_parent_name());
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
+    <span class="kw">fn </span>start_static_if(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::StaticIf,
         _comp: <span class="kw-2">&amp;mut </span>ir::Component,
         _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
@@ -257,16 +317,18 @@
         _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">let </span>ir::Invoke {
-            inputs, outputs, ..
-        } = s;
-        <span class="kw">let </span>cells = inputs
-            .iter()
-            .map(|(<span class="kw">_</span>, p)| p)
-            .chain(outputs.iter().map(|(<span class="kw">_</span>, p)| p))
-            .map(|p| p.borrow().get_parent_name())
-            .chain(iter::once(s.comp.borrow().name()));
-        <span class="self">self</span>.all_reads.extend(cells);
+        <span class="self">self</span>.visit_invoke(<span class="kw-2">&amp;</span>s.comp, <span class="kw-2">&amp;</span>s.inputs, <span class="kw-2">&amp;</span>s.outputs, <span class="kw-2">&amp;</span>s.ref_cells);
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
+    <span class="kw">fn </span>static_invoke(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        s: <span class="kw-2">&amp;mut </span>ir::StaticInvoke,
+        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="self">self</span>.visit_invoke(<span class="kw-2">&amp;</span>s.comp, <span class="kw-2">&amp;</span>s.inputs, <span class="kw-2">&amp;</span>s.outputs, <span class="kw-2">&amp;</span>s.ref_cells);
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
@@ -276,12 +338,14 @@
         _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="comment">// Add @external cells.
+        <span class="comment">// Add @external cells and ref cells.
         </span><span class="self">self</span>.all_reads.extend(
             comp.cells
                 .iter()
                 .filter(|c| {
-                    c.borrow().attributes.get(ir::BoolAttr::External).is_some()
+                    <span class="kw">let </span>cell = c.borrow();
+                    cell.attributes.get(ir::BoolAttr::External).is_some()
+                        || cell.is_reference()
                 })
                 .map(|c| c.borrow().name()),
         );
