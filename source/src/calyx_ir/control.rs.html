@@ -846,6 +846,17 @@
 <span id="846">846</span>
 <span id="847">847</span>
 <span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_frontend::Attribute;
 
 <span class="kw">use </span><span class="kw">super</span>::StaticGroup;
@@ -1436,6 +1447,17 @@
     </span><span class="kw">pub fn </span>take_control(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Control {
         <span class="kw">let </span>empty = Control::empty();
         std::mem::replace(<span class="self">self</span>, empty)
+    }
+
+    <span class="doccomment">/// Replaces &amp;mut self with an empty control statement, and returns StaticControl
+    /// of self. Note that this only works on Control that is static
+    </span><span class="kw">pub fn </span>take_static_control(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; StaticControl {
+        <span class="kw">let </span>empty = Control::empty();
+        <span class="kw">let </span>control = std::mem::replace(<span class="self">self</span>, empty);
+        <span class="kw">let </span>Control::Static(static_control) = control  <span class="kw">else </span>{
+            <span class="macro">unreachable!</span>(<span class="string">&quot;Called take_static_control on non-static control&quot;</span>)
+        };
+        static_control
     }
 }
 

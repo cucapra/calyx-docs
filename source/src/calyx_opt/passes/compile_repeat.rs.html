@@ -103,6 +103,14 @@
 <span id="103">103</span>
 <span id="104">104</span>
 <span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::structure;
@@ -171,6 +179,10 @@
             )
             .to_vec();
             init_group.borrow_mut().assignments = init_assigns;
+            init_group
+                .borrow_mut()
+                .attributes
+                .insert(ir::NumAttr::PromoteStatic, <span class="number">1</span>);
             <span class="comment">// incr_group:
             // 1) writes results of idx + 1 into idx (i.e., increments idx)
             // 2) writes the result of (idx + 1 &lt; num_repeats) into cond_reg,
@@ -189,6 +201,10 @@
             )
             .to_vec();
             incr_group.borrow_mut().assignments = idx_incr_assigns;
+            incr_group
+                .borrow_mut()
+                .attributes
+                .insert(ir::NumAttr::PromoteStatic, <span class="number">1</span>);
             <span class="comment">// create control:
             // init_group; while cond_reg.out {repeat_body; incr_group;}
             </span><span class="kw">let </span>while_body = ir::Control::seq(<span class="macro">vec!</span>[
