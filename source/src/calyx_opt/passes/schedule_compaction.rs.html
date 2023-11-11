@@ -178,6 +178,58 @@
 <span id="178">178</span>
 <span id="179">179</span>
 <span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::Action;
 <span class="kw">use crate</span>::{
     analysis,
@@ -238,54 +290,106 @@
 
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(order) = algo::toposort(<span class="kw-2">&amp;</span>total_order, <span class="prelude-val">None</span>) {
             <span class="kw">let </span><span class="kw-2">mut </span>total_time: u64 = <span class="number">0</span>;
-            <span class="kw">let </span><span class="kw-2">mut </span>stmts: Vec&lt;ir::StaticControl&gt; = Vec::new();
 
-            <span class="kw">for </span>i <span class="kw">in </span>order {
-                <span class="kw">let </span><span class="kw-2">mut </span>start: u64 = <span class="number">0</span>;
-                <span class="kw">for </span>node <span class="kw">in </span>dependency.get(<span class="kw-2">&amp;</span>i).unwrap() {
-                    <span class="kw">let </span>allow_start = schedule[node] + latency_map[node];
-                    <span class="kw">if </span>allow_start &gt; start {
-                        start = allow_start;
-                    }
-                }
+            <span class="comment">// First we build the schedule.
+
+            </span><span class="kw">for </span>i <span class="kw">in </span>order {
+                <span class="comment">// Start time is when the latest dependency finishes
+                </span><span class="kw">let </span>start = dependency
+                    .get(<span class="kw-2">&amp;</span>i)
+                    .unwrap()
+                    .iter()
+                    .map(|node| schedule[node] + latency_map[node])
+                    .max()
+                    .unwrap_or(<span class="number">0</span>);
                 schedule.insert(i, start);
-
-                <span class="kw">let </span>control = total_order[i].take().unwrap();
-                <span class="kw">let </span><span class="kw-2">mut </span>st_seq_stmts: Vec&lt;ir::StaticControl&gt; = Vec::new();
-                <span class="kw">if </span>start &gt; <span class="number">0 </span>{
-                    <span class="kw">let </span>no_op = builder.add_static_group(<span class="string">&quot;no-op&quot;</span>, start);
-
-                    st_seq_stmts.push(ir::StaticControl::Enable(
-                        ir::StaticEnable {
-                            group: no_op,
-                            attributes: ir::Attributes::default(),
-                        },
-                    ));
-                }
-                <span class="kw">if </span>start + latency_map[<span class="kw-2">&amp;</span>i] &gt; total_time {
-                    total_time = start + latency_map[<span class="kw-2">&amp;</span>i];
-                }
-
-                st_seq_stmts.push(control);
-                stmts.push(ir::StaticControl::Seq(ir::StaticSeq {
-                    stmts: st_seq_stmts,
-                    attributes: ir::Attributes::default(),
-                    latency: start + latency_map[<span class="kw-2">&amp;</span>i],
-                }));
+                total_time = std::cmp::max(start + latency_map[<span class="kw-2">&amp;</span>i], total_time);
             }
 
-            <span class="kw">let </span>s_par = ir::StaticControl::Par(ir::StaticPar {
-                stmts,
-                attributes: ir::Attributes::default(),
-                latency: total_time,
-            });
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::static_change(s_par));
+            <span class="comment">// We sort the schedule by start time.
+            </span><span class="kw">let </span><span class="kw-2">mut </span>sorted_schedule: Vec&lt;(NodeIndex, u64)&gt; =
+                schedule.into_iter().collect();
+            sorted_schedule
+                .sort_by(|(k1, v1), (k2, v2)| (v1, k1).cmp(<span class="kw-2">&amp;</span>(v2, k2)));
+            <span class="comment">// Threads for the static par, where each entry is (thread, thread_latency)
+            </span><span class="kw">let </span><span class="kw-2">mut </span>par_threads: Vec&lt;(Vec&lt;ir::StaticControl&gt;, u64)&gt; =
+                Vec::new();
+
+            <span class="comment">// We encode the schedule attempting to minimize the number of
+            // par threads.
+            </span><span class="lifetime">&#39;outer</span>: <span class="kw">for </span>(i, start) <span class="kw">in </span>sorted_schedule {
+                <span class="kw">let </span>control = total_order[i].take().unwrap();
+                <span class="kw">for </span>(thread, thread_latency) <span class="kw">in </span>par_threads.iter_mut() {
+                    <span class="kw">if </span><span class="kw-2">*</span>thread_latency &lt;= start {
+                        <span class="kw">if </span><span class="kw-2">*</span>thread_latency &lt; start {
+                            <span class="comment">// Might need a no-op group so the schedule starts correctly
+                            </span><span class="kw">let </span>no_op = builder.add_static_group(
+                                <span class="string">&quot;no-op&quot;</span>,
+                                start - <span class="kw-2">*</span>thread_latency,
+                            );
+                            thread.push(ir::StaticControl::Enable(
+                                ir::StaticEnable {
+                                    group: no_op,
+                                    attributes: ir::Attributes::default(),
+                                },
+                            ));
+                            <span class="kw-2">*</span>thread_latency = start;
+                        }
+                        thread.push(control);
+                        <span class="kw-2">*</span>thread_latency += latency_map[<span class="kw-2">&amp;</span>i];
+                        <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                    }
+                }
+                <span class="comment">// We must create a new par thread.
+                </span><span class="kw">if </span>start &gt; <span class="number">0 </span>{
+                    <span class="comment">// If start &gt; 0, then we must add a delay to the start of the
+                    // group.
+                    </span><span class="kw">let </span>no_op = builder.add_static_group(<span class="string">&quot;no-op&quot;</span>, start);
+                    <span class="kw">let </span>no_op_enable =
+                        ir::StaticControl::Enable(ir::StaticEnable {
+                            group: no_op,
+                            attributes: ir::Attributes::default(),
+                        });
+                    par_threads.push((
+                        <span class="macro">vec!</span>[no_op_enable, control],
+                        start + latency_map[<span class="kw-2">&amp;</span>i],
+                    ));
+                } <span class="kw">else </span>{
+                    par_threads.push((<span class="macro">vec!</span>[control], latency_map[<span class="kw-2">&amp;</span>i]));
+                }
+            }
+
+            <span class="comment">// Turn Vec&lt;ir::StaticControl&gt; -&gt; StaticSeq
+            </span><span class="kw">let </span><span class="kw-2">mut </span>par_control_threads: Vec&lt;ir::StaticControl&gt; = Vec::new();
+            <span class="kw">for </span>(thread, thread_latency) <span class="kw">in </span>par_threads {
+                par_control_threads.push(ir::StaticControl::Seq(
+                    ir::StaticSeq {
+                        stmts: thread,
+                        attributes: ir::Attributes::default(),
+                        latency: thread_latency,
+                    },
+                ));
+            }
+            <span class="comment">// Double checking that we have built the static par correctly.
+            </span><span class="kw">let </span>max = par_control_threads.iter().map(|c| c.get_latency()).max();
+            <span class="macro">assert!</span>(max.unwrap() == total_time, <span class="string">&quot;The schedule expects latency {}. The static par that was built has latency {}&quot;</span>, total_time, max.unwrap());
+
+            <span class="kw">if </span>par_control_threads.len() == <span class="number">1 </span>{
+                <span class="kw">let </span>c = Vec::pop(<span class="kw-2">&amp;mut </span>par_control_threads).unwrap();
+                <span class="prelude-val">Ok</span>(Action::static_change(c))
+            } <span class="kw">else </span>{
+                <span class="kw">let </span>s_par = ir::StaticControl::Par(ir::StaticPar {
+                    stmts: par_control_threads,
+                    attributes: ir::Attributes::default(),
+                    latency: total_time,
+                });
+                <span class="prelude-val">Ok</span>(Action::static_change(s_par))
+            }
         } <span class="kw">else </span>{
-            <span class="macro">println!</span>(
+            <span class="macro">panic!</span>(
                 <span class="string">&quot;Error when producing topo sort. Dependency graph has a cycle.&quot;
             </span>);
         }
-        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
     <span class="kw">fn </span>finish_static_repeat(
