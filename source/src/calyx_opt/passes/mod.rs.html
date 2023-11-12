@@ -89,6 +89,10 @@
 <span id="89">89</span>
 <span id="90">90</span>
 <span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>attribute_promotion;
 <span class="kw">mod </span>canonical;
@@ -125,7 +129,9 @@
 <span class="kw">mod </span>static_promotion;
 <span class="kw">mod </span>sync;
 <span class="comment">// mod simplify_guards;
-</span><span class="kw">mod </span>data_path_infer;
+</span><span class="kw">mod </span>add_guard;
+<span class="kw">mod </span>compile_static_interface;
+<span class="kw">mod </span>data_path_infer;
 <span class="kw">mod </span>discover_external;
 <span class="kw">mod </span>simplify_with_control;
 <span class="kw">mod </span>synthesis_papercut;
@@ -173,7 +179,9 @@
 <span class="kw">pub use </span>sync::CompileSync;
 <span class="kw">pub use </span>sync::CompileSyncWithoutSyncReg;
 <span class="comment">// pub use simplify_guards::SimplifyGuards;
-</span><span class="kw">pub use </span>synthesis_papercut::SynthesisPapercut;
+</span><span class="kw">pub use </span>add_guard::AddGuard;
+<span class="kw">pub use </span>compile_static_interface::CompileStaticInterface;
+<span class="kw">pub use </span>synthesis_papercut::SynthesisPapercut;
 <span class="kw">pub use </span>top_down_compile_control::TopDownCompileControl;
 <span class="kw">pub use </span>top_down_static_timing::TopDownStaticTiming;
 <span class="kw">pub use </span>unroll_bound::UnrollBounded;

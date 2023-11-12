@@ -420,13 +420,23 @@
 <span id="420">420</span>
 <span id="421">421</span>
 <span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{
     <span class="self">self</span>, Action, ConstructVisitor, Named, VisResult, Visitor,
 };
 <span class="kw">use </span>calyx_ir::structure;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Attributes, LibrarySignatures};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
-<span class="kw">use </span>ir::{RRC, WRC};
+<span class="kw">use </span>ir::{Assignment, RRC, WRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
@@ -795,13 +805,12 @@
         <span class="comment">// Get the go port
         </span><span class="kw">let </span>go_port = get_go_port(Rc::clone(<span class="kw-2">&amp;</span>s.comp))<span class="question-mark">?</span>;
 
+        <span class="comment">// define first cycle guard
+        </span><span class="kw">let </span>first_cycle = ir::Guard::Info(ir::StaticTiming::new((<span class="number">0</span>, <span class="number">1</span>)));
+
         <span class="comment">// Build assignemnts
         </span><span class="kw">let </span>go_assign: ir::Assignment&lt;ir::StaticTiming&gt; = builder
-            .build_assignment(
-                go_port,
-                one.borrow().get(<span class="string">&quot;out&quot;</span>),
-                ir::Guard::True,
-            );
+            .build_assignment(go_port, one.borrow().get(<span class="string">&quot;out&quot;</span>), first_cycle);
         invoke_group.borrow_mut().assignments.push(go_assign);
 
         <span class="comment">// Generate argument assignments
@@ -813,6 +822,17 @@
             cell,
         );
         invoke_group.borrow_mut().assignments.extend(assigns);
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(cgr) = <span class="kw-2">&amp;</span>s.comb_group {
+            <span class="kw">let </span>cg = <span class="kw-2">&amp;*</span>cgr.borrow();
+            invoke_group.borrow_mut().assignments.extend(
+                cg.assignments
+                    .iter()
+                    .cloned()
+                    .map(Assignment::from)
+                    .collect_vec(),
+            );
+        }
 
         <span class="kw">let </span>en = ir::StaticEnable {
             group: invoke_group,

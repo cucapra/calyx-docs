@@ -459,6 +459,8 @@
 <span id="459">459</span>
 <span id="460">460</span>
 <span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx
 </span><span class="kw">use </span><span class="kw">super</span>::parser;
 <span class="kw">use crate</span>::{Attributes, PortDef, Primitive};
@@ -837,6 +839,8 @@
         </span>attributes: Attributes,
         <span class="doccomment">/// External cells that may execute with this invoke.
         </span>ref_cells: Vec&lt;(Id, Id)&gt;,
+        <span class="doccomment">/// Combinational group that may execute with this invoke.
+        </span>comb_group: <span class="prelude-ty">Option</span>&lt;Id&gt;,
         <span class="doccomment">/// (optional) latency. Latency can be inferred if not given.
         </span>latency: <span class="prelude-ty">Option</span>&lt;NonZeroU64&gt;,
     },

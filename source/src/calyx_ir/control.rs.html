@@ -857,6 +857,9 @@
 <span id="857">857</span>
 <span id="858">858</span>
 <span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_frontend::Attribute;
 
 <span class="kw">use </span><span class="kw">super</span>::StaticGroup;
@@ -1161,6 +1164,8 @@
     </span><span class="kw">pub </span>attributes: Attributes,
     <span class="doccomment">/// Mapping from name of external cell in &#39;comp&#39; to the cell connected to it.
     </span><span class="kw">pub </span>ref_cells: CellMap,
+    <span class="doccomment">/// Optional combinational group that is active when the invoke is active.
+    </span><span class="kw">pub </span>comb_group: <span class="prelude-ty">Option</span>&lt;RRC&lt;CombGroup&gt;&gt;,
 }
 <span class="kw">impl </span>GetAttributes <span class="kw">for </span>StaticInvoke {
     <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
@@ -1677,6 +1682,7 @@
             outputs: i.outputs.clone(),
             attributes: i.attributes.clone(),
             ref_cells: i.ref_cells.clone(),
+            comb_group: i.comb_group.clone(),
         }
     }
 

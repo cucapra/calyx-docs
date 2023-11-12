@@ -1319,6 +1319,16 @@
 <span id="1319">1319</span>
 <span id="1320">1320</span>
 <span id="1321">1321</span>
+<span id="1322">1322</span>
+<span id="1323">1323</span>
+<span id="1324">1324</span>
+<span id="1325">1325</span>
+<span id="1326">1326</span>
+<span id="1327">1327</span>
+<span id="1328">1328</span>
+<span id="1329">1329</span>
+<span id="1330">1330</span>
+<span id="1331">1331</span>
 </pre><pre class="rust"><code><span class="attribute">#![allow(clippy::upper_case_acronyms)]
 
 </span><span class="doccomment">//! Parser for Calyx programs.
@@ -1331,7 +1341,6 @@
 <span class="kw">use </span>calyx_utils::{FileIdx, GPosIdx, GlobalPositionTable};
 <span class="kw">use </span>pest::pratt_parser::{Assoc, Op, PrattParser};
 <span class="kw">use </span>pest_consume::{match_nodes, Error, Parser};
-<span class="kw">use </span>std::convert::TryInto;
 <span class="kw">use </span>std::fs;
 <span class="kw">use </span>std::io::Read;
 <span class="kw">use </span>std::path::Path;
@@ -2186,6 +2195,17 @@
                     attributes: attrs.add_span(span),
                     ref_cells: cells,
                     latency,
+                    comb_group: <span class="prelude-val">None</span>,
+                },
+                [at_attributes(attrs), static_optional_latency(latency), identifier(comp), invoke_ref_args(cells),invoke_args(inputs), invoke_args(outputs), identifier(group)] =&gt;
+                ast::Control::StaticInvoke {
+                    comp,
+                    inputs,
+                    outputs,
+                    attributes: attrs.add_span(span),
+                    ref_cells: cells,
+                    latency,
+                    comb_group: <span class="prelude-val">Some</span>(group),
                 },
         ))
     }

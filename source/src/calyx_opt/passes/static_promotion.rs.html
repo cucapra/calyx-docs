@@ -1163,6 +1163,10 @@
 <span id="1163">1163</span>
 <span id="1164">1164</span>
 <span id="1165">1165</span>
+<span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphAnalysis, ReadWriteSet};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
@@ -1853,6 +1857,7 @@
                     latency: inferred_latency,
                     attributes: std::mem::take(attributes),
                     ref_cells: std::mem::take(ref_cells),
+                    comb_group: std::mem::take(comb_group),
                 };
                 ir::StaticControl::Invoke(s_inv)
             }
@@ -1971,8 +1976,11 @@
         _lib: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">if </span>comp.control.borrow().is_static() {
+        <span class="kw">if </span>comp.name != <span class="string">&quot;main&quot; </span>&amp;&amp; comp.control.borrow().is_static() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(lat) = comp.control.borrow().get_latency() {
+                <span class="kw">if </span>!comp.is_static() {
+                    comp.attributes.insert(ir::BoolAttr::Promoted, <span class="number">1</span>);
+                }
                 comp.latency = <span class="prelude-val">Some</span>(NonZeroU64::new(lat).unwrap());
                 <span class="kw">let </span>comp_sig = comp.signature.borrow();
                 <span class="kw">let </span><span class="kw-2">mut </span>done_ports: Vec&lt;<span class="kw">_</span>&gt; =
@@ -2065,7 +2073,7 @@
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
         <span class="comment">// Shouldn&#39;t promote to static invoke if we have a comb group
-        </span><span class="kw">if </span>s.comp.borrow().is_component() &amp;&amp; s.comb_group.is_none() {
+        </span><span class="kw">if </span>s.comp.borrow().is_component() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = <span class="self">self
                 </span>.static_component_latencies
                 .get(<span class="kw-2">&amp;</span>s.comp.borrow().type_name().unwrap())
