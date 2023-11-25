@@ -174,19 +174,23 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="axi-interface-generation"><a class="header" href="#axi-interface-generation">AXI Interface Generation</a></h1>
-<p>Calyx currently generates a fairly complex AXI interface that can be daunting
+<p>In order to run programs on FPGAs, fud is capable of utilizing
+Calyx to generate a fairly complex AXI interface that can be daunting
 to deal with if confronting for the first time.
 The following is an overview of how the generation occurs
-and how the output AXI interface behaves as of 2022-9-11.</p>
+and how the fud-generated AXI interface behaves as of 2022-9-11.</p>
 <p>In general, when <code>fud</code> is asked to create an <a href="https://xilinx.github.io/XRT/2021.2/html/formats.html#xclbin"><code>.xclbin</code> file</a> a <code>kernel.xml</code>,
-<code>main.sv</code>, and <code>toplevel.v</code> are created as intermediate steps for <a href="https://github.com/cucapra/calyx/blob/master/docs/fud/xilinx.md">xilinx tools</a>
-to properly work.</p>
-<p><code>main.sv</code> contains the SystemVerilog needed for our computations to perform
-correctly. It is implemented as an FSM that derives from the original Calyx program.
-<a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/RTL-Kernel-XML-File"><code>kernel.xml</code></a> defines register maps and ports of our
-toplevel xilinx tools needs. <code>toplevel.v</code> wraps our computation kernel and contains
-the AXI interface for each memory defined in a Calyx program and corresponds to the standard Calux lowering process.</p>
-<p>For more info on file generation see <a href="https://docs.calyxir.org/fud/xilinx.html?highlight=synthesis#how-it-works">how the Xilinx Toolchain works</a></p>
+<code>main.sv</code>, and <code>toplevel.v</code> are created as intermediate files required for our
+<a href="https://github.com/cucapra/calyx/blob/master/docs/fud/xilinx.md">Xilinx tools</a> to properly work.</p>
+<p><code>main.sv</code> contains the SystemVerilog implementation of the Calyx program
+we are interested in executing on an FPGA.
+<code>toplevel.v</code> wraps our SystemVerilog implementation and contains
+the AXI interface for each memory marked <a href="https://docs.calyxir.org/lang/attributes.html?highlight=external#external"><code>@external</code></a> in a Calyx program.
+Our <code>toplevel.v</code> and <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/RTL-Kernel-XML-File"><code>kernel.xml</code></a> is what our Xilinx tools interface with.
+Our toplevel adheres to the Xilinx <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Kernel-Interface-Requirements">kernel interface requirements</a>.
+<code>kernel.xml</code> defines register maps and ports of our
+toplevel module used by our Xilinx tools.</p>
+<p>For more information on the generation of the files mentioned above see <a href="https://docs.calyxir.org/fud/xilinx.html?highlight=synthesis#how-it-works">how the Xilinx Toolchain works</a></p>
 <h2 id="toplevel"><a class="header" href="#toplevel">Toplevel</a></h2>
 <p>Our <a href="https://docs.calyxir.org/lang/attributes.html?highlight=toplevel#toplevel">toplevel</a> is generated through files in <code>src/backend/xilinx/</code>.</p>
 <h3 id="axi-memory-controller"><a class="header" href="#axi-memory-controller">AXI memory controller</a></h3>
@@ -198,16 +202,16 @@ To note, separate AXI interfaces are created for each memory
 the memory. Eventually the BRAMs are read and fed into the
 computation kernel of <code>main.sv</code>, which outputs results directly into the relevant
 memories as defined in the original Calyx program.
-Address and data widths and sizes are determined from cell declerations.</p>
+Addresses, data widths, and sizes are determined from cell declarations.</p>
 <blockquote>
 <p>There is always the possiblity that something is hardcoded as a remnant
-from previous versions of our AXI generation. If something is hardcoded where it shouldn't
+of previous versions of our AXI generation. If something is hardcoded where it shouldn't
 be please open an <a href="https://github.com/cucapra/calyx/issues">issue</a>.</p>
 </blockquote>
 <p>AXI memory controllers are constructed as (full) <a href="https://developer.arm.com/documentation/ihi0022/e/AMBA-AXI3-and-AXI4-Protocol-Specification/Signal-Descriptions?lang=en">AXI4 managers</a> that lack a small amount
 of functionality. For example, <a href="https://developer.arm.com/documentation/ihi0022/e/AMBA-AXI3-and-AXI4-Protocol-Specification/Transaction-Attributes/Access-permissions?lang=en">xPROT signals</a> are not currently supported.
 Additionally, things like <a href="https://developer.arm.com/documentation/ihi0022/e/AMBA-AXI3-and-AXI4-Protocol-Specification/Single-Interface-Requirements/Transaction-structure/Address-structure?lang=en">bursting</a> are not currently supported, but should be
-easy to implement due to the existing infrastructure and generation.</p>
+easy to implement due to the existing infrastructure and generation tools.</p>
 <p>A list of current signals that are hardcoded follows:</p>
 <ul>
 <li><code>xLEN</code> is set to 0, corresponding to a burst length of 1.</li>
@@ -221,10 +225,11 @@ easy to implement due to the existing infrastructure and generation.</p>
 <li>No <a href="https://developer.arm.com/documentation/ihi0022/e/AMBA-AXI3-and-AXI4-Protocol-Specification/Signal-Descriptions/Low-power-interface-signals?lang=en">low power signals</a> are generated.</li>
 </ul>
 <h3 id="subordinate-axi-control-controller"><a class="header" href="#subordinate-axi-control-controller">Subordinate AXI control controller</a></h3>
-<p>In addition to our manager memory controllers, a subordinate controller for
-our control module is also generated. This module is responsible for signaling
+<p>In addition to our manager memory-controllers, a subordinate interface,
+connected to our control module is also generated.
+This module is responsible for signaling
 our computational kernel to start working, as well as calculating the correct
-base addresses to use for our memory controllers. Things like address and
+base addresses to use for our memory controllers. Things like addresses and
 data widths are hard coded at the moment. It is suspected that this hardcoding
 is okay for the types of programs we generate. But more work needs to be done to see
 if our control structure works for arbitrary programs or needs to be changed to
