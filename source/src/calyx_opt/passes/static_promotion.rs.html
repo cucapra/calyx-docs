@@ -1167,6 +1167,51 @@
 <span id="1167">1167</span>
 <span id="1168">1168</span>
 <span id="1169">1169</span>
+<span id="1170">1170</span>
+<span id="1171">1171</span>
+<span id="1172">1172</span>
+<span id="1173">1173</span>
+<span id="1174">1174</span>
+<span id="1175">1175</span>
+<span id="1176">1176</span>
+<span id="1177">1177</span>
+<span id="1178">1178</span>
+<span id="1179">1179</span>
+<span id="1180">1180</span>
+<span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
+<span id="1184">1184</span>
+<span id="1185">1185</span>
+<span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
+<span id="1189">1189</span>
+<span id="1190">1190</span>
+<span id="1191">1191</span>
+<span id="1192">1192</span>
+<span id="1193">1193</span>
+<span id="1194">1194</span>
+<span id="1195">1195</span>
+<span id="1196">1196</span>
+<span id="1197">1197</span>
+<span id="1198">1198</span>
+<span id="1199">1199</span>
+<span id="1200">1200</span>
+<span id="1201">1201</span>
+<span id="1202">1202</span>
+<span id="1203">1203</span>
+<span id="1204">1204</span>
+<span id="1205">1205</span>
+<span id="1206">1206</span>
+<span id="1207">1207</span>
+<span id="1208">1208</span>
+<span id="1209">1209</span>
+<span id="1210">1210</span>
+<span id="1211">1211</span>
+<span id="1212">1212</span>
+<span id="1213">1213</span>
+<span id="1214">1214</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphAnalysis, ReadWriteSet};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, VisResult, Visitor,
@@ -1312,7 +1357,7 @@
     <span class="doccomment">/// Threshold for promotion
     </span>threshold: u64,
     <span class="doccomment">/// Whether we should stop promoting when we see a loop.
-    </span>stop_loop: bool,
+    </span>cycle_limit: <span class="prelude-ty">Option</span>&lt;u64&gt;,
 }
 
 <span class="comment">// Override constructor to build latency_data information from the primitives
@@ -1346,13 +1391,13 @@
             </span>}
             latency_data.insert(prim.name, GoDone::new(go_ports));
         }
-        <span class="kw">let </span>(threshold, stop_loop) = <span class="self">Self</span>::get_threshold(ctx);
+        <span class="kw">let </span>(threshold, cycle_limit) = <span class="self">Self</span>::get_threshold(ctx);
         <span class="prelude-val">Ok</span>(StaticPromotion {
             latency_data,
             static_group_name: HashMap::new(),
             static_component_latencies: HashMap::new(),
             threshold,
-            stop_loop,
+            cycle_limit,
         })
     }
 
@@ -1375,7 +1420,7 @@
 <span class="kw">impl </span>StaticPromotion {
     <span class="comment">// Looks through ctx to get the given command line threshold.
     // Default threshold = 1
-    </span><span class="kw">fn </span>get_threshold(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; (u64, bool)
+    </span><span class="kw">fn </span>get_threshold(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; (u64, <span class="prelude-ty">Option</span>&lt;u64&gt;)
     <span class="kw">where
         </span><span class="self">Self</span>: Named,
     {
@@ -1395,12 +1440,23 @@
             })
             .collect();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>stop_loop = <span class="bool-val">false</span>;
-        given_opts.iter().for_each(|arg| {
-            <span class="kw">if </span><span class="kw-2">*</span>arg == <span class="string">&quot;stop_loop&quot; </span>{
-                stop_loop = <span class="bool-val">true
-            </span>}
-        });
+        <span class="comment">// searching for &quot;-x static-promotion:cycle-limit=200&quot; and getting back &quot;200&quot;
+        </span><span class="kw">let </span>cycle_limit_str: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; = given_opts.iter().find_map(|arg| {
+            <span class="kw">let </span>split: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = arg.split(<span class="string">&#39;=&#39;</span>).collect();
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(str) = split.first() {
+                <span class="kw">if </span>str == <span class="kw-2">&amp;</span><span class="string">&quot;cycle-limit&quot; </span>{
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(split[<span class="number">1</span>]);
+                }
+            }
+            <span class="prelude-val">None
+        </span>});
+
+        <span class="comment">// Default to None. There may be a more idiomatic way to do this.
+        </span><span class="kw">let </span>cycle_limit = <span class="kw">match </span>cycle_limit_str.unwrap_or(<span class="string">&quot;None&quot;</span>).parse::&lt;u64&gt;()
+        {
+            <span class="prelude-val">Ok</span>(n) =&gt; <span class="prelude-val">Some</span>(n),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+        };
 
         <span class="comment">// searching for &quot;-x static-promotion:threshold=1&quot; and getting back &quot;1&quot;
         </span><span class="kw">let </span>threshold: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; = given_opts.iter().find_map(|arg| {
@@ -1415,9 +1471,10 @@
 
         <span class="comment">// Need to convert string argument into int argument
         // Always default to threshold=1
+        // Default cycle limit = 2^25 = 33554432
         </span>(
             threshold.unwrap_or(<span class="string">&quot;1&quot;</span>).parse::&lt;u64&gt;().unwrap_or(<span class="number">1</span>),
-            stop_loop,
+            cycle_limit,
         )
     }
 
@@ -1671,6 +1728,13 @@
         c.is_static() || c.has_attribute(ir::NumAttr::PromoteStatic)
     }
 
+    <span class="kw">fn </span>within_cycle_limit(<span class="kw-2">&amp;</span><span class="self">self</span>, latency: u64) -&gt; bool {
+        <span class="kw">if </span><span class="self">self</span>.cycle_limit.is_none() {
+            <span class="kw">return </span><span class="bool-val">true</span>;
+        }
+        latency &lt; <span class="self">self</span>.cycle_limit.unwrap()
+    }
+
     <span class="doccomment">/// If we&#39;ve already constructed the static group then use the already existing
     /// group. Otherwise construct `static group` and then return that.
     </span><span class="kw">fn </span>construct_static_group(
@@ -1912,18 +1976,23 @@
         v.iter().map(<span class="self">Self</span>::approx_size).sum()
     }
 
-    <span class="doccomment">/// First checks if the vec of control statements meets the self.threshold.
+    <span class="doccomment">/// First checks if the vec of control statements satsifies the threshold
+    /// and cycle count threshold
     /// (That is, whether the combined approx_size of the static_vec is greater)
-    /// Than the threshold.
+    /// than the threshold and cycle count is less than cycle limit).
     /// If so, converts vec of control to a static seq, and returns a vec containing
     /// the static seq.
     /// Otherwise, just returns the vec without changing it.
-    </span><span class="kw">fn </span>convert_vec_seq_if_threshold(
+    </span><span class="kw">fn </span>convert_vec_seq_if_sat(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
         control_vec: Vec&lt;ir::Control&gt;,
     ) -&gt; Vec&lt;ir::Control&gt; {
-        <span class="kw">if </span><span class="self">Self</span>::approx_control_vec_size(<span class="kw-2">&amp;</span>control_vec) &lt;= <span class="self">self</span>.threshold {
+        <span class="kw">if </span><span class="self">Self</span>::approx_control_vec_size(<span class="kw-2">&amp;</span>control_vec) &lt;= <span class="self">self</span>.threshold
+            || !<span class="self">self</span>.within_cycle_limit(
+                control_vec.iter().map(<span class="self">Self</span>::get_inferred_latency).sum(),
+            )
+        {
             <span class="comment">// Return unchanged vec
             </span><span class="kw">return </span>control_vec;
         }
@@ -1937,16 +2006,25 @@
         <span class="macro">vec!</span>[sseq]
     }
 
-    <span class="doccomment">/// First checks if the vec of control statements meets the self.threshold.
+    <span class="doccomment">/// First checks if the vec of control statements meets the self.threshold
+    /// and is within self.cycle_limit
     /// If so, converts vec of control to a static par, and returns a vec containing
     /// the static par.
     /// Otherwise, just returns the vec without changing it.
-    </span><span class="kw">fn </span>convert_vec_par_if_threshold(
+    </span><span class="kw">fn </span>convert_vec_par_if_sat(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
         control_vec: Vec&lt;ir::Control&gt;,
     ) -&gt; Vec&lt;ir::Control&gt; {
-        <span class="kw">if </span><span class="self">Self</span>::approx_control_vec_size(<span class="kw-2">&amp;</span>control_vec) &lt;= <span class="self">self</span>.threshold {
+        <span class="kw">if </span><span class="self">Self</span>::approx_control_vec_size(<span class="kw-2">&amp;</span>control_vec) &lt;= <span class="self">self</span>.threshold
+            || !<span class="self">self</span>.within_cycle_limit(
+                control_vec
+                    .iter()
+                    .map(<span class="self">Self</span>::get_inferred_latency)
+                    .max()
+                    .unwrap_or_else(|| <span class="macro">unreachable!</span>(<span class="string">&quot;Non Empty Par Block&quot;</span>)),
+            )
+        {
             <span class="comment">// Return unchanged vec
             </span><span class="kw">return </span>control_vec;
         }
@@ -2102,17 +2180,22 @@
             } <span class="kw">else </span>{
                 <span class="comment">// Accumualte cur_vec into a static seq if it meets threshold
                 </span><span class="kw">let </span>possibly_promoted_stmts =
-                    <span class="self">self</span>.convert_vec_seq_if_threshold(<span class="kw-2">&amp;mut </span>builder, cur_vec);
+                    <span class="self">self</span>.convert_vec_seq_if_sat(<span class="kw-2">&amp;mut </span>builder, cur_vec);
                 new_stmts.extend(possibly_promoted_stmts);
-                cur_vec = Vec::new();
                 <span class="comment">// Add the current (non-promotable) stmt
                 </span>new_stmts.push(stmt);
+                <span class="comment">// New cur_vec
+                </span>cur_vec = Vec::new();
             }
         }
         <span class="kw">if </span>new_stmts.is_empty() {
             <span class="comment">// The entire seq can be promoted
             </span><span class="kw">let </span>approx_size: u64 = cur_vec.iter().map(<span class="self">Self</span>::approx_size).sum();
-            <span class="kw">if </span>approx_size &gt; <span class="self">self</span>.threshold {
+            <span class="kw">if </span>approx_size &gt; <span class="self">self</span>.threshold
+                &amp;&amp; <span class="self">self</span>.within_cycle_limit(
+                    cur_vec.iter().map(<span class="self">Self</span>::get_inferred_latency).sum(),
+                )
+            {
                 <span class="comment">// Promote entire seq to a static seq
                 </span><span class="kw">let </span>s_seq_stmts =
                     <span class="self">self</span>.convert_vec_to_static(<span class="kw-2">&amp;mut </span>builder, cur_vec);
@@ -2139,7 +2222,7 @@
         <span class="comment">// Entire seq is not static, so we&#39;re only promoting the last
         // bit of it if possible.
         </span><span class="kw">let </span>possibly_promoted_stmts =
-            <span class="self">self</span>.convert_vec_seq_if_threshold(<span class="kw-2">&amp;mut </span>builder, cur_vec);
+            <span class="self">self</span>.convert_vec_seq_if_sat(<span class="kw-2">&amp;mut </span>builder, cur_vec);
         new_stmts.extend(possibly_promoted_stmts);
 
         <span class="kw">let </span>new_seq = ir::Control::Seq(ir::Seq {
@@ -2166,7 +2249,15 @@
             });
         <span class="kw">if </span>d_stmts.is_empty() {
             <span class="comment">// Entire par block can be promoted to static
-            </span><span class="kw">if </span><span class="self">Self</span>::approx_control_vec_size(<span class="kw-2">&amp;</span>s_stmts) &gt; <span class="self">self</span>.threshold {
+            </span><span class="kw">if </span><span class="self">Self</span>::approx_control_vec_size(<span class="kw-2">&amp;</span>s_stmts) &gt; <span class="self">self</span>.threshold
+                &amp;&amp; <span class="self">self</span>.within_cycle_limit(
+                    s_stmts
+                        .iter()
+                        .map(<span class="self">Self</span>::get_inferred_latency)
+                        .max()
+                        .unwrap_or_else(|| <span class="macro">unreachable!</span>(<span class="string">&quot;Empty Par Block&quot;</span>)),
+                )
+            {
                 <span class="comment">// Promote entire par block to static
                 </span><span class="kw">let </span>static_par_stmts =
                     <span class="self">self</span>.convert_vec_to_static(<span class="kw-2">&amp;mut </span>builder, s_stmts);
@@ -2194,7 +2285,7 @@
         }
         <span class="comment">// Otherwise just promote the par threads that we can into a static par
         </span><span class="kw">let </span>s_stmts_possibly_promoted =
-            <span class="self">self</span>.convert_vec_par_if_threshold(<span class="kw-2">&amp;mut </span>builder, s_stmts);
+            <span class="self">self</span>.convert_vec_par_if_sat(<span class="kw-2">&amp;mut </span>builder, s_stmts);
         new_stmts.extend(s_stmts_possibly_promoted);
         new_stmts.extend(d_stmts);
         <span class="kw">let </span>new_par = ir::Control::Par(ir::Par {
@@ -2219,16 +2310,18 @@
             </span><span class="kw">let </span>approx_size_if = <span class="self">Self</span>::approx_size(<span class="kw-2">&amp;</span>s.tbranch)
                 + <span class="self">Self</span>::approx_size(<span class="kw-2">&amp;</span>s.fbranch)
                 + APPROX_IF_SIZE;
-            <span class="kw">if </span>approx_size_if &gt; <span class="self">self</span>.threshold {
+            <span class="kw">let </span>latency = std::cmp::max(
+                <span class="self">Self</span>::get_inferred_latency(<span class="kw-2">&amp;</span>s.tbranch),
+                <span class="self">Self</span>::get_inferred_latency(<span class="kw-2">&amp;</span>s.fbranch),
+            );
+            <span class="kw">if </span>approx_size_if &gt; <span class="self">self</span>.threshold
+                &amp;&amp; <span class="self">self</span>.within_cycle_limit(latency)
+            {
                 <span class="comment">// Meets size threshold so promote to static
                 </span><span class="kw">let </span>static_tbranch =
                     <span class="self">self</span>.convert_to_static(<span class="kw-2">&amp;mut </span>s.tbranch, <span class="kw-2">&amp;mut </span>builder);
                 <span class="kw">let </span>static_fbranch =
                     <span class="self">self</span>.convert_to_static(<span class="kw-2">&amp;mut </span>s.fbranch, <span class="kw-2">&amp;mut </span>builder);
-                <span class="kw">let </span>latency = std::cmp::max(
-                    static_tbranch.get_latency(),
-                    static_fbranch.get_latency(),
-                );
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::change(ir::Control::Static(
                     ir::StaticControl::static_if(
                         Rc::clone(<span class="kw-2">&amp;</span>s.port),
@@ -2259,9 +2352,6 @@
         sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">if </span><span class="self">self</span>.stop_loop {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
-        }
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="comment">// First check that while loop is bounded
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(num_repeats) = s.get_attributes().get(ir::NumAttr::Bound) {
@@ -2269,11 +2359,13 @@
             </span><span class="kw">if </span><span class="self">Self</span>::can_be_promoted(<span class="kw-2">&amp;</span>s.body) {
                 <span class="kw">let </span>approx_size =
                     <span class="self">Self</span>::approx_size(<span class="kw-2">&amp;</span>s.body) + APPROX_WHILE_REPEAT_SIZE;
+                <span class="kw">let </span>latency = <span class="self">Self</span>::get_inferred_latency(<span class="kw-2">&amp;</span>s.body) * num_repeats;
                 <span class="comment">// Then check that it reaches the threshold
-                </span><span class="kw">if </span>approx_size &gt; <span class="self">self</span>.threshold {
+                </span><span class="kw">if </span>approx_size &gt; <span class="self">self</span>.threshold
+                    &amp;&amp; <span class="self">self</span>.within_cycle_limit(latency)
+                {
                     <span class="comment">// Turn repeat into static repeat
                     </span><span class="kw">let </span>sc = <span class="self">self</span>.convert_to_static(<span class="kw-2">&amp;mut </span>s.body, <span class="kw-2">&amp;mut </span>builder);
-                    <span class="kw">let </span>latency = sc.get_latency() * num_repeats;
                     <span class="kw">let </span>static_repeat = ir::StaticControl::repeat(
                         num_repeats,
                         latency,
@@ -2303,18 +2395,16 @@
         sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">if </span><span class="self">self</span>.stop_loop {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
-        }
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="kw">if </span><span class="self">Self</span>::can_be_promoted(<span class="kw-2">&amp;</span>s.body) {
             <span class="comment">// Body can be promoted
             </span><span class="kw">let </span>approx_size =
                 <span class="self">Self</span>::approx_size(<span class="kw-2">&amp;</span>s.body) + APPROX_WHILE_REPEAT_SIZE;
-            <span class="kw">if </span>approx_size &gt; <span class="self">self</span>.threshold {
+            <span class="kw">let </span>latency = <span class="self">Self</span>::get_inferred_latency(<span class="kw-2">&amp;</span>s.body) * s.num_repeats;
+            <span class="kw">if </span>approx_size &gt; <span class="self">self</span>.threshold &amp;&amp; <span class="self">self</span>.within_cycle_limit(latency)
+            {
                 <span class="comment">// Meets size threshold, so turn repeat into static repeat
                 </span><span class="kw">let </span>sc = <span class="self">self</span>.convert_to_static(<span class="kw-2">&amp;mut </span>s.body, <span class="kw-2">&amp;mut </span>builder);
-                <span class="kw">let </span>latency = s.num_repeats * sc.get_latency();
                 <span class="kw">let </span>static_repeat = ir::StaticControl::repeat(
                     s.num_repeats,
                     latency,
