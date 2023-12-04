@@ -1376,11 +1376,11 @@
                 }
                 <span class="kw">if </span>outputs.is_empty() {
                     <span class="macro">write!</span>(f, <span class="string">&quot;)&quot;</span>)<span class="question-mark">?</span>;
-                }
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(group) = comb_group {
-                    <span class="macro">writeln!</span>(f, <span class="string">&quot; with {};&quot;</span>, group.borrow().name)<span class="question-mark">?</span>;
                 } <span class="kw">else </span>{
                     <span class="macro">write!</span>(f, <span class="string">&quot;\n{})&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))<span class="question-mark">?</span>;
+                }
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(group) = comb_group {
+                    <span class="macro">write!</span>(f, <span class="string">&quot; with {}&quot;</span>, group.borrow().name)<span class="question-mark">?</span>;
                 }
                 <span class="macro">writeln!</span>(f, <span class="string">&quot;;&quot;</span>)
             }
