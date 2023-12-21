@@ -58,25 +58,44 @@
 <span id="58">58</span>
 <span id="59">59</span>
 <span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
 </pre><pre class="rust"><code><span class="kw">use </span>std::{
     io::{<span class="self">self</span>, BufWriter},
     path::PathBuf,
     str::FromStr,
 };
 
-<span class="doccomment">/// Possible choices for output streams.
-/// Used by the `-o` option to the compiler.
-</span><span class="attribute">#[derive(Default, Debug)]
+<span class="doccomment">/// Possible choices for output streams. Used by the `-o` option to the compiler.
+/// * &quot;-&quot; and &quot;&lt;out&gt;&quot; are treated as stdout.
+/// * &quot;&lt;err&gt;&quot; is treated as stderr.
+/// * &quot;&lt;null&gt;&quot; is treated as a null output stream.
+/// * All other strings are treated as file paths.
+</span><span class="attribute">#[derive(Debug, Clone)]
 </span><span class="kw">pub enum </span>OutputFile {
-    <span class="attribute">#[default]
-    </span>Stdout,
+    Null,
+    Stdout,
+    Stderr,
     File(PathBuf),
 }
 
 <span class="kw">impl </span>OutputFile {
     <span class="kw">pub fn </span>as_path_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="kw">match </span><span class="self">self </span>{
+            OutputFile::Null =&gt; <span class="string">&quot;&lt;null&gt;&quot;</span>.to_string(),
             OutputFile::Stdout =&gt; <span class="string">&quot;&lt;stdout&gt;&quot;</span>.to_string(),
+            OutputFile::Stderr =&gt; <span class="string">&quot;&lt;stderr&gt;&quot;</span>.to_string(),
             OutputFile::File(path) =&gt; path.to_string_lossy().to_string(),
         }
     }
@@ -86,7 +105,9 @@
     <span class="kw">type </span><span class="prelude-val">Err </span>= String;
     <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; std::result::Result&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
         <span class="kw">match </span>s {
-            <span class="string">&quot;-&quot; </span>=&gt; <span class="prelude-val">Ok</span>(OutputFile::Stdout),
+            <span class="string">&quot;-&quot; </span>| <span class="string">&quot;&lt;out&gt;&quot; </span>=&gt; <span class="prelude-val">Ok</span>(OutputFile::Stdout),
+            <span class="string">&quot;&lt;err&gt;&quot; </span>=&gt; <span class="prelude-val">Ok</span>(OutputFile::Stderr),
+            <span class="string">&quot;&lt;null&gt;&quot; </span>=&gt; <span class="prelude-val">Ok</span>(OutputFile::Null),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Ok</span>(OutputFile::File(PathBuf::from(s))),
         }
     }
@@ -96,6 +117,8 @@
     <span class="kw">fn </span>to_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="kw">match </span><span class="self">self </span>{
             OutputFile::Stdout =&gt; <span class="string">&quot;-&quot;</span>.to_string(),
+            OutputFile::Stderr =&gt; <span class="string">&quot;&lt;err&gt;&quot;</span>.to_string(),
+            OutputFile::Null =&gt; <span class="string">&quot;&lt;null&gt;&quot;</span>.to_string(),
             OutputFile::File(p) =&gt; p.to_str().unwrap().to_string(),
         }
     }
@@ -105,16 +128,19 @@
     <span class="kw">pub fn </span>isatty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
             OutputFile::Stdout =&gt; atty::is(atty::Stream::Stdout),
-            OutputFile::File(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
+            OutputFile::Stderr =&gt; atty::is(atty::Stream::Stderr),
+            OutputFile::Null | OutputFile::File(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
         }
     }
 
     <span class="kw">pub fn </span>get_write(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Box&lt;<span class="kw">dyn </span>io::Write&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             OutputFile::Stdout =&gt; Box::new(BufWriter::new(std::io::stdout())),
+            OutputFile::Stderr =&gt; Box::new(BufWriter::new(std::io::stderr())),
             OutputFile::File(path) =&gt; {
                 Box::new(BufWriter::new(std::fs::File::create(path).unwrap()))
             }
+            OutputFile::Null =&gt; Box::new(io::sink()),
         }
     }
 }

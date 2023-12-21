@@ -132,12 +132,22 @@
 <span id="132">132</span>
 <span id="133">133</span>
 <span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{DominatorMap, ShareSet};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
-    Action, ConstructVisitor, Named, Order, VisResult, Visitor,
+    Action, ConstructVisitor, Named, Order, ParseVal, PassOpt, VisResult,
+    Visitor,
 };
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
-<span class="kw">use </span>calyx_utils::CalyxResult;
+<span class="kw">use </span>calyx_utils::{CalyxResult, OutputFile};
 
 <span class="doccomment">/// This pass checks if components are (state) shareable. Here is the process it
 /// goes through: if a component uses any ref cells, or non-shareable cells then it
@@ -145,8 +155,8 @@
 /// cell is guaranteed to be dominated by a write to the same cell-- we check this
 /// by building a domination map. If so, component is state shareable.
 </span><span class="kw">pub struct </span>InferShare {
-    print_dmap: bool,
-    print_static_analysis: bool,
+    print_dmap: <span class="prelude-ty">Option</span>&lt;OutputFile&gt;,
+    print_static_analysis: <span class="prelude-ty">Option</span>&lt;OutputFile&gt;,
     state_shareable: ShareSet,
     shareable: ShareSet,
     <span class="comment">//name of main (so we can skip it)
@@ -162,12 +172,19 @@
         <span class="string">&quot;Infer User Defined Components as Shareable&quot;
     </span>}
 
-    <span class="kw">fn </span>opts() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str)] {
-        <span class="kw-2">&amp;</span>[
-            (<span class="string">&quot;print-dmap&quot;</span>, <span class="string">&quot;Print the domination map&quot;</span>),
-            (
+    <span class="kw">fn </span>opts() -&gt; Vec&lt;PassOpt&gt; {
+        <span class="macro">vec!</span>[
+            PassOpt::new(
+                <span class="string">&quot;print-dmap&quot;</span>,
+                <span class="string">&quot;Print the domination map&quot;</span>,
+                ParseVal::OutStream(OutputFile::Null),
+                PassOpt::parse_outstream,
+            ),
+            PassOpt::new(
                 <span class="string">&quot;print-static-analysis&quot;</span>,
                 <span class="string">&quot;Prints the domination analysis for static dmaps&quot;</span>,
+                ParseVal::OutStream(OutputFile::Null),
+                PassOpt::parse_outstream,
             ),
         ]
     }
@@ -184,8 +201,9 @@
         <span class="kw">let </span>shareable = ShareSet::from_context::&lt;<span class="bool-val">false</span>&gt;(ctx);
 
         <span class="prelude-val">Ok</span>(InferShare {
-            print_dmap: opts[<span class="number">0</span>],
-            print_static_analysis: opts[<span class="number">1</span>],
+            print_dmap: opts[<span class="kw-2">&amp;</span><span class="string">&quot;print-dmap&quot;</span>].not_null_outstream(),
+            print_static_analysis: opts[<span class="kw-2">&amp;</span><span class="string">&quot;print-static-analysis&quot;</span>]
+                .not_null_outstream(),
             state_shareable,
             shareable,
             main: ctx.entrypoint,
@@ -238,11 +256,11 @@
             DominatorMap::new(<span class="kw-2">&amp;mut </span>comp.control.borrow_mut(), comp.name);
 
         <span class="comment">// print the domination map if command line argument says so
-        </span><span class="kw">if </span><span class="self">self</span>.print_dmap {
-            <span class="macro">println!</span>(<span class="string">&quot;{dmap:?}&quot;</span>);
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(s) = <span class="kw-2">&amp;</span><span class="self">self</span>.print_dmap {
+            <span class="macro">write!</span>(s.get_write(), <span class="string">&quot;{dmap:?}&quot;</span>).unwrap();
         }
-        <span class="kw">if </span><span class="self">self</span>.print_static_analysis {
-            <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, dmap.static_par_domination);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(s) = <span class="kw-2">&amp;</span><span class="self">self</span>.print_static_analysis {
+            <span class="macro">write!</span>(s.get_write(), <span class="string">&quot;{:?}&quot;</span>, dmap.static_par_domination).unwrap();
         }
 
         <span class="kw">for </span>(node, dominators) <span class="kw">in </span>dmap.map.iter_mut() {

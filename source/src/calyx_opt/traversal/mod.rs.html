@@ -6,13 +6,17 @@
 <span id="6">6</span>
 <span id="7">7</span>
 <span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Helpers for traversing Control programs
 </span><span class="kw">mod </span>action;
+<span class="kw">mod </span>construct;
 <span class="kw">mod </span>post_order;
 <span class="kw">mod </span>visitor;
 
 <span class="kw">pub use </span>action::{Action, VisResult};
+<span class="kw">pub use </span>construct::{ConstructVisitor, Named, ParseVal, PassOpt};
 <span class="kw">pub use </span>post_order::{CompTraversal, Order};
-<span class="kw">pub use </span>visitor::{ConstructVisitor, Named, Visitable, Visitor};
+<span class="kw">pub use </span>visitor::{Visitable, Visitor};
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx_opt" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

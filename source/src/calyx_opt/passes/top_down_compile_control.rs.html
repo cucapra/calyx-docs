@@ -1019,9 +1019,17 @@
 <span id="1019">1019</span>
 <span id="1020">1020</span>
 <span id="1021">1021</span>
+<span id="1022">1022</span>
+<span id="1023">1023</span>
+<span id="1024">1024</span>
+<span id="1025">1025</span>
+<span id="1026">1026</span>
+<span id="1027">1027</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::passes;
-<span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
+<span class="kw">use </span><span class="kw">crate</span>::traversal::{
+    Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
+};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes, LibrarySignatures, Printer, RRC};
 <span class="kw">use </span>calyx_ir::{build_assignments, guard, structure};
 <span class="kw">use </span>calyx_utils::CalyxResult;
@@ -1801,8 +1809,8 @@
         <span class="kw">let </span>opts = <span class="self">Self</span>::get_opts(ctx);
 
         <span class="prelude-val">Ok</span>(TopDownCompileControl {
-            dump_fsm: opts[<span class="number">0</span>],
-            early_transitions: opts[<span class="number">1</span>],
+            dump_fsm: opts[<span class="kw-2">&amp;</span><span class="string">&quot;dump-fsm&quot;</span>].bool(),
+            early_transitions: opts[<span class="kw-2">&amp;</span><span class="string">&quot;early-transitions&quot;</span>].bool(),
         })
     }
 
@@ -1820,15 +1828,19 @@
         <span class="string">&quot;Top-down compilation for removing control constructs&quot;
     </span>}
 
-    <span class="kw">fn </span>opts() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str)] {
-        <span class="kw-2">&amp;</span>[
-            (
+    <span class="kw">fn </span>opts() -&gt; Vec&lt;PassOpt&gt; {
+        <span class="macro">vec!</span>[
+            PassOpt::new(
                 <span class="string">&quot;dump-fsm&quot;</span>,
                 <span class="string">&quot;Print out the state machine implementing the schedule&quot;</span>,
+                ParseVal::Bool(<span class="bool-val">false</span>),
+                PassOpt::parse_bool,
             ),
-            (
+            PassOpt::new(
                 <span class="string">&quot;early-transitions&quot;</span>,
                 <span class="string">&quot;Experimental: Enable early transitions for group enables&quot;</span>,
+                ParseVal::Bool(<span class="bool-val">false</span>),
+                PassOpt::parse_bool,
             ),
         ]
     }

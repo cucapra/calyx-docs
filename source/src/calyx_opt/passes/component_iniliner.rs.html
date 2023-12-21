@@ -608,9 +608,21 @@
 <span id="608">608</span>
 <span id="609">609</span>
 <span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
-    Action, ConstructVisitor, Named, Order, VisResult, Visitor,
+    Action, ConstructVisitor, Named, Order, ParseVal, PassOpt, VisResult,
+    Visitor,
 };
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, rewriter, GetAttributes, LibrarySignatures, RRC};
 <span class="kw">use </span>calyx_utils::Error;
@@ -654,13 +666,20 @@
         <span class="string">&quot;inline all component instances marked with @inline attribute&quot;
     </span>}
 
-    <span class="kw">fn </span>opts() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str)] {
-        <span class="kw-2">&amp;</span>[
-            (
+    <span class="kw">fn </span>opts() -&gt; Vec&lt;PassOpt&gt; {
+        <span class="macro">vec!</span>[
+            PassOpt::new(
                 <span class="string">&quot;always&quot;</span>,
                 <span class="string">&quot;Attempt to inline all components into the main component&quot;</span>,
+                ParseVal::Bool(<span class="bool-val">false</span>),
+                PassOpt::parse_bool,
             ),
-            (<span class="string">&quot;new-fsms&quot;</span>, <span class="string">&quot;Instantiate new FSM for each inlined component&quot;</span>),
+            PassOpt::new(
+                <span class="string">&quot;new-fsms&quot;</span>,
+                <span class="string">&quot;Instantiate new FSM for each inlined component&quot;</span>,
+                ParseVal::Bool(<span class="bool-val">false</span>),
+                PassOpt::parse_bool,
+            ),
         ]
     }
 }
@@ -685,7 +704,10 @@
         </span><span class="self">Self</span>: Sized,
     {
         <span class="kw">let </span>opts = <span class="self">Self</span>::get_opts(ctx);
-        <span class="prelude-val">Ok</span>(ComponentInliner::new(opts[<span class="number">0</span>], opts[<span class="number">1</span>]))
+        <span class="prelude-val">Ok</span>(ComponentInliner::new(
+            opts[<span class="kw-2">&amp;</span><span class="string">&quot;always&quot;</span>].bool(),
+            opts[<span class="kw-2">&amp;</span><span class="string">&quot;new-fsms&quot;</span>].bool(),
+        ))
     }
 
     <span class="kw">fn </span>clear_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
