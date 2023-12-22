@@ -349,6 +349,7 @@ port. Omitting a guard expression is equivalent to using <code>1'd1</code> (a co
 <li><code>guard || guard</code>: Disjunction between two guards</li>
 <li><code>guard &amp;&amp; guard</code>: Conjunction of two guards</li>
 </ul>
+<p>In the context of guards, a port can also be a literal (i.e., <code>counter.out == 3'd2</code> is a valid guard). </p>
 <blockquote>
 <p><strong>Well-formedness</strong>: For each input port on the LHS, only one guard should be active in any given cycle during the execution of a Calyx program.</p>
 </blockquote>
