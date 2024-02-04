@@ -262,7 +262,7 @@
     ) -&gt; CalyxResult&lt;(SmallVec&lt;[(Id, u64); <span class="number">5</span>]&gt;, Vec&lt;PortDef&lt;u64&gt;&gt;)&gt; {
         <span class="kw">if </span><span class="self">self</span>.params.len() != parameters.len() {
             <span class="kw">let </span>msg = <span class="macro">format!</span>(
-               <span class="string">&quot;Invalid parameter binding for primitive `{}`. Requires {} parameters but provided with {}.&quot;</span>,
+               <span class="string">&quot;primitive `{}` requires {} parameters but instantiation provides {} parameters&quot;</span>,
                <span class="self">self</span>.name.clone(),
                <span class="self">self</span>.params.len(),
                parameters.len(),

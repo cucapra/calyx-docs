@@ -36,6 +36,11 @@
 <span id="36">36</span>
 <span id="37">37</span>
 <span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Analysis for Calyx programs.
 //!
 //! The analyses construct data-structures that make answering certain queries
@@ -49,8 +54,10 @@
 <span class="kw">mod </span>domination_analysis;
 <span class="kw">mod </span>graph;
 <span class="kw">mod </span>graph_coloring;
+<span class="kw">mod </span>inference_analysis;
 <span class="kw">mod </span>live_range_analysis;
 <span class="kw">mod </span>port_interface;
+<span class="kw">mod </span>promotion_analysis;
 <span class="kw">pub mod </span>reaching_defns;
 <span class="kw">mod </span>read_write_set;
 <span class="kw">mod </span>schedule_conflicts;
@@ -67,8 +74,11 @@
 <span class="kw">pub use </span>domination_analysis::DominatorMap;
 <span class="kw">pub use </span>graph::GraphAnalysis;
 <span class="kw">pub use </span>graph_coloring::GraphColoring;
+<span class="kw">pub use </span>inference_analysis::GoDone;
+<span class="kw">pub use </span>inference_analysis::InferenceAnalysis;
 <span class="kw">pub use </span>live_range_analysis::LiveRangeAnalysis;
 <span class="kw">pub use </span>port_interface::PortInterface;
+<span class="kw">pub use </span>promotion_analysis::PromotionAnalysis;
 <span class="kw">pub use </span>read_write_set::ReadWriteSet;
 <span class="kw">pub use </span>schedule_conflicts::ScheduleConflicts;
 <span class="kw">pub use </span>share_set::ShareSet;

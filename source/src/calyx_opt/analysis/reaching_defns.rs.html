@@ -796,8 +796,8 @@
             set: <span class="self">self
                 </span>.set
                 .iter()
+                .filter(|<span class="kw-2">&amp;</span>(name, <span class="kw">_</span>)| !killset.contains(name))
                 .cloned()
-                .filter(|(name, <span class="kw">_</span>)| !killset.contains(name))
                 .collect(),
         }
     }

@@ -859,7 +859,6 @@
 <span id="859">859</span>
 <span id="860">860</span>
 <span id="861">861</span>
-<span id="862">862</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_frontend::Attribute;
 
 <span class="kw">use </span><span class="kw">super</span>::StaticGroup;
@@ -1212,8 +1211,7 @@
 </span><span class="attribute">#[derive(Debug)]
 #[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub enum </span>StaticControl {
-    <span class="doccomment">/// Essentially a Static While Loop
-    </span>Repeat(StaticRepeat),
+    Repeat(StaticRepeat),
     Enable(StaticEnable),
     Par(StaticPar),
     Seq(StaticSeq),
@@ -1459,7 +1457,7 @@
     </span><span class="kw">pub fn </span>take_static_control(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; StaticControl {
         <span class="kw">let </span>empty = Control::empty();
         <span class="kw">let </span>control = std::mem::replace(<span class="self">self</span>, empty);
-        <span class="kw">let </span>Control::Static(static_control) = control  <span class="kw">else </span>{
+        <span class="kw">let </span>Control::Static(static_control) = control <span class="kw">else </span>{
             <span class="macro">unreachable!</span>(<span class="string">&quot;Called take_static_control on non-static control&quot;</span>)
         };
         static_control

@@ -208,7 +208,57 @@
 <span id="208">208</span>
 <span id="209">209</span>
 <span id="210">210</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ReadWriteSet;
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{PromotionAnalysis, ReadWriteSet};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
 <span class="kw">use </span>ir::RRC;
@@ -217,7 +267,7 @@
     algo,
     graph::{DiGraph, NodeIndex},
 };
-<span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::fmt::Write <span class="kw">as _</span>;
 
 <span class="doccomment">/// Extract the dependency order of a list of control programs.
@@ -252,21 +302,19 @@
             .unique()
     }
 
-    <span class="kw">fn </span>get_cells_static_seq(
-        ports: Vec&lt;RRC&lt;ir::Port&gt;&gt;,
-    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = ir::Id&gt; {
-        ports
-            .into_iter()
-            .filter_map(|p| {
-                <span class="kw">let </span>cr = p.borrow().cell_parent();
-                <span class="kw">let </span>cell = cr.borrow();
-                <span class="kw">match </span>cell.prototype {
-                    <span class="comment">// Ignore constants and _this
-                    </span>ir::CellType::Constant { .. } =&gt; <span class="prelude-val">None</span>,
-                    ir::CellType::ThisComponent =&gt; {
-                        <span class="prelude-val">Some</span>(ir::Id::new(<span class="string">&quot;this_comp&quot;</span>))
-                    }
-                    <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(cell.name()),
+    <span class="comment">// Filters out the constants from `cells`, while mapping the remaining `ir:Cell`s
+    // to their cell name.
+    </span><span class="kw">fn </span>filter_out_constants(
+        cells: <span class="kw-2">&amp;</span>[RRC&lt;ir::Cell&gt;],
+    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = ir::Id&gt; + <span class="lifetime">&#39;_ </span>{
+        cells
+            .iter()
+            .filter_map(|cell| <span class="kw">match </span>cell.borrow().prototype {
+                ir::CellType::Constant { .. } =&gt; <span class="prelude-val">None</span>,
+                ir::CellType::Component { .. }
+                | ir::CellType::Primitive { .. }
+                | ir::CellType::ThisComponent { .. } =&gt; {
+                    <span class="prelude-val">Some</span>(cell.borrow().name())
                 }
             })
             .unique()
@@ -297,7 +345,7 @@
         <span class="comment">// Compute read/write sets and add them to the maps
         </span><span class="kw">for </span>c <span class="kw">in </span>stmts {
             <span class="kw">let </span>(port_reads, port_writes) =
-                ReadWriteSet::control_port_read_write_set(<span class="kw-2">&amp;</span>c);
+                ReadWriteSet::control_port_read_write_set::&lt;<span class="bool-val">true</span>&gt;(<span class="kw-2">&amp;</span>c);
             <span class="kw">let </span>idx = gr.add_node(<span class="prelude-val">Some</span>(c));
             add_cells(idx, port_reads, <span class="kw-2">&amp;mut </span>reads);
             add_cells(idx, port_writes, <span class="kw-2">&amp;mut </span>writes);
@@ -334,7 +382,9 @@
                         <span class="kw">let </span>con = gr[<span class="kw-2">*</span>idx].as_ref().unwrap();
                         <span class="kw">let </span><span class="kw-2">mut </span>msg = ir::Printer::control_to_str(con);
                         <span class="kw">let </span>(port_reads, port_writes) =
-                            ReadWriteSet::control_port_read_write_set(con);
+                            ReadWriteSet::control_port_read_write_set::&lt;<span class="bool-val">true</span>&gt;(
+                                con,
+                            );
                         <span class="macro">write!</span>(
                             msg,
                             <span class="string">&quot;  which reads: {}\n  and writes: {}&quot;</span>,
@@ -354,47 +404,82 @@
         }
     }
 
-    <span class="comment">// returns a graph of dependency for input programs
-    // input control programs are considered to have data dependency if:
+    <span class="comment">// Returns a graph of dependency for input programs.
+    // IMPORTANT: we ignore assignments to done ports.
+    // Input control programs are considered to have data dependency if:
     // 1. subsequent program writes to cells that previous program reads from
     // 2. subsequent program writes to cells that previous program writes to
     // 3. subsequent program reads from cells that previous program writes to
-    </span><span class="kw">pub fn </span>get_dependency_graph_static_seq(
-        stmts: <span class="kw">impl </span>Iterator&lt;Item = ir::StaticControl&gt;,
+    // Furthermore, we add dependencies due to continuous assignments as well. If:
+    // 4. Program writes to cell that a continuous assignment writes to or reads from.
+    // 5. Program reads from a cell that a continuous assignment writes to.
+    // Then the program &quot;touches&quot; the continuous assignments, and therefore depends
+    // on all previous programs that &quot;touched&quot; continuous assignments as well.
+    // In short, we treat continuous assignments as one big cell.
+    </span><span class="kw">pub fn </span>get_dependency_graph_seq(
+        stmts: <span class="kw">impl </span>Iterator&lt;Item = ir::Control&gt;,
+        (cont_reads, cont_writes): (
+            <span class="kw-2">&amp;</span>Vec&lt;ir::RRC&lt;ir::Cell&gt;&gt;,
+            <span class="kw-2">&amp;</span>Vec&lt;ir::RRC&lt;ir::Cell&gt;&gt;,
+        ),
         dependency: <span class="kw-2">&amp;mut </span>HashMap&lt;NodeIndex, Vec&lt;NodeIndex&gt;&gt;,
         latency_map: <span class="kw-2">&amp;mut </span>HashMap&lt;NodeIndex, u64&gt;,
-    ) -&gt; DiGraph&lt;<span class="prelude-ty">Option</span>&lt;ir::StaticControl&gt;, ()&gt; {
+    ) -&gt; DiGraph&lt;<span class="prelude-ty">Option</span>&lt;ir::Control&gt;, ()&gt; {
+        <span class="comment">// The names of the cells that are read/written in continuous assignments
+        </span><span class="kw">let </span>cont_read_cell_names =
+            <span class="self">Self</span>::filter_out_constants(cont_reads).collect_vec();
+        <span class="kw">let </span>cont_write_cell_names =
+            <span class="self">Self</span>::filter_out_constants(cont_writes).collect_vec();
+
         <span class="comment">// Directed graph where edges means that a control program must be run before.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>gr: DiGraph&lt;<span class="prelude-ty">Option</span>&lt;ir::StaticControl&gt;, ()&gt; = DiGraph::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>gr: DiGraph&lt;<span class="prelude-ty">Option</span>&lt;ir::Control&gt;, ()&gt; = DiGraph::new();
 
         <span class="comment">// Mapping name of cell to all the indices that read or write to it.
         </span><span class="kw">let </span><span class="kw-2">mut </span>reads: HashMap&lt;ir::Id, Vec&lt;NodeIndex&gt;&gt; = HashMap::default();
         <span class="kw">let </span><span class="kw-2">mut </span>writes: HashMap&lt;ir::Id, Vec&lt;NodeIndex&gt;&gt; = HashMap::default();
 
+        <span class="comment">// Stores the nodes (i.e., control stmts) that are affected by continuous
+        // assignments
+        </span><span class="kw">let </span><span class="kw-2">mut </span>continuous_idxs: HashSet&lt;NodeIndex&gt; = HashSet::new();
+
         <span class="kw">for </span>c <span class="kw">in </span>stmts {
-            <span class="kw">let </span>(port_reads, port_writes) =
-                ReadWriteSet::control_port_read_write_set_static(<span class="kw-2">&amp;</span>c);
-            <span class="kw">let </span>r_cells = <span class="self">Self</span>::get_cells_static_seq(port_reads);
-            <span class="kw">let </span>w_cells = <span class="self">Self</span>::get_cells_static_seq(port_writes);
-            <span class="kw">let </span>latency = c.get_latency();
+            <span class="kw">let </span>(cell_reads, cell_writes) =
+                ReadWriteSet::control_read_write_set::&lt;<span class="bool-val">false</span>&gt;(<span class="kw-2">&amp;</span>c);
+            <span class="kw">let </span>r_cell_names = <span class="self">Self</span>::filter_out_constants(<span class="kw-2">&amp;</span>cell_reads);
+            <span class="kw">let </span>w_cell_names = <span class="self">Self</span>::filter_out_constants(<span class="kw-2">&amp;</span>cell_writes);
+            <span class="kw">let </span>latency = PromotionAnalysis::get_inferred_latency(<span class="kw-2">&amp;</span>c);
             <span class="kw">let </span>idx = gr.add_node(<span class="prelude-val">Some</span>(c));
             dependency.insert(idx, Vec::new());
             latency_map.insert(idx, latency);
 
-            <span class="kw">for </span>cell <span class="kw">in </span>r_cells {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(wr_idxs) = writes.get(<span class="kw-2">&amp;</span>cell) {
+            <span class="kw">for </span>cell <span class="kw">in </span>r_cell_names {
+                <span class="comment">// Checking: 3. subsequent program reads from cells that previous program writes to
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(wr_idxs) = writes.get(<span class="kw-2">&amp;</span>cell) {
                     <span class="kw">for </span>wr_idx <span class="kw">in </span>wr_idxs {
                         <span class="kw">if </span>!wr_idx.eq(<span class="kw-2">&amp;</span>idx) {
                             gr.add_edge(<span class="kw-2">*</span>wr_idx, idx, ());
                             dependency.entry(idx).or_default().push(<span class="kw-2">*</span>wr_idx);
                         }
                     }
+                }
+
+                <span class="comment">// Checking: 5. Program reads from a cell that a continuous
+                // assignment writes to.
+                </span><span class="kw">if </span>cont_write_cell_names.contains(<span class="kw-2">&amp;</span>cell) {
+                    <span class="kw">for </span>cur_idx <span class="kw">in </span>continuous_idxs.iter() {
+                        <span class="kw">if </span>!cur_idx.eq(<span class="kw-2">&amp;</span>idx) {
+                            gr.add_edge(<span class="kw-2">*</span>cur_idx, idx, ());
+                            dependency.entry(idx).or_default().push(<span class="kw-2">*</span>cur_idx);
+                        }
+                    }
+                    continuous_idxs.insert(idx);
                 }
                 reads.entry(cell).or_default().push(idx);
             }
 
-            <span class="kw">for </span>cell <span class="kw">in </span>w_cells {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(wr_idxs) = writes.get(<span class="kw-2">&amp;</span>cell) {
+            <span class="kw">for </span>cell <span class="kw">in </span>w_cell_names {
+                <span class="comment">// Checking: 2. subsequent program writes to cells that previous program writes to
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(wr_idxs) = writes.get(<span class="kw-2">&amp;</span>cell) {
                     <span class="kw">for </span>wr_idx <span class="kw">in </span>wr_idxs {
                         <span class="kw">if </span>!wr_idx.eq(<span class="kw-2">&amp;</span>idx) {
                             gr.add_edge(<span class="kw-2">*</span>wr_idx, idx, ());
@@ -403,13 +488,28 @@
                     }
                 }
 
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(r_idxs) = reads.get(<span class="kw-2">&amp;</span>cell) {
+                <span class="comment">// Checking: 1. subsequent program writes to cells that previous program reads from
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(r_idxs) = reads.get(<span class="kw-2">&amp;</span>cell) {
                     <span class="kw">for </span>r_idx <span class="kw">in </span>r_idxs {
                         <span class="kw">if </span>!r_idx.eq(<span class="kw-2">&amp;</span>idx) {
                             gr.add_edge(<span class="kw-2">*</span>r_idx, idx, ());
                             dependency.entry(idx).or_default().push(<span class="kw-2">*</span>r_idx);
                         }
                     }
+                }
+
+                <span class="comment">// Checking: 4. Program writes to cell that a continuous assignment
+                // writes to or reads from.
+                </span><span class="kw">if </span>cont_write_cell_names.contains(<span class="kw-2">&amp;</span>cell)
+                    || cont_read_cell_names.contains(<span class="kw-2">&amp;</span>cell)
+                {
+                    <span class="kw">for </span>cur_idx <span class="kw">in </span>continuous_idxs.iter() {
+                        <span class="kw">if </span>!cur_idx.eq(<span class="kw-2">&amp;</span>idx) {
+                            gr.add_edge(<span class="kw-2">*</span>cur_idx, idx, ());
+                            dependency.entry(idx).or_default().push(<span class="kw-2">*</span>cur_idx);
+                        }
+                    }
+                    continuous_idxs.insert(idx);
                 }
 
                 writes.entry(cell).or_default().push(idx);

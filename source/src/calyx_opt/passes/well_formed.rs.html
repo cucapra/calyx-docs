@@ -1374,7 +1374,7 @@
                     <span class="string">&quot;If statement has no comb group and its condition port {} is unstable&quot;</span>,
                     s.port.borrow().canonical()
                 ));
-            <span class="kw">return </span><span class="prelude-val">Err</span>(calyx_utils::Error::malformed_control(msg));
+            <span class="macro">log::warn!</span>(<span class="string">&quot;{msg}&quot;</span>);
         }
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
@@ -1388,11 +1388,11 @@
     ) -&gt; VisResult {
         <span class="kw">if </span>!s.port.borrow().has_attribute(ir::BoolAttr::Stable) {
             <span class="kw">let </span>msg = s.attributes.copy_span().format(<span class="macro">format!</span>(
-                <span class="string">&quot;Static If statement&#39;s condition port {} is unstable&quot;</span>,
+                <span class="string">&quot;static if statement&#39;s condition port {} is unstable&quot;</span>,
                 s.port.borrow().canonical()
             ));
-            <span class="prelude-val">Err</span>(calyx_utils::Error::malformed_control(msg))<span class="question-mark">?
-        </span>}
+            <span class="macro">log::warn!</span>(<span class="string">&quot;{msg}&quot;</span>);
+        }
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
@@ -1441,7 +1441,7 @@
                     <span class="string">&quot;While loop has no comb group and its condition port {} is unstable&quot;</span>,
                     s.port.borrow().canonical()
                 ));
-            <span class="kw">return </span><span class="prelude-val">Err</span>(calyx_utils::Error::malformed_control(msg));
+            <span class="macro">log::warn!</span>(<span class="string">&quot;{msg}&quot;</span>);
         }
         <span class="prelude-val">Ok</span>(Action::Continue)
     }

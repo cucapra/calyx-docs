@@ -53,6 +53,9 @@
 <span id="53">53</span>
 <span id="54">54</span>
 <span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An IR context. This is the top-level object for an IR and contains all information
 //! need to transform, lower, an emit a program.
 //! Passes usually have transform/analyze the components in the IR.
@@ -68,6 +71,9 @@
     </span><span class="kw">pub </span>enable_verification: bool,
     <span class="doccomment">/// Use flat (ANF) assignments for guards instead of deep expression trees.
     </span><span class="kw">pub </span>flat_assign: bool,
+    <span class="doccomment">/// [FIRRTL backend only] Emit extmodule declarations for primtives
+    /// for use with SystemVerilog implementations
+    </span><span class="kw">pub </span>emit_primitive_extmodules: bool,
 }
 
 <span class="doccomment">/// The IR Context that represents an entire Calyx program with all of its

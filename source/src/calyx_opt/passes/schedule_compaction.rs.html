@@ -230,21 +230,181 @@
 <span id="230">230</span>
 <span id="231">231</span>
 <span id="232">232</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::Action;
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{InferenceAnalysis, PromotionAnalysis, ReadWriteSet};
+<span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor};
 <span class="kw">use crate</span>::{
     analysis,
     traversal::{Named, Visitor},
 };
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
+<span class="kw">use </span>calyx_utils::CalyxResult;
+<span class="kw">use </span>ir::GetAttributes;
+<span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>petgraph::{algo, graph::NodeIndex};
 <span class="kw">use </span>std::collections::HashMap;
 
-<span class="attribute">#[derive(Default)]
-</span><span class="doccomment">/// for static seqs that are statically promoted by the compiler,
-/// aggressively compacts the execution schedule so that the execution
+<span class="doccomment">/// For static seqs that are statically promoted by the compiler.
+/// Aggressively compacts the execution schedule so that the execution
 /// order of control operators still respects data dependency
-/// Example: see tests/passes/schedule-compaction/schedule-compaction.rs
-</span><span class="kw">pub struct </span>ScheduleCompaction;
+/// Example: see tests/passes/schedule-compaction/schedule-compaction.futil
+</span><span class="kw">pub struct </span>ScheduleCompaction {
+    inference_analysis: InferenceAnalysis,
+    promotion_analysis: PromotionAnalysis,
+}
+
+<span class="comment">// Override constructor to build latency_data information from the primitives
+// library.
+</span><span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>ScheduleCompaction {
+    <span class="kw">fn </span>from(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
+        <span class="prelude-val">Ok</span>(ScheduleCompaction {
+            inference_analysis: InferenceAnalysis::from_ctx(ctx),
+            promotion_analysis: PromotionAnalysis::default(),
+        })
+    }
+
+    <span class="comment">// This pass shared information between components
+    </span><span class="kw">fn </span>clear_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.promotion_analysis = PromotionAnalysis::default()
+    }
+}
 
 <span class="kw">impl </span>Named <span class="kw">for </span>ScheduleCompaction {
     <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
@@ -256,34 +416,79 @@
     </span>}
 }
 
-<span class="kw">impl </span>Visitor <span class="kw">for </span>ScheduleCompaction {
-    <span class="kw">fn </span>iteration_order() -&gt; <span class="kw">crate</span>::traversal::Order
-    <span class="kw">where
-        </span><span class="self">Self</span>: Sized,
-    {
-        <span class="kw">crate</span>::traversal::Order::Post
+<span class="kw">impl </span>ScheduleCompaction {
+    <span class="comment">// Compacts `cur_stmts`, and appends the result to `new_stmts`.
+    </span><span class="kw">fn </span>append_and_compact(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        (cont_reads, cont_writes): (
+            <span class="kw-2">&amp;</span>Vec&lt;ir::RRC&lt;ir::Cell&gt;&gt;,
+            <span class="kw-2">&amp;</span>Vec&lt;ir::RRC&lt;ir::Cell&gt;&gt;,
+        ),
+        builder: <span class="kw-2">&amp;mut </span>ir::Builder,
+        cur_stmts: Vec&lt;ir::Control&gt;,
+        new_stmts: <span class="kw-2">&amp;mut </span>Vec&lt;ir::Control&gt;,
+    ) {
+        <span class="kw">if </span>!cur_stmts.is_empty() {
+            <span class="kw">let </span>og_latency = cur_stmts
+                .iter()
+                .map(PromotionAnalysis::get_inferred_latency)
+                .sum();
+            <span class="comment">// Try to compact cur_stmts.
+            </span><span class="kw">let </span>possibly_compacted_stmt = <span class="self">self</span>.compact_control_vec(
+                cur_stmts,
+                (cont_reads, cont_writes),
+                builder,
+                og_latency,
+                ir::Attributes::default(),
+            );
+            new_stmts.push(possibly_compacted_stmt);
+        }
     }
 
-    <span class="kw">fn </span>finish_static_seq(
+    <span class="comment">// Given a total_order and sorted schedule, builds a seq based on the original
+    // schedule.
+    // Note that this function assumes the `total_order`` and `sorted_schedule`
+    // represent a completely sequential schedule.
+    </span><span class="kw">fn </span>recover_seq(
+        <span class="kw-2">mut </span>total_order: petgraph::graph::DiGraph&lt;<span class="prelude-ty">Option</span>&lt;ir::Control&gt;, ()&gt;,
+        sorted_schedule: Vec&lt;(NodeIndex, u64)&gt;,
+        attributes: ir::Attributes,
+    ) -&gt; ir::Control {
+        <span class="kw">let </span>stmts = sorted_schedule
+            .into_iter()
+            .map(|(i, <span class="kw">_</span>)| total_order[i].take().unwrap())
+            .collect_vec();
+        ir::Control::Seq(ir::Seq { stmts, attributes })
+    }
+
+    <span class="comment">// Takes a vec of ctrl stmts and turns it into a compacted schedule (a static par).
+    // If it can&#39;t compact at all, then it just returns a `seq` in the `stmts`
+    // original order.
+    </span><span class="kw">fn </span>compact_control_vec(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        s: <span class="kw-2">&amp;mut </span>calyx_ir::StaticSeq,
-        comp: <span class="kw-2">&amp;mut </span>calyx_ir::Component,
-        sigs: <span class="kw-2">&amp;</span>calyx_ir::LibrarySignatures,
-        _comps: <span class="kw-2">&amp;</span>[calyx_ir::Component],
-    ) -&gt; <span class="kw">crate</span>::traversal::VisResult {
-        <span class="comment">// records the corresponding node indices that each control program
-        // has data dependency on
+        stmts: Vec&lt;ir::Control&gt;,
+        (cont_reads, cont_writes): (
+            <span class="kw-2">&amp;</span>Vec&lt;ir::RRC&lt;ir::Cell&gt;&gt;,
+            <span class="kw-2">&amp;</span>Vec&lt;ir::RRC&lt;ir::Cell&gt;&gt;,
+        ),
+        builder: <span class="kw-2">&amp;mut </span>ir::Builder,
+        og_latency: u64,
+        attributes: ir::Attributes,
+    ) -&gt; ir::Control {
+        <span class="comment">// Records the corresponding node indices that each control program
+        // has data dependency on.
         </span><span class="kw">let </span><span class="kw-2">mut </span>dependency: HashMap&lt;NodeIndex, Vec&lt;NodeIndex&gt;&gt; = HashMap::new();
-        <span class="comment">// records the latency of corresponding control operator for each node index
+        <span class="comment">// Records the latency of corresponding control operator for each
+        // node index.
         </span><span class="kw">let </span><span class="kw-2">mut </span>latency_map: HashMap&lt;NodeIndex, u64&gt; = HashMap::new();
-        <span class="comment">// records the scheduled start time of corresponding control operator for each node index
+        <span class="comment">// Records the scheduled start time of corresponding control operator
+        // for each node index.
         </span><span class="kw">let </span><span class="kw-2">mut </span>schedule: HashMap&lt;NodeIndex, u64&gt; = HashMap::new();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
-
         <span class="kw">let </span><span class="kw-2">mut </span>total_order =
-            analysis::ControlOrder::&lt;<span class="bool-val">false</span>&gt;::get_dependency_graph_static_seq(
-                s.stmts.drain(..),
+            analysis::ControlOrder::&lt;<span class="bool-val">false</span>&gt;::get_dependency_graph_seq(
+                stmts.into_iter(),
+                (cont_reads, cont_writes),
                 <span class="kw-2">&amp;mut </span>dependency,
                 <span class="kw-2">&amp;mut </span>latency_map,
             );
@@ -292,7 +497,6 @@
             <span class="kw">let </span><span class="kw-2">mut </span>total_time: u64 = <span class="number">0</span>;
 
             <span class="comment">// First we build the schedule.
-
             </span><span class="kw">for </span>i <span class="kw">in </span>order {
                 <span class="comment">// Start time is when the latest dependency finishes
                 </span><span class="kw">let </span>start = dependency
@@ -311,27 +515,37 @@
                 schedule.into_iter().collect();
             sorted_schedule
                 .sort_by(|(k1, v1), (k2, v2)| (v1, k1).cmp(<span class="kw-2">&amp;</span>(v2, k2)));
-            <span class="comment">// Threads for the static par, where each entry is (thread, thread_latency)
-            </span><span class="kw">let </span><span class="kw-2">mut </span>par_threads: Vec&lt;(Vec&lt;ir::StaticControl&gt;, u64)&gt; =
-                Vec::new();
 
-            <span class="comment">// We encode the schedule attempting to minimize the number of
+            <span class="kw">if </span>total_time == og_latency {
+                <span class="comment">// If we can&#39;t comapct at all, then just recover the and return
+                // the original seq.
+                </span><span class="kw">return </span><span class="self">Self</span>::recover_seq(
+                    total_order,
+                    sorted_schedule,
+                    attributes,
+                );
+            }
+
+            <span class="comment">// Threads for the static par, where each entry is (thread, thread_latency)
+            </span><span class="kw">let </span><span class="kw-2">mut </span>par_threads: Vec&lt;(Vec&lt;ir::Control&gt;, u64)&gt; = Vec::new();
+
+            <span class="comment">// We encode the schedule while trying to minimize the number of
             // par threads.
             </span><span class="lifetime">&#39;outer</span>: <span class="kw">for </span>(i, start) <span class="kw">in </span>sorted_schedule {
                 <span class="kw">let </span>control = total_order[i].take().unwrap();
                 <span class="kw">for </span>(thread, thread_latency) <span class="kw">in </span>par_threads.iter_mut() {
                     <span class="kw">if </span><span class="kw-2">*</span>thread_latency &lt;= start {
                         <span class="kw">if </span><span class="kw-2">*</span>thread_latency &lt; start {
-                            <span class="comment">// Might need a no-op group so the schedule starts correctly
+                            <span class="comment">// Need a no-op group so the schedule starts correctly
                             </span><span class="kw">let </span>no_op = builder.add_static_group(
                                 <span class="string">&quot;no-op&quot;</span>,
                                 start - <span class="kw-2">*</span>thread_latency,
                             );
-                            thread.push(ir::StaticControl::Enable(
-                                ir::StaticEnable {
+                            thread.push(ir::Control::Static(
+                                ir::StaticControl::Enable(ir::StaticEnable {
                                     group: no_op,
                                     attributes: ir::Attributes::default(),
-                                },
+                                }),
                             ));
                             <span class="kw-2">*</span>thread_latency = start;
                         }
@@ -345,11 +559,12 @@
                     <span class="comment">// If start &gt; 0, then we must add a delay to the start of the
                     // group.
                     </span><span class="kw">let </span>no_op = builder.add_static_group(<span class="string">&quot;no-op&quot;</span>, start);
-                    <span class="kw">let </span>no_op_enable =
+                    <span class="kw">let </span>no_op_enable = ir::Control::Static(
                         ir::StaticControl::Enable(ir::StaticEnable {
                             group: no_op,
                             attributes: ir::Attributes::default(),
-                        });
+                        }),
+                    );
                     par_threads.push((
                         <span class="macro">vec!</span>[no_op_enable, control],
                         start + latency_map[<span class="kw-2">&amp;</span>i],
@@ -358,76 +573,113 @@
                     par_threads.push((<span class="macro">vec!</span>[control], latency_map[<span class="kw-2">&amp;</span>i]));
                 }
             }
-
             <span class="comment">// Turn Vec&lt;ir::StaticControl&gt; -&gt; StaticSeq
             </span><span class="kw">let </span><span class="kw-2">mut </span>par_control_threads: Vec&lt;ir::StaticControl&gt; = Vec::new();
             <span class="kw">for </span>(thread, thread_latency) <span class="kw">in </span>par_threads {
-                par_control_threads.push(ir::StaticControl::Seq(
-                    ir::StaticSeq {
-                        stmts: thread,
-                        attributes: ir::Attributes::default(),
-                        latency: thread_latency,
-                    },
-                ));
+                <span class="kw">let </span><span class="kw-2">mut </span>promoted_stmts = thread
+                    .into_iter()
+                    .map(|<span class="kw-2">mut </span>stmt| {
+                        <span class="self">self</span>.promotion_analysis
+                            .convert_to_static(<span class="kw-2">&amp;mut </span>stmt, builder)
+                    })
+                    .collect_vec();
+                <span class="kw">if </span>promoted_stmts.len() == <span class="number">1 </span>{
+                    <span class="comment">// Don&#39;t wrap in static seq if we don&#39;t need to.
+                    </span>par_control_threads.push(promoted_stmts.pop().unwrap());
+                } <span class="kw">else </span>{
+                    par_control_threads.push(ir::StaticControl::Seq(
+                        ir::StaticSeq {
+                            stmts: promoted_stmts,
+                            attributes: ir::Attributes::default(),
+                            latency: thread_latency,
+                        },
+                    ));
+                }
             }
             <span class="comment">// Double checking that we have built the static par correctly.
-            </span><span class="kw">let </span>max = par_control_threads.iter().map(|c| c.get_latency()).max();
+            </span><span class="kw">let </span>max: <span class="prelude-ty">Option</span>&lt;u64&gt; =
+                par_control_threads.iter().map(|c| c.get_latency()).max();
             <span class="macro">assert!</span>(max.unwrap() == total_time, <span class="string">&quot;The schedule expects latency {}. The static par that was built has latency {}&quot;</span>, total_time, max.unwrap());
 
-            <span class="kw">if </span>par_control_threads.len() == <span class="number">1 </span>{
-                <span class="kw">let </span>c = Vec::pop(<span class="kw-2">&amp;mut </span>par_control_threads).unwrap();
-                <span class="prelude-val">Ok</span>(Action::static_change(c))
-            } <span class="kw">else </span>{
-                <span class="kw">let </span>s_par = ir::StaticControl::Par(ir::StaticPar {
-                    stmts: par_control_threads,
-                    attributes: ir::Attributes::default(),
-                    latency: total_time,
-                });
-                <span class="prelude-val">Ok</span>(Action::static_change(s_par))
-            }
+            <span class="kw">let </span><span class="kw-2">mut </span>s_par = ir::StaticControl::Par(ir::StaticPar {
+                stmts: par_control_threads,
+                attributes: ir::Attributes::default(),
+                latency: total_time,
+            });
+            s_par.get_mut_attributes().insert(ir::BoolAttr::Promoted, <span class="number">1</span>);
+            ir::Control::Static(s_par)
         } <span class="kw">else </span>{
             <span class="macro">panic!</span>(
                 <span class="string">&quot;Error when producing topo sort. Dependency graph has a cycle.&quot;
             </span>);
         }
     }
+}
 
-    <span class="kw">fn </span>finish_static_repeat(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        s: <span class="kw-2">&amp;mut </span>ir::StaticRepeat,
-        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
-        _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
-        _comps: <span class="kw-2">&amp;</span>[ir::Component],
-    ) -&gt; <span class="kw">crate</span>::traversal::VisResult {
-        s.latency = s.body.get_latency() * s.num_repeats;
-        <span class="prelude-val">Ok</span>(Action::Continue)
+<span class="kw">impl </span>Visitor <span class="kw">for </span>ScheduleCompaction {
+    <span class="kw">fn </span>iteration_order() -&gt; <span class="kw">crate</span>::traversal::Order
+    <span class="kw">where
+        </span><span class="self">Self</span>: Sized,
+    {
+        <span class="kw">crate</span>::traversal::Order::Post
     }
 
-    <span class="kw">fn </span>finish_static_par(
+    <span class="kw">fn </span>finish_seq(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        s: <span class="kw-2">&amp;mut </span>ir::StaticPar,
-        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
-        _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
-        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+        s: <span class="kw-2">&amp;mut </span>calyx_ir::Seq,
+        comp: <span class="kw-2">&amp;mut </span>calyx_ir::Component,
+        sigs: <span class="kw-2">&amp;</span>calyx_ir::LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[calyx_ir::Component],
     ) -&gt; <span class="kw">crate</span>::traversal::VisResult {
-        <span class="kw">let </span><span class="kw-2">mut </span>latency: u64 = <span class="number">0</span>;
-        <span class="kw">for </span>stmt <span class="kw">in </span>s.stmts.iter() {
-            latency = std::cmp::max(latency, stmt.get_latency());
+        <span class="kw">let </span>(cont_reads, cont_writes) = ReadWriteSet::cont_read_write_set(comp);
+        InferenceAnalysis::remove_promotable_from_seq(s);
+        <span class="self">self</span>.inference_analysis.fixup_seq(s);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::PromoteStatic) {
+            <span class="comment">// If entire seq is promotable, then we can compact entire thing
+            // and replace it with a static&lt;n&gt; construct.
+            </span><span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Change(Box::new(<span class="self">self</span>.compact_control_vec(
+                std::mem::take(<span class="kw-2">&amp;mut </span>s.stmts),
+                (<span class="kw-2">&amp;</span>cont_reads, <span class="kw-2">&amp;</span>cont_writes),
+                <span class="kw-2">&amp;mut </span>builder,
+                latency,
+                std::mem::take(<span class="kw-2">&amp;mut </span>s.attributes),
+            ))));
         }
-        s.latency = latency;
-        <span class="prelude-val">Ok</span>(Action::Continue)
-    }
 
-    <span class="kw">fn </span>finish_static_if(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        s: <span class="kw-2">&amp;mut </span>ir::StaticIf,
-        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
-        _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
-        _comps: <span class="kw-2">&amp;</span>[ir::Component],
-    ) -&gt; <span class="kw">crate</span>::traversal::VisResult {
-        s.latency =
-            std::cmp::max(s.tbranch.get_latency(), s.fbranch.get_latency());
-        <span class="prelude-val">Ok</span>(Action::Continue)
+        <span class="comment">// We have to break up the seq into portions that we can compact.
+        </span><span class="kw">let </span>old_stmts = std::mem::take(<span class="kw-2">&amp;mut </span>s.stmts);
+        <span class="kw">let </span><span class="kw-2">mut </span>new_stmts: Vec&lt;ir::Control&gt; = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>cur_stmts: Vec&lt;ir::Control&gt; = Vec::new();
+
+        <span class="kw">for </span>stmt <span class="kw">in </span>old_stmts {
+            <span class="kw">if </span>PromotionAnalysis::can_be_promoted(<span class="kw-2">&amp;</span>stmt) {
+                cur_stmts.push(stmt);
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.append_and_compact(
+                    (<span class="kw-2">&amp;</span>cont_reads, <span class="kw-2">&amp;</span>cont_writes),
+                    <span class="kw-2">&amp;mut </span>builder,
+                    cur_stmts,
+                    <span class="kw-2">&amp;mut </span>new_stmts,
+                );
+                <span class="comment">// Appending the non-promotable statement.
+                </span>new_stmts.push(stmt);
+                <span class="comment">// New cur_vec
+                </span>cur_stmts = Vec::new();
+            }
+        }
+        <span class="self">self</span>.append_and_compact(
+            (<span class="kw-2">&amp;</span>cont_reads, <span class="kw-2">&amp;</span>cont_writes),
+            <span class="kw-2">&amp;mut </span>builder,
+            cur_stmts,
+            <span class="kw-2">&amp;mut </span>new_stmts,
+        );
+        <span class="prelude-val">Ok</span>(Action::change(ir::Control::Seq(ir::Seq {
+            stmts: new_stmts,
+            attributes: ir::Attributes::default(),
+        })))
     }
 
     <span class="kw">fn </span>finish(
@@ -436,29 +688,53 @@
         _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; <span class="kw">crate</span>::traversal::VisResult {
-        <span class="kw">if </span>comp.is_static() {
-            comp.latency = <span class="prelude-val">Some</span>(
-                std::num::NonZeroU64::new(
-                    comp.control.borrow().get_latency().unwrap(),
+        <span class="comment">// Re-infer component&#39;s latency.
+        </span><span class="self">self</span>.inference_analysis.fixup_timing(comp);
+        <span class="kw">if </span>comp.name != <span class="string">&quot;main&quot; </span>{
+            <span class="comment">// Fixup components to show the new latency.
+            </span><span class="kw">let </span>comp_sig = comp.signature.borrow();
+            <span class="kw">let </span>go_ports: Vec&lt;<span class="kw">_</span>&gt; =
+                comp_sig.find_all_with_attr(ir::NumAttr::Go).collect_vec();
+            <span class="kw">if </span>go_ports.iter().any(|go_port| {
+                go_port.borrow_mut().attributes.has(ir::NumAttr::Static)
+            }) {
+                <span class="comment">// Getting current latency
+                </span><span class="kw">let </span>cur_latency = go_ports
+                    .iter()
+                    .filter_map(|go_port| {
+                        go_port.borrow_mut().attributes.get(ir::NumAttr::Static)
+                    })
+                    .next()
+                    .unwrap();
+                <span class="comment">// Getting new latency. We know it will exist because compaction
+                // does not remove latency information, it just alters it.
+                </span><span class="kw">let </span>new_latency = InferenceAnalysis::get_possible_latency(
+                    <span class="kw-2">&amp;</span>comp.control.borrow(),
                 )
-                .unwrap(),
-            );
+                .unwrap();
+                <span class="kw">if </span>cur_latency != new_latency {
+                    <span class="comment">// We adjust the signature of our component
+                    </span><span class="self">self</span>.inference_analysis
+                        .adjust_component((comp.name, new_latency));
+                    <span class="kw">for </span>go_port <span class="kw">in </span>go_ports {
+                        go_port
+                            .borrow_mut()
+                            .attributes
+                            .insert(ir::NumAttr::Static, new_latency);
+                    }
+                }
+            };
         }
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
-    <span class="kw">fn </span>static_invoke(
+    <span class="kw">fn </span>start(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        s: <span class="kw-2">&amp;mut </span>ir::StaticInvoke,
-        _comp: <span class="kw-2">&amp;mut </span>ir::Component,
+        comp: <span class="kw-2">&amp;mut </span>ir::Component,
         _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
-        comps: <span class="kw-2">&amp;</span>[ir::Component],
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; <span class="kw">crate</span>::traversal::VisResult {
-        <span class="kw">for </span>comp <span class="kw">in </span>comps {
-            <span class="kw">if </span>comp.name.eq(<span class="kw-2">&amp;</span>s.comp.borrow().type_name().unwrap()) {
-                s.latency = u64::from(comp.latency.unwrap());
-            }
-        }
+        <span class="self">self</span>.inference_analysis.fixup_timing(comp);
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 }

@@ -364,10 +364,25 @@
 <span id="364">364</span>
 <span id="365">365</span>
 <span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
 </pre><pre class="rust"><code><span class="doccomment">//! IR Builder. Provides convience methods to build various parts of the internal
 //! representation.
 </span><span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures, Nothing, RRC, WRC};
 <span class="kw">use </span>calyx_frontend::BoolAttr;
+<span class="kw">use </span>calyx_utils::CalyxResult;
 <span class="kw">use </span>std::{cmp, rc::Rc};
 
 <span class="kw">use super</span>::{CellType, PortDef};
@@ -583,11 +598,24 @@
         </span>Pre: Into&lt;ir::Id&gt; + ToString + Clone,
         Prim: Into&lt;ir::Id&gt;,
     {
+        <span class="self">self</span>.try_add_primitive(prefix, primitive, param_values)
+            .expect(<span class="string">&quot;failed to add primitive:&quot;</span>)
+    }
+
+    <span class="doccomment">/// Result variant of [[ir::Builder::add_primitive()]].
+    </span><span class="kw">pub fn </span>try_add_primitive&lt;Pre, Prim&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        prefix: Pre,
+        primitive: Prim,
+        param_values: <span class="kw-2">&amp;</span>[u64],
+    ) -&gt; CalyxResult&lt;RRC&lt;ir::Cell&gt;&gt;
+    <span class="kw">where
+        </span>Pre: Into&lt;ir::Id&gt; + ToString + Clone,
+        Prim: Into&lt;ir::Id&gt;,
+    {
         <span class="kw">let </span>prim_id = primitive.into();
         <span class="kw">let </span>prim = <span class="kw-2">&amp;</span><span class="self">self</span>.lib.get_primitive(prim_id);
-        <span class="kw">let </span>(param_binding, ports) = prim
-            .resolve(param_values)
-            .expect(<span class="string">&quot;Failed to add primitive.&quot;</span>);
+        <span class="kw">let </span>(param_binding, ports) = prim.resolve(param_values)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>name = <span class="self">self</span>.component.generate_name(prefix);
         <span class="kw">let </span>cell = <span class="self">Self</span>::cell_from_signature(
@@ -604,7 +632,7 @@
             cell.borrow_mut().add_attribute(BoolAttr::Generated, <span class="number">1</span>);
         }
         <span class="self">self</span>.component.cells.add(Rc::clone(<span class="kw-2">&amp;</span>cell));
-        cell
+        <span class="prelude-val">Ok</span>(cell)
     }
 
     <span class="doccomment">/// Add a component instance to this component using its name and port

@@ -183,6 +183,7 @@
 <span id="183">183</span>
 <span id="184">184</span>
 <span id="185">185</span>
+<span id="186">186</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     AddGuard, AttributePromotion, Canonicalize, CellShare, ClkInsertion,
@@ -193,9 +194,9 @@
     Externalize, GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner,
     InferShare, LowerGuards, MergeAssign, Papercut, ParToSeq,
     RegisterUnsharing, RemoveIds, ResetInsertion, ScheduleCompaction,
-    SimplifyStaticGuards, SimplifyWithControl, StaticInliner, StaticPromotion,
-    SynthesisPapercut, TopDownCompileControl, TopDownStaticTiming,
-    UnrollBounded, WellFormed, WireInliner, WrapMain,
+    SimplifyStaticGuards, SimplifyWithControl, StaticInference, StaticInliner,
+    StaticPromotion, SynthesisPapercut, TopDownCompileControl, UnrollBounded,
+    WellFormed, WireInliner, WrapMain,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::Named;
 <span class="kw">use crate</span>::{pass_manager::PassManager, register_alias};
@@ -223,6 +224,7 @@
         pm.register_pass::&lt;InferShare&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CellShare&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;ScheduleCompaction&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;StaticInference&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;StaticPromotion&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;AttributePromotion&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;SimplifyStaticGuards&gt;()<span class="question-mark">?</span>;
@@ -234,7 +236,6 @@
         pm.register_pass::&lt;CompileInvoke&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileRepeat&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;SimplifyWithControl&gt;()<span class="question-mark">?</span>;
-        pm.register_pass::&lt;TopDownStaticTiming&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;TopDownCompileControl&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileSync&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileSyncWithoutSyncReg&gt;()<span class="question-mark">?</span>;
@@ -282,8 +283,10 @@
                 </span>SimplifyWithControl, <span class="comment">// Must run before compile-invoke
                 </span>CompileInvoke,   <span class="comment">// creates dead comb groups
                 </span>AttributePromotion,
-                StaticPromotion,
+                StaticInference,
                 ScheduleCompaction,
+                StaticPromotion,
+                StaticPromotion,
                 CompileRepeat,
                 DeadGroupRemoval, <span class="comment">// Since previous passes potentially create dead groups
                 </span>CollapseControl,
@@ -301,7 +304,6 @@
                 CompileStaticInterface,
                 DeadGroupRemoval,
                 CompileStatic,
-                TopDownStaticTiming,
                 TopDownCompileControl
             ]
         );

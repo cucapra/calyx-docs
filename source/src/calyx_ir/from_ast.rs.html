@@ -1247,6 +1247,10 @@
 <span id="1247">1247</span>
 <span id="1248">1248</span>
 <span id="1249">1249</span>
+<span id="1250">1250</span>
+<span id="1251">1251</span>
+<span id="1252">1252</span>
+<span id="1253">1253</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Canonical, Cell, CellType,
     Component, Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
@@ -1518,7 +1522,7 @@
     // required information.
     </span>comp.cells
         .into_iter()
-        .for_each(|cell| add_cell(cell, sig_ctx, <span class="kw-2">&amp;mut </span>builder));
+        .try_for_each(|cell| add_cell(cell, sig_ctx, <span class="kw-2">&amp;mut </span>builder))<span class="question-mark">?</span>;
 
     comp.groups
         .into_iter()
@@ -1550,15 +1554,17 @@
 
 <span class="comment">///////////////// Cell Construction /////////////////////////
 
-</span><span class="kw">fn </span>add_cell(cell: ast::Cell, sig_ctx: <span class="kw-2">&amp;</span>SigCtx, builder: <span class="kw-2">&amp;mut </span>Builder) {
+</span><span class="kw">fn </span>add_cell(
+    cell: ast::Cell,
+    sig_ctx: <span class="kw-2">&amp;</span>SigCtx,
+    builder: <span class="kw-2">&amp;mut </span>Builder,
+) -&gt; CalyxResult&lt;()&gt; {
     <span class="kw">let </span>proto_name = cell.prototype.name;
 
     <span class="kw">let </span>res = <span class="kw">if </span>sig_ctx.lib.find_primitive(proto_name).is_some() {
-        <span class="kw">let </span>c = builder.add_primitive(
-            cell.name,
-            proto_name,
-            <span class="kw-2">&amp;</span>cell.prototype.params,
-        );
+        <span class="kw">let </span>c = builder
+            .try_add_primitive(cell.name, proto_name, <span class="kw-2">&amp;</span>cell.prototype.params)
+            .map_err(|e| e.with_pos(<span class="kw-2">&amp;</span>cell.attributes))<span class="question-mark">?</span>;
         c.borrow_mut().set_reference(cell.reference);
         c
     } <span class="kw">else </span>{
@@ -1577,6 +1583,8 @@
 
     <span class="comment">// Add attributes to the built cell
     </span>res.borrow_mut().attributes = cell.attributes;
+
+    <span class="prelude-val">Ok</span>(())
 }
 
 <span class="comment">///////////////// Group Construction /////////////////////////

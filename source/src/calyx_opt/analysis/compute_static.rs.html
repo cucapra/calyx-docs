@@ -228,6 +228,12 @@
 <span id="228">228</span>
 <span id="229">229</span>
 <span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes};
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
@@ -254,7 +260,8 @@
     /// **Ensures**: All sub-programs of the type will also be updated.
     </span><span class="kw">fn </span>update_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extra: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = <span class="self">self</span>.compute_static(extra) {
-            <span class="self">self</span>.get_mut_attributes().insert(ir::NumAttr::Static, time);
+            <span class="self">self</span>.get_mut_attributes()
+                .insert(ir::NumAttr::PromoteStatic, time);
             <span class="prelude-val">Some</span>(time)
         } <span class="kw">else </span>{
             <span class="prelude-val">None
@@ -286,30 +293,24 @@
     }
 }
 
-<span class="kw">impl </span>WithStatic <span class="kw">for </span>ir::StaticEnable {
-    <span class="kw">type </span>Info = ();
-    <span class="kw">fn </span>compute_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
-        <span class="comment">// Attempt to get the latency from the attribute on the enable first, or
-        // failing that, from the group.
-        </span><span class="prelude-val">Some</span>(<span class="self">self</span>.group.borrow().get_latency())
-    }
-}
-
 <span class="kw">impl </span>WithStatic <span class="kw">for </span>ir::Enable {
     <span class="kw">type </span>Info = ();
     <span class="kw">fn </span>compute_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
         <span class="comment">// Attempt to get the latency from the attribute on the enable first, or
         // failing that, from the group.
-        </span><span class="self">self</span>.attributes
-            .get(ir::NumAttr::Static)
-            .or_else(|| <span class="self">self</span>.group.borrow().attributes.get(ir::NumAttr::Static))
+        </span><span class="self">self</span>.attributes.get(ir::NumAttr::PromoteStatic).or_else(|| {
+            <span class="self">self</span>.group
+                .borrow()
+                .attributes
+                .get(ir::NumAttr::PromoteStatic)
+        })
     }
 }
 
 <span class="kw">impl </span>WithStatic <span class="kw">for </span>ir::Invoke {
     <span class="kw">type </span>Info = CompTime;
     <span class="kw">fn </span>compute_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extra: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
-        <span class="self">self</span>.attributes.get(ir::NumAttr::Static).or_else(|| {
+        <span class="self">self</span>.attributes.get(ir::NumAttr::PromoteStatic).or_else(|| {
             <span class="kw">let </span>comp = <span class="self">self</span>.comp.borrow().type_name()<span class="question-mark">?</span>;
             extra.get(<span class="kw-2">&amp;</span>comp).cloned()
         })
@@ -319,36 +320,47 @@
 <span class="kw">impl </span>WithStatic <span class="kw">for </span>ir::Seq {
     <span class="kw">type </span>Info = CompTime;
     <span class="kw">fn </span>compute_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extra: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>sum = <span class="number">0</span>;
-        <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.stmts {
-            sum += stmt.update_static(extra)<span class="question-mark">?</span>;
-        }
-        <span class="prelude-val">Some</span>(sum)
+        <span class="comment">// Go through each stmt in the seq, and try to calculate the latency.
+        </span><span class="self">self</span>.stmts.iter_mut().fold(<span class="prelude-val">Some</span>(<span class="number">0</span>), |acc, stmt| {
+            <span class="kw">match </span>(acc, stmt.update_static(extra)) {
+                (<span class="prelude-val">Some</span>(cur_latency), <span class="prelude-val">Some</span>(stmt_latency)) =&gt; {
+                    <span class="prelude-val">Some</span>(cur_latency + stmt_latency)
+                }
+                (<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+            }
+        })
     }
 }
 
 <span class="kw">impl </span>WithStatic <span class="kw">for </span>ir::Par {
     <span class="kw">type </span>Info = CompTime;
     <span class="kw">fn </span>compute_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extra: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>max = <span class="number">0</span>;
-        <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.stmts {
-            max = std::cmp::max(max, stmt.update_static(extra)<span class="question-mark">?</span>);
-        }
-        <span class="prelude-val">Some</span>(max)
+        <span class="comment">// Go through each stmt in the par, and try to calculate the latency.
+        </span><span class="self">self</span>.stmts.iter_mut().fold(<span class="prelude-val">Some</span>(<span class="number">0</span>), |acc, stmt| {
+            <span class="kw">match </span>(acc, stmt.update_static(extra)) {
+                (<span class="prelude-val">Some</span>(cur_latency), <span class="prelude-val">Some</span>(stmt_latency)) =&gt; {
+                    <span class="prelude-val">Some</span>(std::cmp::max(cur_latency, stmt_latency))
+                }
+                (<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+            }
+        })
     }
 }
 
 <span class="kw">impl </span>WithStatic <span class="kw">for </span>ir::If {
     <span class="kw">type </span>Info = CompTime;
     <span class="kw">fn </span>compute_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extra: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
-        <span class="kw">let </span>t = <span class="self">self</span>.tbranch.update_static(extra)<span class="question-mark">?</span>;
-        <span class="kw">let </span>f = <span class="self">self</span>.fbranch.update_static(extra)<span class="question-mark">?</span>;
         <span class="comment">// Cannot compute latency information for `if`-`with`
-        </span><span class="kw">if </span><span class="self">self</span>.cond.is_some() {
+        </span><span class="kw">let </span>t_latency = <span class="self">self</span>.tbranch.update_static(extra);
+        <span class="kw">let </span>f_latency = <span class="self">self</span>.fbranch.update_static(extra);
+        <span class="kw">if </span><span class="self">self</span>.cond.is_some() {
             <span class="macro">log::debug!</span>(<span class="string">&quot;Cannot compute latency for while-with&quot;</span>);
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
-        <span class="prelude-val">Some</span>(std::cmp::max(t, f))
+        <span class="kw">match </span>(t_latency, f_latency) {
+            (<span class="prelude-val">Some</span>(t), <span class="prelude-val">Some</span>(f)) =&gt; <span class="prelude-val">Some</span>(std::cmp::max(t, f)),
+            (<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+        }
     }
 }
 
