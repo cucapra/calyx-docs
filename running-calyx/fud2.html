@@ -186,11 +186,15 @@ Until then, fud remains your first choice for all your build-related needs.</p>
 You might then want to do something like <code>ln -s `pwd`/target/debug/fud2 ~/.local/bin</code> for easy access to the <code>fud2</code> binary.</p>
 <p>fud2 depends on <a href="https://ninja-build.org">Ninja</a>.
 Install it using your OS package manager or by downloading a binary.</p>
-<p>Create a configuration file at <code>~/.config/fud2.toml</code>, using the path to your checkout of the Calyx git repository:</p>
-<pre><code class="language-toml">rsrc = &quot;.../calyx/fud2/rsrc&quot;
+<h3 id="configuration"><a class="header" href="#configuration">Configuration</a></h3>
+<p>Run the following command to edit <code>fud2</code>'s configuration file (usually <code>~/.config/fud2.toml</code>):</p>
+<pre><code>fud edit-config
+</code></pre>
+<p>Add the following fields:</p>
+<pre><code class="language-toml">rsrc = &quot;&lt;path to calyx checkout&gt;/fud2/rsrc&quot;
 
 [calyx]
-base = &quot;.../calyx&quot;
+base = &quot;&lt;path to calyx checkout&gt;&quot;
 </code></pre>
 <p>Now you're ready to use fud2.</p>
 <h2 id="general-use"><a class="header" href="#general-use">General Use</a></h2>
