@@ -181,8 +181,8 @@
 <p>First, a Calyx program must mark memories using the <a href="attributes.html#external"><code>@external</code> attribute</a> to tell the compiler that the memory is used as either an input or an ouput.</p>
 <pre><code>component main() {
     cells {
-        @external ext = std_mem_d1(...);
-        internal = std_mem_d1(...);
+        @external ext = comb_mem_d1(...);
+        internal = comb_mem_d1(...);
     }
 }
 </code></pre>
@@ -206,7 +206,7 @@ The <code>@external</code> attribute can <strong>only be used</strong> on the <a
   }
 }
 </code></pre>
-<p>The <code>data</code> field represents the initial data for the memory and can use mutlidimensional arrays to describe it. For example, the following is the initial data for a two-dimensional (<code>std_mem_d2</code>) memory:</p>
+<p>The <code>data</code> field represents the initial data for the memory and can use mutlidimensional arrays to describe it. For example, the following is the initial data for a two-dimensional (<code>comb_mem_d2</code>) memory:</p>
 <pre><code class="language-json">{
     &quot;data&quot;: [ [1, 2], [3, 4] ],
     &quot;format&quot;: {...}

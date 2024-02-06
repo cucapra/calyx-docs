@@ -321,11 +321,11 @@ Every component definition has three sections:</p>
 <p>Let's turn our skeleton into a tiny, nearly no-op Calyx program.
 We'll start by adding a memory component to the cells:</p>
 <pre><code>  cells {
-    @external mem = std_mem_d1(32, 1, 1);
+    @external mem = comb_mem_d1(32, 1, 1);
   }
 </code></pre>
-<p>This new line declares a new cell called <code>mem</code> and the primitive component <code>std_mem_d1</code> represents a 1D memory.
-You can see the definition of <code>std_mem_d1</code>, and all the other standard components, in the <code>primitives/core.futil</code> library we imported.</p>
+<p>This new line declares a new cell called <code>mem</code> and the primitive component <code>comb_mem_d1</code> represents a 1D memory.
+You can see the definition of <code>comb_mem_d1</code>, and all the other standard components, in the <code>primitives/core.futil</code> library we imported.</p>
 <p>This one has three parameters:
 the data width (here, 32 bits),
 the number of elements (just one),
@@ -433,7 +433,7 @@ But now we're controlling things with an execution schedule.</p>
 In this version of the program, we'll read a value from the memory, increment it, and store the updated value back to the memory.</p>
 <p>First, we will add two components to the <code>cells</code> section:</p>
 <pre><code>  cells {
-    @external(1) mem = std_mem_d1(32, 1, 1);
+    @external(1) mem = comb_mem_d1(32, 1, 1);
     val = std_reg(32);
     add = std_add(32);
   }
@@ -658,7 +658,7 @@ int main() {
 <p>Calyx uses the <code>ref</code> keyword to describe cells that are passed by reference:</p>
 <pre><code>component add_one() -&gt; () {
   cells {
-    ref mem = std_mem_d1(32, 4, 3); // A memory passed by reference.
+    ref mem = comb_mem_d1(32, 4, 3); // A memory passed by reference.
     ...
   }
   ...
@@ -670,7 +670,7 @@ Inside the component, we can use the cell as usual.</p>
 <pre><code>component add_one() -&gt; () { ... }
 component main() -&gt; () {
   cells {
-    A = std_mem_d1(32, 4, 3); // A memory passed by reference.
+    A = comb_mem_d1(32, 4, 3); // A memory passed by reference.
     one = add_one();
     ...
   }
@@ -695,11 +695,11 @@ the invoker has six memories of size 4 each, but needs to pretend, sometimes sim
 <pre><code>component wrap2(i: 32, j: 32) -&gt; () {
   cells {
     // Six memories that will be passed by reference.
-    ref mem1 = std_mem_d1(32, 4, 32);
+    ref mem1 = comb_mem_d1(32, 4, 32);
     // ...
-    ref mem6 = std_mem_d1(32, 4, 32);
+    ref mem6 = comb_mem_d1(32, 4, 32);
     // An answer cell, also passed by reference.
-    ref ans = std_mem_d1(32, 1, 32);
+    ref ans = comb_mem_d1(32, 1, 32);
   }
   wires { ... }
   control { ... }
@@ -709,11 +709,11 @@ the invoker has six memories of size 4 each, but needs to pretend, sometimes sim
 <pre><code>component wrap3(i: 32, j: 32) -&gt; () {
   cells {
     // Six memories that will be passed by reference.
-    ref mem1 = std_mem_d1(32, 4, 32);
+    ref mem1 = comb_mem_d1(32, 4, 32);
     // ...
-    ref mem6 = std_mem_d1(32, 4, 32);
+    ref mem6 = comb_mem_d1(32, 4, 32);
     // An answer cell, also passed by reference.
-    ref ans = std_mem_d1(32, 1, 32);
+    ref ans = comb_mem_d1(32, 1, 32);
   }
   wires { ... }
   control { ... }
@@ -726,13 +726,13 @@ By passing these memories to the components above, the invoker is able to wrap t
 <pre><code>component main() -&gt; () {
   cells {
     // Six memories that will pass by reference.
-    @external A = std_mem_d1(32, 4, 32);
+    @external A = comb_mem_d1(32, 4, 32);
     //...
-    @external F = std_mem_d1(32, 4, 32);
+    @external F = comb_mem_d1(32, 4, 32);
 
     // Two answer cells that we will also pass.
-    @external out2 = std_mem_d1(32, 1, 32);
-    @external out3 = std_mem_d1(32, 1, 32);
+    @external out2 = comb_mem_d1(32, 1, 32);
+    @external out3 = comb_mem_d1(32, 1, 32);
 
     // Preparing to invoke the components above.
     together2 = wrap2();
@@ -849,7 +849,7 @@ call to <code>invoke</code> to the corresponding memory you'd like to read and/o
 <pre><code>component main() -&gt; () {
   cells {
     add_one0 = add_one();
-    @external(1) x = std_mem_d1(32, 1, 1);
+    @external(1) x = comb_mem_d1(32, 1, 1);
   }
   wires {
   }
@@ -872,6 +872,7 @@ the corresponding address ports. For example, a 2-dimensional memory will requir
 <p>Similarly, multiple memories will just require the ports to be passed for each of the given memories.
 Here is an example of a memory copy (referred to as <code>mem_cpy</code> in the C language), with 1-dimensional memories of size 5:</p>
 <pre><code>import &quot;primitives/core.futil&quot;;
+import &quot;primitives/memories/comb.futil&quot;;
 component copy(dest_done: 1, src_read_data: 32, length: 3) -&gt;
               (dest_write_data: 32, dest_write_en: 1, dest_addr0: 3, src_addr0: 3) {
   cells {
@@ -911,8 +912,8 @@ component copy(dest_done: 1, src_read_data: 32, length: 3) -&gt;
 
 component main() -&gt; () {
   cells {
-    @external(1) d = std_mem_d1(32,5,3);
-    @external(1) s = std_mem_d1(32,5,3);
+    @external(1) d = comb_mem_d1(32,5,3);
+    @external(1) s = comb_mem_d1(32,5,3);
     length = std_const(3, 5);
     copy0 = copy();
   }
@@ -1100,7 +1101,7 @@ port. Omitting a guard expression is equivalent to using <code>1'd1</code> (a co
 <li><code>guard || guard</code>: Disjunction between two guards</li>
 <li><code>guard &amp;&amp; guard</code>: Conjunction of two guards</li>
 </ul>
-<p>In the context of guards, a port can also be a literal (i.e., <code>counter.out == 3'd2</code> is a valid guard). </p>
+<p>In the context of guards, a port can also be a literal (i.e., <code>counter.out == 3'd2</code> is a valid guard).</p>
 <blockquote>
 <p><strong>Well-formedness</strong>: For each input port on the LHS, only one guard should be active in any given cycle during the execution of a Calyx program.</p>
 </blockquote>
@@ -1242,7 +1243,7 @@ loop and therefore should not have conflicting assignments with <code>body_c</co
   body_c
 }
 </code></pre>
-<p>Repeatedly executes the control program <code>body_c</code> <code>num_repeat</code> times in a row. </p>
+<p>Repeatedly executes the control program <code>body_c</code> <code>num_repeat</code> times in a row.</p>
 <h2 id="the-go-done-interface"><a class="header" href="#the-go-done-interface">The <code>go</code>-<code>done</code> Interface</a></h2>
 <p>By default, Calyx components implement a one-sided ready-valid interface called
 <em>the <code>go</code>-<code>done</code> interface</em>.
@@ -1270,7 +1271,7 @@ They are automatically threaded to any primitive that defines <code>@clk</code> 
 <pre><code>// Component that performs mem[0] += 1;
 component update_memory() -&gt; () {
   cells {
-    ref mem = std_mem_d1(...)
+    ref mem = comb_mem_d1(...)
   }
   wires { ... }
   control { ... }
@@ -1280,8 +1281,8 @@ component update_memory() -&gt; () {
 <pre><code>component main() -&gt; () {
   cells {
     upd = update_memory();
-    m1 = std_mem_d1(...);
-    m2 = std_mem_d2(...);
+    m1 = comb_mem_d1(...);
+    m2 = comb_mem_d2(...);
   }
   wires { ... }
   control {
@@ -1300,8 +1301,8 @@ See <a href="lang/./memories-by-reference.html">the tutorial</a> for longer exam
 <p>First, a Calyx program must mark memories using the <a href="lang/attributes.html#external"><code>@external</code> attribute</a> to tell the compiler that the memory is used as either an input or an ouput.</p>
 <pre><code>component main() {
     cells {
-        @external ext = std_mem_d1(...);
-        internal = std_mem_d1(...);
+        @external ext = comb_mem_d1(...);
+        internal = comb_mem_d1(...);
     }
 }
 </code></pre>
@@ -1325,7 +1326,7 @@ The <code>@external</code> attribute can <strong>only be used</strong> on the <a
   }
 }
 </code></pre>
-<p>The <code>data</code> field represents the initial data for the memory and can use mutlidimensional arrays to describe it. For example, the following is the initial data for a two-dimensional (<code>std_mem_d2</code>) memory:</p>
+<p>The <code>data</code> field represents the initial data for the memory and can use mutlidimensional arrays to describe it. For example, the following is the initial data for a two-dimensional (<code>comb_mem_d2</code>) memory:</p>
 <pre><code class="language-json">{
     &quot;data&quot;: [ [1, 2], [3, 4] ],
     &quot;format&quot;: {...}
@@ -1589,7 +1590,7 @@ Because it's common to have a &quot;Boolean&quot; attribute that always maps to 
 </code></pre>
 <h4 id="cell-attributes"><a class="header" href="#cell-attributes"><strong>Cell Attributes</strong></a></h4>
 <pre><code>cells {
-  @external mem = std_mem_d1(32, 8, 4);
+  @external mem = comb_mem_d1(32, 8, 4);
   reg = std_reg(32);
   ...
 }
@@ -1692,7 +1693,7 @@ of a <code>While</code> control is known statically, as indicated by <code>n</co
 <h3 id="write_togethern"><a class="header" href="#write_togethern"><code>write_together(n)</code></a></h3>
 <p>Used by the <code>papercut</code> pass.
 Defines a group <code>n</code> of signals that all must be driven together:</p>
-<pre><code>primitive std_mem_d2&lt;&quot;static&quot;=1&gt;[WIDTH, D0_SIZE, D1_SIZE, D0_IDX_SIZE, D1_IDX_SIZE](
+<pre><code>primitive comb_mem_d2&lt;&quot;static&quot;=1&gt;[WIDTH, D0_SIZE, D1_SIZE, D0_IDX_SIZE, D1_IDX_SIZE](
   @write_together(2) addr0: D0_IDX_SIZE,
   @write_together(2) addr1: D1_IDX_SIZE,
   @write_together(1) write_data: WIDTH,
@@ -1709,7 +1710,7 @@ form &quot;if port <code>x</code> is driven then <code>y</code> should be driven
 <p>Used by <code>papercut</code> and <code>canonicalize</code>.
 Defines a combinational path <code>n</code> between a set of an input ports and an output
 port.</p>
-<pre><code>primitive std_mem_d1&lt;&quot;static&quot;=1&gt;[WIDTH, SIZE, IDX_SIZE](
+<pre><code>primitive comb_mem_d1&lt;&quot;static&quot;=1&gt;[WIDTH, SIZE, IDX_SIZE](
   @read_together(1) addr0: IDX_SIZE, ...
 ) -&gt; (
   @read_together(1) read_data: WIDTH, ...
@@ -2338,7 +2339,7 @@ We provide <code>-x discover-external:default=&lt;size&gt;</code> which tells th
 A limitation of this approach is that the pass does not support discovering interface memories with different sizes.
 If you desperately need this, please <a href="https://github.com/calyxir/calyx/issues/new">open an issue</a>, and we'll try to prioritize it.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="resource-estimation-backend"><a class="header" href="#resource-estimation-backend">Resource Estimation Backend</a></h1>
-<p>The resources estimation backend aims to provide a size estimation for the hardware that Calyx generates. Currently, it only supports estimation for <code>std_reg</code>, <code>std_mem_*</code>, and <code>seq_mem_*</code> primitives, but more primitives will be added.</p>
+<p>The resources estimation backend aims to provide a size estimation for the hardware that Calyx generates. Currently, it only supports estimation for <code>std_reg</code>, <code>comb_mem_*</code>, and <code>seq_mem_*</code> primitives, but more primitives will be added.</p>
 <h2 id="running-the-resource-estimation-backend"><a class="header" href="#running-the-resource-estimation-backend">Running the resource estimation backend</a></h2>
 <ol>
 <li>Run <code>cargo build</code> if you haven't built the compiler already.</li>
@@ -2871,7 +2872,7 @@ OUT_WIDTH-bits. This component is combinational.</p>
 </ul>
 <hr />
 <h2 id="memories"><a class="header" href="#memories">Memories</a></h2>
-<h3 id="std_mem_d1"><a class="header" href="#std_mem_d1"><code>std_mem_d1</code></a></h3>
+<h3 id="comb_mem_d1"><a class="header" href="#comb_mem_d1"><code>comb_mem_d1</code></a></h3>
 <p>A one-dimensional memory.</p>
 <p><strong>Parameters:</strong></p>
 <ul>
@@ -2891,7 +2892,7 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <li><code>done: 1</code>: The done signal for the memory. This signal goes high for one cycle after finishing a write to the memory.</li>
 </ul>
 <hr />
-<h3 id="std_mem_d2"><a class="header" href="#std_mem_d2"><code>std_mem_d2</code></a></h3>
+<h3 id="comb_mem_d2"><a class="header" href="#comb_mem_d2"><code>comb_mem_d2</code></a></h3>
 <p>A two-dimensional memory.</p>
 <p><strong>Parameters:</strong></p>
 <ul>
@@ -2914,7 +2915,7 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <li><code>done: 1</code>: The done signal for the memory. This signal goes high for one cycle after finishing a write to the memory.</li>
 </ul>
 <hr />
-<h3 id="std_mem_d3"><a class="header" href="#std_mem_d3"><code>std_mem_d3</code></a></h3>
+<h3 id="comb_mem_d3"><a class="header" href="#comb_mem_d3"><code>comb_mem_d3</code></a></h3>
 <p>A three-dimensional memory.</p>
 <p><strong>Parameters:</strong></p>
 <ul>
@@ -2940,7 +2941,7 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <li><code>done: 1</code>: The done signal for the memory. This signal goes high for one cycle after finishing a write to the memory.</li>
 </ul>
 <hr />
-<h3 id="std_mem_d4"><a class="header" href="#std_mem_d4"><code>std_mem_d4</code></a></h3>
+<h3 id="comb_mem_d4"><a class="header" href="#comb_mem_d4"><code>comb_mem_d4</code></a></h3>
 <p>A four-dimensional memory.</p>
 <p><strong>Parameters:</strong></p>
 <ul>
@@ -3918,10 +3919,10 @@ The Calyx IL code generated by compiling this program looks more like:</p>
 import &quot;primitives/binary_operators.futil&quot;;
 component main() -&gt; () {
   cells {
-    @external avec_b0 = std_mem_d1(32, 4, 32);
-    @external sos = std_mem_d1(32, 1, 32);
+    @external avec_b0 = comb_mem_d1(32, 4, 32);
+    @external sos = comb_mem_d1(32, 1, 32);
     sos_reg = std_reg(32);
-    squares_b0 = std_mem_d1(32, 4, 32);
+    squares_b0 = comb_mem_d1(32, 4, 32);
     idx_b0_0 = std_reg(32);
     incr_b0_0 = std_add(32);
     lt_b0_0 = std_lt(32);
@@ -4096,13 +4097,13 @@ main = prog.component(&quot;main&quot;) # Create a component named &quot;main&qu
 <h3 id="decl-nodes"><a class="header" href="#decl-nodes"><code>Decl</code> nodes</a></h3>
 <p><code>Decl</code> nodes instantiate new memories and registers.
 We need these to be instantiated in the <code>cells</code> section of our Calyx output.
-We use Calyx's <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0ed7bf949a61/primitives/compile.futil#L22"><code>std_reg</code></a> and <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0ed7bf949a61/primitives/compile.futil#L22"><code>std_mem_d1</code></a> primitives to represent <a href="https://github.com/calyxir/calyx/blob/master/primitives/compile.futil#L31">registers</a> and <a href="https://github.com/calyxir/calyx/blob/master/primitives/core.sv#L220">memories</a>:</p>
+We use Calyx's <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0ed7bf949a61/primitives/compile.futil#L22"><code>std_reg</code></a> and <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0ed7bf949a61/primitives/compile.futil#L22"><code>comb_mem_d1</code></a> primitives to represent <a href="https://github.com/calyxir/calyx/blob/master/primitives/compile.futil#L31">registers</a> and <a href="https://github.com/calyxir/calyx/blob/master/primitives/core.sv#L220">memories</a>:</p>
 <pre><code class="language-C">import &quot;primitives/core.futil&quot;; // Import standard library
 
 component main() -&gt; () {
   cells {
     // A memory with 4 32-bit elements. Indexed using a 6-bit value.
-    avec = std_mem_d1(32, 4, 6);
+    avec = comb_mem_d1(32, 4, 6);
     // A register that contains a 32-bit value
     sos = std_reg(32);
   }
@@ -4118,7 +4119,9 @@ We <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0e
 </code></pre>
 <p>Using this information, we can instantiate registers and memories for our inputs and outputs:</p>
 <pre><code class="language-python">            for i in range(par):
-                main.mem_d1(f&quot;{name}_b{i}&quot;, 32, arr_size // par, 32, is_external=True)
+                main.comb_mem_d1(
+                    f&quot;{name}_b{i}&quot;, 32, arr_size // par, 32, is_external=True
+                )
 </code></pre>
 <p>The <code>main.mem_d1</code> call is a function defined by the Calyx builder module to instantiate memories for a component.
 By setting <code>is_external=True</code>, we're indicating that a memory declaration is a part of the component's input-output interface.</p>
@@ -4256,7 +4259,7 @@ squares := map 2 (a &lt;- avec) { a * a }
 The parallelism factor <code>2</code> specifies that two copies of the loop bodies should be executed in parallel.</p>
 <p>Translating this into a hardware implementation has a couple of associated challenges:</p>
 <ol>
-<li>Our memories (<code>std_mem_d1</code>) are <em>extremely</em> primitive and do not support parallel accesses; a program may only read or write to one memory location every cycle. In order to support parallel accesses, we need to create <em>multiple physical banks</em> that represent one logical memory and contain distinct elements.</li>
+<li>Our memories (<code>comb_mem_d1</code>) are <em>extremely</em> primitive and do not support parallel accesses; a program may only read or write to one memory location every cycle. In order to support parallel accesses, we need to create <em>multiple physical banks</em> that represent one logical memory and contain distinct elements.</li>
 <li>We need to generate <em>multiple copies</em> of the hardware we generated above because, again, adders and multipliers are physical resources and can only support one computation at a time.</li>
 </ol>
 <p>To produce the full Calyx program for the above example, run the following from the root of the Calyx repository:</p>

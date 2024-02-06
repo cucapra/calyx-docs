@@ -95,6 +95,7 @@
 <span id="95">95</span>
 <span id="96">96</span>
 <span id="97">97</span>
+<span id="98">98</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::GraphAnalysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures};
@@ -114,10 +115,11 @@
 
 <span class="kw">impl </span>Default <span class="kw">for </span>SynthesisPapercut {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>memories = [<span class="string">&quot;std_mem_d1&quot;</span>, <span class="string">&quot;std_mem_d2&quot;</span>, <span class="string">&quot;std_mem_d3&quot;</span>, <span class="string">&quot;std_mem_d4&quot;</span>]
-            .iter()
-            .map(|<span class="kw-2">&amp;</span>mem| mem.into())
-            .collect();
+        <span class="kw">let </span>memories =
+            [<span class="string">&quot;comb_mem_d1&quot;</span>, <span class="string">&quot;comb_mem_d2&quot;</span>, <span class="string">&quot;comb_mem_d3&quot;</span>, <span class="string">&quot;comb_mem_d4&quot;</span>]
+                .iter()
+                .map(|<span class="kw-2">&amp;</span>mem| mem.into())
+                .collect();
         SynthesisPapercut { memories }
     }
 }

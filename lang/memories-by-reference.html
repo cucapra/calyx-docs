@@ -202,7 +202,7 @@ int main() {
 <p>Calyx uses the <code>ref</code> keyword to describe cells that are passed by reference:</p>
 <pre><code>component add_one() -&gt; () {
   cells {
-    ref mem = std_mem_d1(32, 4, 3); // A memory passed by reference.
+    ref mem = comb_mem_d1(32, 4, 3); // A memory passed by reference.
     ...
   }
   ...
@@ -214,7 +214,7 @@ Inside the component, we can use the cell as usual.</p>
 <pre><code>component add_one() -&gt; () { ... }
 component main() -&gt; () {
   cells {
-    A = std_mem_d1(32, 4, 3); // A memory passed by reference.
+    A = comb_mem_d1(32, 4, 3); // A memory passed by reference.
     one = add_one();
     ...
   }
@@ -239,11 +239,11 @@ the invoker has six memories of size 4 each, but needs to pretend, sometimes sim
 <pre><code>component wrap2(i: 32, j: 32) -&gt; () {
   cells {
     // Six memories that will be passed by reference.
-    ref mem1 = std_mem_d1(32, 4, 32);
+    ref mem1 = comb_mem_d1(32, 4, 32);
     // ...
-    ref mem6 = std_mem_d1(32, 4, 32);
+    ref mem6 = comb_mem_d1(32, 4, 32);
     // An answer cell, also passed by reference.
-    ref ans = std_mem_d1(32, 1, 32);
+    ref ans = comb_mem_d1(32, 1, 32);
   }
   wires { ... }
   control { ... }
@@ -253,11 +253,11 @@ the invoker has six memories of size 4 each, but needs to pretend, sometimes sim
 <pre><code>component wrap3(i: 32, j: 32) -&gt; () {
   cells {
     // Six memories that will be passed by reference.
-    ref mem1 = std_mem_d1(32, 4, 32);
+    ref mem1 = comb_mem_d1(32, 4, 32);
     // ...
-    ref mem6 = std_mem_d1(32, 4, 32);
+    ref mem6 = comb_mem_d1(32, 4, 32);
     // An answer cell, also passed by reference.
-    ref ans = std_mem_d1(32, 1, 32);
+    ref ans = comb_mem_d1(32, 1, 32);
   }
   wires { ... }
   control { ... }
@@ -270,13 +270,13 @@ By passing these memories to the components above, the invoker is able to wrap t
 <pre><code>component main() -&gt; () {
   cells {
     // Six memories that will pass by reference.
-    @external A = std_mem_d1(32, 4, 32);
+    @external A = comb_mem_d1(32, 4, 32);
     //...
-    @external F = std_mem_d1(32, 4, 32);
+    @external F = comb_mem_d1(32, 4, 32);
 
     // Two answer cells that we will also pass.
-    @external out2 = std_mem_d1(32, 1, 32);
-    @external out3 = std_mem_d1(32, 1, 32);
+    @external out2 = comb_mem_d1(32, 1, 32);
+    @external out3 = comb_mem_d1(32, 1, 32);
 
     // Preparing to invoke the components above.
     together2 = wrap2();
@@ -393,7 +393,7 @@ call to <code>invoke</code> to the corresponding memory you'd like to read and/o
 <pre><code>component main() -&gt; () {
   cells {
     add_one0 = add_one();
-    @external(1) x = std_mem_d1(32, 1, 1);
+    @external(1) x = comb_mem_d1(32, 1, 1);
   }
   wires {
   }
@@ -416,6 +416,7 @@ the corresponding address ports. For example, a 2-dimensional memory will requir
 <p>Similarly, multiple memories will just require the ports to be passed for each of the given memories.
 Here is an example of a memory copy (referred to as <code>mem_cpy</code> in the C language), with 1-dimensional memories of size 5:</p>
 <pre><code>import &quot;primitives/core.futil&quot;;
+import &quot;primitives/memories/comb.futil&quot;;
 component copy(dest_done: 1, src_read_data: 32, length: 3) -&gt;
               (dest_write_data: 32, dest_write_en: 1, dest_addr0: 3, src_addr0: 3) {
   cells {
@@ -455,8 +456,8 @@ component copy(dest_done: 1, src_read_data: 32, length: 3) -&gt;
 
 component main() -&gt; () {
   cells {
-    @external(1) d = std_mem_d1(32,5,3);
-    @external(1) s = std_mem_d1(32,5,3);
+    @external(1) d = comb_mem_d1(32,5,3);
+    @external(1) s = comb_mem_d1(32,5,3);
     length = std_const(3, 5);
     copy0 = copy();
   }

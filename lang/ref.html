@@ -349,7 +349,7 @@ port. Omitting a guard expression is equivalent to using <code>1'd1</code> (a co
 <li><code>guard || guard</code>: Disjunction between two guards</li>
 <li><code>guard &amp;&amp; guard</code>: Conjunction of two guards</li>
 </ul>
-<p>In the context of guards, a port can also be a literal (i.e., <code>counter.out == 3'd2</code> is a valid guard). </p>
+<p>In the context of guards, a port can also be a literal (i.e., <code>counter.out == 3'd2</code> is a valid guard).</p>
 <blockquote>
 <p><strong>Well-formedness</strong>: For each input port on the LHS, only one guard should be active in any given cycle during the execution of a Calyx program.</p>
 </blockquote>
@@ -491,7 +491,7 @@ loop and therefore should not have conflicting assignments with <code>body_c</co
   body_c
 }
 </code></pre>
-<p>Repeatedly executes the control program <code>body_c</code> <code>num_repeat</code> times in a row. </p>
+<p>Repeatedly executes the control program <code>body_c</code> <code>num_repeat</code> times in a row.</p>
 <h2 id="the-go-done-interface"><a class="header" href="#the-go-done-interface">The <code>go</code>-<code>done</code> Interface</a></h2>
 <p>By default, Calyx components implement a one-sided ready-valid interface called
 <em>the <code>go</code>-<code>done</code> interface</em>.
@@ -519,7 +519,7 @@ They are automatically threaded to any primitive that defines <code>@clk</code> 
 <pre><code>// Component that performs mem[0] += 1;
 component update_memory() -&gt; () {
   cells {
-    ref mem = std_mem_d1(...)
+    ref mem = comb_mem_d1(...)
   }
   wires { ... }
   control { ... }
@@ -529,8 +529,8 @@ component update_memory() -&gt; () {
 <pre><code>component main() -&gt; () {
   cells {
     upd = update_memory();
-    m1 = std_mem_d1(...);
-    m2 = std_mem_d2(...);
+    m1 = comb_mem_d1(...);
+    m2 = comb_mem_d2(...);
   }
   wires { ... }
   control {

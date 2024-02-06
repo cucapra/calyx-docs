@@ -7,7 +7,7 @@ component.</p>
     cells {
         <span class="comment">// Inputs: addr0, write_data, write_en
         // Outputs: read_data, done
-        </span>@external(<span class="number">1</span>) m1 = prim std_mem_d1(<span class="number">32</span>, <span class="number">10</span>, <span class="number">4</span>);
+        </span>@external(<span class="number">1</span>) m1 = prim comb_mem_d1(<span class="number">32</span>, <span class="number">10</span>, <span class="number">4</span>);
     }
     wires {
         m1.addr0 = <span class="number">1</span><span class="lifetime">&#39;d1</span>;

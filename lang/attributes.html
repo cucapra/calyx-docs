@@ -191,7 +191,7 @@ Because it's common to have a &quot;Boolean&quot; attribute that always maps to 
 </code></pre>
 <h4 id="cell-attributes"><a class="header" href="#cell-attributes"><strong>Cell Attributes</strong></a></h4>
 <pre><code>cells {
-  @external mem = std_mem_d1(32, 8, 4);
+  @external mem = comb_mem_d1(32, 8, 4);
   reg = std_reg(32);
   ...
 }
@@ -294,7 +294,7 @@ of a <code>While</code> control is known statically, as indicated by <code>n</co
 <h3 id="write_togethern"><a class="header" href="#write_togethern"><code>write_together(n)</code></a></h3>
 <p>Used by the <code>papercut</code> pass.
 Defines a group <code>n</code> of signals that all must be driven together:</p>
-<pre><code>primitive std_mem_d2&lt;&quot;static&quot;=1&gt;[WIDTH, D0_SIZE, D1_SIZE, D0_IDX_SIZE, D1_IDX_SIZE](
+<pre><code>primitive comb_mem_d2&lt;&quot;static&quot;=1&gt;[WIDTH, D0_SIZE, D1_SIZE, D0_IDX_SIZE, D1_IDX_SIZE](
   @write_together(2) addr0: D0_IDX_SIZE,
   @write_together(2) addr1: D1_IDX_SIZE,
   @write_together(1) write_data: WIDTH,
@@ -311,7 +311,7 @@ form &quot;if port <code>x</code> is driven then <code>y</code> should be driven
 <p>Used by <code>papercut</code> and <code>canonicalize</code>.
 Defines a combinational path <code>n</code> between a set of an input ports and an output
 port.</p>
-<pre><code>primitive std_mem_d1&lt;&quot;static&quot;=1&gt;[WIDTH, SIZE, IDX_SIZE](
+<pre><code>primitive comb_mem_d1&lt;&quot;static&quot;=1&gt;[WIDTH, SIZE, IDX_SIZE](
   @read_together(1) addr0: IDX_SIZE, ...
 ) -&gt; (
   @read_together(1) read_data: WIDTH, ...

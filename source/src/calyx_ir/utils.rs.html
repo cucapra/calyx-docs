@@ -138,22 +138,22 @@
                   <span class="kw">let </span><span class="kw-2">mut </span>idx_sizes: Vec&lt;u64&gt; = Vec::new();
                   <span class="kw">let </span>idx_count: u64;
                   <span class="kw">match </span>mem.prototype.get_name().unwrap().as_ref() {
-                      <span class="string">&quot;std_mem_d1&quot; </span>| <span class="string">&quot;seq_mem_d1&quot; </span>=&gt; {
+                      <span class="string">&quot;comb_mem_d1&quot; </span>| <span class="string">&quot;seq_mem_d1&quot; </span>=&gt; {
                         mem_size = mem.get_parameter(<span class="string">&quot;SIZE&quot;</span>).unwrap();
                         idx_count = <span class="number">1</span>;
                       }
-                      <span class="string">&quot;std_mem_d2&quot; </span>| <span class="string">&quot;seq_mem_d2&quot; </span>=&gt; {
+                      <span class="string">&quot;comb_mem_d2&quot; </span>| <span class="string">&quot;seq_mem_d2&quot; </span>=&gt; {
                         mem_size = mem.get_parameter(<span class="string">&quot;D0_SIZE&quot;</span>).unwrap()
                               * mem.get_parameter(<span class="string">&quot;D1_SIZE&quot;</span>).unwrap();
                         idx_count = <span class="number">2</span>;
                     }
-                    <span class="string">&quot;std_mem_d3&quot; </span>| <span class="string">&quot;seq_mem_d3&quot; </span>=&gt; {
+                    <span class="string">&quot;comb_mem_d3&quot; </span>| <span class="string">&quot;seq_mem_d3&quot; </span>=&gt; {
                         mem_size = mem.get_parameter(<span class="string">&quot;D0_SIZE&quot;</span>).unwrap()
                         * mem.get_parameter(<span class="string">&quot;D1_SIZE&quot;</span>).unwrap()
                         * mem.get_parameter(<span class="string">&quot;D2_SIZE&quot;</span>).unwrap();
                         idx_count = <span class="number">3</span>;
                     }
-                    <span class="string">&quot;std_mem_d4&quot; </span>| <span class="string">&quot;seq_mem_d4&quot; </span>=&gt; {
+                    <span class="string">&quot;comb_mem_d4&quot; </span>| <span class="string">&quot;seq_mem_d4&quot; </span>=&gt; {
                         mem_size = mem.get_parameter(<span class="string">&quot;D0_SIZE&quot;</span>).unwrap()
                         * mem.get_parameter(<span class="string">&quot;D1_SIZE&quot;</span>).unwrap()
                         * mem.get_parameter(<span class="string">&quot;D2_SIZE&quot;</span>).unwrap()
