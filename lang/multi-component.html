@@ -220,15 +220,15 @@ save a value and observe it.</p>
   }
   wires {
     group run_id {
-      // We want to &quot;save&quot; the value 10 inside the identity group.
+      // We want to "save" the value 10 inside the identity group.
       id.in = 32'd10;
-      // All components have a magic &quot;go&quot; and &quot;done&quot; port added to them.
+      // All components have a magic "go" and "done" port added to them.
       // Execute the component.
       id.go = 1'd1;
       run_id[done] = id.done;
     }
     group use_id {
-      // We want to &quot;observe&quot; the current value saved in id.
+      // We want to "observe" the current value saved in id.
       // The out port on the `id` component always shows the last saved
       // element. We don't need to set the `go` because we're not executing
       // and control.

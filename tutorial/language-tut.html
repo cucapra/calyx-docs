@@ -187,7 +187,7 @@ the Calyx repository.</p>
 to hardware modules (or function definitions for the software-minded).</p>
 <p>Here is an empty component definition for <code>main</code> along with an <code>import</code>
 statement to import the standard library:</p>
-<pre><code>import &quot;primitives/core.futil&quot;;
+<pre><code>import "primitives/core.futil";
 
 component main(@go go: 1) -&gt; (@done done: 1) {
   cells {}
@@ -236,7 +236,7 @@ Insert these lines to put a constant value into the memory:</p>
 <code>write_en</code> (the <em>write enable</em> signal, telling the memory that it's time to do a write), and
 <code>done</code> (signals that the write was committed).
 Constants like <code>32'd42</code> are Verilog-like literals that include the bit width (32), the base (<code>d</code> for decimal), and the value (42).</p>
-<p>Assignments at the top level in the <code>wires</code> section, like these, are &quot;continuous&quot;.
+<p>Assignments at the top level in the <code>wires</code> section, like these, are "continuous".
 They always happen, without any need for <code>control</code> statements to orchestrate them.
 We'll see later how to organize assignments into groups.</p>
 <blockquote>
@@ -248,12 +248,12 @@ But first, we need to provide it with data.
 The Calyx infrastructure can <a href="../lang/data-format.html">provide data to programs</a> from <a href="https://www.json.org/">JSON</a> files.
 So make a file called something like <code>data.json</code> containing something along these lines:</p>
 <pre><code>{
-  &quot;mem&quot;: {
-    &quot;data&quot;: [10],
-    &quot;format&quot;: {
-      &quot;numeric_type&quot;: &quot;bitnum&quot;,
-      &quot;is_signed&quot;: false,
-      &quot;width&quot;: 32
+  "mem": {
+    "data": [10],
+    "format": {
+      "numeric_type": "bitnum",
+      "is_signed": false,
+      "width": 32
     }
   }
 }
@@ -273,9 +273,9 @@ However, one nice thing you can do with programs is execute them.</p>
 The <code>--through icarus-verilog</code> option tells fud which Verilog simulator to use (see <a href="../fud/index.html">the chapter about fud</a> for alternatives such as <a href="https://www.veripool.org/wiki/verilator">Verilator</a>).
 Executing this program should print:</p>
 <pre><code>{
-  &quot;cycles&quot;: 1,
-  &quot;memories&quot;: {
-    &quot;mem&quot;: [
+  "cycles": 1,
+  "memories": {
+    "mem": [
       42
     ]
   }
@@ -356,7 +356,7 @@ Let's start with the last step, which looks pretty similar to our <code>the_answ
 </code></pre>
 <p>The <code>std_add</code> component from the standard library has two input ports, <code>left</code> and <code>right</code>, and a single output port, <code>out</code>, which we hook up to the register's <code>in</code> port.
 This group adds a constant 4 to the register's value, updating it in place.
-We can enable the <code>val</code> register with a constant 1 because the <code>std_add</code> component is <em>combinational</em>, meaning its results are ready &quot;instantly&quot; without the need to wait for a done signal.</p>
+We can enable the <code>val</code> register with a constant 1 because the <code>std_add</code> component is <em>combinational</em>, meaning its results are ready "instantly" without the need to wait for a done signal.</p>
 <p>We need to extend our control program to orchestrate the execution of the three groups.
 We will need a <code>seq</code> statement to say we want to the three steps sequentially:</p>
 <pre><code>  control {

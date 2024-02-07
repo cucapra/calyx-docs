@@ -177,7 +177,7 @@
                     <main>
                         <h1 id="passing-cells-by-reference"><a class="header" href="#passing-cells-by-reference">Passing Cells by Reference</a></h1>
 <p>One question that may arise when using Calyx as a backend is how to
-pass a cell &quot;by reference&quot; between components. In C++, this might look like:</p>
+pass a cell "by reference" between components. In C++, this might look like:</p>
 <pre><code class="language-C++">#include &lt;array&gt;
 #include &lt;cstdint&gt;
 
@@ -294,7 +294,7 @@ By passing these memories to the components above, the invoker is able to wrap t
   }
 }
 </code></pre>
-<p>Observe: when &quot;wrapped&quot; into two chunks, \( 0 \le i &lt; 2 \) and \( 0 \le j &lt; 12 \); when wrapped into three chunks, \( 0 \le i &lt; 3 \) and \( 0 \le j &lt; 8 \).</p>
+<p>Observe: when "wrapped" into two chunks, \( 0 \le i &lt; 2 \) and \( 0 \le j &lt; 12 \); when wrapped into three chunks, \( 0 \le i &lt; 3 \) and \( 0 \le j &lt; 8 \).</p>
 <h2 id="the-hard-way-without-ref-cells"><a class="header" href="#the-hard-way-without-ref-cells">The Hard Way: Without <code>ref</code> Cells</a></h2>
 <blockquote>
 <p>Proceed with caution. We recommend using the <code>ref</code> syntax in almost all cases since it enables the compiler to perform more optimizations.</p>
@@ -303,7 +303,7 @@ By passing these memories to the components above, the invoker is able to wrap t
 In fact, the Calyx compiler takes <code>ref</code> cells as descibed above and lowers them into code of the style described here.</p>
 <p>Let us walk through an example.</p>
 <h3 id="worked-example-mem_cpy"><a class="header" href="#worked-example-mem_cpy">Worked example: <code>mem_cpy</code></a></h3>
-<p>In the C++ code above, we've constructed an &quot;l-value reference&quot; to the array,
+<p>In the C++ code above, we've constructed an "l-value reference" to the array,
 which essentially means we can both read and write from <code>x</code> in the function
 <code>add_one</code>.</p>
 <p>Now, let's allow similar functionality at the Calyx IR level.
@@ -415,8 +415,8 @@ the corresponding address ports. For example, a 2-dimensional memory will requir
 <h3 id="multiple-memories"><a class="header" href="#multiple-memories">Multiple Memories</a></h3>
 <p>Similarly, multiple memories will just require the ports to be passed for each of the given memories.
 Here is an example of a memory copy (referred to as <code>mem_cpy</code> in the C language), with 1-dimensional memories of size 5:</p>
-<pre><code>import &quot;primitives/core.futil&quot;;
-import &quot;primitives/memories/comb.futil&quot;;
+<pre><code>import "primitives/core.futil";
+import "primitives/memories/comb.futil";
 component copy(dest_done: 1, src_read_data: 32, length: 3) -&gt;
               (dest_write_data: 32, dest_write_en: 1, dest_addr0: 3, src_addr0: 3) {
   cells {
@@ -429,14 +429,14 @@ component copy(dest_done: 1, src_read_data: 32, length: 3) -&gt;
       lt.left = N.out;
       lt.right = length;
     }
-    group upd_index&lt;&quot;static&quot;=1&gt; {
+    group upd_index&lt;"static"=1&gt; {
       add.left = N.out;
       add.right = 3'd1;
       N.in = add.out;
       N.write_en = 1'd1;
       upd_index[done] = N.done;
     }
-    group copy_index_N&lt;&quot;static&quot;=1&gt; {
+    group copy_index_N&lt;"static"=1&gt; {
       src_addr0 = N.out;
       dest_addr0 = N.out;
       dest_write_en = 1'd1;

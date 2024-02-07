@@ -180,12 +180,12 @@
 every basic Calyx construct. This information can then be used to optimize the program
 or change how the program is compiled.</p>
 <p>Attributes can decorate lots of things in Calyx: components, groups, cells, ports, and control statements.
-The syntax looks like <code>name&lt;&quot;attr&quot;=value&gt;</code> for components and groups or <code>@attr(value)</code> for other constructs.
+The syntax looks like <code>name&lt;"attr"=value&gt;</code> for components and groups or <code>@attr(value)</code> for other constructs.
 Attributes always map keys to values.
-Because it's common to have a &quot;Boolean&quot; attribute that always maps to the value 1, the syntax <code>@attr</code> is a shorthand for <code>@attr(1)</code>.</p>
+Because it's common to have a "Boolean" attribute that always maps to the value 1, the syntax <code>@attr</code> is a shorthand for <code>@attr(1)</code>.</p>
 <p>Here is the syntax for attributes in different parts of the AST:</p>
 <h4 id="component-and-port-attributes"><a class="header" href="#component-and-port-attributes"><strong>Component and Port Attributes</strong></a></h4>
-<pre><code>component main&lt;&quot;static&quot;=10&gt;(@go go: 1) -&gt; (@done done: 1) {
+<pre><code>component main&lt;"static"=10&gt;(@go go: 1) -&gt; (@done done: 1) {
  ...
 }
 </code></pre>
@@ -197,7 +197,7 @@ Because it's common to have a &quot;Boolean&quot; attribute that always maps to 
 }
 </code></pre>
 <h4 id="group-attributes"><a class="header" href="#group-attributes"><strong>Group Attributes</strong></a></h4>
-<pre><code>group cond&lt;&quot;static&quot;=1&gt; {
+<pre><code>group cond&lt;"static"=1&gt; {
   ...
 }
 </code></pre>
@@ -217,7 +217,7 @@ compiler errors out.</p>
 <h3 id="go-done-clk-and-reset"><a class="header" href="#go-done-clk-and-reset"><code>go</code>, <code>done</code>, <code>clk</code> and <code>reset</code></a></h3>
 <p>These four ports are part of the interface to Calyx components.
 These are automatically added by the parser if they are missing from the component definition.
-<code>go</code> and <code>done</code> provide the mechanism for how an &quot;outer&quot; component invokes an &quot;inner&quot; cell that it contains.
+<code>go</code> and <code>done</code> provide the mechanism for how an "outer" component invokes an "inner" cell that it contains.
 <code>clk</code> and <code>reset</code> thread through the global clock and resetting signal in a design.</p>
 <h3 id="nointerface"><a class="header" href="#nointerface"><code>nointerface</code></a></h3>
 <p>By default, interface ports are automatically added to a component by the parser if they are missing.
@@ -226,7 +226,7 @@ Adding this attribute disables this behavior.</p>
 <p>The <code>external</code> attribute has meaning when it is attached to a cell.
 It has two meanings:</p>
 <ol>
-<li>If the <code>externalize</code> compiler alias is enabled, the cell is turned into an &quot;external&quot;
+<li>If the <code>externalize</code> compiler alias is enabled, the cell is turned into an "external"
 cell by exposing all its ports through the current component and rewriting
 assignments to the use the ports. See the documentation on <a href="https://docs.rs/calyx-opt/latest/calyx_opt/passes/struct.Externalize.html">externalize</a> for more information.</li>
 <li>If the cell is a memory and has an <code>external</code> attribute on it, the Verilog backend (<code>-b verilog</code>) generates code to read <code>&lt;cell_name&gt;.dat</code> to initialize the memory state and dumps out its final value after execution.</li>
@@ -275,9 +275,9 @@ internal state.
 This is used by <code>-p cell-share</code> to decide which components can be shared.
 Specifically, a component is state shareable if each write to
 that component makes any previous writes to the component irrelevant.
-The definition of a &quot;write to a component&quot; is an activiation of
-the component's &quot;go&quot; port, followed by a read of the component's &quot;done&quot; port (in
-other words, the read of a &quot;done&quot; port still counts as part of a &quot;write&quot; to the
+The definition of a "write to a component" is an activiation of
+the component's "go" port, followed by a read of the component's "done" port (in
+other words, the read of a "done" port still counts as part of a "write" to the
 component).
 For <code>c1</code> and <code>c2</code>, instances of a state_shareable component:
 instantiate <code>c1</code>                        instantiate <code>c2</code>
@@ -294,7 +294,7 @@ of a <code>While</code> control is known statically, as indicated by <code>n</co
 <h3 id="write_togethern"><a class="header" href="#write_togethern"><code>write_together(n)</code></a></h3>
 <p>Used by the <code>papercut</code> pass.
 Defines a group <code>n</code> of signals that all must be driven together:</p>
-<pre><code>primitive comb_mem_d2&lt;&quot;static&quot;=1&gt;[WIDTH, D0_SIZE, D1_SIZE, D0_IDX_SIZE, D1_IDX_SIZE](
+<pre><code>primitive comb_mem_d2&lt;"static"=1&gt;[WIDTH, D0_SIZE, D1_SIZE, D0_IDX_SIZE, D1_IDX_SIZE](
   @write_together(2) addr0: D0_IDX_SIZE,
   @write_together(2) addr1: D1_IDX_SIZE,
   @write_together(1) write_data: WIDTH,
@@ -306,12 +306,12 @@ Defines a group <code>n</code> of signals that all must be driven together:</p>
 The first group requires that <code>write_en</code> and <code>write_data</code> signals together
 while the second requires that <code>addr0</code> and <code>addr1</code> are driven together.</p>
 <p>Note that <code>@write_together</code> specifications cannot encode implication of the
-form &quot;if port <code>x</code> is driven then <code>y</code> should be driven&quot;.</p>
+form "if port <code>x</code> is driven then <code>y</code> should be driven".</p>
 <h3 id="read_togethern"><a class="header" href="#read_togethern"><code>read_together(n)</code></a></h3>
 <p>Used by <code>papercut</code> and <code>canonicalize</code>.
 Defines a combinational path <code>n</code> between a set of an input ports and an output
 port.</p>
-<pre><code>primitive comb_mem_d1&lt;&quot;static&quot;=1&gt;[WIDTH, SIZE, IDX_SIZE](
+<pre><code>primitive comb_mem_d1&lt;"static"=1&gt;[WIDTH, SIZE, IDX_SIZE](
   @read_together(1) addr0: IDX_SIZE, ...
 ) -&gt; (
   @read_together(1) read_data: WIDTH, ...

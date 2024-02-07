@@ -190,16 +190,16 @@ def add_second_comp(prog):
 # method for defining `my_component` and adding it to a program
 def add_my_component(prog, second_comp): 
     # add the component to the program
-    my_component = prog.component(&quot;my_component&quot;)
+    my_component = prog.component("my_component")
 
     # Adding an instance of `second_comp` as a cell of `my_component`
-    my_second_comp = my_component.cell(&quot;my_second_comp&quot;, second_comp)
+    my_second_comp = my_component.cell("my_second_comp", second_comp)
 
     # adding a register cell (or other cells) to the component 
-    my_reg = my_component.reg(&quot;my_reg&quot;, 32)
+    my_reg = my_component.reg("my_reg", 32)
 
     # define a `my_component` group
-    with my_component.group(&quot;my_group&quot;) as my_group:
+    with my_component.group("my_group") as my_group:
       # assignments here 
       my_reg.write_en = 1
 
@@ -218,33 +218,33 @@ def build():
 
 
 # emit the program
-if __name__ == &quot;__main__&quot;:
+if __name__ == "__main__":
     build().emit()
 </code></pre>
 <h2 id="components"><a class="header" href="#components">Components</a></h2>
 <h3 id="defining-components"><a class="header" href="#defining-components">Defining Components</a></h3>
 <p>To define a component, call the <code>Builder().component()</code> method.</p>
 <pre><code class="language-python">prog = cb.Builder()
-prog.component(&quot;my_component&quot;)
+prog.component("my_component")
 </code></pre>
 <h3 id="retrieving-components"><a class="header" href="#retrieving-components">Retrieving Components</a></h3>
 <p>To reference a component without an existing <a href="ref.html#creating-handles">handle</a> to it, use the <code>Builder().get_component()</code> method.</p>
 <pre><code class="language-python">prog = cb.Builder()
-prog.component(&quot;my_component&quot;)
+prog.component("my_component")
 # a few lines later 
-my_component = prog.get_component(&quot;my_component&quot;)
+my_component = prog.get_component("my_component")
 </code></pre>
 <h3 id="defining-component-inputs-and-outputs"><a class="header" href="#defining-component-inputs-and-outputs">Defining Component Inputs and Outputs</a></h3>
 <p>Components can be given input and output ports. Just specify the name of the port and its size.</p>
-<pre><code class="language-python">my_component.input(&quot;my_input&quot;, 32)
-my_component.output(&quot;my_output&quot;, 32)
+<pre><code class="language-python">my_component.input("my_input", 32)
+my_component.output("my_output", 32)
 </code></pre>
 <p>To access the input and output ports of a component within the definition of a component, use the syntax <code>my_component.this().port</code>.</p>
 <pre><code class="language-python">def add_my_component(prog):
-    my_component = prog.component(&quot;my_component&quot;)
-    my_component.output(&quot;my_output&quot;, 32)
+    my_component = prog.component("my_component")
+    my_component.output("my_output", 32)
 
-    with my_component.group(&quot;my_group&quot;):
+    with my_component.group("my_group"):
         my_component.this().my_output = const(32, 1)
 </code></pre>
 <p>Note that it's possible to <a href="ref.html#creating-handles">create a handle</a> to input and output ports.</p>
@@ -252,56 +252,56 @@ my_component.output(&quot;my_output&quot;, 32)
 <p>Calyx supports <a href="../lang/multi-component.html">multi-component designs</a>. The <a href="ref.html#top-level-program-structure">top-level example</a> demonstrates how to construct multi-component designs using the library.</p>
 <h4 id="defining-common-calyx-cells"><a class="header" href="#defining-common-calyx-cells">Defining Common Calyx Cells</a></h4>
 <p>Here's a snippet of code that adds a few common kinds of cells to a component:</p>
-<pre><code class="language-python">my_component = prog.component(&quot;my_component&quot;)
+<pre><code class="language-python">my_component = prog.component("my_component")
 
 # Registers: reg(name, bitwidth)
-my_component.reg(&quot;my_reg&quot;, 32)
+my_component.reg("my_reg", 32)
 
 # Constants: const(name, bitwidth, value)
-my_component.const(&quot;my_reg&quot;, 32, 42)
+my_component.const("my_reg", 32, 42)
 
 # Adders/Subtractors: [add|sub](name, size, signed=False)
 # a signed adder 
-my_component.add(&quot;my_add&quot;, 32, signed=True)
+my_component.add("my_add", 32, signed=True)
 # a subtractor
-my_component.sub(&quot;my_sub&quot;, 32)
+my_component.sub("my_sub", 32)
 
 
 # Comparators: [gt|lt|eq|neq|ge|le](name, size, signed=False)
-my_component.gt(&quot;my_gt&quot;, 32)
+my_component.gt("my_gt", 32)
 # a signed le comparison
-my_component.lt(&quot;my_lt&quot;, 32, signed=True)
-my_component.eq(&quot;my_eq&quot;, 32)
-my_component.neq(&quot;my_neq&quot;, 32)
-my_component.ge(&quot;my_ge&quot;, 32)
-my_component.le(&quot;my_le&quot;, 32)
+my_component.lt("my_lt", 32, signed=True)
+my_component.eq("my_eq", 32)
+my_component.neq("my_neq", 32)
+my_component.ge("my_ge", 32)
+my_component.le("my_le", 32)
 
 # 1-D memory: 
 # mem_d1(name, bitwidth, len, idx_size, is_external=False, is_ref=False)
-my_component.mem_d1(&quot;my_mem&quot;, 32, 4, 32)
+my_component.mem_d1("my_mem", 32, 4, 32)
 # An external memory
-my_component.mem_d1(&quot;my_mem&quot;, 32, 4, 32, is_external=True)
+my_component.mem_d1("my_mem", 32, 4, 32, is_external=True)
 # A memory by reference
-my_component.mem_d1(&quot;my_mem&quot;, 32, 4, 32, is_ref=True)
+my_component.mem_d1("my_mem", 32, 4, 32, is_ref=True)
 </code></pre>
 <p>If you're curious, you can read more about <a href="../lang/data-format.html#external-memories">external memories</a> or <a href="../lang/memories-by-reference.html#passing-cells-by-reference">memories by reference</a>.</p>
 <h4 id="retrieving-cells"><a class="header" href="#retrieving-cells">Retrieving Cells</a></h4>
 <p>In order to reference a cell without a <a href="ref.html#creating-handles">handle</a>, use the <code>Builder().get_cell()</code> method.</p>
 <pre><code class="language-python"># defining a register cell
-my_component.reg(&quot;my_reg&quot;, 32)
+my_component.reg("my_reg", 32)
 
 # a few lines later 
-my_reg = prog.get_cell(&quot;my_reg&quot;)
+my_reg = prog.get_cell("my_reg")
 </code></pre>
 <h2 id="wires"><a class="header" href="#wires">Wires</a></h2>
 <h3 id="guarded-assignments"><a class="header" href="#guarded-assignments">Guarded Assignments</a></h3>
 <p>Guarded assignments in the builder are syntactically similar to those in Calyx.</p>
-<pre><code class="language-python">my_component = prog.component(&quot;my_component&quot;)
+<pre><code class="language-python">my_component = prog.component("my_component")
 
-my_add = comp.add(&quot;my_add&quot;, 32)
-my_reg = comp.reg(&quot;my_reg&quot;, 32)
+my_add = comp.add("my_add", 32)
+my_reg = comp.reg("my_reg", 32)
 
-with my_component.group(&quot;my_group&quot;):
+with my_component.group("my_group"):
     # unconditional assignments
     add.left = const(32, 1)
     add.right = const(32, 41)
@@ -316,46 +316,46 @@ with my_component.group(&quot;my_group&quot;):
 <h4 id="defining-groups"><a class="header" href="#defining-groups">Defining Groups</a></h4>
 <p><a href="../lang/ref.html#group-definitions">Groups</a> are defined using the <code>group()</code> method for a component. To make a <a href="ref.html#creating-handles">handle</a> for a group, use the <code>as</code> syntax. Group handles are necessary in order to set done ports for groups.</p>
 <p>It's possible to define a <a href="../lang/static.html#delay-by-n-cycles">static delay</a> for a group using the optional <code>static_delay</code> argument.</p>
-<pre><code class="language-python">my_component = prog.component(&quot;my_component&quot;)
+<pre><code class="language-python">my_component = prog.component("my_component")
 
 # a group definition + handle for the group
-with my_component.group(&quot;my_group&quot;) as my_group:
+with my_component.group("my_group") as my_group:
     # assignments here
 
 # a group with a static delay
-with my_component.group(&quot;my_static_group&quot;, static_delay=1): 
+with my_component.group("my_static_group", static_delay=1): 
 
 </code></pre>
 <h4 id="defining-combinational-groups"><a class="header" href="#defining-combinational-groups">Defining Combinational Groups</a></h4>
 <p><a href="../lang/ref.html#comb-group-definitions">Combinational groups</a> are defined similarly to groups, except with the <code>comb_group</code> method.</p>
-<pre><code class="language-python">my_component = prog.component(&quot;my_component&quot;)
+<pre><code class="language-python">my_component = prog.component("my_component")
 
-with my_component.comb_group(&quot;my_comb_group&quot;):
+with my_component.comb_group("my_comb_group"):
     # assignments here
 </code></pre>
 <h4 id="retrieving-groups"><a class="header" href="#retrieving-groups">Retrieving Groups</a></h4>
 <p>If a group doesn't have a <a href="ref.html#creating-handles">handle</a>, it can be retrieved later with the <code>Builder().get_group()</code> method. It's possible to retrieve combinational groups as well as regular groups with this method.</p>
 <pre><code class="language-python">prog = cb.Builder()
-my_component = prog.component(&quot;my_component&quot;)
+my_component = prog.component("my_component")
 
-with my_component.group(&quot;my_group&quot;):
+with my_component.group("my_group"):
     # group definition here
 
 # a few lines later
-my_group = prog.get_group(&quot;my_group&quot;)
+my_group = prog.get_group("my_group")
 
-with my_component.comb_group(&quot;my_comb_group&quot;):
+with my_component.comb_group("my_comb_group"):
     # comb group definition here
 
-my_comb_group = prog.get_group(&quot;my_comb_group&quot;)
+my_comb_group = prog.get_group("my_comb_group")
 
 </code></pre>
 <h3 id="continuous-assignments"><a class="header" href="#continuous-assignments">Continuous Assignments</a></h3>
 <p><a href="../lang/ref.html#continuous-assignments">Continuous assignments</a> are generated by using the syntax <code>with comp.continuous</code>.</p>
-<pre><code class="language-python">my_component = prog.component(&quot;my_component&quot;)
+<pre><code class="language-python">my_component = prog.component("my_component")
 
-my_output = my_component.output(&quot;my_output&quot;, 32)
-my_reg = comp.reg(&quot;my_reg&quot;, 32)
+my_output = my_component.output("my_output", 32)
+my_reg = comp.reg("my_reg", 32)
 
 with my_component.continuous:
     my_component.this().my_output = my_reg.out
@@ -368,7 +368,7 @@ with my_component.continuous:
 <pre><code class="language-python">my_component.control += my_group
 
 # using `get_group`
-my_component.control += my_component.get_group(&quot;my_group&quot;)
+my_component.control += my_component.get_group("my_group")
 </code></pre>
 <h3 id="seq"><a class="header" href="#seq"><code>seq</code></a></h3>
 <p>Control statements are <a href="../lang/ref.html#seq">sequenced</a> in the order that they appear in a component's control program, represented by a Python list. Let's say we want to sequence the control statements <code>A</code>, <code>B</code>, and <code>C</code>.</p>
@@ -413,20 +413,20 @@ my_invoke = invoke(my_cell, in_arg1=my_cell_arg1_reg.out, in_arg2=1)
 <p>Handles allow components, groups, cells, control operators, and input/output ports to be referenced after their definition.</p>
 <pre><code class="language-python">def add_my_component(prog):
     # Creating a handle to a component
-    my_component = prog.component(&quot;my_component&quot;)
+    my_component = prog.component("my_component")
 
     # using the component handle
-    my_component.reg(&quot;my_reg&quot;, 32)
+    my_component.reg("my_reg", 32)
 
     # Creating a handle to an input/output port
-    my_input = component.input(&quot;my_input&quot;, 32)
-    my_output = component.output(&quot;my_output&quot;, 32)
+    my_input = component.input("my_input", 32)
+    my_output = component.output("my_output", 32)
 
     # Creating a handle to a cell
-    my_second_comp = my_component.cell(&quot;my_cell&quot;, my_second_comp)
+    my_second_comp = my_component.cell("my_cell", my_second_comp)
 
     # Creating a handle to a group
-    with my_component.group(&quot;my_group&quot;) as my_group:
+    with my_component.group("my_group") as my_group:
         # assignments
 
     # Creating a handle to a control operator
@@ -438,7 +438,7 @@ my_invoke = invoke(my_cell, in_arg1=my_cell_arg1_reg.out, in_arg2=1)
 <h3 id="importing-calyx-libraries"><a class="header" href="#importing-calyx-libraries">Importing Calyx Libraries</a></h3>
 <p>To generate imports for Calyx libraries, use the <code>Builder.import_()</code> method.</p>
 <pre><code class="language-python">prog = cb.Builder()
-prog.import_(&quot;primitives/binary_operators.futil&quot;)
+prog.import_("primitives/binary_operators.futil")
 </code></pre>
 <h3 id="explictly-stating-widths-with-const"><a class="header" href="#explictly-stating-widths-with-const">Explictly Stating Widths with <code>const</code></a></h3>
 <p>Usually, the builder library can automatically infer the width of a port. In cases where it can't, use the <code>const(width, value)</code> expression:</p>
@@ -446,9 +446,9 @@ prog.import_(&quot;primitives/binary_operators.futil&quot;)
 </code></pre>
 <h3 id="high-and-low-signals"><a class="header" href="#high-and-low-signals">High and Low Signals</a></h3>
 <p>The <code>calyx.builder.HI</code> or <code>calyx.builder.LO</code> are shorthand for one-bit high and low signals.</p>
-<pre><code class="language-python">&quot;&quot;&quot;A one-bit low signal&quot;&quot;&quot;
+<pre><code class="language-python">"""A one-bit low signal"""
 LO = const(1, 0)
-&quot;&quot;&quot;A one-bit high signal&quot;&quot;&quot;
+"""A one-bit high signal"""
 HI = const(1, 1)
 </code></pre>
 

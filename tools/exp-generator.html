@@ -177,7 +177,7 @@
                     <main>
                         <h1 id="exp-generator"><a class="header" href="#exp-generator"><code>exp</code> Generator</a></h1>
 <p>The <code>exp</code> generator uses a Taylor series approximation to calculate the fixed point value of the natural
-exponential function <code>e^x</code>. The <a href="https://en.wikipedia.org/wiki/Taylor_series#Exponential_function">Maclaurin series</a> 
+exponential function <code>e^x</code>. The <a href="https://en.wikipedia.org/wiki/Taylor_series#Exponential_function">Maclaurin series</a>
 for the function can be written as:</p>
 <pre><code>e^x = 1 + x + x^2/2! + x^3/3! + ... + x^n/n!
 </code></pre>
@@ -185,22 +185,22 @@ for the function can be written as:</p>
 <p>For signed values, we can take the reciprocal value:</p>
 <pre><code>e^(-x) = 1/e^x
 </code></pre>
-<p>The <code>fp_pow_full</code> component can calculate the value of <code>b^x</code> where <code>b</code> and <code>x</code> are 
-any fixed point numbers. This can be calculated by first observing: </p>
+<p>The <code>fp_pow_full</code> component can calculate the value of <code>b^x</code> where <code>b</code> and <code>x</code> are
+any fixed point numbers. This can be calculated by first observing:</p>
 <pre><code>b^x = e^(ln(b^x)) = e^(x*ln(b))
 </code></pre>
 <p>Therefore, we just calculate <code>x*ln(b)</code>, and then we can feed the result into the <code>exp</code><br />
-component to get our answer. </p>
-<p>To calculate <code>ln(p)</code> for fixed point values <code>p</code>, we use the second order <a href="https://en.wikipedia.org/wiki/Pad%C3%A9_approximant">Padé Approximant</a> of <code>ln(p)</code>. We calculated the approximant 
+component to get our answer.</p>
+<p>To calculate <code>ln(p)</code> for fixed point values <code>p</code>, we use the second order <a href="https://en.wikipedia.org/wiki/Pad%C3%A9_approximant">Padé Approximant</a> of <code>ln(p)</code>. We calculated the approximant
 using <a href="https://www.wolframalpha.com/input?i=+PadeApproximant%5Bln%28x%29%2C%7Bx%2C1.5%2C%7B2%2C2%7D%7D%5D+">Wolfram Alpha</a>.</p>
 <p>The <code>gen_exp.py</code> file can generate an entire Calyx program for testing purposes.
-<code>gen_exp.py</code> can generate two different types of designs, depending on the 
-<code>base_is_e</code> flag: if <code>base_is_e</code> is true, then the design can only caclulate 
-values for <code>e^x</code>. The main component contains memories <code>x</code> (for the input) and <code>ret</code> for the result of <code>e^x</code>. 
-If <code>base_is_e</code> is false, then the design can calculate values for <code>b^x</code> for any base 
+<code>gen_exp.py</code> can generate two different types of designs, depending on the
+<code>base_is_e</code> flag: if <code>base_is_e</code> is true, then the design can only caclulate
+values for <code>e^x</code>. The main component contains memories <code>x</code> (for the input) and <code>ret</code> for the result of <code>e^x</code>.
+If <code>base_is_e</code> is false, then the design can calculate values for <code>b^x</code> for any base
 <code>e</code>. Therefore, the main component contains memories <code>x</code> (the exponent input), <code>b</code> (the base intput),
-and <code>ret</code> for the result of <code>b^x</code>. 
-In order to generate an example program (that can only calculate exponent values with base 
+and <code>ret</code> for the result of <code>b^x</code>.
+In order to generate an example program (that can only calculate exponent values with base
 <code>e</code>), with degree <code>4</code>, bit width <code>32</code>, integer bit width <code>16</code>, and <code>x</code> interpreted as a signed value:</p>
 <pre><code>./calyx-py/calyx/gen_exp.py -d 4 -w 32 -i 16 -s true -e true 
 </code></pre>
@@ -213,10 +213,10 @@ In order to generate an example program (that can only calculate exponent values
 <li><code>--degree</code>: The degree of the Taylor polynomial.</li>
 <li><code>--width</code>: The bit width of the value <code>x</code>.</li>
 <li><code>--int_width</code>: The integer bit width of the value <code>x</code>. The fractional bit width is then inferred as <code>width - int_width</code>.</li>
-<li><code>--is_signed</code>: The signed interpretation of the value <code>x</code>. If <code>x</code> is a signed value, this should be <code>true</code> and otherwise, <code>false</code>. </li>
-<li><code>--base_is_e</code>: A boolean that determines whether or not to generate 
-components needed to just calculate <code>e^x</code>, or to generate components needed to 
-calculate <code>b^x</code> for any base <code>b</code>. </li>
+<li><code>--is_signed</code>: The signed interpretation of the value <code>x</code>. If <code>x</code> is a signed value, this should be <code>true</code> and otherwise, <code>false</code>.</li>
+<li><code>--base_is_e</code>: A boolean that determines whether or not to generate
+components needed to just calculate <code>e^x</code>, or to generate components needed to
+calculate <code>b^x</code> for any base <code>b</code>.</li>
 </ul>
 
                     </main>

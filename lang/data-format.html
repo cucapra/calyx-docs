@@ -196,33 +196,33 @@ The <code>@external</code> attribute can <strong>only be used</strong> on the <a
 <h2 id="the-data-format"><a class="header" href="#the-data-format">The Data Format</a></h2>
 <p>The JSON-based data format allows us to provide inputs for a memory and specify how the values should be interpreted:</p>
 <pre><code class="language-json">{
-  &quot;mem&quot;: {
-    &quot;data&quot;: [10],
-    &quot;format&quot;: {
-      &quot;numeric_type&quot;: &quot;bitnum&quot;,
-      &quot;is_signed&quot;: false,
-      &quot;width&quot;: 32
+  "mem": {
+    "data": [10],
+    "format": {
+      "numeric_type": "bitnum",
+      "is_signed": false,
+      "width": 32
     }
   }
 }
 </code></pre>
 <p>The <code>data</code> field represents the initial data for the memory and can use mutlidimensional arrays to describe it. For example, the following is the initial data for a two-dimensional (<code>comb_mem_d2</code>) memory:</p>
 <pre><code class="language-json">{
-    &quot;data&quot;: [ [1, 2], [3, 4] ],
-    &quot;format&quot;: {...}
+    "data": [ [1, 2], [3, 4] ],
+    "format": {...}
 }
 </code></pre>
 <p>The <code>format</code> specifier tells <code>fud</code> how to interpret the values in the data field. The original program specifies that all values should be treated as 32-bit, unsigned values.</p>
 <p>In order to specify fixed-point values, we must specify both the total width and fraction widths:</p>
-<pre><code class="language-json">&quot;root&quot;: {
-  &quot;data&quot;: [
+<pre><code class="language-json">"root": {
+  "data": [
       0.0
   ],
-  &quot;format&quot;: {
-      &quot;numeric_type&quot;: &quot;fixed_point&quot;,
-      &quot;is_signed&quot;: false,
-      &quot;width&quot;: 32,
-      &quot;frac_width&quot;: 16
+  "format": {
+      "numeric_type": "fixed_point",
+      "is_signed": false,
+      "width": 32,
+      "frac_width": 16
   }
 }
 </code></pre>

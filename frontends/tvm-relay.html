@@ -212,7 +212,7 @@ intermediate representation.</p>
 </code></pre>
 <blockquote>
 <p>If you get an error with <code>shutil</code>, try deleting the <code>python/</code> directory, restoring it, and rerunning the above command: <code>cd .. &amp;&amp; rm -rf python &amp;&amp; git checkout -- python</code>
-If you are on MacOS - Big Sur and are getting an error similar to &quot;(wheel).whl is not a supported wheel on this platform&quot;, try changing part of the wheel's filename from 11_0 to 10_9. See this github <a href="https://github.com/apple/tensorflow_macos/issues/46">issue</a> for more information.</p>
+If you are on MacOS - Big Sur and are getting an error similar to "(wheel).whl is not a supported wheel on this platform", try changing part of the wheel's filename from 11_0 to 10_9. See this github <a href="https://github.com/apple/tensorflow_macos/issues/46">issue</a> for more information.</p>
 </blockquote>
 </li>
 <li>
@@ -249,16 +249,16 @@ for ONNX simulation and image pre-processing:</p>
 </code></pre>
 <p>For example, we can simulate the LeNet ONNX model found <a href="https://github.com/ekut-es/pico-cnn/blob/master/data/lenet/lenet.onnx">here</a> using the following command:</p>
 <pre><code>python3 frontends/relay/onnx_to_calyx.py \
--n &quot;lenet&quot; \
--d &quot;MNIST&quot; \
--i &quot;/path/to/image.png&quot; \
--onnx &quot;/path/to/model.onnx&quot; \
+-n "lenet" \
+-d "MNIST" \
+-i "/path/to/image.png" \
+-onnx "/path/to/model.onnx" \
 -o calyx
 </code></pre>
 <ul>
 <li><code>-n</code>: The name of the input net. This is mostly used for naming the output files.</li>
 <li><code>-d</code>: The dataset for which the input will be classified against. This is necessary to
-determine what preprocessing should be done on the image. e.g. <code>&quot;mnist&quot;</code> or <code>&quot;imagenet&quot;</code>.</li>
+determine what preprocessing should be done on the image. e.g. <code>"mnist"</code> or <code>"imagenet"</code>.</li>
 <li><code>-i</code>: The file path to the input image which you want classified.</li>
 <li><code>-onnx</code>: The file path to the ONNX model.</li>
 <li><code>-o</code>: The type of output.

@@ -183,7 +183,7 @@ produces the correct values with the <a href="../interpreter.html">Calyx Interpr
 <p>To disable the passes, add the flag <code>-p no-opt</code> to compiler invocation:</p>
 <ol>
 <li>For the compiler: <code>futil &lt;filename&gt; -p no-opt</code>.</li>
-<li>For <code>fud</code>: <code>fud ... -s calyx.flags &quot; -p no-opt&quot;</code>.</li>
+<li>For <code>fud</code>: <code>fud ... -s calyx.flags " -p no-opt"</code>.</li>
 </ol>
 <p>If the output is still incorrect then one of the core compilation passes is incorrect.
 Our best bet at this point is to reduce the test file such that the output from the
@@ -203,7 +203,7 @@ adding passes to this flag invocation:</p>
 <p>It is often possible to reduce the size of the example program that is
 generating incorrect results.
 In order to perform a reduction, we need to run the program twice, once with
-a &quot;golden workflow&quot; that we trust to generate the right result and once with
+a "golden workflow" that we trust to generate the right result and once with
 the buggy workflow.</p>
 <h3 id="inlining-optional"><a class="header" href="#inlining-optional">Inlining (Optional)</a></h3>
 <p>It is useful to inline all the code into the <code>main</code> component so that we can focus our energy on reducing one control program. This can be done by passing the following flags to the compiler:</p>
@@ -222,7 +222,7 @@ the buggy workflow.</p>
 <p>When deleting parts of the control program, the compiler may complain that certain groups are no longer being used. In this case, run the <code>-p dead-group-removal</code> pass before any other pass runs.</p>
 </blockquote>
 <p>Next, if we've identified the problem to be in one of the Calyx passes,
-the &quot;golden workflow&quot; is running the program without the pass while the buggy
+the "golden workflow" is running the program without the pass while the buggy
 workflow is running the program with the pass enabled.
 This case is so common that we've written <a href="https://github.com/calyxir/calyx/blob/master/tools/flag-compare.sh">a script</a> that can run
 programs with different set of flags to the Calyx compiler and show the

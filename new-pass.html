@@ -197,7 +197,7 @@ The former defines the name, description, and <a href="./compiler.html#providing
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>impl Named for NewPass {
-    fn name(&amp;self) -&gt; &amp;'static str { &quot;new-pass&quot; }
+    fn name(&amp;self) -&gt; &amp;'static str { "new-pass" }
     ...
 }
 impl Visitor for NewPass { ... }

@@ -187,20 +187,20 @@
 <p>We will also walk through the file <a href="https://github.com/calyxir/calyx/blob/master/calyx-py/test/builder_example.py"><code>builder_example.py</code></a> to demonstrate how the builder library is used. This Calyx program initializes two registers with the numbers 1 and 41, adds them together, and stores the result in a register.</p>
 <p>The <code>add_main_component(prog)</code> method will, as the name suggests, add a main component to our program. We can define components for our Calyx program <code>prog</code> with <code>prog.component</code>. Here's a defininition of a <code>main</code> component with a 32-bit input <code>in</code> and output <code>out</code>:</p>
 <pre><code class="language-python">def add_main_component(prog):
-    main = prog.component(&quot;main&quot;)
-    main.input(&quot;in&quot;, 32)
-    main.output(&quot;out&quot;, 32)
+    main = prog.component("main")
+    main.input("in", 32)
+    main.output("out", 32)
 </code></pre>
-<p>Technically, we didn't need to assign <code>prog.component(&quot;main&quot;)</code> to a variable; the component <code>main</code> would have been added to <code>prog</code> regardless. However, it will often prove useful to store handles to components, registers, or other objects you'd like to use later.</p>
+<p>Technically, we didn't need to assign <code>prog.component("main")</code> to a variable; the component <code>main</code> would have been added to <code>prog</code> regardless. However, it will often prove useful to store handles to components, registers, or other objects you'd like to use later.</p>
 <p>We then instantiate our cells: three 32-bit registers and one 32-bit adder.</p>
-<pre><code class="language-python">    lhs = main.reg(&quot;lhs&quot;, 32)
-    rhs = main.reg(&quot;rhs&quot;, 32)
-    sum = main.reg(&quot;sum&quot;, 32)
-    add = main.add(32, &quot;add&quot;)
+<pre><code class="language-python">    lhs = main.reg("lhs", 32)
+    rhs = main.reg("rhs", 32)
+    sum = main.reg("sum", 32)
+    add = main.add(32, "add")
 </code></pre>
 <p>As with adding components to a program, we don't need to assign <code>main.reg(...)</code> to a variable, but it'll be useful to be able to quickly refer to these cells.</p>
-<p>Next, we'll define our groups of assignments. The syntax for defining a group looks like <code>with {component}.group(&quot;group_name&quot;) as group_variable</code>, as we do below:</p>
-<pre><code class="language-python">    with main.group(&quot;update_operands&quot;) as update_operands:
+<p>Next, we'll define our groups of assignments. The syntax for defining a group looks like <code>with {component}.group("group_name") as group_variable</code>, as we do below:</p>
+<pre><code class="language-python">    with main.group("update_operands") as update_operands:
 </code></pre>
 <p>Now, we'll initialize our registers. You can access cell ports using dot notation. Notably, port names that are also reserved keywords in Python such as <code>in</code> are followed by an underscore.</p>
 <pre><code class="language-python">        # Directly index cell ports using dot notation
@@ -220,7 +220,7 @@
 </code></pre>
 <p>In order to use the ports of cells in our <code>main</code> component within the code for our component, we'll expose the adder's output port by explicitly constructing it using the <code>calyx-py</code> AST.</p>
 <pre><code class="language-python">    # Bare name of the cell
-    add_out = ast.CompPort(ast.CompVar(&quot;add&quot;), &quot;out&quot;)
+    add_out = ast.CompPort(ast.CompVar("add"), "out")
 </code></pre>
 <p>Now, when we want to use the output port of our adder, we can do so easily:</p>
 <pre><code class="language-python">        sum.in_ = add_out
@@ -253,7 +253,7 @@
     return prog.program
 </code></pre>
 <p>Finally, we can emit the program we built.</p>
-<pre><code class="language-python">if __name__ == &quot;__main__&quot;:
+<pre><code class="language-python">if __name__ == "__main__":
     build().emit()
 </code></pre>
 <p>That's about it for getting started with the <code>calyx-py</code> builder library! You can inspect the generated Calyx code yourself by running:</p>

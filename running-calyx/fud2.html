@@ -178,7 +178,7 @@
                         <h1 id="fud2-an-experimental-successor-to-fud"><a class="header" href="#fud2-an-experimental-successor-to-fud">fud2: An Experimental Successor to fud</a></h1>
 <p><a href="./fud/index.html">fud</a> is the compiler driver tool for orchestrating the Calyx ecosystem.
 fud2 is an experiment in building a new driver that works like fud that adds some fundamental new capabilities and resolves some underlying problems.</p>
-<p>&quot;Original&quot; fud is still the right tool for almost all jobs; fud2 is in an experimental phase and does not support everything fud can do.
+<p>"Original" fud is still the right tool for almost all jobs; fud2 is in an experimental phase and does not support everything fud can do.
 Someday, fud2 may supplant fud, but it needs more work before it is ready to do that.
 Until then, fud remains your first choice for all your build-related needs.</p>
 <h2 id="set-up"><a class="header" href="#set-up">Set Up</a></h2>
@@ -191,10 +191,10 @@ Install it using your OS package manager or by downloading a binary.</p>
 <pre><code>fud2 edit-config
 </code></pre>
 <p>Add the following fields:</p>
-<pre><code class="language-toml">rsrc = &quot;&lt;path to calyx checkout&gt;/fud2/rsrc&quot;
+<pre><code class="language-toml">rsrc = "&lt;path to calyx checkout&gt;/fud2/rsrc"
 
 [calyx]
-base = &quot;&lt;path to calyx checkout&gt;&quot;
+base = "&lt;path to calyx checkout&gt;"
 </code></pre>
 <p>Now you're ready to use fud2.</p>
 <h2 id="general-use"><a class="header" href="#general-use">General Use</a></h2>
@@ -225,8 +225,8 @@ Use <code>--set key=value</code> to override any such option.</p>
 <ul>
 <li>By default, fud2 runs the build in a directory called <code>.fud2</code> within the working directory. It automatically deletes this directory when the build is done.
 <ul>
-<li>It can be useful to keep this build directory around for debugging or as a &quot;cache&quot; for future builds. Use <code>--keep</code> to prevent fud2 from deleting the build directory.</li>
-<li>You can also tell fud2 to use a different build directory with <code>--dir</code>. If you give it an existing directory, it will never be deleted, even without <code>--keep</code>. (Only &quot;fresh&quot; build directories are automatically cleaned up.)</li>
+<li>It can be useful to keep this build directory around for debugging or as a "cache" for future builds. Use <code>--keep</code> to prevent fud2 from deleting the build directory.</li>
+<li>You can also tell fud2 to use a different build directory with <code>--dir</code>. If you give it an existing directory, it will never be deleted, even without <code>--keep</code>. (Only "fresh" build directories are automatically cleaned up.)</li>
 </ul>
 </li>
 <li>If you don't like the operation path that fud2 selected for your build, you can control it with <code>--through &lt;OP&gt;</code>. fud2 will search the operation graph for a path that contains that op. You can provide this option multiple times; fud2 will look for paths that contain <em>all</em> these operations, in order.</li>

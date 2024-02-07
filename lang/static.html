@@ -244,7 +244,7 @@ In our case, for example, <code>B6</code> will begin executing exactly one cycle
 <h4 id="static-par-a-static-version-of-par"><a class="header" href="#static-par-a-static-version-of-par"><code>static par</code>, a static version of <a href="./ref.html#par"><code>par</code></a></a></h4>
 <p>If we have <code>static par { A5; B6; C7; D8; }</code>, we can guarantee that the latency of the entire operation is the maximum of the latencies of its children: 8 cycles in this case.
 Further, all the children of a <code>static par</code> are guaranteed to begin executing at the same time.
-The children can rely on this &quot;lockstep&quot; behavior and can communicate with each other.
+The children can rely on this "lockstep" behavior and can communicate with each other.
 Such communication is undefined behavior in a standard, dynamic, <code>par</code>.</p>
 <h4 id="static-if-a-static-version-of-if"><a class="header" href="#static-if-a-static-version-of-if"><code>static if</code>, a static version of <a href="./ref.html#if"><code>if</code></a></a></h4>
 <p>If we have <code>static if { A5; B6; }</code>, we can guarantee that the latency of the entire operation is the maximum of the latencies of its children: 6 cycles in this case.</p>

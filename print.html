@@ -299,7 +299,7 @@ the Calyx repository.</p>
 to hardware modules (or function definitions for the software-minded).</p>
 <p>Here is an empty component definition for <code>main</code> along with an <code>import</code>
 statement to import the standard library:</p>
-<pre><code>import &quot;primitives/core.futil&quot;;
+<pre><code>import "primitives/core.futil";
 
 component main(@go go: 1) -&gt; (@done done: 1) {
   cells {}
@@ -348,7 +348,7 @@ Insert these lines to put a constant value into the memory:</p>
 <code>write_en</code> (the <em>write enable</em> signal, telling the memory that it's time to do a write), and
 <code>done</code> (signals that the write was committed).
 Constants like <code>32'd42</code> are Verilog-like literals that include the bit width (32), the base (<code>d</code> for decimal), and the value (42).</p>
-<p>Assignments at the top level in the <code>wires</code> section, like these, are &quot;continuous&quot;.
+<p>Assignments at the top level in the <code>wires</code> section, like these, are "continuous".
 They always happen, without any need for <code>control</code> statements to orchestrate them.
 We'll see later how to organize assignments into groups.</p>
 <blockquote>
@@ -360,12 +360,12 @@ But first, we need to provide it with data.
 The Calyx infrastructure can <a href="tutorial/../lang/data-format.html">provide data to programs</a> from <a href="https://www.json.org/">JSON</a> files.
 So make a file called something like <code>data.json</code> containing something along these lines:</p>
 <pre><code>{
-  &quot;mem&quot;: {
-    &quot;data&quot;: [10],
-    &quot;format&quot;: {
-      &quot;numeric_type&quot;: &quot;bitnum&quot;,
-      &quot;is_signed&quot;: false,
-      &quot;width&quot;: 32
+  "mem": {
+    "data": [10],
+    "format": {
+      "numeric_type": "bitnum",
+      "is_signed": false,
+      "width": 32
     }
   }
 }
@@ -385,9 +385,9 @@ However, one nice thing you can do with programs is execute them.</p>
 The <code>--through icarus-verilog</code> option tells fud which Verilog simulator to use (see <a href="tutorial/../fud/index.html">the chapter about fud</a> for alternatives such as <a href="https://www.veripool.org/wiki/verilator">Verilator</a>).
 Executing this program should print:</p>
 <pre><code>{
-  &quot;cycles&quot;: 1,
-  &quot;memories&quot;: {
-    &quot;mem&quot;: [
+  "cycles": 1,
+  "memories": {
+    "mem": [
       42
     ]
   }
@@ -468,7 +468,7 @@ Let's start with the last step, which looks pretty similar to our <code>the_answ
 </code></pre>
 <p>The <code>std_add</code> component from the standard library has two input ports, <code>left</code> and <code>right</code>, and a single output port, <code>out</code>, which we hook up to the register's <code>in</code> port.
 This group adds a constant 4 to the register's value, updating it in place.
-We can enable the <code>val</code> register with a constant 1 because the <code>std_add</code> component is <em>combinational</em>, meaning its results are ready &quot;instantly&quot; without the need to wait for a done signal.</p>
+We can enable the <code>val</code> register with a constant 1 because the <code>std_add</code> component is <em>combinational</em>, meaning its results are ready "instantly" without the need to wait for a done signal.</p>
 <p>We need to extend our control program to orchestrate the execution of the three groups.
 We will need a <code>seq</code> statement to say we want to the three steps sequentially:</p>
 <pre><code>  control {
@@ -600,15 +600,15 @@ save a value and observe it.</p>
   }
   wires {
     group run_id {
-      // We want to &quot;save&quot; the value 10 inside the identity group.
+      // We want to "save" the value 10 inside the identity group.
       id.in = 32'd10;
-      // All components have a magic &quot;go&quot; and &quot;done&quot; port added to them.
+      // All components have a magic "go" and "done" port added to them.
       // Execute the component.
       id.go = 1'd1;
       run_id[done] = id.done;
     }
     group use_id {
-      // We want to &quot;observe&quot; the current value saved in id.
+      // We want to "observe" the current value saved in id.
       // The out port on the `id` component always shows the last saved
       // element. We don't need to set the `go` because we're not executing
       // and control.
@@ -633,7 +633,7 @@ The component executes the two groups in-order.</p>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="passing-cells-by-reference"><a class="header" href="#passing-cells-by-reference">Passing Cells by Reference</a></h1>
 <p>One question that may arise when using Calyx as a backend is how to
-pass a cell &quot;by reference&quot; between components. In C++, this might look like:</p>
+pass a cell "by reference" between components. In C++, this might look like:</p>
 <pre><code class="language-C++">#include &lt;array&gt;
 #include &lt;cstdint&gt;
 
@@ -750,7 +750,7 @@ By passing these memories to the components above, the invoker is able to wrap t
   }
 }
 </code></pre>
-<p>Observe: when &quot;wrapped&quot; into two chunks, \( 0 \le i &lt; 2 \) and \( 0 \le j &lt; 12 \); when wrapped into three chunks, \( 0 \le i &lt; 3 \) and \( 0 \le j &lt; 8 \).</p>
+<p>Observe: when "wrapped" into two chunks, \( 0 \le i &lt; 2 \) and \( 0 \le j &lt; 12 \); when wrapped into three chunks, \( 0 \le i &lt; 3 \) and \( 0 \le j &lt; 8 \).</p>
 <h2 id="the-hard-way-without-ref-cells"><a class="header" href="#the-hard-way-without-ref-cells">The Hard Way: Without <code>ref</code> Cells</a></h2>
 <blockquote>
 <p>Proceed with caution. We recommend using the <code>ref</code> syntax in almost all cases since it enables the compiler to perform more optimizations.</p>
@@ -759,7 +759,7 @@ By passing these memories to the components above, the invoker is able to wrap t
 In fact, the Calyx compiler takes <code>ref</code> cells as descibed above and lowers them into code of the style described here.</p>
 <p>Let us walk through an example.</p>
 <h3 id="worked-example-mem_cpy"><a class="header" href="#worked-example-mem_cpy">Worked example: <code>mem_cpy</code></a></h3>
-<p>In the C++ code above, we've constructed an &quot;l-value reference&quot; to the array,
+<p>In the C++ code above, we've constructed an "l-value reference" to the array,
 which essentially means we can both read and write from <code>x</code> in the function
 <code>add_one</code>.</p>
 <p>Now, let's allow similar functionality at the Calyx IR level.
@@ -871,8 +871,8 @@ the corresponding address ports. For example, a 2-dimensional memory will requir
 <h3 id="multiple-memories"><a class="header" href="#multiple-memories">Multiple Memories</a></h3>
 <p>Similarly, multiple memories will just require the ports to be passed for each of the given memories.
 Here is an example of a memory copy (referred to as <code>mem_cpy</code> in the C language), with 1-dimensional memories of size 5:</p>
-<pre><code>import &quot;primitives/core.futil&quot;;
-import &quot;primitives/memories/comb.futil&quot;;
+<pre><code>import "primitives/core.futil";
+import "primitives/memories/comb.futil";
 component copy(dest_done: 1, src_read_data: 32, length: 3) -&gt;
               (dest_write_data: 32, dest_write_en: 1, dest_addr0: 3, src_addr0: 3) {
   cells {
@@ -885,14 +885,14 @@ component copy(dest_done: 1, src_read_data: 32, length: 3) -&gt;
       lt.left = N.out;
       lt.right = length;
     }
-    group upd_index&lt;&quot;static&quot;=1&gt; {
+    group upd_index&lt;"static"=1&gt; {
       add.left = N.out;
       add.right = 3'd1;
       N.in = add.out;
       N.write_en = 1'd1;
       upd_index[done] = N.done;
     }
-    group copy_index_N&lt;&quot;static&quot;=1&gt; {
+    group copy_index_N&lt;"static"=1&gt; {
       src_addr0 = N.out;
       dest_addr0 = N.out;
       dest_write_en = 1'd1;
@@ -932,13 +932,13 @@ component main() -&gt; () {
 <p>Calyx programs are a sequence of <code>import</code> statements followed by a sequence of
 <code>extern</code> statements or <code>component</code> definitions.</p>
 <h3 id="import-statements"><a class="header" href="#import-statements"><code>import</code> statements</a></h3>
-<p><code>import &quot;&lt;path&gt;&quot;</code> has almost exactly the same semantics to that of <code>#include</code> in
+<p><code>import "&lt;path&gt;"</code> has almost exactly the same semantics to that of <code>#include</code> in
 the C preprocessor: it copies the code from the file at <code>path</code> into
 the current file.</p>
 <h3 id="extern-definitions"><a class="header" href="#extern-definitions"><code>extern</code> definitions</a></h3>
 <p><code>extern</code> definitions allow Calyx programs to link against arbitrary RTL code.
 An <code>extern</code> definition looks like this:</p>
-<pre><code>extern &quot;&lt;path&gt;&quot; {
+<pre><code>extern "&lt;path&gt;" {
   &lt;primitives&gt;...
 }
 </code></pre>
@@ -968,7 +968,7 @@ or one of the parameter names.</li>
 </ul>
 <p>For example, the following is the signature of the <code>std_reg</code> primitive from the
 Calyx standard library:</p>
-<pre><code>primitive std_reg&lt;&quot;state_share&quot;=1&gt;[WIDTH](
+<pre><code>primitive std_reg&lt;"state_share"=1&gt;[WIDTH](
   @write_together(1) @data in: WIDTH,
   @write_together(1) @static(1) @go write_en: 1,
   @clk clk: 1,
@@ -983,7 +983,7 @@ the <code>in</code> and the <code>out</code> ports.</p>
 <h3 id="inlined-primitives"><a class="header" href="#inlined-primitives">Inlined Primitives</a></h3>
 <p><em>Inlined primitives</em> do not have a corresponding Verilog file, and are defined within Calyx. The Calyx backend then converts these definitions into Verilog.</p>
 <p>For example, the <code>std_unsyn_mult</code> primitive is inlined:</p>
-<pre><code>comb primitive std_unsyn_mult&lt;&quot;share&quot;=1&gt;[WIDTH](left: WIDTH, right: WIDTH) -&gt; (out: WIDTH) {
+<pre><code>comb primitive std_unsyn_mult&lt;"share"=1&gt;[WIDTH](left: WIDTH, right: WIDTH) -&gt; (out: WIDTH) {
   assign out = left * right;
 };
 </code></pre>
@@ -1092,7 +1092,7 @@ r.in = !cond.out ? 32'd0;
 </code></pre>
 <p>Using guards, Calyx programs can assign multiple different values to the same
 port. Omitting a guard expression is equivalent to using <code>1'd1</code> (a constant
-&quot;true&quot;) as the guard.</p>
+"true") as the guard.</p>
 <p>Guards can use the following constructs:</p>
 <ul>
 <li><code>port</code>: A port access on a defined cell</li>
@@ -1148,7 +1148,7 @@ should assign 1 to this port to indicate that its execution is complete.</p>
 </blockquote>
 <h3 id="comb-group-definitions"><a class="header" href="#comb-group-definitions"><code>comb group</code> definitions</a></h3>
 <p>Combinational groups are a restricted version of groups which perform their
-computation purely combinationally and therefore run for &quot;less than one cycle&quot;:</p>
+computation purely combinationally and therefore run for "less than one cycle":</p>
 <pre><code>comb group name&lt;attributes&gt; {
   assignments...
 }
@@ -1267,7 +1267,7 @@ They are automatically threaded to any primitive that defines <code>@clk</code> 
 <code>@reset</code> ports.</p>
 <h2 id="advanced-concepts"><a class="header" href="#advanced-concepts">Advanced Concepts</a></h2>
 <h3 id="ref-cells"><a class="header" href="#ref-cells"><code>ref</code> cells</a></h3>
-<p>Calyx components can specify that a cell needs to be passed &quot;by reference&quot;:</p>
+<p>Calyx components can specify that a cell needs to be passed "by reference":</p>
 <pre><code>// Component that performs mem[0] += 1;
 component update_memory() -&gt; () {
   cells {
@@ -1316,33 +1316,33 @@ The <code>@external</code> attribute can <strong>only be used</strong> on the <a
 <h2 id="the-data-format"><a class="header" href="#the-data-format">The Data Format</a></h2>
 <p>The JSON-based data format allows us to provide inputs for a memory and specify how the values should be interpreted:</p>
 <pre><code class="language-json">{
-  &quot;mem&quot;: {
-    &quot;data&quot;: [10],
-    &quot;format&quot;: {
-      &quot;numeric_type&quot;: &quot;bitnum&quot;,
-      &quot;is_signed&quot;: false,
-      &quot;width&quot;: 32
+  "mem": {
+    "data": [10],
+    "format": {
+      "numeric_type": "bitnum",
+      "is_signed": false,
+      "width": 32
     }
   }
 }
 </code></pre>
 <p>The <code>data</code> field represents the initial data for the memory and can use mutlidimensional arrays to describe it. For example, the following is the initial data for a two-dimensional (<code>comb_mem_d2</code>) memory:</p>
 <pre><code class="language-json">{
-    &quot;data&quot;: [ [1, 2], [3, 4] ],
-    &quot;format&quot;: {...}
+    "data": [ [1, 2], [3, 4] ],
+    "format": {...}
 }
 </code></pre>
 <p>The <code>format</code> specifier tells <code>fud</code> how to interpret the values in the data field. The original program specifies that all values should be treated as 32-bit, unsigned values.</p>
 <p>In order to specify fixed-point values, we must specify both the total width and fraction widths:</p>
-<pre><code class="language-json">&quot;root&quot;: {
-  &quot;data&quot;: [
+<pre><code class="language-json">"root": {
+  "data": [
       0.0
   ],
-  &quot;format&quot;: {
-      &quot;numeric_type&quot;: &quot;fixed_point&quot;,
-      &quot;is_signed&quot;: false,
-      &quot;width&quot;: 32,
-      &quot;frac_width&quot;: 16
+  "format": {
+      "numeric_type": "fixed_point",
+      "is_signed": false,
+      "width": 32,
+      "frac_width": 16
   }
 }
 </code></pre>
@@ -1431,7 +1431,7 @@ In our case, for example, <code>B6</code> will begin executing exactly one cycle
 <h4 id="static-par-a-static-version-of-par"><a class="header" href="#static-par-a-static-version-of-par"><code>static par</code>, a static version of <a href="lang/./ref.html#par"><code>par</code></a></a></h4>
 <p>If we have <code>static par { A5; B6; C7; D8; }</code>, we can guarantee that the latency of the entire operation is the maximum of the latencies of its children: 8 cycles in this case.
 Further, all the children of a <code>static par</code> are guaranteed to begin executing at the same time.
-The children can rely on this &quot;lockstep&quot; behavior and can communicate with each other.
+The children can rely on this "lockstep" behavior and can communicate with each other.
 Such communication is undefined behavior in a standard, dynamic, <code>par</code>.</p>
 <h4 id="static-if-a-static-version-of-if"><a class="header" href="#static-if-a-static-version-of-if"><code>static if</code>, a static version of <a href="lang/./ref.html#if"><code>if</code></a></a></h4>
 <p>If we have <code>static if { A5; B6; }</code>, we can guarantee that the latency of the entire operation is the maximum of the latencies of its children: 6 cycles in this case.</p>
@@ -1494,12 +1494,12 @@ language.</p>
       }
     }
 </code></pre>
-<p>First and foremost, always remember to import &quot;primitives/sync.futil&quot; when using the @sync attribute.</p>
+<p>First and foremost, always remember to import "primitives/sync.futil" when using the @sync attribute.</p>
 <p>The <code>@sync</code> syntax can only be marked with empty statements. <code>@sync</code> means that the thread
 marked with a certain value, now called barrier index, for this attribute, must stop and wait for all other threads marked with the same barrier index to arrive, at which point they can proceed.</p>
 <p>In the modified program above, we see that <code>incr_idx</code> and <code>incr_r</code> must both finish in order for either thread to go forth. Because <code>add_r_to_accm</code> is executed after <code>incr_idx</code> in thread A, we know that in each iteration, <code>incr_r</code> will always increment <code>r</code> before <code>add_r_to_accm</code> reads it. We've also inserted another barrier at the end of the while loops for each thread, which essentially means <code>add_r_to_accm</code> has to finish before either thread enters the next iteration.</p>
 <h2 id="synchronization-in-branches"><a class="header" href="#synchronization-in-branches">Synchronization in Branches</a></h2>
-<p>We can also have &quot;barriers&quot; in <code>if</code> branches:</p>
+<p>We can also have "barriers" in <code>if</code> branches:</p>
 <pre><code>    par {
       // thread 1
       while lt.out with comp {
@@ -1536,23 +1536,23 @@ marked with a certain value, now called barrier index, for this attribute, must 
 <p>In this control program, both branches of thread 1 have statements marked with <code>@sync(1)</code>,
 which syncs it up with thread 2.</p>
 <p>Be really really careful when using the <code>@sync</code> attribute in conditional branches!
-If the other thread sharing one &quot;barrier&quot; with your thread is blocked unconditionally,
+If the other thread sharing one "barrier" with your thread is blocked unconditionally,
 then you would probably want to have the same <code>@sync</code> value in both branches; since
-having the same <code>@sync</code> value in only one branch would likely lead to a &quot;deadlock&quot;
+having the same <code>@sync</code> value in only one branch would likely lead to a "deadlock"
 situation: if thread A is running in the unlocked branch while the thread B
-has a &quot;barrier&quot; that is expecting two threads, thread B may never proceed because
-thread A never arrives at the &quot;barrier&quot;.</p>
+has a "barrier" that is expecting two threads, thread B may never proceed because
+thread A never arrives at the "barrier".</p>
 <h2 id="more-complex-example"><a class="header" href="#more-complex-example">More Complex Example</a></h2>
 <p>If you want to see a more complex design using <code>@sync</code>, see
 <a href="https://github.com/calyxir/calyx/blob/master/tests/correctness/sync/sync-dot-product.futil">sync-dot-product</a></p>
 <h2 id="limitations"><a class="header" href="#limitations">Limitations</a></h2>
-<p>Currently we only support two threads sharing the same &quot;barrier&quot;, i.e., only two threads can have control with the <code>@sync</code> attribute marked with the same value.</p>
+<p>Currently we only support two threads sharing the same "barrier", i.e., only two threads can have control with the <code>@sync</code> attribute marked with the same value.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="undefined-behaviors"><a class="header" href="#undefined-behaviors">Undefined Behaviors</a></h1>
 <p>Undefined behavior in Calyx is either intentional or unintentional. This page tracks the various issues discussing the undefined behaviors that are known to currently exist in Calyx.</p>
 <h2 id="interface-signals"><a class="header" href="#interface-signals">Interface Signals</a></h2>
 <p>The <code>go</code> and <code>done</code> signals form the two core interface signals in Calyx. Their semantics are baked into the compiler and pervasively used to define the meaning of programs.</p>
 <ul>
-<li><a href="https://github.com/calyxir/calyx/discussions/651">Isolation and stateful &quot;doneness&quot; (#651)</a></li>
+<li><a href="https://github.com/calyxir/calyx/discussions/651">Isolation and stateful "doneness" (#651)</a></li>
 <li><a href="https://github.com/calyxir/calyx/discussions/788">Well-formedness of <code>done</code> signals (#788)</a></li>
 </ul>
 <h2 id="undriven-ports"><a class="header" href="#undriven-ports">Undriven Ports</a></h2>
@@ -1579,12 +1579,12 @@ However, the isolation guarantees for combinational groups, continuous assignmen
 every basic Calyx construct. This information can then be used to optimize the program
 or change how the program is compiled.</p>
 <p>Attributes can decorate lots of things in Calyx: components, groups, cells, ports, and control statements.
-The syntax looks like <code>name&lt;&quot;attr&quot;=value&gt;</code> for components and groups or <code>@attr(value)</code> for other constructs.
+The syntax looks like <code>name&lt;"attr"=value&gt;</code> for components and groups or <code>@attr(value)</code> for other constructs.
 Attributes always map keys to values.
-Because it's common to have a &quot;Boolean&quot; attribute that always maps to the value 1, the syntax <code>@attr</code> is a shorthand for <code>@attr(1)</code>.</p>
+Because it's common to have a "Boolean" attribute that always maps to the value 1, the syntax <code>@attr</code> is a shorthand for <code>@attr(1)</code>.</p>
 <p>Here is the syntax for attributes in different parts of the AST:</p>
 <h4 id="component-and-port-attributes"><a class="header" href="#component-and-port-attributes"><strong>Component and Port Attributes</strong></a></h4>
-<pre><code>component main&lt;&quot;static&quot;=10&gt;(@go go: 1) -&gt; (@done done: 1) {
+<pre><code>component main&lt;"static"=10&gt;(@go go: 1) -&gt; (@done done: 1) {
  ...
 }
 </code></pre>
@@ -1596,7 +1596,7 @@ Because it's common to have a &quot;Boolean&quot; attribute that always maps to 
 }
 </code></pre>
 <h4 id="group-attributes"><a class="header" href="#group-attributes"><strong>Group Attributes</strong></a></h4>
-<pre><code>group cond&lt;&quot;static&quot;=1&gt; {
+<pre><code>group cond&lt;"static"=1&gt; {
   ...
 }
 </code></pre>
@@ -1616,7 +1616,7 @@ compiler errors out.</p>
 <h3 id="go-done-clk-and-reset"><a class="header" href="#go-done-clk-and-reset"><code>go</code>, <code>done</code>, <code>clk</code> and <code>reset</code></a></h3>
 <p>These four ports are part of the interface to Calyx components.
 These are automatically added by the parser if they are missing from the component definition.
-<code>go</code> and <code>done</code> provide the mechanism for how an &quot;outer&quot; component invokes an &quot;inner&quot; cell that it contains.
+<code>go</code> and <code>done</code> provide the mechanism for how an "outer" component invokes an "inner" cell that it contains.
 <code>clk</code> and <code>reset</code> thread through the global clock and resetting signal in a design.</p>
 <h3 id="nointerface"><a class="header" href="#nointerface"><code>nointerface</code></a></h3>
 <p>By default, interface ports are automatically added to a component by the parser if they are missing.
@@ -1625,7 +1625,7 @@ Adding this attribute disables this behavior.</p>
 <p>The <code>external</code> attribute has meaning when it is attached to a cell.
 It has two meanings:</p>
 <ol>
-<li>If the <code>externalize</code> compiler alias is enabled, the cell is turned into an &quot;external&quot;
+<li>If the <code>externalize</code> compiler alias is enabled, the cell is turned into an "external"
 cell by exposing all its ports through the current component and rewriting
 assignments to the use the ports. See the documentation on <a href="https://docs.rs/calyx-opt/latest/calyx_opt/passes/struct.Externalize.html">externalize</a> for more information.</li>
 <li>If the cell is a memory and has an <code>external</code> attribute on it, the Verilog backend (<code>-b verilog</code>) generates code to read <code>&lt;cell_name&gt;.dat</code> to initialize the memory state and dumps out its final value after execution.</li>
@@ -1674,9 +1674,9 @@ internal state.
 This is used by <code>-p cell-share</code> to decide which components can be shared.
 Specifically, a component is state shareable if each write to
 that component makes any previous writes to the component irrelevant.
-The definition of a &quot;write to a component&quot; is an activiation of
-the component's &quot;go&quot; port, followed by a read of the component's &quot;done&quot; port (in
-other words, the read of a &quot;done&quot; port still counts as part of a &quot;write&quot; to the
+The definition of a "write to a component" is an activiation of
+the component's "go" port, followed by a read of the component's "done" port (in
+other words, the read of a "done" port still counts as part of a "write" to the
 component).
 For <code>c1</code> and <code>c2</code>, instances of a state_shareable component:
 instantiate <code>c1</code>                        instantiate <code>c2</code>
@@ -1693,7 +1693,7 @@ of a <code>While</code> control is known statically, as indicated by <code>n</co
 <h3 id="write_togethern"><a class="header" href="#write_togethern"><code>write_together(n)</code></a></h3>
 <p>Used by the <code>papercut</code> pass.
 Defines a group <code>n</code> of signals that all must be driven together:</p>
-<pre><code>primitive comb_mem_d2&lt;&quot;static&quot;=1&gt;[WIDTH, D0_SIZE, D1_SIZE, D0_IDX_SIZE, D1_IDX_SIZE](
+<pre><code>primitive comb_mem_d2&lt;"static"=1&gt;[WIDTH, D0_SIZE, D1_SIZE, D0_IDX_SIZE, D1_IDX_SIZE](
   @write_together(2) addr0: D0_IDX_SIZE,
   @write_together(2) addr1: D1_IDX_SIZE,
   @write_together(1) write_data: WIDTH,
@@ -1705,12 +1705,12 @@ Defines a group <code>n</code> of signals that all must be driven together:</p>
 The first group requires that <code>write_en</code> and <code>write_data</code> signals together
 while the second requires that <code>addr0</code> and <code>addr1</code> are driven together.</p>
 <p>Note that <code>@write_together</code> specifications cannot encode implication of the
-form &quot;if port <code>x</code> is driven then <code>y</code> should be driven&quot;.</p>
+form "if port <code>x</code> is driven then <code>y</code> should be driven".</p>
 <h3 id="read_togethern"><a class="header" href="#read_togethern"><code>read_together(n)</code></a></h3>
 <p>Used by <code>papercut</code> and <code>canonicalize</code>.
 Defines a combinational path <code>n</code> between a set of an input ports and an output
 port.</p>
-<pre><code>primitive comb_mem_d1&lt;&quot;static&quot;=1&gt;[WIDTH, SIZE, IDX_SIZE](
+<pre><code>primitive comb_mem_d1&lt;"static"=1&gt;[WIDTH, SIZE, IDX_SIZE](
   @read_together(1) addr0: IDX_SIZE, ...
 ) -&gt; (
   @read_together(1) read_data: WIDTH, ...
@@ -2043,22 +2043,22 @@ This route involves generating an <a href="https://en.wikipedia.org/wiki/Advance
 <p>As above, you can invoke the Xilinx toolchain locally or remotely, via SSH.
 To set up SSH execution, you can edit your <code>config.toml</code> to add settings like this:</p>
 <pre><code>[stages.xclbin]
-ssh_host = &quot;havarti&quot;
-ssh_username = &quot;als485&quot;
+ssh_host = "havarti"
+ssh_username = "als485"
 remote = 1
 </code></pre>
 <p>To use local execution, just leave off the <code>remote = true</code> line.</p>
 <p>You can also set the Xilinx mode and target device:</p>
 <pre><code>[stages.xclbin]
-mode = &quot;hw_emu&quot;
-device = &quot;xilinx_u50_gen3x16_xdma_201920_3&quot;
+mode = "hw_emu"
+device = "xilinx_u50_gen3x16_xdma_201920_3"
 </code></pre>
 <p>The options for <code>mode</code> are <code>hw_emu</code> (simulation) and <code>hw</code> (on-FPGA execution).
 The device string above is for the <a href="https://www.xilinx.com/products/boards-and-kits/alveo/u50.html">Alveo U50</a> card, which we have at Cornell. The installed Xilinx card would typically be found under the directory <code>/opt/xilinx/platforms</code>, where one would be able to find a device name of interest.</p>
 <p>To run simulations (or on real FPGAs), you will also need to configure the <code>fpga</code> stage to point to your installations of <a href="https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html">Vitis</a> and <a href="https://xilinx.github.io/XRT/">XRT</a>:</p>
 <pre><code>[stages.fpga]
-xilinx_location = &quot;/scratch/opt/Xilinx/Vitis/2020.2&quot;
-xrt_location = &quot;/scratch/opt/xilinx/xrt&quot;
+xilinx_location = "/scratch/opt/Xilinx/Vitis/2020.2"
+xrt_location = "/scratch/opt/xilinx/xrt"
 </code></pre>
 <p>Those are the paths on Cornell's havarti server.</p>
 <h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
@@ -2127,7 +2127,7 @@ We currently generate <code>kernel.xml</code> ourselves (with the <code>xilinx-x
 <h4 id="our-completion-workflow"><a class="header" href="#our-completion-workflow">Our Completion Workflow</a></h4>
 <p>The first step is to produce an <code>.xo</code> file.
 We also use <a href="https://github.com/calyxir/calyx/blob/master/fud/bitstream/gen_xo.tcl">a static Tcl script, <code>gen_xo.tcl</code>,</a> which is a simplified version of <a href="https://github.com/Xilinx/Vitis-Tutorials/blob/2021.1/Hardware_Acceleration/Feature_Tutorials/01-rtl_kernel_workflow/reference-files/scripts/package_kernel.tcl">a script from Xilinx's Vitis tutorials</a>.
-The gist of this script is that it creates a Vivado project, adds the source files, twiddles some settings, and then uses the <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/package_xo-Command"><code>package_xo</code> command</a> to read stuff from this project as an &quot;IP directory&quot; and produce an <code>.xo</code> file.
+The gist of this script is that it creates a Vivado project, adds the source files, twiddles some settings, and then uses the <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/package_xo-Command"><code>package_xo</code> command</a> to read stuff from this project as an "IP directory" and produce an <code>.xo</code> file.
 The Vivado command line looks roughly like this:</p>
 <pre><code>vivado -mode batch -source gen_xo.tcl -tclargs xclbin/kernel.xo
 </code></pre>
@@ -2350,7 +2350,7 @@ If you would like to see an English summary of the CSV as well as the estimated 
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fud2-an-experimental-successor-to-fud"><a class="header" href="#fud2-an-experimental-successor-to-fud">fud2: An Experimental Successor to fud</a></h1>
 <p><a href="running-calyx/./fud/index.html">fud</a> is the compiler driver tool for orchestrating the Calyx ecosystem.
 fud2 is an experiment in building a new driver that works like fud that adds some fundamental new capabilities and resolves some underlying problems.</p>
-<p>&quot;Original&quot; fud is still the right tool for almost all jobs; fud2 is in an experimental phase and does not support everything fud can do.
+<p>"Original" fud is still the right tool for almost all jobs; fud2 is in an experimental phase and does not support everything fud can do.
 Someday, fud2 may supplant fud, but it needs more work before it is ready to do that.
 Until then, fud remains your first choice for all your build-related needs.</p>
 <h2 id="set-up-1"><a class="header" href="#set-up-1">Set Up</a></h2>
@@ -2363,10 +2363,10 @@ Install it using your OS package manager or by downloading a binary.</p>
 <pre><code>fud2 edit-config
 </code></pre>
 <p>Add the following fields:</p>
-<pre><code class="language-toml">rsrc = &quot;&lt;path to calyx checkout&gt;/fud2/rsrc&quot;
+<pre><code class="language-toml">rsrc = "&lt;path to calyx checkout&gt;/fud2/rsrc"
 
 [calyx]
-base = &quot;&lt;path to calyx checkout&gt;&quot;
+base = "&lt;path to calyx checkout&gt;"
 </code></pre>
 <p>Now you're ready to use fud2.</p>
 <h2 id="general-use"><a class="header" href="#general-use">General Use</a></h2>
@@ -2397,8 +2397,8 @@ Use <code>--set key=value</code> to override any such option.</p>
 <ul>
 <li>By default, fud2 runs the build in a directory called <code>.fud2</code> within the working directory. It automatically deletes this directory when the build is done.
 <ul>
-<li>It can be useful to keep this build directory around for debugging or as a &quot;cache&quot; for future builds. Use <code>--keep</code> to prevent fud2 from deleting the build directory.</li>
-<li>You can also tell fud2 to use a different build directory with <code>--dir</code>. If you give it an existing directory, it will never be deleted, even without <code>--keep</code>. (Only &quot;fresh&quot; build directories are automatically cleaned up.)</li>
+<li>It can be useful to keep this build directory around for debugging or as a "cache" for future builds. Use <code>--keep</code> to prevent fud2 from deleting the build directory.</li>
+<li>You can also tell fud2 to use a different build directory with <code>--dir</code>. If you give it an existing directory, it will never be deleted, even without <code>--keep</code>. (Only "fresh" build directories are automatically cleaned up.)</li>
 </ul>
 </li>
 <li>If you don't like the operation path that fud2 selected for your build, you can control it with <code>--through &lt;OP&gt;</code>. fud2 will search the operation graph for a path that contains that op. You can provide this option multiple times; fud2 will look for paths that contain <em>all</em> these operations, in order.</li>
@@ -2451,7 +2451,7 @@ to test a Calyx-generated Verilog design.</p>
 <p>In order to be able to actually write to our register, we need to drive our <code>reset</code> and
 <code>go</code> signals in our cocotb test:</p>
 <pre><code class="language-python"># Required for all cocotb testbenches. Included for completeness.
-cocotb.start_soon(Clock(module.clk, 2, units=&quot;ns&quot;).start()) 
+cocotb.start_soon(Clock(module.clk, 2, units="ns").start()) 
 
 # Reset Calyx-generated control registers
 main.reset.value = 1
@@ -2577,7 +2577,7 @@ The former defines the name, description, and <a href="./compiler.html#providing
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>impl Named for NewPass {
-    fn name(&amp;self) -&gt; &amp;'static str { &quot;new-pass&quot; }
+    fn name(&amp;self) -&gt; &amp;'static str { "new-pass" }
     ...
 }
 impl Visitor for NewPass { ... }
@@ -3087,13 +3087,13 @@ here:</p>
 <p>We get the wrong answer. More generally, we can see that union clobbers
 any writes and intersection clobbers any reads that happen in the par.</p>
 <p>The solution to this problem is solved by passing the <code>gen</code> and <code>kill</code> sets along
-with the <code>live</code> sets. Then <code>par</code> can set its output to be </p>
+with the <code>live</code> sets. Then <code>par</code> can set its output to be</p>
 <pre><code>(union(live(children)) - union(kill(children))) | union(gen(children))
 </code></pre>
 <p>The final tricky bit is thinking about how information flows between siblings in a <code>par</code> statement.
 Consider again the picture above with three nodes: <code>A</code>, <code>B</code>, and <code>C</code>. Should <code>x</code> be live
 at <code>B</code>? For liveness it turns out to be yes, but bare with me for a second for a thought experiment
-and consider the case where we have the guarantee that statements running in parallel can not interact 
+and consider the case where we have the guarantee that statements running in parallel can not interact
 with each other. This lets us reorder statements in some cases.
 Then there seems to be an information trade-off for how to define the liveness of <code>x</code> at <code>B</code>:</p>
 <ul>
@@ -3320,7 +3320,7 @@ produces the correct values with the <a href="debug/../interpreter.html">Calyx I
 <p>To disable the passes, add the flag <code>-p no-opt</code> to compiler invocation:</p>
 <ol>
 <li>For the compiler: <code>futil &lt;filename&gt; -p no-opt</code>.</li>
-<li>For <code>fud</code>: <code>fud ... -s calyx.flags &quot; -p no-opt&quot;</code>.</li>
+<li>For <code>fud</code>: <code>fud ... -s calyx.flags " -p no-opt"</code>.</li>
 </ol>
 <p>If the output is still incorrect then one of the core compilation passes is incorrect.
 Our best bet at this point is to reduce the test file such that the output from the
@@ -3340,7 +3340,7 @@ adding passes to this flag invocation:</p>
 <p>It is often possible to reduce the size of the example program that is
 generating incorrect results.
 In order to perform a reduction, we need to run the program twice, once with
-a &quot;golden workflow&quot; that we trust to generate the right result and once with
+a "golden workflow" that we trust to generate the right result and once with
 the buggy workflow.</p>
 <h3 id="inlining-optional"><a class="header" href="#inlining-optional">Inlining (Optional)</a></h3>
 <p>It is useful to inline all the code into the <code>main</code> component so that we can focus our energy on reducing one control program. This can be done by passing the following flags to the compiler:</p>
@@ -3359,7 +3359,7 @@ the buggy workflow.</p>
 <p>When deleting parts of the control program, the compiler may complain that certain groups are no longer being used. In this case, run the <code>-p dead-group-removal</code> pass before any other pass runs.</p>
 </blockquote>
 <p>Next, if we've identified the problem to be in one of the Calyx passes,
-the &quot;golden workflow&quot; is running the program without the pass while the buggy
+the "golden workflow" is running the program without the pass while the buggy
 workflow is running the program with the pass enabled.
 This case is so common that we've written <a href="https://github.com/calyxir/calyx/blob/master/tools/flag-compare.sh">a script</a> that can run
 programs with different set of flags to the Calyx compiler and show the
@@ -3504,20 +3504,20 @@ the Docker image and run your tests on it.</p>
 <p>We will also walk through the file <a href="https://github.com/calyxir/calyx/blob/master/calyx-py/test/builder_example.py"><code>builder_example.py</code></a> to demonstrate how the builder library is used. This Calyx program initializes two registers with the numbers 1 and 41, adds them together, and stores the result in a register.</p>
 <p>The <code>add_main_component(prog)</code> method will, as the name suggests, add a main component to our program. We can define components for our Calyx program <code>prog</code> with <code>prog.component</code>. Here's a defininition of a <code>main</code> component with a 32-bit input <code>in</code> and output <code>out</code>:</p>
 <pre><code class="language-python">def add_main_component(prog):
-    main = prog.component(&quot;main&quot;)
-    main.input(&quot;in&quot;, 32)
-    main.output(&quot;out&quot;, 32)
+    main = prog.component("main")
+    main.input("in", 32)
+    main.output("out", 32)
 </code></pre>
-<p>Technically, we didn't need to assign <code>prog.component(&quot;main&quot;)</code> to a variable; the component <code>main</code> would have been added to <code>prog</code> regardless. However, it will often prove useful to store handles to components, registers, or other objects you'd like to use later.</p>
+<p>Technically, we didn't need to assign <code>prog.component("main")</code> to a variable; the component <code>main</code> would have been added to <code>prog</code> regardless. However, it will often prove useful to store handles to components, registers, or other objects you'd like to use later.</p>
 <p>We then instantiate our cells: three 32-bit registers and one 32-bit adder.</p>
-<pre><code class="language-python">    lhs = main.reg(&quot;lhs&quot;, 32)
-    rhs = main.reg(&quot;rhs&quot;, 32)
-    sum = main.reg(&quot;sum&quot;, 32)
-    add = main.add(32, &quot;add&quot;)
+<pre><code class="language-python">    lhs = main.reg("lhs", 32)
+    rhs = main.reg("rhs", 32)
+    sum = main.reg("sum", 32)
+    add = main.add(32, "add")
 </code></pre>
 <p>As with adding components to a program, we don't need to assign <code>main.reg(...)</code> to a variable, but it'll be useful to be able to quickly refer to these cells.</p>
-<p>Next, we'll define our groups of assignments. The syntax for defining a group looks like <code>with {component}.group(&quot;group_name&quot;) as group_variable</code>, as we do below:</p>
-<pre><code class="language-python">    with main.group(&quot;update_operands&quot;) as update_operands:
+<p>Next, we'll define our groups of assignments. The syntax for defining a group looks like <code>with {component}.group("group_name") as group_variable</code>, as we do below:</p>
+<pre><code class="language-python">    with main.group("update_operands") as update_operands:
 </code></pre>
 <p>Now, we'll initialize our registers. You can access cell ports using dot notation. Notably, port names that are also reserved keywords in Python such as <code>in</code> are followed by an underscore.</p>
 <pre><code class="language-python">        # Directly index cell ports using dot notation
@@ -3537,7 +3537,7 @@ the Docker image and run your tests on it.</p>
 </code></pre>
 <p>In order to use the ports of cells in our <code>main</code> component within the code for our component, we'll expose the adder's output port by explicitly constructing it using the <code>calyx-py</code> AST.</p>
 <pre><code class="language-python">    # Bare name of the cell
-    add_out = ast.CompPort(ast.CompVar(&quot;add&quot;), &quot;out&quot;)
+    add_out = ast.CompPort(ast.CompVar("add"), "out")
 </code></pre>
 <p>Now, when we want to use the output port of our adder, we can do so easily:</p>
 <pre><code class="language-python">        sum.in_ = add_out
@@ -3570,7 +3570,7 @@ the Docker image and run your tests on it.</p>
     return prog.program
 </code></pre>
 <p>Finally, we can emit the program we built.</p>
-<pre><code class="language-python">if __name__ == &quot;__main__&quot;:
+<pre><code class="language-python">if __name__ == "__main__":
     build().emit()
 </code></pre>
 <p>That's about it for getting started with the <code>calyx-py</code> builder library! You can inspect the generated Calyx code yourself by running:</p>
@@ -3592,16 +3592,16 @@ def add_second_comp(prog):
 # method for defining `my_component` and adding it to a program
 def add_my_component(prog, second_comp): 
     # add the component to the program
-    my_component = prog.component(&quot;my_component&quot;)
+    my_component = prog.component("my_component")
 
     # Adding an instance of `second_comp` as a cell of `my_component`
-    my_second_comp = my_component.cell(&quot;my_second_comp&quot;, second_comp)
+    my_second_comp = my_component.cell("my_second_comp", second_comp)
 
     # adding a register cell (or other cells) to the component 
-    my_reg = my_component.reg(&quot;my_reg&quot;, 32)
+    my_reg = my_component.reg("my_reg", 32)
 
     # define a `my_component` group
-    with my_component.group(&quot;my_group&quot;) as my_group:
+    with my_component.group("my_group") as my_group:
       # assignments here 
       my_reg.write_en = 1
 
@@ -3620,33 +3620,33 @@ def build():
 
 
 # emit the program
-if __name__ == &quot;__main__&quot;:
+if __name__ == "__main__":
     build().emit()
 </code></pre>
 <h2 id="components"><a class="header" href="#components">Components</a></h2>
 <h3 id="defining-components"><a class="header" href="#defining-components">Defining Components</a></h3>
 <p>To define a component, call the <code>Builder().component()</code> method.</p>
 <pre><code class="language-python">prog = cb.Builder()
-prog.component(&quot;my_component&quot;)
+prog.component("my_component")
 </code></pre>
 <h3 id="retrieving-components"><a class="header" href="#retrieving-components">Retrieving Components</a></h3>
 <p>To reference a component without an existing <a href="builder/ref.html#creating-handles">handle</a> to it, use the <code>Builder().get_component()</code> method.</p>
 <pre><code class="language-python">prog = cb.Builder()
-prog.component(&quot;my_component&quot;)
+prog.component("my_component")
 # a few lines later 
-my_component = prog.get_component(&quot;my_component&quot;)
+my_component = prog.get_component("my_component")
 </code></pre>
 <h3 id="defining-component-inputs-and-outputs"><a class="header" href="#defining-component-inputs-and-outputs">Defining Component Inputs and Outputs</a></h3>
 <p>Components can be given input and output ports. Just specify the name of the port and its size.</p>
-<pre><code class="language-python">my_component.input(&quot;my_input&quot;, 32)
-my_component.output(&quot;my_output&quot;, 32)
+<pre><code class="language-python">my_component.input("my_input", 32)
+my_component.output("my_output", 32)
 </code></pre>
 <p>To access the input and output ports of a component within the definition of a component, use the syntax <code>my_component.this().port</code>.</p>
 <pre><code class="language-python">def add_my_component(prog):
-    my_component = prog.component(&quot;my_component&quot;)
-    my_component.output(&quot;my_output&quot;, 32)
+    my_component = prog.component("my_component")
+    my_component.output("my_output", 32)
 
-    with my_component.group(&quot;my_group&quot;):
+    with my_component.group("my_group"):
         my_component.this().my_output = const(32, 1)
 </code></pre>
 <p>Note that it's possible to <a href="builder/ref.html#creating-handles">create a handle</a> to input and output ports.</p>
@@ -3654,56 +3654,56 @@ my_component.output(&quot;my_output&quot;, 32)
 <p>Calyx supports <a href="builder/../lang/multi-component.html">multi-component designs</a>. The <a href="builder/ref.html#top-level-program-structure">top-level example</a> demonstrates how to construct multi-component designs using the library.</p>
 <h4 id="defining-common-calyx-cells"><a class="header" href="#defining-common-calyx-cells">Defining Common Calyx Cells</a></h4>
 <p>Here's a snippet of code that adds a few common kinds of cells to a component:</p>
-<pre><code class="language-python">my_component = prog.component(&quot;my_component&quot;)
+<pre><code class="language-python">my_component = prog.component("my_component")
 
 # Registers: reg(name, bitwidth)
-my_component.reg(&quot;my_reg&quot;, 32)
+my_component.reg("my_reg", 32)
 
 # Constants: const(name, bitwidth, value)
-my_component.const(&quot;my_reg&quot;, 32, 42)
+my_component.const("my_reg", 32, 42)
 
 # Adders/Subtractors: [add|sub](name, size, signed=False)
 # a signed adder 
-my_component.add(&quot;my_add&quot;, 32, signed=True)
+my_component.add("my_add", 32, signed=True)
 # a subtractor
-my_component.sub(&quot;my_sub&quot;, 32)
+my_component.sub("my_sub", 32)
 
 
 # Comparators: [gt|lt|eq|neq|ge|le](name, size, signed=False)
-my_component.gt(&quot;my_gt&quot;, 32)
+my_component.gt("my_gt", 32)
 # a signed le comparison
-my_component.lt(&quot;my_lt&quot;, 32, signed=True)
-my_component.eq(&quot;my_eq&quot;, 32)
-my_component.neq(&quot;my_neq&quot;, 32)
-my_component.ge(&quot;my_ge&quot;, 32)
-my_component.le(&quot;my_le&quot;, 32)
+my_component.lt("my_lt", 32, signed=True)
+my_component.eq("my_eq", 32)
+my_component.neq("my_neq", 32)
+my_component.ge("my_ge", 32)
+my_component.le("my_le", 32)
 
 # 1-D memory: 
 # mem_d1(name, bitwidth, len, idx_size, is_external=False, is_ref=False)
-my_component.mem_d1(&quot;my_mem&quot;, 32, 4, 32)
+my_component.mem_d1("my_mem", 32, 4, 32)
 # An external memory
-my_component.mem_d1(&quot;my_mem&quot;, 32, 4, 32, is_external=True)
+my_component.mem_d1("my_mem", 32, 4, 32, is_external=True)
 # A memory by reference
-my_component.mem_d1(&quot;my_mem&quot;, 32, 4, 32, is_ref=True)
+my_component.mem_d1("my_mem", 32, 4, 32, is_ref=True)
 </code></pre>
 <p>If you're curious, you can read more about <a href="builder/../lang/data-format.html#external-memories">external memories</a> or <a href="builder/../lang/memories-by-reference.html#passing-cells-by-reference">memories by reference</a>.</p>
 <h4 id="retrieving-cells"><a class="header" href="#retrieving-cells">Retrieving Cells</a></h4>
 <p>In order to reference a cell without a <a href="builder/ref.html#creating-handles">handle</a>, use the <code>Builder().get_cell()</code> method.</p>
 <pre><code class="language-python"># defining a register cell
-my_component.reg(&quot;my_reg&quot;, 32)
+my_component.reg("my_reg", 32)
 
 # a few lines later 
-my_reg = prog.get_cell(&quot;my_reg&quot;)
+my_reg = prog.get_cell("my_reg")
 </code></pre>
 <h2 id="wires"><a class="header" href="#wires">Wires</a></h2>
 <h3 id="guarded-assignments-1"><a class="header" href="#guarded-assignments-1">Guarded Assignments</a></h3>
 <p>Guarded assignments in the builder are syntactically similar to those in Calyx.</p>
-<pre><code class="language-python">my_component = prog.component(&quot;my_component&quot;)
+<pre><code class="language-python">my_component = prog.component("my_component")
 
-my_add = comp.add(&quot;my_add&quot;, 32)
-my_reg = comp.reg(&quot;my_reg&quot;, 32)
+my_add = comp.add("my_add", 32)
+my_reg = comp.reg("my_reg", 32)
 
-with my_component.group(&quot;my_group&quot;):
+with my_component.group("my_group"):
     # unconditional assignments
     add.left = const(32, 1)
     add.right = const(32, 41)
@@ -3718,46 +3718,46 @@ with my_component.group(&quot;my_group&quot;):
 <h4 id="defining-groups"><a class="header" href="#defining-groups">Defining Groups</a></h4>
 <p><a href="builder/../lang/ref.html#group-definitions">Groups</a> are defined using the <code>group()</code> method for a component. To make a <a href="builder/ref.html#creating-handles">handle</a> for a group, use the <code>as</code> syntax. Group handles are necessary in order to set done ports for groups.</p>
 <p>It's possible to define a <a href="builder/../lang/static.html#delay-by-n-cycles">static delay</a> for a group using the optional <code>static_delay</code> argument.</p>
-<pre><code class="language-python">my_component = prog.component(&quot;my_component&quot;)
+<pre><code class="language-python">my_component = prog.component("my_component")
 
 # a group definition + handle for the group
-with my_component.group(&quot;my_group&quot;) as my_group:
+with my_component.group("my_group") as my_group:
     # assignments here
 
 # a group with a static delay
-with my_component.group(&quot;my_static_group&quot;, static_delay=1): 
+with my_component.group("my_static_group", static_delay=1): 
 
 </code></pre>
 <h4 id="defining-combinational-groups"><a class="header" href="#defining-combinational-groups">Defining Combinational Groups</a></h4>
 <p><a href="builder/../lang/ref.html#comb-group-definitions">Combinational groups</a> are defined similarly to groups, except with the <code>comb_group</code> method.</p>
-<pre><code class="language-python">my_component = prog.component(&quot;my_component&quot;)
+<pre><code class="language-python">my_component = prog.component("my_component")
 
-with my_component.comb_group(&quot;my_comb_group&quot;):
+with my_component.comb_group("my_comb_group"):
     # assignments here
 </code></pre>
 <h4 id="retrieving-groups"><a class="header" href="#retrieving-groups">Retrieving Groups</a></h4>
 <p>If a group doesn't have a <a href="builder/ref.html#creating-handles">handle</a>, it can be retrieved later with the <code>Builder().get_group()</code> method. It's possible to retrieve combinational groups as well as regular groups with this method.</p>
 <pre><code class="language-python">prog = cb.Builder()
-my_component = prog.component(&quot;my_component&quot;)
+my_component = prog.component("my_component")
 
-with my_component.group(&quot;my_group&quot;):
+with my_component.group("my_group"):
     # group definition here
 
 # a few lines later
-my_group = prog.get_group(&quot;my_group&quot;)
+my_group = prog.get_group("my_group")
 
-with my_component.comb_group(&quot;my_comb_group&quot;):
+with my_component.comb_group("my_comb_group"):
     # comb group definition here
 
-my_comb_group = prog.get_group(&quot;my_comb_group&quot;)
+my_comb_group = prog.get_group("my_comb_group")
 
 </code></pre>
 <h3 id="continuous-assignments-1"><a class="header" href="#continuous-assignments-1">Continuous Assignments</a></h3>
 <p><a href="builder/../lang/ref.html#continuous-assignments">Continuous assignments</a> are generated by using the syntax <code>with comp.continuous</code>.</p>
-<pre><code class="language-python">my_component = prog.component(&quot;my_component&quot;)
+<pre><code class="language-python">my_component = prog.component("my_component")
 
-my_output = my_component.output(&quot;my_output&quot;, 32)
-my_reg = comp.reg(&quot;my_reg&quot;, 32)
+my_output = my_component.output("my_output", 32)
+my_reg = comp.reg("my_reg", 32)
 
 with my_component.continuous:
     my_component.this().my_output = my_reg.out
@@ -3770,7 +3770,7 @@ with my_component.continuous:
 <pre><code class="language-python">my_component.control += my_group
 
 # using `get_group`
-my_component.control += my_component.get_group(&quot;my_group&quot;)
+my_component.control += my_component.get_group("my_group")
 </code></pre>
 <h3 id="seq-2"><a class="header" href="#seq-2"><code>seq</code></a></h3>
 <p>Control statements are <a href="builder/../lang/ref.html#seq">sequenced</a> in the order that they appear in a component's control program, represented by a Python list. Let's say we want to sequence the control statements <code>A</code>, <code>B</code>, and <code>C</code>.</p>
@@ -3815,20 +3815,20 @@ my_invoke = invoke(my_cell, in_arg1=my_cell_arg1_reg.out, in_arg2=1)
 <p>Handles allow components, groups, cells, control operators, and input/output ports to be referenced after their definition.</p>
 <pre><code class="language-python">def add_my_component(prog):
     # Creating a handle to a component
-    my_component = prog.component(&quot;my_component&quot;)
+    my_component = prog.component("my_component")
 
     # using the component handle
-    my_component.reg(&quot;my_reg&quot;, 32)
+    my_component.reg("my_reg", 32)
 
     # Creating a handle to an input/output port
-    my_input = component.input(&quot;my_input&quot;, 32)
-    my_output = component.output(&quot;my_output&quot;, 32)
+    my_input = component.input("my_input", 32)
+    my_output = component.output("my_output", 32)
 
     # Creating a handle to a cell
-    my_second_comp = my_component.cell(&quot;my_cell&quot;, my_second_comp)
+    my_second_comp = my_component.cell("my_cell", my_second_comp)
 
     # Creating a handle to a group
-    with my_component.group(&quot;my_group&quot;) as my_group:
+    with my_component.group("my_group") as my_group:
         # assignments
 
     # Creating a handle to a control operator
@@ -3840,7 +3840,7 @@ my_invoke = invoke(my_cell, in_arg1=my_cell_arg1_reg.out, in_arg2=1)
 <h3 id="importing-calyx-libraries"><a class="header" href="#importing-calyx-libraries">Importing Calyx Libraries</a></h3>
 <p>To generate imports for Calyx libraries, use the <code>Builder.import_()</code> method.</p>
 <pre><code class="language-python">prog = cb.Builder()
-prog.import_(&quot;primitives/binary_operators.futil&quot;)
+prog.import_("primitives/binary_operators.futil")
 </code></pre>
 <h3 id="explictly-stating-widths-with-const"><a class="header" href="#explictly-stating-widths-with-const">Explictly Stating Widths with <code>const</code></a></h3>
 <p>Usually, the builder library can automatically infer the width of a port. In cases where it can't, use the <code>const(width, value)</code> expression:</p>
@@ -3848,9 +3848,9 @@ prog.import_(&quot;primitives/binary_operators.futil&quot;)
 </code></pre>
 <h3 id="high-and-low-signals"><a class="header" href="#high-and-low-signals">High and Low Signals</a></h3>
 <p>The <code>calyx.builder.HI</code> or <code>calyx.builder.LO</code> are shorthand for one-bit high and low signals.</p>
-<pre><code class="language-python">&quot;&quot;&quot;A one-bit low signal&quot;&quot;&quot;
+<pre><code class="language-python">"""A one-bit low signal"""
 LO = const(1, 0)
-&quot;&quot;&quot;A one-bit high signal&quot;&quot;&quot;
+"""A one-bit high signal"""
 HI = const(1, 1)
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="building-a-frontend-for-calyx"><a class="header" href="#building-a-frontend-for-calyx">Building a Frontend for Calyx</a></h1>
@@ -3900,7 +3900,7 @@ sos := reduce 1 (acc, i &lt;- squares) 0 { acc + i }
 </code></pre>
 <p>Why <code>42</code>? Because we populated <code>avec</code> with:</p>
 <pre><code class="language-json">{
-  &quot;avec&quot;: [
+  "avec": [
     0,
     1,
     4,
@@ -3915,8 +3915,8 @@ Our goal in this tutorial is to build a compiler from MrXL to hardware by transl
 The Calyx IL code generated by compiling this program looks more like:</p>
 <details>
 <summary>Click to expand 103 lines.</summary>
-<pre><code class="language-C">import &quot;primitives/core.futil&quot;;
-import &quot;primitives/binary_operators.futil&quot;;
+<pre><code class="language-C">import "primitives/core.futil";
+import "primitives/binary_operators.futil";
 component main() -&gt; () {
   cells {
     @external avec_b0 = comb_mem_d1(32, 4, 32);
@@ -4052,7 +4052,7 @@ We choose to represent <a href="https://github.com/calyxir/calyx/blob/mrxl/mrxl/
 A program is a sequence of array/register declarations followed by computation statements:</p>
 <pre><code class="language-python">@dataclass
 class Prog:
-    &quot;&quot;&quot;A MrXL program.&quot;&quot;&quot;
+    """A MrXL program."""
     decls: List[Decl]  # Memory declarations
     stmts: List[Stmt]  # Map and reduce statements
 </code></pre>
@@ -4060,7 +4060,7 @@ class Prog:
 They carry information about whether the array is an <code>input</code> or <code>output</code>, the array's name, and the type of the array's elements:</p>
 <pre><code class="language-python">@dataclass
 class Decl:
-    &quot;&quot;&quot;Declaration of a memory.&quot;&quot;&quot;
+    """Declaration of a memory."""
     input: bool  # If `False`, this is an `output`.
     name: str
     type: Type
@@ -4069,7 +4069,7 @@ class Decl:
 They contain further nested nodes representing the function-header and -body, and the type of operation:</p>
 <pre><code class="language-python">@dataclass
 class Stmt:
-    &quot;&quot;&quot;A statement in the program.&quot;&quot;&quot;
+    """A statement in the program."""
     dst: str
     operation: Union[Map, Reduce]
 </code></pre>
@@ -4092,13 +4092,13 @@ Finally, the <a href="tutorial/../lang/ref.html#the-control-operators">control s
 <pre><code class="language-python">import calyx.builder as cb
 
 prog = cb.Builder() # A Calyx program
-main = prog.component(&quot;main&quot;) # Create a component named &quot;main&quot;
+main = prog.component("main") # Create a component named "main"
 </code></pre>
 <h3 id="decl-nodes"><a class="header" href="#decl-nodes"><code>Decl</code> nodes</a></h3>
 <p><code>Decl</code> nodes instantiate new memories and registers.
 We need these to be instantiated in the <code>cells</code> section of our Calyx output.
 We use Calyx's <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0ed7bf949a61/primitives/compile.futil#L22"><code>std_reg</code></a> and <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0ed7bf949a61/primitives/compile.futil#L22"><code>comb_mem_d1</code></a> primitives to represent <a href="https://github.com/calyxir/calyx/blob/master/primitives/compile.futil#L31">registers</a> and <a href="https://github.com/calyxir/calyx/blob/master/primitives/core.sv#L220">memories</a>:</p>
-<pre><code class="language-C">import &quot;primitives/core.futil&quot;; // Import standard library
+<pre><code class="language-C">import "primitives/core.futil"; // Import standard library
 
 component main() -&gt; () {
   cells {
@@ -4120,7 +4120,7 @@ We <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0e
 <p>Using this information, we can instantiate registers and memories for our inputs and outputs:</p>
 <pre><code class="language-python">            for i in range(par):
                 main.comb_mem_d1(
-                    f&quot;{name}_b{i}&quot;, 32, arr_size // par, 32, is_external=True
+                    f"{name}_b{i}", 32, arr_size // par, 32, is_external=True
                 )
 </code></pre>
 <p>The <code>main.mem_d1</code> call is a function defined by the Calyx builder module to instantiate memories for a component.
@@ -4147,7 +4147,7 @@ We provide a <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrx
     bank_factor: int,
     s_idx: int,
 ):
-    &quot;&quot;&quot;
+    """
     Returns a dictionary containing Calyx cells, wires and
     control needed to implement a `map` statement.
     See gen_stmt_impl for format of the dictionary.
@@ -4157,7 +4157,7 @@ We provide a <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrx
       - a group that increments an index to access the `map` input array
       - a group that implements the loop condition, checking if the index
         has reached the end of the input array
-    &quot;&quot;&quot;
+    """
     # TODO: Implement map!
     return Empty()
 </code></pre>
@@ -4165,23 +4165,23 @@ We provide a <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrx
 <p>To run <code>mrxl</code> with <code>my_map_impl</code> instead of our implementation, pass the <code>--my-map</code> flag:</p>
 <pre><code class="language-sh">fud e --from mrxl test/sos.mrxl \
         --to dat --through verilog \
-        -s mrxl.flags &quot;--my-map &quot;  \
+        -s mrxl.flags "--my-map "  \
         -s mrxl.data test/sos.mrxl.data
 </code></pre>
 <p>If you are feeling good about your implementation, skip to <a href="tutorial/frontend-tut.html#adding-parallelization">the next section</a>!
 If you'd like to read through the details of our implementation – or build yours in tandem – continue on with the rest of this section.</p>
 <h3 id="loop-condition"><a class="header" href="#loop-condition">Loop condition</a></h3>
 <p>We define a <a href="tutorial/../lang/ref.html#comb-group-definitions">combinational group</a> to perform the comparison <code>idx &lt; arr_size</code> that uses an <code>lt</code> cell:</p>
-<pre><code class="language-python">    group_name = f&quot;cond_{suffix}&quot;
-    cell = f&quot;lt_{suffix}&quot;
-    less_than = comp.cell(cell, Stdlib.op(&quot;lt&quot;, 32, signed=False))
+<pre><code class="language-python">    group_name = f"cond_{suffix}"
+    cell = f"lt_{suffix}"
+    less_than = comp.cell(cell, Stdlib.op("lt", 32, signed=False))
     with comp.comb_group(group_name):
         less_than.left = idx.out
         less_than.right = arr_size
 </code></pre>
 <h3 id="index-increment"><a class="header" href="#index-increment">Index increment</a></h3>
 <p>The loop index increment is implemented using a <a href="tutorial/../lang/ref.html#group-definitions">group</a> and an <code>adder</code>:</p>
-<pre><code class="language-python">    group_name = f&quot;incr_idx_{suffix}&quot;
+<pre><code class="language-python">    group_name = f"incr_idx_{suffix}"
     adder = comp.add(32)
     with comp.group(group_name) as incr:
         adder.left = idx.out
@@ -4196,28 +4196,28 @@ We do this by setting the group's <code>done</code> condition to track the regis
 <h3 id="body-computation"><a class="header" href="#body-computation">Body computation</a></h3>
 <p>The final piece of the puzzle is the body's computation.
 The corresponding group indexes into the input memories:</p>
-<pre><code class="language-python">        with comp.group(f&quot;eval_body_{suffix}&quot;) as evl:
+<pre><code class="language-python">        with comp.group(f"eval_body_{suffix}") as evl:
             # Index each array
             for bind in stmt.binds:
                 # Map bindings have exactly one dest
-                mem = comp.get_cell(f&quot;{name2arr[bind.dst[0]]}&quot;)
+                mem = comp.get_cell(f"{name2arr[bind.dst[0]]}")
                 mem.addr0 = idx.out
 </code></pre>
 <p>Because the builder module is an embedded DSL, we can simply use Python's <code>for</code> loop to generate all the required assignments for indexing.</p>
 <p>This code instantiates an adder or a multiplier depending on the computation needed using the <code>expr_to_port</code> helper function:</p>
-<pre><code class="language-python">        if body.operation == &quot;mul&quot;:
+<pre><code class="language-python">        if body.operation == "mul":
             operation = comp.cell(
-                f&quot;mul_{suffix}&quot;, Stdlib.op(&quot;mult_pipe&quot;, 32, signed=False)
+                f"mul_{suffix}", Stdlib.op("mult_pipe", 32, signed=False)
             )
         else:
-            operation = comp.add(32, f&quot;add_{suffix}&quot;)
+            operation = comp.add(32, f"add_{suffix}")
 </code></pre>
 <p>and writes the value from the operation into the output memory:</p>
-<pre><code class="language-py">            out_mem = comp.get_cell(f&quot;{dest}_b{bank}&quot;)
+<pre><code class="language-py">            out_mem = comp.get_cell(f"{dest}_b{bank}")
             out_mem.addr0 = idx.out
             out_mem.write_data = operation.out
             # Multipliers are sequential so we need to manipulate go/done signals
-            if body.operation == &quot;mul&quot;:
+            if body.operation == "mul":
                 operation.go = 1
                 out_mem.write_en = operation.done
             else:
@@ -4232,11 +4232,11 @@ Finally, the group's computation is done when the memory write is committed.</p>
 <h3 id="generating-control"><a class="header" href="#generating-control">Generating control</a></h3>
 <p>Once we have generated the hardware needed for our computation, we can schedule its computation using <a href="tutorial/../lang/ref.html#the-control-operators">control operators</a>:</p>
 <pre><code class="language-py">            While(
-                CompPort(CompVar(port), &quot;out&quot;),
+                CompPort(CompVar(port), "out"),
                 CompVar(cond),
                 SeqComp(
                     [
-                        Enable(f&quot;eval_body_{suffix}&quot;),
+                        Enable(f"eval_body_{suffix}"),
                         Enable(incr),
                     ]
                 ),
@@ -4322,9 +4322,9 @@ We mentioned that the restrictions placed on the language can be lifted by beefi
 </blockquote>
 <p>Say you wanted to add subtraction and division to the mix.
 We have set you up for success: the MrXL parser already parses <code>-</code> and <code>/</code> into <code>sub</code> and <code>div</code> respectively.
-Now, in <code>gen_calyx.py</code>, you need to check for &quot;sub&quot; and &quot;div&quot; as possible binary operations, and then invoke the appropriate cell-builders of the <code>builder</code> library.
+Now, in <code>gen_calyx.py</code>, you need to check for "sub" and "div" as possible binary operations, and then invoke the appropriate cell-builders of the <code>builder</code> library.
 For reference, see how the <code>+</code> and <code>*</code> operations are handled at present.
-For &quot;fun&quot;, take a look at how Calyx implements <a href="https://github.com/calyxir/calyx/blob/master/primitives/binary_operators.sv#L27-L45">multiplication</a>, and how that maps to the existing invocation to create a 32-bit multiplication cell using the <code>builder</code>!</p>
+For "fun", take a look at how Calyx implements <a href="https://github.com/calyxir/calyx/blob/master/primitives/binary_operators.sv#L27-L45">multiplication</a>, and how that maps to the existing invocation to create a 32-bit multiplication cell using the <code>builder</code>!</p>
 </li>
 <li>
 <blockquote>
@@ -4355,13 +4355,13 @@ They are lighter in two ways.</p>
 <p>Calyx requires cells to be allocated for the output cells.
 Instead of asking the user to supply zeroed-out arrays and registers for output cells, we can infer the need for these output cells from the source code.
 We can then add these on to the MrXL-native data files to make them amenable to Calyx.</p>
-<p>Additionally, because MrXL supports only a few kinds of data, some interesting parameters of Calyx-native data files turn into &quot;just boilerplate&quot; in MrXL-native data.
+<p>Additionally, because MrXL supports only a few kinds of data, some interesting parameters of Calyx-native data files turn into "just boilerplate" in MrXL-native data.
 We can keep MrXL-native data files relatively light and add this <code>format</code> information automatically.</p>
 <h2 id="example-squaresmrxldata"><a class="header" href="#example-squaresmrxldata">Example: <code>squares.mrxl.data</code></a></h2>
 <p>Let us look at these changes in practice.</p>
 <p>We write <code>avec</code>'s values as a straightforward array:</p>
 <pre><code class="language-json">{
-	&quot;avec&quot;: [
+	"avec": [
 			0,
 			1,
 			4,
@@ -4371,48 +4371,48 @@ We can keep MrXL-native data files relatively light and add this <code>format</c
 </code></pre>
 <p>but under the hood, the <em>Calyx IL version</em> of <code>squares.mrxl</code> comes to expect something of the form:</p>
 <pre><code class="language-json">{
-    &quot;avec_b0&quot;: {
-        &quot;data&quot;: [
+    "avec_b0": {
+        "data": [
             0,
             1
         ],
-        &quot;format&quot;: {
-            &quot;is_signed&quot;: false,
-            &quot;numeric_type&quot;: &quot;bitnum&quot;,
-            &quot;width&quot;: 32
+        "format": {
+            "is_signed": false,
+            "numeric_type": "bitnum",
+            "width": 32
         }
     },
-    &quot;avec_b1&quot;: {
-        &quot;data&quot;: [
+    "avec_b1": {
+        "data": [
             4,
             5
         ],
-        &quot;format&quot;: {
-            &quot;is_signed&quot;: false,
-            &quot;numeric_type&quot;: &quot;bitnum&quot;,
-            &quot;width&quot;: 32
+        "format": {
+            "is_signed": false,
+            "numeric_type": "bitnum",
+            "width": 32
         }
     },
-    &quot;squares_b0&quot;: {
-        &quot;data&quot;: [
+    "squares_b0": {
+        "data": [
             0,
             0
         ],
-        &quot;format&quot;: {
-            &quot;is_signed&quot;: false,
-            &quot;numeric_type&quot;: &quot;bitnum&quot;,
-            &quot;width&quot;: 32
+        "format": {
+            "is_signed": false,
+            "numeric_type": "bitnum",
+            "width": 32
         }
     },
-    &quot;squares_b1&quot;: {
-        &quot;data&quot;: [
+    "squares_b1": {
+        "data": [
             0,
             0
         ],
-        &quot;format&quot;: {
-            &quot;is_signed&quot;: false,
-            &quot;numeric_type&quot;: &quot;bitnum&quot;,
-            &quot;width&quot;: 32
+        "format": {
+            "is_signed": false,
+            "numeric_type": "bitnum",
+            "width": 32
         }
     }
 }
@@ -4521,7 +4521,7 @@ intermediate representation.</p>
 </code></pre>
 <blockquote>
 <p>If you get an error with <code>shutil</code>, try deleting the <code>python/</code> directory, restoring it, and rerunning the above command: <code>cd .. &amp;&amp; rm -rf python &amp;&amp; git checkout -- python</code>
-If you are on MacOS - Big Sur and are getting an error similar to &quot;(wheel).whl is not a supported wheel on this platform&quot;, try changing part of the wheel's filename from 11_0 to 10_9. See this github <a href="https://github.com/apple/tensorflow_macos/issues/46">issue</a> for more information.</p>
+If you are on MacOS - Big Sur and are getting an error similar to "(wheel).whl is not a supported wheel on this platform", try changing part of the wheel's filename from 11_0 to 10_9. See this github <a href="https://github.com/apple/tensorflow_macos/issues/46">issue</a> for more information.</p>
 </blockquote>
 </li>
 <li>
@@ -4558,16 +4558,16 @@ for ONNX simulation and image pre-processing:</p>
 </code></pre>
 <p>For example, we can simulate the LeNet ONNX model found <a href="https://github.com/ekut-es/pico-cnn/blob/master/data/lenet/lenet.onnx">here</a> using the following command:</p>
 <pre><code>python3 frontends/relay/onnx_to_calyx.py \
--n &quot;lenet&quot; \
--d &quot;MNIST&quot; \
--i &quot;/path/to/image.png&quot; \
--onnx &quot;/path/to/model.onnx&quot; \
+-n "lenet" \
+-d "MNIST" \
+-i "/path/to/image.png" \
+-onnx "/path/to/model.onnx" \
 -o calyx
 </code></pre>
 <ul>
 <li><code>-n</code>: The name of the input net. This is mostly used for naming the output files.</li>
 <li><code>-d</code>: The dataset for which the input will be classified against. This is necessary to
-determine what preprocessing should be done on the image. e.g. <code>&quot;mnist&quot;</code> or <code>&quot;imagenet&quot;</code>.</li>
+determine what preprocessing should be done on the image. e.g. <code>"mnist"</code> or <code>"imagenet"</code>.</li>
 <li><code>-i</code>: The file path to the input image which you want classified.</li>
 <li><code>-onnx</code>: The file path to the ONNX model.</li>
 <li><code>-o</code>: The type of output.
@@ -4613,9 +4613,9 @@ To install, run:</p>
 <h2 id="configuration-files"><a class="header" href="#configuration-files">Configuration Files</a></h2>
 <p>Configurations files simply specify command line parameters:</p>
 <pre><code class="language-json">{
-  &quot;input_bitwidth&quot;: 32,
-  &quot;input_size&quot;: 4,
-  &quot;modulus&quot;: 97
+  "input_bitwidth": 32,
+  "input_size": 4,
+  "modulus": 97
 }
 </code></pre>
 <h2 id="command-line-options-1"><a class="header" href="#command-line-options-1">Command Line Options</a></h2>
@@ -4637,7 +4637,7 @@ output dot: int
 prodvec := map 16 (a &lt;- avec, b &lt;- bvec) { a * b }
 dot := reduce 4 (a, b &lt;- prodvec) 0 { a + b }
 </code></pre>
-<p>The numbers that come right after <code>map</code> and <code>reduce</code> (<code>16</code> and <code>4</code> respectively) are &quot;parallelism factors&quot; that guide the generation of hardware.
+<p>The numbers that come right after <code>map</code> and <code>reduce</code> (<code>16</code> and <code>4</code> respectively) are "parallelism factors" that guide the generation of hardware.
 The explanation on this page is relatively brief; see the <a href="frontends/../tutorial/frontend-tut.html">frontend tutorial</a> for a more detailed explanation of the language. In particular, the <a href="frontends/../tutorial/frontend-tut.html#example-sum-of-squares">sum of squares</a> example is a good place to start.</p>
 <h2 id="install"><a class="header" href="#install">Install</a></h2>
 <p>First, install the <a href="frontends/../calyx-py.html">calyx-py</a> library.</p>
@@ -4680,7 +4680,7 @@ In order to compile MrXL to Calyx and then simulate the Calyx code in Verilog, r
 </code></pre>
 <p>An aside: MrXL permits a simplified data format, which is what we have been looking at in our <code>&lt;prog&gt;.mrxl.data</code> files.
 Files of this form need to be beefed up with additional information so that Verilog (and similar simulators) can work with them.
-We did this beefing up &quot;on the fly&quot; in the incantation above, but it is interesting to see the changes we made.</p>
+We did this beefing up "on the fly" in the incantation above, but it is interesting to see the changes we made.</p>
 <p>See this with:</p>
 <pre><code>mrxl &lt;prog&gt;.mrxl --data &lt;prog&gt;.mrxl.data --convert
 </code></pre>
@@ -4727,7 +4727,7 @@ the Calyx file and generates an entry in the json for each cell marked with the
 <p>As you can see, the tool is right now pretty limited, because it only supports 2 different representations of numbers. What if you want to generate random, 8 bit, unsigned ints in your memory? Data Gen currently wouldn't support that. Ideally, we would want each Calyx memory cell to have its own attribute(s) which can hold information about what type of number representation format the memory wants. This <a href="https://github.com/calyxir/calyx/issues/1163">github issue</a> goes into more detail about future improvements for the tool.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="exp-generator"><a class="header" href="#exp-generator"><code>exp</code> Generator</a></h1>
 <p>The <code>exp</code> generator uses a Taylor series approximation to calculate the fixed point value of the natural
-exponential function <code>e^x</code>. The <a href="https://en.wikipedia.org/wiki/Taylor_series#Exponential_function">Maclaurin series</a> 
+exponential function <code>e^x</code>. The <a href="https://en.wikipedia.org/wiki/Taylor_series#Exponential_function">Maclaurin series</a>
 for the function can be written as:</p>
 <pre><code>e^x = 1 + x + x^2/2! + x^3/3! + ... + x^n/n!
 </code></pre>
@@ -4735,22 +4735,22 @@ for the function can be written as:</p>
 <p>For signed values, we can take the reciprocal value:</p>
 <pre><code>e^(-x) = 1/e^x
 </code></pre>
-<p>The <code>fp_pow_full</code> component can calculate the value of <code>b^x</code> where <code>b</code> and <code>x</code> are 
-any fixed point numbers. This can be calculated by first observing: </p>
+<p>The <code>fp_pow_full</code> component can calculate the value of <code>b^x</code> where <code>b</code> and <code>x</code> are
+any fixed point numbers. This can be calculated by first observing:</p>
 <pre><code>b^x = e^(ln(b^x)) = e^(x*ln(b))
 </code></pre>
 <p>Therefore, we just calculate <code>x*ln(b)</code>, and then we can feed the result into the <code>exp</code><br />
-component to get our answer. </p>
-<p>To calculate <code>ln(p)</code> for fixed point values <code>p</code>, we use the second order <a href="https://en.wikipedia.org/wiki/Pad%C3%A9_approximant">Padé Approximant</a> of <code>ln(p)</code>. We calculated the approximant 
+component to get our answer.</p>
+<p>To calculate <code>ln(p)</code> for fixed point values <code>p</code>, we use the second order <a href="https://en.wikipedia.org/wiki/Pad%C3%A9_approximant">Padé Approximant</a> of <code>ln(p)</code>. We calculated the approximant
 using <a href="https://www.wolframalpha.com/input?i=+PadeApproximant%5Bln%28x%29%2C%7Bx%2C1.5%2C%7B2%2C2%7D%7D%5D+">Wolfram Alpha</a>.</p>
 <p>The <code>gen_exp.py</code> file can generate an entire Calyx program for testing purposes.
-<code>gen_exp.py</code> can generate two different types of designs, depending on the 
-<code>base_is_e</code> flag: if <code>base_is_e</code> is true, then the design can only caclulate 
-values for <code>e^x</code>. The main component contains memories <code>x</code> (for the input) and <code>ret</code> for the result of <code>e^x</code>. 
-If <code>base_is_e</code> is false, then the design can calculate values for <code>b^x</code> for any base 
+<code>gen_exp.py</code> can generate two different types of designs, depending on the
+<code>base_is_e</code> flag: if <code>base_is_e</code> is true, then the design can only caclulate
+values for <code>e^x</code>. The main component contains memories <code>x</code> (for the input) and <code>ret</code> for the result of <code>e^x</code>.
+If <code>base_is_e</code> is false, then the design can calculate values for <code>b^x</code> for any base
 <code>e</code>. Therefore, the main component contains memories <code>x</code> (the exponent input), <code>b</code> (the base intput),
-and <code>ret</code> for the result of <code>b^x</code>. 
-In order to generate an example program (that can only calculate exponent values with base 
+and <code>ret</code> for the result of <code>b^x</code>.
+In order to generate an example program (that can only calculate exponent values with base
 <code>e</code>), with degree <code>4</code>, bit width <code>32</code>, integer bit width <code>16</code>, and <code>x</code> interpreted as a signed value:</p>
 <pre><code>./calyx-py/calyx/gen_exp.py -d 4 -w 32 -i 16 -s true -e true 
 </code></pre>
@@ -4763,10 +4763,10 @@ In order to generate an example program (that can only calculate exponent values
 <li><code>--degree</code>: The degree of the Taylor polynomial.</li>
 <li><code>--width</code>: The bit width of the value <code>x</code>.</li>
 <li><code>--int_width</code>: The integer bit width of the value <code>x</code>. The fractional bit width is then inferred as <code>width - int_width</code>.</li>
-<li><code>--is_signed</code>: The signed interpretation of the value <code>x</code>. If <code>x</code> is a signed value, this should be <code>true</code> and otherwise, <code>false</code>. </li>
-<li><code>--base_is_e</code>: A boolean that determines whether or not to generate 
-components needed to just calculate <code>e^x</code>, or to generate components needed to 
-calculate <code>b^x</code> for any base <code>b</code>. </li>
+<li><code>--is_signed</code>: The signed interpretation of the value <code>x</code>. If <code>x</code> is a signed value, this should be <code>true</code> and otherwise, <code>false</code>.</li>
+<li><code>--base_is_e</code>: A boolean that determines whether or not to generate
+components needed to just calculate <code>e^x</code>, or to generate components needed to
+calculate <code>b^x</code> for any base <code>b</code>.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="editor-highlighting"><a class="header" href="#editor-highlighting">Editor Highlighting</a></h1>
 <h2 id="vim"><a class="header" href="#vim">Vim</a></h2>
@@ -4787,7 +4787,7 @@ It is located in <code>&lt;repo&gt;/tools/emacs/futil-mode</code>.</p>
 </code></pre>
 <p>Clone the repository, add the above path to your <a href="http://www.emacswiki.org/emacs/LoadPath">load path</a>, and require
 <code>futil-mode</code> in your <code>.emacs</code> file:</p>
-<pre><code class="language-elisp">(push &quot;~/.emacs.d/private/local/futil-mode&quot; load-path)
+<pre><code class="language-elisp">(push "~/.emacs.d/private/local/futil-mode" load-path)
 (require 'futil-mode)
 </code></pre>
 <p>If you use <a href="https://www.spacemacs.org/">Spacemacs</a>, you would add this to <code>dotspacemacs/user-config</code>

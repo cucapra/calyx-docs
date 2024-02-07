@@ -248,22 +248,22 @@ This route involves generating an <a href="https://en.wikipedia.org/wiki/Advance
 <p>As above, you can invoke the Xilinx toolchain locally or remotely, via SSH.
 To set up SSH execution, you can edit your <code>config.toml</code> to add settings like this:</p>
 <pre><code>[stages.xclbin]
-ssh_host = &quot;havarti&quot;
-ssh_username = &quot;als485&quot;
+ssh_host = "havarti"
+ssh_username = "als485"
 remote = 1
 </code></pre>
 <p>To use local execution, just leave off the <code>remote = true</code> line.</p>
 <p>You can also set the Xilinx mode and target device:</p>
 <pre><code>[stages.xclbin]
-mode = &quot;hw_emu&quot;
-device = &quot;xilinx_u50_gen3x16_xdma_201920_3&quot;
+mode = "hw_emu"
+device = "xilinx_u50_gen3x16_xdma_201920_3"
 </code></pre>
 <p>The options for <code>mode</code> are <code>hw_emu</code> (simulation) and <code>hw</code> (on-FPGA execution).
 The device string above is for the <a href="https://www.xilinx.com/products/boards-and-kits/alveo/u50.html">Alveo U50</a> card, which we have at Cornell. The installed Xilinx card would typically be found under the directory <code>/opt/xilinx/platforms</code>, where one would be able to find a device name of interest.</p>
 <p>To run simulations (or on real FPGAs), you will also need to configure the <code>fpga</code> stage to point to your installations of <a href="https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html">Vitis</a> and <a href="https://xilinx.github.io/XRT/">XRT</a>:</p>
 <pre><code>[stages.fpga]
-xilinx_location = &quot;/scratch/opt/Xilinx/Vitis/2020.2&quot;
-xrt_location = &quot;/scratch/opt/xilinx/xrt&quot;
+xilinx_location = "/scratch/opt/Xilinx/Vitis/2020.2"
+xrt_location = "/scratch/opt/xilinx/xrt"
 </code></pre>
 <p>Those are the paths on Cornell's havarti server.</p>
 <h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
@@ -332,7 +332,7 @@ We currently generate <code>kernel.xml</code> ourselves (with the <code>xilinx-x
 <h4 id="our-completion-workflow"><a class="header" href="#our-completion-workflow">Our Completion Workflow</a></h4>
 <p>The first step is to produce an <code>.xo</code> file.
 We also use <a href="https://github.com/calyxir/calyx/blob/master/fud/bitstream/gen_xo.tcl">a static Tcl script, <code>gen_xo.tcl</code>,</a> which is a simplified version of <a href="https://github.com/Xilinx/Vitis-Tutorials/blob/2021.1/Hardware_Acceleration/Feature_Tutorials/01-rtl_kernel_workflow/reference-files/scripts/package_kernel.tcl">a script from Xilinx's Vitis tutorials</a>.
-The gist of this script is that it creates a Vivado project, adds the source files, twiddles some settings, and then uses the <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/package_xo-Command"><code>package_xo</code> command</a> to read stuff from this project as an &quot;IP directory&quot; and produce an <code>.xo</code> file.
+The gist of this script is that it creates a Vivado project, adds the source files, twiddles some settings, and then uses the <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/package_xo-Command"><code>package_xo</code> command</a> to read stuff from this project as an "IP directory" and produce an <code>.xo</code> file.
 The Vivado command line looks roughly like this:</p>
 <pre><code>vivado -mode batch -source gen_xo.tcl -tclargs xclbin/kernel.xo
 </code></pre>

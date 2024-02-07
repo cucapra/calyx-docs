@@ -180,13 +180,13 @@
 <p>Calyx programs are a sequence of <code>import</code> statements followed by a sequence of
 <code>extern</code> statements or <code>component</code> definitions.</p>
 <h3 id="import-statements"><a class="header" href="#import-statements"><code>import</code> statements</a></h3>
-<p><code>import &quot;&lt;path&gt;&quot;</code> has almost exactly the same semantics to that of <code>#include</code> in
+<p><code>import "&lt;path&gt;"</code> has almost exactly the same semantics to that of <code>#include</code> in
 the C preprocessor: it copies the code from the file at <code>path</code> into
 the current file.</p>
 <h3 id="extern-definitions"><a class="header" href="#extern-definitions"><code>extern</code> definitions</a></h3>
 <p><code>extern</code> definitions allow Calyx programs to link against arbitrary RTL code.
 An <code>extern</code> definition looks like this:</p>
-<pre><code>extern &quot;&lt;path&gt;&quot; {
+<pre><code>extern "&lt;path&gt;" {
   &lt;primitives&gt;...
 }
 </code></pre>
@@ -216,7 +216,7 @@ or one of the parameter names.</li>
 </ul>
 <p>For example, the following is the signature of the <code>std_reg</code> primitive from the
 Calyx standard library:</p>
-<pre><code>primitive std_reg&lt;&quot;state_share&quot;=1&gt;[WIDTH](
+<pre><code>primitive std_reg&lt;"state_share"=1&gt;[WIDTH](
   @write_together(1) @data in: WIDTH,
   @write_together(1) @static(1) @go write_en: 1,
   @clk clk: 1,
@@ -231,7 +231,7 @@ the <code>in</code> and the <code>out</code> ports.</p>
 <h3 id="inlined-primitives"><a class="header" href="#inlined-primitives">Inlined Primitives</a></h3>
 <p><em>Inlined primitives</em> do not have a corresponding Verilog file, and are defined within Calyx. The Calyx backend then converts these definitions into Verilog.</p>
 <p>For example, the <code>std_unsyn_mult</code> primitive is inlined:</p>
-<pre><code>comb primitive std_unsyn_mult&lt;&quot;share&quot;=1&gt;[WIDTH](left: WIDTH, right: WIDTH) -&gt; (out: WIDTH) {
+<pre><code>comb primitive std_unsyn_mult&lt;"share"=1&gt;[WIDTH](left: WIDTH, right: WIDTH) -&gt; (out: WIDTH) {
   assign out = left * right;
 };
 </code></pre>
@@ -340,7 +340,7 @@ r.in = !cond.out ? 32'd0;
 </code></pre>
 <p>Using guards, Calyx programs can assign multiple different values to the same
 port. Omitting a guard expression is equivalent to using <code>1'd1</code> (a constant
-&quot;true&quot;) as the guard.</p>
+"true") as the guard.</p>
 <p>Guards can use the following constructs:</p>
 <ul>
 <li><code>port</code>: A port access on a defined cell</li>
@@ -396,7 +396,7 @@ should assign 1 to this port to indicate that its execution is complete.</p>
 </blockquote>
 <h3 id="comb-group-definitions"><a class="header" href="#comb-group-definitions"><code>comb group</code> definitions</a></h3>
 <p>Combinational groups are a restricted version of groups which perform their
-computation purely combinationally and therefore run for &quot;less than one cycle&quot;:</p>
+computation purely combinationally and therefore run for "less than one cycle":</p>
 <pre><code>comb group name&lt;attributes&gt; {
   assignments...
 }
@@ -515,7 +515,7 @@ They are automatically threaded to any primitive that defines <code>@clk</code> 
 <code>@reset</code> ports.</p>
 <h2 id="advanced-concepts"><a class="header" href="#advanced-concepts">Advanced Concepts</a></h2>
 <h3 id="ref-cells"><a class="header" href="#ref-cells"><code>ref</code> cells</a></h3>
-<p>Calyx components can specify that a cell needs to be passed &quot;by reference&quot;:</p>
+<p>Calyx components can specify that a cell needs to be passed "by reference":</p>
 <pre><code>// Component that performs mem[0] += 1;
 component update_memory() -&gt; () {
   cells {
