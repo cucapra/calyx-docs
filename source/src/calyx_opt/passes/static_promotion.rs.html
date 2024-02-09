@@ -621,6 +621,9 @@
 <span id="621">621</span>
 <span id="622">622</span>
 <span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{InferenceAnalysis, PromotionAnalysis};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, ParseVal, PassOpt, VisResult,
@@ -907,7 +910,9 @@
             <span class="kw">let </span>go_ports =
                 comp_sig.find_all_with_attr(ir::NumAttr::Go).collect_vec();
             <span class="kw">if </span>go_ports.iter().any(|go_port| {
-                go_port.borrow_mut().attributes.has(ir::NumAttr::Static)
+                <span class="kw">let </span>go_ref = go_port.borrow_mut();
+                go_ref.attributes.has(ir::NumAttr::Promotable)
+                    || go_ref.attributes.has(ir::NumAttr::Interval)
             }) {
                 <span class="kw">if </span>comp.control.borrow().is_static() {
                     <span class="comment">// We ended up promoting it
@@ -924,20 +929,21 @@
                         .unwrap(),
                     );
                 } <span class="kw">else </span>{
-                    <span class="comment">// We decided not to promote, so we need to update data structures
-                    // and remove @static attribute from the signature.
-
-                    // Updating `static_info`.
+                    <span class="comment">// We decided not to promote, so we need to update data structures.
+                    // This case should only happen on @promotable components
+                    // (i.e., it shouldn&#39;t happen with @interval components).
                     </span><span class="self">self</span>.inference_analysis.remove_component(comp.name);
-                    <span class="comment">// Removing `@static` from the go ports.
-                    </span><span class="kw">for </span>go_port <span class="kw">in </span>go_ports {
-                        go_port
-                            .borrow_mut()
-                            .attributes
-                            .remove(ir::NumAttr::Static);
-                    }
                 }
             };
+            <span class="comment">// Either we have upgraded component to static&lt;n&gt; or we have decided
+            // not to promote component at all. Either way, we can remove the
+            // @promotable attribute.
+            </span><span class="kw">for </span>go_port <span class="kw">in </span>go_ports {
+                go_port
+                    .borrow_mut()
+                    .attributes
+                    .remove(ir::NumAttr::Promotable);
+            }
         }
         <span class="comment">// Remove @promotable (i.e., @promote_static) attribute from control.
         // Probably not necessary, since we&#39;ll ignore it anyways, but makes for
@@ -968,7 +974,7 @@
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::PromoteStatic) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
             <span class="comment">// Convert to static if enable is
             // within cycle limit and size is above threshold.
             </span><span class="kw">if </span><span class="self">self</span>.within_cycle_limit(latency)
@@ -990,7 +996,7 @@
         _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::PromoteStatic) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
             <span class="comment">// Convert to static if within cycle limit and size is above threshold.
             </span><span class="kw">if </span><span class="self">self</span>.within_cycle_limit(latency)
                 &amp;&amp; (APPROX_ENABLE_SIZE &gt; <span class="self">self</span>.threshold)
@@ -1012,7 +1018,7 @@
     ) -&gt; VisResult {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="comment">// Checking if entire seq is promotable
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::PromoteStatic) {
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
             <span class="comment">// If seq is too small to promote, then continue without doing anything.
             </span><span class="kw">if </span><span class="self">Self</span>::approx_control_vec_size(<span class="kw-2">&amp;</span>s.stmts) &lt;= <span class="self">self</span>.threshold {
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
@@ -1072,7 +1078,7 @@
     ) -&gt; VisResult {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="comment">// Check if entire par is promotable
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::PromoteStatic) {
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
             <span class="kw">let </span>approx_size: u64 = s.stmts.iter().map(<span class="self">Self</span>::approx_size).sum();
             <span class="kw">if </span>approx_size &lt;= <span class="self">self</span>.threshold {
                 <span class="comment">// Par is too small to promote, continue.
@@ -1120,7 +1126,7 @@
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::PromoteStatic) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
             <span class="kw">let </span>approx_size_if = <span class="self">Self</span>::approx_size(<span class="kw-2">&amp;</span>s.tbranch)
                 + <span class="self">Self</span>::approx_size(<span class="kw-2">&amp;</span>s.fbranch)
                 + APPROX_IF_SIZE;
@@ -1154,7 +1160,7 @@
             // This isn&#39;t strictly necessary, but it is helpful for parent control
             // programs applying heuristics.
             </span><span class="kw">if </span>!(<span class="self">self</span>.within_cycle_limit(latency)) {
-                s.attributes.remove(ir::NumAttr::PromoteStatic);
+                s.attributes.remove(ir::NumAttr::Promotable);
             }
         }
         <span class="prelude-val">Ok</span>(Action::Continue)
@@ -1170,7 +1176,7 @@
     ) -&gt; VisResult {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="comment">// First check that while loop is promotable
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::PromoteStatic) {
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
             <span class="kw">let </span>approx_size =
                 <span class="self">Self</span>::approx_size(<span class="kw-2">&amp;</span>s.body) + APPROX_WHILE_REPEAT_SIZE;
             <span class="comment">// Then check that it fits the heuristics
@@ -1199,7 +1205,7 @@
             // This isn&#39;t strictly necessary, but it is helpful for parent control
             // programs applying heuristics.
             </span><span class="kw">if </span>!(<span class="self">self</span>.within_cycle_limit(latency)) {
-                s.attributes.remove(ir::NumAttr::PromoteStatic);
+                s.attributes.remove(ir::NumAttr::Promotable);
             }
         }
         <span class="prelude-val">Ok</span>(Action::Continue)
@@ -1214,7 +1220,7 @@
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::PromoteStatic) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
             <span class="kw">let </span>approx_size =
                 <span class="self">Self</span>::approx_size(<span class="kw-2">&amp;</span>s.body) + APPROX_WHILE_REPEAT_SIZE;
             <span class="kw">if </span>approx_size &gt; <span class="self">self</span>.threshold &amp;&amp; <span class="self">self</span>.within_cycle_limit(latency)
@@ -1238,7 +1244,7 @@
             // This isn&#39;t strictly necessary, but it is helpful for parent control
             // programs applying heuristics.
             </span><span class="kw">if </span>!(<span class="self">self</span>.within_cycle_limit(latency)) {
-                s.attributes.remove(ir::NumAttr::PromoteStatic);
+                s.attributes.remove(ir::NumAttr::Promotable);
             }
         }
         <span class="prelude-val">Ok</span>(Action::Continue)

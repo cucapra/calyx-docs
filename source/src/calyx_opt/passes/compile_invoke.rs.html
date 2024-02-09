@@ -430,6 +430,19 @@
 <span id="430">430</span>
 <span id="431">431</span>
 <span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{
     <span class="self">self</span>, Action, ConstructVisitor, Named, VisResult, Visitor,
 };
@@ -763,20 +776,20 @@
                 .extend(cg.assignments.iter().cloned())
         }
 
-        <span class="comment">// Copy &quot;static&quot; annotation from the `invoke` statement if present
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(time) = s.attributes.get(ir::NumAttr::Static) {
+        <span class="comment">// Copy &quot;promotable&quot; annotation from the `invoke` statement if present
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(time) = s.attributes.get(ir::NumAttr::Promotable) {
             invoke_group
                 .borrow_mut()
                 .attributes
-                .insert(ir::NumAttr::Static, time);
+                .insert(ir::NumAttr::Promotable, time);
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>en = ir::Enable {
             group: invoke_group,
             attributes: Attributes::default(),
         };
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = s.attributes.get(ir::NumAttr::Static) {
-            en.attributes.insert(ir::NumAttr::Static, time);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = s.attributes.get(ir::NumAttr::Promotable) {
+            en.attributes.insert(ir::NumAttr::Promotable, time);
         }
 
         <span class="prelude-val">Ok</span>(Action::change(ir::Control::Enable(en)))
@@ -805,12 +818,25 @@
         <span class="comment">// Get the go port
         </span><span class="kw">let </span>go_port = get_go_port(Rc::clone(<span class="kw-2">&amp;</span>s.comp))<span class="question-mark">?</span>;
 
-        <span class="comment">// define first cycle guard
-        </span><span class="kw">let </span>first_cycle = ir::Guard::Info(ir::StaticTiming::new((<span class="number">0</span>, <span class="number">1</span>)));
+        <span class="comment">// Checks whether compe is a static&lt;n&gt; component or an @interval(n) component.
+        </span><span class="kw">let </span>go_guard = <span class="kw">if </span>s
+            .comp
+            .borrow()
+            .ports
+            .iter()
+            .any(|port| port.borrow().attributes.has(ir::NumAttr::Interval))
+        {
+            <span class="comment">// For @interval(n) components, we do not guard the comp.go
+            // We trigger the go signal for the entire interval.
+            </span>ir::Guard::True
+        } <span class="kw">else </span>{
+            <span class="comment">// For static&lt;n&gt; components, we guard the comp.go with %[0:1]
+            </span>ir::Guard::Info(ir::StaticTiming::new((<span class="number">0</span>, <span class="number">1</span>)))
+        };
 
         <span class="comment">// Build assignemnts
         </span><span class="kw">let </span>go_assign: ir::Assignment&lt;ir::StaticTiming&gt; = builder
-            .build_assignment(go_port, one.borrow().get(<span class="string">&quot;out&quot;</span>), first_cycle);
+            .build_assignment(go_port, one.borrow().get(<span class="string">&quot;out&quot;</span>), go_guard);
         invoke_group.borrow_mut().assignments.push(go_assign);
 
         <span class="comment">// Generate argument assignments

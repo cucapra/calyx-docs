@@ -368,6 +368,14 @@
 <span id="368">368</span>
 <span id="369">369</span>
 <span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{InferenceAnalysis, PromotionAnalysis, ReadWriteSet};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor};
 <span class="kw">use crate</span>::{
@@ -637,7 +645,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::PromoteStatic) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
             <span class="comment">// If entire seq is promotable, then we can compact entire thing
             // and replace it with a static&lt;n&gt; construct.
             </span><span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Change(Box::new(<span class="self">self</span>.compact_control_vec(
@@ -695,14 +703,22 @@
             </span><span class="kw">let </span>comp_sig = comp.signature.borrow();
             <span class="kw">let </span>go_ports: Vec&lt;<span class="kw">_</span>&gt; =
                 comp_sig.find_all_with_attr(ir::NumAttr::Go).collect_vec();
-            <span class="kw">if </span>go_ports.iter().any(|go_port| {
-                go_port.borrow_mut().attributes.has(ir::NumAttr::Static)
+            <span class="comment">// We only need to check for the @promotable attribute.
+            // The @interval attribute means the component&#39;s control is entirely
+            // static, meaning it&#39;s interval/latency is already locked in, so
+            // we know we can&#39;t change its control, so no need to change its
+            // signature.
+            </span><span class="kw">if </span>go_ports.iter().any(|go_port| {
+                go_port.borrow_mut().attributes.has(ir::NumAttr::Promotable)
             }) {
                 <span class="comment">// Getting current latency
                 </span><span class="kw">let </span>cur_latency = go_ports
                     .iter()
                     .filter_map(|go_port| {
-                        go_port.borrow_mut().attributes.get(ir::NumAttr::Static)
+                        go_port
+                            .borrow_mut()
+                            .attributes
+                            .get(ir::NumAttr::Promotable)
                     })
                     .next()
                     .unwrap();
@@ -720,7 +736,7 @@
                         go_port
                             .borrow_mut()
                             .attributes
-                            .insert(ir::NumAttr::Static, new_latency);
+                            .insert(ir::NumAttr::Promotable, new_latency);
                     }
                 }
             };

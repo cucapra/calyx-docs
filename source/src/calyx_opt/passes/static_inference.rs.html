@@ -112,7 +112,7 @@
 <span class="kw">use </span>calyx_utils::CalyxResult;
 <span class="kw">use </span>itertools::Itertools;
 
-<span class="doccomment">/// Infer &quot;promote_static&quot; (potentially to be renamed @promotable) annotation
+<span class="doccomment">/// Infer @promotable annotation
 /// for groups and control.
 /// Inference occurs whenever possible.
 </span><span class="kw">pub struct </span>StaticInference {
@@ -164,12 +164,12 @@
                 <span class="kw">let </span>comp_sig = comp.signature.borrow();
                 <span class="kw">let </span><span class="kw-2">mut </span>go_ports: Vec&lt;<span class="kw">_</span>&gt; =
                     comp_sig.find_all_with_attr(ir::NumAttr::Go).collect();
-                <span class="comment">// Insert @static attribute on the go ports.
+                <span class="comment">// Insert @promotable attribute on the go ports.
                 </span><span class="kw">for </span>go_port <span class="kw">in </span><span class="kw-2">&amp;mut </span>go_ports {
                     go_port
                         .borrow_mut()
                         .attributes
-                        .insert(ir::NumAttr::Static, val);
+                        .insert(ir::NumAttr::Promotable, val);
                 }
                 <span class="kw">let </span><span class="kw-2">mut </span>done_ports: Vec&lt;<span class="kw">_</span>&gt; =
                     comp_sig.find_all_with_attr(ir::NumAttr::Done).collect();

@@ -859,6 +859,11 @@
 <span id="859">859</span>
 <span id="860">860</span>
 <span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_frontend::Attribute;
 
 <span class="kw">use </span><span class="kw">super</span>::StaticGroup;
@@ -1437,6 +1442,11 @@
 
     <span class="kw">pub fn </span>is_static(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="macro">matches!</span>(<span class="self">self</span>, Control::Static(<span class="kw">_</span>))
+    }
+
+    <span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="macro">matches!</span>(<span class="self">self</span>, Control::Static(StaticControl::Empty(<span class="kw">_</span>)))
+            || <span class="macro">matches!</span>(<span class="self">self</span>, Control::Empty(<span class="kw">_</span>))
     }
 
     <span class="kw">pub fn </span>get_latency(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;StaticLatency&gt; {

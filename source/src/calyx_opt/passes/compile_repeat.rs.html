@@ -182,7 +182,7 @@
             init_group
                 .borrow_mut()
                 .attributes
-                .insert(ir::NumAttr::PromoteStatic, <span class="number">1</span>);
+                .insert(ir::NumAttr::Promotable, <span class="number">1</span>);
             <span class="comment">// incr_group:
             // 1) writes results of idx + 1 into idx (i.e., increments idx)
             // 2) writes the result of (idx + 1 &lt; num_repeats) into cond_reg,
@@ -204,7 +204,7 @@
             incr_group
                 .borrow_mut()
                 .attributes
-                .insert(ir::NumAttr::PromoteStatic, <span class="number">1</span>);
+                .insert(ir::NumAttr::Promotable, <span class="number">1</span>);
             <span class="comment">// create control:
             // init_group; while cond_reg.out {repeat_body; incr_group;}
             </span><span class="kw">let </span>while_body = ir::Control::seq(<span class="macro">vec!</span>[

@@ -180,16 +180,11 @@
 <span id="180">180</span>
 <span id="181">181</span>
 <span id="182">182</span>
-<span id="183">183</span>
-<span id="184">184</span>
-<span id="185">185</span>
-<span id="186">186</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
-    AddGuard, AttributePromotion, Canonicalize, CellShare, ClkInsertion,
-    CollapseControl, CombProp, CompileEmpty, CompileInvoke, CompileRepeat,
-    CompileStatic, CompileStaticInterface, CompileSync,
-    CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
+    AddGuard, Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
+    CompileInvoke, CompileRepeat, CompileStatic, CompileStaticInterface,
+    CompileSync, CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
     DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, DiscoverExternal,
     Externalize, GoInsertion, GroupToInvoke, GroupToSeq, HoleInliner,
     InferShare, LowerGuards, MergeAssign, Papercut, ParToSeq,
@@ -216,7 +211,6 @@
         </span>pm.register_pass::&lt;CombProp&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;ComponentInliner&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CollapseControl&gt;()<span class="question-mark">?</span>;
-        pm.register_pass::&lt;CompileEmpty&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;DeadAssignmentRemoval&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;DeadCellRemoval&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;DeadGroupRemoval&gt;()<span class="question-mark">?</span>;
@@ -226,7 +220,6 @@
         pm.register_pass::&lt;ScheduleCompaction&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;StaticInference&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;StaticPromotion&gt;()<span class="question-mark">?</span>;
-        pm.register_pass::&lt;AttributePromotion&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;SimplifyStaticGuards&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;DataPathInfer&gt;()<span class="question-mark">?</span>;
 
@@ -282,8 +275,7 @@
                 </span>CellShare,       <span class="comment">// LiveRangeAnalaysis should handle comb groups
                 </span>SimplifyWithControl, <span class="comment">// Must run before compile-invoke
                 </span>CompileInvoke,   <span class="comment">// creates dead comb groups
-                </span>AttributePromotion,
-                StaticInference,
+                </span>StaticInference,
                 ScheduleCompaction,
                 StaticPromotion,
                 StaticPromotion,

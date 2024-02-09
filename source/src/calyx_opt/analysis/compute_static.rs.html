@@ -231,9 +231,6 @@
 <span id="231">231</span>
 <span id="232">232</span>
 <span id="233">233</span>
-<span id="234">234</span>
-<span id="235">235</span>
-<span id="236">236</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes};
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
@@ -261,7 +258,7 @@
     </span><span class="kw">fn </span>update_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extra: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = <span class="self">self</span>.compute_static(extra) {
             <span class="self">self</span>.get_mut_attributes()
-                .insert(ir::NumAttr::PromoteStatic, time);
+                .insert(ir::NumAttr::Promotable, time);
             <span class="prelude-val">Some</span>(time)
         } <span class="kw">else </span>{
             <span class="prelude-val">None
@@ -298,11 +295,8 @@
     <span class="kw">fn </span>compute_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
         <span class="comment">// Attempt to get the latency from the attribute on the enable first, or
         // failing that, from the group.
-        </span><span class="self">self</span>.attributes.get(ir::NumAttr::PromoteStatic).or_else(|| {
-            <span class="self">self</span>.group
-                .borrow()
-                .attributes
-                .get(ir::NumAttr::PromoteStatic)
+        </span><span class="self">self</span>.attributes.get(ir::NumAttr::Promotable).or_else(|| {
+            <span class="self">self</span>.group.borrow().attributes.get(ir::NumAttr::Promotable)
         })
     }
 }
@@ -310,7 +304,7 @@
 <span class="kw">impl </span>WithStatic <span class="kw">for </span>ir::Invoke {
     <span class="kw">type </span>Info = CompTime;
     <span class="kw">fn </span>compute_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extra: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
-        <span class="self">self</span>.attributes.get(ir::NumAttr::PromoteStatic).or_else(|| {
+        <span class="self">self</span>.attributes.get(ir::NumAttr::Promotable).or_else(|| {
             <span class="kw">let </span>comp = <span class="self">self</span>.comp.borrow().type_name()<span class="question-mark">?</span>;
             extra.get(<span class="kw-2">&amp;</span>comp).cloned()
         })

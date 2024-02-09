@@ -89,18 +89,12 @@
 <span id="89">89</span>
 <span id="90">90</span>
 <span id="91">91</span>
-<span id="92">92</span>
-<span id="93">93</span>
-<span id="94">94</span>
-<span id="95">95</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
-</span><span class="kw">mod </span>attribute_promotion;
-<span class="kw">mod </span>canonical;
+</span><span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
 <span class="kw">mod </span>clk_insertion;
 <span class="kw">mod </span>collapse_control;
 <span class="kw">mod </span>comb_prop;
-<span class="kw">mod </span>compile_empty;
 <span class="kw">mod </span>compile_invoke;
 <span class="kw">mod </span>compile_repeat;
 <span class="kw">mod </span>compile_static;
@@ -142,13 +136,11 @@
 <span class="kw">mod </span>wire_inliner;
 <span class="kw">mod </span>wrap_main;
 
-<span class="kw">pub use </span>attribute_promotion::AttributePromotion;
 <span class="kw">pub use </span>canonical::Canonicalize;
 <span class="kw">pub use </span>cell_share::CellShare;
 <span class="kw">pub use </span>clk_insertion::ClkInsertion;
 <span class="kw">pub use </span>collapse_control::CollapseControl;
 <span class="kw">pub use </span>comb_prop::CombProp;
-<span class="kw">pub use </span>compile_empty::CompileEmpty;
 <span class="kw">pub use </span>compile_invoke::CompileInvoke;
 <span class="kw">pub use </span>compile_repeat::CompileRepeat;
 <span class="kw">pub use </span>compile_static::CompileStatic;

@@ -337,6 +337,27 @@
 <span id="337">337</span>
 <span id="338">338</span>
 <span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::compile_static::make_assign_dyn;
 <span class="kw">use </span><span class="kw">crate</span>::passes::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
@@ -362,7 +383,8 @@
     </span>}
 }
 
-<span class="kw">fn </span>separate_first_cycle(
+<span class="comment">// Looks recursively thru guard to %[0:n] into %0 | %[1:n].
+</span><span class="kw">fn </span>separate_first_cycle(
     guard: ir::Guard&lt;StaticTiming&gt;,
 ) -&gt; ir::Guard&lt;StaticTiming&gt; {
     <span class="kw">match </span>guard {
@@ -395,7 +417,8 @@
     }
 }
 
-<span class="kw">fn </span>separate_first_cycle_assign(
+<span class="comment">// Looks recursively thru assignment&#39;s guard to %[0:n] into %0 | %[1:n].
+</span><span class="kw">fn </span>separate_first_cycle_assign(
     assign: ir::Assignment&lt;StaticTiming&gt;,
 ) -&gt; ir::Assignment&lt;StaticTiming&gt; {
     ir::Assignment {
@@ -406,7 +429,9 @@
     }
 }
 
-<span class="kw">fn </span>make_guard_dyn_one_cycle_static_comp(
+<span class="comment">// Used for guards in a one cycle static component.
+// Replaces %0 with comp.go.
+</span><span class="kw">fn </span>make_guard_dyn_one_cycle_static_comp(
     guard: ir::Guard&lt;StaticTiming&gt;,
     comp_sig: RRC&lt;ir::Cell&gt;,
 ) -&gt; ir::Guard&lt;Nothing&gt; {
@@ -431,12 +456,10 @@
             ir::Guard::Not(Box::new(f))
         }
         ir::Guard::Info(t) =&gt; {
-            <span class="kw">let </span>(beg, end) = t.get_interval();
-            <span class="kw">if </span>beg != <span class="number">0 </span>|| end != <span class="number">1 </span>{
-                <span class="macro">unreachable!</span>(<span class="string">&quot;This function is implemented for 1 cycle static components, only %0 can exist as timing guard&quot;</span>)
-            } <span class="kw">else </span>{
-                <span class="kw">let </span>g = <span class="macro">guard!</span>(comp_sig[<span class="string">&quot;go&quot;</span>]);
-                g
+            <span class="kw">match </span>t.get_interval() {
+                (<span class="number">0</span>, <span class="number">1</span>) =&gt; <span class="macro">guard!</span>(comp_sig[<span class="string">&quot;go&quot;</span>]),
+                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;This function is implemented for 1 cycle static components, only %0 can exist as timing guard&quot;</span>),
+
             }
         }
         ir::Guard::CompOp(op, l, r) =&gt; ir::Guard::CompOp(op, l, r),
@@ -445,7 +468,9 @@
     }
 }
 
-<span class="kw">fn </span>make_assign_dyn_one_cycle_static_comp(
+<span class="comment">// Used for assignments in a one cycle static component.
+// Replaces %0 with comp.go in the assignment&#39;s guard.
+</span><span class="kw">fn </span>make_assign_dyn_one_cycle_static_comp(
     assign: ir::Assignment&lt;StaticTiming&gt;,
     comp_sig: RRC&lt;ir::Cell&gt;,
 ) -&gt; ir::Assignment&lt;Nothing&gt; {
@@ -461,7 +486,10 @@
 }
 
 <span class="kw">impl </span>CompileStaticInterface {
-    <span class="kw">fn </span>make_early_reset_assigns_static_component(
+    <span class="comment">// Takes the assignments within a static component, and instantiates
+    // an FSM (i.e., counter) to convert %[i:j] into i&lt;= fsm &lt; j.
+    // Also includes logic to make fsm reset to 0 once it gets to n-1.
+    </span><span class="kw">fn </span>make_early_reset_assigns_static_component(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         sgroup_assigns: <span class="kw-2">&amp;mut </span>Vec&lt;ir::Assignment&lt;ir::StaticTiming&gt;&gt;,
         latency: u64,
@@ -500,33 +528,40 @@
             <span class="kw">let </span>adder = prim std_add(fsm_size);
             <span class="kw">let </span>const_one = constant(<span class="number">1</span>, fsm_size);
             <span class="kw">let </span>first_state = constant(<span class="number">0</span>, fsm_size);
-            <span class="kw">let </span>penultimate_state = constant(latency-<span class="number">1</span>, fsm_size);
+            <span class="kw">let </span>final_state = constant(latency-<span class="number">1</span>, fsm_size);
         );
         <span class="kw">let </span>g1: Guard&lt;Nothing&gt; = <span class="macro">guard!</span>(this[<span class="string">&quot;go&quot;</span>]);
         <span class="kw">let </span>g2: Guard&lt;Nothing&gt; = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] == first_state[<span class="string">&quot;out&quot;</span>]);
         <span class="kw">let </span>trigger_guard = ir::Guard::and(g1, g2);
         <span class="kw">let </span>g3: Guard&lt;Nothing&gt; = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] != first_state[<span class="string">&quot;out&quot;</span>]);
-        <span class="kw">let </span>g4: Guard&lt;Nothing&gt; = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] != penultimate_state[<span class="string">&quot;out&quot;</span>]);
+        <span class="kw">let </span>g4: Guard&lt;Nothing&gt; = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] != final_state[<span class="string">&quot;out&quot;</span>]);
         <span class="kw">let </span>incr_guard = ir::Guard::and(g3, g4);
         <span class="kw">let </span>stop_guard: Guard&lt;Nothing&gt; =
-            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] == penultimate_state[<span class="string">&quot;out&quot;</span>]);
+            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] == final_state[<span class="string">&quot;out&quot;</span>]);
         <span class="kw">let </span>fsm_incr_assigns = <span class="macro">build_assignments!</span>(
           builder;
-          <span class="comment">// increments the fsm
+          <span class="comment">// Incrementsthe fsm
           </span>adder[<span class="string">&quot;left&quot;</span>] = <span class="question-mark">? </span>fsm[<span class="string">&quot;out&quot;</span>];
           adder[<span class="string">&quot;right&quot;</span>] = <span class="question-mark">? </span>const_one[<span class="string">&quot;out&quot;</span>];
-          fsm[<span class="string">&quot;write_en&quot;</span>] = <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
-          fsm[<span class="string">&quot;in&quot;</span>] = trigger_guard <span class="question-mark">? </span>const_one[<span class="string">&quot;out&quot;</span>];
-          fsm[<span class="string">&quot;in&quot;</span>] = incr_guard <span class="question-mark">? </span>adder[<span class="string">&quot;out&quot;</span>];
-           <span class="comment">// resets the fsm early
+          <span class="comment">// Always write into fsm.
+          </span>fsm[<span class="string">&quot;write_en&quot;</span>] = <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
+          <span class="comment">// If fsm == 0 and comp.go is high, then we start an execution.
+          </span>fsm[<span class="string">&quot;in&quot;</span>] = trigger_guard <span class="question-mark">? </span>const_one[<span class="string">&quot;out&quot;</span>];
+          <span class="comment">// If 1 &lt; fsm &lt; n - 1, then we unconditionally increment the fsm.
+          </span>fsm[<span class="string">&quot;in&quot;</span>] = incr_guard <span class="question-mark">? </span>adder[<span class="string">&quot;out&quot;</span>];
+          <span class="comment">// If fsm == n -1 , then we reset the FSM.
           </span>fsm[<span class="string">&quot;in&quot;</span>] = stop_guard <span class="question-mark">? </span>first_state[<span class="string">&quot;out&quot;</span>];
-        );
+          <span class="comment">// Otherwise the FSM is not assigned to, so it defaults to 0.
+          // If we want, we could add an explicit assignment here that sets it
+          // to zero.
+        </span>);
         dyn_assigns.extend(fsm_incr_assigns);
 
         dyn_assigns
     }
 
-    <span class="kw">fn </span>make_done_signal_for_promoted_component(
+    <span class="comment">// Makes `done` signal for promoted static&lt;n&gt; component.
+    </span><span class="kw">fn </span>make_done_signal_for_promoted_component(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         fsm: ir::RRC&lt;ir::Cell&gt;,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
@@ -547,18 +582,22 @@
           <span class="kw">let </span>first_state = constant(<span class="number">0</span>, fsm_size);
         );
         <span class="kw">let </span>go_guard = <span class="macro">guard!</span>(comp_sig[<span class="string">&quot;go&quot;</span>]);
-        <span class="kw">let </span>done_guard = <span class="macro">guard!</span>(comp_sig[<span class="string">&quot;done&quot;</span>]);
-        <span class="kw">let </span>on_guard = go_guard &amp; !done_guard;
+        <span class="kw">let </span>not_go_guard = !<span class="macro">guard!</span>(comp_sig[<span class="string">&quot;go&quot;</span>]);
         <span class="kw">let </span>first_state_guard = <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] == first_state[<span class="string">&quot;out&quot;</span>]);
-        <span class="kw">let </span>signal_on_guard = <span class="macro">guard!</span>(sig_reg[<span class="string">&quot;out&quot;</span>]);
-        <span class="kw">let </span>comp_done_guard = first_state_guard &amp; signal_on_guard;
-        <span class="kw">let </span>done_guard_2 = <span class="macro">guard!</span>(comp_sig[<span class="string">&quot;done&quot;</span>]);
+        <span class="kw">let </span>comp_done_guard =
+            <span class="macro">guard!</span>(fsm[<span class="string">&quot;out&quot;</span>] == first_state[<span class="string">&quot;out&quot;</span>]) &amp; <span class="macro">guard!</span>(sig_reg[<span class="string">&quot;out&quot;</span>]);
         <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
-          sig_reg[<span class="string">&quot;in&quot;</span>] = on_guard <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
-          sig_reg[<span class="string">&quot;write_en&quot;</span>] = on_guard <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
-          comp_sig[<span class="string">&quot;done&quot;</span>] = comp_done_guard <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
-          sig_reg[<span class="string">&quot;in&quot;</span>] = done_guard_2 <span class="question-mark">? </span>zero[<span class="string">&quot;out&quot;</span>];
-          sig_reg[<span class="string">&quot;write_en&quot;</span>] = done_guard_2 <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
+          <span class="comment">// Only write to sig_reg when fsm == 0
+          </span>sig_reg[<span class="string">&quot;write_en&quot;</span>] = first_state_guard <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
+          <span class="comment">// If fsm == 0 and comp.go is high, it means we are starting an execution,
+          // so we set signal_reg to high. Note that this happens regardless of
+          // whether comp.done is high.
+          </span>sig_reg[<span class="string">&quot;in&quot;</span>] = go_guard <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
+          <span class="comment">// Otherwise, we set `sig_reg` to low.
+          </span>sig_reg[<span class="string">&quot;in&quot;</span>] = not_go_guard <span class="question-mark">? </span>zero[<span class="string">&quot;out&quot;</span>];
+          <span class="comment">// comp.done is high when FSM == 0 and sig_reg is high,
+          // since that means we have just finished an execution.
+          </span>comp_sig[<span class="string">&quot;done&quot;</span>] = comp_done_guard <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
         );
         assigns.to_vec()
     }
@@ -574,16 +613,17 @@
           <span class="kw">let </span>zero = constant(<span class="number">0</span>, <span class="number">1</span>);
         );
         <span class="kw">let </span>go_guard = <span class="macro">guard!</span>(comp_sig[<span class="string">&quot;go&quot;</span>]);
-        <span class="kw">let </span>done_guard = <span class="macro">guard!</span>(comp_sig[<span class="string">&quot;done&quot;</span>]);
-        <span class="kw">let </span>on_guard = go_guard &amp; !done_guard;
+        <span class="kw">let </span>not_go = !<span class="macro">guard!</span>(comp_sig[<span class="string">&quot;go&quot;</span>]);
         <span class="kw">let </span>signal_on_guard = <span class="macro">guard!</span>(sig_reg[<span class="string">&quot;out&quot;</span>]);
-        <span class="kw">let </span>done_guard_2 = <span class="macro">guard!</span>(comp_sig[<span class="string">&quot;done&quot;</span>]);
         <span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
-          sig_reg[<span class="string">&quot;in&quot;</span>] = on_guard <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
-          sig_reg[<span class="string">&quot;write_en&quot;</span>] = on_guard <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
+          <span class="comment">// For one cycle components, comp.done is just whatever comp.go
+          // was during the previous cycle.
+          // signal_reg serves as a forwarding register that delays
+          // the `go` signal for one cycle.
+          </span>sig_reg[<span class="string">&quot;in&quot;</span>] = go_guard <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
+          sig_reg[<span class="string">&quot;in&quot;</span>] = not_go <span class="question-mark">? </span>zero[<span class="string">&quot;out&quot;</span>];
+          sig_reg[<span class="string">&quot;write_en&quot;</span>] = <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
           comp_sig[<span class="string">&quot;done&quot;</span>] = signal_on_guard <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
-          sig_reg[<span class="string">&quot;in&quot;</span>] = done_guard_2 <span class="question-mark">? </span>zero[<span class="string">&quot;out&quot;</span>];
-          sig_reg[<span class="string">&quot;write_en&quot;</span>] = done_guard_2 <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
         );
         assigns.to_vec()
     }
@@ -598,7 +638,8 @@
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
         <span class="kw">if </span>comp.is_static() &amp;&amp; s.get_latency() &gt; <span class="number">1 </span>{
-            <span class="kw">let </span>latency = s.get_latency();
+            <span class="comment">// Handle components with latency &gt; 1.
+            </span><span class="kw">let </span>latency = s.get_latency();
             <span class="kw">if let </span>ir::StaticControl::Enable(sen) = s {
                 <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
                 <span class="kw">let </span>fsm_size = get_bit_width_from(latency + <span class="number">1</span>);
@@ -631,7 +672,8 @@
                 }
             }
         } <span class="kw">else if </span>comp.is_static() &amp;&amp; s.get_latency() == <span class="number">1 </span>{
-            <span class="kw">if let </span>ir::StaticControl::Enable(sen) = s {
+            <span class="comment">// Handle components with latency == 1.
+            </span><span class="kw">if let </span>ir::StaticControl::Enable(sen) = s {
                 <span class="kw">let </span>assignments =
                     std::mem::take(<span class="kw-2">&amp;mut </span>sen.group.borrow_mut().assignments);
                 <span class="kw">for </span>assign <span class="kw">in </span>assignments {
@@ -664,9 +706,9 @@
         _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">if </span>comp.is_static() {
-            <span class="comment">//let _c = std::mem::replace(&amp;mut comp.control, Rc::new(RefCell::new(ir::Control::Static(ir::StaticControl::Empty(ir::Empty{attributes:Attributes::default()})))));
-            </span><span class="kw">let </span>_c = std::mem::replace(
+        <span class="comment">// Remove the control.
+        </span><span class="kw">if </span>comp.is_static() {
+            <span class="kw">let </span>_c = std::mem::replace(
                 <span class="kw-2">&amp;mut </span>comp.control,
                 Rc::new(RefCell::new(ir::Control::Empty(ir::Empty {
                     attributes: Attributes::default(),

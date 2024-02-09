@@ -765,6 +765,69 @@
 <span id="765">765</span>
 <span id="766">766</span>
 <span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{
     <span class="self">self </span><span class="kw">as </span>ir, CellType, Component, GetAttributes, LibrarySignatures,
@@ -861,19 +924,8 @@
         <span class="kw">let </span>reserved_names =
             RESERVED_NAMES.iter().map(|s| ir::Id::from(<span class="kw-2">*</span>s)).collect();
 
-        <span class="kw">for </span>prim <span class="kw">in </span>ctx.lib.signatures() {
-            <span class="kw">if </span>prim.attributes.has(ir::NumAttr::Static) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Primitive `{}`: Defining @static attributes on components is deprecated. Place the @static attribute on the port marked as @go&quot;</span>, prim.name)));
-            }
-        }
-
         <span class="kw">let </span><span class="kw-2">mut </span>ref_cell_types = HashMap::new();
         <span class="kw">for </span>comp <span class="kw">in </span>ctx.components.iter() {
-            <span class="comment">// Defining @static on the component is meaningless
-            </span><span class="kw">if </span>comp.attributes.has(ir::NumAttr::Static) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}`: Defining @static attributes on components is deprecated. Place the @static attribute on the port marked as @go&quot;</span>, comp.name)));
-            }
-
             <span class="comment">// Main component cannot use `ref` cells
             </span><span class="kw">if </span>comp.name == ctx.entrypoint {
                 <span class="kw">for </span>cell <span class="kw">in </span>comp.cells.iter() {
@@ -1075,6 +1127,80 @@
             );
         }
 
+        <span class="comment">// Checking that @interval annotations are placed correctly.
+        // There are two options for @interval annotations:
+        // 1. You have written only continuous assignments (this is similar
+        // to primitives written in Verilog).
+        // 2. You are using static&lt;n&gt; control.
+        </span><span class="kw">let </span>comp_sig = <span class="kw-2">&amp;</span>comp.signature.borrow();
+        <span class="kw">let </span>go_ports =
+            comp_sig.find_all_with_attr(ir::NumAttr::Go).collect_vec();
+        <span class="kw">if </span>go_ports.iter().any(|go_port| {
+            go_port.borrow().attributes.has(ir::NumAttr::Interval)
+        }) {
+            <span class="kw">match </span><span class="kw-2">&amp;*</span>comp.control.borrow() {
+                ir::Control::Static(<span class="kw">_</span>) | ir::Control::Empty(<span class="kw">_</span>) =&gt; (),
+                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
+                    <span class="macro">format!</span>(<span class="string">&quot;component {} has dynamic control but has @interval annotations&quot;</span>, comp.name),
+                    )
+                    .with_pos(<span class="kw-2">&amp;</span>comp.attributes)),
+            };
+            <span class="kw">if </span>!comp.control.borrow().is_empty() {
+                <span class="comment">// Getting &quot;reference value&quot; should be the same for all go ports and
+                // the control.
+                </span><span class="kw">let </span>reference_val = <span class="kw">match </span>go_ports[<span class="number">0</span>]
+                    .borrow()
+                    .attributes
+                    .get(ir::NumAttr::Interval)
+                {
+                    <span class="prelude-val">Some</span>(val) =&gt; val,
+                    <span class="prelude-val">None </span>=&gt; {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
+                        <span class="string">&quot;@interval(n) attribute on all @go ports since there is static&lt;n&gt; control&quot;</span>,
+                        )
+                        .with_pos(<span class="kw-2">&amp;</span>comp.attributes))
+                    }
+                };
+                <span class="comment">// Checking go ports.
+                </span><span class="kw">for </span>go_port <span class="kw">in </span><span class="kw-2">&amp;</span>go_ports {
+                    <span class="kw">let </span>go_port_val = <span class="kw">match </span>go_port
+                        .borrow()
+                        .attributes
+                        .get(ir::NumAttr::Interval)
+                    {
+                        <span class="prelude-val">Some</span>(val) =&gt; val,
+                        <span class="prelude-val">None </span>=&gt; {
+                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                                <span class="string">&quot;@go port expected @interval({reference_val}) attribute on all ports \
+                                since the component has static&lt;n&gt; control&quot;</span>,
+                            ))
+                            .with_pos(<span class="kw-2">&amp;</span>comp.attributes))
+                        }
+                    };
+                    <span class="kw">if </span>go_port_val != reference_val {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                            <span class="string">&quot;@go port expected @interval {reference_val}, got @interval {go_port_val}&quot;</span>,
+                        ))
+                        .with_pos(<span class="kw-2">&amp;</span>go_port.borrow().attributes));
+                    }
+                    <span class="comment">// Checking control latency
+                    </span><span class="kw">match </span>comp.control.borrow().get_latency() {
+                        <span class="prelude-val">None </span>=&gt; {
+                            <span class="macro">unreachable!</span>(<span class="string">&quot;already checked control is static&quot;</span>)
+                        }
+                        <span class="prelude-val">Some</span>(control_latency) =&gt; {
+                            <span class="kw">if </span>control_latency != reference_val {
+                                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                                    <span class="string">&quot;component {} expected @interval {reference_val}, got @interval {control_latency}&quot;</span>, comp.name,
+                                ))
+                                .with_pos(<span class="kw-2">&amp;</span>comp.attributes));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         <span class="comment">// For each non-combinational group, check if there is at least one write to the done
         // signal of that group and that the write is to the group&#39;s done signal.
         </span><span class="kw">for </span>gr <span class="kw">in </span>comp.get_groups().iter() {
@@ -1234,11 +1360,11 @@
         <span class="comment">// A group with &quot;static&quot;=0 annotation
         </span><span class="kw">if </span>group
             .attributes
-            .get(ir::NumAttr::Static)
+            .get(ir::NumAttr::Promotable)
             .map(|v| v == <span class="number">0</span>)
             .unwrap_or(<span class="bool-val">false</span>)
         {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="string">&quot;Group with annotation \&quot;static\&quot;=0 is invalid. Use `comb group` instead to define a combinational group or if the group&#39;s done condition is not constant, provide the correct \&quot;static\&quot; annotation.&quot;</span>).with_pos(<span class="kw-2">&amp;</span>group.attributes));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="string">&quot;Group with annotation \&quot;promotable\&quot;=0 is invalid. Use `comb group` instead to define a combinational group or if the group&#39;s done condition is not constant, provide the correct \&quot;static\&quot; annotation.&quot;</span>).with_pos(<span class="kw-2">&amp;</span>group.attributes));
         }
 
         <span class="comment">// Check if the group has obviously conflicting assignments with the continuous assignments and the active combinational groups

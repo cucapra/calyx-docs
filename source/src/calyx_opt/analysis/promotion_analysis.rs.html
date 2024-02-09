@@ -235,7 +235,6 @@
 <span id="235">235</span>
 <span id="236">236</span>
 <span id="237">237</span>
-<span id="238">238</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
@@ -253,8 +252,7 @@
 
     <span class="kw">pub fn </span>get_inferred_latency(c: <span class="kw-2">&amp;</span>ir::Control) -&gt; u64 {
         <span class="kw">let </span>ir::Control::Static(sc) = c <span class="kw">else </span>{
-            <span class="kw">let </span><span class="prelude-val">Some</span>(latency) = c.get_attribute(ir::NumAttr::PromoteStatic)
-            <span class="kw">else </span>{
+            <span class="kw">let </span><span class="prelude-val">Some</span>(latency) = c.get_attribute(ir::NumAttr::Promotable) <span class="kw">else </span>{
                 <span class="macro">unreachable!</span>(<span class="string">&quot;Called get_latency on control that is neither static nor promotable&quot;</span>)
             };
             <span class="kw">return </span>latency;
@@ -265,7 +263,7 @@
     <span class="doccomment">/// Returns true if a control statement is already static, or has the static
     /// attributes
     </span><span class="kw">pub fn </span>can_be_promoted(c: <span class="kw-2">&amp;</span>ir::Control) -&gt; bool {
-        c.is_static() || c.has_attribute(ir::NumAttr::PromoteStatic)
+        c.is_static() || c.has_attribute(ir::NumAttr::Promotable)
     }
 
     <span class="doccomment">/// If we&#39;ve already constructed the static group then use the already existing
@@ -303,7 +301,7 @@
         s: <span class="kw-2">&amp;mut </span>ir::Enable,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
     ) -&gt; ir::StaticControl {
-        s.attributes.remove(ir::NumAttr::PromoteStatic);
+        s.attributes.remove(ir::NumAttr::Promotable);
         ir::StaticControl::Enable(ir::StaticEnable {
             <span class="comment">// upgrading group to static group
             </span>group: <span class="self">self</span>.construct_static_group(
@@ -313,7 +311,7 @@
                     .borrow()
                     .get_attributes()
                     .unwrap()
-                    .get(ir::NumAttr::PromoteStatic)
+                    .get(ir::NumAttr::Promotable)
                     .unwrap(),
             ),
             attributes: std::mem::take(<span class="kw-2">&amp;mut </span>s.attributes),
@@ -329,8 +327,8 @@
             s.comb_group.is_none(),
             <span class="string">&quot;Shouldn&#39;t Promote to Static if there is a Comb Group&quot;</span>,
         );
-        <span class="kw">let </span>latency = s.attributes.get(ir::NumAttr::PromoteStatic).unwrap();
-        s.attributes.remove(ir::NumAttr::PromoteStatic);
+        <span class="kw">let </span>latency = s.attributes.get(ir::NumAttr::Promotable).unwrap();
+        s.attributes.remove(ir::NumAttr::Promotable);
         <span class="kw">let </span>s_inv = ir::StaticInvoke {
             comp: Rc::clone(<span class="kw-2">&amp;</span>s.comp),
             inputs: std::mem::take(<span class="kw-2">&amp;mut </span>s.inputs),
@@ -351,7 +349,7 @@
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
     ) -&gt; ir::StaticControl {
         <span class="macro">assert!</span>(
-            c.has_attribute(ir::NumAttr::PromoteStatic) || c.is_static(),
+            c.has_attribute(ir::NumAttr::Promotable) || c.is_static(),
             <span class="string">&quot;Called convert_to_static control that is neither static nor promotable&quot;
         </span>);
         <span class="comment">// Need to get bound_attribute here, because we cannot borrow `c` within the
@@ -365,7 +363,7 @@
             ir::Control::Enable(s) =&gt; <span class="self">self</span>.convert_enable_to_static(s, builder),
             ir::Control::Seq(ir::Seq { stmts, attributes }) =&gt; {
                 <span class="comment">// Removing the `promote_static` attribute bc we don&#39;t need it anymore
-                </span>attributes.remove(ir::NumAttr::PromoteStatic);
+                </span>attributes.remove(ir::NumAttr::Promotable);
                 <span class="comment">// The resulting static seq should be compactable.
                 </span>attributes.insert(ir::NumAttr::Compactable, <span class="number">1</span>);
                 <span class="kw">let </span>static_stmts =
@@ -381,7 +379,7 @@
             }
             ir::Control::Par(ir::Par { stmts, attributes }) =&gt; {
                 <span class="comment">// Removing the `promote_static` attribute bc we don&#39;t need it anymore
-                </span>attributes.remove(ir::NumAttr::PromoteStatic);
+                </span>attributes.remove(ir::NumAttr::Promotable);
                 <span class="comment">// Convert stmts to static
                 </span><span class="kw">let </span>static_stmts =
                     <span class="self">self</span>.convert_vec_to_static(builder, std::mem::take(stmts));
@@ -404,7 +402,7 @@
                 attributes,
             }) =&gt; {
                 <span class="comment">// Removing the `promote_static` attribute bc we don&#39;t need it anymore
-                </span>attributes.remove(ir::NumAttr::PromoteStatic);
+                </span>attributes.remove(ir::NumAttr::Promotable);
                 <span class="kw">let </span>sc = <span class="self">self</span>.convert_to_static(body, builder);
                 <span class="kw">let </span>latency = (<span class="kw-2">*</span>num_repeats) * sc.get_latency();
                 <span class="self">Self</span>::check_latencies_match(latency, inferred_latency);
@@ -419,7 +417,7 @@
                 body, attributes, ..
             }) =&gt; {
                 <span class="comment">// Removing the `promote_static` attribute bc we don&#39;t need it anymore
-                </span>attributes.remove(ir::NumAttr::PromoteStatic);
+                </span>attributes.remove(ir::NumAttr::Promotable);
                 <span class="comment">// Removing the `bound` attribute bc we don&#39;t need it anymore
                 </span>attributes.remove(ir::NumAttr::Bound);
                 <span class="kw">let </span>sc = <span class="self">self</span>.convert_to_static(body, builder);
@@ -441,7 +439,7 @@
                 ..
             }) =&gt; {
                 <span class="comment">// Removing the `promote_static` attribute bc we don&#39;t need it anymore
-                </span>attributes.remove(ir::NumAttr::PromoteStatic);
+                </span>attributes.remove(ir::NumAttr::Promotable);
                 <span class="kw">let </span>static_tbranch = <span class="self">self</span>.convert_to_static(tbranch, builder);
                 <span class="kw">let </span>static_fbranch = <span class="self">self</span>.convert_to_static(fbranch, builder);
                 <span class="kw">let </span>latency = std::cmp::max(

@@ -535,6 +535,24 @@
 <span id="535">535</span>
 <span id="536">536</span>
 <span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     compute_static::WithStatic, GraphAnalysis, ReadWriteSet,
 };
@@ -608,7 +626,8 @@
         <span class="kw">let </span>go_ports = prim
             .find_all_with_attr(ir::NumAttr::Go)
             .filter_map(|pd| {
-                pd.attributes.get(ir::NumAttr::Static).and_then(|st| {
+                <span class="comment">// Primitives only have @interval.
+                </span>pd.attributes.get(ir::NumAttr::Interval).and_then(|st| {
                     done_ports
                         .get(<span class="kw-2">&amp;</span>pd.attributes.get(ir::NumAttr::Go))
                         .map(|done_port| (pd.name(), <span class="kw-2">*</span>done_port, st))
@@ -633,12 +652,20 @@
             .find_all_with_attr(ir::NumAttr::Go)
             .filter_map(|pr| {
                 <span class="kw">let </span>port = pr.borrow();
-                port.attributes.get(ir::NumAttr::Static).and_then(|st| {
-                    done_ports
+                <span class="comment">// Get static interval thru either @interval or @promotable.
+                </span><span class="kw">let </span>st = <span class="kw">match </span>port.attributes.get(ir::NumAttr::Interval) {
+                    <span class="prelude-val">Some</span>(st) =&gt; <span class="prelude-val">Some</span>(st),
+                    <span class="prelude-val">None </span>=&gt; port.attributes.get(ir::NumAttr::Promotable),
+                };
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(static_latency) = st {
+                    <span class="kw">return </span>done_ports
                         .get(<span class="kw-2">&amp;</span>port.attributes.get(ir::NumAttr::Go))
-                        .map(|done_port| (port.name, <span class="kw-2">*</span>done_port, st))
-                })
-            })
+                        .map(|done_port| {
+                            (port.name, <span class="kw-2">*</span>done_port, static_latency)
+                        });
+                }
+                <span class="prelude-val">None
+            </span>})
             .collect_vec();
         GoDone::new(go_ports)
     }
@@ -688,12 +715,21 @@
                 .find_all_with_attr(ir::NumAttr::Go)
                 .filter_map(|pd| {
                     <span class="kw">let </span>pd_ref = pd.borrow();
-                    pd_ref.attributes.get(ir::NumAttr::Static).and_then(|st| {
-                        done_ports
+                    <span class="comment">// Get static interval thru either @interval or @promotable.
+                    </span><span class="kw">let </span>st = <span class="kw">match </span>pd_ref.attributes.get(ir::NumAttr::Interval)
+                    {
+                        <span class="prelude-val">Some</span>(st) =&gt; <span class="prelude-val">Some</span>(st),
+                        <span class="prelude-val">None </span>=&gt; pd_ref.attributes.get(ir::NumAttr::Promotable),
+                    };
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(static_latency) = st {
+                        <span class="kw">return </span>done_ports
                             .get(<span class="kw-2">&amp;</span>pd_ref.attributes.get(ir::NumAttr::Go))
-                            .map(|done_port| (pd_ref.name, <span class="kw-2">*</span>done_port, st))
-                    })
-                })
+                            .map(|done_port| {
+                                (pd_ref.name, <span class="kw-2">*</span>done_port, static_latency)
+                            });
+                    }
+                    <span class="prelude-val">None
+                </span>})
                 .collect_vec();
 
             <span class="kw">let </span>go_done_comp = GoDone::new(go_ports);
@@ -979,7 +1015,7 @@
     </span><span class="kw">pub fn </span>get_possible_latency(c: <span class="kw-2">&amp;</span>ir::Control) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
         <span class="kw">match </span>c {
             ir::Control::Static(sc) =&gt; <span class="prelude-val">Some</span>(sc.get_latency()),
-            <span class="kw">_ </span>=&gt; c.get_attribute(ir::NumAttr::PromoteStatic),
+            <span class="kw">_ </span>=&gt; c.get_attribute(ir::NumAttr::Promotable),
         }
     }
 
@@ -987,13 +1023,13 @@
         <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;mut </span>seq.stmts {
             <span class="self">Self</span>::remove_promotable_attribute(stmt);
         }
-        seq.get_mut_attributes().remove(ir::NumAttr::PromoteStatic);
+        seq.get_mut_attributes().remove(ir::NumAttr::Promotable);
     }
 
     <span class="doccomment">/// Removes the @promotable attribute from the control program.
     /// Recursively visits the children of the control.
     </span><span class="kw">pub fn </span>remove_promotable_attribute(c: <span class="kw-2">&amp;mut </span>ir::Control) {
-        c.get_mut_attributes().remove(ir::NumAttr::PromoteStatic);
+        c.get_mut_attributes().remove(ir::NumAttr::Promotable);
         <span class="kw">match </span>c {
             ir::Control::Empty(<span class="kw">_</span>)
             | ir::Control::Invoke(<span class="kw">_</span>)
@@ -1049,7 +1085,7 @@
                 </span>group
                     .borrow_mut()
                     .attributes
-                    .remove(ir::NumAttr::PromoteStatic);
+                    .remove(ir::NumAttr::Promotable);
             }
         }
 
@@ -1060,7 +1096,7 @@
                 group
                     .borrow_mut()
                     .attributes
-                    .insert(ir::NumAttr::PromoteStatic, latency);
+                    .insert(ir::NumAttr::Promotable, latency);
             }
         }
 
