@@ -1596,15 +1596,15 @@ Because it's common to have a "Boolean" attribute that always maps to the value 
 }
 </code></pre>
 <h4 id="group-attributes"><a class="header" href="#group-attributes"><strong>Group Attributes</strong></a></h4>
-<pre><code>group cond&lt;"static"=1&gt; {
+<pre><code>group cond&lt;"promotable"=1&gt; {
   ...
 }
 </code></pre>
 <h4 id="control-attributes"><a class="header" href="#control-attributes"><strong>Control Attributes</strong></a></h4>
 <pre><code>control {
-  @static(3) seq {
-    @static(1) A;
-    @static(2) B;
+  @promotable(3) seq {
+    @promotable(1) A;
+    @promotable(2) B;
   }
 }
 </code></pre>
@@ -1631,13 +1631,24 @@ assignments to the use the ports. See the documentation on <a href="https://docs
 <li>If the cell is a memory and has an <code>external</code> attribute on it, the Verilog backend (<code>-b verilog</code>) generates code to read <code>&lt;cell_name&gt;.dat</code> to initialize the memory state and dumps out its final value after execution.</li>
 </ol>
 <h3 id="staticn"><a class="header" href="#staticn"><code>static(n)</code></a></h3>
-<p>Can be attached to components, groups, and control statements. They indicate how
-many cycles a component, group, or control statement will take to run and are used
-by <code>-p static-timing</code> to generate more efficient control FSMs.</p>
-<p>The <code>go</code> and <code>done</code> attributes are, in particular, used by the <code>infer-static-timing</code> pass to configure which ports are used like
-<code>go</code> and <code>done</code> signals.
-Along with the <code>static(n)</code> attribute, this allows the pass to calculate when
-a particular done signal of a primitive will be high.</p>
+<p>This is now deprecated. See the <a href="lang/attributes.html#promotable(n)">promotable</a> and <a href="lang/attributes.html#interval(n)">interval</a>
+attributes.</p>
+<h3 id="promotablen"><a class="header" href="#promotablen"><code>promotable(n)</code></a></h3>
+<p>Can be attached to groups, control, and <code>@go</code> ports of components.
+This tells the compiler how long the group/control would take if it were promoted
+to static.
+This is just a hint, and is free to be ignored by the compiler.
+However, the compiler may use it in the <code>static-promotion</code> pass to upgrade dynamic
+constructs to <code>static&lt;n&gt;</code> ones.</p>
+<h3 id="intervaln"><a class="header" href="#intervaln"><code>interval(n)</code></a></h3>
+<p>This can be attached to the <code>@go</code> ports of dynamic components (both primitives or
+Calyx-defined components).
+This tells the compiler that if you assert the <code>@go</code> port for cycles <code>[0,n)</code>, then
+the done signal will be asserted on cycle <code>n</code>.
+This is different from <code>@promotable</code> since it provides a guarantee rather than a hint.
+Attach <code>@interval</code> to <code>@go</code> ports essentially means that the component can serve
+"double duty": it can be used in both static and dynamic contexts.
+This is common for things like registers.</p>
 <h3 id="inline"><a class="header" href="#inline"><code>inline</code></a></h3>
 <p>Used by the <code>inline</code> pass on cell definitions. Instructs the pass to completely
 inline the instance into the parent component and replace all <code>invoke</code>s of the
