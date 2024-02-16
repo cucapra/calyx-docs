@@ -557,6 +557,37 @@
 <span id="557">557</span>
 <span id="558">558</span>
 <span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::AssignmentAnalysis;
 <span class="kw">use </span><span class="kw">crate</span>::analysis::{compute_static::WithStatic, GraphAnalysis};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes, RRC};
@@ -763,7 +794,11 @@
     /// Note that this expects that the component already is accounted for
     /// in self.latency_data and self.static_component_latencies.
     </span><span class="kw">pub fn </span>remove_component(<span class="kw-2">&amp;mut </span><span class="self">self</span>, comp_name: ir::Id) {
-        <span class="self">self</span>.updated_components.insert(comp_name);
+        <span class="kw">if </span><span class="self">self</span>.latency_data.contains_key(<span class="kw-2">&amp;</span>comp_name) {
+            <span class="comment">// To make inference as strong as possible, only update updated_components
+            // if we actually updated it.
+            </span><span class="self">self</span>.updated_components.insert(comp_name);
+        }
         <span class="self">self</span>.latency_data.remove(<span class="kw-2">&amp;</span>comp_name);
         <span class="self">self</span>.static_component_latencies.remove(<span class="kw-2">&amp;</span>comp_name);
     }
@@ -775,15 +810,22 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         (comp_name, adjusted_latency): (ir::Id, u64),
     ) {
-        <span class="self">self</span>.updated_components.insert(comp_name);
+        <span class="comment">// Check whether we actually updated the component&#39;s latency.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>updated = <span class="bool-val">false</span>;
         <span class="self">self</span>.latency_data.entry(comp_name).and_modify(|go_done| {
             <span class="kw">for </span>(<span class="kw">_</span>, <span class="kw">_</span>, cur_latency) <span class="kw">in </span><span class="kw-2">&amp;mut </span>go_done.ports {
                 <span class="comment">// Updating components with latency data.
-                </span><span class="kw-2">*</span>cur_latency = adjusted_latency;
+                </span><span class="kw">if </span><span class="kw-2">*</span>cur_latency != adjusted_latency {
+                    <span class="kw-2">*</span>cur_latency = adjusted_latency;
+                    updated = <span class="bool-val">true</span>;
+                }
             }
         });
         <span class="self">self</span>.static_component_latencies
             .insert(comp_name, adjusted_latency);
+        <span class="kw">if </span>updated {
+            <span class="self">self</span>.updated_components.insert(comp_name);
+        }
     }
 
     <span class="doccomment">/// Return true if the edge (`src`, `dst`) meet one these criteria, and false otherwise:
@@ -1059,6 +1101,26 @@
 
     <span class="kw">pub fn </span>fixup_seq(<span class="kw-2">&amp;</span><span class="self">self</span>, seq: <span class="kw-2">&amp;mut </span>ir::Seq) {
         seq.update_static(<span class="kw-2">&amp;</span><span class="self">self</span>.static_component_latencies);
+    }
+
+    <span class="kw">pub fn </span>fixup_par(<span class="kw-2">&amp;</span><span class="self">self</span>, par: <span class="kw-2">&amp;mut </span>ir::Par) {
+        par.update_static(<span class="kw-2">&amp;</span><span class="self">self</span>.static_component_latencies);
+    }
+
+    <span class="kw">pub fn </span>fixup_if(<span class="kw-2">&amp;</span><span class="self">self</span>, _if: <span class="kw-2">&amp;mut </span>ir::If) {
+        _if.update_static(<span class="kw-2">&amp;</span><span class="self">self</span>.static_component_latencies);
+    }
+
+    <span class="kw">pub fn </span>fixup_while(<span class="kw-2">&amp;</span><span class="self">self</span>, _while: <span class="kw-2">&amp;mut </span>ir::While) {
+        _while.update_static(<span class="kw-2">&amp;</span><span class="self">self</span>.static_component_latencies);
+    }
+
+    <span class="kw">pub fn </span>fixup_repeat(<span class="kw-2">&amp;</span><span class="self">self</span>, repeat: <span class="kw-2">&amp;mut </span>ir::Repeat) {
+        repeat.update_static(<span class="kw-2">&amp;</span><span class="self">self</span>.static_component_latencies);
+    }
+
+    <span class="kw">pub fn </span>fixup_ctrl(<span class="kw-2">&amp;</span><span class="self">self</span>, ctrl: <span class="kw-2">&amp;mut </span>ir::Control) {
+        ctrl.update_static(<span class="kw-2">&amp;</span><span class="self">self</span>.static_component_latencies);
     }
 
     <span class="doccomment">/// &quot;Fixes Up&quot; the component. In particular:

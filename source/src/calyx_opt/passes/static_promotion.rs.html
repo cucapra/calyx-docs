@@ -624,7 +624,66 @@
 <span id="624">624</span>
 <span id="625">625</span>
 <span id="626">626</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{InferenceAnalysis, PromotionAnalysis};
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
+    CompactionAnalysis, InferenceAnalysis, PromotionAnalysis,
+};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, ParseVal, PassOpt, VisResult,
     Visitor,
@@ -659,12 +718,16 @@
     <span class="doccomment">/// PromotionAnalysis object so that we can easily infer control, and keep
     /// track of which groups were promoted.
     </span>promotion_analysis: PromotionAnalysis,
+    <span class="doccomment">/// CompactionAnalysis object so that we can easily perform compaction
+    </span>compaction_analysis: CompactionAnalysis,
     <span class="doccomment">/// Threshold for promotion
     </span>threshold: u64,
     <span class="doccomment">/// Threshold for difference in latency for if statements
     </span>if_diff_limit: <span class="prelude-ty">Option</span>&lt;u64&gt;,
     <span class="doccomment">/// Whether we should stop promoting when we see a loop.
     </span>cycle_limit: <span class="prelude-ty">Option</span>&lt;u64&gt;,
+    <span class="doccomment">/// Whether to perform compaction. True by default
+    </span>compaction: bool,
 }
 
 <span class="comment">// Override constructor to build latency_data information from the primitives
@@ -675,15 +738,18 @@
         <span class="prelude-val">Ok</span>(StaticPromotion {
             inference_analysis: InferenceAnalysis::from_ctx(ctx),
             promotion_analysis: PromotionAnalysis::default(),
+            compaction_analysis: CompactionAnalysis::default(),
             threshold: opts[<span class="string">&quot;threshold&quot;</span>].pos_num().unwrap(),
             if_diff_limit: opts[<span class="string">&quot;if-diff-limit&quot;</span>].pos_num(),
             cycle_limit: opts[<span class="string">&quot;cycle-limit&quot;</span>].pos_num(),
+            compaction: opts[<span class="string">&quot;compaction&quot;</span>].bool(),
         })
     }
 
     <span class="comment">// This pass shared information between components
     </span><span class="kw">fn </span>clear_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.promotion_analysis = PromotionAnalysis::default();
+        <span class="self">self</span>.compaction_analysis = CompactionAnalysis::default();
     }
 }
 
@@ -715,12 +781,29 @@
                 <span class="string">&quot;the maximum difference between if branches that we tolerate for promotion&quot;</span>,
                 ParseVal::Num(<span class="number">1</span>),
                 PassOpt::parse_num,
+            ),
+            PassOpt::new(
+                <span class="string">&quot;compaction&quot;</span>,
+                <span class="string">&quot;Whether to perform compaction.  True by Default &quot;</span>,
+                ParseVal::Bool(<span class="bool-val">true</span>),
+                PassOpt::parse_bool,
             )
         ]
     }
 }
 
 <span class="kw">impl </span>StaticPromotion {
+    <span class="comment">// Remove @promotable(n) attribute if n is above the cycle limit, since
+    // we know we will never promote such a control.
+    // This can be helpful to the pass when applying the heuristics.
+    </span><span class="kw">fn </span>remove_large_promotables(<span class="kw-2">&amp;</span><span class="self">self</span>, c: <span class="kw-2">&amp;mut </span>ir::Control) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(pr) = c.get_attribute(ir::NumAttr::Promotable) {
+            <span class="kw">if </span>!<span class="self">self</span>.within_cycle_limit(pr) {
+                c.get_mut_attributes().remove(ir::NumAttr::Promotable)
+            }
+        }
+    }
+
     <span class="kw">fn </span>within_cycle_limit(<span class="kw-2">&amp;</span><span class="self">self</span>, latency: u64) -&gt; bool {
         <span class="kw">if </span><span class="self">self</span>.cycle_limit.is_none() {
             <span class="kw">return </span><span class="bool-val">true</span>;
@@ -733,6 +816,12 @@
             <span class="kw">return </span><span class="bool-val">true</span>;
         }
         diff &lt;= <span class="self">self</span>.if_diff_limit.unwrap()
+    }
+
+    <span class="kw">fn </span>fits_heuristics(<span class="kw-2">&amp;</span><span class="self">self</span>, c: <span class="kw-2">&amp;</span>ir::Control) -&gt; bool {
+        <span class="kw">let </span>approx_size = <span class="self">Self</span>::approx_size(c);
+        <span class="kw">let </span>latency = PromotionAnalysis::get_inferred_latency(c);
+        <span class="self">self</span>.within_cycle_limit(latency) &amp;&amp; approx_size &gt; <span class="self">self</span>.threshold
     }
 
     <span class="kw">fn </span>approx_size_static(sc: <span class="kw-2">&amp;</span>ir::StaticControl, promoted: bool) -&gt; u64 {
@@ -795,47 +884,78 @@
         v.iter().map(<span class="self">Self</span>::approx_size).sum()
     }
 
-    <span class="doccomment">/// Converts the control_vec (i..e, the stmts of the seq) using heuristics.
-    </span><span class="kw">fn </span>promote_vec_seq_heuristic(
+    <span class="kw">fn </span>promote_seq_heuristic(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
         <span class="kw-2">mut </span>control_vec: Vec&lt;ir::Control&gt;,
     ) -&gt; Vec&lt;ir::Control&gt; {
         <span class="kw">if </span>control_vec.is_empty() {
-            <span class="comment">// Base case
-            </span><span class="kw">return </span><span class="macro">vec!</span>[];
+            <span class="comment">// Base case len == 0
+            </span><span class="macro">vec!</span>[]
         } <span class="kw">else if </span>control_vec.len() == <span class="number">1 </span>{
-            <span class="kw">return </span><span class="macro">vec!</span>[control_vec.pop().unwrap()];
-        } <span class="kw">else if </span><span class="self">Self</span>::approx_control_vec_size(<span class="kw-2">&amp;</span>control_vec) &lt;= <span class="self">self</span>.threshold
-        {
-            <span class="comment">// Too small to be promoted, return as is
-            </span><span class="kw">return </span>control_vec;
-        } <span class="kw">else if </span>!<span class="self">self</span>.within_cycle_limit(
-            control_vec
-                .iter()
-                .map(PromotionAnalysis::get_inferred_latency)
-                .sum(),
-        ) {
-            <span class="comment">// Too large, try to break up
-            </span><span class="kw">let </span>right = control_vec.split_off(control_vec.len() / <span class="number">2</span>);
-            <span class="macro">dbg!</span>(control_vec.len());
-            <span class="macro">dbg!</span>(right.len());
-            <span class="kw">let </span><span class="kw-2">mut </span>left_res =
-                <span class="self">self</span>.promote_vec_seq_heuristic(builder, control_vec);
-            <span class="kw">let </span>right_res = <span class="self">self</span>.promote_vec_seq_heuristic(builder, right);
-            left_res.extend(right_res);
-            <span class="kw">return </span>left_res;
+            <span class="comment">// Base case len == 1.
+            // Promote if it fits the promotion heuristics.
+            </span><span class="kw">let </span><span class="kw-2">mut </span>stmt = control_vec.pop().unwrap();
+            <span class="kw">if </span><span class="self">self</span>.fits_heuristics(<span class="kw-2">&amp;</span>stmt) {
+                <span class="macro">vec!</span>[ir::Control::Static(
+                    <span class="self">self</span>.promotion_analysis
+                        .convert_to_static(<span class="kw-2">&amp;mut </span>stmt, builder),
+                )]
+            } <span class="kw">else </span>{
+                <span class="macro">vec!</span>[stmt]
+            }
+        } <span class="kw">else </span>{
+            <span class="kw">let </span><span class="kw-2">mut </span>possibly_compacted_ctrl = <span class="kw">if </span><span class="self">self</span>.compaction {
+                <span class="comment">// If compaction is turned on, then we possibly compact
+                </span><span class="self">self</span>.compaction_analysis.compact_control_vec(
+                    control_vec,
+                    <span class="kw-2">&amp;mut </span><span class="self">self</span>.promotion_analysis,
+                    builder,
+                )
+            } <span class="kw">else </span>{
+                <span class="comment">// Otherwise it&#39;s just the og control vec
+                </span>control_vec
+            };
+            <span class="comment">// If length == 1 this means we have a vec[compacted_static_par],
+            // so we can return.
+            // (Note that the og control_vec must be of length &gt;=2, since we
+            // have already checked for two base cases.)
+            </span><span class="kw">if </span>possibly_compacted_ctrl.len() == <span class="number">1 </span>{
+                <span class="kw">return </span>possibly_compacted_ctrl;
+            }
+            <span class="comment">// Otherwise we cannot compact at all,
+            // so go through normal promotion heuristic analysis.
+            </span><span class="kw">if </span><span class="self">Self</span>::approx_control_vec_size(<span class="kw-2">&amp;</span>possibly_compacted_ctrl)
+                &lt;= <span class="self">self</span>.threshold
+            {
+                <span class="comment">// Too small to be promoted, return as is
+                </span><span class="kw">return </span>possibly_compacted_ctrl;
+            } <span class="kw">else if </span>!<span class="self">self</span>.within_cycle_limit(
+                possibly_compacted_ctrl
+                    .iter()
+                    .map(PromotionAnalysis::get_inferred_latency)
+                    .sum(),
+            ) {
+                <span class="comment">// Too large, try to break up
+                </span><span class="kw">let </span>right = possibly_compacted_ctrl
+                    .split_off(possibly_compacted_ctrl.len() / <span class="number">2</span>);
+                <span class="kw">let </span><span class="kw-2">mut </span>left_res = <span class="self">self
+                    </span>.promote_seq_heuristic(builder, possibly_compacted_ctrl);
+                <span class="kw">let </span>right_res = <span class="self">self</span>.promote_seq_heuristic(builder, right);
+                left_res.extend(right_res);
+                <span class="kw">return </span>left_res;
+            }
+            <span class="comment">// Correct size, convert the entire vec
+            </span><span class="kw">let </span>s_seq_stmts = <span class="self">self
+                </span>.promotion_analysis
+                .convert_vec_to_static(builder, possibly_compacted_ctrl);
+            <span class="kw">let </span>latency = s_seq_stmts.iter().map(|sc| sc.get_latency()).sum();
+            <span class="kw">let </span>sseq = ir::Control::Static(ir::StaticControl::seq(
+                s_seq_stmts,
+                latency,
+            ));
+            <span class="macro">vec!</span>[sseq]
         }
-        <span class="comment">// Correct size, convert the entire vec
-        </span><span class="kw">let </span>s_seq_stmts = <span class="self">self
-            </span>.promotion_analysis
-            .convert_vec_to_static(builder, control_vec);
-        <span class="kw">let </span>latency = s_seq_stmts.iter().map(|sc| sc.get_latency()).sum();
-        <span class="kw">let </span>sseq =
-            ir::Control::Static(ir::StaticControl::seq(s_seq_stmts, latency));
-        <span class="comment">// sseq.get_mut_attributes()
-        //     .insert(ir::NumAttr::Compactable, 1);
-        </span><span class="macro">vec!</span>[sseq]
     }
 
     <span class="doccomment">/// First checks if the vec of control statements meets the self.threshold
@@ -907,34 +1027,34 @@
     ) -&gt; VisResult {
         <span class="kw">if </span>comp.name != <span class="string">&quot;main&quot; </span>{
             <span class="kw">let </span>comp_sig = comp.signature.borrow();
+            <span class="kw">if </span>comp.control.borrow().is_static() {
+                <span class="comment">// We ended up promoting it
+                </span><span class="kw">if </span>!comp.is_static() {
+                    <span class="comment">// Need this attribute for a weird, in-between state.
+                    // It has a known latency but also produces a done signal.
+                    </span>comp.attributes.insert(ir::BoolAttr::Promoted, <span class="number">1</span>);
+                }
+                <span class="comment">// (Possibly) new latency because of compaction
+                </span><span class="kw">let </span>new_latency = NonZeroU64::new(
+                    comp.control.borrow().get_latency().unwrap(),
+                )
+                .unwrap();
+                <span class="comment">// This makes the component appear as a static&lt;n&gt; component.
+                </span>comp.latency = <span class="prelude-val">Some</span>(new_latency);
+                <span class="comment">// Adjust inference analysis to account for this new latency.
+                </span><span class="self">self</span>.inference_analysis
+                    .adjust_component((comp.name, new_latency.into()));
+            } <span class="kw">else if </span>!comp.control.borrow().is_empty() {
+                <span class="comment">// This is for the case where we didn&#39;t end up promoting, so
+                // we remove it from our inference_analysis.
+                // Note that sometimes you can have components with only continuous
+                // assignments with @interval annotations: in that case,
+                // we don&#39;t want to remove our inference analysis.
+                </span><span class="self">self</span>.inference_analysis.remove_component(comp.name);
+            };
+
             <span class="kw">let </span>go_ports =
                 comp_sig.find_all_with_attr(ir::NumAttr::Go).collect_vec();
-            <span class="kw">if </span>go_ports.iter().any(|go_port| {
-                <span class="kw">let </span>go_ref = go_port.borrow_mut();
-                go_ref.attributes.has(ir::NumAttr::Promotable)
-                    || go_ref.attributes.has(ir::NumAttr::Interval)
-            }) {
-                <span class="kw">if </span>comp.control.borrow().is_static() {
-                    <span class="comment">// We ended up promoting it
-                    </span><span class="kw">if </span>!comp.is_static() {
-                        <span class="comment">// Need this attribute for a weird, in-between state.
-                        // It has a known latency but also produces a done signal.
-                        </span>comp.attributes.insert(ir::BoolAttr::Promoted, <span class="number">1</span>);
-                    }
-                    <span class="comment">// This makes the component appear as a static&lt;n&gt; component.
-                    </span>comp.latency = <span class="prelude-val">Some</span>(
-                        NonZeroU64::new(
-                            comp.control.borrow().get_latency().unwrap(),
-                        )
-                        .unwrap(),
-                    );
-                } <span class="kw">else </span>{
-                    <span class="comment">// We decided not to promote, so we need to update data structures.
-                    // This case should only happen on @promotable components
-                    // (i.e., it shouldn&#39;t happen with @interval components).
-                    </span><span class="self">self</span>.inference_analysis.remove_component(comp.name);
-                }
-            };
             <span class="comment">// Either we have upgraded component to static&lt;n&gt; or we have decided
             // not to promote component at all. Either way, we can remove the
             // @promotable attribute.
@@ -945,7 +1065,7 @@
                     .remove(ir::NumAttr::Promotable);
             }
         }
-        <span class="comment">// Remove @promotable (i.e., @promote_static) attribute from control.
+        <span class="comment">// Remove @promotable attribute from control.
         // Probably not necessary, since we&#39;ll ignore it anyways, but makes for
         // cleaner code.
         </span>InferenceAnalysis::remove_promotable_attribute(
@@ -963,6 +1083,8 @@
         <span class="comment">// Re-infer static timing based on the components we have updated in
         // this pass.
         </span><span class="self">self</span>.inference_analysis.fixup_timing(comp);
+        <span class="comment">// Update the continuous reads and writes
+        </span><span class="self">self</span>.compaction_analysis.update_cont_read_writes(comp);
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
@@ -1016,35 +1138,15 @@
         sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
+        <span class="self">self</span>.inference_analysis.fixup_seq(s);
+        <span class="comment">// Remove @promotable attributes that are too large to be promoted.
+        // This helps the promotion heuristic make smarter decisions
+        </span>s.stmts
+            .iter_mut()
+            .for_each(|c| <span class="self">self</span>.remove_large_promotables(c));
+
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
-        <span class="comment">// Checking if entire seq is promotable
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
-            <span class="comment">// If seq is too small to promote, then continue without doing anything.
-            </span><span class="kw">if </span><span class="self">Self</span>::approx_control_vec_size(<span class="kw-2">&amp;</span>s.stmts) &lt;= <span class="self">self</span>.threshold {
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
-            } <span class="kw">else if </span><span class="self">self</span>.within_cycle_limit(latency) {
-                <span class="comment">// We promote entire seq.
-                </span><span class="kw">let </span>sseq = ir::Control::Static(ir::StaticControl::seq(
-                    <span class="self">self</span>.promotion_analysis.convert_vec_to_static(
-                        <span class="kw-2">&amp;mut </span>builder,
-                        std::mem::take(<span class="kw-2">&amp;mut </span>s.stmts),
-                    ),
-                    latency,
-                ));
-                <span class="comment">// sseq.get_mut_attributes()
-                //     .insert(ir::NumAttr::Compactable, 1);
-                </span><span class="kw">return </span><span class="prelude-val">Ok</span>(Action::change(sseq));
-            }
-        }
-        <span class="comment">// The seq either a) takes too many cylces to promote entirely or
-        // b) has dynamic stmts in it. Either way, the solution is to
-        // break it up into smaller static seqs.
-        // We know that this seq will *never* be promoted. Therefore, we can
-        // safely replace it with a standard `seq` that does not have an `@promotable`
-        // attribute. This temporarily messes up  its parents&#39; `@promotable`
-        // attribute, but this is fine since we know its parent will never try
-        // to promote it.
-        </span><span class="kw">let </span>old_stmts = std::mem::take(<span class="kw-2">&amp;mut </span>s.stmts);
+        <span class="kw">let </span>old_stmts = std::mem::take(<span class="kw-2">&amp;mut </span>s.stmts);
         <span class="kw">let </span><span class="kw-2">mut </span>new_stmts: Vec&lt;ir::Control&gt; = Vec::new();
         <span class="kw">let </span><span class="kw-2">mut </span>cur_vec: Vec&lt;ir::Control&gt; = Vec::new();
         <span class="kw">for </span>stmt <span class="kw">in </span>old_stmts {
@@ -1053,7 +1155,7 @@
             } <span class="kw">else </span>{
                 <span class="comment">// Use heuristics to decide how to promote this cur_vec of promotable stmts.
                 </span><span class="kw">let </span>possibly_promoted_stmts =
-                    <span class="self">self</span>.promote_vec_seq_heuristic(<span class="kw-2">&amp;mut </span>builder, cur_vec);
+                    <span class="self">self</span>.promote_seq_heuristic(<span class="kw-2">&amp;mut </span>builder, cur_vec);
                 new_stmts.extend(possibly_promoted_stmts);
                 <span class="comment">// Add the current (non-promotable) stmt
                 </span>new_stmts.push(stmt);
@@ -1061,12 +1163,17 @@
                 </span>cur_vec = Vec::new();
             }
         }
-        new_stmts.extend(<span class="self">self</span>.promote_vec_seq_heuristic(<span class="kw-2">&amp;mut </span>builder, cur_vec));
-        <span class="kw">let </span>new_seq = ir::Control::Seq(ir::Seq {
-            stmts: new_stmts,
-            attributes: ir::Attributes::default(),
-        });
-        <span class="prelude-val">Ok</span>(Action::change(new_seq))
+        new_stmts.extend(<span class="self">self</span>.promote_seq_heuristic(<span class="kw-2">&amp;mut </span>builder, cur_vec));
+        <span class="kw">let </span><span class="kw-2">mut </span>new_ctrl = <span class="kw">if </span>new_stmts.len() == <span class="number">1 </span>{
+            new_stmts.pop().unwrap()
+        } <span class="kw">else </span>{
+            ir::Control::Seq(ir::Seq {
+                stmts: new_stmts,
+                attributes: ir::Attributes::default(),
+            })
+        };
+        <span class="self">self</span>.inference_analysis.fixup_ctrl(<span class="kw-2">&amp;mut </span>new_ctrl);
+        <span class="prelude-val">Ok</span>(Action::change(new_ctrl))
     }
 
     <span class="kw">fn </span>finish_par(
@@ -1076,6 +1183,8 @@
         sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
+        <span class="self">self</span>.inference_analysis.fixup_par(s);
+
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="comment">// Check if entire par is promotable
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
@@ -1125,6 +1234,7 @@
         sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
+        <span class="self">self</span>.inference_analysis.fixup_if(s);
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
             <span class="kw">let </span>approx_size_if = <span class="self">Self</span>::approx_size(<span class="kw-2">&amp;</span>s.tbranch)
@@ -1174,6 +1284,8 @@
         sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
+        <span class="self">self</span>.inference_analysis.fixup_while(s);
+
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="comment">// First check that while loop is promotable
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
@@ -1219,6 +1331,8 @@
         sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
+        <span class="self">self</span>.inference_analysis.fixup_repeat(s);
+
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = s.attributes.get(ir::NumAttr::Promotable) {
             <span class="kw">let </span>approx_size =
