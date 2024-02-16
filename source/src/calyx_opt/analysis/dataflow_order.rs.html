@@ -343,7 +343,7 @@
         // XXX(rachit): This probably adds a bunch of duplicate edges and in the
         // worst case makes this pass much slower than it needs to be.
         </span><span class="kw">for </span>(r_idx, (comp, canonical_port)) <span class="kw">in </span>reads {
-            <span class="kw">let </span>ir::Canonical(inst, port) = canonical_port;
+            <span class="kw">let </span>ir::Canonical { cell: inst, port } = canonical_port;
             <span class="kw">let </span>dep_ports = <span class="self">self
                 </span>.write_map
                 .get(<span class="kw-2">&amp;</span>comp)
@@ -362,7 +362,7 @@
             dep_ports
                 .iter()
                 .cloned()
-                .flat_map(|port| writes.get(<span class="kw-2">&amp;</span>ir::Canonical(inst, port)))
+                .flat_map(|port| writes.get(<span class="kw-2">&amp;</span>ir::Canonical::new(inst, port)))
                 .flatten()
                 .try_for_each(|w_idx| {
                     <span class="kw">if </span><span class="kw-2">*</span>w_idx == r_idx {

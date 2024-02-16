@@ -261,7 +261,6 @@
 <span id="261">261</span>
 <span id="262">262</span>
 <span id="263">263</span>
-<span id="264">264</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, structure, GetAttributes, LibrarySignatures, RRC};
@@ -488,10 +487,9 @@
         <span class="kw">let </span>(port_ref, cond_ref) =
             <span class="self">self</span>.port_rewrite.get(<span class="kw-2">&amp;</span>key).unwrap_or_else(|| {
                 <span class="macro">panic!</span>(
-                    <span class="string">&quot;{}: Port `{}.{}` in group `{}` doesn&#39;t have a rewrite&quot;</span>,
+                    <span class="string">&quot;{}: Port `{}` in group `{}` doesn&#39;t have a rewrite&quot;</span>,
                     <span class="self">Self</span>::name(),
-                    key.<span class="number">1 </span>.<span class="number">0</span>,
-                    key.<span class="number">1 </span>.<span class="number">1</span>,
+                    key.<span class="number">1</span>,
                     key.<span class="number">0
                 </span>)
             });

@@ -619,6 +619,10 @@
 <span id="619">619</span>
 <span id="620">620</span>
 <span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, ParseVal, PassOpt, VisResult,
@@ -962,14 +966,17 @@
         // Return as an iterator because it&#39;s immediately merged into the global rewrite map.
         </span><span class="kw">let </span>rev_interface_map =
             rewrite.port_map.into_iter().map(<span class="kw">move </span>|(cp, pr)| {
-                <span class="kw">let </span>ir::Canonical(<span class="kw">_</span>, p) = cp;
+                <span class="kw">let </span>ir::Canonical { port: p, .. } = cp;
                 <span class="kw">let </span>port = pr.borrow();
                 <span class="kw">let </span>np = <span class="kw">match </span>port.name.id.as_str() {
                     <span class="string">&quot;in&quot; </span>=&gt; <span class="string">&quot;out&quot;</span>,
                     <span class="string">&quot;out&quot; </span>=&gt; <span class="string">&quot;in&quot;</span>,
                     <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
                 };
-                (ir::Canonical(name, p), port.cell_parent().borrow().get(np))
+                (
+                    ir::Canonical::new(name, p),
+                    port.cell_parent().borrow().get(np),
+                )
             });
 
         (con, rev_interface_map)
@@ -1149,7 +1156,8 @@
                 })
                 .map(|(name, param)| {
                     <span class="kw">let </span>port = Rc::clone(
-                        <span class="kw-2">&amp;</span>interface_rewrites[<span class="kw-2">&amp;</span>ir::Canonical(instance, name)],
+                        <span class="kw-2">&amp;</span>interface_rewrites
+                            [<span class="kw-2">&amp;</span>ir::Canonical::new(instance, name)],
                     );
                     <span class="comment">// The parameter can refer to port on a cell that has been
                     // inlined.

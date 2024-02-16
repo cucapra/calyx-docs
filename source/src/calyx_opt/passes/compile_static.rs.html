@@ -1658,7 +1658,7 @@
             // technically could do this w/ early_reset_map but is easier w/
             // group_rewrite, which is explicitly of type `PortRewriterMap`
             </span><span class="self">self</span>.group_rewrite.insert(
-                ir::Canonical(sgroup_name, ir::Id::from(<span class="string">&quot;go&quot;</span>)),
+                ir::Canonical::new(sgroup_name, ir::Id::from(<span class="string">&quot;go&quot;</span>)),
                 g.borrow().find(<span class="string">&quot;go&quot;</span>).unwrap_or_else(|| {
                     <span class="macro">unreachable!</span>(<span class="string">&quot;group {} has no go port&quot;</span>, g.borrow().name())
                 }),

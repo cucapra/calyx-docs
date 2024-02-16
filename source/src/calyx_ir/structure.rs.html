@@ -762,6 +762,18 @@
 <span id="762">762</span>
 <span id="763">763</span>
 <span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
@@ -803,11 +815,20 @@
 
 <span class="doccomment">/// Canonical name of a Port
 </span><span class="attribute">#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-</span><span class="kw">pub struct </span>Canonical(<span class="kw">pub </span>Id, <span class="kw">pub </span>Id);
+</span><span class="kw">pub struct </span>Canonical {
+    <span class="kw">pub </span>cell: Id,
+    <span class="kw">pub </span>port: Id,
+}
+
+<span class="kw">impl </span>Canonical {
+    <span class="kw">pub const fn </span>new(cell: Id, port: Id) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ cell, port }
+    }
+}
 
 <span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>Canonical {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}.{}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>, <span class="self">self</span>.<span class="number">1</span>)
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}.{}&quot;</span>, <span class="self">self</span>.cell, <span class="self">self</span>.port)
     }
 }
 
@@ -860,7 +881,10 @@
 
     <span class="doccomment">/// Get the canonical representation for this Port.
     </span><span class="kw">pub fn </span>canonical(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Canonical {
-        Canonical(<span class="self">self</span>.get_parent_name(), <span class="self">self</span>.name)
+        Canonical {
+            cell: <span class="self">self</span>.get_parent_name(),
+            port: <span class="self">self</span>.name,
+        }
     }
 
     <span class="doccomment">/// Returns the value of an attribute if present

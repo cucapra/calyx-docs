@@ -101,7 +101,7 @@
 
 <span class="doccomment">/// Formats name of a port given the id of the cell and the port
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>format_port_name(canon: <span class="kw-2">&amp;</span>ir::Canonical) -&gt; ir::Id {
-    <span class="macro">format!</span>(<span class="string">&quot;{}_{}&quot;</span>, canon.<span class="number">0</span>, canon.<span class="number">1</span>).into()
+    <span class="macro">format!</span>(<span class="string">&quot;{}_{}&quot;</span>, canon.cell, canon.port).into()
 }
 
 <span class="doccomment">/// Remove all the cells matching the given criterion (f evaluates to true) from
