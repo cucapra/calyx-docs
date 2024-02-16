@@ -454,8 +454,13 @@
 <span id="454">454</span>
 <span id="455">455</span>
 <span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
-    GraphColoring, LiveRangeAnalysis, ReadWriteSet, ShareSet, StaticParTiming,
+    AssignmentAnalysis, GraphColoring, LiveRangeAnalysis, ShareSet,
+    StaticParTiming,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
@@ -647,10 +652,13 @@
         _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
     ) {
         <span class="comment">//add cont cells
-        </span><span class="self">self</span>.cont_ref_cells =
-            ReadWriteSet::uses(comp.continuous_assignments.iter())
-                .map(|cr| cr.borrow().name())
-                .collect();
+        </span><span class="self">self</span>.cont_ref_cells = comp
+            .continuous_assignments
+            .iter()
+            .analysis()
+            .cell_uses()
+            .map(|cr| cr.borrow().name())
+            .collect();
         <span class="comment">//add ref cells
         </span><span class="self">self</span>.cont_ref_cells.extend(
             comp.cells

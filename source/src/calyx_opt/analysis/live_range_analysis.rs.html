@@ -1383,7 +1383,44 @@
 <span id="1383">1383</span>
 <span id="1384">1384</span>
 <span id="1385">1385</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{ControlId, ReadWriteSet, ShareSet, VariableDetection};
+<span id="1386">1386</span>
+<span id="1387">1387</span>
+<span id="1388">1388</span>
+<span id="1389">1389</span>
+<span id="1390">1390</span>
+<span id="1391">1391</span>
+<span id="1392">1392</span>
+<span id="1393">1393</span>
+<span id="1394">1394</span>
+<span id="1395">1395</span>
+<span id="1396">1396</span>
+<span id="1397">1397</span>
+<span id="1398">1398</span>
+<span id="1399">1399</span>
+<span id="1400">1400</span>
+<span id="1401">1401</span>
+<span id="1402">1402</span>
+<span id="1403">1403</span>
+<span id="1404">1404</span>
+<span id="1405">1405</span>
+<span id="1406">1406</span>
+<span id="1407">1407</span>
+<span id="1408">1408</span>
+<span id="1409">1409</span>
+<span id="1410">1410</span>
+<span id="1411">1411</span>
+<span id="1412">1412</span>
+<span id="1413">1413</span>
+<span id="1414">1414</span>
+<span id="1415">1415</span>
+<span id="1416">1416</span>
+<span id="1417">1417</span>
+<span id="1418">1418</span>
+<span id="1419">1419</span>
+<span id="1420">1420</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
+    AssignmentAnalysis, ControlId, ReadWriteSet, ShareSet, VariableDetection,
+};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Id, RRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::{
@@ -1425,11 +1462,12 @@
     assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + Clone + <span class="lifetime">&#39;a</span>,
 ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a </span>{
     <span class="comment">// go_writes = all cells which are guaranteed to have their go port written to in assigns
-    </span><span class="kw">let </span>go_writes: Vec&lt;RRC&lt;ir::Cell&gt;&gt; =
-        ReadWriteSet::port_write_set(assigns.clone().filter(|asgn| {
+    </span><span class="kw">let </span>go_writes: Vec&lt;RRC&lt;ir::Cell&gt;&gt; = assigns
+        .clone()
+        .filter(|asgn| {
             <span class="comment">// to be included in go_writes, one of the following must hold:
             // a) guard is true
-            // b) cell.go = !cell.done ? 1&#39;d1
+            // b cell.go = !cell.done ? 1&#39;d1
             </span><span class="kw">if </span>asgn.guard.is_true() {
                 <span class="kw">return </span><span class="bool-val">true</span>;
             }
@@ -1440,7 +1478,9 @@
                     <span class="kw-2">&amp;</span>asgn.dst.borrow().cell_parent().borrow().name(),
                 )
                 &amp;&amp; asgn.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>)
-        }))
+        })
+        .analysis()
+        .writes()
         .filter(|port| port.borrow().attributes.has(ir::NumAttr::Go))
         .map(|port| Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent()))
         .collect();
@@ -2121,7 +2161,9 @@
                 });
 
             <span class="comment">// calculate reads, but ignore `variable`. we&#39;ve already dealt with that
-            </span><span class="kw">let </span>reads: HashSet&lt;<span class="kw">_</span>&gt; = ReadWriteSet::read_set(assignments)
+            </span><span class="kw">let </span>reads: HashSet&lt;<span class="kw">_</span>&gt; = assignments
+                .analysis()
+                .cell_reads()
                 .filter(|c| sc_clone.is_shareable_component(c))
                 .map(|c| (c.borrow().prototype.clone(), c.borrow().name()))
                 .collect();
@@ -2145,11 +2187,13 @@
                 .cloned()
                 .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
 
-            <span class="kw">let </span>writes: HashSet&lt;<span class="kw">_</span>&gt; =
-                ReadWriteSet::write_set(assignments.iter())
-                    .filter(|c| sc_clone.is_shareable_component(c))
-                    .map(|c| (c.borrow().prototype.clone(), c.borrow().name()))
-                    .collect();
+            <span class="kw">let </span>writes: HashSet&lt;<span class="kw">_</span>&gt; = assignments
+                .iter()
+                .analysis()
+                .cell_writes()
+                .filter(|c| sc_clone.is_shareable_component(c))
+                .map(|c| (c.borrow().prototype.clone(), c.borrow().name()))
+                .collect();
 
             (reads, writes)
         }
@@ -2177,7 +2221,10 @@
             .cloned()
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
 
-        <span class="kw">let </span>writes: HashSet&lt;<span class="kw">_</span>&gt; = ReadWriteSet::write_set(assignments.iter())
+        <span class="kw">let </span>writes: HashSet&lt;<span class="kw">_</span>&gt; = assignments
+            .iter()
+            .analysis()
+            .cell_writes()
             .filter(|c| sc_clone.is_shareable_component(c))
             .map(|c| (c.borrow().prototype.clone(), c.borrow().name()))
             .collect();
@@ -2189,7 +2236,10 @@
         assigns: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;],
         shareable_components: <span class="kw-2">&amp;</span>ShareSet,
     ) -&gt; TypeNameSet {
-        ReadWriteSet::uses(assigns.iter())
+        assigns
+            .iter()
+            .analysis()
+            .cell_uses()
             .filter(|cell| shareable_components.is_shareable_component(cell))
             .map(|cell| (cell.borrow().prototype.clone(), cell.borrow().name()))
             .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;()
@@ -2203,11 +2253,20 @@
         state_shareable: <span class="kw-2">&amp;</span>ShareSet,
     ) -&gt; (TypeNameSet, TypeNameSet) {
         <span class="kw">let </span>group = group_ref.borrow();
-        <span class="kw">let </span>share_uses = ReadWriteSet::uses(group.assignments.iter())
+        <span class="kw">let </span>share_uses = group
+            .assignments
+            .iter()
+            .analysis()
+            .cell_uses()
             .filter(|cell| shareable.is_shareable_component(cell))
             .map(|cell| (cell.borrow().prototype.clone(), cell.borrow().name()))
             .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>state_reads = ReadWriteSet::read_set(group.assignments.iter())
+        <span class="kw">let </span>state_reads = group
+            .assignments
+            .iter()
+            .analysis()
+            .reads()
+            .cells()
             .filter(|cell| state_shareable.is_shareable_component(cell))
             .map(|cell| (cell.borrow().prototype.clone(), cell.borrow().name()))
             .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();
@@ -2272,7 +2331,13 @@
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(comb_group) = comb_group_info {
             read_set.extend(
-                ReadWriteSet::read_set(comb_group.borrow().assignments.iter())
+                comb_group
+                    .borrow()
+                    .assignments
+                    .iter()
+                    .analysis()
+                    .reads()
+                    .cells()
                     .filter(|cell| {
                         shareable_components.is_shareable_component(cell)
                     })
@@ -2305,7 +2370,12 @@
         <span class="comment">// uses of shareable components in the comb group (if it exists)
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(comb_group) = <span class="kw-2">&amp;</span>comb_group_info {
             uses.extend(
-                ReadWriteSet::uses(comb_group.borrow().assignments.iter())
+                comb_group
+                    .borrow()
+                    .assignments
+                    .iter()
+                    .analysis()
+                    .cell_uses()
                     .filter(|cell| {
                         shareable_components.is_shareable_component(cell)
                     })

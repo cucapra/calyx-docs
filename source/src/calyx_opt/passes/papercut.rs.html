@@ -268,7 +268,15 @@
 <span id="268">268</span>
 <span id="269">269</span>
 <span id="270">270</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{<span class="self">self</span>, AssignmentAnalysis};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
@@ -394,11 +402,13 @@
         }
 
         <span class="comment">// Compute all cells that are driven in by the continuous assignments0
-        </span><span class="self">self</span>.cont_cells = analysis::ReadWriteSet::write_set(
-            comp.continuous_assignments.iter(),
-        )
-        .map(|cr| cr.borrow().name())
-        .collect();
+        </span><span class="self">self</span>.cont_cells = comp
+            .continuous_assignments
+            .iter()
+            .analysis()
+            .cell_writes()
+            .map(|cr| cr.borrow().name())
+            .collect();
 
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
@@ -470,11 +480,17 @@
 
 <span class="kw">impl </span>Papercut {
     <span class="kw">fn </span>check_specs&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, assigns: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;]) -&gt; VisResult {
-        <span class="kw">let </span>all_writes = analysis::ReadWriteSet::port_write_set(assigns.iter())
+        <span class="kw">let </span>all_writes = assigns
+            .iter()
+            .analysis()
+            .writes()
             .filter_map(port_information)
             .into_grouping_map()
             .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>all_reads = analysis::ReadWriteSet::port_read_set(assigns.iter())
+        <span class="kw">let </span>all_reads = assigns
+            .iter()
+            .analysis()
+            .reads()
             .filter_map(port_information)
             .into_grouping_map()
             .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();

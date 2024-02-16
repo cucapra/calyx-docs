@@ -376,7 +376,17 @@
 <span id="376">376</span>
 <span id="377">377</span>
 <span id="378">378</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{InferenceAnalysis, PromotionAnalysis, ReadWriteSet};
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
+    AssignmentAnalysis, InferenceAnalysis, PromotionAnalysis,
+};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor};
 <span class="kw">use crate</span>::{
     analysis,
@@ -639,7 +649,13 @@
         sigs: <span class="kw-2">&amp;</span>calyx_ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[calyx_ir::Component],
     ) -&gt; <span class="kw">crate</span>::traversal::VisResult {
-        <span class="kw">let </span>(cont_reads, cont_writes) = ReadWriteSet::cont_read_write_set(comp);
+        <span class="kw">let </span>(cont_reads, cont_writes) = comp
+            .continuous_assignments
+            .iter()
+            .analysis()
+            .reads_and_writes();
+        <span class="kw">let </span>(cont_reads, cont_writes) =
+            (cont_reads.cells().collect(), cont_writes.cells().collect());
         InferenceAnalysis::remove_promotable_from_seq(s);
         <span class="self">self</span>.inference_analysis.fixup_seq(s);
 

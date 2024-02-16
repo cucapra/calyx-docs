@@ -65,7 +65,11 @@
 <span id="65">65</span>
 <span id="66">66</span>
 <span id="67">67</span>
-</pre><pre class="rust"><code><span class="kw">use super</span>::{GraphAnalysis, ReadWriteSet};
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+</pre><pre class="rust"><code><span class="kw">use super</span>::{read_write_set::AssignmentAnalysis, GraphAnalysis};
 <span class="kw">use </span><span class="kw">crate</span>::analysis::ShareSet;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 
@@ -85,7 +89,11 @@
     ) -&gt; <span class="prelude-ty">Option</span>&lt;(ir::CellType, ir::Id)&gt; {
         <span class="kw">let </span>group = group_ref.borrow();
 
-        <span class="kw">let </span>writes = ReadWriteSet::write_set(group.assignments.iter())
+        <span class="kw">let </span>writes = group
+            .assignments
+            .iter()
+            .analysis()
+            .cell_writes()
             .filter(|cell| state_share.is_shareable_component(cell))
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
 

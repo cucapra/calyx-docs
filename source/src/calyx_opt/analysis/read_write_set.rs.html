@@ -409,9 +409,219 @@
 <span id="409">409</span>
 <span id="410">410</span>
 <span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>std::{iter, rc::Rc};
+<span class="kw">use </span>std::{collections::HashMap, iter, rc::Rc};
+
+<span class="attribute">#[derive(Clone)]
+</span><span class="kw">pub struct </span>AssignmentIterator&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>, I&gt;
+<span class="kw">where
+    </span>I: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt;,
+{
+    iter: I,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>, I&gt; Iterator <span class="kw">for </span>AssignmentIterator&lt;<span class="lifetime">&#39;a</span>, T, I&gt;
+<span class="kw">where
+    </span>I: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt;,
+{
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;;
+
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="self">self</span>.iter.next()
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>, I: <span class="lifetime">&#39;a</span>&gt; AssignmentIterator&lt;<span class="lifetime">&#39;a</span>, T, I&gt;
+<span class="kw">where
+    </span>I: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt;,
+{
+    <span class="doccomment">/// Returns [ir::Port] which are read from in the assignments.
+    </span><span class="kw">pub fn </span>reads(
+        <span class="self">self</span>,
+    ) -&gt; PortIterator&lt;<span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a</span>&gt; {
+        PortIterator::new(<span class="self">self</span>.flat_map(ReadWriteSet::port_reads))
+    }
+
+    <span class="doccomment">/// Returns [ir::Port] which are written to in the assignments.
+    </span><span class="kw">pub fn </span>writes(
+        <span class="self">self</span>,
+    ) -&gt; PortIterator&lt;<span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a</span>&gt; {
+        PortIterator::new(
+            <span class="self">self</span>.map(|assign| Rc::clone(<span class="kw-2">&amp;</span>assign.dst))
+                .filter(|port| !port.borrow().is_hole()),
+        )
+    }
+
+    <span class="doccomment">/// Return the name of the cells that these assignments write to for writes
+    /// that are guarded by true.
+    /// **Ignores** writes to group holes.
+    </span><span class="kw">pub fn </span>must_writes(
+        <span class="self">self</span>,
+    ) -&gt; PortIterator&lt;<span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a</span>&gt; {
+        PortIterator::new(<span class="self">self</span>.filter_map(|assignment| {
+            <span class="kw">if </span>assignment.guard.is_true() &amp;&amp; !assignment.dst.borrow().is_hole()
+            {
+                <span class="prelude-val">Some</span>(Rc::clone(<span class="kw-2">&amp;</span>assignment.dst))
+            } <span class="kw">else </span>{
+                <span class="prelude-val">None
+            </span>}
+        }))
+    }
+
+    <span class="doccomment">/// Returns the ports mentioned in this set of assignments.
+    </span><span class="kw">pub fn </span>uses(
+        <span class="self">self</span>,
+    ) -&gt; PortIterator&lt;<span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a</span>&gt; {
+        PortIterator::new(<span class="self">self</span>.flat_map(|assign| {
+            assign
+                .guard
+                .all_ports()
+                .into_iter()
+                .chain(iter::once(Rc::clone(<span class="kw-2">&amp;</span>assign.dst)))
+                .chain(iter::once(Rc::clone(<span class="kw-2">&amp;</span>assign.src)))
+                .filter(|port| !port.borrow().is_hole())
+        }))
+    }
+
+    <span class="comment">// Convinience Methods
+
+    </span><span class="doccomment">/// Returns the cells read from in this set of assignments
+    </span><span class="kw">pub fn </span>cell_reads(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
+        <span class="self">self</span>.reads().cells()
+    }
+
+    <span class="doccomment">/// Returns the cells written to in this set of assignments
+    </span><span class="kw">pub fn </span>cell_writes(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
+        <span class="self">self</span>.writes().cells()
+    }
+
+    <span class="doccomment">/// Returns the cells used in this set of assignments
+    </span><span class="kw">pub fn </span>cell_uses(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
+        <span class="self">self</span>.uses().cells()
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>, I: <span class="lifetime">&#39;a</span>&gt; AssignmentIterator&lt;<span class="lifetime">&#39;a</span>, T, I&gt;
+<span class="kw">where
+    </span>I: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt;,
+    I: Clone,
+    T: Clone,
+{
+    <span class="doccomment">/// Separately returns the read and write sets for the given assignments.
+    </span><span class="kw">pub fn </span>reads_and_writes(
+        <span class="self">self</span>,
+    ) -&gt; (
+        PortIterator&lt;<span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a</span>&gt;,
+        PortIterator&lt;<span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a</span>&gt;,
+    ) {
+        (<span class="self">self</span>.clone().reads(), <span class="self">self</span>.writes())
+    }
+}
+
+<span class="doccomment">/// Analyzes that can be performed on a set of assignments.
+</span><span class="kw">pub trait </span>AssignmentAnalysis&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;:
+    Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt;
+<span class="kw">where
+    </span><span class="self">Self</span>: Sized,
+{
+    <span class="kw">fn </span>analysis(<span class="self">self</span>) -&gt; AssignmentIterator&lt;<span class="lifetime">&#39;a</span>, T, <span class="self">Self</span>&gt; {
+        AssignmentIterator { iter: <span class="self">self </span>}
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>, I: <span class="lifetime">&#39;a</span>&gt; AssignmentAnalysis&lt;<span class="lifetime">&#39;a</span>, T&gt; <span class="kw">for </span>I <span class="kw">where
+    </span>I: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt;
+{
+}
+
+<span class="doccomment">/// An iterator over ports
+</span><span class="kw">pub struct </span>PortIterator&lt;I&gt;
+<span class="kw">where
+    </span>I: Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt;,
+{
+    iter: I,
+}
+
+<span class="kw">impl</span>&lt;I&gt; Iterator <span class="kw">for </span>PortIterator&lt;I&gt;
+<span class="kw">where
+    </span>I: Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt;,
+{
+    <span class="kw">type </span>Item = RRC&lt;ir::Port&gt;;
+
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="self">self</span>.iter.next()
+    }
+}
+
+<span class="kw">impl</span>&lt;I&gt; PortIterator&lt;I&gt;
+<span class="kw">where
+    </span>I: Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt;,
+{
+    <span class="kw">pub const fn </span>new(iter: I) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ iter }
+    }
+
+    <span class="doccomment">/// Return the unique cells that the ports are a part of
+    </span><span class="kw">pub fn </span>cells(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; {
+        <span class="self">self</span>.iter
+            .map(|port| Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent()))
+            .unique_by(|cell| cell.borrow().name())
+    }
+
+    <span class="doccomment">/// Group the ports by cells that they are a part of
+    </span><span class="kw">pub fn </span>group_by_cell(<span class="self">self</span>) -&gt; HashMap&lt;ir::Id, Vec&lt;RRC&lt;ir::Port&gt;&gt;&gt; {
+        <span class="self">self</span>.iter.into_group_map_by(|port| {
+            port.borrow().cell_parent().borrow().name()
+        })
+    }
+}
 
 <span class="doccomment">/// Calcuate the reads-from and writes-to set for a given set of assignments.
 </span><span class="kw">pub struct </span>ReadWriteSet;
@@ -420,113 +630,15 @@
     <span class="doccomment">/// Returns [ir::Port] that are read from in the given Assignment.
     </span><span class="kw">pub fn </span>port_reads&lt;T&gt;(
         assign: <span class="kw-2">&amp;</span>ir::Assignment&lt;T&gt;,
-    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;_ </span>{
-        assign
-            .guard
-            .all_ports()
-            .into_iter()
-            .chain(iter::once(Rc::clone(<span class="kw-2">&amp;</span>assign.src)))
-            .filter(|port| !port.borrow().is_hole())
-    }
-
-    <span class="doccomment">/// Returns [ir::Port] which are read from in the assignments.
-    </span><span class="kw">pub fn </span>port_read_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + <span class="lifetime">&#39;a</span>,
-    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a </span>{
-        assigns.flat_map(<span class="self">Self</span>::port_reads)
-    }
-
-    <span class="doccomment">/// Returns [ir::Port] which are written to in the assignments.
-    </span><span class="kw">pub fn </span>port_write_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + <span class="lifetime">&#39;a</span>,
-    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt; + <span class="lifetime">&#39;a </span>{
-        assigns
-            .map(|assign| Rc::clone(<span class="kw-2">&amp;</span>assign.dst))
-            .filter(|port| !port.borrow().is_hole())
-    }
-
-    <span class="doccomment">/// Returns [ir::Cell] which are read from in the assignments.
-    /// **Ignores** reads from group holes.
-    </span><span class="kw">pub fn </span>read_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + <span class="lifetime">&#39;a</span>,
-    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
-        <span class="self">Self</span>::port_read_set(assigns)
-            .map(|port| Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent()))
-            .unique_by(|cell| cell.borrow().name())
-    }
-
-    <span class="doccomment">/// Returns [ir::Cell] which are written to by the assignments.
-    /// **Ignores** reads from group holes.
-    </span><span class="kw">pub fn </span>write_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + <span class="lifetime">&#39;a</span>,
-    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
-        <span class="self">Self</span>::port_write_set(assigns)
-            .map(|port| Rc::clone(<span class="kw-2">&amp;</span>port.borrow().cell_parent()))
-            .unique_by(|cell| cell.borrow().name())
-    }
-
-    <span class="doccomment">/// Returns the register cells whose out port is read anywhere in the given
-    /// assignments
-    </span><span class="kw">pub fn </span>register_reads&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + Clone + <span class="lifetime">&#39;a</span>,
-    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
-        <span class="kw">fn </span>is_register_out(port_ref: RRC&lt;ir::Port&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;ir::Cell&gt;&gt; {
-            <span class="kw">let </span>port = port_ref.borrow();
-            <span class="kw">if let </span>ir::PortParent::Cell(cell_wref) = <span class="kw-2">&amp;</span>port.parent {
-                <span class="kw">if </span><span class="kw-2">&amp;</span>port.name == <span class="string">&quot;out&quot; </span>{
-                    <span class="kw">return </span><span class="prelude-val">Some</span>(Rc::clone(<span class="kw-2">&amp;</span>cell_wref.upgrade()));
-                }
-            }
-            <span class="prelude-val">None
-        </span>}
-        <span class="kw">let </span>guard_ports = assigns.clone().flat_map(|assign| {
+    ) -&gt; PortIterator&lt;<span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Port&gt;&gt;&gt; {
+        PortIterator::new(
             assign
                 .guard
                 .all_ports()
                 .into_iter()
-                .filter_map(is_register_out)
-        });
-        assigns
-            .filter_map(|assign| is_register_out(Rc::clone(<span class="kw-2">&amp;</span>assign.src)))
-            .chain(guard_ports)
-            .filter(|x| {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = x.borrow().type_name() {
-                    name == <span class="string">&quot;std_reg&quot;
-                </span>} <span class="kw">else </span>{
-                    <span class="bool-val">false
-                </span>}
-            })
-            .unique_by(|cell| cell.borrow().name())
-    }
-
-    <span class="doccomment">/// Return the name of the cells that these assignments write to for writes
-    /// that are guarded by true.
-    /// **Ignores** writes to group holes.
-    </span><span class="kw">pub fn </span>must_write_set&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + <span class="lifetime">&#39;a</span>,
-    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
-        assigns
-            .filter_map(|assignment| {
-                <span class="kw">if let </span>ir::Guard::True = <span class="kw-2">*</span>assignment.guard {
-                    <span class="kw">let </span>dst_ref = assignment.dst.borrow();
-                    <span class="kw">if let </span>ir::PortParent::Cell(cell_wref) = <span class="kw-2">&amp;</span>dst_ref.parent {
-                        <span class="kw">return </span><span class="prelude-val">Some</span>(Rc::clone(<span class="kw-2">&amp;</span>cell_wref.upgrade()));
-                    }
-                }
-                <span class="prelude-val">None
-            </span>})
-            .unique_by(|cell| cell.borrow().name())
-    }
-
-    <span class="doccomment">/// Returns all uses of cells in this group. Uses constitute both reads and
-    /// writes to cells.
-    </span><span class="kw">pub fn </span>uses&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt;(
-        assigns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + Clone + <span class="lifetime">&#39;a</span>,
-    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;ir::Cell&gt;&gt; + <span class="lifetime">&#39;a </span>{
-        <span class="kw">let </span>reads = <span class="self">Self</span>::read_set(assigns.clone());
-        reads
-            .chain(<span class="self">Self</span>::write_set(assigns))
-            .unique_by(|cell| cell.borrow().name())
+                .chain(iter::once(Rc::clone(<span class="kw-2">&amp;</span>assign.src)))
+                .filter(|port| !port.borrow().is_hole()),
+        )
     }
 }
 
@@ -538,12 +650,11 @@
     ) -&gt; (Vec&lt;RRC&lt;ir::Port&gt;&gt;, Vec&lt;RRC&lt;ir::Port&gt;&gt;) {
         <span class="kw">match </span>scon {
             ir::StaticControl::Empty(<span class="kw">_</span>) =&gt; (<span class="macro">vec!</span>[], <span class="macro">vec!</span>[]),
-            ir::StaticControl::Enable(ir::StaticEnable { group, .. }) =&gt; (
-                <span class="self">Self</span>::port_read_set(group.borrow().assignments.iter())
-                    .collect(),
-                <span class="self">Self</span>::port_write_set(group.borrow().assignments.iter())
-                    .collect(),
-            ),
+            ir::StaticControl::Enable(ir::StaticEnable { group, .. }) =&gt; {
+                <span class="kw">let </span>g = group.borrow();
+                <span class="kw">let </span>(r, w) = g.assignments.iter().analysis().reads_and_writes();
+                (r.collect(), w.collect())
+            }
             ir::StaticControl::Repeat(ir::StaticRepeat { body, .. }) =&gt; {
                 <span class="self">Self</span>::control_port_read_write_set_static(body)
             }
@@ -647,20 +758,23 @@
     ) -&gt; (Vec&lt;RRC&lt;ir::Port&gt;&gt;, Vec&lt;RRC&lt;ir::Port&gt;&gt;) {
         <span class="kw">match </span>con {
             ir::Control::Empty(<span class="kw">_</span>) =&gt; (<span class="macro">vec!</span>[], <span class="macro">vec!</span>[]),
-            ir::Control::Enable(ir::Enable { group, .. }) =&gt; (
-                <span class="self">Self</span>::port_read_set(group.borrow().assignments.iter().filter(
-                    |assign| {
-                        INCLUDE_HOLE_ASSIGNS || !assign.dst.borrow().is_hole()
-                    },
-                ))
-                .collect(),
-                <span class="self">Self</span>::port_write_set(group.borrow().assignments.iter().filter(
-                    |assign| {
-                        INCLUDE_HOLE_ASSIGNS || !assign.dst.borrow().is_hole()
-                    },
-                ))
-                .collect(),
-            ),
+            ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
+                <span class="kw">let </span>group = group.borrow();
+                <span class="kw">let </span>(reads, writes) =
+                    group.assignments.iter().analysis().reads_and_writes();
+                (
+                    reads
+                        .filter(|p| {
+                            INCLUDE_HOLE_ASSIGNS || !p.borrow().is_hole()
+                        })
+                        .collect(),
+                    writes
+                        .filter(|p| {
+                            INCLUDE_HOLE_ASSIGNS || !p.borrow().is_hole()
+                        })
+                        .collect(),
+                )
+            }
             ir::Control::Invoke(ir::Invoke {
                 inputs,
                 outputs,
@@ -706,10 +820,12 @@
                 <span class="kw">match </span>comb_group {
                     <span class="prelude-val">Some</span>(cgr) =&gt; {
                         <span class="kw">let </span>cg = cgr.borrow();
-                        <span class="kw">let </span>assigns = cg.assignments.iter();
-                        <span class="kw">let </span>reads = <span class="self">Self</span>::port_read_set(assigns.clone());
-                        <span class="kw">let </span>writes = <span class="self">Self</span>::port_write_set(assigns);
-                        (reads.chain(r).collect(), writes.chain(w).collect())
+                        <span class="kw">let </span>(reads, writes) =
+                            cg.assignments.iter().analysis().reads_and_writes();
+                        (
+                            reads.into_iter().chain(r).collect(),
+                            writes.into_iter().chain(w).collect(),
+                        )
                     }
                     <span class="prelude-val">None </span>=&gt; (r, w),
                 }
@@ -741,12 +857,11 @@
                 twrites.append(<span class="kw-2">&amp;mut </span>fwrites);
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(cg) = cond {
-                    treads.extend(<span class="self">Self</span>::port_read_set(
-                        cg.borrow().assignments.iter(),
-                    ));
-                    twrites.extend(<span class="self">Self</span>::port_write_set(
-                        cg.borrow().assignments.iter(),
-                    ));
+                    <span class="kw">let </span>cg = cg.borrow();
+                    <span class="kw">let </span>(reads, writes) =
+                        cg.assignments.iter().analysis().reads_and_writes();
+                    treads.extend(reads);
+                    twrites.extend(writes);
                 }
                 (treads, twrites)
             }
@@ -758,12 +873,11 @@
                 reads.push(Rc::clone(port));
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(cg) = cond {
-                    reads.extend(<span class="self">Self</span>::port_read_set(
-                        cg.borrow().assignments.iter(),
-                    ));
-                    writes.extend(<span class="self">Self</span>::port_write_set(
-                        cg.borrow().assignments.iter(),
-                    ));
+                    <span class="kw">let </span>cg = cg.borrow();
+                    <span class="kw">let </span>(r, w) =
+                        cg.assignments.iter().analysis().reads_and_writes();
+                    reads.extend(r);
+                    writes.extend(w);
                 }
                 (reads, writes)
             }
@@ -795,28 +909,6 @@
                 .into_iter()
                 .map(|p| p.borrow().cell_parent())
                 .collect(),
-        )
-    }
-
-    <span class="doccomment">/// Returns the ports that are read and written, respectively,
-    /// in the continuous assignments of the given component.
-    </span><span class="kw">pub fn </span>cont_ports_read_write_set(
-        comp: <span class="kw-2">&amp;mut </span>calyx_ir::Component,
-    ) -&gt; (Vec&lt;RRC&lt;ir::Port&gt;&gt;, Vec&lt;RRC&lt;ir::Port&gt;&gt;) {
-        (
-            <span class="self">Self</span>::port_read_set(comp.continuous_assignments.iter()).collect(),
-            <span class="self">Self</span>::port_write_set(comp.continuous_assignments.iter()).collect(),
-        )
-    }
-
-    <span class="doccomment">/// Returns the cells that are read and written, respectively,
-    /// in the continuous assignments of the given component.
-    </span><span class="kw">pub fn </span>cont_read_write_set(
-        comp: <span class="kw-2">&amp;mut </span>calyx_ir::Component,
-    ) -&gt; (Vec&lt;RRC&lt;ir::Cell&gt;&gt;, Vec&lt;RRC&lt;ir::Cell&gt;&gt;) {
-        (
-            <span class="self">Self</span>::read_set(comp.continuous_assignments.iter()).collect(),
-            <span class="self">Self</span>::write_set(comp.continuous_assignments.iter()).collect(),
         )
     }
 }

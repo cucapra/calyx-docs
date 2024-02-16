@@ -651,15 +651,47 @@
 <span id="651">651</span>
 <span id="652">652</span>
 <span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Calculate the reaching definitions in a control program.
-</span><span class="kw">use </span><span class="kw">crate</span>::analysis::ReadWriteSet;
-<span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
+</span><span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
+<span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::cmp::{Ord, PartialOrd};
 <span class="kw">use </span>std::{
     collections::{BTreeMap, BTreeSet, HashMap},
     ops::BitOr,
 };
+
+<span class="kw">use </span><span class="kw">super</span>::read_write_set::AssignmentAnalysis;
 
 <span class="kw">const </span>INVOKE_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">&quot;__invoke_&quot;</span>;
 
@@ -872,18 +904,19 @@
     <span class="kw">where
         </span>I: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;T&gt;&gt; + Clone + <span class="lifetime">&#39;a</span>,
     {
-        <span class="kw">let </span>continuous_regs: Vec&lt;ir::Id&gt; =
-            ReadWriteSet::uses(continuous_assignments)
-                .filter_map(|cell| {
-                    <span class="kw">let </span>cell_ref = cell.borrow();
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = cell_ref.type_name() {
-                        <span class="kw">if </span>name == <span class="string">&quot;std_reg&quot; </span>{
-                            <span class="kw">return </span><span class="prelude-val">Some</span>(cell_ref.name());
-                        }
+        <span class="kw">let </span>continuous_regs: Vec&lt;ir::Id&gt; = continuous_assignments
+            .analysis()
+            .cell_uses()
+            .filter_map(|cell| {
+                <span class="kw">let </span>cell_ref = cell.borrow();
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = cell_ref.type_name() {
+                    <span class="kw">if </span>name == <span class="string">&quot;std_reg&quot; </span>{
+                        <span class="kw">return </span><span class="prelude-val">Some</span>(cell_ref.name());
                     }
-                    <span class="prelude-val">None
-                </span>})
-                .collect();
+                }
+                <span class="prelude-val">None
+            </span>})
+            .collect();
 
         <span class="kw">let </span><span class="kw-2">mut </span>overlap_map: BTreeMap&lt;
             ir::Id,
@@ -954,6 +987,34 @@
         .collect();
 }
 
+<span class="doccomment">/// Returns the register cells whose out port is read anywhere in the given
+/// assignments
+</span><span class="kw">fn </span>register_reads&lt;T&gt;(assigns: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;]) -&gt; BTreeSet&lt;ir::Id&gt; {
+    assigns
+        .iter()
+        .analysis()
+        .reads()
+        .filter_map(|p| {
+            <span class="kw">let </span>port = p.borrow();
+            <span class="kw">let </span>ir::PortParent::Cell(cell_wref) = <span class="kw-2">&amp;</span>port.parent <span class="kw">else </span>{
+                <span class="macro">unreachable!</span>(<span class="string">&quot;Port not part of a cell&quot;</span>);
+            };
+            <span class="comment">// Skip this if the port is not an output
+            </span><span class="kw">if </span><span class="kw-2">&amp;</span>port.name != <span class="string">&quot;out&quot; </span>{
+                <span class="kw">return </span><span class="prelude-val">None</span>;
+            };
+            <span class="kw">let </span>cr = cell_wref.upgrade();
+            <span class="kw">let </span>cell = cr.borrow();
+            <span class="kw">if </span>cell.is_primitive(<span class="prelude-val">Some</span>(<span class="string">&quot;std_reg&quot;</span>)) {
+                <span class="prelude-val">Some</span>(cr.borrow().name())
+            } <span class="kw">else </span>{
+                <span class="prelude-val">None
+            </span>}
+        })
+        .unique()
+        .collect()
+}
+
 <span class="comment">// handles `build_reaching_defns` for the enable/static_enables case.
 // asgns are the assignments in the group (either static or dynamic)
 </span><span class="kw">fn </span>handle_reaching_def_enables&lt;T&gt;(
@@ -962,7 +1023,7 @@
     rd: <span class="kw-2">&amp;mut </span>ReachingDefinitionAnalysis,
     group_name: ir::Id,
 ) -&gt; (DefSet, KilledSet) {
-    <span class="kw">let </span>writes = ReadWriteSet::must_write_set(asgns.iter());
+    <span class="kw">let </span>writes = asgns.iter().analysis().must_writes().cells();
     <span class="comment">// for each write:
     // Killing all other reaching defns for that var
     // generating a new defn (Id, GROUP)
@@ -974,9 +1035,8 @@
         .map(|x| x.borrow().name())
         .collect::&lt;BTreeSet&lt;<span class="kw">_</span>&gt;&gt;();
 
-    <span class="kw">let </span>read_set = ReadWriteSet::register_reads(asgns.iter())
-        .map(|x| x.borrow().name())
-        .collect::&lt;BTreeSet&lt;<span class="kw">_</span>&gt;&gt;();
+    <span class="kw">let </span>read_set = register_reads(asgns);
+
     <span class="comment">// only kill a def if the value is not read.
     </span><span class="kw">let </span>(<span class="kw-2">mut </span>cur_reach, killed) =
         reach.kill_from_writeread(<span class="kw-2">&amp;</span>write_set, <span class="kw-2">&amp;</span>read_set);

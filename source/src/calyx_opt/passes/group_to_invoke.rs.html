@@ -344,7 +344,10 @@
 <span id="344">344</span>
 <span id="345">345</span>
 <span id="346">346</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ReadWriteSet;
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::AssignmentAnalysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>calyx_ir::{GetAttributes, RRC};
@@ -583,7 +586,10 @@
         assigns: <span class="kw-2">&amp;</span>[ir::Assignment&lt;Nothing&gt;],
         group_done_port: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::Port&gt;,
     ) {
-        <span class="kw">let </span><span class="kw-2">mut </span>writes = ReadWriteSet::write_set(assigns.iter())
+        <span class="kw">let </span><span class="kw-2">mut </span>writes = assigns
+            .iter()
+            .analysis()
+            .cell_writes()
             .filter(|cell| <span class="kw">match </span>cell.borrow().prototype {
                 ir::CellType::Primitive { is_comb, .. } =&gt; !is_comb,
                 <span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,

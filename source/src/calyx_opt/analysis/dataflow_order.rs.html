@@ -197,10 +197,6 @@
 <span id="197">197</span>
 <span id="198">198</span>
 <span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::read_write_set::ReadWriteSet;
 <span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
@@ -321,11 +317,7 @@
                     .collect_vec();
                 <span class="kw">let </span>ws = {
                     <span class="kw">let </span>dst = assign.dst.borrow();
-                    <span class="kw">let </span>dst_parent = <span class="macro">matches!</span>(
-                        dst.cell_parent().borrow().prototype,
-                        ir::CellType::Primitive { .. }
-                    );
-                    <span class="kw">if </span>dst_parent {
+                    <span class="kw">if </span>dst.cell_parent().borrow().is_primitive::&lt;<span class="kw-2">&amp;</span>str&gt;(<span class="prelude-val">None</span>) {
                         <span class="prelude-val">Some</span>(dst.canonical())
                     } <span class="kw">else </span>{
                         <span class="prelude-val">None

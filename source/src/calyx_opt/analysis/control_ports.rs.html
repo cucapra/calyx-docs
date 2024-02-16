@@ -221,7 +221,14 @@
 <span id="221">221</span>
 <span id="222">222</span>
 <span id="223">223</span>
-</pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::AssignmentAnalysis;
+<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::{
     collections::{HashMap, HashSet},
@@ -289,10 +296,15 @@
         comb_group: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;ir::RRC&lt;ir::CombGroup&gt;&gt;,
     ) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = comb_group {
-            <span class="kw">let </span>cells =
-                <span class="kw">super</span>::ReadWriteSet::uses(c.borrow().assignments.iter())
-                    .map(|cell| cell.borrow().name())
-                    .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();
+            <span class="kw">let </span>cells = c
+                .borrow()
+                .assignments
+                .iter()
+                .analysis()
+                .cell_uses()
+                .map(|cell| cell.borrow().name())
+                .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();
+
             <span class="comment">// Only add ports that come from cells used in this comb group.
             </span><span class="kw">let </span>ports =
                 inputs
