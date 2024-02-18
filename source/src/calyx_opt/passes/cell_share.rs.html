@@ -456,8 +456,6 @@
 <span id="456">456</span>
 <span id="457">457</span>
 <span id="458">458</span>
-<span id="459">459</span>
-<span id="460">460</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     AssignmentAnalysis, GraphColoring, LiveRangeAnalysis, ShareSet,
     StaticParTiming,
@@ -847,9 +845,7 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>coloring: rewriter::RewriteMap&lt;ir::Cell&gt; = HashMap::new();
         <span class="kw">let </span><span class="kw-2">mut </span>comp_share_freqs: HashMap&lt;ir::CellType, HashMap&lt;i64, i64&gt;&gt; =
             HashMap::new();
-        <span class="kw">let </span>comb_bound = <span class="self">self</span>.bounds.get(<span class="number">0</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
-        <span class="kw">let </span>reg_bound = <span class="self">self</span>.bounds.get(<span class="number">1</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
-        <span class="kw">let </span>other_bound = <span class="self">self</span>.bounds.get(<span class="number">2</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>);
+        <span class="kw">let </span>[comb_bound, reg_bound, other_bound] = <span class="kw-2">&amp;</span><span class="self">self</span>.bounds;
         <span class="kw">for </span>(cell_type, <span class="kw-2">mut </span>graph) <span class="kw">in </span>graphs_by_type {
             <span class="comment">// getting bound, based on self.bounds and cell_type
             </span><span class="kw">let </span>bound = {

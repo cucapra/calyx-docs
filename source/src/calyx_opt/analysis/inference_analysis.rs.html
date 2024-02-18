@@ -1031,7 +1031,7 @@
             <span class="macro">log::debug!</span>(<span class="string">&quot;FAIL: No path between @go and @done port&quot;</span>);
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
-        <span class="kw">let </span>first_path = paths.get(<span class="number">0</span>).unwrap();
+        <span class="kw">let </span>first_path = paths.first().unwrap();
 
         <span class="comment">// Sum the latencies of each primitive along the path.
         </span><span class="kw">let </span><span class="kw-2">mut </span>latency_sum = <span class="number">0</span>;

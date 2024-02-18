@@ -231,6 +231,10 @@
 <span id="231">231</span>
 <span id="232">232</span>
 <span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes};
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
@@ -311,33 +315,37 @@
     }
 }
 
+<span class="doccomment">/// Walk over a set of control statements and call `update_static` on each of them.
+/// Use a merge function to merge the results of the `update_static` calls.
+</span><span class="kw">fn </span>walk_static&lt;T, F&gt;(stmts: <span class="kw-2">&amp;mut </span>[T], extra: <span class="kw-2">&amp;</span>T::Info, merge: F) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
+<span class="kw">where
+    </span>T: WithStatic,
+    F: Fn(u64, u64) -&gt; u64,
+{
+    <span class="kw">let </span><span class="kw-2">mut </span>latency = <span class="prelude-val">Some</span>(<span class="number">0</span>);
+    <span class="comment">// This is implemented as a loop because we want to call `update_static` on
+    // each statement even if we cannot compute a total latency anymore.
+    </span><span class="kw">for </span>stmt <span class="kw">in </span>stmts.iter_mut() {
+        <span class="kw">let </span>stmt_latency = stmt.update_static(extra);
+        latency = <span class="kw">match </span>(latency, stmt_latency) {
+            (<span class="prelude-val">Some</span>(l), <span class="prelude-val">Some</span>(s)) =&gt; <span class="prelude-val">Some</span>(merge(l, s)),
+            (<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+        }
+    }
+    latency
+}
+
 <span class="kw">impl </span>WithStatic <span class="kw">for </span>ir::Seq {
     <span class="kw">type </span>Info = CompTime;
     <span class="kw">fn </span>compute_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extra: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
-        <span class="comment">// Go through each stmt in the seq, and try to calculate the latency.
-        </span><span class="self">self</span>.stmts.iter_mut().fold(<span class="prelude-val">Some</span>(<span class="number">0</span>), |acc, stmt| {
-            <span class="kw">match </span>(acc, stmt.update_static(extra)) {
-                (<span class="prelude-val">Some</span>(cur_latency), <span class="prelude-val">Some</span>(stmt_latency)) =&gt; {
-                    <span class="prelude-val">Some</span>(cur_latency + stmt_latency)
-                }
-                (<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
-            }
-        })
+        walk_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>.stmts, extra, |x, y| x + y)
     }
 }
 
 <span class="kw">impl </span>WithStatic <span class="kw">for </span>ir::Par {
     <span class="kw">type </span>Info = CompTime;
     <span class="kw">fn </span>compute_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extra: <span class="kw-2">&amp;</span><span class="self">Self</span>::Info) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
-        <span class="comment">// Go through each stmt in the par, and try to calculate the latency.
-        </span><span class="self">self</span>.stmts.iter_mut().fold(<span class="prelude-val">Some</span>(<span class="number">0</span>), |acc, stmt| {
-            <span class="kw">match </span>(acc, stmt.update_static(extra)) {
-                (<span class="prelude-val">Some</span>(cur_latency), <span class="prelude-val">Some</span>(stmt_latency)) =&gt; {
-                    <span class="prelude-val">Some</span>(std::cmp::max(cur_latency, stmt_latency))
-                }
-                (<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
-            }
-        })
+        walk_static(<span class="kw-2">&amp;mut </span><span class="self">self</span>.stmts, extra, std::cmp::max)
     }
 }
 
