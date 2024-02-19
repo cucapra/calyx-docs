@@ -248,6 +248,14 @@ my_component.output("my_output", 32)
         my_component.this().my_output = const(32, 1)
 </code></pre>
 <p>Note that it's possible to <a href="ref.html#creating-handles">create a handle</a> to input and output ports.</p>
+<h3 id="defining-component-attributes"><a class="header" href="#defining-component-attributes">Defining Component Attributes</a></h3>
+<p>Components can be given attributes. Similar to ports, just specify the name of the attribute and its value.
+Note that <code>attribute(name, value)</code> does not return a handle to the attribute.</p>
+<pre><code class="language-python">my_component.attribute("my_attribute", 1)
+</code></pre>
+<p>Will create a component that looks like:</p>
+<pre><code>component my_component&lt;"my_attribute"=1&gt;(...) -&gt; (...) {
+</code></pre>
 <h3 id="multi-component-designs"><a class="header" href="#multi-component-designs">Multi-Component Designs</a></h3>
 <p>Calyx supports <a href="../lang/multi-component.html">multi-component designs</a>. The <a href="ref.html#top-level-program-structure">top-level example</a> demonstrates how to construct multi-component designs using the library.</p>
 <h4 id="defining-common-calyx-cells"><a class="header" href="#defining-common-calyx-cells">Defining Common Calyx Cells</a></h4>
