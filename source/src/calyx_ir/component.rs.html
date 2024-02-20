@@ -432,6 +432,14 @@
 <span id="432">432</span>
 <span id="433">433</span>
 <span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attribute, Attributes, BoolAttr, Builder, Cell, CellType,
     CombGroup, Control, Direction, GetName, Group, Id, NumAttr, PortDef,
@@ -665,6 +673,14 @@
         <span class="self">self</span>.namegen.gen_name(prefix)
     }
 
+    <span class="doccomment">/// Check whether this component is purely structural, i.e. has no groups or control
+    </span><span class="kw">pub fn </span>is_structural(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.groups.is_empty()
+            &amp;&amp; <span class="self">self</span>.comb_groups.is_empty()
+            &amp;&amp; <span class="self">self</span>.static_groups.is_empty()
+            &amp;&amp; <span class="self">self</span>.control.borrow().is_empty()
+    }
+
     <span class="doccomment">/// Check whether this is a static component.
     /// A static component is a component which has a latency field.
     </span><span class="kw">pub fn </span>is_static(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
@@ -750,7 +766,7 @@
 </span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>IdList&lt;T: GetName&gt;(LinkedHashMap&lt;Id, RRC&lt;T&gt;&gt;);
 
-<span class="doccomment">/// Simple into-iter impl delegating to the [`Values`](linked_hash_map::Values).
+<span class="doccomment">/// Simple iter impl delegating to the [`Values`](linked_hash_map::Values).
 </span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: GetName&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>IdList&lt;T&gt; {
     <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RRC&lt;T&gt;;
 
