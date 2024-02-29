@@ -229,6 +229,13 @@
 <span id="229">229</span>
 <span id="230">230</span>
 <span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Definitions for tracking source position information of Calyx programs
 
 </span><span class="kw">use </span>itertools::Itertools;
@@ -444,6 +451,13 @@
         )
         .unwrap();
         buf
+    }
+
+    <span class="kw">pub fn </span>get_location(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="kw-2">&amp;</span>str, usize, usize) {
+        <span class="kw">let </span>table = GlobalPositionTable::as_ref();
+        <span class="kw">let </span>pos_d = table.get_pos(<span class="self">self</span>.<span class="number">0</span>);
+        <span class="kw">let </span>name = <span class="kw-2">&amp;</span>table.get_file_data(pos_d.file).name;
+        (name, pos_d.start, pos_d.end)
     }
 
     <span class="doccomment">/// Visualizes the span without any message or mkaring
