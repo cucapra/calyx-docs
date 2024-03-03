@@ -816,18 +816,6 @@
 <span id="816">816</span>
 <span id="817">817</span>
 <span id="818">818</span>
-<span id="819">819</span>
-<span id="820">820</span>
-<span id="821">821</span>
-<span id="822">822</span>
-<span id="823">823</span>
-<span id="824">824</span>
-<span id="825">825</span>
-<span id="826">826</span>
-<span id="827">827</span>
-<span id="828">828</span>
-<span id="829">829</span>
-<span id="830">830</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{
     <span class="self">self </span><span class="kw">as </span>ir, CellType, Component, GetAttributes, LibrarySignatures,
@@ -926,18 +914,6 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>ref_cell_types = HashMap::new();
         <span class="kw">for </span>comp <span class="kw">in </span>ctx.components.iter() {
-            <span class="comment">// Main component cannot use `ref` cells
-            </span><span class="kw">if </span>comp.name == ctx.entrypoint {
-                <span class="kw">for </span>cell <span class="kw">in </span>comp.cells.iter() {
-                    <span class="kw">if </span>cell.borrow().is_reference() {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
-                            <span class="string">&quot;ref cells are not allowed for main component&quot;</span>,
-                        )
-                        .with_pos(cell.borrow().get_attributes()));
-                    }
-                }
-            }
-
             <span class="comment">// Non-main components cannot use @external attribute
             </span><span class="kw">let </span>cellmap: LinkedHashMap&lt;ir::Id, CellType&gt; = comp
                 .cells

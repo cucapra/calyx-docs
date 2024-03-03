@@ -179,18 +179,19 @@
 <span id="179">179</span>
 <span id="180">180</span>
 <span id="181">181</span>
+<span id="182">182</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     AddGuard, Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
     CompileInvoke, CompileRepeat, CompileStatic, CompileStaticInterface,
     CompileSync, CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
     DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, DefaultAssigns,
-    DiscoverExternal, Externalize, GoInsertion, GroupToInvoke, GroupToSeq,
-    HoleInliner, InferShare, LowerGuards, MergeAssign, Papercut, ParToSeq,
-    RegisterUnsharing, RemoveIds, ResetInsertion, SimplifyStaticGuards,
-    SimplifyWithControl, StaticInference, StaticInliner, StaticPromotion,
-    SynthesisPapercut, TopDownCompileControl, UnrollBounded, WellFormed,
-    WireInliner, WrapMain,
+    DiscoverExternal, ExternalToRef, Externalize, GoInsertion, GroupToInvoke,
+    GroupToSeq, HoleInliner, InferShare, LowerGuards, MergeAssign, Papercut,
+    ParToSeq, RegisterUnsharing, RemoveIds, ResetInsertion,
+    SimplifyStaticGuards, SimplifyWithControl, StaticInference, StaticInliner,
+    StaticPromotion, SynthesisPapercut, TopDownCompileControl, UnrollBounded,
+    WellFormed, WireInliner, WrapMain,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::Named;
 <span class="kw">use crate</span>::{pass_manager::PassManager, register_alias};
@@ -255,6 +256,7 @@
         pm.register_pass::&lt;LowerGuards&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;HoleInliner&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;RemoveIds&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;ExternalToRef&gt;()<span class="question-mark">?</span>;
 
         <span class="macro">register_alias!</span>(pm, <span class="string">&quot;validate&quot;</span>, [WellFormed, Papercut, Canonicalize]);
         <span class="macro">register_alias!</span>(

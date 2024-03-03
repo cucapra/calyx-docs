@@ -89,6 +89,8 @@
 <span id="89">89</span>
 <span id="90">90</span>
 <span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
@@ -103,6 +105,7 @@
 <span class="kw">mod </span>dead_cell_removal;
 <span class="kw">mod </span>dead_group_removal;
 <span class="kw">mod </span>dump_ports;
+<span class="kw">mod </span>external_to_ref;
 <span class="kw">mod </span>externalize;
 <span class="kw">mod </span>go_insertion;
 <span class="kw">mod </span>group_to_invoke;
@@ -150,6 +153,7 @@
 <span class="kw">pub use </span>dead_cell_removal::DeadCellRemoval;
 <span class="kw">pub use </span>dead_group_removal::DeadGroupRemoval;
 <span class="kw">pub use </span>discover_external::DiscoverExternal;
+<span class="kw">pub use </span>external_to_ref::ExternalToRef;
 <span class="kw">pub use </span>externalize::Externalize;
 <span class="kw">pub use </span>go_insertion::GoInsertion;
 <span class="kw">pub use </span>group_to_invoke::GroupToInvoke;
