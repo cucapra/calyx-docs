@@ -179,7 +179,7 @@
 <p>Working with Calyx involves a lot of command-line tools. For example, an
 incomplete yet daunting list of CLI tools used by Calyx is:</p>
 <ul>
-<li>All the Calyx <a href="../frontends/index.html">frontends</a>.</li>
+<li>All the Calyx <a href="../../frontends/index.html">frontends</a>.</li>
 <li>Calyx compiler and its various command line tools</li>
 <li>Verilator, the Verilog simulation framework used to test Calyx-generated designs.</li>
 <li>Waveform viewers to see the results of simulation</li>
@@ -271,7 +271,7 @@ priority</a>:</p>
 <pre><code>fud c stages.verilog.priority 1
 </code></pre>
 <h2 id="dahlia-frontend"><a class="header" href="#dahlia-frontend">Dahlia Frontend</a></h2>
-<p>In order to use the Dahlia frontend with Fud, first <a href="../frontends/dahlia.html">install
+<p>In order to use the Dahlia frontend with Fud, first <a href="../../frontends/dahlia.html">install
 Dahlia</a>.
 Once Dahlia is compiled, point <code>fud</code> to the Dahlia compiler binary:</p>
 <pre><code class="language-bash">fud config stages.dahlia.exec &lt;full path to dahlia repo&gt;/fuse
@@ -280,25 +280,25 @@ Once Dahlia is compiled, point <code>fud</code> to the Dahlia compiler binary:</
 <p>You need <a href="https://flit.readthedocs.io/en/latest/">flit</a> to install our Python frontends.</p>
 <pre><code>pip3 install flit
 </code></pre>
-<p>Our Python <a href="../frontends">frontends</a> use a Calyx ast library written in Python. Install with:</p>
+<p>Our Python <a href="../../frontends">frontends</a> use a Calyx ast library written in Python. Install with:</p>
 <pre><code>cd calyx-py &amp;&amp; flit install -s
 </code></pre>
 <p>Frontend specific instructions:</p>
 <ul>
-<li><a href="../frontends/systolic-array.html">Systolic array</a>: Nothing else needed.</li>
-<li><a href="../frontends/ntt.html">NTT</a>:
+<li><a href="../../frontends/systolic-array.html">Systolic array</a>: Nothing else needed.</li>
+<li><a href="../../frontends/ntt.html">NTT</a>:
 <ul>
 <li>Install dependencies: <code>pip3 install prettytable</code></li>
 <li>Install external <code>fud</code> stage: <code>fud register ntt -p frontends/ntt-pipeline/fud/ntt.py</code></li>
 </ul>
 </li>
-<li><a href="../frontends/mrxl.html">MrXL</a>:
+<li><a href="../../frontends/mrxl.html">MrXL</a>:
 <ul>
 <li>Install <code>mrxl</code> binary: <code>cd frontends/mrxl &amp;&amp; flit install -s</code></li>
 <li>Install <code>mrxl</code> <a href="./external.html">external stage</a> for <code>fud</code>: <code>fud register mrxl -p frontends/mrxl/fud/mrxl.py</code></li>
 </ul>
 </li>
-<li><a href="../frontends/tvm-relay.html">TVM Relay</a>: See instructions.</li>
+<li><a href="../../frontends/tvm-relay.html">TVM Relay</a>: See instructions.</li>
 </ul>
 <h2 id="adding-synthesis-backends"><a class="header" href="#adding-synthesis-backends">Adding Synthesis Backends</a></h2>
 <p><code>fud</code> supports wraps the Vivado (<code>synth-verilog</code>) and Vivado HLS (<code>vivado-hls</code>)

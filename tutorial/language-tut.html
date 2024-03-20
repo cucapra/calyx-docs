@@ -260,7 +260,7 @@ So make a file called something like <code>data.json</code> containing something
 </code></pre>
 <p>The <code>mem</code> key means we're providing the initial value for our memory called <code>mem</code>.
 We have one (unsigned integer) data element, and we indicate the bit width (32 bits).</p>
-<p>If you want to see how this Calyx program compiles to Verilog, here's the <a href="../fud/index.html">fud</a> incantation you need:</p>
+<p>If you want to see how this Calyx program compiles to Verilog, here's the <a href="../running-calyx/fud/index.html">fud</a> incantation you need:</p>
 <pre><code>fud exec language-tutorial-mem.futil --to verilog
 </code></pre>
 <p>Not terribly interesting!
@@ -270,7 +270,7 @@ However, one nice thing you can do with programs is execute them.</p>
     -s verilog.data data.json
 </code></pre>
 <p>Using <code>--to dat</code> asks fud to run the program, and the extra <code>-s verilog.data &lt;filename&gt;</code> argument tells it where to find the input data.
-The <code>--through icarus-verilog</code> option tells fud which Verilog simulator to use (see <a href="../fud/index.html">the chapter about fud</a> for alternatives such as <a href="https://www.veripool.org/wiki/verilator">Verilator</a>).
+The <code>--through icarus-verilog</code> option tells fud which Verilog simulator to use (see <a href="../running-calyx/fud/index.html">the chapter about fud</a> for alternatives such as <a href="https://www.veripool.org/wiki/verilator">Verilator</a>).
 Executing this program should print:</p>
 <pre><code>{
   "cycles": 1,

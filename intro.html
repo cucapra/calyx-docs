@@ -234,7 +234,7 @@ Install the following tools:</p>
 <p>If everything has been installed correctly, this should not produce any failing
 tests.</p>
 <h2 id="installing-the-command-line-driver"><a class="header" href="#installing-the-command-line-driver">Installing the Command-Line Driver</a></h2>
-<p><a href="./fud">The Calyx driver</a> wraps the various compiler frontends and
+<p><a href="./running-calyx/fud">The Calyx driver</a> wraps the various compiler frontends and
 backends to simplify running Calyx programs.</p>
 <p>Install <a href="https://flit.readthedocs.io/en/latest/">Flit</a>:</p>
 <pre><code>pip3 install flit
@@ -251,12 +251,12 @@ backends to simplify running Calyx programs.</p>
 <p><code>fud</code> will report certain tools are not available. This is expected.</p>
 <h2 id="simulation"><a class="header" href="#simulation">Simulation</a></h2>
 <p>There are three ways to run Calyx programs:
-<a href="https://www.veripool.org/wiki/verilator">Verilator</a>, <a href="http://iverilog.icarus.com">Icarus Verilog</a>, and Calyx's native <a href="./interpreter.html">interpreter</a>.
+<a href="https://www.veripool.org/wiki/verilator">Verilator</a>, <a href="http://iverilog.icarus.com">Icarus Verilog</a>, and Calyx's native <a href="./running-calyx/interpreter.html">interpreter</a>.
 You'll want to set up at least one of these options so you can try out your code.</p>
 <p>Icarus Verilog is an easy way to get started on most platforms.
 On a Mac, you can install it via <a href="https://brew.sh">Homebrew</a> by typing <code>brew install icarus-verilog</code>.
 On Ubuntu, <a href="https://iverilog.fandom.com/wiki/Installation_Guide#Installation_From_Source">install from source</a>.
-Then install the relevant <a href="./fud/index.html#icarus-verilog">fud support</a> by running:</p>
+Then install the relevant <a href="./running-calyx/fud/index.html#icarus-verilog">fud support</a> by running:</p>
 <pre><code>fud register icarus-verilog -p fud/icarus/icarus.py
 </code></pre>
 <p>Type <code>fud check</code> to make sure the new stage is working.
@@ -264,8 +264,8 @@ Some missing tools are again expected; just pay attention to the report for <cod
 <p>It is worth saying a little about the alternatives.
 You could consider:</p>
 <ol>
-<li><a href="./fud/index.html#verilator">Setting up Verilator</a> for faster performance, which is good for long-running simulations.</li>
-<li>Using the <a href="./interpreter.html">interpreter</a> to avoid RTL simulation altogether.</li>
+<li><a href="./running-calyx/fud/index.html#verilator">Setting up Verilator</a> for faster performance, which is good for long-running simulations.</li>
+<li>Using the <a href="./running-calyx/interpreter.html">interpreter</a> to avoid RTL simulation altogether.</li>
 </ol>
 <h2 id="running-a-hardware-design"><a class="header" href="#running-a-hardware-design">Running a Hardware Design</a></h2>
 <p>You're all set to run a Calyx hardware design now. Run the following command:</p>
@@ -282,8 +282,8 @@ final memory state.</p>
 <ul>
 <li><a href="./tools/editor-highlighting.html">How can I setup syntax highlighting in my editor?</a></li>
 <li><a href="./tutorial/language-tut.html">How does the language work?</a></li>
-<li><a href="./fud/index.html#dahlia-fronted">How do I install Calyx frontends?</a></li>
-<li><a href="./fud/examples.html">Where can I see further examples with <code>fud</code>?</a></li>
+<li><a href="./running-calyx/fud/index.html#dahlia-fronted">How do I install Calyx frontends?</a></li>
+<li><a href="./running-calyx/fud/examples.html">Where can I see further examples with <code>fud</code>?</a></li>
 <li><a href="./tutorial/frontend-tut.html">How do I write a frontend for Calyx?</a></li>
 </ul>
 

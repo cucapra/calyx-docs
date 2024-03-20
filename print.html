@@ -235,7 +235,7 @@ Install the following tools:</p>
 <p>If everything has been installed correctly, this should not produce any failing
 tests.</p>
 <h2 id="installing-the-command-line-driver"><a class="header" href="#installing-the-command-line-driver">Installing the Command-Line Driver</a></h2>
-<p><a href="./fud">The Calyx driver</a> wraps the various compiler frontends and
+<p><a href="./running-calyx/fud">The Calyx driver</a> wraps the various compiler frontends and
 backends to simplify running Calyx programs.</p>
 <p>Install <a href="https://flit.readthedocs.io/en/latest/">Flit</a>:</p>
 <pre><code>pip3 install flit
@@ -252,12 +252,12 @@ backends to simplify running Calyx programs.</p>
 <p><code>fud</code> will report certain tools are not available. This is expected.</p>
 <h2 id="simulation"><a class="header" href="#simulation">Simulation</a></h2>
 <p>There are three ways to run Calyx programs:
-<a href="https://www.veripool.org/wiki/verilator">Verilator</a>, <a href="http://iverilog.icarus.com">Icarus Verilog</a>, and Calyx's native <a href="./interpreter.html">interpreter</a>.
+<a href="https://www.veripool.org/wiki/verilator">Verilator</a>, <a href="http://iverilog.icarus.com">Icarus Verilog</a>, and Calyx's native <a href="./running-calyx/interpreter.html">interpreter</a>.
 You'll want to set up at least one of these options so you can try out your code.</p>
 <p>Icarus Verilog is an easy way to get started on most platforms.
 On a Mac, you can install it via <a href="https://brew.sh">Homebrew</a> by typing <code>brew install icarus-verilog</code>.
 On Ubuntu, <a href="https://iverilog.fandom.com/wiki/Installation_Guide#Installation_From_Source">install from source</a>.
-Then install the relevant <a href="./fud/index.html#icarus-verilog">fud support</a> by running:</p>
+Then install the relevant <a href="./running-calyx/fud/index.html#icarus-verilog">fud support</a> by running:</p>
 <pre><code>fud register icarus-verilog -p fud/icarus/icarus.py
 </code></pre>
 <p>Type <code>fud check</code> to make sure the new stage is working.
@@ -265,8 +265,8 @@ Some missing tools are again expected; just pay attention to the report for <cod
 <p>It is worth saying a little about the alternatives.
 You could consider:</p>
 <ol>
-<li><a href="./fud/index.html#verilator">Setting up Verilator</a> for faster performance, which is good for long-running simulations.</li>
-<li>Using the <a href="./interpreter.html">interpreter</a> to avoid RTL simulation altogether.</li>
+<li><a href="./running-calyx/fud/index.html#verilator">Setting up Verilator</a> for faster performance, which is good for long-running simulations.</li>
+<li>Using the <a href="./running-calyx/interpreter.html">interpreter</a> to avoid RTL simulation altogether.</li>
 </ol>
 <h2 id="running-a-hardware-design"><a class="header" href="#running-a-hardware-design">Running a Hardware Design</a></h2>
 <p>You're all set to run a Calyx hardware design now. Run the following command:</p>
@@ -283,8 +283,8 @@ final memory state.</p>
 <ul>
 <li><a href="./tools/editor-highlighting.html">How can I setup syntax highlighting in my editor?</a></li>
 <li><a href="./tutorial/language-tut.html">How does the language work?</a></li>
-<li><a href="./fud/index.html#dahlia-fronted">How do I install Calyx frontends?</a></li>
-<li><a href="./fud/examples.html">Where can I see further examples with <code>fud</code>?</a></li>
+<li><a href="./running-calyx/fud/index.html#dahlia-fronted">How do I install Calyx frontends?</a></li>
+<li><a href="./running-calyx/fud/examples.html">Where can I see further examples with <code>fud</code>?</a></li>
 <li><a href="./tutorial/frontend-tut.html">How do I write a frontend for Calyx?</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="calyx-language-tutorial"><a class="header" href="#calyx-language-tutorial">Calyx Language Tutorial</a></h1>
@@ -372,7 +372,7 @@ So make a file called something like <code>data.json</code> containing something
 </code></pre>
 <p>The <code>mem</code> key means we're providing the initial value for our memory called <code>mem</code>.
 We have one (unsigned integer) data element, and we indicate the bit width (32 bits).</p>
-<p>If you want to see how this Calyx program compiles to Verilog, here's the <a href="tutorial/../fud/index.html">fud</a> incantation you need:</p>
+<p>If you want to see how this Calyx program compiles to Verilog, here's the <a href="tutorial/../running-calyx/fud/index.html">fud</a> incantation you need:</p>
 <pre><code>fud exec language-tutorial-mem.futil --to verilog
 </code></pre>
 <p>Not terribly interesting!
@@ -382,7 +382,7 @@ However, one nice thing you can do with programs is execute them.</p>
     -s verilog.data data.json
 </code></pre>
 <p>Using <code>--to dat</code> asks fud to run the program, and the extra <code>-s verilog.data &lt;filename&gt;</code> argument tells it where to find the input data.
-The <code>--through icarus-verilog</code> option tells fud which Verilog simulator to use (see <a href="tutorial/../fud/index.html">the chapter about fud</a> for alternatives such as <a href="https://www.veripool.org/wiki/verilator">Verilator</a>).
+The <code>--through icarus-verilog</code> option tells fud which Verilog simulator to use (see <a href="tutorial/../running-calyx/fud/index.html">the chapter about fud</a> for alternatives such as <a href="https://www.veripool.org/wiki/verilator">Verilator</a>).
 Executing this program should print:</p>
 <pre><code>{
   "cycles": 1,
@@ -1296,7 +1296,7 @@ component update_memory() -&gt; () {
 <p>As the example shows, each invocation can take different bindings for each <code>ref</code> cell.
 See <a href="lang/./memories-by-reference.html">the tutorial</a> for longer example on how to use this feature.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="data-format"><a class="header" href="#data-format">Data Format</a></h1>
-<p>Calyx's <a href="lang/../fud/index.html"><code>fud</code></a>-based workflows specifies a JSON-based data format which can be used with software simulators.</p>
+<p>Calyx's <a href="lang/../running-calyx/fud/index.html"><code>fud</code></a>-based workflows specifies a JSON-based data format which can be used with software simulators.</p>
 <h2 id="external-memories"><a class="header" href="#external-memories">External memories</a></h2>
 <p>First, a Calyx program must mark memories using the <a href="lang/attributes.html#external"><code>@external</code> attribute</a> to tell the compiler that the memory is used as either an input or an ouput.</p>
 <pre><code>component main() {
@@ -1351,7 +1351,7 @@ The <code>@external</code> attribute can <strong>only be used</strong> on the <a
 <p><strong>Note:</strong> <code>fud</code> requires that for each memory marked with the <code>@external</code> attribute in the program.</p>
 </blockquote>
 <h2 id="using-fud"><a class="header" href="#using-fud">Using <code>fud</code></a></h2>
-<p>All software simulators supported by <code>fud</code>, including <a href="lang/../fud/index.html#verilator">Verilator</a> and <a href="lang/../fud/index.html#icarus-verilog">Icarus Verilog</a>, as well as the <a href="lang/../interpreter.html">Calyx interpreter</a> can use this data format.
+<p>All software simulators supported by <code>fud</code>, including <a href="lang/../running-calyx/fud/index.html#verilator">Verilator</a> and <a href="lang/../running-calyx/fud/index.html#icarus-verilog">Icarus Verilog</a>, as well as the <a href="lang/../interpreter.html">Calyx interpreter</a> can use this data format.
 To pass a JSON file with initial values, use the <code>-s verilog.data</code> flag:</p>
 <pre><code class="language-bash"># Use Icarus Verilog
 fud e --to dat --through icarus-verilog &lt;CALYX FILE&gt; -s verilog.data &lt;JSON&gt;
@@ -1748,7 +1748,7 @@ Note that each group must have exactly one output port in it.</p>
 <p>Working with Calyx involves a lot of command-line tools. For example, an
 incomplete yet daunting list of CLI tools used by Calyx is:</p>
 <ul>
-<li>All the Calyx <a href="running-calyx/fud/../frontends/index.html">frontends</a>.</li>
+<li>All the Calyx <a href="running-calyx/fud/../../frontends/index.html">frontends</a>.</li>
 <li>Calyx compiler and its various command line tools</li>
 <li>Verilator, the Verilog simulation framework used to test Calyx-generated designs.</li>
 <li>Waveform viewers to see the results of simulation</li>
@@ -1840,7 +1840,7 @@ priority</a>:</p>
 <pre><code>fud c stages.verilog.priority 1
 </code></pre>
 <h2 id="dahlia-frontend"><a class="header" href="#dahlia-frontend">Dahlia Frontend</a></h2>
-<p>In order to use the Dahlia frontend with Fud, first <a href="running-calyx/fud/../frontends/dahlia.html">install
+<p>In order to use the Dahlia frontend with Fud, first <a href="running-calyx/fud/../../frontends/dahlia.html">install
 Dahlia</a>.
 Once Dahlia is compiled, point <code>fud</code> to the Dahlia compiler binary:</p>
 <pre><code class="language-bash">fud config stages.dahlia.exec &lt;full path to dahlia repo&gt;/fuse
@@ -1849,25 +1849,25 @@ Once Dahlia is compiled, point <code>fud</code> to the Dahlia compiler binary:</
 <p>You need <a href="https://flit.readthedocs.io/en/latest/">flit</a> to install our Python frontends.</p>
 <pre><code>pip3 install flit
 </code></pre>
-<p>Our Python <a href="running-calyx/fud/../frontends">frontends</a> use a Calyx ast library written in Python. Install with:</p>
+<p>Our Python <a href="running-calyx/fud/../../frontends">frontends</a> use a Calyx ast library written in Python. Install with:</p>
 <pre><code>cd calyx-py &amp;&amp; flit install -s
 </code></pre>
 <p>Frontend specific instructions:</p>
 <ul>
-<li><a href="running-calyx/fud/../frontends/systolic-array.html">Systolic array</a>: Nothing else needed.</li>
-<li><a href="running-calyx/fud/../frontends/ntt.html">NTT</a>:
+<li><a href="running-calyx/fud/../../frontends/systolic-array.html">Systolic array</a>: Nothing else needed.</li>
+<li><a href="running-calyx/fud/../../frontends/ntt.html">NTT</a>:
 <ul>
 <li>Install dependencies: <code>pip3 install prettytable</code></li>
 <li>Install external <code>fud</code> stage: <code>fud register ntt -p frontends/ntt-pipeline/fud/ntt.py</code></li>
 </ul>
 </li>
-<li><a href="running-calyx/fud/../frontends/mrxl.html">MrXL</a>:
+<li><a href="running-calyx/fud/../../frontends/mrxl.html">MrXL</a>:
 <ul>
 <li>Install <code>mrxl</code> binary: <code>cd frontends/mrxl &amp;&amp; flit install -s</code></li>
 <li>Install <code>mrxl</code> <a href="running-calyx/fud/./external.html">external stage</a> for <code>fud</code>: <code>fud register mrxl -p frontends/mrxl/fud/mrxl.py</code></li>
 </ul>
 </li>
-<li><a href="running-calyx/fud/../frontends/tvm-relay.html">TVM Relay</a>: See instructions.</li>
+<li><a href="running-calyx/fud/../../frontends/tvm-relay.html">TVM Relay</a>: See instructions.</li>
 </ul>
 <h2 id="adding-synthesis-backends"><a class="header" href="#adding-synthesis-backends">Adding Synthesis Backends</a></h2>
 <p><code>fud</code> supports wraps the Vivado (<code>synth-verilog</code>) and Vivado HLS (<code>vivado-hls</code>)
@@ -2178,7 +2178,7 @@ Our <code>toplevel.v</code> and <a href="https://docs.xilinx.com/r/en-US/ug1393-
 Our toplevel adheres to the Xilinx <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Kernel-Interface-Requirements">kernel interface requirements</a>.
 <code>kernel.xml</code> defines register maps and ports of our
 toplevel module used by our Xilinx tools.</p>
-<p>For more information on the generation of the files mentioned above see <a href="https://docs.calyxir.org/fud/xilinx.html?highlight=synthesis#how-it-works">how the Xilinx Toolchain works</a></p>
+<p>For more information on the generation of the files mentioned above see <a href="https://docs.calyxir.org/running-calyx/fud/xilinx.html?highlight=synthesis#how-it-works">how the Xilinx Toolchain works</a></p>
 <h2 id="toplevel-1"><a class="header" href="#toplevel-1">Toplevel</a></h2>
 <p>Our <a href="https://docs.calyxir.org/lang/attributes.html?highlight=toplevel#toplevel">toplevel</a> is generated through files in <code>src/backend/xilinx/</code>.</p>
 <h3 id="axi-memory-controller"><a class="header" href="#axi-memory-controller">AXI memory controller</a></h3>
@@ -2233,7 +2233,7 @@ external stage with:</p>
 <p>You can remove an external stage with:</p>
 <pre><code>fud register stage_name --delete
 </code></pre>
-<p>The following defines a stage that transforms <a href="running-calyx/fud/../frontends/mrxl.html">MrXL</a> programs to Calyx
+<p>The following defines a stage that transforms <a href="running-calyx/fud/../../frontends/mrxl.html">MrXL</a> programs to Calyx
 programs.</p>
 <pre><code class="language-python">{{#include ../../frontends/mrxl/fud/mrxl.py}}
 </code></pre>
@@ -2330,11 +2330,11 @@ path/to/circt-translate --export-calyx tests/backend/mlir/simple.expect
 </code></pre>
 <p>This should emit the Calyx dialect once again.</p>
 <h2 id="using-native-tools-with-mlir-generated-calyx"><a class="header" href="#using-native-tools-with-mlir-generated-calyx">Using Native Tools with MLIR-Generated Calyx</a></h2>
-<p>The native infrastructure, such as <a href="running-calyx/fud/../fud"><code>fud</code></a>, <a href="running-calyx/fud/../interpreter.html">the calyx debugger</a>, our <a href="running-calyx/fud/../fud/xilinx.html#synthesis-only">synthesis scripts</a>, and the <a href="running-calyx/fud/../fud/axi-gen.html">AXI generator</a> all make certain assumptions that are violated by MLIR-generated code.
+<p>The native infrastructure, such as <a href="running-calyx/fud/./index.html"><code>fud</code></a>, <a href="running-calyx/fud/../interpreter.html">the calyx debugger</a>, our <a href="running-calyx/fud/./xilinx.html#synthesis-only">synthesis scripts</a>, and the <a href="running-calyx/fud/./axi-gen.html">AXI generator</a> all make certain assumptions that are violated by MLIR-generated code.
 Specifically, the tools often require that:</p>
 <ol>
-<li>The interface memories are marked with the <a href="running-calyx/fud/../lang/attributes.html#external"><code>@external</code></a> attribute. This allows our testbench to generate the code needed by <a href="running-calyx/fud/../fud"><code>fud</code></a> to simulate designs with the convenient data format. It is also used by the <a href="running-calyx/fud/../fud/axi-gen.html">AXI generator</a> to generate AXI interfaces for memories.</li>
-<li>The <code>toplevel</code> component is named <code>main</code>. This is used by the <a href="running-calyx/fud/../fud/xilinx.html#synthesis-only">synthesis scripts</a> to generate resource usage numbers and the test bench to simulate the design.</li>
+<li>The interface memories are marked with the <a href="running-calyx/fud/../lang/attributes.html#external"><code>@external</code></a> attribute. This allows our testbench to generate the code needed by <a href="running-calyx/fud/./index.html"><code>fud</code></a> to simulate designs with the convenient data format. It is also used by the <a href="running-calyx/fud/./axi-gen.html">AXI generator</a> to generate AXI interfaces for memories.</li>
+<li>The <code>toplevel</code> component is named <code>main</code>. This is used by the <a href="running-calyx/fud/./xilinx.html#synthesis-only">synthesis scripts</a> to generate resource usage numbers and the test bench to simulate the design.</li>
 </ol>
 <p>While we're working on addressing these problems directly, in the meantime, if you'd like to use the native tools with MLIR-generated code, you can use the following two passes:</p>
 <ol>
@@ -3215,7 +3215,7 @@ above the parent in the tree will take care of this re-computation.</p>
 Interpreter</a>. If it produces the wrong values, your Calyx implementation of the
 algorithm is incorrect. You can use the <a href="debug/./cider.html">Calyx Debugger</a> to debug these problems.</p>
 <p>If the interpreter produces the right values, try a different Verilog backed. We support both
-<a href="debug/../fud/index.html#verilator">Verilator</a> and <a href="debug/../fud/index.html#icarus-verilog">Icarus Verilog</a>. If
+<a href="debug/../running-calyx/fud/index.html#verilator">Verilator</a> and <a href="debug/../running-calyx/fud/index.html#icarus-verilog">Icarus Verilog</a>. If
 both produce the wrong answer <em>and</em> the interpreter produces the right answer then you likely have
 a compilation bug on your hands. Use the <a href="debug/./debug.html">debugging tips</a> to narrow down the pass that causes
 the error.</p>
@@ -3224,7 +3224,7 @@ the error.</p>
 <a href="debug/../interpreter.html">Calyx Interpreter</a> which exposes a <a href="https://sourceware.org/gdb/">gdb</a>-like interface for
 debugging Calyx programs.</p>
 <h2 id="getting-started-1"><a class="header" href="#getting-started-1">Getting Started</a></h2>
-<p>If you are using <a href="debug/../fud/index.html"><code>fud</code></a> getting started with the debugger is easy.
+<p>If you are using <a href="debug/../running-calyx/fud/index.html"><code>fud</code></a> getting started with the debugger is easy.
 Assuming you are trying to debug a program called <code>my_program.futil</code> with data
 file <code>my_program.futil.data</code>, invoke the debugger with the following command:</p>
 <pre><code>fud e --to debugger -q my_program.futil -s verilog.data my_program.futil.data
@@ -4514,7 +4514,7 @@ We can keep MrXL-native data files relatively light and add this <code>format</c
 <p>And we can generate this automatically. Try it yourself:</p>
 <pre><code>mrxl frontends/mrxl/test/squares.mrxl --data frontends/mrxl/test/squares.mrxl.data --convert
 </code></pre>
-<p>This transformation is achieved using a <a href="tutorial/../fud/index.html"><code>fud</code></a> pass that converts MrXL-native data files into Calyx-native data files.</p>
+<p>This transformation is achieved using a <a href="tutorial/../running-calyx/fud/index.html"><code>fud</code></a> pass that converts MrXL-native data files into Calyx-native data files.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="frontend-compilers"><a class="header" href="#frontend-compilers">Frontend Compilers</a></h1>
 <p>Several compiler generate Calyx programs from other high-level languages.</p>
 <ul>
@@ -4698,7 +4698,7 @@ during each stage of the pipeline. This requires installing PrettyTable:</p>
 <pre><code>pip3 install prettytable numpy
 </code></pre>
 <h2 id="fud-stage"><a class="header" href="#fud-stage">Fud Stage</a></h2>
-<p>The NTT pipeline defines an [external fud stage][../fud/external.md] to
+<p>The NTT pipeline defines an [external fud stage][../running-calyx/fud/external.md] to
 transform configuration files into Calyx programs.
 To install, run:</p>
 <pre><code>fud register ntt -p frontends/ntt-pipeline/fud/ntt.py &amp;&amp; fud check
@@ -4741,7 +4741,7 @@ following after changing your directory to <code>frontend/mrxl</code>:</p>
 <pre><code>flit install --symlink
 </code></pre>
 <p>This creates a symbolic link to the present directory and installs the <code>mrxl</code> command line tool.</p>
-<p>By default, <a href="frontends/../fud">fud</a> looks for the <code>mrxl</code> executable to enable
+<p>By default, <a href="frontends/../running-calyx/fud">fud</a> looks for the <code>mrxl</code> executable to enable
 the <code>mrxl</code> compilation stage.
 Type <code>fud check</code> to make sure <code>fud</code> reports that the <code>mrxl</code> compiler has been
 found. If it does not, run the following while still in <code>frontend/mrxl</code>.</p>

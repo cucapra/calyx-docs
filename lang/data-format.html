@@ -176,7 +176,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="data-format"><a class="header" href="#data-format">Data Format</a></h1>
-<p>Calyx's <a href="../fud/index.html"><code>fud</code></a>-based workflows specifies a JSON-based data format which can be used with software simulators.</p>
+<p>Calyx's <a href="../running-calyx/fud/index.html"><code>fud</code></a>-based workflows specifies a JSON-based data format which can be used with software simulators.</p>
 <h2 id="external-memories"><a class="header" href="#external-memories">External memories</a></h2>
 <p>First, a Calyx program must mark memories using the <a href="attributes.html#external"><code>@external</code> attribute</a> to tell the compiler that the memory is used as either an input or an ouput.</p>
 <pre><code>component main() {
@@ -231,7 +231,7 @@ The <code>@external</code> attribute can <strong>only be used</strong> on the <a
 <p><strong>Note:</strong> <code>fud</code> requires that for each memory marked with the <code>@external</code> attribute in the program.</p>
 </blockquote>
 <h2 id="using-fud"><a class="header" href="#using-fud">Using <code>fud</code></a></h2>
-<p>All software simulators supported by <code>fud</code>, including <a href="../fud/index.html#verilator">Verilator</a> and <a href="../fud/index.html#icarus-verilog">Icarus Verilog</a>, as well as the <a href="../interpreter.html">Calyx interpreter</a> can use this data format.
+<p>All software simulators supported by <code>fud</code>, including <a href="../running-calyx/fud/index.html#verilator">Verilator</a> and <a href="../running-calyx/fud/index.html#icarus-verilog">Icarus Verilog</a>, as well as the <a href="../interpreter.html">Calyx interpreter</a> can use this data format.
 To pass a JSON file with initial values, use the <code>-s verilog.data</code> flag:</p>
 <pre><code class="language-bash"># Use Icarus Verilog
 fud e --to dat --through icarus-verilog &lt;CALYX FILE&gt; -s verilog.data &lt;JSON&gt;
