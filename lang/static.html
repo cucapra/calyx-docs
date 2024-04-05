@@ -176,6 +176,9 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="static-timing"><a class="header" href="#static-timing">Static Timing</a></h1>
+<blockquote>
+<p>The features discussed below have been available since Calyx version 0.2.1.</p>
+</blockquote>
 <p>By default, Calyx programs use a <em>latency-insensitive</em>, or <em>dynamic</em>, model of computation.
 This means that the compiler does not know, track, or guarantee the number of cycles it takes to perform a computation or run a control operator.
 This is in contrast to a <em>latency-sensitive</em>, or <em>static</em>, model of computation, where the number of cycles a component needs is known to, and honored by, the compiler.</p>
@@ -187,7 +190,7 @@ First, the generated hardware may not be efficient: if the compiler does not kno
 Second, it is impossible for <em>latency-insensitive</em> programs to interact with <em>latency-sensitive</em> hardware implemented in RTL;
 this means that the use of black-box hardware designs requires costly handshaking logic at the interface.</p>
 <p>To address these issues, Calyx provides a <code>static</code> qualifier that modifies components and groups, along with static variants of other control operators.</p>
-<p>Broadly, the <code>static</code> qualifier is a promise to the compiler that the component or group will take exactly the specified number of cycles to execute.
+<p>Broadly, the <code>static</code> qualifier is a promise to the compiler that the specifed component or group will take exactly the specified number of cycles to execute.
 The compiler is free to take advantage of this promise to generate more efficient hardware.
 In return, the compiler must access out-ports of static components only after the specified number of cycles have passed, or risk receiving incorrect results.</p>
 <h2 id="static-constructs-in-the-calyx-il"><a class="header" href="#static-constructs-in-the-calyx-il">Static Constructs in the Calyx IL</a></h2>
@@ -197,7 +200,7 @@ In return, the compiler must access out-ports of static components only after th
 This component is dynamic; its latency is unknown.</p>
 <pre><code>primitive std_div[W](go: 1, left: W, right: W) -&gt; (out: W, done: 1);
 </code></pre>
-<p>A client of the divider must pass two inputs, raise the <code>go</code> signal, and wait for the component itself to raise its <code>done</code> signal.
+<p>A client of the divider must pass two inputs <code>left</code> and <code>right</code>, raise the <code>go</code> signal, and wait for the component itself to raise its <code>done</code> signal.
 The client can then read the result from the <code>out</code> port.
 That is, it obeys the <a href="./ref.html#the-go-done-interface">go-done interface</a>.</p>
 <p>Compare this to a multiplier component, <code>std_mult</code>, which has a similar signature but whose latency is known to be three cycles.
@@ -206,8 +209,8 @@ We declare it as follows:</p>
 </code></pre>
 <p>The key differences are:</p>
 <ul>
-<li>The <code>static</code> qualifier is used to declare the component as static and to specify its latency.</li>
-<li>The <code>done</code> port is not present in the static component.</li>
+<li>The <code>static</code> qualifier is used to declare the component as static and to specify its latency (3 cycles).</li>
+<li>The <code>done</code> port is absent.</li>
 </ul>
 <p>A client of the multiplier must pass two inputs and raise the <code>go</code> signal as before.
 However, the client need not then wait for the component to indicate completion.
@@ -239,21 +242,19 @@ While dynamic commands may contain both static and dynamic children, static comm
 In the examples below, assume that <code>A5</code>, <code>B6</code>, <code>C7</code>, and <code>D8</code> are static groups with latencies 5, 6, 7, and 8, respectively.</p>
 <h4 id="static-seq-a-static-version-of-seq"><a class="header" href="#static-seq-a-static-version-of-seq"><code>static seq</code>, a static version of <a href="./ref.html#seq"><code>seq</code></a></a></h4>
 <p>If we have <code>static seq { A5; B6; C7; D8; }</code>, we can guarantee that the latency of the entire operation is the sum of the latencies of its children: 5 + 6 + 7 + 8 = 26 cycles in this case.
-We can also guarantee that, each child will begin executing exactly one cycle after the previous child has finished.
+We can also guarantee that each child will begin executing exactly one cycle after the previous child has finished.
 In our case, for example, <code>B6</code> will begin executing exactly one cycle after <code>A5</code> has finished.</p>
 <h4 id="static-par-a-static-version-of-par"><a class="header" href="#static-par-a-static-version-of-par"><code>static par</code>, a static version of <a href="./ref.html#par"><code>par</code></a></a></h4>
 <p>If we have <code>static par { A5; B6; C7; D8; }</code>, we can guarantee that the latency of the entire operation is the maximum of the latencies of its children: 8 cycles in this case.
 Further, all the children of a <code>static par</code> are guaranteed to begin executing at the same time.
 The children can rely on this "lockstep" behavior and can communicate with each other.
-Such communication is undefined behavior in a standard, dynamic, <code>par</code>.</p>
+Inter-thread communication of this sort is undefined behavior in a standard, dynamic, <code>par</code>.</p>
 <h4 id="static-if-a-static-version-of-if"><a class="header" href="#static-if-a-static-version-of-if"><code>static if</code>, a static version of <a href="./ref.html#if"><code>if</code></a></a></h4>
 <p>If we have <code>static if { A5; B6; }</code>, we can guarantee that the latency of the entire operation is the maximum of the latencies of its children: 6 cycles in this case.</p>
 <h4 id="static-repeat-a-static-version-of-repeat"><a class="header" href="#static-repeat-a-static-version-of-repeat"><code>static repeat</code>, a static version of <a href="./ref.html#repeat"><code>repeat</code></a></a></h4>
-<blockquote>
-<p>Calyx's <code>while</code> loop is unbouded and so it does not have a static variant.</p>
-</blockquote>
 <p>If we have <code>static repeat 7 { B6; }</code>, we can guarantee that the latency of the entire operation is the product of the number of iterations and the latency of its child: 7 × 6 = 42 cycles in this case.
 The body of a <code>static repeat</code> is guaranteed to begin executing exactly one cycle after the previous iteration has finished.</p>
+<p>Calyx's <a href="./ref.html#while"><code>while</code></a> loop is unbouded and so it does not have a static variant.</p>
 <h4 id="static-invoke-a-static-version-of-invoke"><a class="header" href="#static-invoke-a-static-version-of-invoke"><code>static invoke</code>, a static version of <a href="./ref.html#invoke"><code>invoke</code></a></a></h4>
 <p>Its latency is the latency of the invoked cell.</p>
 
