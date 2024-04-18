@@ -249,6 +249,17 @@ In our case, for example, <code>B6</code> will begin executing exactly one cycle
 Further, all the children of a <code>static par</code> are guaranteed to begin executing at the same time.
 The children can rely on this "lockstep" behavior and can communicate with each other.
 Inter-thread communication of this sort is undefined behavior in a standard, dynamic, <code>par</code>.</p>
+<p>As a corollary, consider this useful trick in the case when we need <code>A5</code> and <code>D8</code> to run in parallel, but we do not want them to start at the same time.
+Instead, in order to support some inter-thread communication, we want <code>A5</code> to start three cycles after <code>D8</code>.</p>
+<pre><code>static&lt;3&gt; group dummy_group { }
+
+static par {
+  static seq { dummy_group; A5; }
+  D8;
+}
+</code></pre>
+<p>We have not elided the body of <code>dummy_group</code>; it can literally be left blank.
+During compilation, no hardware will be generated for <code>dummy_group</code>. It is simply a placeholder to delay the start of <code>A5</code> by three cycles.</p>
 <h4 id="static-if-a-static-version-of-if"><a class="header" href="#static-if-a-static-version-of-if"><code>static if</code>, a static version of <a href="./ref.html#if"><code>if</code></a></a></h4>
 <p>If we have <code>static if { A5; B6; }</code>, we can guarantee that the latency of the entire operation is the maximum of the latencies of its children: 6 cycles in this case.</p>
 <h4 id="static-repeat-a-static-version-of-repeat"><a class="header" href="#static-repeat-a-static-version-of-repeat"><code>static repeat</code>, a static version of <a href="./ref.html#repeat"><code>repeat</code></a></a></h4>
