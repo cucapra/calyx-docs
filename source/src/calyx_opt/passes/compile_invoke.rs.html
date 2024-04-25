@@ -443,6 +443,9 @@
 <span id="443">443</span>
 <span id="444">444</span>
 <span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{
     <span class="self">self</span>, Action, ConstructVisitor, Named, VisResult, Visitor,
 };
@@ -520,9 +523,12 @@
     <span class="doccomment">/// Get all of the newly added ports associated with a component that had
     /// ref cells
     </span><span class="kw">fn </span>get_ports(<span class="kw-2">&amp;</span><span class="self">self</span>, comp_name: <span class="kw-2">&amp;</span>ir::Id) -&gt; <span class="prelude-ty">Option</span>&lt;Vec&lt;RRC&lt;ir::Port&gt;&gt;&gt; {
-        <span class="self">self</span>.<span class="number">0
-            </span>.get(comp_name)
-            .map(|map| map.values().cloned().collect())
+        <span class="self">self</span>.<span class="number">0</span>.get(comp_name).map(|map| {
+            map.values()
+                .cloned()
+                .sorted_by(|a, b| a.borrow().name.cmp(<span class="kw-2">&amp;</span>b.borrow().name))
+                .collect()
+        })
     }
 }
 
