@@ -1748,14 +1748,43 @@ Note that each group must have exactly one output port in it.</p>
 <li>An input port is marked with <code>@data</code> in the component definitions, and</li>
 <li>The cell instance is marked as <code>@data</code></li>
 </ol>
-<p>The backend generate <code>'x</code> as the default value for the assignment to the port instead of <code>'0</code>. Additionally, if the port has exactly one assignment, the backend removes the guard entirely and produces a continuous assignment.</p>
+<p>The backend generates <code>'x</code> as the default value for the assignment to the port instead of <code>'0</code>. Additionally, if the port has exactly one assignment, the backend removes the guard entirely and produces a continuous assignment.</p>
 <p>This represents the optimization:</p>
-<pre><code>in = g ? out : 'x
+<pre><code>cells {
+  @data cell = cell_component();
+}
+wires {
+  cell.in = g ? out : 'x
+}
 </code></pre>
 <p>into:</p>
-<pre><code>in = out;
+<pre><code>// cells are same as before
+wires {
+  cell.in = out;
+}
 </code></pre>
-<p>Since the value <code>'x</code> can be replaced with anything.</p>
+<p>Since the value <code>'x</code> can be replaced with anything.
+(Currently Calyx does not support assignments of the form <code>rhs = guard ? lhs1: lhs2</code>,
+so the syntax isn't 100% accurate.
+This optimization happens when translating from Calyx to Verilog.
+At some point we may want to make this optimization happen during a Calyx pass.)</p>
+<p><code>@data</code> can also appear on the output ports of a Calyx component.
+This represents when we want to optimize assignments to the port <em>within a Calyx component</em>.
+Consider the following example:</p>
+<pre><code>component main() -&gt;(...@data out_write_data: 32....) {
+  ...
+  wires {
+    out_write_data = g ? out : 'x // we want to optimize to out_write_data = out
+  }
+}
+</code></pre>
+<p>Note that we are trying to perform this optimization <em>within the component</em>, i.e.,
+<code>out_write_data</code> is a port on the signature of the component itself, not an instance.
+Also note that in this case, <code>@data</code> appears on the <em>output</em> port of the component's signature.
+When <code>@data</code> appears on an output port of a Calyx component, it means that assignments
+to this port <em>within</em> the component will get the "default to <code>'x</code>" semantics and optimizations.
+Note that there is no requirement of having the "cell instance is marked as <code>@data</code>",
+as before.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fud-the-calyx-driver"><a class="header" href="#fud-the-calyx-driver"><code>fud</code>: The Calyx Driver</a></h1>
 <p>Working with Calyx involves a lot of command-line tools. For example, an
 incomplete yet daunting list of CLI tools used by Calyx is:</p>

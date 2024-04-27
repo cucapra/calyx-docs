@@ -98,6 +98,7 @@
 <span id="98">98</span>
 <span id="99">99</span>
 <span id="100">100</span>
+<span id="101">101</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC, WRC};
 <span class="kw">use </span>ir::rewriter;
 <span class="kw">use </span>itertools::Itertools;
@@ -165,8 +166,10 @@
         <span class="kw">for </span>port_ref <span class="kw">in </span>ports_inline {
             <span class="kw">let </span>canon = port_ref.borrow().canonical();
             <span class="kw">let </span>port = port_ref.borrow();
-            <span class="comment">// We might want to insert
-            </span><span class="kw">let </span><span class="kw-2">mut </span>new_port_attrs =
+            <span class="comment">// We might want to insert the @data attribute for optimization purposes.
+            // But to do this, we have to make sure that the cell is marked @data
+            // as well.
+            </span><span class="kw">let </span>new_port_attrs =
                 <span class="kw">if </span>is_data_cell &amp; port.attributes.has(ir::BoolAttr::Data) {
                     <span class="kw">let </span><span class="kw-2">mut </span>attrs = ir::Attributes::default();
                     attrs.insert(ir::BoolAttr::Data, <span class="number">1</span>);
@@ -174,7 +177,6 @@
                 } <span class="kw">else </span>{
                     ir::Attributes::default()
                 };
-            new_port_attrs.insert(ir::BoolAttr::Externalized, <span class="number">1</span>);
 
             <span class="kw">let </span>new_port = ir::rrc(ir::Port {
                 name: component.generate_name(format_port_name(<span class="kw-2">&amp;</span>canon)),
