@@ -178,13 +178,11 @@
 <span id="178">178</span>
 <span id="179">179</span>
 <span id="180">180</span>
-<span id="181">181</span>
-<span id="182">182</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     AddGuard, Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
-    CompileInvoke, CompileRepeat, CompileStatic, CompileStaticInterface,
-    CompileSync, CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
+    CompileInvoke, CompileRepeat, CompileStatic, CompileSync,
+    CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
     DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, DefaultAssigns,
     DiscoverExternal, ExternalToRef, Externalize, GoInsertion, GroupToInvoke,
     GroupToSeq, HoleInliner, InferShare, LowerGuards, MergeAssign, Papercut,
@@ -232,7 +230,6 @@
         pm.register_pass::&lt;CompileSync&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileSyncWithoutSyncReg&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;AddGuard&gt;()<span class="question-mark">?</span>;
-        pm.register_pass::&lt;CompileStaticInterface&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">// Lowering passes
         </span>pm.register_pass::&lt;GoInsertion&gt;()<span class="question-mark">?</span>;
@@ -292,9 +289,8 @@
                 </span>DeadGroupRemoval, <span class="comment">// Static inliner generates lots of dead groups
                 </span>SimplifyStaticGuards,
                 AddGuard,
-                CompileStaticInterface,
-                DeadGroupRemoval,
                 CompileStatic,
+                DeadGroupRemoval,
                 TopDownCompileControl
             ]
         );
