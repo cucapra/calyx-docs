@@ -3639,9 +3639,9 @@ the Docker image and run your tests on it.</p>
 </code></pre>
 <p>Technically, we didn't need to assign <code>prog.component("main")</code> to a variable; the component <code>main</code> would have been added to <code>prog</code> regardless. However, it will often prove useful to store handles to components, registers, or other objects you'd like to use later.</p>
 <p>We then instantiate our cells: three 32-bit registers and one 32-bit adder.</p>
-<pre><code class="language-python">    lhs = main.reg("lhs", 32)
-    rhs = main.reg("rhs", 32)
-    sum = main.reg("sum", 32)
+<pre><code class="language-python">    lhs = main.reg(32, "lhs")
+    rhs = main.reg(32, "rhs")
+    sum = main.reg(32, "sum")
     add = main.add(32, "add")
 </code></pre>
 <p>As with adding components to a program, we don't need to assign <code>main.reg(...)</code> to a variable, but it'll be useful to be able to quickly refer to these cells.</p>
