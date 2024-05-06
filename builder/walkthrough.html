@@ -1,0 +1,513 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Builder Library Walkthrough - Calyx Documentation</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../intro.html">Getting Started</a></li><li class="chapter-item expanded affix "><li class="part-title">Calyx Language</li><li class="chapter-item expanded "><a href="../tutorial/language-tut.html"><strong aria-hidden="true">1.</strong> Language Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/multi-component.html"><strong aria-hidden="true">1.1.</strong> Multi-Component Designs</a></li><li class="chapter-item expanded "><a href="../lang/memories-by-reference.html"><strong aria-hidden="true">1.2.</strong> Passing Memories by Reference</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/ref.html"><strong aria-hidden="true">2.</strong> Language Reference</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../lang/data-format.html"><strong aria-hidden="true">2.1.</strong> Data Format</a></li><li class="chapter-item expanded "><a href="../lang/static.html"><strong aria-hidden="true">2.2.</strong> Static Timing</a></li><li class="chapter-item expanded "><a href="../lang/sync.html"><strong aria-hidden="true">2.3.</strong> Experimental: Synchronization</a></li><li class="chapter-item expanded "><a href="../lang/undefined.html"><strong aria-hidden="true">2.4.</strong> Undefined Behaviors</a></li></ol></li><li class="chapter-item expanded "><a href="../lang/attributes.html"><strong aria-hidden="true">3.</strong> Attributes</a></li><li class="chapter-item expanded affix "><li class="part-title">Running Calyx Programs</li><li class="chapter-item expanded "><a href="../running-calyx/fud/index.html"><strong aria-hidden="true">4.</strong> fud: The Calyx Driver</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../running-calyx/fud/examples.html"><strong aria-hidden="true">4.1.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../running-calyx/fud/xilinx.html"><strong aria-hidden="true">4.2.</strong> Xilinx Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../running-calyx/fud/axi-gen.html"><strong aria-hidden="true">4.2.1.</strong> AXI Generation</a></li></ol></li><li class="chapter-item expanded "><a href="../running-calyx/fud/external.html"><strong aria-hidden="true">4.3.</strong> External Stages</a></li><li class="chapter-item expanded "><a href="../running-calyx/fud/multiple-paths.html"><strong aria-hidden="true">4.4.</strong> Multiple Paths</a></li><li class="chapter-item expanded "><a href="../running-calyx/fud/circt.html"><strong aria-hidden="true">4.5.</strong> CIRCT</a></li><li class="chapter-item expanded "><a href="../running-calyx/fud/resource-estimation.html"><strong aria-hidden="true">4.6.</strong> Resource Estimation</a></li></ol></li><li class="chapter-item expanded "><a href="../running-calyx/fud2.html"><strong aria-hidden="true">5.</strong> fud2: Experimental Driver</a></li><li class="chapter-item expanded "><a href="../running-calyx/interfacing.html"><strong aria-hidden="true">6.</strong> Interfacing with Calyx RTL</a></li><li class="chapter-item expanded "><a href="../running-calyx/interpreter.html"><strong aria-hidden="true">7.</strong> The Calyx Interpreter</a></li><li class="chapter-item expanded affix "><li class="part-title">Compiler Development Guide</li><li class="chapter-item expanded "><a href="../compiler.html"><strong aria-hidden="true">8.</strong> The Calyx Compiler</a></li><li class="chapter-item expanded "><a href="../new-pass.html"><strong aria-hidden="true">9.</strong> Adding a New Pass</a></li><li class="chapter-item expanded "><a href="../libraries/core.html"><strong aria-hidden="true">10.</strong> Primitive Library</a></li><li class="chapter-item expanded "><a href="../compiler-as-library.html"><strong aria-hidden="true">11.</strong> The calyx Library</a></li><li class="chapter-item expanded "><a href="../optimizations/dataflow.html"><strong aria-hidden="true">12.</strong> Dataflow Analysis</a></li><li class="chapter-item expanded "><a href="../debug/index.html"><strong aria-hidden="true">13.</strong> Debugging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../debug/cider.html"><strong aria-hidden="true">13.1.</strong> Logical Bugs</a></li><li class="chapter-item expanded "><a href="../debug/debug.html"><strong aria-hidden="true">13.2.</strong> Compilation Bugs</a></li></ol></li><li class="chapter-item expanded "><a href="../github.html"><strong aria-hidden="true">14.</strong> Contributing to Calyx</a></li><li class="chapter-item expanded affix "><li class="part-title">Generating Calyx</li><li class="chapter-item expanded "><a href="../builder/calyx-py.html"><strong aria-hidden="true">15.</strong> Emitting Calyx from Python</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../builder/walkthrough.html" class="active"><strong aria-hidden="true">15.1.</strong> Builder Library Walkthrough</a></li></ol></li><li class="chapter-item expanded "><a href="../tutorial/frontend-tut.html"><strong aria-hidden="true">16.</strong> Frontend Tutorial</a></li><li class="chapter-item expanded "><a href="../frontends/index.html"><strong aria-hidden="true">17.</strong> Frontend Compilers</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../frontends/dahlia.html"><strong aria-hidden="true">17.1.</strong> Dahlia</a></li><li class="chapter-item expanded "><a href="../frontends/systolic-array.html"><strong aria-hidden="true">17.2.</strong> Systolic Array Generator</a></li><li class="chapter-item expanded "><a href="../frontends/tvm-relay.html"><strong aria-hidden="true">17.3.</strong> TVM Relay</a></li><li class="chapter-item expanded "><a href="../frontends/ntt.html"><strong aria-hidden="true">17.4.</strong> NTT Pipeline Generator</a></li><li class="chapter-item expanded "><a href="../frontends/queues.html"><strong aria-hidden="true">17.5.</strong> Queues</a></li><li class="chapter-item expanded "><a href="../frontends/mrxl.html"><strong aria-hidden="true">17.6.</strong> MrXL</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="../tools/runt.html"><strong aria-hidden="true">18.</strong> Runt</a></li><li class="chapter-item expanded "><a href="../tools/data-gen.html"><strong aria-hidden="true">19.</strong> Data Gen</a></li><li class="chapter-item expanded "><a href="../tools/exp-generator.html"><strong aria-hidden="true">20.</strong> exp Generator</a></li><li class="chapter-item expanded "><a href="../tools/editor-highlighting.html"><strong aria-hidden="true">21.</strong> Editor Highlighting</a></li><li class="chapter-item expanded "><a href="../tools/language-server.html"><strong aria-hidden="true">22.</strong> Language Server</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../contributors.html">Contributors</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Calyx Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="builder-library-walkthrough"><a class="header" href="#builder-library-walkthrough">Builder Library Walkthrough</a></h1>
+<p>This is an extended walkthough of all the features of the Calyx builder library. The builder library is an embedded DSL, embedded in Python, that allows users to generate Calyx code programmatically.</p>
+<p>This page seeks to demonstrate all the features of the builder library. For a quick start, we refer you to the <a href="calyx-py.html">hello world example</a>.</p>
+<p>We will make repeated references to the example program <a href="https://github.com/calyxir/calyx/blob/master/calyx-py/test/walkthrough.py"><code>walkthrough.py</code></a>, which emits the Calyx code<a href="https://github.com/calyxir/calyx/blob/master/calyx-py/test/walkthrough.expect"><code>walkthrough.expect</code></a> when run. We recommend that you refer to these files as you work through this document.</p>
+<h2 id="components"><a class="header" href="#components">Components</a></h2>
+<p>We add a component to our program as follows:</p>
+<pre><code class="language-python">    comp = prog.component("adder")
+</code></pre>
+<h2 id="ports-of-components"><a class="header" href="#ports-of-components">Ports of Components</a></h2>
+<p>We specify the names and bitwidths of any ports that we want a component to have as follows:</p>
+<pre><code class="language-python">    val1 = comp.input("val1", 32)
+    val2 = comp.input("val2", 32)
+    comp.output("out", 32)
+</code></pre>
+<p>Observe that we have saved handles to the input ports by assigning them to Python variables, but have not done the same with the output port.
+We will show shortly how to create a handle to a port after its definition.</p>
+<h2 id="cells"><a class="header" href="#cells">Cells</a></h2>
+<p>We add cells to the component as follows.
+The standard cells are all supported.
+Bitwidths must be passed as arguments, while names are optional.</p>
+<pre><code class="language-python">    sum = comp.reg(32)
+    add = comp.add(32)
+</code></pre>
+<p>The adder defined above is unsigned; we would define a signed variant as:</p>
+<pre><code class="language-python">    add = comp.add(32, signed=True)
+</code></pre>
+<h2 id="groups"><a class="header" href="#groups">Groups</a></h2>
+<p>We begin a group with:</p>
+<pre><code class="language-python">    with comp.group("compute_sum") as compute_sum:
+</code></pre>
+<p>We add wires within a group by staying within the indentation of the <code>with</code> block.</p>
+<p><a href="../lang/ref.html#comb-group-definitions">Combinational groups</a> are written similarly, but with <code>comb_group</code> instead of <code>group</code>:</p>
+<pre><code class="language-python">    with comp.comb_group("update_register") as update_register:
+
+</code></pre>
+<p>Static groups are written with <code>static_group</code>, and must specify a latency. The group below will take 3 cycles to execute:</p>
+<pre><code class="language-python">    with comp.static_group("multiply", 3) as compute_sum:
+</code></pre>
+<h2 id="ports-of-cells"><a class="header" href="#ports-of-cells">Ports of Cells</a></h2>
+<p>We access ports of cells using dot notation.</p>
+<pre><code class="language-python">        add.left = val1
+        add.right = val2
+</code></pre>
+<h3 id="special-case-in_"><a class="header" href="#special-case-in_">Special Case: <code>in_</code></a></h3>
+<p>We specify the value to be written to a register with:</p>
+<pre><code class="language-python">        sum.in_ = add.out
+</code></pre>
+<p>Although the Calyx port is named <code>in</code>, we must write <code>in_</code> in the eDSL to avoid a clash with Python's <code>in</code> keyword.</p>
+<h2 id="hi-and-lo-signals"><a class="header" href="#hi-and-lo-signals"><code>HI</code> and <code>LO</code> Signals</a></h2>
+<p>The builder library provides shorthand for high and low signals.</p>
+<pre><code class="language-python">        sum.write_en = cb.HI
+</code></pre>
+<p>There is a corresponding <code>LO</code> signal.
+These are just one-bit values <code>1</code> and <code>0</code>, respectively.</p>
+<h2 id="group-done-signals"><a class="header" href="#group-done-signals">Group <code>done</code> Signals</a></h2>
+<p>Groups that are not <a href="../lang/ref.html#comb-group-definitions">combinational</a> must raise a <code>done</code> signal.</p>
+<pre><code class="language-python">        compute_sum.done = sum.done
+</code></pre>
+<h2 id="accessing-output-ports-of-components"><a class="header" href="#accessing-output-ports-of-components">Accessing Output Ports of Components</a></h2>
+<p>We can create a handle to a port after its definition.</p>
+<pre><code class="language-python">    with comp.continuous:
+        comp.this().out = sum.out
+</code></pre>
+<p>That is, <code>comp.this().out</code> is a handle to the port named "out" on the component whose handle is <code>comp</code>.</p>
+<p>Accessing ports in this way may feel silly, since we have already shown that we can save handles to ports by assigning them to Python variables. This does work for input ports, but not for output ports.</p>
+<p>Say we had saved a handle to the output port of the adder component:</p>
+<pre><code>out = comp.output("out", 32)
+</code></pre>
+<p>Now say we wanted to say that the output port gets the value of the sum's output port:</p>
+<pre><code class="language-python">out = sum.out
+</code></pre>
+<p>Python will get in our way because it will think that <code>out</code> is a variable that is written to (twice!) but never read from.</p>
+<p>To avoid this, we use the <code>this()</code> method to access the output ports of a component.</p>
+<h2 id="continuous-assignments"><a class="header" href="#continuous-assignments">Continuous Assignments</a></h2>
+<p><a href="../lang/ref.html#continuous-assignments">Continuous assignments</a> are added using <code>with {component}.continuous:</code>.</p>
+<pre><code class="language-python">    with comp.continuous:
+        comp.this().out = sum.out
+</code></pre>
+<h2 id="simple-control-program"><a class="header" href="#simple-control-program">Simple Control Program</a></h2>
+<p>A simple control program is added to the component as follows.
+This is just <a href="../lang/ref.html#group-enable">enabling</a> the group that we have defined.</p>
+<pre><code class="language-python">    comp.control += compute_sum
+</code></pre>
+<h2 id="binary-operation-and-store"><a class="header" href="#binary-operation-and-store">Binary Operation and Store</a></h2>
+<p>The library provides a shorthand for the common pattern of performing a binary operation and writing the result to a register.</p>
+<pre><code class="language-python">    diff_group_1, _ = comp.sub_store_in_reg(val1, val2, diff)
+</code></pre>
+<p>Here <code>diff</code> is a handle to a register that we have defined earlier. This single line of Python adds lines to the <code>cells</code> and the <code>wires</code> sections of the Calyx code:</p>
+<pre><code>  cells {
+    sub_1 = std_sub(32);
+  }
+  wires {
+    group sub_1_group {
+      sub_1.left = val1;
+      sub_1.right = val2;
+      diff.write_en = 1'd1;
+      diff.in = sub_1.out;
+      sub_1_group[done] = diff.done;
+    }
+  }
+</code></pre>
+<p>In Python, its return value is a handle to the group that it has created, and a handle to the register is has written to. In the line of Python above, we have saved the handle to the group (as <code>diff_group_1</code>) but have discarded the handle to the register using a <code>_</code> variable name since we already have a handle to the register, <code>diff</code>.</p>
+<p>This construct can also be called without passing a register, in which case it will create a register and return it. It is useful in that case to save the handle to the register.</p>
+<h2 id="operation-use"><a class="header" href="#operation-use">Operation-Use</a></h2>
+<p>The library provides a shorthand for the common pattern of performing a binary operation and using the result combinationally.</p>
+<pre><code class="language-python">    val2_lt_val1 = comp.lt_use(val2, val1)
+</code></pre>
+<p>This line of Python adds lines to the <code>cells</code> and the <code>wires</code> sections of the Calyx code:</p>
+<pre><code>cells {
+    lt_3 = std_lt(32);
+  }
+  wires {
+    comb group lt_3_group {
+      lt_3.left = val2;
+      lt_3.right = val1;
+    }
+  }
+</code></pre>
+<p>Note that the group is combinational, and so does not need a <code>done</code> signal.</p>
+<p>The value returned by this function, which we have saved above as <code>val2_lt_val1</code> is in fact a tuple of handles: a handle to the group that it has created and a handle to the cell that that group uses. We shall see shortly how to use this tuple.</p>
+<h2 id="complex-control-par-seq-if"><a class="header" href="#complex-control-par-seq-if">Complex Control: <code>par</code>, <code>seq</code>, <code>if</code></a></h2>
+<p>Let us work through a slightly more complex control program.</p>
+<pre><code class="language-python">    comp.control += cb.par(
+        [
+            val1_ge_val2,
+            cb.if_(ge_reg.out, diff_group_1, diff_group_2),
+        ],
+        cb.if_with(val2_lt_val1, diff_group_2, diff_group_1),
+    )
+</code></pre>
+<p>We run control operators in <a href="../lang/ref.html#seq">sequence</a> by making them elements of a list. This is why the group <code>val1_ge_val2</code> runs before the if check written on the next line.</p>
+<p>We run control operators in <a href="../lang/ref.html#par">parallel</a> by passing them to the <code>par</code> function.</p>
+<p>The <code>if_</code> function (named with the underscore to avoid clashing with Python's <code>if</code> keyword) is a straightforward <a href="../lang/ref.html#if">if</a> check. It takes a condition, a body, and an optional else body.</p>
+<p>The <code>if_with</code> function is a slightly more complex <a href="../lang/ref.html#if">if</a> check. It takes a (<code>cell</code>, <code>comb_group</code>) tuple, a body, and an optional else body.
+It generates a combinational if check, of the form</p>
+<pre><code>if cell.out with comb_group ...
+</code></pre>
+<p>It is especially useful in concert with the <code>Operation-Use</code> construct, which returns exactly such a tuple of a cell and a group.</p>
+<h2 id="multi-component-designs"><a class="header" href="#multi-component-designs">Multi-Component Designs</a></h2>
+<p>Using one component in another is straightforward.</p>
+<p>We must first define the called component as a cell of the calling component, and then we can use the cell as usual.</p>
+<p>Say we have a handle, <code>diff_comp</code>, to the component that we wish to call. Say also that we know that the component has input ports <code>val1</code> and <code>val2</code>, and an output port <code>out</code>.</p>
+<p>We can write:</p>
+<pre><code class="language-python">    abs_diff = comp.cell("abs_diff", diff_comp)
+    with comp.group("compute_diff") as diff_group:
+        abs_diff.val1 = val1
+        abs_diff.val2 = val2
+        abs_diff.go = cb.HI
+        mux.write_en = abs_diff.done
+        mux.in_ = abs_diff.out
+        diff_group.done = mux.done
+</code></pre>
+<p>Although the called component did not have explicit <code>go</code> and <code>done</code> ports, the builder library has added them for us.
+We use these ports to guide the execution of the group.
+We assert the <code>go</code> signal to the called component with <code>diff_comp.go = HI</code>, and then, by writing <code>mux.write_en = abs_diff.done</code>, we make the write to the register <code>mux</code> conditional on the <code>done</code> signal of the called component.</p>
+<h2 id="memories"><a class="header" href="#memories">Memories</a></h2>
+<p>We can define memories in a component as follows:</p>
+<pre><code class="language-python">    mem = comp.comb_mem_d1("mem", 32, 10, 32, is_ref=True)
+</code></pre>
+<p>This is a 1-D memory with ten 32-bit entries, each 32 bits wide. We have additionally declared that this memory will be passed to the component <a href="../lang/memories-by-reference.html#passing-cells-by-reference">by reference</a>. We shall see how shortly.</p>
+<h2 id="miscellaneous-higher-level-constructors"><a class="header" href="#miscellaneous-higher-level-constructors">Miscellaneous Higher-Level Constructors</a></h2>
+<p>As patterns of use emerge, we can add further constructors to the builder library to support common use-cases.
+For example, we can add a constructor that increments a register by a constant value.</p>
+<pre><code class="language-python">    incr_i = comp.incr(i)
+</code></pre>
+<p>That line of Python adds lines to the <code>cells</code> and the <code>wires</code> sections of the Calyx code:</p>
+<pre><code>  cells {
+    i_incr = std_add(8);
+  }
+  wires {
+    group i_incr_group {
+      i_incr.left = i.out;
+      i_incr.right = 8'd1;
+      i.write_en = 1'd1;
+      i.in = i_incr.out;
+      i_incr_group[done] = i.done;
+    }
+  }
+</code></pre>
+<p>The Python return value, <code>incr_i</code>, is a handle to the group that performs the incrementing. The method defaults to incrementing by 1, but can be passed any value.</p>
+<h2 id="guarded-assignments"><a class="header" href="#guarded-assignments">Guarded Assignments</a></h2>
+<p>Consider the group that adds value <code>v</code> to a memory at the cell pointed to by register <code>i</code>.</p>
+<pre><code class="language-python">    with comp.group("add_at_position_i") as add_at_position_i:
+        mem.addr0 = i.out
+        add.left = mem.read_data
+        add.right = v
+        mem.write_en = add.done @ cb.HI
+        mem.write_data = add.out
+        add_at_position_i.done = mem.done
+</code></pre>
+<p>The first few lines are straightforward; we are setting the cell to be read from with <code>addr0</code>, reading from that cell and driving the value to the adder's left port, and setting the right port of the adder to the value <code>v</code>.</p>
+<p>Now we wish to write the result to the memory at the cell pointed to by register <code>i</code>, but only once we know that the adder has finished its work. We do this with a guarded assignment, using the <code>@</code> operator:</p>
+<pre><code class="language-python">        mem.write_en = add.done @ cb.HI
+</code></pre>
+<p>In Calyx, we would have written this guarded assignment with a question mark:</p>
+<pre><code>        mem.write_en = add.done ? 1'd1;
+</code></pre>
+<p>We use the <code>@</code> operator in the builder library to avoid clashing with Python's ternary operator.</p>
+<h2 id="complex-control-while"><a class="header" href="#complex-control-while">Complex Control: <code>while</code></a></h2>
+<p>The builder library supports <a href="../lang/ref.html#while">while</a> loops and also the higher-level <code>while_with</code> constructor.</p>
+<pre><code class="language-python">    comp.control += cb.while_with(i_lt_10, [add_at_position_i, incr_i])
+</code></pre>
+<p>Here <code>i_lt_10</code> is a tuple of two handles, exactly as returned by the <code>Operation-Use</code> constructor. The <code>while_with</code> constructor takes this tuple and a body.</p>
+<h2 id="external-memories"><a class="header" href="#external-memories">External Memories</a></h2>
+<p>We can define <a href="../lang/data-format.html#external-memories">external memories</a> in a component, typically the <code>main</code> component, as follows:</p>
+<pre><code class="language-python">    mymem = comp.comb_mem_d1("mymem", 32, 10, 32, is_external=True)
+</code></pre>
+<h2 id="invoking-components"><a class="header" href="#invoking-components">Invoking Components</a></h2>
+<p>We can <a href="../lang/ref.html#invoke">invoke</a> components as follows:</p>
+<pre><code class="language-python">        cb.invoke(map, ref_mem=mymem, in_v=cb.const(32, 42))
+</code></pre>
+<p>That is, we have a Python-level handle to some component <code>map</code> that has one memory called <code>mem</code> that it expects to be passed <a href="../lang/memories-by-reference.html#passing-cells-by-reference">by reference</a>, and one input port called <code>v</code>.
+We must prepend <code>ref_</code> to the names of any memories, and <code>in_</code> to the names of any input ports.</p>
+<h2 id="building-the-program"><a class="header" href="#building-the-program">Building the Program</a></h2>
+<p>Finally, we build the program.</p>
+<pre><code class="language-python">def build():
+    prog = cb.Builder()
+    insert_adder_component(prog)
+    diff_comp = insert_abs_diff_component(prog)
+    insert_mux_component(prog, diff_comp)
+    map_comp = insert_map_component(prog)
+    insert_main_component(prog, map_comp)
+    return prog.program
+</code></pre>
+<p>Note that all of our component-inserting helpers have been <em>returning</em> the components that they have created. This is so that we can build complex programs where components either call each other as cells or invoke each other.</p>
+<p>This is why we save a Python-level handle to the <code>diff_comp</code> component that we have defined, and then pass it to the <code>insert_mux_component</code> function. As we have seen, the <code>mux</code> uses <code>diff_comp</code> as a cell.</p>
+<p>We also save a Python-level handle to the <code>map</code> component that we have defined, and then pass it to the <code>insert_main_component</code> function. As we have seen, <code>map</code> is invoked by <code>main</code>.</p>
+<h2 id="emitting-the-program"><a class="header" href="#emitting-the-program">Emitting the Program</a></h2>
+<p>Finally, we emit Calyx.</p>
+<pre><code class="language-python">if __name__ == "__main__":
+    build().emit()
+</code></pre>
+<h2 id="retrieving-items-by-name"><a class="header" href="#retrieving-items-by-name">Retrieving Items by Name</a></h2>
+<p>In the discussion so far, we have guided you towards a pattern of defining an item (a cell, a group, a component, etc.) and then saving a handle to it as a Python variable. This is a good pattern to follow, but it is not the only one.</p>
+<p>To reference a component without an existing handle to it, use the <code>Builder().get_component()</code> method.</p>
+<pre><code class="language-python">prog.component("my_component")
+# a few lines later
+my_component = prog.get_component("my_component")
+</code></pre>
+<p>To access the input and output ports of a component within the definition of a component, use the syntax <code>my_component.this().port</code>.</p>
+<pre><code class="language-python">def add_my_component(prog):
+    my_component = prog.component("my_component")
+    my_component.output("my_output", 32)
+
+    with my_component.group("my_group"):
+        my_component.this().my_output = const(32, 1)
+</code></pre>
+<p>In order to reference a cell without a handle use the <code>Builder().get_cell()</code> method.</p>
+<pre><code class="language-python">my_component.reg("my_reg", 32)
+# a few lines later
+my_reg = prog.get_cell("my_reg")
+</code></pre>
+<p>A group can be retrieved with the <code>Builder().get_group()</code> method. It's possible to retrieve combinational groups as well as regular groups with this method.</p>
+<pre><code class="language-python">with my_component.group("my_group"):
+    # group definition here
+# a few lines later
+my_group = prog.get_group("my_group")
+
+</code></pre>
+<h2 id="defining-component-attributes"><a class="header" href="#defining-component-attributes">Defining Component Attributes</a></h2>
+<p>Components can be given attributes. Similar to ports, just specify the name of the attribute and its value.
+Note that <code>attribute(name, value)</code> does not return a handle to the attribute.</p>
+<pre><code class="language-python">my_component.attribute("my_attribute", 1)
+</code></pre>
+<p>Will create a component that looks like:</p>
+<pre><code>component my_component&lt;"my_attribute"=1&gt;(...) -&gt; (...) {
+</code></pre>
+<h2 id="importing-calyx-libraries"><a class="header" href="#importing-calyx-libraries">Importing Calyx Libraries</a></h2>
+<p>The builder library imports necessary Calyx libraries automatically. However, it is possible to import additional libraries manually.</p>
+<pre><code class="language-python">prog = cb.Builder()
+prog.import_("primitives/binary_operators.futil")
+</code></pre>
+<h2 id="explictly-stating-widths"><a class="header" href="#explictly-stating-widths">Explictly Stating Widths</a></h2>
+<p>Usually, the builder library can automatically infer the widths of constants. In cases where it cannot, it will complain at Python compilation. Use the <code>const(width, value)</code> expression to explicitly state the width of a constant.</p>
+<pre><code class="language-python">my_cell.my_port = const(32, 1)
+</code></pre>
+<h2 id="components-with-known-latency"><a class="header" href="#components-with-known-latency">Components with Known Latency</a></h2>
+<p>You can declare a component to be <code>static</code> by stating its latency when declaring it.
+For instance, our contrived adder from above could be declared as static with a latency of one cycle as follows:</p>
+<pre><code class="language-python">comp = prog.component("adder", latency=1)
+</code></pre>
+<p>As a reminder,  the regular version is just:</p>
+<pre><code class="language-python">comp = prog.component("adder")
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../builder/calyx-py.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../tutorial/frontend-tut.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../builder/calyx-py.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../tutorial/frontend-tut.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
