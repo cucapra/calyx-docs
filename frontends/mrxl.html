@@ -191,14 +191,14 @@ The explanation on this page is relatively brief; see the <a href="../tutorial/f
 <p>First, install the <a href="../calyx-py.html">calyx-py</a> library.</p>
 <p>The MrXL implementation is in Python and uses <a href="https://flit.readthedocs.io/en/latest/index.html">Flit</a>.
 Install Flit (<code>pip install flit</code> or similar), and then type the
-following after changing your directory to <code>frontend/mrxl</code>:</p>
+following after changing your directory to <code>frontends/mrxl</code>:</p>
 <pre><code>flit install --symlink
 </code></pre>
 <p>This creates a symbolic link to the present directory and installs the <code>mrxl</code> command line tool.</p>
 <p>By default, <a href="../running-calyx/fud">fud</a> looks for the <code>mrxl</code> executable to enable
 the <code>mrxl</code> compilation stage.
 Type <code>fud check</code> to make sure <code>fud</code> reports that the <code>mrxl</code> compiler has been
-found. If it does not, run the following while still in <code>frontend/mrxl</code>.</p>
+found. If it does not, run the following while still in <code>frontends/mrxl</code>.</p>
 <pre><code>fud register mrxl -p fud/mrxl.py
 </code></pre>
 <p>Run <code>fud check</code> again to ensure that <code>fud</code> sees <code>mrxl</code>.</p>
