@@ -156,6 +156,28 @@
 <span id="156">156</span>
 <span id="157">157</span>
 <span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::Attribute;
 <span class="kw">use </span><span class="kw">crate</span>::InlineAttributes;
 <span class="kw">use </span>calyx_utils::{CalyxResult, GPosIdx, WithPos};
@@ -277,6 +299,28 @@
             }
             attr =&gt; {
                 <span class="self">self</span>.hinfo.attrs.remove(<span class="kw-2">&amp;</span>attr);
+            }
+        }
+    }
+
+    <span class="doccomment">/// `self` copys (i.e., assigns the same values) the attributes in `other`.
+    /// However, we only copy attributes in `keys` (i.e.. we don&#39;t copy
+    /// all attributes in `other`, only the ones that we specify).
+    /// If a `key` is not present in `other`, then we ignore that `key`.
+    /// Example: suppose
+    /// self: A-&gt;10, B-&gt;5
+    /// other: A-&gt;15, C-&gt;5
+    /// keys: A, D
+    /// Then self gets: A-&gt;15 B-&gt;5. (D is ignored since it&#39;s not present in other
+    /// and C is ignored since it&#39;s not keys.)
+    </span><span class="kw">pub fn </span>copy_from&lt;A&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>, keys: Vec&lt;A&gt;)
+    <span class="kw">where
+        </span>A: Into&lt;Attribute&gt; + Clone,
+    {
+        <span class="kw">for </span>key <span class="kw">in </span>keys {
+            <span class="kw">match </span>other.get(key.clone()) {
+                <span class="prelude-val">None </span>=&gt; (),
+                <span class="prelude-val">Some</span>(val) =&gt; <span class="self">self</span>.insert(key, val),
             }
         }
     }

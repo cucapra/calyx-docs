@@ -239,6 +239,11 @@
 <span id="239">239</span>
 <span id="240">240</span>
 <span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_utils::{CalyxResult, Error, Id};
 <span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>strum::EnumCount;
@@ -299,6 +304,11 @@
     <span class="attribute">#[strum(serialize = <span class="string">&quot;new_fsm&quot;</span>)]
     </span><span class="doccomment">/// Generate a new FSM for this control node
     </span>NewFSM,
+    <span class="attribute">#[strum(serialize = <span class="string">&quot;one_hot&quot;</span>)]
+    </span><span class="doccomment">/// Generate a one-hot FSM for this control node. (Not necesarily a
+    /// guarantee: if the control node does not get its own FSM, then this attribute
+    /// won&#39;t necesarily be honored.)
+    </span>OneHot,
     <span class="attribute">#[strum(serialize = <span class="string">&quot;inline&quot;</span>)]
     </span><span class="doccomment">/// Inline this subcomponent
     </span>Inline,

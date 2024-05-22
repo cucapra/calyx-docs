@@ -219,8 +219,21 @@
 <span id="219">219</span>
 <span id="220">220</span>
 <span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
-<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures};
+<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes, LibrarySignatures};
 
 <span class="attribute">#[derive(Default)]
 </span><span class="doccomment">/// Collapses and de-nests control constructs.
@@ -354,7 +367,14 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::static_change(ir::StaticControl::empty()));
         }
         <span class="kw">if </span>s.stmts.len() == <span class="number">1 </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::static_change(s.stmts.pop().unwrap()));
+            <span class="comment">// Want to preserve @one_hot attribute.
+            </span><span class="kw">let </span><span class="kw-2">mut </span>replacement_ctrl = s.stmts.pop().unwrap();
+            <span class="kw">let </span>attrs = std::mem::take(<span class="kw-2">&amp;mut </span>s.attributes);
+            replacement_ctrl
+                .get_mut_attributes()
+                .copy_from(attrs, <span class="macro">vec!</span>[ir::BoolAttr::OneHot]);
+
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::static_change(replacement_ctrl));
         }
         <span class="kw">let </span><span class="kw-2">mut </span>pars: Vec&lt;ir::StaticControl&gt; = <span class="macro">vec!</span>[];
         <span class="kw">for </span>con <span class="kw">in </span>s.stmts.drain(..) {
@@ -381,7 +401,13 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::static_change(ir::StaticControl::empty()));
         }
         <span class="kw">if </span>s.stmts.len() == <span class="number">1 </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::static_change(s.stmts.pop().unwrap()));
+            <span class="comment">// Want to preserve @one_hot attribute.
+            </span><span class="kw">let </span><span class="kw-2">mut </span>replacement_ctrl = s.stmts.pop().unwrap();
+            <span class="kw">let </span>attrs = std::mem::take(<span class="kw-2">&amp;mut </span>s.attributes);
+            replacement_ctrl
+                .get_mut_attributes()
+                .copy_from(attrs, <span class="macro">vec!</span>[ir::BoolAttr::OneHot]);
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::static_change(replacement_ctrl));
         }
         <span class="kw">let </span><span class="kw-2">mut </span>seqs: Vec&lt;ir::StaticControl&gt; = <span class="macro">vec!</span>[];
         <span class="kw">for </span>con <span class="kw">in </span>s.stmts.drain(..) {

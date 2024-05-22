@@ -603,6 +603,9 @@
 <span id="603">603</span>
 <span id="604">604</span>
 <span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::passes::math_utilities::get_bit_width_from;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>calyx_ir::{build_assignments, Nothing};
@@ -613,10 +616,11 @@
 <span class="kw">use </span>std::ops::Not;
 <span class="kw">use </span>std::rc::Rc;
 
-<span class="attribute">#[derive(Debug, Clone, Copy)]
+<span class="attribute">#[derive(Debug, Clone, Copy, Default)]
 </span><span class="comment">// Define an FSMEncoding Enum
 </span><span class="kw">enum </span>FSMEncoding {
-    Binary,
+    <span class="attribute">#[default]
+    </span>Binary,
     OneHot,
 }
 
@@ -656,7 +660,6 @@
 
 <span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>StaticFSM {
-    _num_states: u64,
     encoding: FSMEncoding,
     <span class="comment">// The fsm&#39;s bitwidth (this redundant information bc  we have `cell`)
     // but makes it easier if we easily have access to this.
@@ -692,7 +695,6 @@
         <span class="kw">let </span>fsm = FSMImplementation::Single(register);
 
         StaticFSM {
-            _num_states: num_states,
             encoding,
             bitwidth: fsm_size,
             implementation: fsm,
@@ -949,6 +951,8 @@
     <span class="doccomment">/// The queries that the FSM needs to support.
     /// E.g., `lhs = %[2:3] ? rhs` corresponds to (2,3).
     </span>queries: HashSet&lt;(u64, u64)&gt;,
+    <span class="doccomment">/// Encoding type for the FSM
+    </span>encoding: FSMEncoding,
     <span class="doccomment">/// The static groups the FSM will schedule. It is a vec because sometimes
     /// the same FSM will handle two different static islands.
     </span><span class="kw">pub </span>static_groups: Vec&lt;ir::RRC&lt;ir::StaticGroup&gt;&gt;,
@@ -962,6 +966,16 @@
             ..Default::default()
         };
         schedule.num_states = <span class="number">0</span>;
+        <span class="comment">// iter().any() or iter().all() should both work, since our coloring
+        // algorithm inserts conflicts if the @one_hot attribute doesn&#39;t match.
+        </span>schedule.encoding =
+            <span class="kw">if </span>schedule.static_groups.iter().any(|sgroup| {
+                sgroup.borrow().attributes.has(ir::BoolAttr::OneHot)
+            }) {
+                FSMEncoding::OneHot
+            } <span class="kw">else </span>{
+                FSMEncoding::Binary
+            };
         <span class="kw">for </span>static_group <span class="kw">in </span><span class="kw-2">&amp;</span>schedule.static_groups {
             <span class="comment">// Getting self.queries
             </span><span class="kw">for </span>static_assign <span class="kw">in </span><span class="kw-2">&amp;</span>static_group.borrow().assignments {
@@ -1019,19 +1033,11 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
         static_component_interface: bool,
-        one_hot_cutoff: u64,
     ) -&gt; (VecDeque&lt;Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;&gt;, StaticFSM) {
-        <span class="comment">// Choose encoding based on one-hot cutoff.
-        </span><span class="kw">let </span>encoding = <span class="kw">if </span><span class="self">self</span>.num_states &gt; one_hot_cutoff {
-            FSMEncoding::Binary
-        } <span class="kw">else </span>{
-            FSMEncoding::OneHot
-        };
-
         <span class="comment">// First build the fsm we will use to realize the schedule.
         </span><span class="kw">let </span><span class="kw-2">mut </span>fsm_object = StaticFSM::from_basic_info(
             <span class="self">self</span>.num_states,
-            encoding,
+            <span class="self">self</span>.encoding,
             FSMImplementationSpec::Single,
             builder,
         );

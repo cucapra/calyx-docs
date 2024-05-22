@@ -216,10 +216,10 @@
                 <span class="prelude-val">None</span>,
                 Box::new(while_body),
             );
-            <span class="kw">let </span>while_seq = ir::Control::seq(<span class="macro">vec!</span>[
-                ir::Control::enable(init_group),
-                while_loop,
-            ]);
+            <span class="kw">let </span>while_seq = ir::Control::Seq(ir::Seq {
+                stmts: <span class="macro">vec!</span>[ir::Control::enable(init_group), while_loop],
+                attributes: std::mem::take(<span class="kw-2">&amp;mut </span>s.attributes),
+            });
             <span class="prelude-val">Ok</span>(Action::change(while_seq))
         }
     }

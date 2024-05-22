@@ -178,6 +178,8 @@
 <span id="178">178</span>
 <span id="179">179</span>
 <span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::passes::{
     AddGuard, Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
@@ -187,9 +189,9 @@
     DiscoverExternal, ExternalToRef, Externalize, GoInsertion, GroupToInvoke,
     GroupToSeq, HoleInliner, InferShare, LowerGuards, MergeAssign, Papercut,
     ParToSeq, RegisterUnsharing, RemoveIds, ResetInsertion,
-    SimplifyStaticGuards, SimplifyWithControl, StaticInference, StaticInliner,
-    StaticPromotion, SynthesisPapercut, TopDownCompileControl, UnrollBounded,
-    WellFormed, WireInliner, WrapMain,
+    SimplifyStaticGuards, SimplifyWithControl, StaticFSMOpts, StaticInference,
+    StaticInliner, StaticPromotion, SynthesisPapercut, TopDownCompileControl,
+    UnrollBounded, WellFormed, WireInliner, WrapMain,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::Named;
 <span class="kw">use crate</span>::{pass_manager::PassManager, register_alias};
@@ -222,6 +224,7 @@
 
         <span class="comment">// Compilation passes
         </span>pm.register_pass::&lt;StaticInliner&gt;()<span class="question-mark">?</span>;
+        pm.register_pass::&lt;StaticFSMOpts&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileStatic&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileInvoke&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;CompileRepeat&gt;()<span class="question-mark">?</span>;
@@ -289,6 +292,7 @@
                 </span>DeadGroupRemoval, <span class="comment">// Static inliner generates lots of dead groups
                 </span>SimplifyStaticGuards,
                 AddGuard,
+                StaticFSMOpts,
                 CompileStatic,
                 DeadGroupRemoval,
                 TopDownCompileControl

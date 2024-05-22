@@ -1003,23 +1003,11 @@
 <span id="1003">1003</span>
 <span id="1004">1004</span>
 <span id="1005">1005</span>
-<span id="1006">1006</span>
-<span id="1007">1007</span>
-<span id="1008">1008</span>
-<span id="1009">1009</span>
-<span id="1010">1010</span>
-<span id="1011">1011</span>
-<span id="1012">1012</span>
-<span id="1013">1013</span>
-<span id="1014">1014</span>
-<span id="1015">1015</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphColoring, StaticFSM, StaticSchedule};
-<span class="kw">use </span><span class="kw">crate</span>::traversal::{
-    Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
-};
+<span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, ParseVal, PassOpt, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>calyx_ir::{guard, structure, GetAttributes};
-<span class="kw">use </span>calyx_utils::{CalyxResult, Error};
+<span class="kw">use </span>calyx_utils::Error;
 <span class="kw">use </span>ir::{build_assignments, RRC};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
@@ -1027,6 +1015,7 @@
 <span class="kw">use </span>std::rc::Rc;
 
 <span class="doccomment">/// Compiles Static Islands
+</span><span class="attribute">#[derive(Default)]
 </span><span class="kw">pub struct </span>CompileStatic {
     <span class="doccomment">/// maps original static group names to the corresponding group that has an FSM that reset early
     </span>reset_early_map: HashMap&lt;ir::Id, ir::Id&gt;,
@@ -1036,10 +1025,6 @@
     </span>signal_reg_map: HashMap&lt;ir::Id, ir::Id&gt;,
     <span class="doccomment">/// maps reset_early_group names to StaticFSM object
     </span>fsm_info_map: HashMap&lt;ir::Id, ir::RRC&lt;StaticFSM&gt;&gt;,
-    <span class="comment">// ========= Pass Options ============
-    </span><span class="doccomment">/// How many states the static FSM must have before we pick binary encoding over
-    /// one-hot
-    </span>one_hot_cutoff: u64,
 }
 
 <span class="kw">impl </span>Named <span class="kw">for </span>CompileStatic {
@@ -1059,27 +1044,6 @@
             ParseVal::Num(<span class="number">0</span>),
             PassOpt::parse_num,
         )]
-    }
-}
-
-<span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>CompileStatic {
-    <span class="kw">fn </span>from(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>opts = <span class="self">Self</span>::get_opts(ctx);
-
-        <span class="prelude-val">Ok</span>(CompileStatic {
-            one_hot_cutoff: opts[<span class="string">&quot;one-hot-cutoff&quot;</span>].pos_num().unwrap(),
-            reset_early_map: HashMap::new(),
-            wrapper_map: HashMap::new(),
-            signal_reg_map: HashMap::new(),
-            fsm_info_map: HashMap::new(),
-        })
-    }
-
-    <span class="kw">fn </span>clear_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.reset_early_map = HashMap::new();
-        <span class="self">self</span>.wrapper_map = HashMap::new();
-        <span class="self">self</span>.signal_reg_map = HashMap::new();
-        <span class="self">self</span>.fsm_info_map = HashMap::new();
     }
 }
 
@@ -1452,6 +1416,25 @@
         }
     }
 
+    <span class="doccomment">/// Adds conflicts between static groups that require different encodings.
+    /// For example: if one group is one-hot and another is binary, then
+    /// we insert a conflict between those two groups.
+    </span><span class="kw">fn </span>add_encoding_conflicts(
+        sgroups: <span class="kw-2">&amp;</span>[ir::RRC&lt;ir::StaticGroup&gt;],
+        conflict_graph: <span class="kw-2">&amp;mut </span>GraphColoring&lt;ir::Id&gt;,
+    ) {
+        <span class="kw">for </span>(sgroup1, sgroup2) <span class="kw">in </span>sgroups.iter().tuple_combinations() {
+            <span class="kw">if </span>sgroup1.borrow().attributes.has(ir::BoolAttr::OneHot)
+                != sgroup2.borrow().attributes.has(ir::BoolAttr::OneHot)
+            {
+                conflict_graph.insert_conflict(
+                    <span class="kw-2">&amp;</span>sgroup1.borrow().name(),
+                    <span class="kw-2">&amp;</span>sgroup2.borrow().name(),
+                );
+            }
+        }
+    }
+
     <span class="comment">// helper to `build_sgroup_uses_map`
     // `parent_group` is the group that we are &quot;currently&quot; analyzing
     // `full_group_ancestry` is the &quot;ancestry of the group we are analyzing&quot;
@@ -1527,6 +1510,7 @@
             GraphColoring::from(sgroups.iter().map(|g| g.borrow().name()));
         <span class="self">Self</span>::add_par_conflicts(control, <span class="kw-2">&amp;</span>sgroup_uses_map, <span class="kw-2">&amp;mut </span>conflict_graph);
         <span class="self">Self</span>::add_go_port_conflicts(<span class="kw-2">&amp;</span>sgroup_uses_map, <span class="kw-2">&amp;mut </span>conflict_graph);
+        <span class="self">Self</span>::add_encoding_conflicts(sgroups, <span class="kw-2">&amp;mut </span>conflict_graph);
         conflict_graph.color_greedy(<span class="prelude-val">None</span>, <span class="bool-val">true</span>)
     }
 }
@@ -1657,8 +1641,7 @@
             <span class="comment">// Build a StaticSchedule object, realize it and add assignments
             // as continuous assignments.
             </span><span class="kw">let </span><span class="kw-2">mut </span>sch = StaticSchedule::from(<span class="macro">vec!</span>[Rc::clone(<span class="kw-2">&amp;</span>sgroup)]);
-            <span class="kw">let </span>(<span class="kw-2">mut </span>assigns, <span class="kw-2">mut </span>fsm) =
-                sch.realize_schedule(builder, <span class="bool-val">true</span>, <span class="self">self</span>.one_hot_cutoff);
+            <span class="kw">let </span>(<span class="kw-2">mut </span>assigns, <span class="kw-2">mut </span>fsm) = sch.realize_schedule(builder, <span class="bool-val">true</span>);
             builder
                 .component
                 .continuous_assignments
@@ -1748,7 +1731,7 @@
 
         <span class="comment">// Realize an fsm for each StaticSchedule object.
         </span><span class="kw">for </span>sch <span class="kw">in </span><span class="kw-2">&amp;mut </span>schedule_objects {
-            <span class="comment">// Check whetehr we are compiling the top level static island.
+            <span class="comment">// Check whether we are compiling the top level static island.
             </span><span class="kw">let </span>static_component_interface = <span class="kw">match </span>top_level_sgroup {
                 <span class="prelude-val">None </span>=&gt; <span class="bool-val">false</span>,
                 <span class="comment">// For the top level group, sch.static_groups should really only
@@ -1768,11 +1751,8 @@
                     <span class="kw-2">&amp;mut </span>builder,
                 )
             } <span class="kw">else </span>{
-                <span class="kw">let </span>(<span class="kw-2">mut </span>static_group_assigns, fsm) = sch.realize_schedule(
-                    <span class="kw-2">&amp;mut </span>builder,
-                    static_component_interface,
-                    <span class="self">self</span>.one_hot_cutoff,
-                );
+                <span class="kw">let </span>(<span class="kw-2">mut </span>static_group_assigns, fsm) = sch
+                    .realize_schedule(<span class="kw-2">&amp;mut </span>builder, static_component_interface);
                 <span class="kw">let </span>fsm_ref = ir::rrc(fsm);
                 <span class="kw">for </span>static_group <span class="kw">in </span>sch.static_groups.iter() {
                     <span class="comment">// Create the dynamic &quot;early reset group&quot; that will replace the static group.
