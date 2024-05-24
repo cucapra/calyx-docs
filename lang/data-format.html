@@ -231,7 +231,7 @@ The <code>@external</code> attribute can <strong>only be used</strong> on the <a
 <p><strong>Note:</strong> <code>fud</code> requires that for each memory marked with the <code>@external</code> attribute in the program.</p>
 </blockquote>
 <h2 id="using-fud"><a class="header" href="#using-fud">Using <code>fud</code></a></h2>
-<p>All software simulators supported by <code>fud</code>, including <a href="../running-calyx/fud/index.html#verilator">Verilator</a> and <a href="../running-calyx/fud/index.html#icarus-verilog">Icarus Verilog</a>, as well as the <a href="../interpreter.html">Calyx interpreter</a> can use this data format.
+<p>All software simulators supported by <code>fud</code>, including <a href="../running-calyx/fud/index.html#verilator">Verilator</a> and <a href="../running-calyx/fud/index.html#icarus-verilog">Icarus Verilog</a>, as well as the <a href="../running-calyx/interpreter.html">Calyx interpreter</a> can use this data format.
 To pass a JSON file with initial values, use the <code>-s verilog.data</code> flag:</p>
 <pre><code class="language-bash"># Use Icarus Verilog
 fud e --to dat --through icarus-verilog &lt;CALYX FILE&gt; -s verilog.data &lt;JSON&gt;

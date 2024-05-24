@@ -1355,7 +1355,7 @@ The <code>@external</code> attribute can <strong>only be used</strong> on the <a
 <p><strong>Note:</strong> <code>fud</code> requires that for each memory marked with the <code>@external</code> attribute in the program.</p>
 </blockquote>
 <h2 id="using-fud"><a class="header" href="#using-fud">Using <code>fud</code></a></h2>
-<p>All software simulators supported by <code>fud</code>, including <a href="lang/../running-calyx/fud/index.html#verilator">Verilator</a> and <a href="lang/../running-calyx/fud/index.html#icarus-verilog">Icarus Verilog</a>, as well as the <a href="lang/../interpreter.html">Calyx interpreter</a> can use this data format.
+<p>All software simulators supported by <code>fud</code>, including <a href="lang/../running-calyx/fud/index.html#verilator">Verilator</a> and <a href="lang/../running-calyx/fud/index.html#icarus-verilog">Icarus Verilog</a>, as well as the <a href="lang/../running-calyx/interpreter.html">Calyx interpreter</a> can use this data format.
 To pass a JSON file with initial values, use the <code>-s verilog.data</code> flag:</p>
 <pre><code class="language-bash"># Use Icarus Verilog
 fud e --to dat --through icarus-verilog &lt;CALYX FILE&gt; -s verilog.data &lt;JSON&gt;
@@ -3257,7 +3257,7 @@ above the parent in the tree will take care of this re-computation.</p>
 <li>The program implements the wrong algorithm, i.e., it has a logical bug.</li>
 <li>The Calyx compiler incorrectly compiles the program, i.e., there is a compilation bug.</li>
 </ol>
-<p>First make sure that the program generates the correct values with the <a href="debug/../interpreter.html">Calyx
+<p>First make sure that the program generates the correct values with the <a href="debug/../running-calyx/interpreter.html">Calyx
 Interpreter</a>. If it produces the wrong values, your Calyx implementation of the
 algorithm is incorrect. You can use the <a href="debug/./cider.html">Calyx Debugger</a> to debug these problems.</p>
 <p>If the interpreter produces the right values, try a different Verilog backed. We support both
@@ -3267,7 +3267,7 @@ a compilation bug on your hands. Use the <a href="debug/./debug.html">debugging 
 the error.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="the-calyx-interactive-debugger"><a class="header" href="#the-calyx-interactive-debugger">The Calyx Interactive Debugger</a></h1>
 <p>The Calyx Interactive Debugger is a prototype debugging tool built on top of the
-<a href="debug/../interpreter.html">Calyx Interpreter</a> which exposes a <a href="https://sourceware.org/gdb/">gdb</a>-like interface for
+<a href="debug/../running-calyx/interpreter.html">Calyx Interpreter</a> which exposes a <a href="https://sourceware.org/gdb/">gdb</a>-like interface for
 debugging Calyx programs.</p>
 <h2 id="getting-started-1"><a class="header" href="#getting-started-1">Getting Started</a></h2>
 <p>If you are using <a href="debug/../running-calyx/fud/index.html"><code>fud</code></a> getting started with the debugger is easy.
@@ -3446,7 +3446,7 @@ much of the execution is occurring in parallel at any given point.</p>
 <p>Use <code>help</code> to see all commands. Use <code>exit</code> to exit the debugger.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="debugging-compilation-bugs"><a class="header" href="#debugging-compilation-bugs">Debugging Compilation Bugs</a></h1>
 <p>These tips are directed towards <em>compilation bugs</em>. Before trying these, make sure your program
-produces the correct values with the <a href="debug/../interpreter.html">Calyx Interpreter</a></p>
+produces the correct values with the <a href="debug/../running-calyx/interpreter.html">Calyx Interpreter</a>.</p>
 <h2 id="disabling-optimizations"><a class="header" href="#disabling-optimizations">Disabling Optimizations</a></h2>
 <p>The first step is disabling optimization passes and running the bare bones compilation pipeline.</p>
 <p>To disable the passes, add the flag <code>-p no-opt</code> to compiler invocation:</p>
