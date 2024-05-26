@@ -234,6 +234,18 @@ new value.</li>
 <li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left &gt;&gt; right</code></li>
 </ul>
 <hr />
+<h3 id="std_catwidth0-width1"><a class="header" href="#std_catwidth0-width1"><code>std_cat&lt;WIDTH0, WIDTH1&gt;</code></a></h3>
+<p>Concatenate two values. This component is combinational.</p>
+<p><strong>Inputs:</strong></p>
+<ul>
+<li><code>left: WIDTH0</code> - A WIDTH0-bit value</li>
+<li><code>right: WIDTH1</code> - A WIDTH1-bit value</li>
+</ul>
+<p><strong>Outputs:</strong></p>
+<ul>
+<li><code>out: WIDTH0 + WIDTH1</code> - A WIDTH0 + WIDTH1-bit value equivalent to <code>(left &lt;&lt; WIDTH1) || right</code></li>
+</ul>
+<hr />
 <h3 id="std_addwidth"><a class="header" href="#std_addwidth"><code>std_add&lt;WIDTH&gt;</code></a></h3>
 <p>Bitwise addition without a carry flag. Performs <code>left + right</code>. This component
 is combinational.</p>
