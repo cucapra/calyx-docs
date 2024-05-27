@@ -204,34 +204,34 @@ new value.</li>
 <hr />
 <h3 id="std_constwidthval"><a class="header" href="#std_constwidthval"><code>std_const&lt;WIDTH,VAL&gt;</code></a></h3>
 <p>A constant WIDTH-bit value with value VAL.</p>
-<p><strong>Inputs:</strong> None</p>
+<p><strong>Inputs:</strong> None.</p>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - The value of the constant (i.e. <code>VAL</code>)</li>
+<li><code>out: WIDTH</code> - The value of the constant (i.e. <code>VAL</code>).</li>
 </ul>
 <hr />
 <h3 id="std_lshwidth"><a class="header" href="#std_lshwidth"><code>std_lsh&lt;WIDTH&gt;</code></a></h3>
 <p>A left bit shift. Performs <code>left &lt;&lt; right</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit value to be shifted</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit value representing the shift amount</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit value to be shifted.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit value representing the shift amount.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left &lt;&lt; right</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left &lt;&lt; right</code>.</li>
 </ul>
 <hr />
 <h3 id="std_rshwidth"><a class="header" href="#std_rshwidth"><code>std_rsh&lt;WIDTH&gt;</code></a></h3>
 <p>A right bit shift. Performs <code>left &gt;&gt; right</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit value to be shifted</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit value representing the shift amount</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit value to be shifted.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit value representing the shift amount.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left &gt;&gt; right</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left &gt;&gt; right</code>.</li>
 </ul>
 <hr />
 <h3 id="std_catwidth0-width1"><a class="header" href="#std_catwidth0-width1"><code>std_cat&lt;WIDTH0, WIDTH1&gt;</code></a></h3>
@@ -251,24 +251,24 @@ new value.</li>
 is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit value</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit value</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit value.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit value.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left + right</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left + right</code>.</li>
 </ul>
 <hr />
 <h3 id="std_subwidth"><a class="header" href="#std_subwidth"><code>std_sub&lt;WIDTH&gt;</code></a></h3>
 <p>Bitwise subtraction. Performs <code>left - right</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit value</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit value</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit value.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit value.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left - right</code></li>
+<li><code>out: WIDTH</code> - A WIDTH-bit value equivalent to <code>left - right</code>.</li>
 </ul>
 <hr />
 <h3 id="std_slicein_width-out_width"><a class="header" href="#std_slicein_width-out_width"><code>std_slice&lt;IN_WIDTH, OUT_WIDTH&gt;</code></a></h3>
@@ -276,11 +276,11 @@ is combinational.</p>
 <code>in[OUT_WIDTH - 1 : 0]</code>. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>in: IN_WIDTH</code> - An IN_WIDTH-bit value</li>
+<li><code>in: IN_WIDTH</code> - An IN_WIDTH-bit value.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: OUT_WIDTH</code> - The lower OUT_WIDTH bits of <code>in</code></li>
+<li><code>out: OUT_WIDTH</code> - The lower OUT_WIDTH bits of <code>in</code>.</li>
 </ul>
 <hr />
 <h3 id="std_bit_slicein_width-start_idx-end_idx-out_width"><a class="header" href="#std_bit_slicein_width-start_idx-end_idx-out_width"><code>std_bit_slice&lt;IN_WIDTH, START_IDX, END_IDX, OUT_WIDTH&gt;</code></a></h3>
@@ -289,11 +289,11 @@ This is computed as <code>in[END_IDX:START_IDX]</code>.<code>OUT_WIDTH</code> mu
 be <code>END_WIDTH - START_WITH</code> wide when instantiating the module.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>in: IN_WIDTH</code> - An IN_WIDTH-bit value</li>
+<li><code>in: IN_WIDTH</code> - An IN_WIDTH-bit value.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: OUT_WIDTH</code> - The value of the bit-string <code>in[START_IDX:END_IDX]</code></li>
+<li><code>out: OUT_WIDTH</code> - The value of the bit-string <code>in[START_IDX:END_IDX]</code>.</li>
 </ul>
 <hr />
 <h3 id="std_padin_width-out_width"><a class="header" href="#std_padin_width-out_width"><code>std_pad&lt;IN_WIDTH, OUT_WIDTH&gt;</code></a></h3>
@@ -301,11 +301,11 @@ be <code>END_WIDTH - START_WITH</code> wide when instantiating the module.</p>
 OUT_WIDTH-bits. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>in: IN_WIDTH</code> - An IN_WIDTH-bit value to be padded</li>
+<li><code>in: IN_WIDTH</code> - An IN_WIDTH-bit value to be padded.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: OUT_WIDTH</code> - The padded value</li>
+<li><code>out: OUT_WIDTH</code> - The padded value.</li>
 </ul>
 <hr />
 <h2 id="logical-operators"><a class="header" href="#logical-operators">Logical Operators</a></h2>
@@ -317,43 +317,43 @@ OUT_WIDTH-bits. This component is combinational.</p>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - The bitwise NOT of the input (<code>~in</code>)</li>
+<li><code>out: WIDTH</code> - The bitwise NOT of the input (<code>~in</code>).</li>
 </ul>
 <hr />
 <h3 id="std_andwidth"><a class="header" href="#std_andwidth"><code>std_and&lt;WIDTH&gt;</code></a></h3>
 <p>Bitwise AND. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit argument</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit argument</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit argument.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit argument.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - The bitwise AND of the arguments (<code>left &amp; right</code>)</li>
+<li><code>out: WIDTH</code> - The bitwise AND of the arguments (<code>left &amp; right</code>).</li>
 </ul>
 <hr />
 <h3 id="std_orwidth"><a class="header" href="#std_orwidth"><code>std_or&lt;WIDTH&gt;</code></a></h3>
 <p>Bitwise OR. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit argument</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit argument</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit argument.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit argument.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - The bitwise OR of the arguments (<code>left | right</code>)</li>
+<li><code>out: WIDTH</code> - The bitwise OR of the arguments (<code>left | right</code>).</li>
 </ul>
 <hr />
 <h3 id="std_xorwidth"><a class="header" href="#std_xorwidth"><code>std_xor&lt;WIDTH&gt;</code></a></h3>
 <p>Bitwise XOR. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit argument</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit argument</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit argument.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit argument.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>out: WIDTH</code> - The bitwise XOR of the arguments (<code>left ^ right</code>)</li>
+<li><code>out: WIDTH</code> - The bitwise XOR of the arguments (<code>left ^ right</code>).</li>
 </ul>
 <hr />
 <h2 id="comparison-operators"><a class="header" href="#comparison-operators">Comparison Operators</a></h2>
@@ -361,8 +361,8 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <p>Greater than. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit argument</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit argument</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit argument.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit argument.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
@@ -373,8 +373,8 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <p>Less than. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit argument</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit argument</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit argument.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit argument.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
@@ -385,8 +385,8 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <p>Equality comparison. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit argument</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit argument</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit argument.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit argument.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
@@ -397,8 +397,8 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <p>Not equal. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit argument</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit argument</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit argument.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit argument.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
@@ -409,8 +409,8 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <p>Greater than or equal. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit argument</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit argument</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit argument.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit argument.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
@@ -421,8 +421,8 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <p>Less than or equal. This component is combinational.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>left: WIDTH</code> - A WIDTH-bit argument</li>
-<li><code>right: WIDTH</code> - A WIDTH-bit argument</li>
+<li><code>left: WIDTH</code> - A WIDTH-bit argument.</li>
+<li><code>right: WIDTH</code> - A WIDTH-bit argument.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
@@ -430,8 +430,13 @@ OUT_WIDTH-bits. This component is combinational.</p>
 </ul>
 <hr />
 <h2 id="memories"><a class="header" href="#memories">Memories</a></h2>
-<h3 id="comb_mem_d1"><a class="header" href="#comb_mem_d1"><code>comb_mem_d1</code></a></h3>
-<p>A one-dimensional memory.</p>
+<p>Calyx features two flavors of memories: combinational and sequential.
+Combinational memories promise that they will return <code>mem[addr]</code> in the same cycle that <code>addr</code> is provided.
+Sequential memories, on the other hand, promise that they will return <code>mem[addr]</code> in the next cycle after <code>addr</code> is provided.
+We generally encourage the use of sequential memories as they are more realistic.
+Combinational memories are useful when the memory is known to be small, and the application is very performance-sensitive.</p>
+<h3 id="seq_mem_d1"><a class="header" href="#seq_mem_d1"><code>seq_mem_d1</code></a></h3>
+<p>A one-dimensional memory with sequential reads.</p>
 <p><strong>Parameters:</strong></p>
 <ul>
 <li><code>WIDTH</code> - Size of an individual memory slot.</li>
@@ -440,18 +445,20 @@ OUT_WIDTH-bits. This component is combinational.</p>
 </ul>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>addr0: IDX_SIZE</code> - The index to be accessed or updated</li>
-<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot</li>
-<li><code>write_en: 1</code> - One bit write enabled signal, causes the memory to write <code>write_data</code> to the slot indexed by <code>addr0</code></li>
+<li><code>addr0: IDX_SIZE</code> - The index to be accessed or updated.</li>
+<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot.</li>
+<li><code>write_en: 1</code> - One bit write enabled signal. Used in concert with <code>content_en</code>; see below.</li>
+<li><code>content_en: 1</code> - One bit content enabled signal. When <code>content_en</code> is high and <code>write_en</code> is low, the memory reads the value stored at <code>addr0</code> and latches it. When <code>write_en</code> and <code>content_en</code> are both high, the memory writes <code>write_data</code> to the slot indexed by <code>addr0</code> and <code>read_data</code> is undefined.</li>
+<li><code>reset: 1</code> - A reset signal that overrides all other interface signals and sets the latched output of the memory to <code>0</code>.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>read_data: WIDTH</code> - The value stored at <code>addr0</code>. This value is combinational with respect to <code>addr0</code>.</li>
-<li><code>done: 1</code>: The done signal for the memory. This signal goes high for one cycle after finishing a write to the memory.</li>
+<li><code>read_data: WIDTH</code> - The value stored at <code>addr0</code>. This value is available once <code>done</code> goes high.</li>
+<li><code>done: 1</code>: The done signal for the memory. This signal goes high once a read or write operation is complete. In this case, this happens a cycle after the operation is requested.</li>
 </ul>
 <hr />
-<h3 id="comb_mem_d2"><a class="header" href="#comb_mem_d2"><code>comb_mem_d2</code></a></h3>
-<p>A two-dimensional memory.</p>
+<h3 id="seq_mem_d2"><a class="header" href="#seq_mem_d2"><code>seq_mem_d2</code></a></h3>
+<p>A two-dimensional memory with sequential reads.</p>
 <p><strong>Parameters:</strong></p>
 <ul>
 <li><code>WIDTH</code> - Size of an individual memory slot.</li>
@@ -462,19 +469,21 @@ OUT_WIDTH-bits. This component is combinational.</p>
 </ul>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>addr0: D0_IDX_SIZE</code> - The first index into the memory</li>
-<li><code>addr1: D1_IDX_SIZE</code> - The second index into the memory</li>
-<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot</li>
-<li><code>write_en: 1</code> - One bit write enabled signal, causes the memory to write <code>write_data</code> to the slot indexed by <code>addr0</code> and <code>addr1</code></li>
+<li><code>addr0: D0_IDX_SIZE</code> - The first index into the memory.</li>
+<li><code>addr1: D1_IDX_SIZE</code> - The second index into the memory.</li>
+<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot.</li>
+<li><code>write_en: 1</code> - One bit write enabled signal. Used in concert with <code>content_en</code>; see below.</li>
+<li><code>content_en: 1</code> - One bit content enabled signal. When <code>content_en</code> is high, the memory reads the value stored at <code>addr0</code> and <code>addr1</code> and latches it. When <code>write_en</code> and <code>content_en</code> are both high, the memory writes <code>write_data</code> to the slot indexed by <code>addr0</code> and <code>addr1</code> and <code>read_data</code> is undefined.</li>
+<li><code>reset: 1</code> - A reset signal that overrides all other interface signals and sets the latched output of the memory to <code>0</code>.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>read_data: WIDTH</code> - The value stored at <code>mem[addr0][addr1]</code>. This value is combinational with respect to <code>addr0</code> and <code>addr1</code>.</li>
-<li><code>done: 1</code>: The done signal for the memory. This signal goes high for one cycle after finishing a write to the memory.</li>
+<li><code>read_data: WIDTH</code> - The value stored at <code>mem[addr0][addr1]</code>. This value is available once <code>done</code> goes high.</li>
+<li><code>done: 1</code>: The done signal for the memory. This signal goes high once a read or write operation is complete. In this case, this happens a cycle after the operation is requested.</li>
 </ul>
 <hr />
-<h3 id="comb_mem_d3"><a class="header" href="#comb_mem_d3"><code>comb_mem_d3</code></a></h3>
-<p>A three-dimensional memory.</p>
+<h3 id="seq_mem_d3"><a class="header" href="#seq_mem_d3"><code>seq_mem_d3</code></a></h3>
+<p>A three-dimensional memory with sequential reads.</p>
 <p><strong>Parameters:</strong></p>
 <ul>
 <li><code>WIDTH</code> - Size of an individual memory slot.</li>
@@ -487,20 +496,22 @@ OUT_WIDTH-bits. This component is combinational.</p>
 </ul>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>addr0: D0_IDX_SIZE</code> - The first index into the memory</li>
-<li><code>addr1: D1_IDX_SIZE</code> - The second index into the memory</li>
-<li><code>addr2: D2_IDX_SIZE</code> - The third index into the memory</li>
-<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot</li>
-<li><code>write_en: 1</code> - One bit write enabled signal, causes the memory to write <code>write_data</code> to the slot indexed by <code>addr0</code>, <code>addr1</code>, and <code>addr2</code></li>
+<li><code>addr0: D0_IDX_SIZE</code> - The first index into the memory.</li>
+<li><code>addr1: D1_IDX_SIZE</code> - The second index into the memory.</li>
+<li><code>addr2: D2_IDX_SIZE</code> - The third index into the memory.</li>
+<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot.</li>
+<li><code>write_en: 1</code> - One bit write enabled signal. Used in concert with <code>content_en</code>; see below.</li>
+<li><code>content_en: 1</code> - One bit content enabled signal. When <code>content_en</code> is high, the memory reads the value stored at <code>addr0</code>, <code>addr1</code>, and <code>addr2</code> and latches it. When <code>write_en</code> and <code>content_en</code> are both high, the memory writes <code>write_data</code> to the slot indexed by <code>addr0</code>, <code>addr1</code>, and <code>addr2</code> and <code>read_data</code> is undefined.</li>
+<li><code>reset: 1</code> - A reset signal that overrides all other interface signals and sets the latched output of the memory to <code>0</code>.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
-<li><code>read_data: WIDTH</code> - The value stored at <code>mem[addr0][addr1][addr2]</code>. This value is combinational with respect to <code>addr0</code>, <code>addr1</code>, and <code>addr2</code>.</li>
-<li><code>done: 1</code>: The done signal for the memory. This signal goes high for one cycle after finishing a write to the memory.</li>
+<li><code>read_data: WIDTH</code> - The value stored at <code>mem[addr0][addr1][addr2]</code>. This value is available once <code>done</code> goes high.</li>
+<li><code>done: 1</code>: The done signal for the memory. This signal goes high once a read or write operation is complete. In this case, this happens a cycle after the operation is requested.</li>
 </ul>
 <hr />
-<h3 id="comb_mem_d4"><a class="header" href="#comb_mem_d4"><code>comb_mem_d4</code></a></h3>
-<p>A four-dimensional memory.</p>
+<h3 id="seq_mem_d4"><a class="header" href="#seq_mem_d4"><code>seq_mem_d4</code></a></h3>
+<p>A four-dimensional memory with sequential reads.</p>
 <p><strong>Parameters:</strong></p>
 <ul>
 <li><code>WIDTH</code> - Size of an individual memory slot.</li>
@@ -515,12 +526,112 @@ OUT_WIDTH-bits. This component is combinational.</p>
 </ul>
 <p><strong>Inputs:</strong></p>
 <ul>
-<li><code>addr0: D0_IDX_SIZE</code> - The first index into the memory</li>
-<li><code>addr1: D1_IDX_SIZE</code> - The second index into the memory</li>
-<li><code>addr2: D2_IDX_SIZE</code> - The third index into the memory</li>
-<li><code>addr3: D3_IDX_SIZE</code> - The fourth index into the memory</li>
-<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot</li>
-<li><code>write_en: 1</code> - One bit write enabled signal, causes the memory to write <code>write_data</code> to the slot indexed by <code>addr0</code>, <code>addr1</code>, <code>addr2</code>, and <code>addr3</code></li>
+<li><code>addr0: D0_IDX_SIZE</code> - The first index into the memory.</li>
+<li><code>addr1: D1_IDX_SIZE</code> - The second index into the memory.</li>
+<li><code>addr2: D2_IDX_SIZE</code> - The third index into the memory.</li>
+<li><code>addr3: D3_IDX_SIZE</code> - The fourth index into the memory.</li>
+<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot.</li>
+<li><code>write_en: 1</code> - One bit write enabled signal. Used in concert with <code>content_en</code>; see below.</li>
+<li><code>content_en: 1</code> - One bit content enabled signal. When <code>content_en</code> is high, the memory reads the value stored at <code>addr0</code>, <code>addr1</code>, <code>addr2</code>, and <code>addr3</code> and latches it. When <code>write_en</code> and <code>content_en</code> are both high, the memory writes <code>write_data</code> to the slot indexed by <code>addr0</code>, <code>addr1</code>, <code>addr2</code>, and <code>addr3</code> and <code>read_data</code> is undefined.</li>
+<li><code>reset: 1</code> - A reset signal that overrides all other interface signals and sets the latched output of the memory to <code>0</code>.</li>
+</ul>
+<p><strong>Outputs:</strong></p>
+<ul>
+<li><code>read_data: WIDTH</code> - The value stored at <code>mem[addr0][addr1][addr2][addr3]</code>. This value is available once <code>done</code> goes high.</li>
+<li><code>done: 1</code>: The done signal for the memory. This signal goes high once a read or write operation is complete. In this case, this happens a cycle after the operation is requested.</li>
+</ul>
+<hr />
+<h3 id="comb_mem_d1"><a class="header" href="#comb_mem_d1"><code>comb_mem_d1</code></a></h3>
+<p>A one-dimensional memory with combinational reads.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>WIDTH</code> - Size of an individual memory slot.</li>
+<li><code>SIZE</code> - Number of slots in the memory.</li>
+<li><code>IDX_SIZE</code> - The width of the index given to the memory.</li>
+</ul>
+<p><strong>Inputs:</strong></p>
+<ul>
+<li><code>addr0: IDX_SIZE</code> - The index to be accessed or updated.</li>
+<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot.</li>
+<li><code>write_en: 1</code> - One bit write enabled signal, causes the memory to write <code>write_data</code> to the slot indexed by <code>addr0</code>.</li>
+</ul>
+<p><strong>Outputs:</strong></p>
+<ul>
+<li><code>read_data: WIDTH</code> - The value stored at <code>addr0</code>. This value is combinational with respect to <code>addr0</code>.</li>
+<li><code>done: 1</code>: The done signal for the memory. This signal goes high for one cycle after finishing a write to the memory.</li>
+</ul>
+<hr />
+<h3 id="comb_mem_d2"><a class="header" href="#comb_mem_d2"><code>comb_mem_d2</code></a></h3>
+<p>A two-dimensional memory with combinational reads.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>WIDTH</code> - Size of an individual memory slot.</li>
+<li><code>D0_SIZE</code> - Number of memory slots for the first index.</li>
+<li><code>D1_SIZE</code> - Number of memory slots for the second index.</li>
+<li><code>D0_IDX_SIZE</code> - The width of the first index.</li>
+<li><code>D1_IDX_SIZE</code> - The width of the second index.</li>
+</ul>
+<p><strong>Inputs:</strong></p>
+<ul>
+<li><code>addr0: D0_IDX_SIZE</code> - The first index into the memory.</li>
+<li><code>addr1: D1_IDX_SIZE</code> - The second index into the memory.</li>
+<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot.</li>
+<li><code>write_en: 1</code> - One bit write enabled signal, causes the memory to write <code>write_data</code> to the slot indexed by <code>addr0</code> and <code>addr1</code>.</li>
+</ul>
+<p><strong>Outputs:</strong></p>
+<ul>
+<li><code>read_data: WIDTH</code> - The value stored at <code>mem[addr0][addr1]</code>. This value is combinational with respect to <code>addr0</code> and <code>addr1</code>.</li>
+<li><code>done: 1</code>: The done signal for the memory. This signal goes high for one cycle after finishing a write to the memory.</li>
+</ul>
+<hr />
+<h3 id="comb_mem_d3"><a class="header" href="#comb_mem_d3"><code>comb_mem_d3</code></a></h3>
+<p>A three-dimensional memory with combinational reads.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>WIDTH</code> - Size of an individual memory slot.</li>
+<li><code>D0_SIZE</code> - Number of memory slots for the first index.</li>
+<li><code>D1_SIZE</code> - Number of memory slots for the second index.</li>
+<li><code>D2_SIZE</code> - Number of memory slots for the third index.</li>
+<li><code>D0_IDX_SIZE</code> - The width of the first index.</li>
+<li><code>D1_IDX_SIZE</code> - The width of the second index.</li>
+<li><code>D2_IDX_SIZE</code> - The width of the third index.</li>
+</ul>
+<p><strong>Inputs:</strong></p>
+<ul>
+<li><code>addr0: D0_IDX_SIZE</code> - The first index into the memory.</li>
+<li><code>addr1: D1_IDX_SIZE</code> - The second index into the memory.</li>
+<li><code>addr2: D2_IDX_SIZE</code> - The third index into the memory.</li>
+<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot.</li>
+<li><code>write_en: 1</code> - One bit write enabled signal, causes the memory to write <code>write_data</code> to the slot indexed by <code>addr0</code>, <code>addr1</code>, and <code>addr2</code>.</li>
+</ul>
+<p><strong>Outputs:</strong></p>
+<ul>
+<li><code>read_data: WIDTH</code> - The value stored at <code>mem[addr0][addr1][addr2]</code>. This value is combinational with respect to <code>addr0</code>, <code>addr1</code>, and <code>addr2</code>.</li>
+<li><code>done: 1</code>: The done signal for the memory. This signal goes high for one cycle after finishing a write to the memory.</li>
+</ul>
+<hr />
+<h3 id="comb_mem_d4"><a class="header" href="#comb_mem_d4"><code>comb_mem_d4</code></a></h3>
+<p>A four-dimensional memory with combinational reads.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>WIDTH</code> - Size of an individual memory slot.</li>
+<li><code>D0_SIZE</code> - Number of memory slots for the first index.</li>
+<li><code>D1_SIZE</code> - Number of memory slots for the second index.</li>
+<li><code>D2_SIZE</code> - Number of memory slots for the third index.</li>
+<li><code>D3_SIZE</code> - Number of memory slots for the fourth index.</li>
+<li><code>D0_IDX_SIZE</code> - The width of the first index.</li>
+<li><code>D1_IDX_SIZE</code> - The width of the second index.</li>
+<li><code>D2_IDX_SIZE</code> - The width of the third index.</li>
+<li><code>D3_IDX_SIZE</code> - The width of the fourth index.</li>
+</ul>
+<p><strong>Inputs:</strong></p>
+<ul>
+<li><code>addr0: D0_IDX_SIZE</code> - The first index into the memory.</li>
+<li><code>addr1: D1_IDX_SIZE</code> - The second index into the memory.</li>
+<li><code>addr2: D2_IDX_SIZE</code> - The third index into the memory.</li>
+<li><code>addr3: D3_IDX_SIZE</code> - The fourth index into the memory.</li>
+<li><code>write_data: WIDTH</code> - Data to be written to the selected memory slot.</li>
+<li><code>write_en: 1</code> - One bit write enabled signal, causes the memory to write <code>write_data</code> to the slot indexed by <code>addr0</code>, <code>addr1</code>, <code>addr2</code>, and <code>addr3</code>.</li>
 </ul>
 <p><strong>Outputs:</strong></p>
 <ul>
