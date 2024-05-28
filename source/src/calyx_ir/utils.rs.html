@@ -176,14 +176,14 @@
                   <span class="kw">let </span><span class="kw-2">mut </span>dimension_sizes: Vec&lt;u64&gt; = Vec::new();
                   <span class="kw">let </span><span class="kw-2">mut </span>idx_sizes: Vec&lt;u64&gt; = Vec::new();
                   <span class="kw">let </span>dimensions: u64;
-                  <span class="comment">//let mem_cell_type = mem.prototype.get_name().unwrap(); //i.e. &quot;comb_mem_d1&quot;
-                  </span><span class="kw">let </span>mem_type : MemoryType = <span class="kw">if </span>mem.is_comb_cell() {
+                  <span class="kw">let </span>mem_cell_type = mem.prototype.get_name().unwrap(); <span class="comment">//i.e. &quot;comb_mem_d1&quot;
+                  </span><span class="kw">let </span>mem_type : MemoryType = <span class="kw">if </span>mem_cell_type.to_string().contains(<span class="string">&quot;comb&quot;</span>) {
                     MemoryType::Combinational
                   } <span class="kw">else </span>{
                     MemoryType::Sequential
                   };
 
-                  <span class="kw">match </span>mem.prototype.get_name().unwrap().as_ref() {
+                  <span class="kw">match </span>mem_cell_type.as_ref() {
                       <span class="string">&quot;comb_mem_d1&quot; </span>| <span class="string">&quot;seq_mem_d1&quot; </span>=&gt; {
                         dimension_sizes.push(mem.get_parameter(<span class="string">&quot;SIZE&quot;</span>).unwrap());
                         dimensions = <span class="number">1</span>;
