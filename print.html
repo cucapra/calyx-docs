@@ -3891,6 +3891,13 @@ To access the ports of a component while defining it, we use the <code>this()</c
 </code></pre>
 <p>Observe that we have saved handles to the input ports by assigning them to Python variables, but have not done the same with the output port.
 We will show shortly how to create a handle to a port after its definition.</p>
+<p>It is also possible to create ports that have <a href="https://docs.calyxir.org/lang/attributes.html">attributes</a>. Attributes can either
+be described as a string or a (string, value) tuple.
+A string such as <code>"data"</code>, which will create an <code>@data</code> attribute.
+A (string, value) tuple such as <code>("done", 1)</code> will create an <code>@done(1)</code> attribute.</p>
+<pre><code class="language-python">    comp.output("out_2", 1, ["data"])
+    comp.output("out_3", 1, ["data", ("done", 1)])
+</code></pre>
 <h2 id="cells-1"><a class="header" href="#cells-1">Cells</a></h2>
 <p>We add cells to the component as follows.
 The standard cells are all supported.
