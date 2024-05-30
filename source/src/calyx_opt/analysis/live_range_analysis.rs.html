@@ -1418,6 +1418,13 @@
 <span id="1418">1418</span>
 <span id="1419">1419</span>
 <span id="1420">1420</span>
+<span id="1421">1421</span>
+<span id="1422">1422</span>
+<span id="1423">1423</span>
+<span id="1424">1424</span>
+<span id="1425">1425</span>
+<span id="1426">1426</span>
+<span id="1427">1427</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     AssignmentAnalysis, ControlId, ReadWriteSet, ShareSet, VariableDetection,
 };
@@ -1770,6 +1777,7 @@
         control: <span class="kw-2">&amp;mut </span>ir::Control,
         state_share: ShareSet,
         share: ShareSet,
+        only_run_once: bool,
     ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>ranges = LiveRangeAnalysis {
             state_share,
@@ -1780,12 +1788,18 @@
         <span class="comment">// Give each control statement a unique &quot;NODE_ID&quot; attribute.
         </span>ControlId::compute_unique_ids(control, <span class="number">0</span>, <span class="bool-val">false</span>);
 
-        ranges.build_live_ranges(
+        <span class="kw">let </span>(alive, gens, kills) = ranges.build_live_ranges(
             control,
             Prop::default(),
             Prop::default(),
             Prop::default(),
         );
+        <span class="comment">// If the component could run more than once, than we have to feed the
+        // output alive,gens,kills, back into the control and run the algorithm
+        // again.
+        </span><span class="kw">if </span>!only_run_once {
+            ranges.build_live_ranges(control, alive, gens, kills);
+        }
 
         <span class="kw">for </span>(node, cells_by_type) <span class="kw">in </span><span class="kw-2">&amp;</span>ranges.invokes_enables_map {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(prop) = ranges.live.get_mut(node) {
