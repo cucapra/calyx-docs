@@ -198,14 +198,50 @@ representation, use the command:</p>
 <pre><code>path/to/circt-translate --export-calyx /path/to/file
 </code></pre>
 <p>For example, you can use the expected output of the test <code>tests/backend/mlir/simple.expect</code>:</p>
-<pre><code>{{#include ../../tests/backend/mlir/simple.expect}}
+<pre><code>module attributes {calyx.entrypoint = "main" } {
+calyx.component @main(%go: i1 {go=1}, %clk: i1 {clk=1}, %reset: i1 {reset=1}) -&gt; (%out: i1, %done: i1 {done=1}) {
+  %r1.in, %r1.write_en, %r1.clk, %r1.reset, %r1.out, %r1.done = calyx.register @r1 : i1, i1, i1, i1, i1, i1
+  %_1_1.out = hw.constant 1 : i1
+  calyx.wires {
+    calyx.group @Group1 {
+      calyx.assign %r1.in = %_1_1.out : i1
+      calyx.assign %r1.write_en = %_1_1.out : i1
+      calyx.group_done %r1.done : i1
+    }
+  }
+
+  calyx.control {
+    calyx.seq {
+      calyx.enable @Group1
+    }
+  }
+}
+
+}
 </code></pre>
 <p>Using the command:</p>
 <pre><code class="language-bash"># Don't worry too much about the file alias; this is used for testing purposes.
 path/to/circt-translate --export-calyx tests/backend/mlir/simple.expect
 </code></pre>
 <p>This should output:</p>
-<pre><code>{{#include ../../tests/backend/mlir/simple.futil}}
+<pre><code>// -p well-formed -b mlir
+import "primitives/core.futil";
+import "primitives/memories/comb.futil";
+component main(@go go: 1, @clk clk: 1, @reset reset: 1) -&gt; (out: 1, @done done: 1) {
+  cells {
+    r1 = std_reg(1);
+  }
+  wires {
+    group Group1 {
+      r1.in = 1'd1;
+      r1.write_en = 1'd1;
+      Group1[done] = r1.done;
+    }
+  }
+  control {
+    seq { Group1; }
+  }
+}
 </code></pre>
 <h2 id="native-representation-to-mlir"><a class="header" href="#native-representation-to-mlir">Native Representation to MLIR</a></h2>
 <p>To round-trip back to the Calyx dialect, we can use <code>fud</code>:</p>
