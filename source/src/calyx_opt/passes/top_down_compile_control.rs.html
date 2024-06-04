@@ -1090,6 +1090,58 @@
 <span id="1090">1090</span>
 <span id="1091">1091</span>
 <span id="1092">1092</span>
+<span id="1093">1093</span>
+<span id="1094">1094</span>
+<span id="1095">1095</span>
+<span id="1096">1096</span>
+<span id="1097">1097</span>
+<span id="1098">1098</span>
+<span id="1099">1099</span>
+<span id="1100">1100</span>
+<span id="1101">1101</span>
+<span id="1102">1102</span>
+<span id="1103">1103</span>
+<span id="1104">1104</span>
+<span id="1105">1105</span>
+<span id="1106">1106</span>
+<span id="1107">1107</span>
+<span id="1108">1108</span>
+<span id="1109">1109</span>
+<span id="1110">1110</span>
+<span id="1111">1111</span>
+<span id="1112">1112</span>
+<span id="1113">1113</span>
+<span id="1114">1114</span>
+<span id="1115">1115</span>
+<span id="1116">1116</span>
+<span id="1117">1117</span>
+<span id="1118">1118</span>
+<span id="1119">1119</span>
+<span id="1120">1120</span>
+<span id="1121">1121</span>
+<span id="1122">1122</span>
+<span id="1123">1123</span>
+<span id="1124">1124</span>
+<span id="1125">1125</span>
+<span id="1126">1126</span>
+<span id="1127">1127</span>
+<span id="1128">1128</span>
+<span id="1129">1129</span>
+<span id="1130">1130</span>
+<span id="1131">1131</span>
+<span id="1132">1132</span>
+<span id="1133">1133</span>
+<span id="1134">1134</span>
+<span id="1135">1135</span>
+<span id="1136">1136</span>
+<span id="1137">1137</span>
+<span id="1138">1138</span>
+<span id="1139">1139</span>
+<span id="1140">1140</span>
+<span id="1141">1141</span>
+<span id="1142">1142</span>
+<span id="1143">1143</span>
+<span id="1144">1144</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::passes;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
@@ -1314,6 +1366,23 @@
     </span><span class="kw">pub </span>builder: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>ir::Builder&lt;<span class="lifetime">&#39;a</span>&gt;,
 }
 
+<span class="doccomment">/// Information to serialize for profiling purposes
+</span><span class="attribute">#[derive(PartialEq, Eq, Hash, Clone, Serialize)]
+</span><span class="kw">enum </span>ProfilingInfo {
+    Fsm(FSMInfo),
+    SingleEnable(SingleEnableInfo),
+}
+
+<span class="doccomment">/// Information to be serialized for a group that isn&#39;t managed by a FSM
+/// This can happen if the group is the only group in a control block or a par arm
+</span><span class="attribute">#[derive(PartialEq, Eq, Hash, Clone, Serialize)]
+</span><span class="kw">struct </span>SingleEnableInfo {
+    <span class="attribute">#[serde(serialize_with = <span class="string">&quot;id_serialize_passthrough&quot;</span>)]
+    </span><span class="kw">pub </span>component: Id,
+    <span class="attribute">#[serde(serialize_with = <span class="string">&quot;id_serialize_passthrough&quot;</span>)]
+    </span><span class="kw">pub </span>group: Id,
+}
+
 <span class="doccomment">/// Information to be serialized for a single FSM
 </span><span class="attribute">#[derive(PartialEq, Eq, Hash, Clone, Serialize)]
 </span><span class="kw">struct </span>FSMInfo {
@@ -1321,6 +1390,8 @@
     </span><span class="kw">pub </span>component: Id,
     <span class="attribute">#[serde(serialize_with = <span class="string">&quot;id_serialize_passthrough&quot;</span>)]
     </span><span class="kw">pub </span>group: Id,
+    <span class="attribute">#[serde(serialize_with = <span class="string">&quot;id_serialize_passthrough&quot;</span>)]
+    </span><span class="kw">pub </span>fsm: Id,
     <span class="kw">pub </span>states: Vec&lt;FSMStateInfo&gt;,
 }
 
@@ -1403,7 +1474,7 @@
     </span><span class="kw">fn </span>realize_schedule(
         <span class="self">self</span>,
         dump_fsm: bool,
-        fsm_groups: <span class="kw-2">&amp;mut </span>HashSet&lt;FSMInfo&gt;,
+        fsm_groups: <span class="kw-2">&amp;mut </span>HashSet&lt;ProfilingInfo&gt;,
     ) -&gt; RRC&lt;ir::Group&gt; {
         <span class="self">self</span>.validate();
 
@@ -1416,13 +1487,6 @@
             ));
         }
 
-        <span class="comment">// Keep track of groups to FSM state id information for dumping to json
-        </span>fsm_groups.insert(FSMInfo {
-            component: <span class="self">self</span>.builder.component.name,
-            group: group.borrow().name(),
-            states: <span class="self">self</span>.groups_to_states.iter().cloned().collect_vec(),
-        });
-
         <span class="kw">let </span>final_state = <span class="self">self</span>.last_state();
         <span class="kw">let </span>fsm_size = get_bit_width_from(
             final_state + <span class="number">1</span>, <span class="comment">/* represent 0..final_state */
@@ -1433,6 +1497,21 @@
             <span class="kw">let </span>last_state = constant(final_state, fsm_size);
             <span class="kw">let </span>first_state = constant(<span class="number">0</span>, fsm_size);
         );
+
+        <span class="comment">// Add last state to JSON info
+        </span><span class="kw">let </span><span class="kw-2">mut </span>states = <span class="self">self</span>.groups_to_states.iter().cloned().collect_vec();
+        states.push(FSMStateInfo {
+            id: final_state,
+            group: Id::new(<span class="macro">format!</span>(<span class="string">&quot;{}_END&quot;</span>, fsm.borrow().name())),
+        });
+
+        <span class="comment">// Keep track of groups to FSM state id information for dumping to json
+        </span>fsm_groups.insert(ProfilingInfo::Fsm(FSMInfo {
+            component: <span class="self">self</span>.builder.component.name,
+            fsm: fsm.borrow().name(),
+            group: group.borrow().name(),
+            states,
+        }));
 
         <span class="comment">// Enable assignments
         </span>group.borrow_mut().assignments.extend(
@@ -1529,7 +1608,6 @@
         <span class="kw">match </span>con {
         <span class="comment">// See explanation of FSM states generated in [ir::TopDownCompileControl].
         </span>ir::Control::Enable(ir::Enable { group, attributes }) =&gt; {
-
             <span class="kw">let </span>cur_state = attributes.get(NODE_ID).unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;Group `{}` does not have node_id information&quot;</span>, group.borrow().name()));
             <span class="comment">// If there is exactly one previous transition state with a `true`
             // guard, then merge this state into previous state.
@@ -1911,7 +1989,7 @@
     <span class="doccomment">/// Enable early transitions
     </span>early_transitions: bool,
     <span class="doccomment">/// Bookkeeping for FSM ids for groups across all FSMs in the program
-    </span>fsm_groups: HashSet&lt;FSMInfo&gt;,
+    </span>fsm_groups: HashSet&lt;ProfilingInfo&gt;,
 }
 
 <span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>TopDownCompileControl {
@@ -1967,6 +2045,27 @@
     }
 }
 
+<span class="doccomment">/// Helper function to emit profiling information when the control consists of a single group.
+</span><span class="kw">fn </span>emit_single_enable(
+    con: <span class="kw-2">&amp;mut </span>ir::Control,
+    component: Id,
+    json_out_file: <span class="kw-2">&amp;</span>OutputFile,
+) {
+    <span class="kw">if let </span>ir::Control::Enable(enable) = con {
+        <span class="kw">let </span><span class="kw-2">mut </span>profiling_info_set: HashSet&lt;ProfilingInfo&gt; = HashSet::new();
+        profiling_info_set.insert(ProfilingInfo::SingleEnable(
+            SingleEnableInfo {
+                component,
+                group: enable.group.borrow().name(),
+            },
+        ));
+        <span class="kw">let _ </span>= serde_json::to_writer_pretty(
+            json_out_file.get_write(),
+            <span class="kw-2">&amp;</span>profiling_info_set,
+        );
+    }
+}
+
 <span class="kw">impl </span>Visitor <span class="kw">for </span>TopDownCompileControl {
     <span class="kw">fn </span>start(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1974,15 +2073,14 @@
         _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="comment">// Do not try to compile an enable
-        </span><span class="kw">if </span><span class="macro">matches!</span>(
-            <span class="kw-2">*</span>comp.control.borrow(),
-            ir::Control::Enable(..) | ir::Control::Empty(..)
-        ) {
+        <span class="kw">let </span><span class="kw-2">mut </span>con = comp.control.borrow_mut();
+        <span class="kw">if </span><span class="macro">matches!</span>(<span class="kw-2">*</span>con, ir::Control::Empty(..) | ir::Control::Enable(..)) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(json_out_file) = <span class="kw-2">&amp;</span><span class="self">self</span>.dump_fsm_json {
+                emit_single_enable(<span class="kw-2">&amp;mut </span>con, comp.name, json_out_file);
+            }
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Stop);
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>con = comp.control.borrow_mut();
         compute_unique_ids(<span class="kw-2">&amp;mut </span>con, <span class="number">0</span>);
         <span class="comment">// IRPrinter::write_control(&amp;con, 0, &amp;mut std::io::stderr());
         </span><span class="prelude-val">Ok</span>(Action::Continue)
@@ -2094,6 +2192,12 @@
             <span class="kw">let </span>group = <span class="kw">match </span>con {
                 <span class="comment">// Do not compile enables
                 </span>ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
+                    <span class="self">self</span>.fsm_groups.insert(ProfilingInfo::SingleEnable(
+                        SingleEnableInfo {
+                            group: group.borrow().name(),
+                            component: builder.component.name,
+                        },
+                    ));
                     Rc::clone(group)
                 }
                 <span class="comment">// Compile complex schedule and return the group.
