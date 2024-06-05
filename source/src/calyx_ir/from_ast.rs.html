@@ -1310,6 +1310,13 @@
 <span id="1310">1310</span>
 <span id="1311">1311</span>
 <span id="1312">1312</span>
+<span id="1313">1313</span>
+<span id="1314">1314</span>
+<span id="1315">1315</span>
+<span id="1316">1316</span>
+<span id="1317">1317</span>
+<span id="1318">1318</span>
+<span id="1319">1319</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Cell, CellType, Component,
     Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
@@ -1759,17 +1766,24 @@
             .ok_or_else(|| Error::undefined(component, <span class="string">&quot;cell&quot;</span>.to_string()))<span class="question-mark">?
             </span>.borrow()
             .find(port)
-            .ok_or_else(|| Error::undefined(port, <span class="string">&quot;port&quot;</span>.to_string())),
+            .ok_or_else(|| {
+                Error::undefined(
+                    Id::new(<span class="macro">format!</span>(<span class="string">&quot;{}.{}&quot;</span>, component, port)),
+                    <span class="string">&quot;port&quot;</span>.to_string(),
+                )
+            }),
         ast::Port::This { port } =&gt; {
             comp.signature.borrow().find(<span class="kw-2">&amp;</span>port).ok_or_else(|| {
                 Error::undefined(port, <span class="string">&quot;component port&quot;</span>.to_string())
             })
         }
         ast::Port::Hole { group, name: port } =&gt; <span class="kw">match </span>comp.find_group(group) {
-            <span class="prelude-val">Some</span>(g) =&gt; g
-                .borrow()
-                .find(port)
-                .ok_or_else(|| Error::undefined(port, <span class="string">&quot;hole&quot;</span>.to_string())),
+            <span class="prelude-val">Some</span>(g) =&gt; g.borrow().find(port).ok_or_else(|| {
+                Error::undefined(
+                    Id::new(<span class="macro">format!</span>(<span class="string">&quot;{}.{}&quot;</span>, g.borrow().name(), port)),
+                    <span class="string">&quot;hole&quot;</span>.to_string(),
+                )
+            }),
             <span class="prelude-val">None </span>=&gt; comp
                 .find_static_group(group)
                 .ok_or_else(|| Error::undefined(group, <span class="string">&quot;group&quot;</span>.to_string()))<span class="question-mark">?
