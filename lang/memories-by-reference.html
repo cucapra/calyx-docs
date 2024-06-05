@@ -264,7 +264,7 @@ the invoker has six memories of size 4 each, but needs to pretend, sometimes sim
 }
 </code></pre>
 <p>That is, they have the same signature including <code>input</code> ports, <code>output</code> ports, and <code>ref</code> cells.
-We have elided the logic, but feel free to explore the <a href="https://github.com/calyxir/calyx/blob/master/calyx-py/test/arbiter_6.futil">source code</a>.</p>
+We have elided the logic, but feel free to explore the <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/arbiter_6.py">source code</a> in Python. You can also generate the Calyx code by running <code>python calyx-py/test/correctness/arbiter_6.py</code>.</p>
 <p>Now the invoker has six locally defined memories.
 By passing these memories to the components above, the invoker is able to wrap the same six memories two different ways, and then maintain two different fictional indexing systems at the same time.</p>
 <pre><code>component main() -&gt; () {
