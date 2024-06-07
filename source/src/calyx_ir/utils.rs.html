@@ -117,8 +117,10 @@
 <span id="117">117</span>
 <span id="118">118</span>
 <span id="119">119</span>
+<span id="120">120</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Helpers used to examine calyx programs. Used in Xilinx and Yxi backends among others.
 </span><span class="kw">use super</span>::{BoolAttr, Cell, Component, RRC};
+<span class="kw">use </span>calyx_utils::Id;
 <span class="attribute">#[cfg(feature = <span class="string">&quot;yxi&quot;</span>)]
 </span><span class="kw">use </span>serde::Serialize;
 
@@ -148,6 +150,7 @@
 </span><span class="kw">pub enum </span>MemoryType {
     Combinational,
     Sequential,
+    Dynamic,
 }
 
 <span class="doccomment">/// Parameters for std memories
@@ -170,53 +173,36 @@
 
 <span class="kw">impl </span>GetMemInfo <span class="kw">for </span>Vec&lt;RRC&lt;Cell&gt;&gt; {
     <span class="kw">fn </span>get_mem_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;MemInfo&gt; {
+        <span class="comment">//Params of dimensions for multi dimensional memories. d1 memories use `&quot;SIZE&quot;`.
+        </span><span class="kw">let </span>dimension_params = [<span class="string">&quot;D0_SIZE&quot;</span>, <span class="string">&quot;D1_SIZE&quot;</span>, <span class="string">&quot;D2_SIZE&quot;</span>, <span class="string">&quot;D3_SIZE&quot;</span>];
         <span class="self">self</span>.iter()
               .map(|cr| {
                   <span class="kw">let </span>mem = cr.borrow();
                   <span class="kw">let </span><span class="kw-2">mut </span>dimension_sizes: Vec&lt;u64&gt; = Vec::new();
                   <span class="kw">let </span><span class="kw-2">mut </span>idx_sizes: Vec&lt;u64&gt; = Vec::new();
-                  <span class="kw">let </span>dimensions: u64;
                   <span class="kw">let </span>mem_cell_type = mem.prototype.get_name().unwrap(); <span class="comment">//i.e. &quot;comb_mem_d1&quot;
                   </span><span class="kw">let </span>mem_type : MemoryType = <span class="kw">if </span>mem_cell_type.to_string().contains(<span class="string">&quot;comb&quot;</span>) {
-                    MemoryType::Combinational
-                  } <span class="kw">else </span>{
-                    MemoryType::Sequential
-                  };
+                      MemoryType::Combinational
+                    } <span class="kw">else if </span>mem_cell_type.to_string().contains(<span class="string">&quot;seq&quot;</span>) {
+                        MemoryType::Sequential
+                    } <span class="kw">else </span>{
+                        MemoryType::Dynamic
+                    };
 
-                  <span class="kw">match </span>mem_cell_type.as_ref() {
-                      <span class="string">&quot;comb_mem_d1&quot; </span>| <span class="string">&quot;seq_mem_d1&quot; </span>=&gt; {
+                    <span class="kw">let </span>dimensions = dimension_count(mem_cell_type);
+                    <span class="kw">if </span>dimensions == <span class="number">1</span>{
                         dimension_sizes.push(mem.get_parameter(<span class="string">&quot;SIZE&quot;</span>).unwrap());
-                        dimensions = <span class="number">1</span>;
-                      }
-                      <span class="string">&quot;comb_mem_d2&quot; </span>| <span class="string">&quot;seq_mem_d2&quot; </span>=&gt; {
-                        dimension_sizes.push(mem.get_parameter(<span class="string">&quot;D0_SIZE&quot;</span>).unwrap());
-                        dimension_sizes.push(mem.get_parameter(<span class="string">&quot;D1_SIZE&quot;</span>).unwrap());
-                        dimensions = <span class="number">2</span>;
+                        idx_sizes.push(mem.get_parameter(<span class="string">&quot;IDX_SIZE&quot;</span>).unwrap());
                     }
-                    <span class="string">&quot;comb_mem_d3&quot; </span>| <span class="string">&quot;seq_mem_d3&quot; </span>=&gt; {
-                        dimension_sizes.push(mem.get_parameter(<span class="string">&quot;D0_SIZE&quot;</span>).unwrap());
-                        dimension_sizes.push(mem.get_parameter(<span class="string">&quot;D1_SIZE&quot;</span>).unwrap());
-                        dimension_sizes.push(mem.get_parameter(<span class="string">&quot;D2_SIZE&quot;</span>).unwrap());
-                        dimensions = <span class="number">3</span>;
+                    <span class="kw">else if </span>dimensions &gt; <span class="number">1 </span>&amp;&amp; dimensions &lt;= <span class="number">4</span>{
+                        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..dimensions {
+                            dimension_sizes.push(mem.get_parameter(dimension_params[i <span class="kw">as </span>usize]).unwrap());
+                            idx_sizes.push(mem.get_parameter(<span class="macro">format!</span>(<span class="string">&quot;D{}_IDX_SIZE&quot;</span>,i)).unwrap());
+                        }
                     }
-                    <span class="string">&quot;comb_mem_d4&quot; </span>| <span class="string">&quot;seq_mem_d4&quot; </span>=&gt; {
-                        dimension_sizes.push(mem.get_parameter(<span class="string">&quot;D0_SIZE&quot;</span>).unwrap());
-                        dimension_sizes.push(mem.get_parameter(<span class="string">&quot;D1_SIZE&quot;</span>).unwrap());
-                        dimension_sizes.push(mem.get_parameter(<span class="string">&quot;D2_SIZE&quot;</span>).unwrap());
-                        dimension_sizes.push(mem.get_parameter(<span class="string">&quot;D3_SIZE&quot;</span>).unwrap());
-                        dimensions = <span class="number">4</span>;
-                      }
-                      <span class="kw">_ </span>=&gt; {
-                          <span class="macro">panic!</span>(<span class="string">&quot;cell `{}&#39; marked with `@external&#39; but is not a memory primitive.&quot;</span>, mem.name())
-                      }
-                  };
-                  <span class="kw">if </span>dimensions == <span class="number">1 </span>{
-                    idx_sizes.push(mem.get_parameter(<span class="string">&quot;IDX_SIZE&quot;</span>).unwrap());
-                  } <span class="kw">else </span>{
-                    <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..dimensions {
-                        idx_sizes.push(mem.get_parameter(<span class="macro">format!</span>(<span class="string">&quot;D{}_IDX_SIZE&quot;</span>,i)).unwrap());
-                    }
-                  }
+                    <span class="kw">else</span>{
+                            <span class="macro">unreachable!</span>(<span class="string">&quot;It is not expected for memory primitives to have more than 4 dimensions.&quot;</span>);
+                    };
                   <span class="kw">let </span>total_size = dimension_sizes.clone().iter().product();
                   MemInfo {
                       memory_type: mem_type,
@@ -234,6 +220,22 @@
 <span class="kw">impl </span>GetMemInfo <span class="kw">for </span>Component {
     <span class="kw">fn </span>get_mem_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;MemInfo&gt; {
         external_and_ref_memories_cells(<span class="self">self</span>).get_mem_info()
+    }
+}
+
+<span class="kw">fn </span>dimension_count(mem_id: Id) -&gt; u64 {
+    <span class="kw">let </span>mem_name = mem_id.as_ref();
+
+    <span class="kw">if </span>mem_name.contains(<span class="string">&quot;d1&quot;</span>) {
+        <span class="number">1
+    </span>} <span class="kw">else if </span>mem_name.contains(<span class="string">&quot;d2&quot;</span>) {
+        <span class="number">2
+    </span>} <span class="kw">else if </span>mem_name.contains(<span class="string">&quot;d3&quot;</span>) {
+        <span class="number">3
+    </span>} <span class="kw">else if </span>mem_name.contains(<span class="string">&quot;d4&quot;</span>) {
+        <span class="number">4
+    </span>} <span class="kw">else </span>{
+        <span class="macro">panic!</span>(<span class="string">&quot;Cell {} does not seem to be a memory primitive. Memory primitives are expected to have 1-4 dimensions inclusive.&quot;</span>, mem_name);
     }
 }
 </code></pre></div>
