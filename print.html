@@ -4272,26 +4272,26 @@ For example, we can add a constructor that increments a register by a constant v
 </code></pre>
 <p>The Python return value, <code>incr_i</code>, is a handle to the group that performs the incrementing. The method defaults to incrementing by 1, but can be passed any value.</p>
 <h2 id="guarded-assignments-1"><a class="header" href="#guarded-assignments-1">Guarded Assignments</a></h2>
-<p>Consider the group that adds value <code>v</code> to a memory at the cell pointed to by register <code>i</code>.</p>
-<pre><code class="language-python">    with comp.group("add_at_position_i") as add_at_position_i:
+<p>Consider the group that multiplies the memory at the cell pointed to by register <code>i</code> by the value <code>v</code>.</p>
+<pre><code class="language-python">    with comp.group("mul_at_position_i") as mul_at_position_i:
         mem.addr0 = i.out
-        add.left = mem.read_data
-        add.right = v
-        mem.write_en = add.done @ cb.HI
-        mem.write_data = add.out
-        add_at_position_i.done = mem.done
+        mul.left = mem.read_data
+        mul.right = v
+        mem.write_en = mul.done @ cb.HI
+        mem.write_data = mul.out
+        mul_at_position_i.done = mem.done
 </code></pre>
-<p>The first few lines are straightforward; we are setting the cell to be read from with <code>addr0</code>, reading from that cell and driving the value to the adder's left port, and setting the right port of the adder to the value <code>v</code>.</p>
-<p>Now we wish to write the result to the memory at the cell pointed to by register <code>i</code>, but only once we know that the adder has finished its work. We do this with a guarded assignment, using the <code>@</code> operator:</p>
-<pre><code class="language-python">        mem.write_en = add.done @ cb.HI
+<p>The first few lines are straightforward; we are setting the cell to be read from with <code>addr0</code>, reading from that cell and driving the value to the multiplier's left port, and setting the right port of the multiplier to the value <code>v</code>.</p>
+<p>Now we wish to write the result to the memory at the cell pointed to by register <code>i</code>, but only once we know that the multiplier has finished its work. We do this with a guarded assignment, using the <code>@</code> operator:</p>
+<pre><code class="language-python">        mem.write_en = mul.done @ cb.HI
 </code></pre>
 <p>In Calyx, we would have written this guarded assignment with a question mark:</p>
-<pre><code>        mem.write_en = add.done ? 1'd1;
+<pre><code>        mem.write_en = mul.done ? 1'd1;
 </code></pre>
 <p>We use the <code>@</code> operator in the builder library to avoid clashing with Python's ternary operator.</p>
 <h2 id="complex-control-while"><a class="header" href="#complex-control-while">Complex Control: <code>while</code></a></h2>
 <p>The builder library supports <a href="builder/../lang/ref.html#while">while</a> loops and also the higher-level <code>while_with</code> constructor.</p>
-<pre><code class="language-python">    comp.control += cb.while_with(i_lt_10, [add_at_position_i, incr_i])
+<pre><code class="language-python">    comp.control += cb.while_with(i_lt_10, [mul_at_position_i, incr_i])
 </code></pre>
 <p>Here <code>i_lt_10</code> is a tuple of two handles, exactly as returned by the <code>Operation-Use</code> constructor. The <code>while_with</code> constructor takes this tuple and a body.</p>
 <h2 id="external-memories-1"><a class="header" href="#external-memories-1">External Memories</a></h2>
