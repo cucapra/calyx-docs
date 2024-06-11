@@ -121,7 +121,7 @@
 </pre><pre class="rust"><code><span class="doccomment">//! Helpers used to examine calyx programs. Used in Xilinx and Yxi backends among others.
 </span><span class="kw">use super</span>::{BoolAttr, Cell, Component, RRC};
 <span class="kw">use </span>calyx_utils::Id;
-<span class="attribute">#[cfg(feature = <span class="string">&quot;yxi&quot;</span>)]
+<span class="attribute">#[cfg(feature = <span class="string">&quot;serialize&quot;</span>)]
 </span><span class="kw">use </span>serde::Serialize;
 
 <span class="comment">// Returns Vec&lt;String&gt; of `@external` or `ref` memory names
@@ -145,7 +145,7 @@
         .collect()
 }
 
-<span class="attribute">#[cfg_attr(feature = <span class="string">&quot;yxi&quot;</span>, derive(Serialize))]
+<span class="attribute">#[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(Serialize))]
 #[derive(Clone, Copy)]
 </span><span class="kw">pub enum </span>MemoryType {
     Combinational,
