@@ -2807,7 +2807,10 @@ make heavy use of control operators, to fully lowered Calyx programs.
 <h2 id="interpreting-via-fud"><a class="header" href="#interpreting-via-fud">Interpreting via fud</a></h2>
 <p>The interpreter is available as a stage in <a href="running-calyx/fud/index.html">fud</a>, which lets you provide standard JSON data files as input and easily execute passes on the input Calyx program before interpretation.</p>
 <p>You'll want to build the interpreter first:</p>
-<pre><code>cd interp &amp;&amp; cargo build
+<pre><code>cd interp &amp;&amp; cargo build &amp;&amp; cd ..
+</code></pre>
+<p>Now register the interpreter as a fud stage:</p>
+<pre><code>fud config stages.interpreter.exec &lt;full path to Calyx repository&gt;/target/debug/cider
 </code></pre>
 <p>Here's how to run a Calyx program:</p>
 <pre><code>fud e --to interpreter-out interp/tests/control/if.futil
@@ -2824,6 +2827,8 @@ For example, to fully lower the Calyx program before interpreting it:</p>
     -s calyx.flags '-p all' \
     interp/tests/control/if.futil
 </code></pre>
+<p>In particular, the interpreter does not currently support <a href="running-calyx/../lang/memories-by-reference.html#the-easy-way-ref-cells"><code>ref</code> cells</a>.
+To run the interpreter on a program that uses these, you must first compile them away by running the <code>compile-invoke</code> pass.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="the-calyx-compiler"><a class="header" href="#the-calyx-compiler">The Calyx Compiler</a></h1>
 <p>The Calyx compiler has several command line options to control the execution of
 various passes and backends.</p>
@@ -3601,14 +3606,17 @@ the error.</p>
 <a href="debug/../running-calyx/interpreter.html">Calyx Interpreter</a> which exposes a <a href="https://sourceware.org/gdb/">gdb</a>-like interface for
 debugging Calyx programs.</p>
 <h2 id="getting-started-1"><a class="header" href="#getting-started-1">Getting Started</a></h2>
-<p>If you are using <a href="debug/../running-calyx/fud/index.html"><code>fud</code></a> getting started with the debugger is easy.
-Assuming you are trying to debug a program called <code>my_program.futil</code> with data
+<p>If you are using <a href="debug/../running-calyx/fud/index.html"><code>fud</code></a>, getting started with the debugger is easy.</p>
+<p>First, follow <a href="debug/../running-calyx/interpreter.html#interpreting-via-fud">these instructions</a> to build the interpreter and register it as a <code>fud</code> stage.</p>
+<p>Assuming you are trying to debug a program called <code>my_program.futil</code> with data
 file <code>my_program.futil.data</code>, invoke the debugger with the following command:</p>
 <pre><code>fud e --to debugger -q my_program.futil -s verilog.data my_program.futil.data
 </code></pre>
-<p>This will open the target program in the interactive debugger. Note that <code>fud</code>
-uses <strong>the quiet flag</strong>, <code>-q</code>, here. This prevents the printing from the <code>fud</code> tool
-from conflicting the debugger as both tools interact with standard out.</p>
+<p>This will open the target program in the interactive debugger. Note that we use <code>fud</code>'s <em>quiet</em> flag, <code>-q</code>, here. This avoids clashes between <code>fud</code>'s outputs and the debugger's outputs, since both tools interact with <code>stdout</code>.</p>
+<p>The interpreter does not currently support <a href="debug/../lang/memories-by-reference.html#the-easy-way-ref-cells"><code>ref</code> cells</a>.
+To run the debugger on a program that uses these, you must first compile them away by running the <code>compile-invoke</code> pass:</p>
+<pre><code>fud e --to debugger -s calyx.flags '-p compile-invoke' -q my_program.futil -s verilog.data my_program.futil.data
+</code></pre>
 <h2 id="advancing-program-execution"><a class="header" href="#advancing-program-execution">Advancing Program execution</a></h2>
 <h3 id="step"><a class="header" href="#step"><code>step</code></a></h3>
 <p>The simplest way to advance the program is via the <code>step</code> command which causes

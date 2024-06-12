@@ -190,7 +190,10 @@ make heavy use of control operators, to fully lowered Calyx programs.
 <h2 id="interpreting-via-fud"><a class="header" href="#interpreting-via-fud">Interpreting via fud</a></h2>
 <p>The interpreter is available as a stage in <a href="fud/index.html">fud</a>, which lets you provide standard JSON data files as input and easily execute passes on the input Calyx program before interpretation.</p>
 <p>You'll want to build the interpreter first:</p>
-<pre><code>cd interp &amp;&amp; cargo build
+<pre><code>cd interp &amp;&amp; cargo build &amp;&amp; cd ..
+</code></pre>
+<p>Now register the interpreter as a fud stage:</p>
+<pre><code>fud config stages.interpreter.exec &lt;full path to Calyx repository&gt;/target/debug/cider
 </code></pre>
 <p>Here's how to run a Calyx program:</p>
 <pre><code>fud e --to interpreter-out interp/tests/control/if.futil
@@ -207,6 +210,8 @@ For example, to fully lower the Calyx program before interpreting it:</p>
     -s calyx.flags '-p all' \
     interp/tests/control/if.futil
 </code></pre>
+<p>In particular, the interpreter does not currently support <a href="../lang/memories-by-reference.html#the-easy-way-ref-cells"><code>ref</code> cells</a>.
+To run the interpreter on a program that uses these, you must first compile them away by running the <code>compile-invoke</code> pass.</p>
 
                     </main>
 
