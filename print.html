@@ -1099,13 +1099,12 @@ port. Omitting a guard expression is equivalent to using <code>1'd1</code> (a co
 "true") as the guard.</p>
 <p>Guards can use the following constructs:</p>
 <ul>
-<li><code>port</code>: A port access on a defined cell</li>
-<li><code>port op port</code>: A comparison between values on two ports. Valid <code>op</code> are: <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>==</code></li>
+<li><code>port</code>: A port access on a defined cell, such as <code>cond.out</code>, or a literal, such as <code>3'd2</code>.</li>
+<li><code>port op port</code>: A comparison between values on two ports. Valid instances of <code>op</code> are: <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>==</code></li>
 <li><code>!guard</code>: Logical negation of a guard value</li>
-<li><code>guard || guard</code>: Disjunction between two guards</li>
-<li><code>guard &amp;&amp; guard</code>: Conjunction of two guards</li>
+<li><code>guard | guard</code>: Disjunction between two guards</li>
+<li><code>guard &amp; guard</code>: Conjunction of two guards</li>
 </ul>
-<p>In the context of guards, a port can also be a literal (i.e., <code>counter.out == 3'd2</code> is a valid guard).</p>
 <blockquote>
 <p><strong>Well-formedness</strong>: For each input port on the LHS, only one guard should be active in any given cycle during the execution of a Calyx program.</p>
 </blockquote>
