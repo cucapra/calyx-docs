@@ -290,7 +290,7 @@
 <span class="kw">use </span>ir::RRC;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>linked_hash_map::LinkedHashMap;
-<span class="kw">use </span>std::collections::{HashMap, HashSet};
+<span class="kw">use </span>std::collections::HashSet;
 
 <span class="doccomment">/// A pass to detect cells that have been inlined into the top-level component
 /// and turn them into real cells marked with [ir::BoolAttr::External].
@@ -527,7 +527,7 @@
         }
 
         <span class="comment">// Rewrite the ports mentioned in the component signature and remove them
-        </span><span class="kw">let </span><span class="kw-2">mut </span>rewrites: ir::rewriter::PortRewriteMap = HashMap::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>rewrites: ir::rewriter::PortRewriteMap = LinkedHashMap::new();
         <span class="kw">for </span>(pre, ports) <span class="kw">in </span>port_map {
             <span class="comment">// let prim = sigs.get_primitive(pre_to_prim[&amp;pre]);
             </span><span class="kw">let </span>cr = pre_to_cells[<span class="kw-2">&amp;</span>pre].clone();

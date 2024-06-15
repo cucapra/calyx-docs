@@ -441,7 +441,7 @@
     }
 }
 
-<span class="attribute">#[derive(Default, Debug, Clone)]
+<span class="attribute">#[derive(Default, Debug, Clone, PartialEq, Eq)]
 </span><span class="doccomment">/// Inline storage for boolean attributes.
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>InlineAttributes {
     <span class="doccomment">/// Boolean attributes stored in a 16-bit number.

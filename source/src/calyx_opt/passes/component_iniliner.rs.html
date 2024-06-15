@@ -623,6 +623,8 @@
 <span id="623">623</span>
 <span id="624">624</span>
 <span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, ParseVal, PassOpt, VisResult,
@@ -632,6 +634,7 @@
 <span class="kw">use </span>calyx_utils::Error;
 <span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>itertools::Itertools;
+<span class="kw">use </span>linked_hash_map::LinkedHashMap;
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::rc::Rc;
 
@@ -696,7 +699,7 @@
             always_inline,
             new_fsms,
             control_map: HashMap::default(),
-            interface_rewrites: HashMap::default(),
+            interface_rewrites: LinkedHashMap::default(),
             inlined_cells: Vec::default(),
         }
     }
@@ -1067,7 +1070,8 @@
             .collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;();
 
         <span class="comment">// Rewrites for the interface ports of inlined cells.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>interface_rewrites: rewriter::PortRewriteMap = HashMap::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>interface_rewrites: rewriter::PortRewriteMap =
+            LinkedHashMap::new();
         <span class="comment">// Track names of cells that were inlined.
         </span><span class="kw">let </span><span class="kw-2">mut </span>inlined_cells = HashSet::new();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);

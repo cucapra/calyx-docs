@@ -1280,7 +1280,7 @@ component update_memory() -&gt; () {
   control { ... }
 }
 </code></pre>
-<p>When invoking such a component, the calling component must provide a binding for each defined cell:</p>
+<p>When invoking<a href="lang/ref.html#invoke">invoke</a> such a component, the calling component must provide a binding for each defined cell:</p>
 <pre><code>component main() -&gt; () {
   cells {
     upd = update_memory();
@@ -1297,7 +1297,61 @@ component update_memory() -&gt; () {
 }
 </code></pre>
 <p>As the example shows, each invocation can take different bindings for each <code>ref</code> cell.
+In the first invocation, we pass in the concrete cell <code>m1</code> while in the second we pass
+in <code>m2</code>.
 See <a href="lang/./memories-by-reference.html">the tutorial</a> for longer example on how to use this feature.</p>
+<h3 id="subtyping-for-ref-cells"><a class="header" href="#subtyping-for-ref-cells">Subtyping for <code>ref</code> cells</a></h3>
+<p>When providing bindings for <a href="lang/ref.html#ref-cells"><code>ref</code> cells</a>, one must provide a concrete cell that is a
+<em>subtype</em> of the <code>ref</code> cell. A cell <code>a</code> is a subtype of cell <code>b</code> if the <a href="lang/ref.html#calyx-components">component</a>
+defining <code>a</code> has <em>at least</em> the same ports as the component defining <code>b.</code></p>
+<p>Consider the following component definitions:</p>
+<pre><code>component b(in_1 : 1) -&gt; (out_1 : 1) {
+    // cells, wires, and control blocks
+}
+
+component a(in_1 : 1, in_2 : 1) -&gt; (out_1 : 1, out_2 : 1){
+    // cells, wires, and control blocks
+}
+</code></pre>
+<p>Because the component definition of <code>a</code> has the ports <code>in_1</code> and <code>out_1</code>, a concrete cell of <code>a</code> can be bound to a <code>ref</code> cell of component <code>b</code>:</p>
+<pre><code>//Expects a `ref` cell of component `b`
+component c() -&gt; () {
+    cells{
+        ref b1 = b();
+    }
+    wires{...}
+    control{...}
+}
+
+
+component main() -&gt; () {
+  cells {
+      c_cell = c();
+      b_cell = b();
+      a_cell = a(); //recall `a` is a subtype of `b`
+  }
+  wires { ... }
+  control {
+    seq {
+      // Pass `b_cell` by reference. Both are `b1` and `b_cell` are defined by the component `b`
+      invoke c[b1=b_cell]()(); 
+      // Pass `a_cell` by reference. The `ref` cell and concrete cell are defined by different components,
+      // but this is allowed because `a` is a subtype of `b`.
+      invoke c[b1=a_cell]()();
+    }
+  }
+}
+</code></pre>
+<p>Ports are considered to be equal with respect to subtyping if they have the same
+name, width, direction, and attributes.</p>
+<blockquote>
+<p><strong>Note:</strong> The notion of subtyping described above, that only checks for port equivalence between components, is incomplete.
+A complete, correct definition of subtyping would require that for <code>a</code> to be a subtype
+of <code>b</code>, for every <code>ref</code> cell expected in <code>a</code>, component <code>b</code> must expect a <code>ref</code>
+cell that is a subtype of the associated <code>ref</code> cell in <code>a</code> (note that the relationship between
+these nested <code>ref</code> cells is opposite the relationship of <code>a</code> and <code>b</code>).</p>
+<p>Because nested <code>ref</code> cells are not currently allowed in Calyx, this is not a problem in practice.</p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="data-format"><a class="header" href="#data-format">Data Format</a></h1>
 <p>Calyx's <a href="lang/../running-calyx/fud/index.html"><code>fud</code></a>-based workflows specifies a JSON-based data format which can be used with software simulators.</p>
 <h2 id="external-memories"><a class="header" href="#external-memories">External memories</a></h2>

@@ -774,6 +774,15 @@
 <span id="774">774</span>
 <span id="775">775</span>
 <span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
@@ -902,6 +911,15 @@
     {
         <span class="self">self</span>.get_attributes().has(attr)
     }
+
+    <span class="doccomment">/// Returns true if the widths, name, direction, and attributes of 2 ports match.
+    /// This is different than `==` equivalence, which only looks at parent and name.
+    </span><span class="kw">pub fn </span>type_equivalent(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Port) -&gt; bool {
+        <span class="self">self</span>.width == other.width
+            &amp;&amp; <span class="self">self</span>.direction == other.direction
+            &amp;&amp; <span class="self">self</span>.name == other.name
+            &amp;&amp; <span class="self">self</span>.attributes == other.attributes
+    }
 }
 
 <span class="kw">impl </span>GetAttributes <span class="kw">for </span>Port {
@@ -991,7 +1009,7 @@
 }
 
 <span class="kw">impl </span>CellType {
-    <span class="doccomment">/// Return the name associated with this CellType is present
+    <span class="doccomment">/// Return the name associated with this CellType if present
     </span><span class="kw">pub fn </span>get_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Id&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             CellType::Primitive { name, .. } | CellType::Component { name } =&gt; {
@@ -1020,7 +1038,7 @@
 }
 
 <span class="doccomment">/// Represents an instantiated cell.
-</span><span class="attribute">#[derive(Debug)]
+</span><span class="attribute">#[derive(Debug, Clone)]
 #[cfg_attr(feature = <span class="string">&quot;serialize&quot;</span>, derive(serde::Serialize))]
 </span><span class="kw">pub struct </span>Cell {
     <span class="doccomment">/// Name of this cell.

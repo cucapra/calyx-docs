@@ -816,9 +816,29 @@
 <span id="816">816</span>
 <span id="817">817</span>
 <span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{
-    <span class="self">self </span><span class="kw">as </span>ir, CellType, Component, GetAttributes, LibrarySignatures,
+    <span class="self">self </span><span class="kw">as </span>ir, Cell, CellType, Component, GetAttributes, LibrarySignatures,
     RESERVED_NAMES,
 };
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, WithPos};
@@ -898,10 +918,69 @@
     </span>used_groups: HashSet&lt;ir::Id&gt;,
     <span class="doccomment">/// Names of combinational groups used in the control.
     </span>used_comb_groups: HashSet&lt;ir::Id&gt;,
-    <span class="doccomment">/// ref cell types of components used in the control.
-    </span>ref_cell_types: HashMap&lt;ir::Id, LinkedHashMap&lt;ir::Id, CellType&gt;&gt;,
+    <span class="doccomment">/// ref cells of components used in the control. Used for type checking.
+    </span>ref_cells: HashMap&lt;ir::Id, LinkedHashMap&lt;ir::Id, Cell&gt;&gt;,
     <span class="doccomment">/// Stack of currently active combinational groups
     </span>active_comb: ActiveAssignments,
+}
+
+<span class="kw">enum </span>Invoke&lt;<span class="lifetime">&#39;a</span>&gt; {
+    StaticInvoke(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::StaticInvoke),
+    Invoke(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Invoke),
+}
+
+<span class="kw">impl </span>Invoke&lt;<span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">fn </span>get_ref_cells(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;(ir::Id, ir::RRC&lt;Cell&gt;)&gt; {
+        <span class="kw">match </span><span class="self">self </span>{
+            Invoke::StaticInvoke(s) =&gt; <span class="kw-2">&amp;</span>s.ref_cells,
+            Invoke::Invoke(s) =&gt; <span class="kw-2">&amp;</span>s.ref_cells,
+        }
+    }
+
+    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ir::Attributes {
+        <span class="kw">match </span><span class="self">self </span>{
+            Invoke::StaticInvoke(s) =&gt; s.get_attributes(),
+            Invoke::Invoke(s) =&gt; s.get_attributes(),
+        }
+    }
+}
+
+<span class="kw">fn </span>require_subtype(
+    invoke: Invoke,
+    self_ref_cells: <span class="kw-2">&amp;</span>HashMap&lt;ir::Id, LinkedHashMap&lt;ir::Id, Cell&gt;&gt;,
+    id: <span class="kw-2">&amp;</span>ir::Id,
+) -&gt; CalyxResult&lt;()&gt; {
+    <span class="kw">let </span>cell_map = <span class="kw-2">&amp;</span>self_ref_cells[id];
+    <span class="kw">let </span><span class="kw-2">mut </span>mentioned_cells = HashSet::new();
+    <span class="kw">for </span>(outcell, incell) <span class="kw">in </span>invoke.get_ref_cells().iter() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(oc) = cell_map.get(outcell) {
+            <span class="kw">if </span>!subtype(oc, <span class="kw-2">&amp;</span>incell.borrow()) {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
+                    <span class="string">&quot;The type passed in `{}` is not a subtype of the expected type `{}`.&quot;</span>,
+                    incell.borrow().prototype.surface_name().unwrap(),
+                    oc.prototype.surface_name().unwrap()
+                ))
+                .with_pos(invoke.get_attributes()));
+            } <span class="kw">else </span>{
+                mentioned_cells.insert(outcell);
+            }
+        } <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
+                <span class="string">&quot;{} does not have ref cell named {}&quot;</span>,
+                id, outcell
+            )));
+        }
+    }
+    <span class="kw">for </span>id <span class="kw">in </span>cell_map.keys() {
+        <span class="kw">if </span>!mentioned_cells.contains(id) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
+                <span class="string">&quot;unmentioned ref cell: {}&quot;</span>,
+                id
+            ))
+            .with_pos(invoke.get_attributes()));
+        }
+    }
+    <span class="prelude-val">Ok</span>(())
 }
 
 <span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>WellFormed {
@@ -912,10 +991,10 @@
         <span class="kw">let </span>reserved_names =
             RESERVED_NAMES.iter().map(|s| ir::Id::from(<span class="kw-2">*</span>s)).collect();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>ref_cell_types = HashMap::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>ref_cells = HashMap::new();
         <span class="kw">for </span>comp <span class="kw">in </span>ctx.components.iter() {
             <span class="comment">// Non-main components cannot use @external attribute
-            </span><span class="kw">let </span>cellmap: LinkedHashMap&lt;ir::Id, CellType&gt; = comp
+            </span><span class="kw">let </span>cellmap: LinkedHashMap&lt;ir::Id, Cell&gt; = comp
                 .cells
                 .iter()
                 .filter_map(|cr| {
@@ -926,20 +1005,20 @@
                     {
                         <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(Error::malformed_structure(<span class="string">&quot;Cell cannot be marked `@external` in non-entrypoint component&quot;</span>).with_pos(<span class="kw-2">&amp;</span>cell.attributes)))
                     } <span class="kw">else if </span>cell.is_reference() {
-                        <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>((cell.name(), cell.prototype.clone())))
+                        <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>((cell.name(), cell.clone())))
                     } <span class="kw">else </span>{
                         <span class="prelude-val">None
                     </span>}
                 })
                 .collect::&lt;CalyxResult&lt;<span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
-            ref_cell_types.insert(comp.name, cellmap);
+            ref_cells.insert(comp.name, cellmap);
         }
 
         <span class="kw">let </span>w_f = WellFormed {
             reserved_names,
             used_groups: HashSet::new(),
             used_comb_groups: HashSet::new(),
-            ref_cell_types,
+            ref_cells,
             active_comb: ActiveAssignments::default(),
         };
 
@@ -1009,17 +1088,26 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn </span>same_type(proto_out: <span class="kw-2">&amp;</span>CellType, proto_in: <span class="kw-2">&amp;</span>CellType) -&gt; CalyxResult&lt;()&gt; {
-    <span class="kw">if </span>proto_out != proto_in {
-        <span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
-            <span class="string">&quot;Unexpected type for ref cell. Expected `{}`, received `{}`&quot;</span>,
-            proto_out.surface_name().unwrap(),
-            proto_in.surface_name().unwrap(),
-        )))
-    } <span class="kw">else </span>{
-        <span class="prelude-val">Ok</span>(())
+<span class="doccomment">/// Returns true if `cell_in` is a subtype of `cell_out`.
+/// Currenly this only checks for [`type_equivalence`](#method.calyx_ir::structure::Port::type_equivalent)
+/// between ports. It does not fully examine the cells
+/// for subtype compatability for things like nested ref cells.
+</span><span class="comment">// XXX(nate): Cells don&#39;t contain information about their own `ref` cells so we&#39;d need to extract it from `ir:Component` I think?
+</span><span class="kw">fn </span>subtype(cell_out: <span class="kw-2">&amp;</span>Cell, cell_in: <span class="kw-2">&amp;</span>Cell) -&gt; bool {
+    <span class="kw">for </span>port <span class="kw">in </span>cell_out.ports() {
+        <span class="kw">match </span>cell_in.find(port.borrow().name) {
+            <span class="prelude-val">Some</span>(port_in) =&gt; {
+                <span class="kw">if </span>!port.borrow().type_equivalent(<span class="kw-2">&amp;</span>port_in.borrow()) {
+                    <span class="kw">return </span><span class="bool-val">false</span>;
+                }
+            }
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="kw">return </span><span class="bool-val">false</span>;
+            }
+        }
     }
-}
+    <span class="bool-val">true
+</span>}
 
 <span class="kw">impl </span>Visitor <span class="kw">for </span>WellFormed {
     <span class="kw">fn </span>start(
@@ -1378,32 +1466,8 @@
         </span><span class="kw">let </span>cell = s.comp.borrow();
 
         <span class="kw">if let </span>CellType::Component { name: id } = <span class="kw-2">&amp;</span>cell.prototype {
-            <span class="kw">let </span>cellmap = <span class="kw-2">&amp;</span><span class="self">self</span>.ref_cell_types[id];
-            <span class="kw">let </span><span class="kw-2">mut </span>mentioned_cells = HashSet::new();
-            <span class="kw">for </span>(outcell, incell) <span class="kw">in </span>s.ref_cells.iter() {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(t) = cellmap.get(outcell) {
-                    <span class="kw">let </span>proto = incell.borrow().prototype.clone();
-                    same_type(t, <span class="kw-2">&amp;</span>proto)
-                        .map_err(|err| err.with_pos(<span class="kw-2">&amp;</span>s.attributes))<span class="question-mark">?</span>;
-                    mentioned_cells.insert(outcell);
-                } <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
-                        <span class="string">&quot;{} does not have ref cell named {}&quot;</span>,
-                        id, outcell
-                    )));
-                }
-            }
-            <span class="kw">for </span>id <span class="kw">in </span>cellmap.keys() {
-                <span class="kw">if </span>mentioned_cells.get(id).is_none() {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
-                        <span class="string">&quot;unmentioned ref cell: {}&quot;</span>,
-                        id
-                    ))
-                    .with_pos(<span class="kw-2">&amp;</span>s.attributes));
-                }
-            }
+            require_subtype(Invoke::Invoke(s), <span class="kw-2">&amp;</span><span class="self">self</span>.ref_cells, id)<span class="question-mark">?</span>;
         }
-
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
@@ -1418,32 +1482,8 @@
         </span><span class="kw">let </span>cell = s.comp.borrow();
 
         <span class="kw">if let </span>CellType::Component { name: id } = <span class="kw-2">&amp;</span>cell.prototype {
-            <span class="kw">let </span>cellmap = <span class="kw-2">&amp;</span><span class="self">self</span>.ref_cell_types[id];
-            <span class="kw">let </span><span class="kw-2">mut </span>mentioned_cells = HashSet::new();
-            <span class="kw">for </span>(outcell, incell) <span class="kw">in </span>s.ref_cells.iter() {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(t) = cellmap.get(outcell) {
-                    <span class="kw">let </span>proto = incell.borrow().prototype.clone();
-                    same_type(t, <span class="kw-2">&amp;</span>proto)
-                        .map_err(|err| err.with_pos(<span class="kw-2">&amp;</span>s.attributes))<span class="question-mark">?</span>;
-                    mentioned_cells.insert(outcell);
-                } <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
-                        <span class="string">&quot;{} does not have ref cell named {}&quot;</span>,
-                        id, outcell
-                    )));
-                }
-            }
-            <span class="kw">for </span>id <span class="kw">in </span>cellmap.keys() {
-                <span class="kw">if </span>mentioned_cells.get(id).is_none() {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
-                        <span class="string">&quot;unmentioned ref cell: {}&quot;</span>,
-                        id
-                    ))
-                    .with_pos(<span class="kw-2">&amp;</span>s.attributes));
-                }
-            }
+            require_subtype(Invoke::StaticInvoke(s), <span class="kw-2">&amp;</span><span class="self">self</span>.ref_cells, id)<span class="question-mark">?</span>;
         }
-
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 

@@ -273,7 +273,11 @@
 <span id="273">273</span>
 <span id="274">274</span>
 <span id="275">275</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::control::StaticInvoke;
+<span id="276">276</span>
+<span id="277">277</span>
+</pre><pre class="rust"><code><span class="kw">use </span>linked_hash_map::LinkedHashMap;
+
+<span class="kw">use </span><span class="kw">crate</span>::control::StaticInvoke;
 <span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>std::borrow::BorrowMut;
 <span class="kw">use </span>std::cell::RefCell;
@@ -285,7 +289,7 @@
 
 <span class="doccomment">/// Map to rewrite port uses. Maps the canonical name of an old port (generated using
 /// [ir::Port::canonical]) to the new [ir::Port] instance.
-</span><span class="kw">pub type </span>PortRewriteMap = HashMap&lt;ir::Canonical, RRC&lt;ir::Port&gt;&gt;;
+</span><span class="kw">pub type </span>PortRewriteMap = LinkedHashMap&lt;ir::Canonical, RRC&lt;ir::Port&gt;&gt;;
 
 <span class="attribute">#[derive(Default)]
 </span><span class="doccomment">/// A structure to track rewrite maps for ports. Stores both cell rewrites and direct port
