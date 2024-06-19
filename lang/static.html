@@ -196,26 +196,27 @@ In return, the compiler must access out-ports of static components only after th
 <h2 id="static-constructs-in-the-calyx-il"><a class="header" href="#static-constructs-in-the-calyx-il">Static Constructs in the Calyx IL</a></h2>
 <p>We will now discuss the static constructs available in the Calyx IL, along with the guarantees they come with.</p>
 <h3 id="static-components"><a class="header" href="#static-components">Static Components</a></h3>
-<p>Briefly consider a divider component, <code>std_div</code>, which divides the value <code>left</code> by the value <code>right</code> and puts the result in <code>out</code>.
+<p>Briefly consider a divider component, <code>std_div_pipe</code>, which divides the value <code>left</code> by the value <code>right</code> and puts the result, which is in two parts, in two <code>out</code> ports.
 This component is dynamic; its latency is unknown.</p>
-<pre><code>primitive std_div[W](go: 1, left: W, right: W) -&gt; (out: W, done: 1);
+<pre><code>primitive std_div_pipe[W](go: 1, left: W, right: W) -&gt; (out_remainder: W, out_quotient: W, done: 1);
 </code></pre>
 <p>A client of the divider must pass two inputs <code>left</code> and <code>right</code>, raise the <code>go</code> signal, and wait for the component itself to raise its <code>done</code> signal.
-The client can then read the result from the <code>out</code> port.
+The client can then read the result from the two <code>out</code> ports.
 That is, it obeys the <a href="./ref.html#the-go-done-interface">go-done interface</a>.</p>
-<p>Compare this to a multiplier component, <code>std_mult</code>, which has a similar signature but whose latency is known to be three cycles.
+<p>Compare this to a multiplier component, <code>std_mult_pipe</code>, which has a similar signature but whose latency is known to be three cycles.
 We declare it as follows:</p>
-<pre><code>static&lt;3&gt; primitive std_mult[W](go: 1, left: W, right: W) -&gt; (out: W);
+<pre><code>static&lt;3&gt; primitive std_mult_pipe[W](go: 1, left: W, right: W) -&gt; (out: W);
 </code></pre>
-<p>The key differences are:</p>
+<p>The fact that the multiplier has one <code>out</code> port while the divider has two is not relevant to the discussion.</p>
+<p>The differences that <em>do</em> matter are:</p>
 <ul>
 <li>The <code>static</code> qualifier is used to declare the component as static and to specify its latency (3 cycles).</li>
-<li>The <code>done</code> port is absent.</li>
+<li>The <code>done</code> port is absent from the multiplier's signature.</li>
 </ul>
 <p>A client of the multiplier must pass two inputs and raise the <code>go</code> signal as before.
 However, the client need not then wait for the component to indicate completion.
-It can simply and safely assume that the result will be available after 3 cycles.
-This is a guarantee that the author of the component has made to the client, and the compiler is free to take advantage of it.</p>
+The client can simply and safely assume that the result will be available after 3 cycles.
+This is a guarantee that the author of the component has made to the client, and the client is free to take advantage of it.</p>
 <h3 id="static-groups-and-relative-timing-guards"><a class="header" href="#static-groups-and-relative-timing-guards">Static Groups and Relative Timing Guards</a></h3>
 <p>Much like components, groups can be declared as static.
 Since groups are just unordered sets of assignments, it pays to have a little more control over the scheduling of the assignments within a group.
