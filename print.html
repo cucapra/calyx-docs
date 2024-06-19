@@ -5308,6 +5308,34 @@ If <code>peek</code> or <code>pop</code> is selected, the queue writes the resul
 <li>Register <code>err</code>, a 1-bit integer that is passed to the queue by reference.
 The queue raises this flag in case of overflow or underflow.</li>
 </ul>
+<h2 id="shared-testing-harness"><a class="header" href="#shared-testing-harness">Shared Testing Harness</a></h2>
+<p>Because they expose a common interface, we can test all queues using the same harness.</p>
+<h4 id="data-generation"><a class="header" href="#data-generation">Data Generation</a></h4>
+<p>First, we have a Python module that generates randomized sequences of operations and values, and dumps the sequences out in a Calyx <code>.data</code> file.
+It accepts as a command line argument the number of operations to generate.
+It also takes a flag, <code>--no-err</code>, that generates a special sequence of operations that does not trigger any overflow or underflow errors.
+If this flag is provided, the queue's length must also be provided.
+The Python code is in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/queue_data_gen.py"><code>queue_data_gen.py</code></a>.</p>
+<h4 id="oracles"><a class="header" href="#oracles">Oracles</a></h4>
+<p>Next, we have a Python module <em>for each kind of queue</em> that reads the <code>.data</code> file, simulates the queue in Python, and dumps the expected result out in a Calyx <code>.expect</code> file.
+This Python code is aware of our <a href="frontends/queues.html#shared-interface">shared iterface</a>.
+The oracles are in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/fifo_oracle.py"><code>fifo_oracle.py</code></a>, <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/pifo_oracle.py"><code>pifo_oracle.py</code></a>, and <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/pifo_tree_oracle.py"><code>pifo_tree_oracle.py</code></a>.
+They all appeal to pure-Python implementations of the queues, which are found in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/queues.py"><code>queues.py</code></a>.
+Each oracle also requires, as command line arguments, the number of operations being simulated and the queue's length.</p>
+<h4 id="queue-call"><a class="header" href="#queue-call">Queue Call</a></h4>
+<p>The steps above lay out <code>.data</code> and <code>.expect</code> files for our Calyx code.
+To actually pass a series of commands to a given eDSL queue implementation, we need to call the queue repeatedly with memories parsed from the <code>.data</code> file.
+Unlike the above, which happens at the pure Python level, this needs to happen at the eDSL level.</p>
+<p>This is exactly what <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/queue_call.py"><code>queue_call.py</code></a> does.
+It accepts as a Python-level argument a handle to the queue component that is to be tested.
+It inserts a <code>main</code> component that reads the <code>.data</code> file and calls the queue component repeatedly.
+If a command-line flag, <code>--keepgoing</code>, is provided, the <code>main</code> component will ignore any overflow or underflow errors raised by the queue component and will complete the entire sequence of operations.
+If not, the <code>main</code> component will stop after the queue component first raises an error.</p>
+<h4 id="putting-it-all-together"><a class="header" href="#putting-it-all-together">Putting It All Together</a></h4>
+<p>The testing harness can be executed, for all our queues, by running the shell script <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/gen_queue_data_expect.sh"><code>gen_queue_data_expect.sh</code></a>.
+This generates the <code>.data</code> and <code>.expect</code> files for each queue.</p>
+<p>Then, each queue can be tested using our <code>runt</code> setup.
+The queue-generating Python files themselves expect command-line arguments (the number of operations and the optional <code>--keepgoing</code> flag) and you can see these being passed in the <a href="https://github.com/calyxir/calyx/blob/a4c2442675d3419be6d2f5cf912aa3f804b3c4ab/runt.toml#L131-L144">relevant <code>runt</code> stanza</a>.</p>
 <h2 id="fifo"><a class="header" href="#fifo">FIFO</a></h2>
 <p>The most basic queue is the <em>first in, first out</em> (FIFO) queue: the most favorably ranked element is just the one that was added to the queue first.</p>
 <p>Our queue frontend generates a simple FIFO in Calyx.
