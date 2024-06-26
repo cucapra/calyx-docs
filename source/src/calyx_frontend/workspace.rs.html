@@ -308,6 +308,15 @@
 <span id="308">308</span>
 <span id="309">309</span>
 <span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     ast::{ComponentDef, NamespaceDef},
     parser,
@@ -364,8 +373,11 @@
 
 <span class="kw">impl </span>Workspace {
     <span class="doccomment">/// Returns the absolute location to an imported file.
-    /// Imports can refer to files either in the library path or in the parent
-    /// folder.
+    ///
+    /// An import path is first resolved as an absolute or
+    /// relative(-to-`parent`) path, and if no file exists at either such
+    /// extended path exists, it assumed to be under the library path
+    /// `lib_path`.
     </span><span class="kw">fn </span>canonicalize_import&lt;S&gt;(
         import: S,
         parent: <span class="kw-2">&amp;</span>Path,
@@ -374,17 +386,23 @@
     <span class="kw">where
         </span>S: AsRef&lt;Path&gt; + Clone,
     {
-        <span class="kw">let </span>parent_path = parent.join(import.clone());
-        <span class="kw">if </span>parent_path.exists() {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(parent_path);
+        <span class="kw">let </span>absolute_import = import.as_ref();
+        <span class="kw">if </span>absolute_import.is_absolute() &amp;&amp; absolute_import.exists() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(import.as_ref().to_path_buf());
         }
-        <span class="kw">let </span>lib = lib_path.join(import.clone());
-        <span class="kw">if </span>lib.exists() {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(lib);
+
+        <span class="kw">let </span>relative_import = parent.join(import.clone());
+        <span class="kw">if </span>relative_import.exists() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(relative_import);
+        }
+
+        <span class="kw">let </span>library_import = lib_path.join(import.clone());
+        <span class="kw">if </span>library_import.exists() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(library_import);
         }
 
         <span class="prelude-val">Err</span>(Error::invalid_file(
-            <span class="macro">format!</span>(<span class="string">&quot;Import path `{}` found neither in the parent ({}) nor library path ({})&quot;</span>,
+            <span class="macro">format!</span>(<span class="string">&quot;Import path `{}` found neither as an absolute path, nor in the parent ({}), nor in library path ({})&quot;</span>,
             import.as_ref().to_string_lossy(),
             parent.to_string_lossy(),
             lib_path.to_string_lossy()
