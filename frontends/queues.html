@@ -181,9 +181,9 @@ A new element is added to the queue using the <code>enqueue</code> operation, wh
 Because of the total order, some element of the queue is the <em>most favorably ranked</em> element.
 We can read this element using the <code>peek</code> operation.
 We can also remove this element from the queue using the <code>dequeue</code> operation, which is also known as <code>pop</code> or <code>remove</code> in some contexts.</p>
-<p>We provision three types of queues in Calyx, which follow the same interface for ease of use.
+<p>We provision four types of queues in Calyx. The first three follow the same shared interface, while the fourth follows a slightly extended interface.
 The frontend is implemented using the <a href="../builder/calyx-py.html">Calyx builder library</a>, and the source code is heavily commented.</p>
-<p>We first describe the shared interface and then detail the three types of queues.</p>
+<p>We first describe the shared interface and their associated testing harness and then detail the four types of queues.</p>
 <h2 id="shared-interface"><a class="header" href="#shared-interface">Shared Interface</a></h2>
 <p>All queues in Calyx expose the same interface.</p>
 <ul>
@@ -195,7 +195,7 @@ Selects the operation to perform:
 <li><code>2</code>: <code>push</code>.</li>
 </ul>
 </li>
-<li>Input port <code>value</code>, a 32-bit integer
+<li>Input port <code>value</code>, a 32-bit integer.
 The value to push.</li>
 <li>Register <code>ans</code>, a 32-bit integer that is passed to the queue by reference.
 If <code>peek</code> or <code>pop</code> is selected, the queue writes the result to this register.</li>
@@ -212,8 +212,8 @@ If this flag is provided, the queue's length must also be provided.
 The Python code is in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/queue_data_gen.py"><code>queue_data_gen.py</code></a>.</p>
 <h4 id="oracles"><a class="header" href="#oracles">Oracles</a></h4>
 <p>Next, we have a Python module <em>for each kind of queue</em> that reads the <code>.data</code> file, simulates the queue in Python, and dumps the expected result out in a Calyx <code>.expect</code> file.
-This Python code is aware of our <a href="#shared-interface">shared iterface</a>.
-The oracles are in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/fifo_oracle.py"><code>fifo_oracle.py</code></a>, <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/pifo_oracle.py"><code>pifo_oracle.py</code></a>, and <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/pifo_tree_oracle.py"><code>pifo_tree_oracle.py</code></a>.
+This Python code is aware of our <a href="#shared-interface">shared interface</a>.
+The oracles are in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/fifo_oracle.py"><code>fifo_oracle.py</code></a>, <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/pifo_oracle.py"><code>pifo_oracle.py</code></a>, <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/pifo_tree_oracle.py"><code>pifo_tree_oracle.py</code></a>, and <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/binheap_oracle.py"><code>binheap_oracle.py</code></a>.
 They all appeal to pure-Python implementations of the queues, which are found in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/queues.py"><code>queues.py</code></a>.
 Each oracle also requires, as command line arguments, the number of operations being simulated and the queue's length.</p>
 <h4 id="queue-call"><a class="header" href="#queue-call">Queue Call</a></h4>
@@ -273,6 +273,31 @@ Specifically, the example implements the PIFO tree described in §2 of <a href="
 <p>Internally, our PIFO tree is implemented by leveraging the PIFO frontend.
 The PIFO frontend seeks to orchestrate two queues, which in the simple case will just be two FIFOs.
 However, it is easy to generalize those two queues: instead of being FIFOs, they can be PIFOs or even PIFO trees.</p>
+<h2 id="minimum-binary-heap"><a class="header" href="#minimum-binary-heap">Minimum Binary Heap</a></h2>
+<p>A minimum binary heap is another tree-shaped data structure where each node has at most two children.
+However, unlike the queues discussed above, a heap exposes an extended interface:
+in addition to the input ports and reference registers discussed above, a heap has an additional input <code>rank</code>.
+The <code>push</code> operation now accepts both a <code>value</code> and the <code>rank</code> that the user wishes to associate with that value.
+Consequently, a heap <em>orders</em> its elements by <code>rank</code>, with the <code>pop</code> (resp. <code>peek</code>) operation set to remove (resp. read) the element with minimal rank.</p>
+<p>To maintain this ordering efficiently, a heap stores <code>(rank, value)</code> pairs in each node and takes special care to maintain the following invariant:</p>
+<blockquote>
+<p><strong>Min-Heap Property</strong>: for any given node <code>C</code>, if <code>P</code> is a parent of <code>C</code>, then the rank of <code>P</code> is less than or equal to the rank of <code>C</code>.</p>
+</blockquote>
+<p>To <code>push</code> or <code>pop</code> an element is easy at the top level: write to or read from the correct node, and then massage the tree to restore the Min-Heap Property.
+The <code>peek</code> operation is constant-time and <code>push</code> and <code>pop</code> are logarithmic in the size of the heap.</p>
+<p>Our frontend allows for the creation of minimum binary heaps in Calyx; the source code is available in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/binheap/binheap.py"><code>binheap.py</code></a>.</p>
+<p>One quirk of any minimum binary heap is its ambiguous behavior in the case of rank ties.
+More specifically, if the value <code>a</code> is pushed with some rank, and then later value <code>b</code> is pushed with the same rank, it's unclear which will be popped first.
+Often, it's desirable to break such ties in FIFO order: that is we'd like a guarantee that <code>a</code> will be popped first.
+A binary heap that provides this guarantee is called a <em>stable binary heap</em>, and our frontend provides a thin layer over our heap that enforces this property.</p>
+<p>Our <code>stable_binheap</code> is a heap accepting 32-bit ranks and values.
+It uses a counter <code>i</code> and instantiates, in turn, a binary heap that accepts 64-bit ranks and 32-bit values.</p>
+<ul>
+<li>To push a pair <code>(r, v)</code> into <code>stable_binheap</code>, we craft a new 64-bit rank that incorporates the counter <code>i</code> (specifically, we compute <code>r &lt;&lt; 32 + i</code>), and we push <code>v</code> into our underlying binary heap with this new 64-bit rank. We also increment the counter <code>i</code>.</li>
+<li>To pop <code>stable_binheap</code>, we pop the underlying binary heap.</li>
+<li>To peek <code>stable_binheap</code>, we peek the underlying binary heap.</li>
+</ul>
+<p>The source code is available in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/binheap/stable_binheap.py"><code>stable_binheap.py</code></a>.</p>
 
                     </main>
 
