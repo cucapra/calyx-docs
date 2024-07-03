@@ -212,6 +212,9 @@ This should automatically install <code>cargo</code>.</p>
 <pre><code>cargo build # Builds the compiler
 ./target/debug/calyx --help # Executes the compiler binary
 </code></pre>
+<p>We recommend installing the git hooks to run linting and formatting checks before each commit:</p>
+<pre><code class="language-shell">/bin/sh setup_hooks.sh
+</code></pre>
 <h2 id="running-core-tests"><a class="header" href="#running-core-tests">Running Core Tests</a></h2>
 <p>The core test suite tests the Calyx compiler's various passes.
 Install the following tools:</p>
