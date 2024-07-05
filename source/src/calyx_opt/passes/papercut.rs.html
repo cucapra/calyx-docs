@@ -305,10 +305,23 @@
 <span id="305">305</span>
 <span id="306">306</span>
 <span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{<span class="self">self</span>, AssignmentAnalysis};
-<span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
+<span class="kw">use </span><span class="kw">crate</span>::traversal::{
+    Action, ConstructVisitor, DiagnosticContext, DiagnosticPass, Named,
+    VisResult, Visitor,
+};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures};
-<span class="kw">use </span>calyx_utils::{CalyxResult, Error};
+<span class="kw">use </span>calyx_utils::{CalyxResult, Error, WithPos};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 
@@ -318,6 +331,7 @@
 
 <span class="doccomment">/// Pass to check for common errors such as missing assignments to `done` holes
 /// of groups.
+</span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Papercut {
     <span class="doccomment">/// Map from (primitive name) -&gt; Vec&lt;(set of ports)&gt;
     /// When any of the ports in a set is driven, all ports in that set must
@@ -333,6 +347,9 @@
 
     <span class="doccomment">/// The cells that are driven through continuous assignments
     </span>cont_cells: HashSet&lt;ir::Id&gt;,
+
+    <span class="doccomment">/// diagnostic context to accumulate multiple errors
+    </span>diag: DiagnosticContext,
 }
 
 <span class="kw">impl </span>Papercut {
@@ -369,6 +386,7 @@
             write_together,
             read_together,
             cont_cells: HashSet::new(),
+            diag: DiagnosticContext::default(),
         })
     }
 
@@ -403,6 +421,12 @@
     <span class="prelude-val">None
 </span>}
 
+<span class="kw">impl </span>DiagnosticPass <span class="kw">for </span>Papercut {
+    <span class="kw">fn </span>diagnostics(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>DiagnosticContext {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.diag
+    }
+}
+
 <span class="kw">impl </span>Visitor <span class="kw">for </span>Papercut {
     <span class="kw">fn </span>start(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -428,7 +452,7 @@
                             </span>assign.name == p.borrow().name &amp;&amp; !assign.is_hole()
                         });
                     <span class="kw">if </span>done_use.is_none() {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::papercut(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` has an empty control program and does not assign to the done port `{}`. Without an assignment to the done port, the component cannot return control flow.&quot;</span>, comp.name, p.borrow().name)));
+                        <span class="self">self</span>.diag.err(Error::papercut(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` has an empty control program and does not assign to the done port `{}`. Without an assignment to the done port, the component cannot return control flow.&quot;</span>, comp.name, p.borrow().name)).with_pos(<span class="kw-2">&amp;</span>comp.attributes))
                     }
                 }
             }
@@ -440,21 +464,18 @@
         // driven.
         </span><span class="kw">for </span>group_ref <span class="kw">in </span>comp.get_groups().iter() {
             <span class="kw">let </span>group = group_ref.borrow();
-            <span class="self">self</span>.check_specs(<span class="kw-2">&amp;</span>group.assignments)
-                .map_err(|err| err.with_pos(<span class="kw-2">&amp;</span>group.attributes))<span class="question-mark">?</span>;
+            <span class="self">self</span>.check_specs(<span class="kw-2">&amp;</span>group.assignments, <span class="kw-2">&amp;</span>group.attributes);
         }
         <span class="kw">for </span>group_ref <span class="kw">in </span>comp.get_static_groups().iter() {
             <span class="kw">let </span>group = group_ref.borrow();
-            <span class="self">self</span>.check_specs(<span class="kw-2">&amp;</span>group.assignments)
-                .map_err(|err| err.with_pos(<span class="kw-2">&amp;</span>group.attributes))<span class="question-mark">?</span>;
+            <span class="self">self</span>.check_specs(<span class="kw-2">&amp;</span>group.assignments, <span class="kw-2">&amp;</span>group.attributes);
         }
         <span class="kw">for </span>cgr <span class="kw">in </span>comp.comb_groups.iter() {
             <span class="kw">let </span>cg = cgr.borrow();
-            <span class="self">self</span>.check_specs(<span class="kw-2">&amp;</span>cg.assignments)
-                .map_err(|err| err.with_pos(<span class="kw-2">&amp;</span>cg.attributes))<span class="question-mark">?</span>;
+            <span class="self">self</span>.check_specs(<span class="kw-2">&amp;</span>cg.assignments, <span class="kw-2">&amp;</span>cg.attributes);
         }
 
-        <span class="comment">// Compute all cells that are driven in by the continuous assignments0
+        <span class="comment">// Compute all cells that are driven in by the continuous assignments
         </span><span class="self">self</span>.cont_cells = comp
             .continuous_assignments
             .iter()
@@ -488,9 +509,8 @@
                     </span><span class="kw">if </span><span class="kw-2">*</span>is_comb &amp;&amp; !<span class="self">self</span>.cont_cells.contains(<span class="kw-2">&amp;</span>cell.name()) {
                         <span class="kw">let </span>msg = <span class="macro">format!</span>(<span class="string">&quot;Port `{}.{}` is an output port on combinational primitive `{}` and will always output 0. Add a `with` statement to the `while` statement to ensure it has a valid value during execution.&quot;</span>, cell.name(), port.name, prim_name);
                         <span class="comment">// Use dummy Id to get correct source location for error
-                        </span><span class="kw">return </span><span class="prelude-val">Err</span>(
-                            Error::papercut(msg).with_pos(<span class="kw-2">&amp;</span>s.attributes)
-                        );
+                        </span><span class="self">self</span>.diag
+                            .err(Error::papercut(msg).with_pos(<span class="kw-2">&amp;</span>s.attributes));
                     }
                 }
             }
@@ -520,9 +540,8 @@
                     </span><span class="kw">if </span><span class="kw-2">*</span>is_comb &amp;&amp; !<span class="self">self</span>.cont_cells.contains(<span class="kw-2">&amp;</span>cell.name()) {
                         <span class="kw">let </span>msg = <span class="macro">format!</span>(<span class="string">&quot;Port `{}.{}` is an output port on combinational primitive `{}` and will always output 0. Add a `with` statement to the `if` statement to ensure it has a valid value during execution.&quot;</span>, cell.name(), port.name, prim_name);
                         <span class="comment">// Use dummy Id to get correct source location for error
-                        </span><span class="kw">return </span><span class="prelude-val">Err</span>(
-                            Error::papercut(msg).with_pos(<span class="kw-2">&amp;</span>s.attributes)
-                        );
+                        </span><span class="self">self</span>.diag
+                            .err(Error::papercut(msg).with_pos(<span class="kw-2">&amp;</span>s.attributes));
                     }
                 }
             }
@@ -532,7 +551,10 @@
 }
 
 <span class="kw">impl </span>Papercut {
-    <span class="kw">fn </span>check_specs&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, assigns: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;]) -&gt; VisResult {
+    <span class="kw">fn </span>check_specs&lt;T, P&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, assigns: <span class="kw-2">&amp;</span>[ir::Assignment&lt;T&gt;], pos: <span class="kw-2">&amp;</span>P)
+    <span class="kw">where
+        </span>P: WithPos,
+    {
         <span class="kw">let </span>all_writes = assigns
             .iter()
             .analysis()
@@ -569,7 +591,7 @@
                                     read,
                                     missing,
                                     comp_type);
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::papercut(msg));
+                        <span class="self">self</span>.diag.err(Error::papercut(msg).with_pos(pos));
                     }
                 }
             }
@@ -604,12 +626,10 @@
                                 first,
                                 missing,
                                 comp_type);
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::papercut(msg));
+                    <span class="self">self</span>.diag.err(Error::papercut(msg).with_pos(pos));
                 }
             }
         }
-        <span class="comment">// This return value is not used
-        </span><span class="prelude-val">Ok</span>(Action::Continue)
     }
 }
 </code></pre></div>

@@ -465,18 +465,18 @@
 </span><span class="kw">use </span><span class="kw">super</span>::parser;
 <span class="kw">use crate</span>::{Attributes, PortDef, Primitive};
 <span class="kw">use </span>atty::Stream;
-<span class="kw">use </span>calyx_utils::{CalyxResult, Error, GPosIdx, Id};
+<span class="kw">use </span>calyx_utils::{CalyxResult, Error, GPosIdx, Id, PosString};
 <span class="kw">use </span>std::{num::NonZeroU64, path::PathBuf};
 
 <span class="doccomment">/// Corresponds to an individual Calyx file.
 </span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>NamespaceDef {
     <span class="doccomment">/// Path to extern files.
-    </span><span class="kw">pub </span>imports: Vec&lt;String&gt;,
+    </span><span class="kw">pub </span>imports: Vec&lt;PosString&gt;,
     <span class="doccomment">/// List of component definitions.
     </span><span class="kw">pub </span>components: Vec&lt;ComponentDef&gt;,
     <span class="doccomment">/// Extern statements and any primitive declarations in them.
-    </span><span class="kw">pub </span>externs: Vec&lt;(<span class="prelude-ty">Option</span>&lt;String&gt;, Vec&lt;Primitive&gt;)&gt;,
+    </span><span class="kw">pub </span>externs: Vec&lt;(<span class="prelude-ty">Option</span>&lt;PosString&gt;, Vec&lt;Primitive&gt;)&gt;,
     <span class="doccomment">/// Optional opaque metadata
     </span><span class="kw">pub </span>metadata: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }

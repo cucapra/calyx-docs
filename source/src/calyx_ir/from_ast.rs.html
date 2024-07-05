@@ -1317,6 +1317,10 @@
 <span id="1317">1317</span>
 <span id="1318">1318</span>
 <span id="1319">1319</span>
+<span id="1320">1320</span>
+<span id="1321">1321</span>
+<span id="1322">1322</span>
+<span id="1323">1323</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Cell, CellType, Component,
     Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
@@ -1501,16 +1505,20 @@
     <span class="kw">let </span><span class="kw-2">mut </span>all_names: HashSet&lt;<span class="kw-2">&amp;</span>Id&gt; =
         HashSet::with_capacity(workspace.components.len() + prims.len());
 
-    <span class="kw">let </span>prim_names = prims.iter().map(|p| <span class="kw-2">&amp;</span>p.name);
+    <span class="kw">let </span>prim_names = prims.iter().map(|p| (<span class="kw-2">&amp;</span>p.name, p.attributes.copy_span()));
 
-    <span class="kw">let </span>comp_names = workspace.components.iter().map(|comp| <span class="kw-2">&amp;</span>comp.name);
+    <span class="kw">let </span>comp_names = workspace
+        .components
+        .iter()
+        .map(|comp| (<span class="kw-2">&amp;</span>comp.name, comp.attributes.copy_span()));
 
-    <span class="kw">for </span>bound <span class="kw">in </span>prim_names.chain(comp_names) {
+    <span class="kw">for </span>(bound, span) <span class="kw">in </span>prim_names.chain(comp_names) {
         <span class="kw">if </span>all_names.contains(bound) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::already_bound(
                 <span class="kw-2">*</span>bound,
                 <span class="string">&quot;component or primitive&quot;</span>.to_string(),
-            ));
+            )
+            .with_pos(<span class="kw-2">&amp;</span>span));
         }
         all_names.insert(bound);
     }

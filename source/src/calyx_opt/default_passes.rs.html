@@ -181,7 +181,8 @@
 <span id="181">181</span>
 <span id="182">182</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
-</span><span class="kw">use </span><span class="kw">crate</span>::passes::{
+</span><span class="kw">use </span><span class="kw">crate</span>::pass_manager::PassResult;
+<span class="kw">use </span><span class="kw">crate</span>::passes::{
     AddGuard, Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
     CompileInvoke, CompileRepeat, CompileStatic, CompileSync,
     CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
@@ -195,16 +196,15 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::Named;
 <span class="kw">use crate</span>::{pass_manager::PassManager, register_alias};
-<span class="kw">use </span>calyx_utils::CalyxResult;
 
 <span class="kw">impl </span>PassManager {
-    <span class="kw">pub fn </span>default_passes() -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">pub fn </span>default_passes() -&gt; PassResult&lt;<span class="self">Self</span>&gt; {
         <span class="comment">// Construct the pass manager and register all passes.
         </span><span class="kw">let </span><span class="kw-2">mut </span>pm = PassManager::default();
 
         <span class="comment">// Validation passes
-        </span>pm.register_pass::&lt;WellFormed&gt;()<span class="question-mark">?</span>;
-        pm.register_pass::&lt;Papercut&gt;()<span class="question-mark">?</span>;
+        </span>pm.register_diagnostic::&lt;WellFormed&gt;()<span class="question-mark">?</span>;
+        pm.register_diagnostic::&lt;Papercut&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;Canonicalize&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">// Optimization passes
@@ -244,7 +244,7 @@
         pm.register_pass::&lt;DefaultAssigns&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">// Enabled in the synthesis compilation flow
-        </span>pm.register_pass::&lt;SynthesisPapercut&gt;()<span class="question-mark">?</span>;
+        </span>pm.register_diagnostic::&lt;SynthesisPapercut&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;Externalize&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">// Disabled by default

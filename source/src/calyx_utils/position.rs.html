@@ -236,6 +236,22 @@
 <span id="236">236</span>
 <span id="237">237</span>
 <span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Definitions for tracking source position information of Calyx programs
 
 </span><span class="kw">use </span>itertools::Itertools;
@@ -422,14 +438,13 @@
         (buf, out_idx, out_line)
     }
 
-    <span class="doccomment">/// Format this position with a the error message `err_msg`
-    </span><span class="kw">pub fn </span>format&lt;S: AsRef&lt;str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, err_msg: S) -&gt; String {
+    <span class="doccomment">/// Format this position with the error message `err_msg`
+    </span><span class="kw">pub fn </span>format_raw&lt;S: AsRef&lt;str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, err_msg: S) -&gt; String {
         <span class="kw">let </span>table = GlobalPositionTable::as_ref();
         <span class="kw">let </span>pos_d = table.get_pos(<span class="self">self</span>.<span class="number">0</span>);
-        <span class="kw">let </span>name = <span class="kw-2">&amp;</span>table.get_file_data(pos_d.file).name;
 
         <span class="kw">let </span>(lines, pos, linum) = <span class="self">self</span>.get_lines();
-        <span class="kw">let </span><span class="kw-2">mut </span>buf = name.to_string();
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = String::new();
 
         <span class="kw">let </span>l = lines[<span class="number">0</span>];
         <span class="kw">let </span>linum_text = <span class="macro">format!</span>(<span class="string">&quot;{} &quot;</span>, linum);
@@ -439,7 +454,6 @@
             l.len() - (pos_d.start - pos),
         ));
         <span class="kw">let </span>space: String = <span class="string">&quot; &quot;</span>.repeat(pos_d.start - pos);
-        <span class="macro">writeln!</span>(buf).unwrap();
         <span class="macro">writeln!</span>(buf, <span class="string">&quot;{}|{}&quot;</span>, linum_text, l).unwrap();
         <span class="macro">write!</span>(
             buf,
@@ -453,6 +467,18 @@
         buf
     }
 
+    <span class="doccomment">/// Format this position with filename header and the error message `err_msg`
+    </span><span class="kw">pub fn </span>format&lt;S: AsRef&lt;str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, err_msg: S) -&gt; String {
+        <span class="kw">let </span>table = GlobalPositionTable::as_ref();
+        <span class="kw">let </span>pos_d = table.get_pos(<span class="self">self</span>.<span class="number">0</span>);
+        <span class="kw">let </span>name = <span class="kw-2">&amp;</span>table.get_file_data(pos_d.file).name;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = name.to_string();
+        <span class="macro">writeln!</span>(buf).unwrap();
+        <span class="macro">write!</span>(buf, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.format_raw(err_msg)).unwrap();
+        buf
+    }
+
     <span class="kw">pub fn </span>get_location(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="kw-2">&amp;</span>str, usize, usize) {
         <span class="kw">let </span>table = GlobalPositionTable::as_ref();
         <span class="kw">let </span>pos_d = table.get_pos(<span class="self">self</span>.<span class="number">0</span>);
@@ -460,7 +486,7 @@
         (name, pos_d.start, pos_d.end)
     }
 
-    <span class="doccomment">/// Visualizes the span without any message or mkaring
+    <span class="doccomment">/// Visualizes the span without any message or marking
     </span><span class="kw">pub fn </span>show(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="kw">let </span>(lines, <span class="kw">_</span>, linum) = <span class="self">self</span>.get_lines();
         <span class="kw">let </span>l = lines[<span class="number">0</span>];
@@ -473,6 +499,12 @@
 </span><span class="kw">pub trait </span>WithPos {
     <span class="doccomment">/// Copy the span associated with this node.
     </span><span class="kw">fn </span>copy_span(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GPosIdx;
+}
+
+<span class="kw">impl </span>WithPos <span class="kw">for </span>GPosIdx {
+    <span class="kw">fn </span>copy_span(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GPosIdx {
+        <span class="kw-2">*</span><span class="self">self
+    </span>}
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="calyx_utils" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

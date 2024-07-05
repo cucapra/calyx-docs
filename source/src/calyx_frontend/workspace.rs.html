@@ -317,12 +317,15 @@
 <span id="317">317</span>
 <span id="318">318</span>
 <span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     ast::{ComponentDef, NamespaceDef},
     parser,
 };
 <span class="kw">use </span><span class="kw">crate</span>::LibrarySignatures;
-<span class="kw">use </span>calyx_utils::{CalyxResult, Error};
+<span class="kw">use </span>calyx_utils::{CalyxResult, Error, WithPos};
 <span class="kw">use </span>std::{
     collections::HashSet,
     path::{Path, PathBuf},
@@ -384,7 +387,7 @@
         lib_path: <span class="kw-2">&amp;</span>Path,
     ) -&gt; CalyxResult&lt;PathBuf&gt;
     <span class="kw">where
-        </span>S: AsRef&lt;Path&gt; + Clone,
+        </span>S: AsRef&lt;Path&gt; + Clone + WithPos,
     {
         <span class="kw">let </span>absolute_import = import.as_ref();
         <span class="kw">if </span>absolute_import.is_absolute() &amp;&amp; absolute_import.exists() {
@@ -406,7 +409,7 @@
             import.as_ref().to_string_lossy(),
             parent.to_string_lossy(),
             lib_path.to_string_lossy()
-        )))
+        )).with_pos(<span class="kw-2">&amp;</span>import))
     }
 
     <span class="comment">// Get the absolute path to an extern. Extern can only exist on paths
@@ -417,17 +420,19 @@
         parent: <span class="kw-2">&amp;</span>Path,
     ) -&gt; CalyxResult&lt;PathBuf&gt;
     <span class="kw">where
-        </span>S: AsRef&lt;Path&gt; + Clone,
+        </span>S: AsRef&lt;Path&gt; + Clone + WithPos,
     {
-        <span class="kw">let </span>parent_path = parent.join(extern_path.clone()).canonicalize()<span class="question-mark">?</span>;
-        <span class="kw">if </span>parent_path.exists() {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(parent_path);
-        }
-        <span class="prelude-val">Err</span>(Error::invalid_file(<span class="macro">format!</span>(
-            <span class="string">&quot;Extern path `{}` not found in parent directory ({})&quot;</span>,
-            extern_path.as_ref().to_string_lossy(),
-            parent.to_string_lossy(),
-        )))
+        parent
+            .join(extern_path.clone())
+            .canonicalize()
+            .map_err(|<span class="kw">_</span>| {
+                Error::invalid_file(<span class="macro">format!</span>(
+                    <span class="string">&quot;Extern path `{}` not found in parent directory ({})&quot;</span>,
+                    extern_path.as_ref().to_string_lossy(),
+                    parent.to_string_lossy(),
+                ))
+                .with_pos(<span class="kw-2">&amp;</span>extern_path)
+            })
     }
 
     <span class="doccomment">/// Construct a new workspace using the `compile.futil` library which
@@ -592,7 +597,8 @@
         })<span class="question-mark">?</span>;
 
         <span class="comment">// Add original imports to workspace
-        </span>ws.original_imports = ns.imports.clone();
+        </span>ws.original_imports =
+            ns.imports.iter().map(|imp| imp.to_string()).collect();
 
         <span class="comment">// TODO (griffin): Probably not a great idea to clone the metadata
         // string but it works for now

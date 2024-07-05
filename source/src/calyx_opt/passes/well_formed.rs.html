@@ -836,7 +836,52 @@
 <span id="836">836</span>
 <span id="837">837</span>
 <span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
+<span class="kw">use </span><span class="kw">crate</span>::traversal::{DiagnosticContext, DiagnosticPass, DiagnosticResult};
 <span class="kw">use </span>calyx_ir::{
     <span class="self">self </span><span class="kw">as </span>ir, Cell, CellType, Component, GetAttributes, LibrarySignatures,
     RESERVED_NAMES,
@@ -922,6 +967,19 @@
     </span>ref_cells: HashMap&lt;ir::Id, LinkedHashMap&lt;ir::Id, Cell&gt;&gt;,
     <span class="doccomment">/// Stack of currently active combinational groups
     </span>active_comb: ActiveAssignments,
+    <span class="doccomment">/// groups that have done holes
+    </span>has_done_hole: HashSet&lt;ir::Id&gt;,
+    <span class="doccomment">/// Diagnostic context to accumulate multiple errors.
+    </span>diag: DiagnosticContext,
+}
+
+<span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>WellFormed {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        f.debug_struct(<span class="string">&quot;WellFormed&quot;</span>)
+            .field(<span class="string">&quot;has_done_hole&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.has_done_hole)
+            .field(<span class="string">&quot;diag&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.diag)
+            .finish_non_exhaustive()
+    }
 }
 
 <span class="kw">enum </span>Invoke&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -1020,6 +1078,8 @@
             used_comb_groups: HashSet::new(),
             ref_cells,
             active_comb: ActiveAssignments::default(),
+            has_done_hole: HashSet::new(),
+            diag: DiagnosticContext::default(),
         };
 
         <span class="prelude-val">Ok</span>(w_f)
@@ -1041,6 +1101,12 @@
     </span>}
 }
 
+<span class="kw">impl </span>DiagnosticPass <span class="kw">for </span>WellFormed {
+    <span class="kw">fn </span>diagnostics(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>DiagnosticContext {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.diag
+    }
+}
+
 <span class="doccomment">/// Returns an error if the assignments are obviously conflicting. This happens when two
 /// assignments assign to the same port unconditionally.
 /// Because there are two types of assignments, we take in `assigns1` and `assigns2`.
@@ -1050,39 +1116,28 @@
     </span>I1: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;Nothing&gt;&gt;,
     I2: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ir::Assignment&lt;StaticTiming&gt;&gt;,
 {
-    <span class="kw">let </span>dsts1 = assigns1.filter(|a| a.guard.is_true()).map(|a| {
-        (
-            a.dst.borrow().canonical(),
-            a.attributes
-                .copy_span()
-                .into_option()
-                .map(|s| s.show())
-                .unwrap_or_else(|| ir::Printer::assignment_to_str(a)),
-        )
-    });
-    <span class="kw">let </span>dsts2 = assigns2.filter(|a| a.guard.is_true()).map(|a| {
-        (
-            a.dst.borrow().canonical(),
-            a.attributes
-                .copy_span()
-                .into_option()
-                .map(|s| s.show())
-                .unwrap_or_else(|| ir::Printer::assignment_to_str(a)),
-        )
-    });
+    <span class="kw">let </span>dsts1 = assigns1
+        .filter(|a| a.guard.is_true())
+        .map(|a| (a.dst.borrow().canonical(), a.attributes.copy_span()));
+    <span class="kw">let </span>dsts2 = assigns2
+        .filter(|a| a.guard.is_true())
+        .map(|a| (a.dst.borrow().canonical(), a.attributes.copy_span()));
     <span class="kw">let </span>dsts = dsts1.chain(dsts2);
     <span class="kw">let </span>dst_grps = dsts
         .sorted_by(|(dst1, <span class="kw">_</span>), (dst2, <span class="kw">_</span>)| ir::Canonical::cmp(dst1, dst2))
         .group_by(|(dst, <span class="kw">_</span>)| dst.clone());
 
     <span class="kw">for </span>(<span class="kw">_</span>, group) <span class="kw">in </span><span class="kw-2">&amp;</span>dst_grps {
-        <span class="kw">let </span>assigns = group.map(|(<span class="kw">_</span>, a)| a).collect_vec();
+        <span class="kw">let </span>assigns = group.collect_vec();
         <span class="kw">if </span>assigns.len() &gt; <span class="number">1 </span>{
-            <span class="kw">let </span>msg = assigns.into_iter().join(<span class="string">&quot;&quot;</span>);
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
-                <span class="string">&quot;Obviously conflicting assignments found:\n{}&quot;</span>,
-                msg
-            )));
+            <span class="kw">let </span><span class="kw-2">mut </span>asgn_iter = assigns.into_iter().rev();
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
+                <span class="string">&quot;Obviously conflicting assignments found&quot;</span>,
+            )
+            .with_pos(<span class="kw-2">&amp;</span>asgn_iter.next().unwrap().<span class="number">1</span>)
+            .with_annotations(asgn_iter.map(|(cannon, pos)| {
+                (pos, <span class="macro">format!</span>(<span class="string">&quot;`{cannon}` is also written to here&quot;</span>))
+            })));
         }
     }
     <span class="prelude-val">Ok</span>(())
@@ -1120,16 +1175,20 @@
             <span class="kw">let </span>cell = cell_ref.borrow();
             <span class="comment">// Check if any of the cells use a reserved name.
             </span><span class="kw">if </span><span class="self">self</span>.reserved_names.contains(<span class="kw-2">&amp;</span>cell.name()) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::reserved_name(cell.name())
-                    .with_pos(cell.get_attributes()));
+                <span class="self">self</span>.diag.err(
+                    Error::reserved_name(cell.name())
+                        .with_pos(cell.get_attributes()),
+                );
             }
             <span class="comment">// Check if a `ref` cell is invalid
             </span><span class="kw">if </span>cell.is_reference() {
                 <span class="kw">if </span>cell.is_primitive(<span class="prelude-val">Some</span>(<span class="string">&quot;std_const&quot;</span>)) {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
-                        <span class="string">&quot;constant not allowed for ref cells&quot;</span>.to_string(),
-                    )
-                    .with_pos(cell.get_attributes()));
+                    <span class="self">self</span>.diag.err(
+                        Error::malformed_structure(
+                            <span class="string">&quot;constant not allowed for ref cells&quot;</span>.to_string(),
+                        )
+                        .with_pos(cell.get_attributes()),
+                    );
                 }
                 <span class="kw">if </span><span class="macro">matches!</span>(cell.prototype, CellType::ThisComponent) {
                     <span class="macro">unreachable!</span>(
@@ -1143,23 +1202,23 @@
         // there are no group or comb group definitions, and the control program is empty
         </span><span class="kw">if </span>comp.is_comb {
             <span class="kw">if </span>!<span class="macro">matches!</span>(<span class="kw-2">&amp;*</span>comp.control.borrow(), ir::Control::Empty(..)) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but has a non-empty control program&quot;</span>, comp.name)));
+                <span class="self">self</span>.diag.err(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but has a non-empty control program&quot;</span>, comp.name)));
             }
 
             <span class="kw">if </span>!comp.get_groups().is_empty() {
                 <span class="kw">let </span>group = comp.get_groups().iter().next().unwrap().borrow();
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains a group `{}`&quot;</span>, comp.name, group.name())).with_pos(<span class="kw-2">&amp;</span>group.attributes));
+                <span class="self">self</span>.diag.err(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains a group `{}`&quot;</span>, comp.name, group.name())).with_pos(<span class="kw-2">&amp;</span>group.attributes));
             }
 
             <span class="kw">if </span>!comp.get_static_groups().is_empty() {
                 <span class="kw">let </span>group =
                     comp.get_static_groups().iter().next().unwrap().borrow();
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains a group `{}`&quot;</span>, comp.name, group.name())).with_pos(<span class="kw-2">&amp;</span>group.attributes));
+                <span class="self">self</span>.diag.err(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains a group `{}`&quot;</span>, comp.name, group.name())).with_pos(<span class="kw-2">&amp;</span>group.attributes));
             }
 
             <span class="kw">if </span>!comp.comb_groups.is_empty() {
                 <span class="kw">let </span>group = comp.comb_groups.iter().next().unwrap().borrow();
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains a group `{}`&quot;</span>, comp.name, group.name())).with_pos(<span class="kw-2">&amp;</span>group.attributes));
+                <span class="self">self</span>.diag.err(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains a group `{}`&quot;</span>, comp.name, group.name())).with_pos(<span class="kw-2">&amp;</span>group.attributes));
             }
 
             <span class="kw">for </span>cell_ref <span class="kw">in </span>comp.cells.iter() {
@@ -1178,7 +1237,7 @@
                     <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
                 };
                 <span class="kw">if </span>!is_comb {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains non-combinational cell `{}`&quot;</span>, comp.name, cell.name())).with_pos(<span class="kw-2">&amp;</span>cell.attributes));
+                    <span class="self">self</span>.diag.err(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">&quot;Component `{}` is marked combinational but contains non-combinational cell `{}`&quot;</span>, comp.name, cell.name())).with_pos(<span class="kw-2">&amp;</span>cell.attributes));
                 }
             }
         }
@@ -1204,7 +1263,7 @@
         }) {
             <span class="kw">match </span><span class="kw-2">&amp;*</span>comp.control.borrow() {
                 ir::Control::Static(<span class="kw">_</span>) | ir::Control::Empty(<span class="kw">_</span>) =&gt; (),
-                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
+                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="self">self</span>.diag.early_return_err(Error::malformed_structure(
                     <span class="macro">format!</span>(<span class="string">&quot;component {} has dynamic control but has @interval annotations&quot;</span>, comp.name),
                     )
                     .with_pos(<span class="kw-2">&amp;</span>comp.attributes)),
@@ -1219,10 +1278,10 @@
                 {
                     <span class="prelude-val">Some</span>(val) =&gt; val,
                     <span class="prelude-val">None </span>=&gt; {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
+                        <span class="kw">return </span><span class="self">self</span>.diag.early_return_err(Error::malformed_structure(
                         <span class="string">&quot;@interval(n) attribute on all @go ports since there is static&lt;n&gt; control&quot;</span>,
                         )
-                        .with_pos(<span class="kw-2">&amp;</span>comp.attributes))
+                                      .with_pos(<span class="kw-2">&amp;</span>comp.attributes));
                     }
                 };
                 <span class="comment">// Checking go ports.
@@ -1234,18 +1293,20 @@
                     {
                         <span class="prelude-val">Some</span>(val) =&gt; val,
                         <span class="prelude-val">None </span>=&gt; {
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                            <span class="self">self</span>.diag.err(Error::malformed_structure(<span class="macro">format!</span>(
                                 <span class="string">&quot;@go port expected @interval({reference_val}) attribute on all ports \
                                 since the component has static&lt;n&gt; control&quot;</span>,
                             ))
-                            .with_pos(<span class="kw-2">&amp;</span>comp.attributes))
+                            .with_pos(<span class="kw-2">&amp;</span>comp.attributes));
+                            <span class="kw">continue</span>;
                         }
                     };
                     <span class="kw">if </span>go_port_val != reference_val {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                        <span class="self">self</span>.diag.err(Error::malformed_structure(<span class="macro">format!</span>(
                             <span class="string">&quot;@go port expected @interval {reference_val}, got @interval {go_port_val}&quot;</span>,
                         ))
                         .with_pos(<span class="kw-2">&amp;</span>go_port.borrow().attributes));
+                        <span class="kw">continue</span>;
                     }
                     <span class="comment">// Checking control latency
                     </span><span class="kw">match </span>comp.control.borrow().get_latency() {
@@ -1254,7 +1315,7 @@
                         }
                         <span class="prelude-val">Some</span>(control_latency) =&gt; {
                             <span class="kw">if </span>control_latency != reference_val {
-                                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                                <span class="self">self</span>.diag.err(Error::malformed_structure(<span class="macro">format!</span>(
                                     <span class="string">&quot;component {} expected @interval {reference_val}, got @interval {control_latency}&quot;</span>, comp.name,
                                 ))
                                 .with_pos(<span class="kw-2">&amp;</span>comp.attributes));
@@ -1275,39 +1336,50 @@
             </span><span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>group.assignments {
                 <span class="kw">let </span>dst = assign.dst.borrow();
                 <span class="kw">if </span>port_is_static_prim(<span class="kw-2">&amp;</span>dst) {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
-                        <span class="string">&quot;Static cell `{}` written to in non-static group&quot;</span>,
-                        dst.get_parent_name()
-                    ))
-                    .with_pos(<span class="kw-2">&amp;</span>assign.attributes));
+                    <span class="self">self</span>.diag.err(
+                        Error::malformed_structure(<span class="macro">format!</span>(
+                            <span class="string">&quot;Static cell `{}` written to in non-static group&quot;</span>,
+                            dst.get_parent_name()
+                        ))
+                        .with_pos(<span class="kw-2">&amp;</span>assign.attributes),
+                    );
                 }
                 <span class="kw">if </span>dst.is_hole() &amp;&amp; dst.name == <span class="string">&quot;done&quot; </span>{
                     <span class="comment">// Group has multiple done conditions
                     </span><span class="kw">if </span>has_done {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
-                            <span class="string">&quot;Group `{}` has multiple done conditions&quot;</span>,
-                            gname
-                        ))
-                        .with_pos(<span class="kw-2">&amp;</span>assign.attributes));
+                        <span class="self">self</span>.diag.err(
+                            Error::malformed_structure(<span class="macro">format!</span>(
+                                <span class="string">&quot;Group `{}` has multiple done conditions&quot;</span>,
+                                gname
+                            ))
+                            .with_pos(<span class="kw-2">&amp;</span>assign.attributes),
+                        );
                     } <span class="kw">else </span>{
                         has_done = <span class="bool-val">true</span>;
                     }
                     <span class="comment">// Group uses another group&#39;s done condition
                     </span><span class="kw">if </span>gname != dst.get_parent_name() {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(
-                            <span class="macro">format!</span>(<span class="string">&quot;Group `{}` refers to the done condition of another group (`{}`).&quot;</span>,
-                            gname,
-                            dst.get_parent_name())).with_pos(<span class="kw-2">&amp;</span>dst.attributes));
+                        <span class="self">self</span>.diag.err(Error::malformed_structure(
+                            <span class="macro">format!</span>(
+                                <span class="string">&quot;Group `{}` refers to the done condition of another group (`{}`)&quot;</span>,
+                                gname,
+                                dst.get_parent_name(),
+                            )).with_pos(<span class="kw-2">&amp;</span>assign.attributes));
                     }
                 }
             }
 
-            <span class="comment">// Group does not have a done condition
-            </span><span class="kw">if </span>!has_done {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
-                    <span class="string">&quot;No writes to the `done&#39; hole for group `{gname}&#39;&quot;</span>,
-                ))
-                .with_pos(<span class="kw-2">&amp;</span>group.attributes));
+            <span class="comment">// If group has done condition, record this fact,
+            // otherwise record an error
+            </span><span class="kw">if </span>has_done {
+                <span class="self">self</span>.has_done_hole.insert(gname);
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.diag.err(
+                    Error::malformed_structure(<span class="macro">format!</span>(
+                        <span class="string">&quot;No writes to the `done&#39; hole for group `{gname}&#39;&quot;</span>,
+                    ))
+                    .with_pos(<span class="kw-2">&amp;</span>group.attributes),
+                );
             }
         }
 
@@ -1348,17 +1420,20 @@
         </span>obvious_conflicts(
             comp.continuous_assignments.iter(),
             std::iter::empty::&lt;<span class="kw-2">&amp;</span>ir::Assignment&lt;StaticTiming&gt;&gt;(),
-        )<span class="question-mark">?</span>;
+        )
+        .accumulate_err(<span class="kw-2">&amp;mut </span><span class="self">self</span>.diag)<span class="question-mark">?</span>;
         <span class="comment">// Check for obvious conflicting assignments between the continuous assignments and the groups
         </span><span class="kw">for </span>cgr <span class="kw">in </span>comp.comb_groups.iter() {
             <span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>cgr.borrow().assignments {
                 <span class="kw">let </span>dst = assign.dst.borrow();
                 <span class="kw">if </span>port_is_static_prim(<span class="kw-2">&amp;</span>dst) {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
-                        <span class="string">&quot;Static cell `{}` written to in non-static group&quot;</span>,
-                        dst.get_parent_name()
-                    ))
-                    .with_pos(<span class="kw-2">&amp;</span>assign.attributes));
+                    <span class="self">self</span>.diag.err(
+                        Error::malformed_structure(<span class="macro">format!</span>(
+                            <span class="string">&quot;Static cell `{}` written to in non-static group&quot;</span>,
+                            dst.get_parent_name()
+                        ))
+                        .with_pos(<span class="kw-2">&amp;</span>assign.attributes),
+                    );
                 }
             }
             obvious_conflicts(
@@ -1367,7 +1442,8 @@
                     .iter()
                     .chain(comp.continuous_assignments.iter()),
                 std::iter::empty::&lt;<span class="kw-2">&amp;</span>ir::Assignment&lt;StaticTiming&gt;&gt;(),
-            )<span class="question-mark">?</span>;
+            )
+            .accumulate_err(<span class="kw-2">&amp;mut </span><span class="self">self</span>.diag)<span class="question-mark">?</span>;
         }
 
         <span class="prelude-val">Ok</span>(Action::Continue)
@@ -1392,13 +1468,12 @@
             group.assignments.iter(),
         )
         .map_err(|err| {
-            <span class="kw">let </span>msg = s
-                .attributes
-                .copy_span()
-                .into_option()
-                .map(|s| s.format(<span class="string">&quot;Assigments activated by group enable&quot;</span>));
-            err.with_post_msg(msg)
-        })<span class="question-mark">?</span>;
+            err.with_annotation(
+                <span class="kw-2">&amp;</span>s.attributes,
+                <span class="string">&quot;Assignments activated by group static enable, causing the conflict&quot;</span>,
+            )
+        })
+        .accumulate_err(<span class="kw-2">&amp;mut </span><span class="self">self</span>.diag)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
@@ -1410,15 +1485,22 @@
         _ctx: <span class="kw-2">&amp;</span>LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="self">self</span>.used_groups.insert(s.group.borrow().name());
-
         <span class="kw">let </span>group = s.group.borrow();
+        <span class="kw">let </span>gname = group.name();
+        <span class="self">self</span>.used_groups.insert(gname);
+
+        <span class="comment">// if this group doesn&#39;t have a done hole, we can&#39;t run this analysis
+        // so we abort early
+        </span><span class="kw">if </span>!<span class="self">self</span>.has_done_hole.contains(<span class="kw-2">&amp;</span>gname) {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
+        }
+
         <span class="kw">let </span>asgn = group.done_cond();
         <span class="kw">let </span>const_done_assign =
             asgn.guard.is_true() &amp;&amp; asgn.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>);
 
         <span class="kw">if </span>const_done_assign {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="string">&quot;Group with constant done condition is invalid. Use `comb group` instead to define a combinational group.&quot;</span>).with_pos(<span class="kw-2">&amp;</span>group.attributes));
+            <span class="self">self</span>.diag.err(Error::malformed_structure(<span class="string">&quot;Group with constant done condition is invalid. Use `comb group` instead to define a combinational group.&quot;</span>).with_pos(<span class="kw-2">&amp;</span>group.attributes));
         }
 
         <span class="comment">// A group with &quot;static&quot;=0 annotation
@@ -1428,7 +1510,7 @@
             .map(|v| v == <span class="number">0</span>)
             .unwrap_or(<span class="bool-val">false</span>)
         {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="string">&quot;Group with annotation \&quot;promotable\&quot;=0 is invalid. Use `comb group` instead to define a combinational group or if the group&#39;s done condition is not constant, provide the correct \&quot;static\&quot; annotation.&quot;</span>).with_pos(<span class="kw-2">&amp;</span>group.attributes));
+            <span class="self">self</span>.diag.err(Error::malformed_structure(<span class="string">&quot;Group with annotation \&quot;promotable\&quot;=0 is invalid. Use `comb group` instead to define a combinational group or if the group&#39;s done condition is not constant, provide the correct \&quot;static\&quot; annotation.&quot;</span>).with_pos(<span class="kw-2">&amp;</span>group.attributes));
         }
 
         <span class="comment">// Check if the group has obviously conflicting assignments with the continuous assignments and the active combinational groups
@@ -1441,13 +1523,12 @@
             std::iter::empty::&lt;<span class="kw-2">&amp;</span>ir::Assignment&lt;StaticTiming&gt;&gt;(),
         )
         .map_err(|err| {
-            <span class="kw">let </span>msg = s
-                .attributes
-                .copy_span()
-                .into_option()
-                .map(|s| s.format(<span class="string">&quot;Assigments activated by group enable&quot;</span>));
-            err.with_post_msg(msg)
-        })<span class="question-mark">?</span>;
+            err.with_annotation(
+                <span class="kw-2">&amp;</span>s.attributes,
+                <span class="string">&quot;Assignments activated by group enable, causing the conflict&quot;</span>,
+            )
+        })
+        .accumulate_err(<span class="kw-2">&amp;mut </span><span class="self">self</span>.diag)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
@@ -1503,20 +1584,23 @@
                 std::iter::empty::&lt;<span class="kw-2">&amp;</span>ir::Assignment&lt;StaticTiming&gt;&gt;(),
             )
             .map_err(|err| {
-                <span class="kw">let </span>msg = s.attributes.copy_span().format(<span class="macro">format!</span>(
-                    <span class="string">&quot;Assignments from `{}&#39; are actived here&quot;</span>,
-                    cg.name()
-                ));
-                err.with_post_msg(<span class="prelude-val">Some</span>(msg))
-            })<span class="question-mark">?</span>;
+                err.with_annotation(
+                    <span class="kw-2">&amp;</span>s.attributes,
+                    <span class="macro">format!</span>(
+                        <span class="string">&quot;Assignments from `{}&#39; are activated here, causing the conflict&quot;</span>,
+                        cg.name()
+                    ),
+                )
+            })
+            .accumulate_err(<span class="kw-2">&amp;mut </span><span class="self">self</span>.diag)<span class="question-mark">?</span>;
             <span class="comment">// Push the combinational group to the stack of active groups
             </span><span class="self">self</span>.active_comb.push(assigns);
         } <span class="kw">else if </span>!s.port.borrow().has_attribute(ir::BoolAttr::Stable) {
-            <span class="kw">let </span>msg = s.attributes.copy_span().format(<span class="macro">format!</span>(
-                    <span class="string">&quot;If statement has no comb group and its condition port {} is unstable&quot;</span>,
-                    s.port.borrow().canonical()
-                ));
-            <span class="macro">log::warn!</span>(<span class="string">&quot;{msg}&quot;</span>);
+            <span class="kw">let </span>err = Error::misc(<span class="macro">format!</span>(
+                <span class="string">&quot;If statement has no comb group and its condition port {} is unstable&quot;</span>,
+                s.port.borrow().canonical()
+            )).with_pos(<span class="kw-2">&amp;</span>s.attributes);
+            <span class="self">self</span>.diag.warning(err);
         }
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
@@ -1529,11 +1613,12 @@
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
         <span class="kw">if </span>!s.port.borrow().has_attribute(ir::BoolAttr::Stable) {
-            <span class="kw">let </span>msg = s.attributes.copy_span().format(<span class="macro">format!</span>(
+            <span class="kw">let </span>err = Error::misc(<span class="macro">format!</span>(
                 <span class="string">&quot;static if statement&#39;s condition port {} is unstable&quot;</span>,
                 s.port.borrow().canonical()
-            ));
-            <span class="macro">log::warn!</span>(<span class="string">&quot;{msg}&quot;</span>);
+            ))
+            .with_pos(<span class="kw-2">&amp;</span>s.attributes);
+            <span class="self">self</span>.diag.warning(err);
         }
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
@@ -1571,19 +1656,20 @@
             )
             .map_err(|err| {
                 <span class="kw">let </span>msg = s.attributes.copy_span().format(<span class="macro">format!</span>(
-                    <span class="string">&quot;Assignments from `{}&#39; are actived here&quot;</span>,
+                    <span class="string">&quot;Assignments from `{}&#39; are activated here&quot;</span>,
                     cg.name()
                 ));
                 err.with_post_msg(<span class="prelude-val">Some</span>(msg))
-            })<span class="question-mark">?</span>;
+            })
+            .accumulate_err(<span class="kw-2">&amp;mut </span><span class="self">self</span>.diag)<span class="question-mark">?</span>;
             <span class="comment">// Push the combinational group to the stack of active groups
             </span><span class="self">self</span>.active_comb.push(assigns);
         } <span class="kw">else if </span>!s.port.borrow().has_attribute(ir::BoolAttr::Stable) {
-            <span class="kw">let </span>msg = s.attributes.copy_span().format(<span class="macro">format!</span>(
-                    <span class="string">&quot;While loop has no comb group and its condition port {} is unstable&quot;</span>,
-                    s.port.borrow().canonical()
-                ));
-            <span class="macro">log::warn!</span>(<span class="string">&quot;{msg}&quot;</span>);
+            <span class="kw">let </span>err = Error::misc(<span class="macro">format!</span>(
+                <span class="string">&quot;While loop has no comb group and its condition port `{}` is unstable&quot;</span>,
+                s.port.borrow().canonical()
+            )).with_pos(<span class="kw-2">&amp;</span>s.attributes);
+            <span class="self">self</span>.diag.warning(err);
         }
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
@@ -1647,15 +1733,15 @@
             <span class="kw">match </span>comp.find_group(<span class="kw-2">*</span>group) {
                 <span class="prelude-val">Some</span>(gr) =&gt; {
                     <span class="kw">let </span>gr = gr.borrow();
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(
-                        Error::unused(<span class="kw-2">*</span>group, <span class="string">&quot;group&quot;</span>).with_pos(<span class="kw-2">&amp;</span>gr.attributes)
+                    <span class="self">self</span>.diag.err(
+                        Error::unused(<span class="kw-2">*</span>group, <span class="string">&quot;group&quot;</span>).with_pos(<span class="kw-2">&amp;</span>gr.attributes),
                     );
                 }
                 <span class="prelude-val">None </span>=&gt; {
                     <span class="kw">let </span>gr = comp.find_static_group(<span class="kw-2">*</span>group).unwrap();
                     <span class="kw">let </span>gr = gr.borrow();
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(
-                        Error::unused(<span class="kw-2">*</span>group, <span class="string">&quot;group&quot;</span>).with_pos(<span class="kw-2">&amp;</span>gr.attributes)
+                    <span class="self">self</span>.diag.err(
+                        Error::unused(<span class="kw-2">*</span>group, <span class="string">&quot;group&quot;</span>).with_pos(<span class="kw-2">&amp;</span>gr.attributes),
                     );
                 }
             }
@@ -1668,8 +1754,10 @@
         {
             <span class="kw">let </span>cgr = comp.find_comb_group(<span class="kw-2">*</span>comb_group).unwrap();
             <span class="kw">let </span>cgr = cgr.borrow();
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::unused(<span class="kw-2">*</span>comb_group, <span class="string">&quot;combinational group&quot;</span>)
-                .with_pos(<span class="kw-2">&amp;</span>cgr.attributes));
+            <span class="self">self</span>.diag.err(
+                Error::unused(<span class="kw-2">*</span>comb_group, <span class="string">&quot;combinational group&quot;</span>)
+                    .with_pos(<span class="kw-2">&amp;</span>cgr.attributes),
+            );
         }
         <span class="prelude-val">Ok</span>(Action::Continue)
     }

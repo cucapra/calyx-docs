@@ -292,17 +292,60 @@
 <span id="292">292</span>
 <span id="293">293</span>
 <span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Define the PassManager structure that is used to construct and run pass
 //! passes.
 </span><span class="kw">use </span><span class="kw">crate</span>::traversal;
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
-<span class="kw">use </span>calyx_utils::{CalyxResult, Error};
+<span class="kw">use </span>calyx_utils::{Error, MultiError};
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::fmt::Write <span class="kw">as _</span>;
 <span class="kw">use </span>std::time::Instant;
 
+<span class="kw">pub type </span>PassResult&lt;T&gt; = std::result::Result&lt;T, MultiError&gt;;
+
 <span class="doccomment">/// Top-level type for all passes that transform an [ir::Context]
-</span><span class="kw">pub type </span>PassClosure = Box&lt;<span class="kw">dyn </span>Fn(<span class="kw-2">&amp;mut </span>ir::Context) -&gt; CalyxResult&lt;()&gt;&gt;;
+</span><span class="kw">pub type </span>PassClosure = Box&lt;<span class="kw">dyn </span>Fn(<span class="kw-2">&amp;mut </span>ir::Context) -&gt; PassResult&lt;()&gt;&gt;;
 
 <span class="doccomment">/// Structure that tracks all registered passes for the compiler.
 </span><span class="attribute">#[derive(Default)]
@@ -324,7 +367,48 @@
     /// let pm = PassManager::default();
     /// pm.register_pass::&lt;WellFormed&gt;()?;
     /// ```
-    </span><span class="kw">pub fn </span>register_pass&lt;Pass&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; CalyxResult&lt;()&gt;
+    </span><span class="kw">pub fn </span>register_pass&lt;Pass&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; PassResult&lt;()&gt;
+    <span class="kw">where
+        </span>Pass:
+            traversal::Visitor + traversal::ConstructVisitor + traversal::Named,
+    {
+        <span class="self">self</span>.register_generic_pass::&lt;Pass&gt;(Box::new(|ir| {
+            Pass::do_pass_default(ir)<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(())
+        }))
+    }
+
+    <span class="doccomment">/// Registers a diagnostic pass as a normal pass. If there is an error,
+    /// this will report the first error gathered by the pass.
+    </span><span class="kw">pub fn </span>register_diagnostic&lt;Pass&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; PassResult&lt;()&gt;
+    <span class="kw">where
+        </span>Pass: traversal::Visitor
+            + traversal::ConstructVisitor
+            + traversal::Named
+            + traversal::DiagnosticPass,
+    {
+        <span class="self">self</span>.register_generic_pass::&lt;Pass&gt;(Box::new(|ir| {
+            <span class="kw">let </span><span class="kw-2">mut </span>visitor = Pass::from(ir)<span class="question-mark">?</span>;
+            visitor.do_pass(ir)<span class="question-mark">?</span>;
+
+            <span class="kw">let </span>errors: Vec&lt;<span class="kw">_</span>&gt; =
+                visitor.diagnostics().errors_iter().cloned().collect();
+            <span class="kw">if </span>!errors.is_empty() {
+                <span class="prelude-val">Err</span>(MultiError::from(errors))
+            } <span class="kw">else </span>{
+                <span class="comment">// only show warnings, if there are no errors
+                </span>visitor.diagnostics().warning_iter().for_each(
+                    |warning| <span class="macro">log::warn!</span>(target: Pass::name(), <span class="string">&quot;{warning:?}&quot;</span>),
+                );
+                <span class="prelude-val">Ok</span>(())
+            }
+        }))
+    }
+
+    <span class="kw">fn </span>register_generic_pass&lt;Pass&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        pass_closure: PassClosure,
+    ) -&gt; PassResult&lt;()&gt;
     <span class="kw">where
         </span>Pass:
             traversal::Visitor + traversal::ConstructVisitor + traversal::Named,
@@ -334,12 +418,9 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::misc(<span class="macro">format!</span>(
                 <span class="string">&quot;Pass with name &#39;{}&#39; is already registered.&quot;</span>,
                 name
-            )));
+            ))
+            .into());
         }
-        <span class="kw">let </span>pass_closure: PassClosure = Box::new(|ir| {
-            Pass::do_pass_default(ir)<span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>(())
-        });
         <span class="self">self</span>.passes.insert(name.clone(), pass_closure);
         <span class="kw">let </span><span class="kw-2">mut </span>help = <span class="macro">format!</span>(<span class="string">&quot;- {}: {}&quot;</span>, name, Pass::description());
         <span class="kw">for </span>opt <span class="kw">in </span>Pass::opts() {
@@ -363,12 +444,13 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         name: String,
         passes: Vec&lt;String&gt;,
-    ) -&gt; CalyxResult&lt;()&gt; {
+    ) -&gt; PassResult&lt;()&gt; {
         <span class="kw">if </span><span class="self">self</span>.aliases.contains_key(<span class="kw-2">&amp;</span>name) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::misc(<span class="macro">format!</span>(
                 <span class="string">&quot;Alias with name &#39;{}&#39;  already registered.&quot;</span>,
                 name
-            )));
+            ))
+            .into());
         }
         <span class="comment">// Expand any aliases used in defining this alias.
         </span><span class="kw">let </span>all_passes = passes
@@ -445,7 +527,7 @@
         incls: <span class="kw-2">&amp;</span>[String],
         excls: <span class="kw-2">&amp;</span>[String],
         insns: <span class="kw-2">&amp;</span>[String],
-    ) -&gt; CalyxResult&lt;(Vec&lt;String&gt;, HashSet&lt;String&gt;)&gt; {
+    ) -&gt; PassResult&lt;(Vec&lt;String&gt;, HashSet&lt;String&gt;)&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>insertions = insns
             .iter()
             .filter_map(|str| <span class="kw">match </span>str.split_once(<span class="string">&#39;:&#39;</span>) {
@@ -522,7 +604,7 @@
         excl: <span class="kw-2">&amp;</span>[String],
         insn: <span class="kw-2">&amp;</span>[String],
         dump_ir: bool,
-    ) -&gt; CalyxResult&lt;()&gt; {
+    ) -&gt; PassResult&lt;()&gt; {
         <span class="kw">let </span>(passes, excl_set) = <span class="self">self</span>.create_plan(incl, excl, insn)<span class="question-mark">?</span>;
 
         <span class="kw">for </span>name <span class="kw">in </span>passes {
