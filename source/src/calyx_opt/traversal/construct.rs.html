@@ -278,6 +278,21 @@
 <span id="278">278</span>
 <span id="279">279</span>
 <span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::Visitor;
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>calyx_utils::{CalyxResult, OutputFile};
@@ -292,6 +307,8 @@
     </span>Bool(bool),
     <span class="doccomment">/// A number option.
     </span>Num(i64),
+    <span class="doccomment">/// A string option.
+    </span>String(String),
     <span class="doccomment">/// A list of values.
     </span>List(Vec&lt;ParseVal&gt;),
     <span class="doccomment">/// An output stream (stdout, stderr, file name)
@@ -311,6 +328,13 @@
             <span class="macro">panic!</span>(<span class="string">&quot;Expected number, got {self}&quot;</span>);
         };
         <span class="kw-2">*</span>n
+    }
+
+    <span class="kw">pub fn </span>string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+        <span class="kw">let </span>ParseVal::String(s) = <span class="self">self </span><span class="kw">else </span>{
+            <span class="macro">panic!</span>(<span class="string">&quot;Expected String, got {self}&quot;</span>);
+        };
+        s.clone()
     }
 
     <span class="kw">pub fn </span>pos_num(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
@@ -366,6 +390,7 @@
         <span class="kw">match </span><span class="self">self </span>{
             ParseVal::Bool(b) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{b}&quot;</span>),
             ParseVal::Num(n) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{n}&quot;</span>),
+            ParseVal::String(s) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{s}&quot;</span>),
             ParseVal::List(l) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;[&quot;</span>)<span class="question-mark">?</span>;
                 <span class="kw">for </span>(i, e) <span class="kw">in </span>l.iter().enumerate() {
@@ -444,6 +469,11 @@
     <span class="doccomment">/// Parse a number from a string.
     </span><span class="kw">pub fn </span>parse_num(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;ParseVal&gt; {
         s.parse::&lt;i64&gt;().ok().map(ParseVal::Num)
+    }
+
+    <span class="doccomment">/// Parse a String from a string.
+    </span><span class="kw">pub fn </span>parse_string(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;ParseVal&gt; {
+        <span class="prelude-val">Some</span>(ParseVal::String(s.to_string()))
     }
 
     <span class="doccomment">/// Parse a list of numbers from a string.
