@@ -1283,7 +1283,7 @@ component update_memory() -&gt; () {
   control { ... }
 }
 </code></pre>
-<p>When invoking<a href="lang/ref.html#invoke">invoke</a> such a component, the calling component must provide a binding for each defined cell:</p>
+<p>When <a href="lang/ref.html#invoke">invoking</a> such a component, the calling component must provide a binding for each defined cell:</p>
 <pre><code>component main() -&gt; () {
   cells {
     upd = update_memory();
