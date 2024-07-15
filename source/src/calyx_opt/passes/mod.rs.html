@@ -92,6 +92,8 @@
 <span id="92">92</span>
 <span id="93">93</span>
 <span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
@@ -132,6 +134,7 @@
 <span class="kw">mod </span>data_path_infer;
 <span class="kw">mod </span>default_assigns;
 <span class="kw">mod </span>discover_external;
+<span class="kw">mod </span>metadata_table_gen;
 <span class="kw">mod </span>simplify_with_control;
 <span class="kw">mod </span>synthesis_papercut;
 <span class="kw">mod </span>top_down_compile_control;
@@ -164,6 +167,7 @@
 <span class="kw">pub use </span>lower_guards::LowerGuards;
 <span class="kw">pub use </span>math_utilities::get_bit_width_from;
 <span class="kw">pub use </span>merge_assign::MergeAssign;
+<span class="kw">pub use </span>metadata_table_gen::Metadata;
 <span class="kw">pub use </span>papercut::Papercut;
 <span class="kw">pub use </span>par_to_seq::ParToSeq;
 <span class="kw">pub use </span>register_unsharing::RegisterUnsharing;

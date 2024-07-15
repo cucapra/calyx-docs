@@ -180,6 +180,9 @@
 <span id="180">180</span>
 <span id="181">181</span>
 <span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::pass_manager::PassResult;
 <span class="kw">use </span><span class="kw">crate</span>::passes::{
@@ -188,8 +191,8 @@
     CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
     DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, DefaultAssigns,
     DiscoverExternal, ExternalToRef, Externalize, GoInsertion, GroupToInvoke,
-    GroupToSeq, HoleInliner, InferShare, LowerGuards, MergeAssign, Papercut,
-    ParToSeq, RegisterUnsharing, RemoveIds, ResetInsertion,
+    GroupToSeq, HoleInliner, InferShare, LowerGuards, MergeAssign, Metadata,
+    Papercut, ParToSeq, RegisterUnsharing, RemoveIds, ResetInsertion,
     SimplifyStaticGuards, SimplifyWithControl, StaticFSMOpts, StaticInference,
     StaticInliner, StaticPromotion, SynthesisPapercut, TopDownCompileControl,
     UnrollBounded, WellFormed, WireInliner, WrapMain,
@@ -257,6 +260,9 @@
         pm.register_pass::&lt;HoleInliner&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;RemoveIds&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;ExternalToRef&gt;()<span class="question-mark">?</span>;
+
+        <span class="comment">//add metadata
+        </span>pm.register_pass::&lt;Metadata&gt;()<span class="question-mark">?</span>;
 
         <span class="macro">register_alias!</span>(pm, <span class="string">&quot;validate&quot;</span>, [WellFormed, Papercut, Canonicalize]);
         <span class="macro">register_alias!</span>(
