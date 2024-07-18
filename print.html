@@ -3760,22 +3760,17 @@ algorithm is incorrect. You can use the <a href="debug/./cider.html">Calyx Debug
 both produce the wrong answer <em>and</em> the interpreter produces the right answer then you likely have
 a compilation bug on your hands. Use the <a href="debug/./debug.html">debugging tips</a> to narrow down the pass that causes
 the error.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="the-calyx-interactive-debugger"><a class="header" href="#the-calyx-interactive-debugger">The Calyx Interactive Debugger</a></h1>
-<p>The Calyx Interactive Debugger is a prototype debugging tool built on top of the
-<a href="debug/../running-calyx/interpreter.html">Calyx Interpreter</a> which exposes a <a href="https://sourceware.org/gdb/">gdb</a>-like interface for
-debugging Calyx programs.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cider-the-calyx-interpreter-and-debugger"><a class="header" href="#cider-the-calyx-interpreter-and-debugger">Cider: The Calyx Interpreter and Debugger</a></h1>
+<p>Cider is a prototype debugging tool which exposes a <a href="https://sourceware.org/gdb/">gdb</a>-like interface
+for debugging Calyx programs.</p>
 <h2 id="getting-started-1"><a class="header" href="#getting-started-1">Getting Started</a></h2>
-<p>If you are using <a href="debug/../running-calyx/fud/index.html"><code>fud</code></a>, getting started with the debugger is easy.</p>
-<p>First, follow <a href="debug/../running-calyx/interpreter.html#interpreting-via-fud">these instructions</a> to build the interpreter and register it as a <code>fud</code> stage.</p>
+<p>If you are using <a href="debug/../running-calyx/fud2/index.html"><code>fud2</code></a>, getting started with the debugger is easy. It
+requires no extra setup beyond the initial <code>fud2</code> directory configuration.</p>
 <p>Assuming you are trying to debug a program called <code>my_program.futil</code> with data
 file <code>my_program.futil.data</code>, invoke the debugger with the following command:</p>
-<pre><code>fud e --to debugger -q my_program.futil -s verilog.data my_program.futil.data
+<pre><code>fud2 my_program.futil --to cider-debug -s sim.data=my_program.futil.data
 </code></pre>
-<p>This will open the target program in the interactive debugger. Note that we use <code>fud</code>'s <em>quiet</em> flag, <code>-q</code>, here. This avoids clashes between <code>fud</code>'s outputs and the debugger's outputs, since both tools interact with <code>stdout</code>.</p>
-<p>The interpreter does not currently support <a href="debug/../lang/memories-by-reference.html#the-easy-way-ref-cells"><code>ref</code> cells</a>.
-To run the debugger on a program that uses these, you must first compile them away by running the <code>compile-invoke</code> pass:</p>
-<pre><code>fud e --to debugger -s calyx.flags '-p compile-invoke' -q my_program.futil -s verilog.data my_program.futil.data
-</code></pre>
+<p>This will open the target program in the interactive debugger.</p>
 <h2 id="advancing-program-execution"><a class="header" href="#advancing-program-execution">Advancing Program execution</a></h2>
 <h3 id="step"><a class="header" href="#step"><code>step</code></a></h3>
 <p>The simplest way to advance the program is via the <code>step</code> command which causes
@@ -3808,7 +3803,7 @@ accessed with the shortcode <code>c</code>.</p>
 Main component has finished executing. Debugger is now in inspection mode.
 </code></pre>
 <h2 id="breakpoints"><a class="header" href="#breakpoints">Breakpoints</a></h2>
-<p>CIDR supports breakpoints on group definitions. This helps focus attention on
+<p>Cider supports breakpoints on group definitions. This helps focus attention on
 suspect portions of the code.</p>
 <h3 id="setting-a-breakpoint"><a class="header" href="#setting-a-breakpoint">Setting a breakpoint</a></h3>
 <p>Breakpoints may be set on the main component by simple specifying the group of
@@ -3861,7 +3856,7 @@ breakpoints will not cause program execution to halt when <code>continue</code>-
 formatting. Use the <code>print</code> and <code>print-state</code> commands for targeted inspection
 with formatting.</p>
 <h3 id="formatting-codes"><a class="header" href="#formatting-codes">Formatting codes</a></h3>
-<p>CIDR supports several different formatting codes which do the hard work of
+<p>Cider supports several different formatting codes which do the hard work of
 interpreting the data in human readable ways.</p>
 <div class="table-wrapper"><table><thead><tr><th>name</th><th>code</th><th>description</th></tr></thead><tbody>
 <tr><td>binary</td><td></td><td>The default, a bit vector with the msb on the left</td></tr>
