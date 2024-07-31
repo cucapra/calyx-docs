@@ -215,7 +215,7 @@
                     <span class="kw">if </span><span class="self">self</span>.memories.contains(parent) {
                         <span class="kw">let </span>has_external =
                             cell.get_attribute(ir::BoolAttr::External);
-                        <span class="kw">if </span>has_external.is_none() {
+                        <span class="kw">if </span>has_external.is_none() &amp;&amp; !cell.is_reference() {
                             <span class="kw">return </span><span class="prelude-val">Some</span>(cell.name());
                         }
                     }
