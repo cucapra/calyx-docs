@@ -89,6 +89,23 @@
 <span id="89">89</span>
 <span id="90">90</span>
 <span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::Id;
 <span class="kw">use </span>calyx_utils::WithPos;
@@ -99,7 +116,7 @@
 <span class="doccomment">/// Metadata stores a Map between each group name and data used in the metadata table (specified in PR #2022)
 </span><span class="attribute">#[derive(Default)]
 </span><span class="kw">pub struct </span>Metadata {
-    groups: LinkedHashMap&lt;Id, (usize, PathBuf)&gt;,
+    groups: LinkedHashMap&lt;(Id, Id), ((usize, usize), PathBuf)&gt;,
 }
 
 <span class="kw">impl </span>Metadata {
@@ -109,8 +126,14 @@
     }
 
     <span class="doccomment">/// Add a new entry to the metadata table
-    </span><span class="kw">fn </span>add_entry(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: Id, line: usize, path: PathBuf) {
-        <span class="kw">let </span>ins = <span class="self">self</span>.groups.insert(name, (line, path));
+    </span><span class="kw">fn </span>add_entry(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        comp_name: Id,
+        name: Id,
+        span: (usize, usize),
+        path: PathBuf,
+    ) {
+        <span class="kw">let </span>ins = <span class="self">self</span>.groups.insert((comp_name, name), (span, path));
         <span class="kw">if let </span><span class="prelude-val">Some</span>(_v) = ins {
             <span class="macro">panic!</span>(<span class="string">&quot;Two of same group name found&quot;</span>)
         }
@@ -121,9 +144,10 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">let </span>grps = <span class="kw-2">&amp;</span><span class="self">self</span>.groups;
 
-        <span class="kw">for </span>(name, (line_num, file)) <span class="kw">in </span>grps {
+        <span class="kw">for </span>((comp, name), ((start, end), file)) <span class="kw">in </span>grps {
             <span class="kw">let </span>file = file.to_str().unwrap();
-            <span class="macro">writeln!</span>(f, <span class="string">&quot;    {name}: {file} {line_num}&quot;</span>)<span class="question-mark">?</span>;
+
+            <span class="macro">writeln!</span>(f, <span class="string">&quot;{comp}.{name}: {file} {start}-{end}&quot;</span>)<span class="question-mark">?</span>;
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -149,9 +173,14 @@
                 <span class="kw">for </span>rcc_grp <span class="kw">in </span>cmpt_iter {
                     <span class="kw">let </span>grp = rcc_grp.borrow_mut();
                     <span class="kw">let </span>pos_data = grp.attributes.copy_span();
-                    <span class="kw">let </span>(file, line_num) = pos_data.get_line_num();
-                    table.add_entry(grp.name(), line_num, PathBuf::from(file));
-                }
+                    <span class="kw">let </span>(file, span) = pos_data.get_line_num();
+                    table.add_entry(
+                        component.name,
+                        grp.name(),
+                        span,
+                        PathBuf::from(file),
+                    ); <span class="comment">//hm may need to actually use the full name of the group
+                </span>}
 
                 ctx.metadata = <span class="prelude-val">Some</span>(table.to_string());
             }
@@ -174,10 +203,15 @@
         <span class="macro">assert_eq!</span>(empt_string, <span class="string">&quot;&quot;</span>);
 
         <span class="kw">let </span>path = PathBuf::from(<span class="string">&quot;/temp/path/for/testing.futil&quot;</span>);
-        data.add_entry(Id::from(<span class="string">&quot;group_1&quot;</span>), <span class="number">12</span>, path.clone());
-        data.add_entry(Id::from(<span class="string">&quot;group_2&quot;</span>), <span class="number">23</span>, path);
+        data.add_entry(
+            Id::from(<span class="string">&quot;main&quot;</span>),
+            Id::from(<span class="string">&quot;group_1&quot;</span>),
+            (<span class="number">12</span>, <span class="number">16</span>),
+            path.clone(),
+        );
+        data.add_entry(Id::from(<span class="string">&quot;main&quot;</span>), Id::from(<span class="string">&quot;group_2&quot;</span>), (<span class="number">23</span>, <span class="number">28</span>), path);
         <span class="kw">let </span>test_string = data.to_string();
-        <span class="macro">assert_eq!</span>(test_string, <span class="string">&quot;    group_1: /temp/path/for/testing.futil 12\n    group_2: /temp/path/for/testing.futil 23\n&quot;</span>)
+        <span class="macro">assert_eq!</span>(test_string, <span class="string">&quot;main.group_1: /temp/path/for/testing.futil 12-16\nmain.group_2: /temp/path/for/testing.futil 23-28\n&quot;</span>)
     }
 }
 </code></pre></div>
