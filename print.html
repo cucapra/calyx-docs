@@ -3944,7 +3944,7 @@ produces the correct values with the <a href="debug/../running-calyx/interpreter
 <p>The first step is disabling optimization passes and running the bare bones compilation pipeline.</p>
 <p>To disable the passes, add the flag <code>-p no-opt</code> to compiler invocation:</p>
 <ol>
-<li>For the compiler: <code>futil &lt;filename&gt; -p no-opt</code>.</li>
+<li>For the compiler: <code>calyx &lt;filename&gt; -p no-opt</code>.</li>
 <li>For <code>fud</code>: <code>fud ... -s calyx.flags " -p no-opt"</code>.</li>
 </ol>
 <p>If the output is still incorrect then one of the core compilation passes is incorrect.
@@ -4007,7 +4007,7 @@ is not used in the control program which can get in the way of minimizing
 programs.
 To get around this, run the <a href="https://docs.rs/calyx-opt/latest/calyx_opt/passes/struct.DeadGroupRemoval.html"><code>dead-group-removal</code></a> pass before the validation
 passes:</p>
-<pre><code>futil -p dead-group-removal -p validate ...
+<pre><code>calyx -p dead-group-removal -p validate ...
 </code></pre>
 <h3 id="reducing-dahlia-programs"><a class="header" href="#reducing-dahlia-programs">Reducing Dahlia Programs</a></h3>
 <p>If you're working with Dahlia programs, it is also possible to reduce the
@@ -4052,7 +4052,7 @@ values and identify other signals that we care about.</li>
 <p>Suppose that we want to make sure that <code>let0</code> is correctly performing its
 computation.
 We can generate the control FSM for the program using:</p>
-<pre><code>  futil &lt;filename&gt; -p top-down-cc
+<pre><code>  calyx &lt;filename&gt; -p top-down-cc
 </code></pre>
 <p>This generates a Calyx program with several new groups.
 We want to look for groups with the prefix <code>tdcc</code> which look something like
