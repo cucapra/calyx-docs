@@ -1458,6 +1458,16 @@
 <span id="1458">1458</span>
 <span id="1459">1459</span>
 <span id="1460">1460</span>
+<span id="1461">1461</span>
+<span id="1462">1462</span>
+<span id="1463">1463</span>
+<span id="1464">1464</span>
+<span id="1465">1465</span>
+<span id="1466">1466</span>
+<span id="1467">1467</span>
+<span id="1468">1468</span>
+<span id="1469">1469</span>
+<span id="1470">1470</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::passes;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
@@ -2171,6 +2181,8 @@
         </span>preds: Vec&lt;PredEdge&gt;,
         <span class="comment">// True if early_transitions are allowed
         </span>early_transitions: bool,
+        <span class="comment">// True if the `@fast` attribute has successfully been applied to the parent of this control
+        </span>has_fast_guarantee: bool,
     ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
         <span class="kw">match </span>con {
         <span class="comment">// See explanation of FSM states generated in [ir::TopDownCompileControl].
@@ -2206,7 +2218,7 @@
             // NOTE: We explicilty do not add `not_done` to the guard.
             // See explanation in [ir::TopDownCompileControl] to understand
             // why.
-            </span><span class="kw">if </span>early_transitions {
+            </span><span class="kw">if </span>early_transitions || has_fast_guarantee {
                 <span class="kw">for </span>(st, g) <span class="kw">in </span><span class="kw-2">&amp;</span>prev_states {
                     <span class="kw">let </span>early_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
                         group[<span class="string">&quot;go&quot;</span>] = g <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
@@ -2253,9 +2265,13 @@
         </span>early_transitions: bool,
     ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>prev = preds;
-        <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;</span>seq.stmts {
-            prev =
-                <span class="self">self</span>.calculate_states_recur(stmt, prev, early_transitions)<span class="question-mark">?</span>;
+        <span class="kw">for </span>(i, stmt) <span class="kw">in </span>seq.stmts.iter().enumerate() {
+            prev = <span class="self">self</span>.calculate_states_recur(
+                stmt,
+                prev,
+                early_transitions,
+                i &gt; <span class="number">0 </span>&amp;&amp; seq.get_attributes().has(BoolAttr::Fast),
+            )<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(prev)
     }
@@ -2288,6 +2304,7 @@
             <span class="kw-2">&amp;</span>if_stmt.tbranch,
             tru_transitions,
             early_transitions,
+            <span class="bool-val">false</span>,
         )<span class="question-mark">?</span>;
         <span class="comment">// Previous states transitioning into false branch need the conditional
         // to be false.
@@ -2305,6 +2322,7 @@
                 <span class="kw-2">&amp;</span>if_stmt.fbranch,
                 fal_transitions,
                 early_transitions,
+                <span class="bool-val">false</span>,
             )<span class="question-mark">?
         </span>};
 
@@ -2347,6 +2365,7 @@
             <span class="kw-2">&amp;</span>while_stmt.body,
             transitions,
             early_transitions,
+            <span class="bool-val">false</span>,
         )<span class="question-mark">?</span>;
 
         <span class="comment">// Step 3: The final out edges from the while come from:
@@ -2451,6 +2470,7 @@
             con,
             <span class="macro">vec!</span>[first_state],
             early_transitions,
+            <span class="bool-val">false</span>,
         )<span class="question-mark">?</span>;
         <span class="self">self</span>.add_nxt_transition(prev);
         <span class="prelude-val">Ok</span>(())

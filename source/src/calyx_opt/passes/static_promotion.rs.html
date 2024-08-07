@@ -681,6 +681,12 @@
 <span id="681">681</span>
 <span id="682">682</span>
 <span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     CompactionAnalysis, InferenceAnalysis, PromotionAnalysis,
 };
@@ -688,7 +694,7 @@
     Action, ConstructVisitor, Named, Order, ParseVal, PassOpt, VisResult,
     Visitor,
 };
-<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures};
+<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, BoolAttr, LibrarySignatures};
 <span class="kw">use </span>calyx_utils::CalyxResult;
 <span class="kw">use </span>ir::GetAttributes;
 <span class="kw">use </span>itertools::Itertools;
@@ -1173,6 +1179,12 @@
             })
         };
         <span class="self">self</span>.inference_analysis.fixup_ctrl(<span class="kw-2">&amp;mut </span>new_ctrl);
+
+        <span class="comment">// this might be part of a larger issue where passes remove some attributes they shouldn&#39;t
+        </span><span class="kw">if </span>s.get_attributes().has(BoolAttr::Fast) {
+            new_ctrl.get_mut_attributes().insert(BoolAttr::Fast, <span class="number">1</span>);
+        }
+
         <span class="prelude-val">Ok</span>(Action::change(new_ctrl))
     }
 
