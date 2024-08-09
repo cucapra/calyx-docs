@@ -5316,8 +5316,7 @@ pipeline.</p>
 <p>A queue is a standard data structure that maintains a set of elements in some total order.
 A new element is added to the queue using the <code>enqueue</code> operation, which is also known as <code>push</code> or <code>insert</code> in some contexts.
 Because of the total order, some element of the queue is the <em>most favorably ranked</em> element.
-We can read this element using the <code>peek</code> operation.
-We can also remove this element from the queue using the <code>dequeue</code> operation, which is also known as <code>pop</code> or <code>remove</code> in some contexts.</p>
+We can remove this element from the queue using the <code>dequeue</code> operation, which is also known as <code>pop</code> or <code>remove</code> in some contexts.</p>
 <p>We provision four types of queues in Calyx. The first three follow the same shared interface, while the fourth follows a slightly extended interface.
 The frontend is implemented using the <a href="frontends/../builder/calyx-py.html">Calyx builder library</a>, and the source code is heavily commented.</p>
 <p>We first describe the shared interface and their associated testing harness and then detail the four types of queues.</p>
@@ -5328,14 +5327,13 @@ The frontend is implemented using the <a href="frontends/../builder/calyx-py.htm
 Selects the operation to perform:
 <ul>
 <li><code>0</code>: <code>pop</code>.</li>
-<li><code>1</code>: <code>peek</code>.</li>
-<li><code>2</code>: <code>push</code>.</li>
+<li><code>1</code>: <code>push</code>.</li>
 </ul>
 </li>
 <li>Input port <code>value</code>, a 32-bit integer.
 The value to push.</li>
 <li>Register <code>ans</code>, a 32-bit integer that is passed to the queue by reference.
-If <code>peek</code> or <code>pop</code> is selected, the queue writes the result to this register.</li>
+If <code>pop</code> is selected, the queue writes the result to this register.</li>
 <li>Register <code>err</code>, a 1-bit integer that is passed to the queue by reference.
 The queue raises this flag in case of overflow or underflow.</li>
 </ul>
@@ -5377,22 +5375,53 @@ The control logic is straightforward, and proceeds in three parallel arms based 
 <p>Using a circular buffer usually entails incrementing indices modulo the buffer size.
 We use a trick to avoid this: we require the FIFO's length to be a power of two, say <code>2^k</code>, and we use adders of width <code>k</code> to increment the indices.
 This means we can just naively increment the indices forever and the wrap-around behavior we want is automatically provided by overflow.</p>
-<h2 id="pifo"><a class="header" href="#pifo">PIFO</a></h2>
+<h2 id="specialized-pifos"><a class="header" href="#specialized-pifos">Specialized PIFOs</a></h2>
 <p>A more complex instance is the priority queue.
 At time of enqueue, an element is associated with a priority.
 The most favorably ranked element is the one with the highest priority.
-Two elements may be pushed with the same priority.
-A priority queue that is additionally defined to break such ties in FIFO order is called a <em>push in, first out</em> (PIFO) queue.</p>
-<p>Our queue frontend generates a simple PIFO in Calyx; the source code is available <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/pifo.py">here</a>.</p>
-<p>Curiously, our PIFO has a ranking policy "baked in": it partitions incoming elements into two classes, and tries to emit elements from those two classes in a round-robin fashion.
-The PIFO operates in a work-conserving manner: if there are no elements from one class and there are elements from the other, we emit an element from the latter class even if it is not its turn.</p>
-<p>Internally, our PIFO maintains two sub-queues, one for each class.
-It also has a boundary value, which informs its partition policy: elements less than the boundary go to the first class, and other elements go to the second class.
-Control logic for pushing a new element is straightforward.
-The control logic for peeking and popping is more subtle because this is where the round-robin policy is enforced.
-A register tracks the class that we wish to emit from next.
-The register starts arbitrarily, and is updated after each successful emission from the desired class.
-It is left unchanged in the case when the desired class is empty and an element of the other class is emitted in the interest of work conservation.</p>
+Two elements may be pushed with the same priority; a priority queue that is additionally defined to break such ties in FIFO order is called a <em>push in, first out</em> (PIFO) queue.</p>
+<p>We provide PIFOs in the general sense (i.e., queues that accept <code>(item, rank)</code> pairs and enqueue based on <code>rank</code>) <a href="frontends/queues.html#minimum-binary-heap">shortly</a>. For now, let's focus on specialized PIFOs that have a policy "baked in" to the queue itself.</p>
+<p>We have two types of specialized PIFOs - Round Robin and Strict - that implement policies which determine which flow to pop from next. These PIFOs are parameterized over the number of flows, <code>n</code>, that they can arbitrate between.</p>
+<h3 id="round-robin-queues"><a class="header" href="#round-robin-queues">Round-Robin Queues</a></h3>
+<p>Round robin queues are PIFOs generalized to <code>n</code> flows that operate in a work
+conserving round-robin fashion. That is, if a flow is silent when it is its turn, that flow
+simply skips its turn and the next flow is offered service.</p>
+<p>Internally, it operates <code>n</code> subqueues.
+It takes in a list <code>boundaries</code> that must be of length <code>n</code>, using which the
+client can divide the incoming traffic into <code>n</code> flows.
+For example, if <code>n = 3</code> and the client passes boundaries <code>[133, 266, 400]</code>,
+packets will be divided into three flows according to the intervals: <code>[0, 133]</code>, <code>[134, 266]</code>, <code>[267, 400]</code>.</p>
+<ul>
+<li>At <code>push</code>, we check the <code>boundaries</code> list to determine which flow to push to.
+Take the boundaries example given earlier, <code>[133, 266, 400]</code>.
+If we push the value <code>89</code>, it will, under the hood, be pushed into subqueue 0 becuase <code>0 &lt;= 89 &lt;= 133</code>,
+and <code>305</code> will be pushed into subqueue 2 since <code>266 &lt;= 305 &lt;= 400</code>.</li>
+<li>The program maintains a <code>hot</code> pointer that starts off at 0, meaning the next subqueue to pop from is queue 0.
+At <code>pop</code> we first try to pop from <code>hot</code>. If this succeeds, great. If it fails,
+we increment <code>hot</code> and therefore continue to check all other flows
+in round robin fashion.</li>
+</ul>
+<p>The source code is available in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/strict_and_rr_queues/gen_strict_or_rr.py"><code>gen_strict_or_rr.py</code></a>, which takes as arguments <code>n</code>, <code>boundaries</code>, and handles to the subqueues it must administer. It also takes a boolean parameter <code>round_robin</code>, which, if <code>true</code>, results in the generation of a round-robin queue.</p>
+<h3 id="strict-queues"><a class="header" href="#strict-queues">Strict Queues</a></h3>
+<p>Strict queues support <code>n</code> flows as well, but instead, flows have a strict order of priority and this which determines popping
+order. That is, the second-highest priority subqueue will only be allowed to pop if the highest priority subqueue is empty.
+If the higher-priority flow get pushed to in the interim, the next call to <code>pop</code> will again try to pop from the highest priority flow.</p>
+<p>Like round-robin queues, it takes in a list <code>boundaries</code> that must be of length <code>n</code>, which divide the incoming traffic into <code>n</code> flows.
+For example, if <code>n = 3</code> and the client passes boundaries <code>[133, 266, 400]</code>,
+packets will be divided into three flows according to the intervals: <code>[0, 133]</code>, <code>[134, 266]</code>, <code>[267, 400]</code>.</p>
+<p>It takes a list <code>order</code> that must be of length <code>n</code>, which specifies the order
+of priority of the flows. For example, if <code>n = 3</code> and the client passes order
+<code>[1, 2, 0]</code>, then flow 1 (packets in range <code>[134, 266]</code>) has first priority, flow 2
+(packets in range <code>[267, 400]</code>) has second priority, and flow 0 (packets in range
+<code>[0, 133]</code>) has last priority.</p>
+<ul>
+<li>At push, we check the <code>boundaries</code> list to determine which flow to push to.
+Take the boundaries example given earlier, <code>[133, 266, 400]</code>.
+If we push the value <code>89</code>, it will, under the hood, be pushed into subqueue 0 becuase <code>0 &lt;= 89 &lt;= 133</code>,
+and <code>305</code> will be pushed into subqueue 2 since <code>266 &lt;= 305 &lt;= 400</code>.</li>
+<li>Pop first tries to pop from <code>order[0]</code>. If this succeeds, great. If it fails, it tries <code>order[1]</code>, and so on.</li>
+</ul>
+<p>The source code is available in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/strict_and_rr_queues/gen_strict_or_rr.py"><code>gen_strict_or_rr.py</code></a>, which takes as arguments <code>n</code>, <code>boundaries</code>, <code>order</code>, and handles to the subqueues it must administer. It also takes a boolean parameter <code>round_robin</code>, which, if <code>false</code>, results in the generation of a strict queue.</p>
 <h2 id="pifo-tree"><a class="header" href="#pifo-tree">PIFO Tree</a></h2>
 <p>A PIFO tree is a tree-shaped data structure in which each node is associated with a PIFO.
 The PIFO tree stores elements in its leaf PIFOs and scheduling metadata in its internal nodes.</p>
@@ -5400,28 +5429,26 @@ The PIFO tree stores elements in its leaf PIFOs and scheduling metadata in its i
 A variety of scheduling policies can be realized by manipulating the various priorities with which this data is inserted into each PIFO.
 Popping the most favorably ranked element from a PIFO tree is relatively straightforward: popping the root PIFO tells us which child PIFO to pop from next, and we recurse until we reach a leaf PIFO.
 We refer interested readers to <a href="https://dl.acm.org/doi/10.1145/2934872.2934899">this</a> research paper for more details on PIFO trees.</p>
-<p>Our frontend allows for the creation of PIFO trees of any height, but with two restrictions:</p>
-<ul>
-<li>The tree must be binary-branching.</li>
-<li>The scheduling policy at each internal node must be <em>round-robin</em>.</li>
-</ul>
+<p>Our frontend allows for the creation of PIFO trees of any height, number of children, and with
+the scheduling policy at each internal node being <em>round-robin</em> or <em>strict</em>.</p>
 <p>See the <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/pifo_tree.py">source code</a> for an example where we create a PIFO tree of height 2.
 Specifically, the example implements the PIFO tree described in §2 of <a href="https://dl.acm.org/doi/10.1145/3622845">this</a> research paper.</p>
 <p>Internally, our PIFO tree is implemented by leveraging the PIFO frontend.
 The PIFO frontend seeks to orchestrate two queues, which in the simple case will just be two FIFOs.
 However, it is easy to generalize those two queues: instead of being FIFOs, they can be PIFOs or even PIFO trees.</p>
+<p>We see a more complex example of a PIFO tree in [<code>complex_tree.py</code>] <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/complex_tree.py">complex_tree.py</a>. This tree does round robin between three children, two of which are strict queues and the other is a round robin queue. This tree has a height of 3. The overall structure is <code>rr(strict(A, B, C), rr(D, E, F), strict(G, H))</code>.</p>
 <h2 id="minimum-binary-heap"><a class="header" href="#minimum-binary-heap">Minimum Binary Heap</a></h2>
 <p>A minimum binary heap is another tree-shaped data structure where each node has at most two children.
 However, unlike the queues discussed above, a heap exposes an extended interface:
 in addition to the input ports and reference registers discussed above, a heap has an additional input <code>rank</code>.
 The <code>push</code> operation now accepts both a <code>value</code> and the <code>rank</code> that the user wishes to associate with that value.
-Consequently, a heap <em>orders</em> its elements by <code>rank</code>, with the <code>pop</code> (resp. <code>peek</code>) operation set to remove (resp. read) the element with minimal rank.</p>
+Consequently, a heap <em>orders</em> its elements by <code>rank</code>, with the <code>pop</code> operation set to remove the element with minimal rank.</p>
 <p>To maintain this ordering efficiently, a heap stores <code>(rank, value)</code> pairs in each node and takes special care to maintain the following invariant:</p>
 <blockquote>
 <p><strong>Min-Heap Property</strong>: for any given node <code>C</code>, if <code>P</code> is a parent of <code>C</code>, then the rank of <code>P</code> is less than or equal to the rank of <code>C</code>.</p>
 </blockquote>
 <p>To <code>push</code> or <code>pop</code> an element is easy at the top level: write to or read from the correct node, and then massage the tree to restore the Min-Heap Property.
-The <code>peek</code> operation is constant-time and <code>push</code> and <code>pop</code> are logarithmic in the size of the heap.</p>
+The <code>push</code> and <code>pop</code> operations are logarithmic in the size of the heap.</p>
 <p>Our frontend allows for the creation of minimum binary heaps in Calyx; the source code is available in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/binheap/binheap.py"><code>binheap.py</code></a>.</p>
 <p>One quirk of any minimum binary heap is its ambiguous behavior in the case of rank ties.
 More specifically, if the value <code>a</code> is pushed with some rank, and then later value <code>b</code> is pushed with the same rank, it's unclear which will be popped first.
@@ -5432,7 +5459,6 @@ It uses a counter <code>i</code> and instantiates, in turn, a binary heap that a
 <ul>
 <li>To push a pair <code>(r, v)</code> into <code>stable_binheap</code>, we craft a new 64-bit rank that incorporates the counter <code>i</code> (specifically, we compute <code>r &lt;&lt; 32 + i</code>), and we push <code>v</code> into our underlying binary heap with this new 64-bit rank. We also increment the counter <code>i</code>.</li>
 <li>To pop <code>stable_binheap</code>, we pop the underlying binary heap.</li>
-<li>To peek <code>stable_binheap</code>, we peek the underlying binary heap.</li>
 </ul>
 <p>The source code is available in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/binheap/stable_binheap.py"><code>stable_binheap.py</code></a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="mrxl"><a class="header" href="#mrxl">MrXL</a></h1>
