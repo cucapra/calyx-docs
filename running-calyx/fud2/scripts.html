@@ -185,9 +185,50 @@
 [calyx]
 base = "..."
 </code></pre>
-<h2 id="example-script"><a class="header" href="#example-script">Example Script</a></h2>
+<h2 id="example-script-in-high-level-rhai"><a class="header" href="#example-script-in-high-level-rhai">Example Script in High Level Rhai</a></h2>
 <p>We'll walk through how to write a script that adds support for using the <code>calyx</code> compiler.</p>
 <p>First, we need to define some states:</p>
+<pre><code class="language-rust ignore">export const calyx_state = state("calyx", ["futil"]);
+export const verilog_state = state("verilog", ["sv", "v"]);</code></pre>
+<p>These two lines define a <code>calyx</code> state and a <code>verilog</code> state. The <code>export</code> prefix means that these variables will be accessible to other scripts that <code>import "calyx"</code>.</p>
+<p>Now we will define an operation taking the <code>calyx</code> state to the <code>verilog</code> state. These operations define functions whose arguments are input files and return values are output values. Their bodies consist of commands that will transform those inputs to those outputs.</p>
+<pre><code class="language-rust ignore">// define an op called "calyx_to_verilog" taking a "calyx_state" to a "verilog_state".
+defop calyx_to_verilog(c: calyx_state) &gt;&gt; v: verilog_state {
+    // retrieve a variable from the fud2.toml config
+    let calyx_base = config("calyx.base");
+    // retrieve a variable from the config, or a default value
+    let calyx_exe = config_or("calyx.exe", "${calyx_base}/target/debug/calyx");
+    let args = config_or("calyx.args", "");
+
+    // specify a shell command to turn a calyx file "c" into a verilog file "v"
+    shell("${calyx_exe} -l ${calyx_base} -b verilog ${args} ${c} &gt; ${v});
+}</code></pre>
+<p>Counterintuitively, <code>c</code>, <code>v</code>, <code>calyx_base</code>, <code>calyx_exe</code>, and <code>args</code> do not contain the actual variable values. They contain identifiers which are replaced by the values at runtime. For example, <code>print(args)</code> would print a <code>$args</code> instead of the value assigned by the config. An op cannot take different code paths based on config values or different input/output file names.</p>
+<p>This example shows off nearly all of the features available for defining ops. Scripts can reuse functionality by exploiting the tools of Rhai scripting. For example, if we wanted to create a second, similar op <code>calyx_noverify</code>, we could factor the contents of <code>calyx_to_verilog</code> into a new function and call that function in both ops.</p>
+<pre><code>// a function constructing a shell command to take a calyx in_file to a verilog out_file
+// this function adds `add_args` as extra arguments to it's call to the calyx compiler
+fn calyx_cmd(in_file, out_file, add_args) {
+    let calyx_base = config("calyx.base");
+    let calyx_exe = config_or("calyx.exe", "${calyx_base}/target/debug/calyx");
+    let args = config_or("calyx.args", "");
+
+    shell("${calyx_exe} -l ${calyx_base} -b verilog ${args} ${add_args} ${in_file} &gt; ${out_file});
+}
+
+// define an op called "calyx_to_verilog" taking a "calyx_state" to a "verilog_state".
+defop calyx_to_verilog(c: calyx_state) &gt;&gt; v: verilog_state {
+    calyx_cmd(c, v, "");
+}
+
+// define an op called "calyx_noverify" taking a "calyx_state" to a "verilog_state".
+defop calyx_to_verilog(c: calyx_state) &gt;&gt; v: verilog_state {
+    calyx_cmd(c, v, "--disable-verify");
+}
+</code></pre>
+<h2 id="example-script-in-low-level-rhai"><a class="header" href="#example-script-in-low-level-rhai">Example Script in Low Level Rhai</a></h2>
+<p><code>fud2</code> generates Ninja build files. Low level Rhai gives more control over what generated build files look like.</p>
+<p>We'll walk through how to write a script that adds support for using the <code>calyx</code> compiler.</p>
+<p>Like before, we need to define some states:</p>
 <pre><code class="language-rust ignore">export const calyx_state = state("calyx", ["futil"]);
 export const verilog_state = state("verilog", ["sv", "v"]);</code></pre>
 <p>These two lines define a <code>calyx</code> state and a <code>verilog</code> state. The <code>export</code> prefix means that these variables will be accessible to other scripts that <code>import "calyx"</code>.</p>
@@ -241,6 +282,26 @@ print(c::calyx_setup);</code></pre>
 <p>The name for an import is always just the basename of the script file, without any extension.</p>
 </div>
 <h2 id="api"><a class="header" href="#api">API</a></h2>
+<h3 id="high-level-rhai"><a class="header" href="#high-level-rhai">High Level Rhai</a></h3>
+<h4 id="defop"><a class="header" href="#defop">defop</a></h4>
+<pre><code>defop &lt;op name&gt;(&lt;input1&gt;: &lt;input1 state&gt;, &lt;input2&gt;: &lt;input2 state&gt; ...) &gt;&gt; &lt;target1&gt;: &lt;target1 state&gt;, &lt;target2&gt;, &lt;target2 state&gt; ... {
+    &lt;statements&gt;
+}
+</code></pre>
+<p>Defines an op with <code>&lt;op name&gt;</code> which runs <code>&lt;statements&gt;</code> to generate target states from input states.</p>
+<p>The name, inputs, and targets are called the signature of the op. <code>&lt;statements&gt;</code> is called the body of the op.</p>
+<h4 id="shell"><a class="header" href="#shell">shell</a></h4>
+<pre><code>shell(&lt;string&gt;)
+</code></pre>
+<p>When called in the body of an op, that op will run <code>&lt;string&gt;</code> as a shell command to generate its targets. It is an error to call <code>shell</code> outside of the body of an op. Additionally, it is an error to call <code>shell</code> in the body of an op in which <code>shell_deps</code> was called prior.</p>
+<p>In the generated Ninja code, <code>shell</code> will create both a <code>rule</code> wrapping the shell command and a <code>build</code> command that invokes that rule. When a <code>defop</code> contains multiple <code>shell</code> commands, <code>fud2</code> automatically generates Ninja dependencies among the <code>build</code> command to ensure they run in order.</p>
+<h4 id="shell_deps"><a class="header" href="#shell_deps">shell_deps</a></h4>
+<pre><code>shell_deps(&lt;string&gt;, [&lt;dep1&gt;, &lt;dep2&gt;, ...], [&lt;target1&gt;, &lt;target2&gt;, ..])
+</code></pre>
+<p>When called in the body of an op, that op will run <code>&lt;string&gt;</code> as a shell command if it needs to generate <code>&lt;target1&gt;, &lt;target2&gt;, ...</code> from <code>&lt;dep1&gt;, &lt;dep2&gt;, ...</code>. It is an error to call <code>shell_deps</code> outside of the body of an op. Additionally, it is an error to call <code>shell_deps</code> in the body of an op in which <code>shell</code>  was called prior.</p>
+<p>Targets and deps are either strings, such as <code>"file1"</code>, or identifiers, such as if <code>c: calyx</code> existed in the signature of an op then <code>c</code> could be used as a target or dep.</p>
+<p>A call to <code>shell_deps</code> corresponds directly to a Ninja rule in the Ninja file generated by <code>fud2</code>.</p>
+<h3 id="low-level-rhai"><a class="header" href="#low-level-rhai">Low Level Rhai</a></h3>
 <p>Currently, the Rhai API is almost identical to the Rust API. However <code>Emitter::add_file</code> is not currently supported. And <code>Emitter::var</code> is renamed to <code>_var</code> because <code>var</code> is a reserved keyword in Rhai.</p>
 <h3 id="adding-to-the-api"><a class="header" href="#adding-to-the-api">Adding to the API</a></h3>
 <p>If there is something that is hard to do in Rhai, it is straightforward to <a href="https://rhai.rs/book/rust/functions.html">register a Rust function</a> so that it is available from Rhai.</p>
