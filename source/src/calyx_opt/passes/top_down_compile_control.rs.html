@@ -1468,6 +1468,8 @@
 <span id="1468">1468</span>
 <span id="1469">1469</span>
 <span id="1470">1470</span>
+<span id="1471">1471</span>
+<span id="1472">1472</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::passes;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
@@ -2685,24 +2687,18 @@
 }
 
 <span class="doccomment">/// Helper function to emit profiling information when the control consists of a single group.
-</span><span class="kw">fn </span>emit_single_enable(
+</span><span class="kw">fn </span>extract_single_enable(
     con: <span class="kw-2">&amp;mut </span>ir::Control,
     component: Id,
-    json_out_file: <span class="kw-2">&amp;</span>OutputFile,
-) {
+) -&gt; <span class="prelude-ty">Option</span>&lt;SingleEnableInfo&gt; {
     <span class="kw">if let </span>ir::Control::Enable(enable) = con {
-        <span class="kw">let </span><span class="kw-2">mut </span>profiling_info_set: HashSet&lt;ProfilingInfo&gt; = HashSet::new();
-        profiling_info_set.insert(ProfilingInfo::SingleEnable(
-            SingleEnableInfo {
-                component,
-                group: enable.group.borrow().name(),
-            },
-        ));
-        <span class="kw">let _ </span>= serde_json::to_writer_pretty(
-            json_out_file.get_write(),
-            <span class="kw-2">&amp;</span>profiling_info_set,
-        );
-    }
+        <span class="kw">return </span><span class="prelude-val">Some</span>(SingleEnableInfo {
+            component,
+            group: enable.group.borrow().name(),
+        });
+    } <span class="kw">else </span>{
+        <span class="prelude-val">None
+    </span>}
 }
 
 <span class="kw">impl </span>Visitor <span class="kw">for </span>TopDownCompileControl {
@@ -2714,8 +2710,11 @@
     ) -&gt; VisResult {
         <span class="kw">let </span><span class="kw-2">mut </span>con = comp.control.borrow_mut();
         <span class="kw">if </span><span class="macro">matches!</span>(<span class="kw-2">*</span>con, ir::Control::Empty(..) | ir::Control::Enable(..)) {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(json_out_file) = <span class="kw-2">&amp;</span><span class="self">self</span>.dump_fsm_json {
-                emit_single_enable(<span class="kw-2">&amp;mut </span>con, comp.name, json_out_file);
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(enable_info) =
+                extract_single_enable(<span class="kw-2">&amp;mut </span>con, comp.name)
+            {
+                <span class="self">self</span>.fsm_groups
+                    .insert(ProfilingInfo::SingleEnable(enable_info));
             }
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Stop);
         }
@@ -2929,13 +2928,18 @@
         <span class="kw">let </span>comp_group =
             sch.realize_schedule(<span class="self">self</span>.dump_fsm, <span class="kw-2">&amp;mut </span><span class="self">self</span>.fsm_groups, fsm_impl);
 
+        <span class="prelude-val">Ok</span>(Action::change(ir::Control::enable(comp_group)))
+    }
+
+    <span class="doccomment">/// If requested, emit FSM json after all components are processed
+    </span><span class="kw">fn </span>finish_context(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _ctx: <span class="kw-2">&amp;mut </span>calyx_ir::Context) -&gt; VisResult {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(json_out_file) = <span class="kw-2">&amp;</span><span class="self">self</span>.dump_fsm_json {
             <span class="kw">let _ </span>= serde_json::to_writer_pretty(
                 json_out_file.get_write(),
                 <span class="kw-2">&amp;</span><span class="self">self</span>.fsm_groups,
             );
         }
-        <span class="prelude-val">Ok</span>(Action::change(ir::Control::enable(comp_group)))
+        <span class="prelude-val">Ok</span>(Action::Continue)
     }
 }
 </code></pre></div>
