@@ -783,6 +783,15 @@
 <span id="783">783</span>
 <span id="784">784</span>
 <span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
@@ -1322,6 +1331,15 @@
             <span class="self">self</span>.dst = new_dst;
         }
         <span class="self">self</span>.guard.for_each(<span class="kw-2">&amp;mut </span>|port| f(<span class="kw-2">&amp;</span>port).map(Guard::port))
+    }
+
+    <span class="doccomment">/// Iterate through all ports contained within the assignment.
+    </span><span class="kw">pub fn </span>iter_ports(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;Port&gt;&gt; {
+        <span class="self">self</span>.guard
+            .all_ports()
+            .into_iter()
+            .chain(std::iter::once(Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.dst)))
+            .chain(std::iter::once(Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.src)))
     }
 }
 
