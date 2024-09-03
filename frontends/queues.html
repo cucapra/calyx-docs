@@ -182,7 +182,14 @@ Because of the total order, some element of the queue is the <em>most favorably 
 We can remove this element from the queue using the <code>dequeue</code> operation, which is also known as <code>pop</code> or <code>remove</code> in some contexts.</p>
 <p>We provision four types of queues in Calyx. The first three follow the same shared interface, while the fourth follows a slightly extended interface.
 The frontend is implemented using the <a href="../builder/calyx-py.html">Calyx builder library</a>, and the source code is heavily commented.</p>
-<p>We first describe the shared interface and their associated testing harness and then detail the four types of queues.</p>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<ol>
+<li>Install <a href="https://flit.readthedocs.io/en/latest/#install">flit</a></li>
+<li>Install the <code>queues</code> package:</li>
+</ol>
+<pre><code>    $ cd frontends/queues/
+    $ flit install --symlink
+</code></pre>
 <h2 id="shared-interface"><a class="header" href="#shared-interface">Shared Interface</a></h2>
 <p>All queues in Calyx expose the same interface.</p>
 <ul>
@@ -207,31 +214,31 @@ The queue raises this flag in case of overflow or underflow.</li>
 It accepts as a command line argument the number of operations to generate.
 It also takes a flag, <code>--no-err</code>, that generates a special sequence of operations that does not trigger any overflow or underflow errors.
 If this flag is provided, the queue's length must also be provided.
-The Python code is in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/queue_data_gen.py"><code>queue_data_gen.py</code></a>.</p>
+The Python code is in <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/test_data_gen/gen_oracle_data.py"><code>gen_oracle_data.py</code></a>.</p>
 <h4 id="oracles"><a class="header" href="#oracles">Oracles</a></h4>
 <p>Next, we have a Python module <em>for each kind of queue</em> that reads the <code>.data</code> file, simulates the queue in Python, and dumps the expected result out in a Calyx <code>.expect</code> file.
 This Python code is aware of our <a href="#shared-interface">shared interface</a>.
-The oracles are in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/fifo_oracle.py"><code>fifo_oracle.py</code></a>, <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/pifo_oracle.py"><code>pifo_oracle.py</code></a>, <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/pifo_tree_oracle.py"><code>pifo_tree_oracle.py</code></a>, and <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/binheap_oracle.py"><code>binheap_oracle.py</code></a>.
-They all appeal to pure-Python implementations of the queues, which are found in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/queues.py"><code>queues.py</code></a>.
+The oracles are in <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/test_data_gen/fifo_oracle.py"><code>fifo_oracle.py</code></a>, <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/test_data_gen/pifo_oracle.py"><code>pifo_oracle.py</code></a>, <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/test_data_gen/pifo_tree_oracle.py"><code>pifo_tree_oracle.py</code></a>, and <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/test_data_gen/binheap_oracle.py"><code>binheap_oracle.py</code></a>.
+They all appeal to pure-Python implementations of the queues, which are found in <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/test_data_gen/queues.py"><code>queues.py</code></a>.
 Each oracle also requires, as command line arguments, the number of operations being simulated and the queue's length.</p>
 <h4 id="queue-call"><a class="header" href="#queue-call">Queue Call</a></h4>
 <p>The steps above lay out <code>.data</code> and <code>.expect</code> files for our Calyx code.
 To actually pass a series of commands to a given eDSL queue implementation, we need to call the queue repeatedly with memories parsed from the <code>.data</code> file.
 Unlike the above, which happens at the pure Python level, this needs to happen at the eDSL level.</p>
-<p>This is exactly what <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/queue_call.py"><code>queue_call.py</code></a> does.
+<p>This is exactly what <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/queues/queue_call.py"><code>queue_call.py</code></a> does.
 It accepts as a Python-level argument a handle to the queue component that is to be tested.
 It inserts a <code>main</code> component that reads the <code>.data</code> file and calls the queue component repeatedly.
 If a command-line flag, <code>--keepgoing</code>, is provided, the <code>main</code> component will ignore any overflow or underflow errors raised by the queue component and will complete the entire sequence of operations.
 If not, the <code>main</code> component will stop after the queue component first raises an error.</p>
 <h4 id="putting-it-all-together"><a class="header" href="#putting-it-all-together">Putting It All Together</a></h4>
-<p>The testing harness can be executed, for all our queues, by running the shell script <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/calyx/gen_queue_data_expect.sh"><code>gen_queue_data_expect.sh</code></a>.
+<p>The testing harness can be executed, for all our queues, by running the shell script <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/test_data_gen/gen_test_data.sh"><code>gen_test_data.sh</code></a>.
 This generates the <code>.data</code> and <code>.expect</code> files for each queue.</p>
 <p>Then, each queue can be tested using our <code>runt</code> setup.
-The queue-generating Python files themselves expect command-line arguments (the number of operations and the optional <code>--keepgoing</code> flag) and you can see these being passed in the <a href="https://github.com/calyxir/calyx/blob/a4c2442675d3419be6d2f5cf912aa3f804b3c4ab/runt.toml#L131-L144">relevant <code>runt</code> stanza</a>.</p>
+The queue-generating Python files themselves expect command-line arguments (the number of operations and the optional <code>--keepgoing</code> flag) and you can see these being passed in the <a href="https://github.com/calyxir/calyx/blob/8221fe35c4a5bd9279547452c16bf29550396a03/runt.toml#L109-L127">relevant <code>runt</code> stanza</a>.</p>
 <h2 id="fifo"><a class="header" href="#fifo">FIFO</a></h2>
 <p>The most basic queue is the <em>first in, first out</em> (FIFO) queue: the most favorably ranked element is just the one that was added to the queue first.</p>
 <p>Our queue frontend generates a simple FIFO in Calyx.
-The source code is available <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/fifo.py">here</a>.</p>
+The source code is available <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/queues/fifo.py">here</a>.</p>
 <p>Internally, our FIFO queue is implemented as a circular buffer.
 One register marks the next element that would be popped, another marks the next cell into which an element would be pushed, and a third marks the number of elements in the queue.
 The control logic is straightforward, and proceeds in three parallel arms based on the operation requested.</p>
@@ -257,14 +264,14 @@ packets will be divided into three flows according to the intervals: <code>[0, 1
 <ul>
 <li>At <code>push</code>, we check the <code>boundaries</code> list to determine which flow to push to.
 Take the boundaries example given earlier, <code>[133, 266, 400]</code>.
-If we push the value <code>89</code>, it will, under the hood, be pushed into subqueue 0 becuase <code>0 &lt;= 89 &lt;= 133</code>,
+If we push the value <code>89</code>, it will, under the hood, be pushed into subqueue 0 because <code>0 &lt;= 89 &lt;= 133</code>,
 and <code>305</code> will be pushed into subqueue 2 since <code>266 &lt;= 305 &lt;= 400</code>.</li>
 <li>The program maintains a <code>hot</code> pointer that starts off at 0, meaning the next subqueue to pop from is queue 0.
 At <code>pop</code> we first try to pop from <code>hot</code>. If this succeeds, great. If it fails,
 we increment <code>hot</code> and therefore continue to check all other flows
 in round robin fashion.</li>
 </ul>
-<p>The source code is available in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/strict_and_rr_queues/gen_strict_or_rr.py"><code>gen_strict_or_rr.py</code></a>, which takes as arguments <code>n</code>, <code>boundaries</code>, and handles to the subqueues it must administer. It also takes a boolean parameter <code>round_robin</code>, which, if <code>true</code>, results in the generation of a round-robin queue.</p>
+<p>The source code is available in <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/queues/strict_or_rr.py"><code>strict_or_rr.py</code></a>, which takes as arguments <code>n</code>, <code>boundaries</code>, and handles to the subqueues it must administer. It also takes a boolean parameter <code>round_robin</code>, which, if <code>true</code>, results in the generation of a round-robin queue.</p>
 <h3 id="strict-queues"><a class="header" href="#strict-queues">Strict Queues</a></h3>
 <p>Strict queues support <code>n</code> flows as well, but instead, flows have a strict order of priority and this which determines popping
 order. That is, the second-highest priority subqueue will only be allowed to pop if the highest priority subqueue is empty.
@@ -280,11 +287,11 @@ of priority of the flows. For example, if <code>n = 3</code> and the client pass
 <ul>
 <li>At push, we check the <code>boundaries</code> list to determine which flow to push to.
 Take the boundaries example given earlier, <code>[133, 266, 400]</code>.
-If we push the value <code>89</code>, it will, under the hood, be pushed into subqueue 0 becuase <code>0 &lt;= 89 &lt;= 133</code>,
+If we push the value <code>89</code>, it will, under the hood, be pushed into subqueue 0 because <code>0 &lt;= 89 &lt;= 133</code>,
 and <code>305</code> will be pushed into subqueue 2 since <code>266 &lt;= 305 &lt;= 400</code>.</li>
 <li>Pop first tries to pop from <code>order[0]</code>. If this succeeds, great. If it fails, it tries <code>order[1]</code>, and so on.</li>
 </ul>
-<p>The source code is available in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/strict_and_rr_queues/gen_strict_or_rr.py"><code>gen_strict_or_rr.py</code></a>, which takes as arguments <code>n</code>, <code>boundaries</code>, <code>order</code>, and handles to the subqueues it must administer. It also takes a boolean parameter <code>round_robin</code>, which, if <code>false</code>, results in the generation of a strict queue.</p>
+<p>The source code is available in [<code>gen_strict_or_rr.py</code>][gen_strict_or_rr.py], which takes as arguments <code>n</code>, <code>boundaries</code>, <code>order</code>, and handles to the subqueues it must administer. It also takes a boolean parameter <code>round_robin</code>, which, if <code>false</code>, results in the generation of a strict queue.</p>
 <h2 id="pifo-tree"><a class="header" href="#pifo-tree">PIFO Tree</a></h2>
 <p>A PIFO tree is a tree-shaped data structure in which each node is associated with a PIFO.
 The PIFO tree stores elements in its leaf PIFOs and scheduling metadata in its internal nodes.</p>
@@ -294,12 +301,12 @@ Popping the most favorably ranked element from a PIFO tree is relatively straigh
 We refer interested readers to <a href="https://dl.acm.org/doi/10.1145/2934872.2934899">this</a> research paper for more details on PIFO trees.</p>
 <p>Our frontend allows for the creation of PIFO trees of any height, number of children, and with
 the scheduling policy at each internal node being <em>round-robin</em> or <em>strict</em>.</p>
-<p>See the <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/pifo_tree.py">source code</a> for an example where we create a PIFO tree of height 2.
+<p>See the <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/tests/pifo_tree_test.py">source code</a> for an example where we create a PIFO tree of height 2.
 Specifically, the example implements the PIFO tree described in §2 of <a href="https://dl.acm.org/doi/10.1145/3622845">this</a> research paper.</p>
 <p>Internally, our PIFO tree is implemented by leveraging the PIFO frontend.
 The PIFO frontend seeks to orchestrate two queues, which in the simple case will just be two FIFOs.
 However, it is easy to generalize those two queues: instead of being FIFOs, they can be PIFOs or even PIFO trees.</p>
-<p>We see a more complex example of a PIFO tree in [<code>complex_tree.py</code>] <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/complex_tree.py">complex_tree.py</a>. This tree does round robin between three children, two of which are strict queues and the other is a round robin queue. This tree has a height of 3. The overall structure is <code>rr(strict(A, B, C), rr(D, E, F), strict(G, H))</code>.</p>
+<p>We see a more complex example of a PIFO tree in [<code>complex_tree_test.py</code>] <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/tests/complex_tree_test.py">complex_tree_test.py</a>. This tree does round robin between three children, two of which are strict queues and the other is a round robin queue. This tree has a height of 3. The overall structure is <code>rr(strict(A, B, C), rr(D, E, F), strict(G, H))</code>.</p>
 <h2 id="minimum-binary-heap"><a class="header" href="#minimum-binary-heap">Minimum Binary Heap</a></h2>
 <p>A minimum binary heap is another tree-shaped data structure where each node has at most two children.
 However, unlike the queues discussed above, a heap exposes an extended interface:
@@ -312,7 +319,7 @@ Consequently, a heap <em>orders</em> its elements by <code>rank</code>, with the
 </blockquote>
 <p>To <code>push</code> or <code>pop</code> an element is easy at the top level: write to or read from the correct node, and then massage the tree to restore the Min-Heap Property.
 The <code>push</code> and <code>pop</code> operations are logarithmic in the size of the heap.</p>
-<p>Our frontend allows for the creation of minimum binary heaps in Calyx; the source code is available in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/binheap/binheap.py"><code>binheap.py</code></a>.</p>
+<p>Our frontend allows for the creation of minimum binary heaps in Calyx; the source code is available in <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/queues/binheap/binheap.py"><code>binheap.py</code></a>.</p>
 <p>One quirk of any minimum binary heap is its ambiguous behavior in the case of rank ties.
 More specifically, if the value <code>a</code> is pushed with some rank, and then later value <code>b</code> is pushed with the same rank, it's unclear which will be popped first.
 Often, it's desirable to break such ties in FIFO order: that is we'd like a guarantee that <code>a</code> will be popped first.
@@ -323,7 +330,7 @@ It uses a counter <code>i</code> and instantiates, in turn, a binary heap that a
 <li>To push a pair <code>(r, v)</code> into <code>stable_binheap</code>, we craft a new 64-bit rank that incorporates the counter <code>i</code> (specifically, we compute <code>r &lt;&lt; 32 + i</code>), and we push <code>v</code> into our underlying binary heap with this new 64-bit rank. We also increment the counter <code>i</code>.</li>
 <li>To pop <code>stable_binheap</code>, we pop the underlying binary heap.</li>
 </ul>
-<p>The source code is available in <a href="https://github.com/calyxir/calyx/blob/main/calyx-py/test/correctness/queues/binheap/stable_binheap.py"><code>stable_binheap.py</code></a>.</p>
+<p>The source code is available in <a href="https://github.com/calyxir/calyx/blob/main/frontends/queues/queues/binheap/stable_binheap.py"><code>stable_binheap.py</code></a>.</p>
 
                     </main>
 
