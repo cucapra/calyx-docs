@@ -214,7 +214,7 @@ Inside the component, we can use the cell as usual.</p>
 <pre><code>component add_one() -&gt; () { ... }
 component main() -&gt; () {
   cells {
-    A = comb_mem_d1(32, 4, 3); // A memory passed by reference.
+    A = comb_mem_d1(32, 4, 3); // A memory that will be passed by reference.
     one = add_one();
     ...
   }
