@@ -1003,19 +1003,414 @@
 <span id="1003">1003</span>
 <span id="1004">1004</span>
 <span id="1005">1005</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphColoring, StaticFSM, StaticSchedule};
-<span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, ParseVal, PassOpt, VisResult, Visitor};
-<span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
+<span id="1006">1006</span>
+<span id="1007">1007</span>
+<span id="1008">1008</span>
+<span id="1009">1009</span>
+<span id="1010">1010</span>
+<span id="1011">1011</span>
+<span id="1012">1012</span>
+<span id="1013">1013</span>
+<span id="1014">1014</span>
+<span id="1015">1015</span>
+<span id="1016">1016</span>
+<span id="1017">1017</span>
+<span id="1018">1018</span>
+<span id="1019">1019</span>
+<span id="1020">1020</span>
+<span id="1021">1021</span>
+<span id="1022">1022</span>
+<span id="1023">1023</span>
+<span id="1024">1024</span>
+<span id="1025">1025</span>
+<span id="1026">1026</span>
+<span id="1027">1027</span>
+<span id="1028">1028</span>
+<span id="1029">1029</span>
+<span id="1030">1030</span>
+<span id="1031">1031</span>
+<span id="1032">1032</span>
+<span id="1033">1033</span>
+<span id="1034">1034</span>
+<span id="1035">1035</span>
+<span id="1036">1036</span>
+<span id="1037">1037</span>
+<span id="1038">1038</span>
+<span id="1039">1039</span>
+<span id="1040">1040</span>
+<span id="1041">1041</span>
+<span id="1042">1042</span>
+<span id="1043">1043</span>
+<span id="1044">1044</span>
+<span id="1045">1045</span>
+<span id="1046">1046</span>
+<span id="1047">1047</span>
+<span id="1048">1048</span>
+<span id="1049">1049</span>
+<span id="1050">1050</span>
+<span id="1051">1051</span>
+<span id="1052">1052</span>
+<span id="1053">1053</span>
+<span id="1054">1054</span>
+<span id="1055">1055</span>
+<span id="1056">1056</span>
+<span id="1057">1057</span>
+<span id="1058">1058</span>
+<span id="1059">1059</span>
+<span id="1060">1060</span>
+<span id="1061">1061</span>
+<span id="1062">1062</span>
+<span id="1063">1063</span>
+<span id="1064">1064</span>
+<span id="1065">1065</span>
+<span id="1066">1066</span>
+<span id="1067">1067</span>
+<span id="1068">1068</span>
+<span id="1069">1069</span>
+<span id="1070">1070</span>
+<span id="1071">1071</span>
+<span id="1072">1072</span>
+<span id="1073">1073</span>
+<span id="1074">1074</span>
+<span id="1075">1075</span>
+<span id="1076">1076</span>
+<span id="1077">1077</span>
+<span id="1078">1078</span>
+<span id="1079">1079</span>
+<span id="1080">1080</span>
+<span id="1081">1081</span>
+<span id="1082">1082</span>
+<span id="1083">1083</span>
+<span id="1084">1084</span>
+<span id="1085">1085</span>
+<span id="1086">1086</span>
+<span id="1087">1087</span>
+<span id="1088">1088</span>
+<span id="1089">1089</span>
+<span id="1090">1090</span>
+<span id="1091">1091</span>
+<span id="1092">1092</span>
+<span id="1093">1093</span>
+<span id="1094">1094</span>
+<span id="1095">1095</span>
+<span id="1096">1096</span>
+<span id="1097">1097</span>
+<span id="1098">1098</span>
+<span id="1099">1099</span>
+<span id="1100">1100</span>
+<span id="1101">1101</span>
+<span id="1102">1102</span>
+<span id="1103">1103</span>
+<span id="1104">1104</span>
+<span id="1105">1105</span>
+<span id="1106">1106</span>
+<span id="1107">1107</span>
+<span id="1108">1108</span>
+<span id="1109">1109</span>
+<span id="1110">1110</span>
+<span id="1111">1111</span>
+<span id="1112">1112</span>
+<span id="1113">1113</span>
+<span id="1114">1114</span>
+<span id="1115">1115</span>
+<span id="1116">1116</span>
+<span id="1117">1117</span>
+<span id="1118">1118</span>
+<span id="1119">1119</span>
+<span id="1120">1120</span>
+<span id="1121">1121</span>
+<span id="1122">1122</span>
+<span id="1123">1123</span>
+<span id="1124">1124</span>
+<span id="1125">1125</span>
+<span id="1126">1126</span>
+<span id="1127">1127</span>
+<span id="1128">1128</span>
+<span id="1129">1129</span>
+<span id="1130">1130</span>
+<span id="1131">1131</span>
+<span id="1132">1132</span>
+<span id="1133">1133</span>
+<span id="1134">1134</span>
+<span id="1135">1135</span>
+<span id="1136">1136</span>
+<span id="1137">1137</span>
+<span id="1138">1138</span>
+<span id="1139">1139</span>
+<span id="1140">1140</span>
+<span id="1141">1141</span>
+<span id="1142">1142</span>
+<span id="1143">1143</span>
+<span id="1144">1144</span>
+<span id="1145">1145</span>
+<span id="1146">1146</span>
+<span id="1147">1147</span>
+<span id="1148">1148</span>
+<span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
+<span id="1152">1152</span>
+<span id="1153">1153</span>
+<span id="1154">1154</span>
+<span id="1155">1155</span>
+<span id="1156">1156</span>
+<span id="1157">1157</span>
+<span id="1158">1158</span>
+<span id="1159">1159</span>
+<span id="1160">1160</span>
+<span id="1161">1161</span>
+<span id="1162">1162</span>
+<span id="1163">1163</span>
+<span id="1164">1164</span>
+<span id="1165">1165</span>
+<span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
+<span id="1170">1170</span>
+<span id="1171">1171</span>
+<span id="1172">1172</span>
+<span id="1173">1173</span>
+<span id="1174">1174</span>
+<span id="1175">1175</span>
+<span id="1176">1176</span>
+<span id="1177">1177</span>
+<span id="1178">1178</span>
+<span id="1179">1179</span>
+<span id="1180">1180</span>
+<span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
+<span id="1184">1184</span>
+<span id="1185">1185</span>
+<span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
+<span id="1189">1189</span>
+<span id="1190">1190</span>
+<span id="1191">1191</span>
+<span id="1192">1192</span>
+<span id="1193">1193</span>
+<span id="1194">1194</span>
+<span id="1195">1195</span>
+<span id="1196">1196</span>
+<span id="1197">1197</span>
+<span id="1198">1198</span>
+<span id="1199">1199</span>
+<span id="1200">1200</span>
+<span id="1201">1201</span>
+<span id="1202">1202</span>
+<span id="1203">1203</span>
+<span id="1204">1204</span>
+<span id="1205">1205</span>
+<span id="1206">1206</span>
+<span id="1207">1207</span>
+<span id="1208">1208</span>
+<span id="1209">1209</span>
+<span id="1210">1210</span>
+<span id="1211">1211</span>
+<span id="1212">1212</span>
+<span id="1213">1213</span>
+<span id="1214">1214</span>
+<span id="1215">1215</span>
+<span id="1216">1216</span>
+<span id="1217">1217</span>
+<span id="1218">1218</span>
+<span id="1219">1219</span>
+<span id="1220">1220</span>
+<span id="1221">1221</span>
+<span id="1222">1222</span>
+<span id="1223">1223</span>
+<span id="1224">1224</span>
+<span id="1225">1225</span>
+<span id="1226">1226</span>
+<span id="1227">1227</span>
+<span id="1228">1228</span>
+<span id="1229">1229</span>
+<span id="1230">1230</span>
+<span id="1231">1231</span>
+<span id="1232">1232</span>
+<span id="1233">1233</span>
+<span id="1234">1234</span>
+<span id="1235">1235</span>
+<span id="1236">1236</span>
+<span id="1237">1237</span>
+<span id="1238">1238</span>
+<span id="1239">1239</span>
+<span id="1240">1240</span>
+<span id="1241">1241</span>
+<span id="1242">1242</span>
+<span id="1243">1243</span>
+<span id="1244">1244</span>
+<span id="1245">1245</span>
+<span id="1246">1246</span>
+<span id="1247">1247</span>
+<span id="1248">1248</span>
+<span id="1249">1249</span>
+<span id="1250">1250</span>
+<span id="1251">1251</span>
+<span id="1252">1252</span>
+<span id="1253">1253</span>
+<span id="1254">1254</span>
+<span id="1255">1255</span>
+<span id="1256">1256</span>
+<span id="1257">1257</span>
+<span id="1258">1258</span>
+<span id="1259">1259</span>
+<span id="1260">1260</span>
+<span id="1261">1261</span>
+<span id="1262">1262</span>
+<span id="1263">1263</span>
+<span id="1264">1264</span>
+<span id="1265">1265</span>
+<span id="1266">1266</span>
+<span id="1267">1267</span>
+<span id="1268">1268</span>
+<span id="1269">1269</span>
+<span id="1270">1270</span>
+<span id="1271">1271</span>
+<span id="1272">1272</span>
+<span id="1273">1273</span>
+<span id="1274">1274</span>
+<span id="1275">1275</span>
+<span id="1276">1276</span>
+<span id="1277">1277</span>
+<span id="1278">1278</span>
+<span id="1279">1279</span>
+<span id="1280">1280</span>
+<span id="1281">1281</span>
+<span id="1282">1282</span>
+<span id="1283">1283</span>
+<span id="1284">1284</span>
+<span id="1285">1285</span>
+<span id="1286">1286</span>
+<span id="1287">1287</span>
+<span id="1288">1288</span>
+<span id="1289">1289</span>
+<span id="1290">1290</span>
+<span id="1291">1291</span>
+<span id="1292">1292</span>
+<span id="1293">1293</span>
+<span id="1294">1294</span>
+<span id="1295">1295</span>
+<span id="1296">1296</span>
+<span id="1297">1297</span>
+<span id="1298">1298</span>
+<span id="1299">1299</span>
+<span id="1300">1300</span>
+<span id="1301">1301</span>
+<span id="1302">1302</span>
+<span id="1303">1303</span>
+<span id="1304">1304</span>
+<span id="1305">1305</span>
+<span id="1306">1306</span>
+<span id="1307">1307</span>
+<span id="1308">1308</span>
+<span id="1309">1309</span>
+<span id="1310">1310</span>
+<span id="1311">1311</span>
+<span id="1312">1312</span>
+<span id="1313">1313</span>
+<span id="1314">1314</span>
+<span id="1315">1315</span>
+<span id="1316">1316</span>
+<span id="1317">1317</span>
+<span id="1318">1318</span>
+<span id="1319">1319</span>
+<span id="1320">1320</span>
+<span id="1321">1321</span>
+<span id="1322">1322</span>
+<span id="1323">1323</span>
+<span id="1324">1324</span>
+<span id="1325">1325</span>
+<span id="1326">1326</span>
+<span id="1327">1327</span>
+<span id="1328">1328</span>
+<span id="1329">1329</span>
+<span id="1330">1330</span>
+<span id="1331">1331</span>
+<span id="1332">1332</span>
+<span id="1333">1333</span>
+<span id="1334">1334</span>
+<span id="1335">1335</span>
+<span id="1336">1336</span>
+<span id="1337">1337</span>
+<span id="1338">1338</span>
+<span id="1339">1339</span>
+<span id="1340">1340</span>
+<span id="1341">1341</span>
+<span id="1342">1342</span>
+<span id="1343">1343</span>
+<span id="1344">1344</span>
+<span id="1345">1345</span>
+<span id="1346">1346</span>
+<span id="1347">1347</span>
+<span id="1348">1348</span>
+<span id="1349">1349</span>
+<span id="1350">1350</span>
+<span id="1351">1351</span>
+<span id="1352">1352</span>
+<span id="1353">1353</span>
+<span id="1354">1354</span>
+<span id="1355">1355</span>
+<span id="1356">1356</span>
+<span id="1357">1357</span>
+<span id="1358">1358</span>
+<span id="1359">1359</span>
+<span id="1360">1360</span>
+<span id="1361">1361</span>
+<span id="1362">1362</span>
+<span id="1363">1363</span>
+<span id="1364">1364</span>
+<span id="1365">1365</span>
+<span id="1366">1366</span>
+<span id="1367">1367</span>
+<span id="1368">1368</span>
+<span id="1369">1369</span>
+<span id="1370">1370</span>
+<span id="1371">1371</span>
+<span id="1372">1372</span>
+<span id="1373">1373</span>
+<span id="1374">1374</span>
+<span id="1375">1375</span>
+<span id="1376">1376</span>
+<span id="1377">1377</span>
+<span id="1378">1378</span>
+<span id="1379">1379</span>
+<span id="1380">1380</span>
+<span id="1381">1381</span>
+<span id="1382">1382</span>
+<span id="1383">1383</span>
+<span id="1384">1384</span>
+<span id="1385">1385</span>
+<span id="1386">1386</span>
+<span id="1387">1387</span>
+<span id="1388">1388</span>
+<span id="1389">1389</span>
+<span id="1390">1390</span>
+<span id="1391">1391</span>
+<span id="1392">1392</span>
+<span id="1393">1393</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
+    GraphColoring, Node, ParNodes, SingleNode, StateType, StaticFSM,
+};
+<span class="kw">use </span><span class="kw">crate</span>::traversal::{
+    Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
+};
+<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Nothing, PortParent};
 <span class="kw">use </span>calyx_ir::{guard, structure, GetAttributes};
-<span class="kw">use </span>calyx_utils::Error;
+<span class="kw">use </span>calyx_utils::{CalyxResult, Error};
+<span class="kw">use </span>core::panic;
 <span class="kw">use </span>ir::{build_assignments, RRC};
 <span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>std::collections::{HashMap, HashSet};
+<span class="kw">use </span>std::collections::{BTreeMap, HashMap, HashSet};
 <span class="kw">use </span>std::ops::Not;
 <span class="kw">use </span>std::rc::Rc;
+<span class="kw">use </span>std::vec;
+
+<span class="kw">type </span>OptionalStaticFSM = <span class="prelude-ty">Option</span>&lt;ir::RRC&lt;StaticFSM&gt;&gt;;
 
 <span class="doccomment">/// Compiles Static Islands
-</span><span class="attribute">#[derive(Default)]
 </span><span class="kw">pub struct </span>CompileStatic {
     <span class="doccomment">/// maps original static group names to the corresponding group that has an FSM that reset early
     </span>reset_early_map: HashMap&lt;ir::Id, ir::Id&gt;,
@@ -1023,8 +1418,25 @@
     </span>wrapper_map: HashMap&lt;ir::Id, ir::Id&gt;,
     <span class="doccomment">/// maps fsm names to their corresponding signal_reg
     </span>signal_reg_map: HashMap&lt;ir::Id, ir::Id&gt;,
-    <span class="doccomment">/// maps reset_early_group names to StaticFSM object
-    </span>fsm_info_map: HashMap&lt;ir::Id, ir::RRC&lt;StaticFSM&gt;&gt;,
+    <span class="doccomment">/// maps reset_early_group names to (fsm_identifier, fsm_first_state, final_fsm_state);
+    /// The &quot;fsm identifier&quot; is just the name of the fsm (if it exists) and
+    /// some other unique identifier if it doesn&#39;t exist (this works because
+    /// it is always fine to give each entry group its own completely unique identifier.)
+    </span>fsm_info_map:
+        HashMap&lt;ir::Id, (ir::Id, ir::Guard&lt;Nothing&gt;, ir::Guard&lt;Nothing&gt;)&gt;,
+    <span class="doccomment">/// Maps `static_group[go]` to `early_reset_group[go]`.
+    </span>group_rewrites: ir::rewriter::PortRewriteMap,
+
+    <span class="doccomment">/// Command line arguments:
+    /// Cutoff for one hot encoding. Anything larger than the cutoff becomes
+    /// binary.
+    </span>one_hot_cutoff: u64,
+    <span class="doccomment">/// Bool indicating whether to make the FSM pause (i.e., stop counting) when
+    /// offloading. In order for compilation to make sense, this parameter must
+    /// match the parameter for `static-inline`.
+    </span>offload_pause: bool,
+    <span class="doccomment">/// Bool indicating whether to greedily share the FSM registers
+    </span>greedy_share: bool,
 }
 
 <span class="kw">impl </span>Named <span class="kw">for </span>CompileStatic {
@@ -1039,23 +1451,65 @@
     <span class="kw">fn </span>opts() -&gt; Vec&lt;PassOpt&gt; {
         <span class="macro">vec!</span>[PassOpt::new(
             <span class="string">&quot;one-hot-cutoff&quot;</span>,
-            <span class="string">&quot;The upper limit on the number of states the static FSM must have before we pick binary \
+            <span class="string">&quot;The upper limit on the number of states the static FSM must have before we pick binary
             encoding over one-hot. Defaults to 0 (i.e., always choose binary encoding)&quot;</span>,
             ParseVal::Num(<span class="number">0</span>),
             PassOpt::parse_num,
-        )]
+        ),
+        PassOpt::new(
+            <span class="string">&quot;offload-pause&quot;</span>,
+            <span class="string">&quot;Whether to pause the static FSM when offloading. Note that this
+            parameter must be in sync with the static-inliner&#39;s offload-pause
+            parameter for compilation to work correctly&quot;</span>,
+            ParseVal::Bool(<span class="bool-val">true</span>),
+            PassOpt::parse_bool,
+        ),
+        PassOpt::new(
+            <span class="string">&quot;greedy-share&quot;</span>,
+            <span class="string">&quot;Whether to greedily share the FSMs&quot;</span>,
+            ParseVal::Bool(<span class="bool-val">true</span>),
+            PassOpt::parse_bool,
+        )
+
+        ]
+    }
+}
+
+<span class="kw">impl </span>ConstructVisitor <span class="kw">for </span>CompileStatic {
+    <span class="kw">fn </span>from(ctx: <span class="kw-2">&amp;</span>ir::Context) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>opts = <span class="self">Self</span>::get_opts(ctx);
+
+        <span class="prelude-val">Ok</span>(CompileStatic {
+            one_hot_cutoff: opts[<span class="string">&quot;one-hot-cutoff&quot;</span>].pos_num().unwrap(),
+            offload_pause: opts[<span class="string">&quot;offload-pause&quot;</span>].bool(),
+            greedy_share: opts[<span class="string">&quot;greedy-share&quot;</span>].bool(),
+            reset_early_map: HashMap::new(),
+            wrapper_map: HashMap::new(),
+            signal_reg_map: HashMap::new(),
+            fsm_info_map: HashMap::new(),
+            group_rewrites: ir::rewriter::PortRewriteMap::default(),
+        })
+    }
+
+    <span class="kw">fn </span>clear_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.reset_early_map = HashMap::new();
+        <span class="self">self</span>.wrapper_map = HashMap::new();
+        <span class="self">self</span>.signal_reg_map = HashMap::new();
+        <span class="self">self</span>.fsm_info_map = HashMap::new();
+        <span class="self">self</span>.group_rewrites = ir::rewriter::PortRewriteMap::default();
     }
 }
 
 <span class="kw">impl </span>CompileStatic {
-    <span class="doccomment">/// Builds a wrapper group for group named group_name using fsm and
+    <span class="doccomment">/// Builds a wrapper group for group named group_name using fsm_final_state
     /// and a signal_reg.
-    /// Both the group and FSM (and the signal_reg) should already exist.
+    /// We set the signal_reg high on the final fsm state, since we know the
+    /// `done` signal should be high the next cycle after that.
     /// `add_resetting_logic` is a bool; since the same FSM/signal_reg pairing
     /// may be used for multiple static islands, and we only add resetting logic
     /// for the signal_reg once.
     </span><span class="kw">fn </span>build_wrapper_group(
-        fsm_object: ir::RRC&lt;StaticFSM&gt;,
+        fsm_final_state: ir::Guard&lt;Nothing&gt;,
         group_name: <span class="kw-2">&amp;</span>ir::Id,
         signal_reg: ir::RRC&lt;ir::Cell&gt;,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
@@ -1073,9 +1527,6 @@
                 )
             });
 
-        <span class="comment">// fsm.out == 0
-        </span><span class="kw">let </span>first_state =
-            <span class="kw-2">*</span>fsm_object.borrow_mut().query_between(builder, (<span class="number">0</span>, <span class="number">1</span>));
         <span class="macro">structure!</span>( builder;
             <span class="kw">let </span>signal_on = constant(<span class="number">1</span>, <span class="number">1</span>);
             <span class="kw">let </span>signal_off = constant(<span class="number">0</span>, <span class="number">1</span>);
@@ -1086,10 +1537,9 @@
             <span class="macro">guard!</span>(signal_reg[<span class="string">&quot;out&quot;</span>]);
         <span class="comment">// !signal_reg.out
         </span><span class="kw">let </span>not_signal_reg = signal_reg_guard.clone().not();
-        <span class="comment">// fsm.out == 0 &amp; signal_reg.out
-        </span><span class="kw">let </span>first_state_and_signal = first_state.clone() &amp; signal_reg_guard;
-        <span class="comment">// fsm.out == 0 &amp; ! signal_reg.out
-        </span><span class="kw">let </span>first_state_and_not_signal = first_state &amp; not_signal_reg;
+        <span class="comment">// &lt;fsm in final state&gt; &amp; ! signal_reg.out
+        </span><span class="kw">let </span>final_state_not_signal = fsm_final_state &amp; not_signal_reg;
+
         <span class="comment">// create the wrapper group for early_reset_group
         </span><span class="kw">let </span><span class="kw-2">mut </span>wrapper_name = group_name.clone().to_string();
         wrapper_name.insert_str(<span class="number">0</span>, <span class="string">&quot;wrapper_&quot;</span>);
@@ -1098,11 +1548,11 @@
           builder;
           <span class="comment">// early_reset_group[go] = 1&#39;d1
           </span>early_reset_group[<span class="string">&quot;go&quot;</span>] = <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
-          <span class="comment">// when fsm == 0, and !signal_reg, then set signal_reg to high
-          </span>signal_reg[<span class="string">&quot;write_en&quot;</span>] = first_state_and_not_signal <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
-          signal_reg[<span class="string">&quot;in&quot;</span>] =  first_state_and_not_signal <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
-          <span class="comment">// group[done] = fsm.out == 0 &amp; signal_reg.out ? 1&#39;d1
-          </span>g[<span class="string">&quot;done&quot;</span>] = first_state_and_signal <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
+          <span class="comment">// when &lt;fsm_in_final_state&gt; and !signal_reg, then set signal_reg to high
+          </span>signal_reg[<span class="string">&quot;write_en&quot;</span>] = final_state_not_signal <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
+          signal_reg[<span class="string">&quot;in&quot;</span>] =  final_state_not_signal <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
+          <span class="comment">// group[done] = signal_reg.out ? 1&#39;d1
+          </span>g[<span class="string">&quot;done&quot;</span>] = signal_reg_guard <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
         );
         <span class="kw">if </span>add_reseting_logic {
             <span class="comment">// continuous assignments to reset signal_reg back to 0 when the wrapper is done
@@ -1110,8 +1560,8 @@
                 builder;
                 <span class="comment">// when (fsm == 0 &amp; signal_reg is high), which is the done condition of the wrapper,
                 // reset the signal_reg back to low
-                </span>signal_reg[<span class="string">&quot;write_en&quot;</span>] = first_state_and_signal <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
-                signal_reg[<span class="string">&quot;in&quot;</span>] =  first_state_and_signal <span class="question-mark">? </span>signal_off[<span class="string">&quot;out&quot;</span>];
+                </span>signal_reg[<span class="string">&quot;write_en&quot;</span>] = signal_reg_guard <span class="question-mark">? </span>signal_on[<span class="string">&quot;out&quot;</span>];
+                signal_reg[<span class="string">&quot;in&quot;</span>] =  signal_reg_guard <span class="question-mark">? </span>signal_off[<span class="string">&quot;out&quot;</span>];
             );
             builder.add_continuous_assignments(continuous_assigns.to_vec());
         }
@@ -1131,7 +1581,7 @@
     /// Note: this only works if the port for the while condition is `@stable`.
     </span><span class="kw">fn </span>build_wrapper_group_while(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        fsm_object: ir::RRC&lt;StaticFSM&gt;,
+        fsm_first_state: ir::Guard&lt;Nothing&gt;,
         group_name: <span class="kw-2">&amp;</span>ir::Id,
         port: RRC&lt;ir::Port&gt;,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
@@ -1146,8 +1596,6 @@
                 )
             });
 
-        <span class="kw">let </span>fsm_eq_0 = <span class="kw-2">*</span>fsm_object.borrow_mut().query_between(builder, (<span class="number">0</span>, <span class="number">1</span>));
-
         <span class="kw">let </span>wrapper_group =
             builder.add_group(<span class="macro">format!</span>(<span class="string">&quot;while_wrapper_{}&quot;</span>, group_name));
 
@@ -1158,53 +1606,16 @@
 
         <span class="kw">let </span>port_parent = port.borrow().cell_parent();
         <span class="kw">let </span>port_name = port.borrow().name;
-        <span class="kw">let </span>done_guard = <span class="macro">guard!</span>(port_parent[port_name]).not() &amp; fsm_eq_0;
+        <span class="kw">let </span>done_guard = <span class="macro">guard!</span>(port_parent[port_name]).not() &amp; fsm_first_state;
 
         <span class="kw">let </span>assignments = <span class="macro">build_assignments!</span>(
             builder;
-            <span class="comment">// reset_early_group[go] = 1&#39;d1;
-            // wrapper_group[done] = !port ? 1&#39;d1;
-            </span>reset_early_group[<span class="string">&quot;go&quot;</span>] = <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
+            reset_early_group[<span class="string">&quot;go&quot;</span>] = <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
             wrapper_group[<span class="string">&quot;done&quot;</span>] = done_guard <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
         );
 
         wrapper_group.borrow_mut().assignments.extend(assignments);
         wrapper_group
-    }
-
-    <span class="comment">// Given a `coloring` of static group names, along with the actual `static_groups`,
-    // it builds one StaticSchedule per color.
-    </span><span class="kw">fn </span>build_schedule_objects(
-        coloring: HashMap&lt;ir::Id, ir::Id&gt;,
-        <span class="kw-2">mut </span>static_groups: Vec&lt;ir::RRC&lt;ir::StaticGroup&gt;&gt;,
-        _builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-    ) -&gt; Vec&lt;StaticSchedule&gt; {
-        <span class="comment">// &quot;reverse&quot; the coloring to map colors -&gt; static group_names
-        </span><span class="kw">let </span><span class="kw-2">mut </span>color_to_groups: HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt; =
-            HashMap::new();
-        <span class="kw">for </span>(group, color) <span class="kw">in </span>coloring {
-            color_to_groups.entry(color).or_default().insert(group);
-        }
-        <span class="comment">// Need deterministic ordering for testing.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>vec_color_to_groups: Vec&lt;(ir::Id, HashSet&lt;ir::Id&gt;)&gt; =
-            color_to_groups.into_iter().collect();
-        vec_color_to_groups
-            .sort_by(|(color1, <span class="kw">_</span>), (color2, <span class="kw">_</span>)| color1.cmp(color2));
-        vec_color_to_groups
-            .into_iter()
-            .map(|(<span class="kw">_</span>, group_names)| {
-                <span class="comment">// For each color, build a StaticSchedule object.
-                // We first have to figure out out which groups we need to
-                // build the static_schedule object for.
-                </span><span class="kw">let </span>(matching_groups, other_groups) =
-                    static_groups.drain(..).partition(|group| {
-                        group_names.contains(<span class="kw-2">&amp;</span>group.borrow().name())
-                    });
-                <span class="kw">let </span>sch = StaticSchedule::from(matching_groups);
-                static_groups = other_groups;
-                sch
-            })
-            .collect()
     }
 
     <span class="comment">// Get early reset group name from static control (we assume the static control
@@ -1232,7 +1643,8 @@
     }
 }
 
-<span class="comment">// These are the functions used to allocate FSMs to static islands
+<span class="comment">// These are the functions used to allocate FSMs to static islands through a
+// greedy coloring algorithm.
 </span><span class="kw">impl </span>CompileStatic {
     <span class="comment">// Given a list of `static_groups`, find the group named `name`.
     // If there is no such group, then there is an unreachable! error.
@@ -1250,80 +1662,12 @@
         )
     }
 
-    <span class="comment">// Given an input static_group `sgroup`, finds the names of all of the groups
-    // that it triggers through their go hole.
-    // E.g., if `sgroup` has assignments that write to `sgroup1[go]` and `sgroup2[go]`
-    // then return `{sgroup1, sgroup2}`
-    // Assumes that static groups will only write the go holes of other static
-    // groups, and never dynamic groups (which seems like a reasonable assumption).
-    </span><span class="kw">fn </span>get_go_writes(sgroup: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::StaticGroup&gt;) -&gt; HashSet&lt;ir::Id&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>uses = HashSet::new();
-        <span class="kw">for </span>asgn <span class="kw">in </span><span class="kw-2">&amp;</span>sgroup.borrow().assignments {
-            <span class="kw">let </span>dst = asgn.dst.borrow();
-            <span class="kw">if </span>dst.is_hole() &amp;&amp; dst.name == <span class="string">&quot;go&quot; </span>{
-                uses.insert(dst.get_parent_name());
-            }
-        }
-        uses
-    }
-
-    <span class="comment">// Gets all of the triggered static groups within `c`, and adds it to `cur_names`.
-    // Relies on sgroup_uses_map to take into account groups that are triggered through
-    // their `go` hole.
-    </span><span class="kw">fn </span>get_used_sgroups(
-        c: <span class="kw-2">&amp;</span>ir::Control,
-        cur_names: <span class="kw-2">&amp;mut </span>HashSet&lt;ir::Id&gt;,
-        sgroup_uses_map: <span class="kw-2">&amp;</span>HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt;,
-    ) {
-        <span class="kw">match </span>c {
-            ir::Control::Empty(<span class="kw">_</span>)
-            | ir::Control::Enable(<span class="kw">_</span>)
-            | ir::Control::Invoke(<span class="kw">_</span>) =&gt; (),
-            ir::Control::Static(sc) =&gt; {
-                <span class="kw">let </span>ir::StaticControl::Enable(s) = sc <span class="kw">else </span>{
-                    <span class="macro">unreachable!</span>(<span class="string">&quot;Non-Enable Static Control should have been compiled away. Run {} to do this&quot;</span>, <span class="kw">crate</span>::passes::StaticInliner::name());
-                };
-                <span class="kw">let </span>group_name = s.group.borrow().name();
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(sgroup_uses) = sgroup_uses_map.get(<span class="kw-2">&amp;</span>group_name) {
-                    cur_names.extend(sgroup_uses);
-                }
-                cur_names.insert(group_name);
-            }
-            ir::Control::Par(ir::Par { stmts, .. })
-            | ir::Control::Seq(ir::Seq { stmts, .. }) =&gt; {
-                <span class="kw">for </span>stmt <span class="kw">in </span>stmts {
-                    <span class="self">Self</span>::get_used_sgroups(stmt, cur_names, sgroup_uses_map);
-                }
-            }
-            ir::Control::Repeat(ir::Repeat { body, .. })
-            | ir::Control::While(ir::While { body, .. }) =&gt; {
-                <span class="self">Self</span>::get_used_sgroups(body, cur_names, sgroup_uses_map);
-            }
-            ir::Control::If(if_stmt) =&gt; {
-                <span class="self">Self</span>::get_used_sgroups(
-                    <span class="kw-2">&amp;</span>if_stmt.tbranch,
-                    cur_names,
-                    sgroup_uses_map,
-                );
-                <span class="self">Self</span>::get_used_sgroups(
-                    <span class="kw-2">&amp;</span>if_stmt.fbranch,
-                    cur_names,
-                    sgroup_uses_map,
-                );
-            }
-        }
-    }
-
-    <span class="doccomment">/// Given control `c`, adds conflicts to `conflict_graph` between all
-    /// static groups that are executed in separate threads of the same par block.
-    /// `sgroup_uses_map` maps:
-    /// static group names -&gt; all of the static groups that it triggers the go ports
-    /// of (even recursively).
-    /// Example: group A {B[go] = 1;} group B {C[go] = 1} group C{}
-    /// Would map: A -&gt; {B,C} and B -&gt; {C}
+    <span class="doccomment">/// Add conflicts between all nodes of `fsm_trees` which are executing
+    /// on separate threads of a dynamic `par` block.
+    /// This function adds conflicts between nodes of separate trees.
     </span><span class="kw">fn </span>add_par_conflicts(
         c: <span class="kw-2">&amp;</span>ir::Control,
-        sgroup_uses_map: <span class="kw-2">&amp;</span>HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt;,
+        fsm_trees: <span class="kw-2">&amp;</span>Vec&lt;Node&gt;,
         conflict_graph: <span class="kw-2">&amp;mut </span>GraphColoring&lt;ir::Id&gt;,
     ) {
         <span class="kw">match </span>c {
@@ -1333,189 +1677,540 @@
             | ir::Control::Static(<span class="kw">_</span>) =&gt; (),
             ir::Control::Seq(seq) =&gt; {
                 <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;</span>seq.stmts {
-                    <span class="self">Self</span>::add_par_conflicts(
-                        stmt,
-                        sgroup_uses_map,
-                        conflict_graph,
-                    );
+                    <span class="self">Self</span>::add_par_conflicts(stmt, fsm_trees, conflict_graph);
                 }
             }
             ir::Control::Repeat(ir::Repeat { body, .. })
             | ir::Control::While(ir::While { body, .. }) =&gt; {
-                <span class="self">Self</span>::add_par_conflicts(body, sgroup_uses_map, conflict_graph)
+                <span class="self">Self</span>::add_par_conflicts(body, fsm_trees, conflict_graph)
             }
             ir::Control::If(if_stmt) =&gt; {
                 <span class="self">Self</span>::add_par_conflicts(
                     <span class="kw-2">&amp;</span>if_stmt.tbranch,
-                    sgroup_uses_map,
+                    fsm_trees,
                     conflict_graph,
                 );
                 <span class="self">Self</span>::add_par_conflicts(
                     <span class="kw-2">&amp;</span>if_stmt.fbranch,
-                    sgroup_uses_map,
+                    fsm_trees,
                     conflict_graph,
                 );
             }
             ir::Control::Par(par) =&gt; {
-                <span class="comment">// sgroup_conflict_vec is a vec of HashSets.
-                // Each entry of the vec corresponds to a par thread, and holds
+                <span class="comment">// `sgroup_conflict_vec` is a vec of HashSets.
+                // Each item in the vec corresponds to a par thread, and holds
                 // all of the groups executed in that thread.
-                </span><span class="kw">let </span><span class="kw-2">mut </span>sgroup_conflict_vec = Vec::new();
+                </span><span class="kw">let </span><span class="kw-2">mut </span>sgroup_conflict_vec: Vec&lt;HashSet&lt;ir::Id&gt;&gt; = Vec::new();
                 <span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;</span>par.stmts {
-                    <span class="kw">let </span><span class="kw-2">mut </span>used_sgroups = HashSet::new();
-                    <span class="self">Self</span>::get_used_sgroups(
-                        stmt,
-                        <span class="kw-2">&amp;mut </span>used_sgroups,
-                        sgroup_uses_map,
-                    );
-                    sgroup_conflict_vec.push(used_sgroups);
+                    sgroup_conflict_vec.push(HashSet::from_iter(
+                        <span class="self">Self</span>::get_static_enables(stmt),
+                    ));
                 }
-                <span class="kw">for </span>(thread1_sgroups, thread2_sgroups) <span class="kw">in
+                <span class="kw">for </span>(thread1_st_enables, thread2_st_enables) <span class="kw">in
                     </span>sgroup_conflict_vec.iter().tuple_combinations()
                 {
-                    <span class="kw">for </span>sgroup1 <span class="kw">in </span>thread1_sgroups {
-                        <span class="kw">for </span>sgroup2 <span class="kw">in </span>thread2_sgroups {
-                            conflict_graph.insert_conflict(sgroup1, sgroup2);
+                    <span class="comment">// For each static group g1 enabled in thread1 and static
+                    // group g2 enabled in thread2 respectively, add a conflict
+                    // each node in g1 and g2&#39;s corresponding trees.
+                    </span><span class="kw">for </span>static_enable1 <span class="kw">in </span>thread1_st_enables {
+                        <span class="kw">for </span>static_enable2 <span class="kw">in </span>thread2_st_enables {
+                            <span class="comment">// Getting tree1
+                            </span><span class="kw">let </span>tree1 = fsm_trees
+                                .iter()
+                                .find(|tree| {
+                                    tree.get_group_name() == static_enable1
+                                })
+                                .expect(<span class="string">&quot;couldn&#39;t find FSM tree&quot;</span>);
+                            <span class="comment">// Getting tree2
+                            </span><span class="kw">let </span>tree2 = fsm_trees
+                                .iter()
+                                .find(|tree| {
+                                    tree.get_group_name() == static_enable2
+                                })
+                                .expect(<span class="string">&quot;couldn&#39;t find tree&quot;</span>);
+                            <span class="comment">// Add conflict between each node in tree1 and tree2
+                            </span><span class="kw">for </span>sgroup1 <span class="kw">in </span>tree1.get_all_nodes() {
+                                <span class="kw">for </span>sgroup2 <span class="kw">in </span>tree2.get_all_nodes() {
+                                    conflict_graph
+                                        .insert_conflict(<span class="kw-2">&amp;</span>sgroup1, <span class="kw-2">&amp;</span>sgroup2)
+                                }
+                            }
                         }
                     }
                 }
                 <span class="comment">// Necessary to add conflicts between nested pars
                 </span><span class="kw">for </span>stmt <span class="kw">in </span><span class="kw-2">&amp;</span>par.stmts {
-                    <span class="self">Self</span>::add_par_conflicts(
-                        stmt,
-                        sgroup_uses_map,
-                        conflict_graph,
-                    );
+                    <span class="self">Self</span>::add_par_conflicts(stmt, fsm_trees, conflict_graph);
                 }
             }
         }
     }
 
-    <span class="doccomment">/// Given an `sgroup_uses_map`, which maps:
-    /// static group names -&gt; all of the static groups that it triggers the go ports
-    /// of (even recursively).
-    /// Example: group A {B[go] = 1;} group B {C[go] = 1} group C{}
-    /// Would map: A -&gt; {B,C} and B -&gt; {C}
-    /// Adds conflicts between any groups triggered at the same time based on
-    /// `go` port triggering.
-    </span><span class="kw">fn </span>add_go_port_conflicts(
-        sgroup_uses_map: <span class="kw-2">&amp;</span>HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt;,
-        conflict_graph: <span class="kw-2">&amp;mut </span>GraphColoring&lt;ir::Id&gt;,
-    ) {
-        <span class="kw">for </span>(sgroup, sgroup_uses) <span class="kw">in </span>sgroup_uses_map {
-            <span class="kw">for </span>sgroup_use <span class="kw">in </span>sgroup_uses {
-                conflict_graph.insert_conflict(sgroup_use, sgroup);
-            }
-            <span class="comment">// If multiple groups are triggered by the same group, then
-            // we conservatively add a conflict between such groups
-            </span><span class="kw">for </span>(sgroup_use1, sgroup_use2) <span class="kw">in
-                </span>sgroup_uses.iter().tuple_combinations()
-            {
-                conflict_graph.insert_conflict(sgroup_use1, sgroup_use2);
-            }
-        }
-    }
-
-    <span class="doccomment">/// Adds conflicts between static groups that require different encodings.
-    /// For example: if one group is one-hot and another is binary, then
-    /// we insert a conflict between those two groups.
-    </span><span class="kw">fn </span>add_encoding_conflicts(
-        sgroups: <span class="kw-2">&amp;</span>[ir::RRC&lt;ir::StaticGroup&gt;],
-        conflict_graph: <span class="kw-2">&amp;mut </span>GraphColoring&lt;ir::Id&gt;,
-    ) {
-        <span class="kw">for </span>(sgroup1, sgroup2) <span class="kw">in </span>sgroups.iter().tuple_combinations() {
-            <span class="kw">if </span>sgroup1.borrow().attributes.has(ir::BoolAttr::OneHot)
-                != sgroup2.borrow().attributes.has(ir::BoolAttr::OneHot)
-            {
-                conflict_graph.insert_conflict(
-                    <span class="kw-2">&amp;</span>sgroup1.borrow().name(),
-                    <span class="kw-2">&amp;</span>sgroup2.borrow().name(),
-                );
-            }
-        }
-    }
-
-    <span class="comment">// helper to `build_sgroup_uses_map`
-    // `parent_group` is the group that we are &quot;currently&quot; analyzing
-    // `full_group_ancestry` is the &quot;ancestry of the group we are analyzing&quot;
-    // Example: group A {B[go] = 1;} group B {C[go] = 1} group C{}, and `parent_group`
-    // is B, then ancestry would be B and A.
-    // `cur_mapping` is the current_mapping for `sgroup_uses_map`
-    // `group_names` is a vec of group_names. Once we analyze a group, we should
-    // remove it from group_names
-    // `sgroups` is a vec of static groups.
-    </span><span class="kw">fn </span>update_sgroup_uses_map(
-        parent_group: <span class="kw-2">&amp;</span>ir::Id,
-        full_group_ancestry: <span class="kw-2">&amp;mut </span>HashSet&lt;ir::Id&gt;,
-        cur_mapping: <span class="kw-2">&amp;mut </span>HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt;,
-        group_names: <span class="kw-2">&amp;mut </span>HashSet&lt;ir::Id&gt;,
-        sgroups: <span class="kw-2">&amp;</span>Vec&lt;ir::RRC&lt;ir::StaticGroup&gt;&gt;,
-    ) {
-        <span class="kw">let </span>group_uses = <span class="self">Self</span>::get_go_writes(<span class="kw-2">&amp;</span><span class="self">Self</span>::find_static_group(
-            parent_group,
-            sgroups,
-        ));
-        <span class="kw">for </span>group_use <span class="kw">in </span>group_uses {
-            <span class="kw">for </span>ancestor <span class="kw">in </span>full_group_ancestry.iter() {
-                cur_mapping.entry(<span class="kw-2">*</span>ancestor).or_default().insert(group_use);
-            }
-            full_group_ancestry.insert(group_use);
-            <span class="self">Self</span>::update_sgroup_uses_map(
-                <span class="kw-2">&amp;</span>group_use,
-                full_group_ancestry,
-                cur_mapping,
-                group_names,
-                sgroups,
-            );
-            full_group_ancestry.remove(<span class="kw-2">&amp;</span>group_use);
-        }
-        group_names.remove(parent_group);
-    }
-
-    <span class="doccomment">/// Builds an `sgroup_uses_map`, which maps:
-    /// static group names -&gt; all of the static groups that it triggers the go ports
-    /// of (even recursively).
-    /// Example: group A {B[go] = 1;} group B {C[go] = 1} group C{}
-    /// Would map: A -&gt; {B,C} and B -&gt; {C}
-    </span><span class="kw">fn </span>build_sgroup_uses_map(
-        sgroups: <span class="kw-2">&amp;</span>Vec&lt;ir::RRC&lt;ir::StaticGroup&gt;&gt;,
-    ) -&gt; HashMap&lt;ir::Id, HashSet&lt;ir::Id&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>names: HashSet&lt;ir::Id&gt; = sgroups
-            .iter()
-            .map(|sgroup| sgroup.borrow().name())
-            .collect();
-        <span class="kw">let </span><span class="kw-2">mut </span>cur_mapping = HashMap::new();
-        <span class="kw">while </span>!names.is_empty() {
-            <span class="kw">let </span>random_group = <span class="kw-2">*</span>names.iter().next().unwrap();
-            <span class="self">Self</span>::update_sgroup_uses_map(
-                <span class="kw-2">&amp;</span>random_group,
-                <span class="kw-2">&amp;mut </span>HashSet::from([random_group]),
-                <span class="kw-2">&amp;mut </span>cur_mapping,
-                <span class="kw-2">&amp;mut </span>names,
-                sgroups,
+    <span class="comment">// Gets the maximum number of repeats for the static group named
+    // `sgroup` among all trees in `tree_objects`. Most of the time, `sgroup`
+    // will only appear once but it is possible that the same group appears
+    // in more than one tree.
+    </span><span class="kw">fn </span>get_max_num_repeats(sgroup: ir::Id, tree_objects: <span class="kw-2">&amp;</span>Vec&lt;Node&gt;) -&gt; u64 {
+        <span class="kw">let </span><span class="kw-2">mut </span>cur_max = <span class="number">1</span>;
+        <span class="kw">for </span>tree <span class="kw">in </span>tree_objects {
+            cur_max = std::cmp::max(
+                cur_max,
+                tree.get_max_value(<span class="kw-2">&amp;</span>sgroup, <span class="kw-2">&amp;</span>(|tree| tree.num_repeats)),
             )
         }
-        cur_mapping
+        cur_max
     }
 
-    <span class="kw">pub fn </span>get_coloring(
-        sgroups: <span class="kw-2">&amp;</span>Vec&lt;ir::RRC&lt;ir::StaticGroup&gt;&gt;,
-        control: <span class="kw-2">&amp;</span>ir::Control,
+    <span class="comment">// Gets the maximum number of repeats for the static group named
+    // `sgroup` among all trees in `tree_objects`. Most of the time, `sgroup`
+    // will only appear once but it is possible that the same group appears
+    // in more than one tree.
+    </span><span class="kw">fn </span>get_max_num_states(sgroup: ir::Id, tree_objects: <span class="kw-2">&amp;</span>Vec&lt;Node&gt;) -&gt; u64 {
+        <span class="kw">let </span><span class="kw-2">mut </span>cur_max = <span class="number">1</span>;
+        <span class="kw">for </span>tree <span class="kw">in </span>tree_objects {
+            cur_max = std::cmp::max(
+                cur_max,
+                tree.get_max_value(<span class="kw-2">&amp;</span>sgroup, <span class="kw-2">&amp;</span>(|tree| tree.num_states)),
+            )
+        }
+        cur_max
+    }
+
+    <span class="doccomment">/// Creates a graph (one node per item in `sgroup` where nodes are the `sgroup`&#39;s
+    /// names).
+    /// Use `tree_objects` and `control` to draw conflicts between any two nodes
+    /// that could be executing in parallel, and returns a greedy coloring of the
+    /// graph.
+    </span><span class="kw">pub fn </span>get_coloring(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        tree_objects: <span class="kw-2">&amp;</span>Vec&lt;Node&gt;,
+        sgroups: <span class="kw-2">&amp;</span>[ir::RRC&lt;ir::StaticGroup&gt;],
+        control: <span class="kw-2">&amp;mut </span>ir::Control,
     ) -&gt; HashMap&lt;ir::Id, ir::Id&gt; {
-        <span class="comment">// `sgroup_uses_map` builds a mapping of static groups -&gt; groups that
-        // it (even indirectly) triggers the `go` port of.
-        </span><span class="kw">let </span>sgroup_uses_map = <span class="self">Self</span>::build_sgroup_uses_map(sgroups);
-        <span class="comment">// Build conflict graph and get coloring.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>conflict_graph: GraphColoring&lt;ir::Id&gt; =
+        <span class="kw">if </span>!<span class="self">self</span>.greedy_share {
+            <span class="comment">// If !greedy_share just give each sgroup its own color.
+            </span><span class="kw">return </span>sgroups
+                .iter()
+                .map(|g| (g.borrow().name(), g.borrow().name()))
+                .collect();
+        }
+        <span class="kw">let </span><span class="kw-2">mut </span>conflict_graph: GraphColoring&lt;ir::Id&gt; =
             GraphColoring::from(sgroups.iter().map(|g| g.borrow().name()));
-        <span class="self">Self</span>::add_par_conflicts(control, <span class="kw-2">&amp;</span>sgroup_uses_map, <span class="kw-2">&amp;mut </span>conflict_graph);
-        <span class="self">Self</span>::add_go_port_conflicts(<span class="kw-2">&amp;</span>sgroup_uses_map, <span class="kw-2">&amp;mut </span>conflict_graph);
-        <span class="self">Self</span>::add_encoding_conflicts(sgroups, <span class="kw-2">&amp;mut </span>conflict_graph);
-        conflict_graph.color_greedy(<span class="prelude-val">None</span>, <span class="bool-val">true</span>)
+
+        <span class="comment">// Necessary conflicts to ensure correctness
+
+        // Self::add_par_conflicts adds necessary conflicts between all nodes of
+        // trees that execute in separate threads of the same `par` block: this is
+        // adding conflicts between nodes of separate trees.
+        </span><span class="self">Self</span>::add_par_conflicts(control, tree_objects, <span class="kw-2">&amp;mut </span>conflict_graph);
+        <span class="kw">for </span>tree <span class="kw">in </span>tree_objects {
+            <span class="comment">// tree.add_conflicts adds the necessary conflicts within nodes of
+            // same tree.
+            </span>tree.add_conflicts(<span class="kw-2">&amp;mut </span>conflict_graph);
+        }
+        <span class="comment">// Optional conflicts to ?potentially? improve QoR
+        // for (sgroup1, sgroup2) in sgroups.iter().tuple_combinations() {
+        //     let max_num_states1 =
+        //         Self::get_max_num_states(sgroup1.borrow().name(), tree_objects);
+        //     let max_num_repeats1 = Self::get_max_num_repeats(
+        //         sgroup1.borrow().name(),
+        //         tree_objects,
+        //     );
+        //     let max_num_states2 =
+        //         Self::get_max_num_states(sgroup2.borrow().name(), tree_objects);
+        //     let max_num_repeats2 = Self::get_max_num_repeats(
+        //         sgroup2.borrow().name(),
+        //         tree_objects,
+        //     );
+        //     if ((max_num_states1 == 1) != (max_num_states2 == 1))
+        //         || ((max_num_repeats1) != (max_num_repeats2))
+        //     {
+        //         conflict_graph.insert_conflict(
+        //             &amp;sgroup1.borrow().name(),
+        //             &amp;sgroup2.borrow().name(),
+        //         );
+        //     }
+        // }
+
+        </span>conflict_graph.color_greedy(<span class="prelude-val">None</span>, <span class="bool-val">true</span>)
+    }
+
+    <span class="doccomment">/// Given a coloring of group names, returns a Hashmap that maps:
+    /// colors -&gt; (max num states for that color, max num repeats for color).
+    </span><span class="kw">pub fn </span>get_color_max_values(
+        coloring: <span class="kw-2">&amp;</span>HashMap&lt;ir::Id, ir::Id&gt;,
+        tree_objects: <span class="kw-2">&amp;</span>Vec&lt;Node&gt;,
+    ) -&gt; HashMap&lt;ir::Id, (u64, u64)&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>colors_to_sgroups: HashMap&lt;ir::Id, Vec&lt;ir::Id&gt;&gt; =
+            HashMap::new();
+        <span class="comment">// &quot;Reverse&quot; the coloring: instead of maping group names-&gt;colors,
+        // map colors -&gt; group names.
+        </span><span class="kw">for </span>(group_name, color) <span class="kw">in </span>coloring {
+            colors_to_sgroups
+                .entry(<span class="kw-2">*</span>color)
+                .or_default()
+                .push(<span class="kw-2">*</span>group_name);
+        }
+        colors_to_sgroups
+            .into_iter()
+            .map(|(name, colors_sgroups)| {
+                <span class="comment">// Get max num states for this color
+                </span><span class="kw">let </span>max_num_states = colors_sgroups
+                    .iter()
+                    .map(|gname| <span class="self">Self</span>::get_max_num_states(<span class="kw-2">*</span>gname, tree_objects))
+                    .max()
+                    .expect(<span class="string">&quot;color is empty&quot;</span>);
+                <span class="comment">// Get max num repeats for this color
+                </span><span class="kw">let </span>max_num_repeats = colors_sgroups
+                    .iter()
+                    .map(|gname| {
+                        <span class="self">Self</span>::get_max_num_repeats(<span class="kw-2">*</span>gname, tree_objects)
+                    })
+                    .max()
+                    .expect(<span class="string">&quot;color is empty&quot;</span>);
+                (name, (max_num_states, max_num_repeats))
+            })
+            .collect()
     }
 }
 
-<span class="comment">// These are the functions used to compile for the static *component* interface
+<span class="kw">impl </span>CompileStatic {
+    <span class="doccomment">/// `get_interval_from_guard` returns the interval found within guard `g`.
+    /// The tricky part is that sometimes there can be an implicit latency
+    /// `lat` that is not explicitly stated (i.e., every assignment in a
+    /// group with latency n has an implicit guard of %[0:n]). `lat` is `n`.
+    </span><span class="kw">fn </span>get_interval_from_guard(
+        g: <span class="kw-2">&amp;</span>ir::Guard&lt;ir::StaticTiming&gt;,
+        lat: u64,
+    ) -&gt; (u64, u64) {
+        <span class="kw">match </span>g {
+            calyx_ir::Guard::Info(static_timing_interval) =&gt; {
+                static_timing_interval.get_interval()
+            }
+            calyx_ir::Guard::Not(<span class="kw">_</span>)
+            | calyx_ir::Guard::CompOp(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>)
+            | calyx_ir::Guard::Port(<span class="kw">_</span>)
+            | calyx_ir::Guard::True =&gt; (<span class="number">0</span>, lat),
+            calyx_ir::Guard::And(l, r) =&gt; {
+                <span class="kw">let </span>((beg1, end1), (beg2, end2)) = (
+                    <span class="self">Self</span>::get_interval_from_guard(l, lat),
+                    <span class="self">Self</span>::get_interval_from_guard(r, lat),
+                );
+                <span class="macro">assert!</span>(end1 - beg1 == lat || end2 - beg2 == lat);
+                <span class="kw">if </span>end1 - beg1 == lat {
+                    (beg2, end2)
+                } <span class="kw">else </span>{
+                    (beg1, end1)
+                }
+
+            }
+            ir::Guard::Or(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;Shouldn&#39;t try to get interval from guard if there is an &#39;or&#39; in the guard&quot;</span>),
+        }
+    }
+
+    <span class="comment">// Given a children_sched (a sorted vec of intervals for which
+    // the children are active), builds an FSM schedule and returns it,
+    // along with the number of states the resulting FSM will have (42 in the
+    // example given below).
+    // Schedule maps cycles (i,j) -&gt; fsm state type (i.e., what the fsm outputs).
+    // Here is an example FSM schedule:
+    //                           Cycles     FSM State (i.e., `fsm.out`)
+    //                           (0..10) -&gt;  Normal[0,10) // FSM counting from 0..10
+    //                           (10..30) -&gt; Offload(10) // Offloading to child
+    //                           (30..40) -&gt; Normal[11, 21)
+    //                           (40,80) -&gt;  Offload(21)
+    //                           (80,100)-&gt;  Normal[22, 42)
+    //
+    // `target_latency` is the latency of the entire tree (100 in this case).
+    </span><span class="kw">fn </span>build_tree_schedule(
+        children_sched: <span class="kw-2">&amp;</span>[(u64, u64)],
+        target_latency: u64,
+    ) -&gt; (BTreeMap&lt;(u64, u64), StateType&gt;, u64) {
+        <span class="kw">let </span><span class="kw-2">mut </span>fsm_schedule = BTreeMap::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>cur_num_states = <span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>cur_lat = <span class="number">0</span>;
+        <span class="kw">for </span>(beg, end) <span class="kw">in </span>children_sched {
+            <span class="comment">// Filling in the gap between children, if necessary with a
+            // `Normal` StateType.
+            </span><span class="kw">if </span>cur_lat != <span class="kw-2">*</span>beg {
+                fsm_schedule.insert(
+                    (cur_lat, <span class="kw-2">*</span>beg),
+                    StateType::Normal((
+                        cur_num_states,
+                        cur_num_states + (beg - cur_lat),
+                    )),
+                );
+                cur_num_states += beg - cur_lat;
+                <span class="comment">// cur_lat = *beg; assignment is unnecessary
+            </span>}
+            <span class="comment">// Inserting an Offload StateType to the schedule.
+            </span>fsm_schedule
+                .insert((<span class="kw-2">*</span>beg, <span class="kw-2">*</span>end), StateType::Offload(cur_num_states));
+            cur_lat = <span class="kw-2">*</span>end;
+            cur_num_states += <span class="number">1</span>;
+        }
+        <span class="comment">// Filling in the gap between the final child and the end of the group
+        // with a Normal StateType.
+        </span><span class="kw">if </span>cur_lat != target_latency {
+            fsm_schedule.insert(
+                (cur_lat, target_latency),
+                StateType::Normal((
+                    cur_num_states,
+                    cur_num_states + (target_latency - cur_lat),
+                )),
+            );
+            cur_num_states += target_latency - cur_lat;
+        }
+        (fsm_schedule, cur_num_states)
+    }
+
+    <span class="doccomment">/// Given a static group `target_name` and vec of `static_groups`, builds a
+    /// `tree_object` for group `target_name` that repeats itself `num_repeat`
+    /// times.
+    </span><span class="kw">fn </span>build_tree_object(
+        target_name: ir::Id,
+        static_groups: <span class="kw-2">&amp;</span>[ir::RRC&lt;ir::StaticGroup&gt;],
+        num_repeats: u64,
+    ) -&gt; Node {
+        <span class="comment">// Find the group that will serve as the root of the tree.
+        </span><span class="kw">let </span>target_group = static_groups
+            .iter()
+            .find(|sgroup| sgroup.borrow().name() == target_name)
+            .unwrap();
+        <span class="comment">// Children of the root of the tree.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>children_vec = <span class="macro">vec!</span>[];
+
+        <span class="kw">let </span>target_group_ref = target_group.borrow();
+        <span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>target_group_ref.assignments {
+            <span class="comment">// Looking for static_child[go] = %[i:j] ? 1&#39;d1; to build children.
+            // This lets us know that `static_child` is executing from cycles
+            // i through j.
+            </span><span class="kw">match </span><span class="kw-2">&amp;</span>assign.dst.borrow().parent {
+                PortParent::Cell(<span class="kw">_</span>) =&gt; {
+                    <span class="kw">if </span>target_group_ref.attributes.has(ir::BoolAttr::ParCtrl) {
+                        <span class="macro">panic!</span>(<span class="string">&quot;&quot;</span>)
+                    }
+                }
+                PortParent::Group(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;&quot;</span>),
+                PortParent::StaticGroup(sgroup) =&gt; {
+                    <span class="macro">assert!</span>(assign.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>));
+                    <span class="kw">let </span>(beg, end) = <span class="self">Self</span>::get_interval_from_guard(
+                        <span class="kw-2">&amp;</span>assign.guard,
+                        target_group.borrow().get_latency(),
+                    );
+                    <span class="kw">let </span>name: calyx_ir::Id = sgroup.upgrade().borrow().name();
+                    <span class="comment">// Need the following lines to determine `num_repeats`
+                    // for the child.
+                    </span><span class="kw">let </span>target_child_latency =
+                        <span class="self">Self</span>::get_sgroup_latency(name, static_groups);
+                    <span class="kw">let </span>child_execution_time = end - beg;
+                    <span class="macro">assert!</span>(
+                        child_execution_time % target_child_latency == <span class="number">0</span>,
+                        <span class="string">&quot;child will execute only part of an iteration&quot;
+                    </span>);
+                    <span class="kw">let </span>child_num_repeats =
+                        child_execution_time / target_child_latency;
+                    <span class="comment">// Recursively build a tree for the child.
+                    </span>children_vec.push((
+                        <span class="self">Self</span>::build_tree_object(
+                            name,
+                            static_groups,
+                            child_num_repeats,
+                        ),
+                        (beg, end),
+                    ));
+                }
+            }
+        }
+
+        <span class="kw">if </span>target_group_ref.attributes.has(ir::BoolAttr::ParCtrl) {
+            <span class="comment">// If we are in a par group, then the &quot;children&quot; are actually
+            // threads that should all start at 0.
+            </span><span class="macro">assert!</span>(children_vec.iter().all(|(<span class="kw">_</span>, (beg, <span class="kw">_</span>))| <span class="kw-2">*</span>beg == <span class="number">0</span>));
+            Node::Par(ParNodes {
+                group_name: target_name,
+                threads: children_vec,
+                latency: target_group_ref.latency,
+                num_repeats,
+            })
+        } <span class="kw">else </span>{
+            <span class="comment">// If we are in a regular group, then the children should be
+            // non-overlapping.
+            </span>children_vec.sort_by_key(|(<span class="kw">_</span>, interval)| <span class="kw-2">*</span>interval);
+            <span class="macro">assert!</span>(<span class="self">Self</span>::are_ranges_non_overlapping(<span class="kw-2">&amp;</span>children_vec));
+            <span class="kw">let </span>(fsm_schedule, num_states) = <span class="self">Self</span>::build_tree_schedule(
+                <span class="kw-2">&amp;</span>children_vec
+                    .iter()
+                    .map(|(<span class="kw">_</span>, interval)| <span class="kw-2">*</span>interval)
+                    .collect_vec(),
+                target_group_ref.latency,
+            );
+            Node::Single(SingleNode {
+                latency: target_group_ref.latency,
+                fsm_cell: <span class="prelude-val">None</span>,
+                iter_count_cell: <span class="prelude-val">None</span>,
+                root: (target_name, <span class="macro">vec!</span>[]),
+                fsm_schedule,
+                children: children_vec,
+                num_repeats,
+                num_states,
+            })
+        }
+    }
+
+    <span class="doccomment">/// Builds a dummy tree, solely for the purposes of determining conflicts
+    /// so we can greedily color when assigning FSMs. This should only be occuring
+    /// when we count during offloading (i.e., don&#39;t pause).
+    /// This tree should never actually be turned into hardware!! (Thd trees that we
+    /// build here do not make sense if you want to actually do that.)
+    /// We can&#39;t call `build_tree_object` on this because that looks for the
+    /// `par` attribute, which isn&#39;t present when we&#39;re counting.
+    </span><span class="kw">fn </span>build_dummy_tree(
+        target_name: ir::Id,
+        static_groups: <span class="kw-2">&amp;</span>[ir::RRC&lt;ir::StaticGroup&gt;],
+    ) -&gt; Node {
+        <span class="comment">// Find the group that will serve as the root of the tree.
+        </span><span class="kw">let </span>target_group = static_groups
+            .iter()
+            .find(|sgroup| sgroup.borrow().name() == target_name)
+            .unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>children_vec = <span class="macro">vec!</span>[];
+        <span class="kw">let </span>target_group_ref = target_group.borrow();
+        <span class="macro">assert!</span>(
+            !target_group_ref.attributes.has(ir::BoolAttr::ParCtrl),
+            <span class="string">&quot;ParCtrl attribute is not compatible with building dummy trees&quot;
+        </span>);
+        <span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;</span>target_group_ref.assignments {
+            <span class="comment">// Looking for static_child[go] = %[i:j] ? 1&#39;d1; to build children.
+            </span><span class="kw">match </span><span class="kw-2">&amp;</span>assign.dst.borrow().parent {
+                PortParent::Cell(<span class="kw">_</span>) =&gt; (),
+                PortParent::Group(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;&quot;</span>),
+                PortParent::StaticGroup(sgroup) =&gt; {
+                    <span class="macro">assert!</span>(assign.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>));
+                    <span class="kw">let </span>(beg, end) = <span class="self">Self</span>::get_interval_from_guard(
+                        <span class="kw-2">&amp;</span>assign.guard,
+                        target_group.borrow().get_latency(),
+                    );
+
+                    <span class="kw">let </span>name: calyx_ir::Id = sgroup.upgrade().borrow().name();
+                    children_vec.push((
+                        <span class="self">Self</span>::build_dummy_tree(name, static_groups),
+                        (beg, end),
+                    ));
+                }
+            }
+        }
+
+        children_vec.sort_by_key(|(<span class="kw">_</span>, interval)| <span class="kw-2">*</span>interval);
+        Node::Single(SingleNode {
+            latency: target_group_ref.latency,
+            fsm_cell: <span class="prelude-val">None</span>,
+            iter_count_cell: <span class="prelude-val">None</span>,
+            root: (target_name, <span class="macro">vec!</span>[]),
+            fsm_schedule: BTreeMap::new(),
+            children: children_vec,
+            num_repeats: <span class="number">1</span>,
+            num_states: target_group_ref.latency,
+        })
+    }
+
+    <span class="doccomment">/// Builds &quot;trees&quot; but just make them single nodes that never offload.
+    /// This is the original strategy that we used.
+    </span><span class="kw">fn </span>build_single_node(
+        name: ir::Id,
+        static_groups: <span class="kw-2">&amp;</span>[ir::RRC&lt;ir::StaticGroup&gt;],
+    ) -&gt; Node {
+        <span class="kw">let </span>target_group = static_groups
+            .iter()
+            .find(|sgroup| sgroup.borrow().name() == name)
+            .unwrap();
+        <span class="kw">let </span>target_group_ref = target_group.borrow();
+        <span class="macro">assert!</span>(
+            !target_group_ref.attributes.has(ir::BoolAttr::ParCtrl),
+            <span class="string">&quot;ParCtrl attribute is not compatible with building a single node&quot;
+        </span>);
+
+        Node::Single(SingleNode {
+            latency: target_group_ref.latency,
+            fsm_cell: <span class="prelude-val">None</span>,
+            iter_count_cell: <span class="prelude-val">None</span>,
+            root: (name, <span class="macro">vec!</span>[]),
+            fsm_schedule: <span class="macro">vec!</span>[(
+                (<span class="number">0</span>, target_group_ref.latency),
+                StateType::Normal((<span class="number">0</span>, target_group_ref.latency)),
+            )]
+            .into_iter()
+            .collect(),
+            children: <span class="macro">vec!</span>[],
+            num_repeats: <span class="number">1</span>,
+            num_states: target_group_ref.latency,
+        })
+    }
+
+    <span class="doccomment">/// Search through `static_groups` and get latency of sgroup named `name`
+    </span><span class="kw">fn </span>get_sgroup_latency(
+        name: ir::Id,
+        static_groups: <span class="kw-2">&amp;</span>[ir::RRC&lt;ir::StaticGroup&gt;],
+    ) -&gt; u64 {
+        static_groups
+            .iter()
+            .find(|sgroup| sgroup.borrow().name() == name)
+            .expect(<span class="string">&quot;couldn&#39;t find static group&quot;</span>)
+            .borrow()
+            .get_latency()
+    }
+
+    <span class="comment">// Given a vec of tuples (i,j) sorted by the first element (i.e., `i`) checks
+    // whether the ranges do not overlap.
+    </span><span class="kw">fn </span>are_ranges_non_overlapping(ranges: <span class="kw-2">&amp;</span>[(Node, (u64, u64))]) -&gt; bool {
+        <span class="kw">if </span>ranges.is_empty() {
+            <span class="kw">return </span><span class="bool-val">true</span>;
+        }
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..ranges.len() - <span class="number">1 </span>{
+            <span class="kw">let </span>(<span class="kw">_</span>, (<span class="kw">_</span>, end1)) = ranges[i];
+            <span class="kw">let </span>(<span class="kw">_</span>, (start2, <span class="kw">_</span>)) = ranges[i + <span class="number">1</span>];
+            <span class="comment">// Ensure that the current range&#39;s end is less than or equal to the next range&#39;s start
+            </span><span class="kw">if </span>end1 &gt; start2 {
+                <span class="kw">return </span><span class="bool-val">false</span>;
+            }
+        }
+        <span class="bool-val">true
+    </span>}
+
+    <span class="comment">// Get a vec of all static groups that were &quot;enabled&quot; in `ctrl`.
+    </span><span class="kw">fn </span>get_static_enables(ctrl: <span class="kw-2">&amp;</span>ir::Control) -&gt; Vec&lt;ir::Id&gt; {
+        <span class="kw">match </span>ctrl {
+            ir::Control::Seq(ir::Seq { stmts, .. })
+            | ir::Control::Par(ir::Par { stmts, .. }) =&gt; stmts
+                .iter()
+                .flat_map(<span class="self">Self</span>::get_static_enables)
+                .collect_vec(),
+            ir::Control::Empty(<span class="kw">_</span>)
+            | ir::Control::Enable(<span class="kw">_</span>)
+            | ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">vec!</span>[],
+            ir::Control::If(c) =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>tbranch_res = <span class="self">Self</span>::get_static_enables(<span class="kw-2">&amp;</span>c.tbranch);
+                <span class="kw">let </span>fbranch_res = <span class="self">Self</span>::get_static_enables(<span class="kw-2">&amp;</span>c.fbranch);
+                tbranch_res.extend(fbranch_res);
+                tbranch_res
+            }
+            ir::Control::Repeat(ir::Repeat { body, .. })
+            | ir::Control::While(ir::While { body, .. }) =&gt; {
+                <span class="self">Self</span>::get_static_enables(body)
+            }
+            ir::Control::Static(sc) =&gt; {
+                <span class="kw">let </span>ir::StaticControl::Enable(s) = sc <span class="kw">else </span>{
+                    <span class="macro">unreachable!</span>(<span class="string">&quot;Non-Enable Static Control should have been compiled away. Run {} to do this&quot;</span>, <span class="kw">crate</span>::passes::StaticInliner::name());
+                };
+                <span class="macro">vec!</span>[s.group.borrow().name()]
+            }
+        }
+    }
+}
+
+<span class="comment">// These are the functions used to compile for the static *component* interface,
+// which (annoyingly) only needs a go signal fro %0, compared to %[0:n] for
+// static groups.
 </span><span class="kw">impl </span>CompileStatic {
     <span class="comment">// Used for guards in a one cycle static component.
     // Replaces %0 with comp.go.
@@ -1571,11 +2266,11 @@
 
     <span class="comment">// Makes `done` signal for promoted static&lt;n&gt; component.
     </span><span class="kw">fn </span>make_done_signal_for_promoted_component(
-        fsm: <span class="kw-2">&amp;mut </span>StaticFSM,
+        fsm_tree: <span class="kw-2">&amp;mut </span>Node,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
         comp_sig: RRC&lt;ir::Cell&gt;,
     ) -&gt; Vec&lt;ir::Assignment&lt;ir::Nothing&gt;&gt; {
-        <span class="kw">let </span>first_state_guard = <span class="kw-2">*</span>fsm.query_between(builder, (<span class="number">0</span>, <span class="number">1</span>));
+        <span class="kw">let </span>first_state_guard = fsm_tree.query_between((<span class="number">0</span>, <span class="number">1</span>), builder);
         <span class="macro">structure!</span>(builder;
           <span class="kw">let </span>sig_reg = prim std_reg(<span class="number">1</span>);
           <span class="kw">let </span>one = constant(<span class="number">1</span>, <span class="number">1</span>);
@@ -1629,29 +2324,82 @@
         assigns.to_vec()
     }
 
-    <span class="comment">// Compiles `sgroup` according to the static component interface.
+    <span class="comment">// `fsm_tree` should be the top-level tree in the components.
+    // `static_groups` are the component&#39;s static groups.
     // The assignments are removed from `sgroup` and placed into
     // `builder.component`&#39;s continuous assignments.
     </span><span class="kw">fn </span>compile_static_interface(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        sgroup: ir::RRC&lt;ir::StaticGroup&gt;,
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        fsm_tree: <span class="kw-2">&amp;mut </span>Node,
+        static_groups: <span class="kw-2">&amp;mut </span>Vec&lt;ir::RRC&lt;ir::StaticGroup&gt;&gt;,
+        coloring: <span class="kw-2">&amp;</span>HashMap&lt;ir::Id, ir::Id&gt;,
+        colors_to_max_values: <span class="kw-2">&amp;</span>HashMap&lt;ir::Id, (u64, u64)&gt;,
+        colors_to_fsm: <span class="kw-2">&amp;mut </span>HashMap&lt;
+            ir::Id,
+            (OptionalStaticFSM, OptionalStaticFSM),
+        &gt;,
         builder: <span class="kw-2">&amp;mut </span>ir::Builder,
-    ) {
-        <span class="kw">if </span>sgroup.borrow().get_latency() &gt; <span class="number">1 </span>{
-            <span class="comment">// Build a StaticSchedule object, realize it and add assignments
-            // as continuous assignments.
-            </span><span class="kw">let </span><span class="kw-2">mut </span>sch = StaticSchedule::from(<span class="macro">vec!</span>[Rc::clone(<span class="kw-2">&amp;</span>sgroup)]);
-            <span class="kw">let </span>(<span class="kw-2">mut </span>assigns, <span class="kw-2">mut </span>fsm) = sch.realize_schedule(builder, <span class="bool-val">true</span>);
-            builder
-                .component
-                .continuous_assignments
-                .extend(assigns.pop_front().unwrap());
+    ) -&gt; calyx_utils::CalyxResult&lt;()&gt; {
+        <span class="kw">if </span>fsm_tree.get_latency() &gt; <span class="number">1 </span>{
+            <span class="comment">// Find top-level static group.
+            </span><span class="kw">let </span>sgroup = <span class="self">Self</span>::find_static_group(
+                <span class="kw-2">&amp;</span>fsm_tree.get_root_name(),
+                static_groups,
+            );
+            <span class="comment">// Perform some preprocessing on the assignments
+            // (in particular, transform %[0:n] into %0 | %[1:n])
+            </span><span class="kw">for </span>assign <span class="kw">in </span><span class="kw-2">&amp;mut </span>sgroup.borrow_mut().assignments {
+                Node::preprocess_static_interface_assigns(
+                    assign,
+                    Rc::clone(<span class="kw-2">&amp;</span>builder.component.signature),
+                );
+            }
+
+            <span class="kw">let </span>comp_go = ir::Guard::port(
+                builder
+                    .component
+                    .signature
+                    .borrow()
+                    .find_unique_with_attr(ir::NumAttr::Go)<span class="question-mark">?
+                    </span>.unwrap(),
+            );
+
+            <span class="comment">// Realize the fsm tree in hardware.
+            </span>fsm_tree.instantiate_fsms(
+                builder,
+                coloring,
+                colors_to_max_values,
+                colors_to_fsm,
+                <span class="self">self</span>.one_hot_cutoff,
+            );
+            fsm_tree.count_to_n(builder, <span class="prelude-val">Some</span>(comp_go));
+            fsm_tree.realize(
+                <span class="bool-val">false</span>,
+                static_groups,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.reset_early_map,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.fsm_info_map,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.group_rewrites,
+                builder,
+            );
+            <span class="comment">// Add root&#39;s assignments as continuous assignments, execpt for the
+            // `group[done]` assignments.
+            </span>builder.component.continuous_assignments.extend(
+                fsm_tree.take_root_assigns().into_iter().filter(|assign| {
+                    <span class="kw">let </span>dst = assign.dst.borrow();
+                    <span class="kw">match </span>dst.parent {
+                        PortParent::Cell(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+                        <span class="comment">// Don&#39;t add assignment to `group[done]`
+                        </span>PortParent::Group(<span class="kw">_</span>) =&gt; dst.name != <span class="string">&quot;done&quot;</span>,
+                        PortParent::StaticGroup(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+                    }
+                }),
+            );
             <span class="kw">let </span>comp_sig = Rc::clone(<span class="kw-2">&amp;</span>builder.component.signature);
             <span class="kw">if </span>builder.component.attributes.has(ir::BoolAttr::Promoted) {
                 <span class="comment">// If necessary, add the logic to produce a done signal.
                 </span><span class="kw">let </span>done_assigns =
                     <span class="self">Self</span>::make_done_signal_for_promoted_component(
-                        <span class="kw-2">&amp;mut </span>fsm, builder, comp_sig,
+                        fsm_tree, builder, comp_sig,
                     );
                 builder
                     .component
@@ -1662,10 +2410,29 @@
             <span class="comment">// Handle components with latency == 1.
             // In this case, we don&#39;t need an FSM; we just guard the assignments
             // with comp.go.
-            </span><span class="kw">let </span>assignments =
+            </span><span class="kw">let </span>sgroup = <span class="self">Self</span>::find_static_group(
+                <span class="kw-2">&amp;</span>fsm_tree.get_root_name(),
+                static_groups,
+            );
+            <span class="kw">for </span>(child, <span class="kw">_</span>) <span class="kw">in </span>fsm_tree.get_children() {
+                <span class="comment">// We can ignore any static timing guards in the children,
+                // since we know the latency is 1. That is why we call
+                // `convert_assignments_type`.
+                </span>child.realize(
+                    <span class="bool-val">true</span>,
+                    static_groups,
+                    <span class="kw-2">&amp;mut </span><span class="self">self</span>.reset_early_map,
+                    <span class="kw-2">&amp;mut </span><span class="self">self</span>.fsm_info_map,
+                    <span class="kw-2">&amp;mut </span><span class="self">self</span>.group_rewrites,
+                    builder,
+                )
+            }
+            <span class="kw">let </span>assignments =
                 std::mem::take(<span class="kw-2">&amp;mut </span>sgroup.borrow_mut().assignments);
-            <span class="kw">for </span>assign <span class="kw">in </span>assignments {
-                <span class="kw">let </span>comp_sig = Rc::clone(<span class="kw-2">&amp;</span>builder.component.signature);
+            <span class="kw">for </span><span class="kw-2">mut </span>assign <span class="kw">in </span>assignments {
+                <span class="comment">// Make `assignments` continuous and replace %[0:1] with `comp.go`
+                </span><span class="kw">let </span>comp_sig = Rc::clone(<span class="kw-2">&amp;</span>builder.component.signature);
+                assign.guard.update(|g| g.and(<span class="macro">guard!</span>(comp_sig[<span class="string">&quot;go&quot;</span>])));
                 builder.component.continuous_assignments.push(
                     <span class="self">Self</span>::make_assign_dyn_one_cycle_static_comp(
                         assign, comp_sig,
@@ -1673,7 +2440,8 @@
                 );
             }
             <span class="kw">if </span>builder.component.attributes.has(ir::BoolAttr::Promoted) {
-                <span class="kw">let </span>comp_sig = Rc::clone(<span class="kw-2">&amp;</span>builder.component.signature);
+                <span class="comment">// Need to add a done signal if this component was promoted.
+                </span><span class="kw">let </span>comp_sig = Rc::clone(<span class="kw-2">&amp;</span>builder.component.signature);
                 <span class="kw">let </span>done_assigns =
                     <span class="self">Self</span>::make_done_signal_for_promoted_component_one_cycle(
                         builder, comp_sig,
@@ -1682,8 +2450,9 @@
                     .component
                     .continuous_assignments
                     .extend(done_assigns);
-            }
-        }
+            };
+        };
+        <span class="prelude-val">Ok</span>(())
     }
 }
 
@@ -1694,14 +2463,77 @@
         sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
+        <span class="comment">// Drain static groups of component
+        </span><span class="kw">let </span><span class="kw-2">mut </span>sgroups: Vec&lt;ir::RRC&lt;ir::StaticGroup&gt;&gt; =
+            comp.get_static_groups_mut().drain().collect();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+        <span class="comment">// Get a vec of all groups that are enabled in comp&#39;s control.
+        </span><span class="kw">let </span>static_enable_ids =
+            <span class="self">Self</span>::get_static_enables(<span class="kw-2">&amp;</span>builder.component.control.borrow());
+        <span class="comment">// Build one tree object per static enable.
+        // Even if we don&#39;t offload, we still need to build trees to
+        // determine coloring.
+        </span><span class="kw">let </span>default_tree_objects = static_enable_ids
+            .iter()
+            .map(|id| {
+                <span class="kw">if </span><span class="self">self</span>.offload_pause {
+                    <span class="self">Self</span>::build_tree_object(<span class="kw-2">*</span>id, <span class="kw-2">&amp;</span>sgroups, <span class="number">1</span>)
+                } <span class="kw">else </span>{
+                    <span class="comment">// If we&#39;re not offloading, then we should build dummy trees
+                    // that are just used to determine coloring.
+                    // This is basically the same thing as `build_tree_object`,
+                    // but doesn&#39;t check the `ParCtrl` attribute. I think
+                    // we could reduce code size by merging this function with
+                    // `build_tree_object`.
+                    </span><span class="self">Self</span>::build_dummy_tree(<span class="kw-2">*</span>id, <span class="kw-2">&amp;</span>sgroups)
+                }
+            })
+            .collect_vec();
+
+        <span class="comment">// The first thing is to assign FSMs -&gt; static islands.
+        // We sometimes assign the same FSM to different static islands
+        // to reduce register usage. We do this by getting greedy coloring.
+        </span><span class="kw">let </span>coloring: HashMap&lt;ir::Id, ir::Id&gt; = <span class="self">self</span>.get_coloring(
+            <span class="kw-2">&amp;</span>default_tree_objects,
+            <span class="kw-2">&amp;</span>sgroups,
+            <span class="kw-2">&amp;mut </span>builder.component.control.borrow_mut(),
+        );
+        <span class="comment">// We need the max_num_states  and max_num_repeats for each
+        // color so we know how many bits the corresponding registers should get.
+        </span><span class="kw">let </span>colors_to_max_values =
+            <span class="self">Self</span>::get_color_max_values(<span class="kw-2">&amp;</span>coloring, <span class="kw-2">&amp;</span>default_tree_objects);
+        <span class="kw">let </span><span class="kw-2">mut </span>colors_to_fsms: HashMap&lt;
+            ir::Id,
+            (OptionalStaticFSM, OptionalStaticFSM),
+        &gt; = HashMap::new();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>tree_objects = <span class="kw">if </span><span class="self">self</span>.offload_pause {
+            default_tree_objects
+        } <span class="kw">else </span>{
+            <span class="comment">// Build simple trees if we&#39;re not offloading (i.e., build trees
+            // that just consist of a single node.)
+            // Note that these trees would not correctly draw conflicts between
+            // nodes for coloring.
+            </span><span class="kw">let </span><span class="kw-2">mut </span>simple_trees = <span class="macro">vec!</span>[];
+            <span class="kw">let </span>sgroup_names = sgroups
+                .iter()
+                .map(|sgroup| sgroup.borrow().name())
+                .collect_vec();
+            <span class="kw">for </span>name <span class="kw">in </span>sgroup_names {
+                simple_trees.push(<span class="self">Self</span>::build_single_node(name, <span class="kw-2">&amp;</span>sgroups))
+            }
+            simple_trees
+        };
+
         <span class="comment">// Static components have a different interface than static groups.
         // If we have a static component, we have to compile the top-level
         // island (this island should be a group by now and corresponds
         // to the the entire control of the component) differently.
         // This island might invoke other static groups-- these static groups
         // should still follow the group interface.
-        </span><span class="kw">let </span>top_level_sgroup = <span class="kw">if </span>comp.is_static() {
-            <span class="kw">let </span>comp_control = comp.control.borrow();
+        </span><span class="kw">let </span>top_level_sgroup = <span class="kw">if </span>builder.component.is_static() {
+            <span class="kw">let </span>comp_control = builder.component.control.borrow();
             <span class="kw">match </span><span class="kw-2">&amp;*</span>comp_control {
                 ir::Control::Static(ir::StaticControl::Enable(sen)) =&gt; {
                     <span class="prelude-val">Some</span>(sen.group.borrow().name())
@@ -1711,101 +2543,46 @@
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>};
-
-        <span class="comment">// Drain static groups of component
-        </span><span class="kw">let </span>sgroups: Vec&lt;ir::RRC&lt;ir::StaticGroup&gt;&gt; =
-            comp.get_static_groups_mut().drain().collect();
-
-        <span class="comment">// The first thing is to assign FSMs -&gt; static islands.
-        // We sometimes assign the same FSM to different static islands
-        // to reduce register usage. We do this by getting greedy coloring.
-        </span><span class="kw">let </span>coloring = <span class="self">Self</span>::get_coloring(<span class="kw-2">&amp;</span>sgroups, <span class="kw-2">&amp;</span>comp.control.borrow());
-
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
-        <span class="comment">// Build one StaticSchedule object per color
-        </span><span class="kw">let </span><span class="kw-2">mut </span>schedule_objects =
-            <span class="self">Self</span>::build_schedule_objects(coloring, sgroups, <span class="kw-2">&amp;mut </span>builder);
-
-        <span class="comment">// Map so we can rewrite `static_group[go]` to `early_reset_group[go]`
-        </span><span class="kw">let </span><span class="kw-2">mut </span>group_rewrites = ir::rewriter::PortRewriteMap::default();
-
-        <span class="comment">// Realize an fsm for each StaticSchedule object.
-        </span><span class="kw">for </span>sch <span class="kw">in </span><span class="kw-2">&amp;mut </span>schedule_objects {
+        <span class="comment">// Make each tree count to n.
+        </span><span class="kw">for </span>tree <span class="kw">in </span><span class="kw-2">&amp;mut </span>tree_objects {
             <span class="comment">// Check whether we are compiling the top level static island.
             </span><span class="kw">let </span>static_component_interface = <span class="kw">match </span>top_level_sgroup {
                 <span class="prelude-val">None </span>=&gt; <span class="bool-val">false</span>,
                 <span class="comment">// For the top level group, sch.static_groups should really only
-                // have group--the top level group.
-                </span><span class="prelude-val">Some</span>(top_level_group) =&gt; sch
-                    .static_groups
-                    .iter()
-                    .any(|g| g.borrow().name() == top_level_group),
+                // have one group--the top level group.
+                </span><span class="prelude-val">Some</span>(top_level_group) =&gt; {
+                    tree.get_group_name() == top_level_group
+                }
             };
             <span class="comment">// Static component/groups have different interfaces
             </span><span class="kw">if </span>static_component_interface {
                 <span class="comment">// Compile top level static group differently.
-                // We know that the top level static island has its own
-                // unique FSM so we can do `.pop().unwrap()`
                 </span><span class="self">self</span>.compile_static_interface(
-                    sch.static_groups.pop().unwrap(),
+                    tree,
+                    <span class="kw-2">&amp;mut </span>sgroups,
+                    <span class="kw-2">&amp;</span>coloring,
+                    <span class="kw-2">&amp;</span>colors_to_max_values,
+                    <span class="kw-2">&amp;mut </span>colors_to_fsms,
                     <span class="kw-2">&amp;mut </span>builder,
-                )
+                )<span class="question-mark">?</span>;
             } <span class="kw">else </span>{
-                <span class="kw">let </span>(<span class="kw-2">mut </span>static_group_assigns, fsm) = sch
-                    .realize_schedule(<span class="kw-2">&amp;mut </span>builder, static_component_interface);
-                <span class="kw">let </span>fsm_ref = ir::rrc(fsm);
-                <span class="kw">for </span>static_group <span class="kw">in </span>sch.static_groups.iter() {
-                    <span class="comment">// Create the dynamic &quot;early reset group&quot; that will replace the static group.
-                    </span><span class="kw">let </span>static_group_name = static_group.borrow().name();
-                    <span class="kw">let </span><span class="kw-2">mut </span>early_reset_name = static_group_name.to_string();
-                    early_reset_name.insert_str(<span class="number">0</span>, <span class="string">&quot;early_reset_&quot;</span>);
-                    <span class="kw">let </span>early_reset_group = builder.add_group(early_reset_name);
-                    <span class="kw">let </span><span class="kw-2">mut </span>assigns = static_group_assigns.pop_front().unwrap();
-
-                    <span class="comment">// Add assignment `group[done] = ud.out`` to the new group.
-                    </span><span class="macro">structure!</span>( builder; <span class="kw">let </span>ud = prim undef(<span class="number">1</span>););
-                    <span class="kw">let </span>early_reset_done_assign = <span class="macro">build_assignments!</span>(
-                      builder;
-                      early_reset_group[<span class="string">&quot;done&quot;</span>] = <span class="question-mark">? </span>ud[<span class="string">&quot;out&quot;</span>];
-                    );
-                    assigns.extend(early_reset_done_assign);
-
-                    early_reset_group.borrow_mut().assignments = assigns;
-                    early_reset_group.borrow_mut().attributes =
-                        static_group.borrow().attributes.clone();
-
-                    <span class="comment">// Now we have to update the fields with a bunch of information.
-                    // This makes it easier when we have to build wrappers, rewrite ports, etc.
-
-                    // Map the static group name -&gt; early reset group name.
-                    // This is helpful for rewriting control
-                    </span><span class="self">self</span>.reset_early_map.insert(
-                        static_group_name,
-                        early_reset_group.borrow().name(),
-                    );
-                    <span class="comment">// self.group_rewrite_map helps write static_group[go] to early_reset_group[go]
-                    // Technically we could do this w/ early_reset_map but is easier w/
-                    // group_rewrite, which is explicitly of type `PortRewriterMap`
-                    </span>group_rewrites.insert(
-                        ir::Canonical::new(
-                            static_group_name,
-                            ir::Id::from(<span class="string">&quot;go&quot;</span>),
-                        ),
-                        early_reset_group.borrow().find(<span class="string">&quot;go&quot;</span>).unwrap_or_else(
-                            || {
-                                <span class="macro">unreachable!</span>(
-                                    <span class="string">&quot;group {} has no go port&quot;</span>,
-                                    early_reset_group.borrow().name()
-                                )
-                            },
-                        ),
-                    );
-
-                    <span class="self">self</span>.fsm_info_map.insert(
-                        early_reset_group.borrow().name(),
-                        Rc::clone(<span class="kw-2">&amp;</span>fsm_ref),
-                    );
-                }
+                <span class="comment">// Otherwise just instantiate the tree to hardware.
+                </span>tree.instantiate_fsms(
+                    <span class="kw-2">&amp;mut </span>builder,
+                    <span class="kw-2">&amp;</span>coloring,
+                    <span class="kw-2">&amp;</span>colors_to_max_values,
+                    <span class="kw-2">&amp;mut </span>colors_to_fsms,
+                    <span class="self">self</span>.one_hot_cutoff,
+                );
+                tree.count_to_n(<span class="kw-2">&amp;mut </span>builder, <span class="prelude-val">None</span>);
+                tree.realize(
+                    <span class="bool-val">false</span>,
+                    <span class="kw-2">&amp;</span>sgroups,
+                    <span class="kw-2">&amp;mut </span><span class="self">self</span>.reset_early_map,
+                    <span class="kw-2">&amp;mut </span><span class="self">self</span>.fsm_info_map,
+                    <span class="kw-2">&amp;mut </span><span class="self">self</span>.group_rewrites,
+                    <span class="kw-2">&amp;mut </span>builder,
+                );
             }
         }
 
@@ -1814,17 +2591,14 @@
         // groups don&#39;t have done holes.
         </span>comp.for_each_assignment(|assign| {
             assign.for_each_port(|port| {
-                group_rewrites
+                <span class="self">self</span>.group_rewrites
                     .get(<span class="kw-2">&amp;</span>port.borrow().canonical())
                     .map(Rc::clone)
             })
         });
 
         <span class="comment">// Add the static groups back to the component.
-        </span><span class="kw">for </span>schedule <span class="kw">in </span>schedule_objects {
-            comp.get_static_groups_mut()
-                .append(schedule.static_groups.into_iter());
-        }
+        </span>comp.get_static_groups_mut().append(sgroups.into_iter());
 
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
@@ -1837,7 +2611,10 @@
         sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="comment">// No need to build wrapper for static component interface
+        <span class="comment">// The main purpose of this method is inserting wrappers / singal registers
+        // when appropriate.
+
+        // No need to build wrapper for static component interface
         </span><span class="kw">if </span>comp.is_static() {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Continue);
         }
@@ -1864,12 +2641,11 @@
             <span class="prelude-val">None </span>=&gt; {
                 <span class="comment">// create the builder/cells that we need to create wrapper group
                 </span><span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
-                <span class="kw">let </span>fsm_object = <span class="self">self</span>.fsm_info_map.get(early_reset_name).unwrap_or_else(|| <span class="macro">unreachable!</span>(<span class="string">&quot;group {} has no correspondoing fsm in self.fsm_map&quot;</span>, early_reset_name));
+                <span class="kw">let </span>(fsm_name, <span class="kw">_</span>, fsm_final_state) = <span class="self">self</span>.fsm_info_map.get(early_reset_name).unwrap_or_else(|| <span class="macro">unreachable!</span>(<span class="string">&quot;group {} has no correspondoing fsm in self.fsm_map&quot;</span>, early_reset_name));
                 <span class="comment">// If we&#39;ve already made a wrapper for a group that uses the same
                 // FSM, we can reuse the signal_reg. Otherwise, we must
                 // instantiate a new signal_reg.
-                </span><span class="kw">let </span>fsm_name = fsm_object.borrow().get_unique_id();
-                <span class="kw">let </span>wrapper = <span class="kw">match </span><span class="self">self</span>.signal_reg_map.get(<span class="kw-2">&amp;</span>fsm_name) {
+                </span><span class="kw">let </span>wrapper = <span class="kw">match </span><span class="self">self</span>.signal_reg_map.get(fsm_name) {
                     <span class="prelude-val">None </span>=&gt; {
                         <span class="comment">// Need to build the signal_reg and the continuous
                         // assignment that resets the signal_reg
@@ -1877,9 +2653,9 @@
                             <span class="kw">let </span>signal_reg = prim std_reg(<span class="number">1</span>);
                         );
                         <span class="self">self</span>.signal_reg_map
-                            .insert(fsm_name, signal_reg.borrow().name());
+                            .insert(<span class="kw-2">*</span>fsm_name, signal_reg.borrow().name());
                         <span class="self">Self</span>::build_wrapper_group(
-                            Rc::clone(fsm_object),
+                            fsm_final_state.clone(),
                             early_reset_name,
                             signal_reg,
                             <span class="kw-2">&amp;mut </span>builder,
@@ -1897,7 +2673,7 @@
                                 <span class="macro">unreachable!</span>(<span class="string">&quot;signal reg {reg_name} found&quot;</span>)
                             });
                         <span class="self">Self</span>::build_wrapper_group(
-                            Rc::clone(fsm_object),
+                            fsm_final_state.clone(),
                             early_reset_name,
                             signal_reg,
                             <span class="kw-2">&amp;mut </span>builder,
@@ -1969,9 +2745,9 @@
                 <span class="kw">let </span>reset_group_name = <span class="self">self</span>.get_reset_group_name(sc);
 
                 <span class="comment">// Get fsm for reset_group
-                </span><span class="kw">let </span>fsm_object = <span class="self">self</span>.fsm_info_map.get(reset_group_name).unwrap_or_else(|| <span class="macro">unreachable!</span>(<span class="string">&quot;group {} has no correspondoing fsm in self.fsm_map&quot;</span>, reset_group_name));
+                </span><span class="kw">let </span>(<span class="kw">_</span>, fsm_first_state, <span class="kw">_</span>) = <span class="self">self</span>.fsm_info_map.get(reset_group_name).unwrap_or_else(|| <span class="macro">unreachable!</span>(<span class="string">&quot;group {} has no correspondoing fsm in self.fsm_map&quot;</span>, reset_group_name));
                 <span class="kw">let </span>wrapper_group = <span class="self">self</span>.build_wrapper_group_while(
-                    Rc::clone(fsm_object),
+                    fsm_first_state.clone(),
                     reset_group_name,
                     Rc::clone(<span class="kw-2">&amp;</span>s.port),
                     <span class="kw-2">&amp;mut </span>builder,
@@ -1992,12 +2768,12 @@
     ) -&gt; VisResult {
         <span class="comment">// make sure static groups have no assignments, since
         // we should have already drained the assignments in static groups
-        </span><span class="kw">for </span>g <span class="kw">in </span>comp.get_static_groups() {
-            <span class="kw">if </span>!g.borrow().assignments.is_empty() {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;Should have converted all static groups to dynamic. {} still has assignments in it. It&#39;s possible that you may need to run {} to remove dead groups and get rid of this error.&quot;</span>, g.borrow().name(), <span class="kw">crate</span>::passes::DeadGroupRemoval::name());
-            }
-        }
-        <span class="comment">// remove all static groups
+        // for g in comp.get_static_groups() {
+        //     if !g.borrow().assignments.is_empty() {
+        //         unreachable!(&quot;Should have converted all static groups to dynamic. {} still has assignments in it. It&#39;s possible that you may need to run {} to remove dead groups and get rid of this error.&quot;, g.borrow().name(), crate::passes::DeadGroupRemoval::name());
+        //     }
+        // }
+        // remove all static groups
         </span>comp.get_static_groups_mut().retain(|<span class="kw">_</span>| <span class="bool-val">false</span>);
 
         <span class="comment">// Remove control if static component

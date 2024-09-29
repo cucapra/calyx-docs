@@ -42,6 +42,12 @@
 <span id="42">42</span>
 <span id="43">43</span>
 <span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 
@@ -66,20 +72,26 @@
         _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">if </span>comp.is_static() {
-            <span class="kw">let </span>latency = s.get_latency();
-            <span class="kw">if let </span>ir::StaticControl::Enable(sen) = s {
-                <span class="kw">for </span>assign <span class="kw">in </span>sen.group.borrow_mut().assignments.iter_mut() {
-                    <span class="kw">let </span>g =
-                        ir::Guard::Info(ir::StaticTiming::new((<span class="number">0</span>, latency)));
-                    <span class="kw">let </span>new_g = ir::Guard::And(
-                        Box::new(g),
-                        std::mem::replace(
-                            <span class="kw-2">&amp;mut </span>assign.guard,
-                            Box::new(ir::Guard::True),
-                        ),
-                    );
-                    assign.guard = Box::new(new_g);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(latency) = comp.latency {
+            <span class="kw">let </span>lat_u64: u64 = latency.into();
+            <span class="kw">if </span>lat_u64 &gt; <span class="number">1 </span>{
+                <span class="kw">if let </span>ir::StaticControl::Enable(sen) = s {
+                    <span class="kw">for </span>assign <span class="kw">in </span>sen.group.borrow_mut().assignments.iter_mut()
+                    {
+                        <span class="kw">let </span>g = ir::Guard::Info(ir::StaticTiming::new((
+                            <span class="number">0</span>, lat_u64,
+                        )));
+                        <span class="kw">let </span>new_g = ir::Guard::And(
+                            Box::new(g),
+                            std::mem::replace(
+                                <span class="kw-2">&amp;mut </span>assign.guard,
+                                Box::new(ir::Guard::True),
+                            ),
+                        );
+                        assign.guard = Box::new(new_g);
+                    }
+                } <span class="kw">else </span>{
+                    <span class="macro">unreachable!</span>(<span class="string">&quot;Non-Enable Static Control should have been compiled away. Run {} to do this&quot;</span>, <span class="kw">crate</span>::passes::StaticInliner::name());
                 }
             }
         }

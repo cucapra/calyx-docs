@@ -45,6 +45,8 @@
 <span id="45">45</span>
 <span id="46">46</span>
 <span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Analysis for Calyx programs.
 //!
 //! The analyses construct data-structures that make answering certain queries
@@ -67,8 +69,9 @@
 <span class="kw">mod </span>read_write_set;
 <span class="kw">mod </span>schedule_conflicts;
 <span class="kw">mod </span>share_set;
+<span class="kw">mod </span>static_fsm;
 <span class="kw">mod </span>static_par_timing;
-<span class="kw">mod </span>static_schedule;
+<span class="kw">mod </span>static_tree;
 <span class="kw">mod </span>variable_detection;
 
 <span class="kw">pub use </span>compaction_analysis::CompactionAnalysis;
@@ -89,8 +92,9 @@
 <span class="kw">pub use </span>read_write_set::{AssignmentAnalysis, ReadWriteSet};
 <span class="kw">pub use </span>schedule_conflicts::ScheduleConflicts;
 <span class="kw">pub use </span>share_set::ShareSet;
+<span class="kw">pub use </span>static_fsm::{FSMEncoding, StaticFSM};
 <span class="kw">pub use </span>static_par_timing::StaticParTiming;
-<span class="kw">pub use </span>static_schedule::{StaticFSM, StaticSchedule};
+<span class="kw">pub use </span>static_tree::{Node, ParNodes, SingleNode, StateType};
 <span class="kw">pub use </span>variable_detection::VariableDetection;
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="calyx_opt" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

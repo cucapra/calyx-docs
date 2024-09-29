@@ -210,6 +210,17 @@
 <span id="210">210</span>
 <span id="211">211</span>
 <span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_utils::{Idx, WeightGraph};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>petgraph::algo;
@@ -381,6 +392,17 @@
             .collect()
     }
 
+    <span class="comment">// Reverses a coloring by mapping color C -&gt; vec of nodes colored C.
+    </span><span class="kw">pub fn </span>reverse_coloring(coloring: <span class="kw-2">&amp;</span>HashMap&lt;T, T&gt;) -&gt; HashMap&lt;T, Vec&lt;T&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>rev_coloring: HashMap&lt;T, Vec&lt;T&gt;&gt; = HashMap::new();
+        <span class="kw">for </span>(node, color) <span class="kw">in </span>coloring {
+            rev_coloring
+                .entry(color.clone())
+                .or_default()
+                .push(node.clone());
+        }
+        rev_coloring
+    }
     <span class="kw">pub fn </span>welsh_powell_coloring(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; HashMap&lt;T, T&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>coloring: HashMap&lt;T, T&gt; = HashMap::new();
 
