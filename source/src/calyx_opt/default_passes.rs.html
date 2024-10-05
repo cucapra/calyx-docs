@@ -183,19 +183,23 @@
 <span id="183">183</span>
 <span id="184">184</span>
 <span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::pass_manager::PassResult;
 <span class="kw">use </span><span class="kw">crate</span>::passes::{
     AddGuard, Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
-    CompileInvoke, CompileRepeat, CompileStatic, CompileSync,
-    CompileSyncWithoutSyncReg, ComponentInliner, DataPathInfer,
-    DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval, DefaultAssigns,
-    DiscoverExternal, ExternalToRef, Externalize, GoInsertion, GroupToInvoke,
-    GroupToSeq, HoleInliner, InferShare, LowerGuards, MergeAssign, Metadata,
-    Papercut, ParToSeq, RegisterUnsharing, RemoveIds, ResetInsertion,
+    CompileInvoke, CompileRepeat, CompileStatic, ComponentInliner,
+    DataPathInfer, DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval,
+    DefaultAssigns, Externalize, GoInsertion, GroupToInvoke, GroupToSeq,
+    InferShare, LowerGuards, MergeAssign, Papercut, RemoveIds, ResetInsertion,
     SimplifyStaticGuards, SimplifyWithControl, StaticFSMOpts, StaticInference,
     StaticInliner, StaticPromotion, SynthesisPapercut, TopDownCompileControl,
     UnrollBounded, WellFormed, WireInliner, WrapMain,
+};
+<span class="kw">use </span><span class="kw">crate</span>::passes_experimental::{
+    CompileSync, CompileSyncWithoutSyncReg, DiscoverExternal, ExternalToRef,
+    HoleInliner, Metadata, ParToSeq, RegisterUnsharing,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::Named;
 <span class="kw">use crate</span>::{pass_manager::PassManager, register_alias};

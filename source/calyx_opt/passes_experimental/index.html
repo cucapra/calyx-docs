@@ -1,0 +1,43 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `passes_experimental` mod in crate `calyx_opt`."><meta name="keywords" content="rust, rustlang, rust-lang, passes_experimental"><title>calyx_opt::passes_experimental - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../calyx_opt/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../calyx_opt/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"><a href="#">Module passes_experimental</a></h2><div class="sidebar-elems"><section><ul class="block"><li><a href="#structs">Structs</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Module <a href="../index.html">calyx_opt</a>::<wbr><a class="mod" href="#">passes_experimental</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../../src/calyx_opt/passes_experimental/mod.rs.html#1-16">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.CompileSync.html" title="calyx_opt::passes_experimental::CompileSync struct">CompileSync</a></div><div class="item-right docblock-short"><li>loop through all control statements under “par” block to find # barriers
+needed and # members of each barrier</li>
+<li>add all cells and groups needed</li>
+<li>loop through all control statements, find the statements with @sync
+attribute and replace them with
+seq {
+<stmt>;
+incr_barrier_0_<em>;
+write_barrier_0_</em>;
+wait_<em>;
+restore_</em>;
+}
+or
+seq {
+<stmt>;
+incr_barrier_<em>_</em>;
+write_barrier_<em>_</em>;
+wait_<em>;
+wait_restore_</em>;
+}</li>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.CompileSyncWithoutSyncReg.html" title="calyx_opt::passes_experimental::CompileSyncWithoutSyncReg struct">CompileSyncWithoutSyncReg</a></div><div class="item-right docblock-short">Compiles @sync without use of std_sync_reg
+Upon encountering @sync, it first instantiates a std_reg(1) for each thread(<code>bar</code>)
+and a std_wire(1) for each barrier (<code>s</code>)
+It then continuously assigns the value of (<code>s.in</code>) to 1’d1 guarded by the
+expression that all values of <code>bar</code> for threads under the barrier are
+set to 1’d1
+Then it replaces the @sync control operator with
+seq {
+barrier;
+clear;
+}
+<code>barrier</code> simply sets the value of <code>bar</code> to 1’d1 and then waits
+for <code>s.out</code> to be up
+<code>clear</code> resets the value of <code>bar</code> to 1’d0 for reuse of barrier
+Using this method, each thread only incurs 3 cycles of latency overhead for
+the barrier, and we theoretically won’t have a limit for number of threads
+under one barrier</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.DiscoverExternal.html" title="calyx_opt::passes_experimental::DiscoverExternal struct">DiscoverExternal</a></div><div class="item-right docblock-short">A pass to detect cells that have been inlined into the top-level component
+and turn them into real cells marked with <a href="../../calyx_frontend/attribute/enum.BoolAttr.html#variant.External" title="ir::BoolAttr::External">ir::BoolAttr::External</a>.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ExternalToRef.html" title="calyx_opt::passes_experimental::ExternalToRef struct">ExternalToRef</a></div><div class="item-right docblock-short">Turns memory cell primitives with the <code>@external(1)</code> attribute into
+<code>ref</code> memory cells without the <code>@external</code> attribute.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.HoleInliner.html" title="calyx_opt::passes_experimental::HoleInliner struct">HoleInliner</a></div><div class="item-right docblock-short">Removes all groups and inlines reads and writes from holes.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Metadata.html" title="calyx_opt::passes_experimental::Metadata struct">Metadata</a></div><div class="item-right docblock-short">Metadata stores a Map between each group name and data used in the metadata table (specified in PR #2022)</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ParToSeq.html" title="calyx_opt::passes_experimental::ParToSeq struct">ParToSeq</a></div><div class="item-right docblock-short">Transforms all <code>par</code> into <code>seq</code>. When the <code>correctness-checking</code> option is on,
+uses <a href="../analysis/struct.ControlOrder.html" title="analysis::ControlOrder">analysis::ControlOrder</a> to get a sequentialization of <code>par</code> such that
+the program still computes the same value, and errors out when
+there is no such sequentialization.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.RegisterUnsharing.html" title="calyx_opt::passes_experimental::RegisterUnsharing struct">RegisterUnsharing</a></div><div class="item-right docblock-short">Unsharing registers reduces the amount of multiplexers used in the final design, trading them
+off for more memory.</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="calyx_opt" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
