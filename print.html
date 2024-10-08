@@ -4839,7 +4839,7 @@ The rest of the tutorial will show you how to implement such a DSL by studying <
 </ol>
 <h2 id="parsing-mrxl-into-an-ast"><a class="header" href="#parsing-mrxl-into-an-ast">Parsing MrXL into an AST</a></h2>
 <p>To start, we'll parse the MrXL program into a Python AST representation.
-We choose to represent <a href="https://github.com/calyxir/calyx/blob/mrxl/mrxl/mrxl/ast.py">AST</a> nodes with <a href="https://docs.python.org/3/library/dataclasses.html">Python dataclasses</a>.
+We choose to represent <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrxl/mrxl/ast.py">AST</a> nodes with <a href="https://docs.python.org/3/library/dataclasses.html">Python dataclasses</a>.
 A program is a sequence of array/register declarations followed by computation statements:</p>
 <pre><code class="language-python">@dataclass
 class Prog:
