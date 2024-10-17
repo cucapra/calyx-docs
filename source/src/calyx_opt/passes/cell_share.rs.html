@@ -468,6 +468,10 @@
 <span id="468">468</span>
 <span id="469">469</span>
 <span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     AssignmentAnalysis, GraphColoring, LiveRangeAnalysis, ShareSet,
     StaticParTiming,
@@ -475,8 +479,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
 };
-<span class="kw">use </span>calyx_ir::rewriter;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
+<span class="kw">use </span>calyx_ir::{rewriter, BoolAttr};
 <span class="kw">use </span>calyx_utils::{CalyxResult, OutputFile};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>serde_json::{json, Value};
@@ -710,6 +714,10 @@
     <span class="kw">fn </span>cell_filter(<span class="kw-2">&amp;</span><span class="self">self</span>, cell: <span class="kw-2">&amp;</span>ir::Cell) -&gt; bool {
         <span class="comment">// Cells used in continuous assignments cannot be shared, nor can ref cells.
         </span><span class="kw">if </span><span class="self">self</span>.cont_ref_cells.contains(<span class="kw-2">&amp;</span>cell.name()) {
+            <span class="kw">return </span><span class="bool-val">false</span>;
+        }
+        <span class="comment">// Cells that have @protected cannot be shared (even if they have share/state_share attributes)
+        </span><span class="kw">if </span>cell.attributes.has(BoolAttr::Protected) {
             <span class="kw">return </span><span class="bool-val">false</span>;
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>name) = cell.type_name() {

@@ -252,6 +252,9 @@
 <span id="252">252</span>
 <span id="253">253</span>
 <span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
 </pre><pre class="rust"><code><span class="kw">use </span>calyx_utils::{CalyxResult, Error, Id};
 <span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>strum::EnumCount;
@@ -330,6 +333,9 @@
     <span class="attribute">#[strum(serialize = <span class="string">&quot;fast&quot;</span>)]
     </span><span class="doccomment">/// https://github.com/calyxir/calyx/issues/1828
     </span>Fast,
+    <span class="attribute">#[strum(serialize = <span class="string">&quot;protected&quot;</span>)]
+    </span><span class="doccomment">/// Indicate that the cell should not be removed or shared during optimization.
+    </span>Protected,
 }
 
 <span class="kw">impl </span>From&lt;BoolAttr&gt; <span class="kw">for </span>Attribute {

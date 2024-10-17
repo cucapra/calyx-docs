@@ -207,6 +207,7 @@
 <span id="207">207</span>
 <span id="208">208</span>
 <span id="209">209</span>
+<span id="210">210</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>std::collections::HashSet;
@@ -338,13 +339,14 @@
         _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="comment">// Add @external cells and ref cells.
+        <span class="comment">// Add @external cells, @protected cells and ref cells.
         </span><span class="self">self</span>.all_reads.extend(
             comp.cells
                 .iter()
                 .filter(|c| {
                     <span class="kw">let </span>cell = c.borrow();
                     cell.attributes.get(ir::BoolAttr::External).is_some()
+                        || cell.attributes.has(ir::BoolAttr::Protected)
                         || cell.is_reference()
                 })
                 .map(|c| c.borrow().name()),
