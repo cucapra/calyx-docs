@@ -2691,6 +2691,14 @@ Install it using your OS package manager or by downloading a binary.</p>
 <pre><code class="language-toml">[calyx]
 base = "&lt;path to calyx checkout&gt;"
 </code></pre>
+<h3 id="environment-setup"><a class="header" href="#environment-setup">Environment Setup</a></h3>
+<p>Some parts of Calyx and <code>fud2</code> require setting up and installing various python packages. With Python removing support for installing packages system wide, it's recommended to install relevant packages into a python virtual environment. <code>fud2</code> can set up this environment for you and instruct <code>fud2</code> to automatically run relevant tools in the correct virtual environment.</p>
+<p>To do this, simply run:</p>
+<pre><code>$ fud2 env init
+</code></pre>
+<p>There may be some cases where you want to manually interact with the python virtual environment. The virtual environment is installed to <code>$XDG_DATA_HOME/fud2/venv</code> (usually <code>~/.local/share/fud2/venv</code>). You can activate the virtual environment in your current shell with:</p>
+<pre><code>$ fud2 env activate
+</code></pre>
 <p>Now you're ready to use fud2.</p>
 <h2 id="general-use"><a class="header" href="#general-use">General Use</a></h2>
 <p>You can see complete command-line documentation with <code>fud2 --help</code>.
