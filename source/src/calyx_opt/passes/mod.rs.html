@@ -80,6 +80,8 @@
 <span id="80">80</span>
 <span id="81">81</span>
 <span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
@@ -102,6 +104,7 @@
 <span class="kw">pub mod </span>math_utilities;
 <span class="kw">mod </span>merge_assign;
 <span class="kw">mod </span>papercut;
+<span class="kw">mod </span>profiler_instrumentation;
 <span class="kw">mod </span>reset_insertion;
 <span class="kw">mod </span>simplify_static_guards;
 <span class="kw">mod </span>static_fsm_opts;
@@ -145,6 +148,7 @@
 <span class="kw">pub use </span>math_utilities::get_bit_width_from;
 <span class="kw">pub use </span>merge_assign::MergeAssign;
 <span class="kw">pub use </span>papercut::Papercut;
+<span class="kw">pub use </span>profiler_instrumentation::ProfilerInstrumentation;
 <span class="kw">pub use </span>remove_ids::RemoveIds;
 <span class="kw">pub use </span>reset_insertion::ResetInsertion;
 <span class="kw">pub use </span>simplify_static_guards::SimplifyStaticGuards;

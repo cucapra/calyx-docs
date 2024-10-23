@@ -185,6 +185,9 @@
 <span id="185">185</span>
 <span id="186">186</span>
 <span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::pass_manager::PassResult;
 <span class="kw">use </span><span class="kw">crate</span>::passes::{
@@ -192,10 +195,11 @@
     CompileInvoke, CompileRepeat, CompileStatic, ComponentInliner,
     DataPathInfer, DeadAssignmentRemoval, DeadCellRemoval, DeadGroupRemoval,
     DefaultAssigns, Externalize, GoInsertion, GroupToInvoke, GroupToSeq,
-    InferShare, LowerGuards, MergeAssign, Papercut, RemoveIds, ResetInsertion,
-    SimplifyStaticGuards, SimplifyWithControl, StaticFSMOpts, StaticInference,
-    StaticInliner, StaticPromotion, SynthesisPapercut, TopDownCompileControl,
-    UnrollBounded, WellFormed, WireInliner, WrapMain,
+    InferShare, LowerGuards, MergeAssign, Papercut, ProfilerInstrumentation,
+    RemoveIds, ResetInsertion, SimplifyStaticGuards, SimplifyWithControl,
+    StaticFSMOpts, StaticInference, StaticInliner, StaticPromotion,
+    SynthesisPapercut, TopDownCompileControl, UnrollBounded, WellFormed,
+    WireInliner, WrapMain,
 };
 <span class="kw">use </span><span class="kw">crate</span>::passes_experimental::{
     CompileSync, CompileSyncWithoutSyncReg, DiscoverExternal, ExternalToRef,
@@ -264,6 +268,8 @@
         pm.register_pass::&lt;HoleInliner&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;RemoveIds&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;ExternalToRef&gt;()<span class="question-mark">?</span>;
+
+        pm.register_pass::&lt;ProfilerInstrumentation&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">//add metadata
         </span>pm.register_pass::&lt;Metadata&gt;()<span class="question-mark">?</span>;
