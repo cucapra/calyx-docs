@@ -792,6 +792,16 @@
 <span id="792">792</span>
 <span id="793">793</span>
 <span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
@@ -800,7 +810,7 @@
 <span class="kw">use super</span>::{
     Attributes, Direction, GetAttributes, Guard, Id, PortDef, RRC, WRC,
 };
-<span class="kw">use </span>calyx_frontend::Attribute;
+<span class="kw">use </span>calyx_frontend::{Attribute, BoolAttr};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, GetName};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>smallvec::{smallvec, SmallVec};
@@ -893,6 +903,16 @@
     </span><span class="kw">pub fn </span>parent_is_comb(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.parent {
             PortParent::Cell(cell) =&gt; cell.upgrade().borrow().is_comb_cell(),
+            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
+        }
+    }
+
+    <span class="doccomment">/// Checks if parent is a protected cell
+    </span><span class="kw">pub fn </span>parent_is_protected(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.parent {
+            PortParent::Cell(cell) =&gt; {
+                cell.upgrade().borrow().attributes.has(BoolAttr::Protected)
+            }
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         }
     }

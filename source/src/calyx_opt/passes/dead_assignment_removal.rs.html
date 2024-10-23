@@ -142,6 +142,7 @@
 <span id="142">142</span>
 <span id="143">143</span>
 <span id="144">144</span>
+<span id="145">145</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
@@ -274,8 +275,9 @@
 
             gr.borrow_mut().assignments.retain(|assign| {
                 <span class="kw">let </span>dst = assign.dst.borrow();
-                <span class="comment">// if dst is a combinational component, must be used
-                </span><span class="kw">if </span>dst.parent_is_comb() {
+                <span class="comment">// if dst is a combinational component that is not protected,
+                // the assignment is removed if it is not used
+                </span><span class="kw">if </span>dst.parent_is_comb() &amp;&amp; !dst.parent_is_protected() {
                     <span class="kw">return </span>used_combs.contains(<span class="kw-2">&amp;</span>dst.get_parent_name());
                 }
                 <span class="comment">// Make sure that the assignment&#39;s guard it not false
