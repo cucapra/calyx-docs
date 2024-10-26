@@ -706,7 +706,7 @@
             comp.name,
             <span class="kw-2">&amp;</span><span class="self">self</span>.live,
         );
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(stream) = <span class="kw-2">&amp;</span><span class="self">self</span>.print_par_timing {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(stream) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.print_par_timing {
             <span class="macro">write!</span>(stream.get_write(), <span class="string">&quot;{:?}&quot;</span>, <span class="self">self</span>.par_timing_map).unwrap();
         }
     }
@@ -728,8 +728,8 @@
     }
 
     <span class="comment">// prints the json if self.print_share_freqs is not None
-    </span><span class="kw">fn </span>print_share_json(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(file) = <span class="kw-2">&amp;</span><span class="self">self</span>.print_share_freqs {
+    </span><span class="kw">fn </span>print_share_json(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(file) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.print_share_freqs {
             <span class="kw">let </span>printable_share_freqs: HashMap&lt;String, HashMap&lt;String, <span class="kw">_</span>&gt;&gt; =
                 <span class="self">self</span>.share_freqs
                     .iter()

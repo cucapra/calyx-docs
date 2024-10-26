@@ -256,10 +256,10 @@
             DominatorMap::new(<span class="kw-2">&amp;mut </span>comp.control.borrow_mut(), comp.name);
 
         <span class="comment">// print the domination map if command line argument says so
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(s) = <span class="kw-2">&amp;</span><span class="self">self</span>.print_dmap {
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(s) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.print_dmap {
             <span class="macro">write!</span>(s.get_write(), <span class="string">&quot;{dmap:?}&quot;</span>).unwrap();
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(s) = <span class="kw-2">&amp;</span><span class="self">self</span>.print_static_analysis {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(s) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.print_static_analysis {
             <span class="macro">write!</span>(s.get_write(), <span class="string">&quot;{:?}&quot;</span>, dmap.static_par_domination).unwrap();
         }
 

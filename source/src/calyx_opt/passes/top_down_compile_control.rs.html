@@ -2933,7 +2933,7 @@
 
     <span class="doccomment">/// If requested, emit FSM json after all components are processed
     </span><span class="kw">fn </span>finish_context(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _ctx: <span class="kw-2">&amp;mut </span>calyx_ir::Context) -&gt; VisResult {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(json_out_file) = <span class="kw-2">&amp;</span><span class="self">self</span>.dump_fsm_json {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(json_out_file) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.dump_fsm_json {
             <span class="kw">let _ </span>= serde_json::to_writer_pretty(
                 json_out_file.get_write(),
                 <span class="kw-2">&amp;</span><span class="self">self</span>.fsm_groups,
