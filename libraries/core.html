@@ -183,6 +183,7 @@ such as registers and basic bitwise operations.</p>
 <li><a href="#numerical-operators">Numerical Operators</a></li>
 <li><a href="#logical-operators">Logical Operators</a></li>
 <li><a href="#comparison-operators">Comparison Operators</a></li>
+<li><a href="#floating-point">Floating Point</a></li>
 <li><a href="#memories">Memories</a></li>
 </ul>
 <hr />
@@ -427,6 +428,18 @@ OUT_WIDTH-bits. This component is combinational.</p>
 <p><strong>Outputs:</strong></p>
 <ul>
 <li><code>out: 1</code> - A single bit output. 1 if <code>left &lt;= right</code> else 0.</li>
+</ul>
+<hr />
+<h2 id="floating-point"><a class="header" href="#floating-point">Floating Point</a></h2>
+<h3 id="std_float_const"><a class="header" href="#std_float_const"><code>std_float_const</code></a></h3>
+<p>A floating-point constant with a particular representation and bitwidth.
+Floating-point values are specially parsed by the frontend and turned into the equivalent bit pattern (as dictated by the representation).
+Similarly, the backend supports specialized printing for constants based on the representation</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>REP</code>: The representation to use. <code>0</code> corresponds to <a href="https://en.wikipedia.org/wiki/IEEE_754">IEEE-754 floating point</a> numbers. No other representation is supported at this point.</li>
+<li><code>WIDTH</code>: Bitwidth to use. Supported values: <code>32</code>, <code>64</code>.</li>
+<li><code>VAL</code>: The floating-point value. Frontend converts this into a <code>u64</code> internally.</li>
 </ul>
 <hr />
 <h2 id="memories"><a class="header" href="#memories">Memories</a></h2>

@@ -821,11 +821,50 @@
 <span id="821">821</span>
 <span id="822">822</span>
 <span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a formatter for the in-memory representation of Components.
 //! The printing operation clones inner nodes and doesn&#39;t perform any mutation
 //! to the Component.
 </span><span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
 <span class="kw">use </span>calyx_frontend::PrimitiveInfo;
+<span class="kw">use </span>calyx_utils::float;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::io;
 <span class="kw">use </span>std::path::Path;
@@ -1097,6 +1136,39 @@
         <span class="macro">write!</span>(f, <span class="string">&quot;}}&quot;</span>)
     }
 
+    <span class="kw">pub fn </span>write_float_const&lt;F: io::Write&gt;(
+        cell: <span class="kw-2">&amp;</span>ir::Cell,
+        indent_level: usize,
+        f: <span class="kw-2">&amp;mut </span>F,
+    ) -&gt; io::Result&lt;()&gt; {
+        <span class="kw">let </span>ir::CellType::Primitive {
+            name: prim,
+            param_binding,
+            ..
+        } = <span class="kw-2">&amp;</span>cell.prototype
+        <span class="kw">else </span>{
+            <span class="macro">unreachable!</span>(<span class="string">&quot;Expected std_float_const cell&quot;</span>)
+        };
+
+        <span class="kw">let </span>(rep, width, val) =
+            (param_binding[<span class="number">0</span>].<span class="number">1</span>, param_binding[<span class="number">1</span>].<span class="number">1</span>, param_binding[<span class="number">2</span>].<span class="number">1</span>);
+
+        <span class="kw">let </span>fl = <span class="kw">match </span>float::emit(val, width) {
+            <span class="prelude-val">Ok</span>(fl) =&gt; fl,
+            <span class="prelude-val">Err</span>(e) =&gt; {
+                <span class="macro">panic!</span>(<span class="string">&quot;Error emitting float constant: {e:?}&quot;</span>)
+            }
+        };
+
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(<span class="kw-2">&amp;</span>cell.attributes))<span class="question-mark">?</span>;
+        <span class="kw">if </span>cell.is_reference() {
+            <span class="macro">write!</span>(f, <span class="string">&quot;ref &quot;</span>)<span class="question-mark">?</span>;
+        }
+        <span class="macro">writeln!</span>(f, <span class="string">&quot;{} = {prim}({rep}, {width}, {fl});&quot;</span>, cell.name().id)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+
     <span class="doccomment">/// Format and write a cell.
     </span><span class="kw">pub fn </span>write_cell&lt;F: io::Write&gt;(
         cell: <span class="kw-2">&amp;</span>ir::Cell,
@@ -1109,6 +1181,10 @@
                 param_binding,
                 ..
             } =&gt; {
+                <span class="kw">if </span>name == <span class="string">&quot;std_float_const&quot; </span>{
+                    <span class="kw">return </span><span class="self">Self</span>::write_float_const(cell, indent_level, f);
+                }
+
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="string">&quot; &quot;</span>.repeat(indent_level))<span class="question-mark">?</span>;
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">Self</span>::format_at_attributes(<span class="kw-2">&amp;</span>cell.attributes))<span class="question-mark">?</span>;
                 <span class="kw">if </span>cell.is_reference() {
