@@ -70,6 +70,10 @@
 <span id="70">70</span>
 <span id="71">71</span>
 <span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, build_assignments, BoolAttr};
 <span class="kw">use </span>calyx_utils::CalyxResult;
@@ -116,18 +120,22 @@
             .iter()
             .map(|group| group.borrow().name())
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span>comp_name = comp.name;
         <span class="comment">// for each group, construct a instrumentation cell and instrumentation assignment
         </span><span class="kw">let </span><span class="kw-2">mut </span>asgn_and_cell = Vec::with_capacity(group_names.len());
         {
             <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
             <span class="kw">let </span>one = builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
             <span class="kw">for </span>group_name <span class="kw">in </span>group_names.into_iter() {
-                <span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;{}_probe&quot;</span>, group_name);
+                <span class="comment">// store group and component name (differentiate between groups of the same name under different components)
+                </span><span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;{}__{}_probe&quot;</span>, group_name, comp_name);
                 <span class="kw">let </span>inst_cell = builder.add_primitive(name, <span class="string">&quot;std_wire&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
                 <span class="kw">let </span>asgn: [ir::Assignment&lt;ir::Nothing&gt;; <span class="number">1</span>] = <span class="macro">build_assignments!</span>(
                     builder;
                     inst_cell[<span class="string">&quot;in&quot;</span>] = <span class="question-mark">? </span>one[<span class="string">&quot;out&quot;</span>];
                 );
+                <span class="comment">// the probes should be @control because they should have value 0 whenever the corresponding group is not active.
+                </span>inst_cell.borrow_mut().add_attribute(BoolAttr::Control, <span class="number">1</span>);
                 inst_cell.borrow_mut().add_attribute(BoolAttr::Protected, <span class="number">1</span>);
                 asgn_and_cell.push((asgn[<span class="number">0</span>].clone(), inst_cell));
             }
