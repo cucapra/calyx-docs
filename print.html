@@ -3262,7 +3262,7 @@ such as registers and basic bitwise operations.</p>
 <li><a href="libraries/core.html#memories">Memories</a></li>
 </ul>
 <hr />
-<h2 id="numerical-operators"><a class="header" href="#numerical-operators">Numerical Operators</a></h2>
+<h2 id="state-elements"><a class="header" href="#state-elements">State Elements</a></h2>
 <h3 id="std_regwidth"><a class="header" href="#std_regwidth"><code>std_reg&lt;WIDTH&gt;</code></a></h3>
 <p>A <code>WIDTH</code>-wide register.</p>
 <p><strong>Inputs:</strong></p>
@@ -3274,10 +3274,48 @@ should store the value on the <code>in</code> wire.</li>
 <p><strong>Outputs:</strong></p>
 <ul>
 <li><code>out: WIDTH</code> - The value contained in the register.</li>
-<li><code>done: 1</code> - The register's done signal. Set high for one cycle after writing a
-new value.</li>
+<li><code>done: 1</code> - The register's done signal. Set high for one cycle after writing
+a new value.</li>
 </ul>
 <hr />
+<h3 id="std_skid_bufferwidth"><a class="header" href="#std_skid_bufferwidth"><code>std_skid_buffer&lt;WIDTH&gt;</code></a></h3>
+<p>A <code>WIDTH</code>-wide non-pipelined skid buffer. Used to ensure data is not lost
+during handshakes.</p>
+<p><strong>Inputs:</strong></p>
+<ul>
+<li><code>in: WIDTH</code> - An input value to the skid buffer <code>WIDTH</code>-bits.</li>
+<li><code>i_valid: 1</code> - The one bit input valid signal. Indicates that the data
+provided on the <code>in</code> wire is valid.</li>
+<li><code>i_ready: 1</code> - The one bit input ready signal. Indicates that the follower is
+ready to recieve data from the <code>out</code> wire.</li>
+</ul>
+<p><strong>Outputs:</strong></p>
+<ul>
+<li><code>out: WIDTH</code> - The value contained in the register.</li>
+<li><code>o_valid: 1</code> - The one bit output valid signal. Indicates that the data
+provided on the <code>out</code> wire is valid.</li>
+<li><code>o_ready: 1</code> - The one bit output ready signal. Indicates that the skid buffer
+is ready to recieve data on the <code>in</code> wire.</li>
+</ul>
+<hr />
+<h3 id="std_bypass_regwidth"><a class="header" href="#std_bypass_regwidth"><code>std_bypass_reg&lt;WIDTH&gt;</code></a></h3>
+<p>A <code>WIDTH</code>-wide bypass register.</p>
+<p><strong>Inputs:</strong></p>
+<ul>
+<li><code>in: WIDTH</code> - An input value to the bypass register <code>WIDTH</code>-bits.</li>
+<li><code>write_en: 1</code> - The one bit write enabled signal. Indicates that the bypass
+register should store the value on the <code>in</code> wire.</li>
+</ul>
+<p><strong>Outputs:</strong></p>
+<ul>
+<li><code>out: WIDTH</code> - The value of the bypass register. When <code>write_en</code> is asserted
+the value of <code>in</code> is bypassed to <code>out</code>. Otherwise <code>out</code> is equal to the last
+value written to the register.</li>
+<li><code>done: 1</code> - The bypass register's done signal. Set high for one cycle after
+<code>write_en</code> is asserted.</li>
+</ul>
+<hr />
+<h2 id="numerical-operators"><a class="header" href="#numerical-operators">Numerical Operators</a></h2>
 <h3 id="std_constwidthval"><a class="header" href="#std_constwidthval"><code>std_const&lt;WIDTH,VAL&gt;</code></a></h3>
 <p>A constant WIDTH-bit value with value VAL.</p>
 <p><strong>Inputs:</strong> None.</p>
