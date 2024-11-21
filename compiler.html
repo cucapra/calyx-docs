@@ -456,6 +456,9 @@ when the compiler is run from the command-line.</p>
 the default execution alias <code>all</code>:</p>
 <pre><code class="language-bash">cargo run -- examples/futil/simple.futil -p all -d static-timing
 </code></pre>
+<p>If you want to work with passes interactively (for instance, you only care about
+a pass far into the <code>all</code> sequence, and it is impractical to pass 20 <code>-p</code>
+options), you can <a href="./dev/calyx-pass-explorer.html">visualize them</a> with the <code>calyx-pass-explorer</code> tool.</p>
 <h2 id="providing-pass-options"><a class="header" href="#providing-pass-options">Providing Pass Options</a></h2>
 <p>Some passes take options to control their behavior. The <code>--list-passes</code> command prints out the options for each pass. For example, the <code>tdcc</code> pass has the following options:</p>
 <pre><code>tdcc: &lt;description&gt;

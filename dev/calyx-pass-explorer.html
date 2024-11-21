@@ -431,7 +431,8 @@ Sometimes the best way to learn how a pass works (or to debug an existing pass)
 is just to run it on code and see what happens.</p>
 <p>Enter <a href="https://github.com/calyxir/calyx/tree/main/tools/calyx-pass-explorer"><code>calyx-pass-explorer</code></a>.
 It's a command line tool that provides an interactive interface for visualizing
-how different passes affect the source code.</p>
+how different passes affect the source code.
+It's been used to debug and develop new compiler passes as well as implement new features in the compiler, so I hope you can find it useful too!</p>
 <blockquote>
 <p><img src="https://raw.githubusercontent.com/calyxir/calyx/main/tools/calyx-pass-explorer/example_v0.0.0.png" alt="Example running of the tool" />
 <em>The above image depicts the tool's interface in v0.0.0.
@@ -484,14 +485,14 @@ Incidentally, I used this file to test my implementation of the
 tool to help develop it!</p>
 <p>We'll first run <code>calyx-pass-explorer example0.futil</code>.
 You should get something horrific like</p>
-<p><img src="./assets/horrific-interface.png" alt="Lots of random text output that doesn&#39;t make sense" /></p>
+<p><img src="assets/horrific-interface.png" alt="Lots of random text output that doesn&#39;t make sense" /></p>
 <div class="mdbook-callouts mdbook-callouts-tip">
 <p class="mdbook-callouts-title">
   <span class="mdbook-callouts-icon"></span>
   tip
 </p>
 <p>If you get this message:
-<img src="./assets/calyx-missing.png" alt="Calyx executable could not be found" />
+<img src="assets/calyx-missing.png" alt="Calyx executable could not be found" />
 You should setup <code>fud</code> or pass the path explicitly with <code>-e</code>, as suggested.
 However, we're going to update this later to look at <code>fud2</code> as well because
 <code>fud</code> is now officially deprecated.</p>
@@ -500,7 +501,7 @@ However, we're going to update this later to look at <code>fud2</code> as well b
 standard library components we don't really care too much about.
 What we really want is to focus on what happens to, <em>e.g.</em>, the <code>main</code> component.
 To do that, we just pass <code>-c main</code> (or <code>--component main</code>) as a flag:</p>
-<p><img src="./assets/well-formed.png" alt="Running the tool and visualizing how the well-formed pass affects the main component" /></p>
+<p><img src="assets/well-formed.png" alt="Running the tool and visualizing how the well-formed pass affects the main component" /></p>
 <p>That's a lot better, but it's still quite a bit of information.
 Let's break it down.</p>
 <ul>
