@@ -1384,6 +1384,12 @@
 <span id="1384">1384</span>
 <span id="1385">1385</span>
 <span id="1386">1386</span>
+<span id="1387">1387</span>
+<span id="1388">1388</span>
+<span id="1389">1389</span>
+<span id="1390">1390</span>
+<span id="1391">1391</span>
+<span id="1392">1392</span>
 </pre><pre class="rust"><code><span class="attribute">#![allow(clippy::upper_case_acronyms)]
 
 </span><span class="doccomment">//! Parser for Calyx programs.
@@ -1446,10 +1452,13 @@
         <span class="kw">let </span>file = GlobalPositionTable::as_mut()
             .add_file(path.to_string_lossy().to_string(), string_content);
         <span class="kw">let </span>user_data = UserData { file };
-        <span class="kw">let </span>content = GlobalPositionTable::as_ref().get_source(file);
+        <span class="kw">let </span>gpos_ref = GlobalPositionTable::as_ref();
+        <span class="kw">let </span>content = gpos_ref.get_source(file).to_owned();
+        drop(gpos_ref);
+
         <span class="comment">// Parse the file
         </span><span class="kw">let </span>inputs =
-            CalyxParser::parse_with_userdata(Rule::file, content, user_data)
+            CalyxParser::parse_with_userdata(Rule::file, <span class="kw-2">&amp;</span>content, user_data)
                 .map_err(|e| e.with_path(<span class="kw-2">&amp;</span>path.to_string_lossy()))
                 .map_err(|e| {
                     calyx_utils::Error::parse_error(e.variant.message())
@@ -1482,10 +1491,13 @@
         </span><span class="kw">let </span>file =
             GlobalPositionTable::as_mut().add_file(<span class="string">&quot;&lt;stdin&gt;&quot;</span>.to_string(), buf);
         <span class="kw">let </span>user_data = UserData { file };
-        <span class="kw">let </span>contents = GlobalPositionTable::as_ref().get_source(file);
+        <span class="kw">let </span>gpos_ref = GlobalPositionTable::as_ref();
+        <span class="kw">let </span>content = gpos_ref.get_source(file).to_owned();
+        drop(gpos_ref);
+
         <span class="comment">// Parse the input
         </span><span class="kw">let </span>inputs =
-            CalyxParser::parse_with_userdata(Rule::file, contents, user_data)
+            CalyxParser::parse_with_userdata(Rule::file, <span class="kw-2">&amp;</span>content, user_data)
                 .map_err(|e| {
                 calyx_utils::Error::parse_error(e.variant.message())
                     .with_pos(<span class="kw-2">&amp;</span><span class="self">Self</span>::error_span(<span class="kw-2">&amp;</span>e, file))
