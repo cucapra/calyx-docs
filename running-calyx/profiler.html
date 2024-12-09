@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>FIRRTL Backend - Calyx Documentation</title>
+        <title>The Calyx Profiler - Calyx Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -423,61 +423,43 @@
 }
 
 </style>
-<h1 id="firrtl-backend"><a class="header" href="#firrtl-backend">FIRRTL Backend</a></h1>
-<p>Calyx programs can be translated into the <a href="https://bar.eecs.berkeley.edu/projects/firrtl.html">FIRRTL</a> intermediate language. <!-- TODO: Link OSDA paper when it goes on arxiv --></p>
+<h1 id="the-calyx-profiler"><a class="header" href="#the-calyx-profiler">The Calyx Profiler</a></h1>
+<p><em>Note: The profiler is still in development. If you have any suggestions, thoughts, or feedback, please let us know!</em></p>
+<p>Profilers can help you analyze performance information to find places you can optimize in your code. Currently, the Calyx profiler prouduces timing information in terms of cycle counts.</p>
+<h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
+<p>In order to run the profiler, you need:</p>
+<ul>
+<li><a href="./fud2/index.html">fud2</a></li>
+<li>The Python <a href="https://github.com/cirosantilli/vcdvcd"><code>vcdvcd</code> library</a>. Running <code>fud2 env init</code> should install this for you.</li>
+<li>A clone of Brendan Gregg's Flamegraph repository: <a href="https://github.com/brendangregg/FlameGraph">https://github.com/brendangregg/FlameGraph</a></li>
+</ul>
+<p>Then, you need to edit your fud2 configuration file to specify the location of <code>flamegraph.pl</code> within the <code>Flamegraph</code> repository:</p>
+<p>ex)</p>
+<pre><code>[flamegraph]
+script = "/home/ayaka/projects/FlameGraph/flamegraph.pl"
+</code></pre>
 <h2 id="basic-use"><a class="header" href="#basic-use">Basic Use</a></h2>
-<p>To translate an example program to FIRRTL, try:</p>
-<pre><code>$ cargo run examples/tutorial/language-tutorial-iterate.futil -p external-to-ref -p all -b firrtl
+<p>To obtain a flame graph, run fud2 with an SVG output file:</p>
+<p>ex)</p>
+<pre><code>fud2 tests/correctness/pow.futil -o pow.svg -s sim.data=tests/correctness/pow.futil.data
 </code></pre>
-<h2 id="running-with-fud2"><a class="header" href="#running-with-fud2">Running with <code>fud2</code></a></h2>
-<p>The FIRRTL backend can also be run through fud2, which we recommend using.</p>
-<h3 id="setup"><a class="header" href="#setup">Setup</a></h3>
-<p>To run FIRRTL-translated programs, we need to set up <a href="https://github.com/llvm/circt">Firtool</a> for use by fud2. We recommend using <a href="https://github.com/llvm/circt/releases/tag/firtool-1.75.0">Firtool version 1.75.0</a>.</p>
-<p>First, download and extract the Firtool binary. Then, edit <code>fud2</code>'s configuration file:</p>
-<pre><code>$ fud2 edit-config
-</code></pre>
-<p>Add these lines:</p>
-<pre><code class="language-toml">[firrtl]
-firtool = "&lt;path to extracted firtool directory&gt;/bin/firtool"
-</code></pre>
-<h3 id="obtaining-firrtl"><a class="header" href="#obtaining-firrtl">Obtaining FIRRTL</a></h3>
-<blockquote>
-<p>The FIRRTL backend on fud2 currently requires Calyx with the YXI feature to be built. (Refer to the above)</p>
-</blockquote>
-<p>The FIRRTL backend offers two options based on how Calyx primitives are handled: (1) use Calyx's existing Verilog implementations, and (2) generate FIRRTL implementations.</p>
-<p>To generate FIRRTL-version of the Calyx program that will use Verilog primitives, run fud2 with <code>--to firrtl</code>:</p>
-<pre><code>fud2 examples/tutorial/language-tutorial-iterate.futil --to firrtl
-</code></pre>
-<p>To generate FIRRTL-version of the Calyx program containing FIRRTL primitives, run fud2 with <code>--to firrtl-with-primitives</code>:</p>
-<pre><code>fud2 examples/tutorial/language-tutorial-iterate.futil --to firrtl-with-primitives
-</code></pre>
-<h3 id="simulating-firrtl-translated-programs"><a class="header" href="#simulating-firrtl-translated-programs">Simulating FIRRTL-translated programs</a></h3>
-<p>To simulate a FIRRTL-translated Calyx program using Verilog primitives, run fud2 with <code>--through firrtl</code>:</p>
-<pre><code>fud2 examples/tutorial/language-tutorial-iterate.futil --to dat -s sim.data=examples/tutorial/data.json --through firrtl
-</code></pre>
-<p>To simulate a FIRRTL-translated Calyx program using FIRRTL primitives, run fud2 with <code>--through firrtl-with-primitives</code>:</p>
-<pre><code>fud2 examples/tutorial/language-tutorial-iterate.futil --to dat -s sim.data=examples/tutorial/data.json --through firrtl-with-primitives
-</code></pre>
-<p>Both examples will yield</p>
-<pre><code>{
-  "cycles": 76,
-  "memories": {
-    "mem": [
-      42
-    ]
-  }
-}
-</code></pre>
+<p>The produced flame graph is "flattened", which means that each parallel arm gets its own "cycle". So, if arm A and arm B were executing on a single cycle, the flame graph would account for a cycle in arm A and a cycle in arm B. You can view and interact with the flame graph using your favorite web browser.</p>
+<p>If you retain the fud2 build directory with the <code>--keep</code> option or the <code>--dir</code> option, you will find additional profiler output files in <code>&lt;FUD2_BUILD_DIRECTORY&gt;/profiler-out</code>:</p>
+<ul>
+<li><code>scaled-flame.svg</code>: A scaled flame graph, where a cycle is divided between the parallel arms in execution. So, if arm A and arm B were executing on a single cycle, the flame graph would account for 0.5 cycles in arm A and 0.5 cycles in arm B.</li>
+<li><code>aggregate.dot.png</code>: A tree summary of the execution of the program. Nodes (groups and cells) are labeled with the number of times the node was a leaf, and edges are labeled with the number of cycles that edge was activated.</li>
+<li><code>rank{i}.dot.png</code>: A tree representation of the <code>i</code>th most active stack picture. <code>rankings.csv</code> lists the specific cycles that each ranked tree was active for.</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../running-calyx/profiler.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../running-calyx/interpreter.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../compiler.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../running-calyx/firrtl.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -487,11 +469,11 @@ firtool = "&lt;path to extracted firtool directory&gt;/bin/firtool"
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../running-calyx/profiler.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../running-calyx/interpreter.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../compiler.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../running-calyx/firrtl.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
