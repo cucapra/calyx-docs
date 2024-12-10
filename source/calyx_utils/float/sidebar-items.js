@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["emit",""],["parse",""]]};
+window.SIDEBAR_ITEMS = {"fn":["emit","parse"]};

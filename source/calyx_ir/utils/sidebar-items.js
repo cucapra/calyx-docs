@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["MemoryType",""]],"fn":[["external_and_ref_memories_cells","Gets all memory cells in top level marked `@external` or `ref`."],["external_and_ref_memories_names",""]],"struct":[["MemInfo","Parameters for std memories"]],"trait":[["GetMemInfo",""]]};
+window.SIDEBAR_ITEMS = {"enum":["MemoryType"],"fn":["external_and_ref_memories_cells","external_and_ref_memories_names"],"struct":["MemInfo"],"trait":["GetMemInfo"]};

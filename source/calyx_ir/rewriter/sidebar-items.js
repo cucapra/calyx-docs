@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Rewriter","A structure to track rewrite maps for ports. Stores both cell rewrites and direct port rewrites. Attempts to apply port rewrites first before trying the cell rewrite."]],"type":[["PortRewriteMap","Map to rewrite port uses. Maps the canonical name of an old port (generated using [ir::Port::canonical]) to the new [ir::Port] instance."],["RewriteMap","A rewrite map from [ir::Id] to [T]."]]};
+window.SIDEBAR_ITEMS = {"struct":["Rewriter"],"type":["PortRewriteMap","RewriteMap"]};
