@@ -8902,17 +8902,17 @@ make heavy use of control operators, to fully lowered Calyx programs.
 can use <a href="running-calyx/./fud2/index.html">fud2</a>. The latter is generally recommended.</p>
 <h2 id="basic-use"><a class="header" href="#basic-use">Basic Use</a></h2>
 <p>To run an example program, try:</p>
-<pre><code>cd interp &amp;&amp; cargo run tests/control/if.futil
+<pre><code>cd cider &amp;&amp; cargo run -- tests/control/if.futil
 </code></pre>
 <p>You should see something like:</p>
-<pre><code>Z{"top_level":"main","memories":[{"name":"mem","width":32,"size":1,"dimensions":{"D1":1}}]}%
+<pre><code>���T�itop_leveldmainhmemories��dnamecmemjdimensions�bD1fformat�fBitnum�fsigned�ewidth %
 </code></pre>
 <p>This output contains some header information and the raw binary data of the
 memories in the program and as such is not human readable. A separate tool,
 <code>cider-data-converter</code> is used to parse this dump into a human readable json and
 vice versa. Once you've compiled it, either by running <code>cargo build</code> in
 <code>tools/cider-data-converter</code> or by running <code>cargo build --all</code>, you can run:</p>
-<pre><code>cargo run tests/control/if.futil | ../target/debug/cider-data-converter --to json
+<pre><code>cargo run -- tests/control/if.futil | ../target/debug/cider-data-converter --to json
 </code></pre>
 <p>which should produce</p>
 <pre><code class="language-json">{
@@ -8928,7 +8928,7 @@ standard JSON data files as input and easily execute passes on the input Calyx
 program before interpretation.</p>
 <p>You'll want to build the interpreter and compiler first:</p>
 <pre><code>cargo build &amp;&amp; \
-cd interp &amp;&amp; cargo build &amp;&amp; \
+cd cider &amp;&amp; cargo build &amp;&amp; \
 cd ../tools/cider-data-converter &amp;&amp; cargo build &amp;&amp; cd ../../
 </code></pre>
 <p>or just run</p>
