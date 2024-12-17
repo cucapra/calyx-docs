@@ -256,33 +256,11 @@
 <a href="#256" id="256">256</a>
 <a href="#257" id="257">257</a>
 <a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Definitions for tracking source position information of Calyx programs
 
-</span><span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>lazy_static::lazy_static;
-<span class="kw">use </span>std::{
-    cmp,
-    fmt::Write,
-    sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
-};
+</span><span class="kw">use </span>std::{cmp, fmt::Write, sync::LazyLock};
+
+<span class="kw">use </span>itertools::Itertools;
 
 <span class="attr">#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 </span><span class="doccomment">/// Handle to a position in a [PositionTable]
@@ -297,9 +275,9 @@
 <span class="doccomment">/// A source program file
 </span><span class="kw">struct </span>File {
     <span class="doccomment">/// Name of the file
-    </span>name: String,
+    </span>name: Box&lt;str&gt;,
     <span class="doccomment">/// The source code of the file
-    </span>source: String,
+    </span>source: Box&lt;str&gt;,
 }
 
 <span class="kw">struct </span>PosData {
@@ -313,11 +291,11 @@
 }
 
 <span class="doccomment">/// Source position information for a Calyx program.
-</span><span class="kw">pub struct </span>PositionTable {
+</span><span class="kw">struct </span>PositionTable {
     <span class="doccomment">/// The source files of the program
-    </span>files: Vec&lt;File&gt;,
+    </span>files: boxcar::Vec&lt;File&gt;,
     <span class="doccomment">/// Mapping from indexes to position data
-    </span>indices: Vec&lt;PosData&gt;,
+    </span>indices: boxcar::Vec&lt;PosData&gt;,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>PositionTable {
@@ -332,9 +310,9 @@
 
     <span class="doccomment">/// Create a new position table where the first file and first position are unknown
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>table = PositionTable {
-            files: Vec::new(),
-            indices: Vec::new(),
+        <span class="kw">let </span>table = PositionTable {
+            files: boxcar::Vec::new(),
+            indices: boxcar::Vec::new(),
         };
         table.add_file(<span class="string">"unknown"</span>.to_string(), <span class="string">""</span>.to_string());
         <span class="kw">let </span>pos = table.add_pos(FileIdx(<span class="number">0</span>), <span class="number">0</span>, <span class="number">0</span>);
@@ -343,10 +321,12 @@
     }
 
     <span class="doccomment">/// Add a new file to the position table
-    </span><span class="kw">pub fn </span>add_file(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: String, source: String) -&gt; FileIdx {
-        <span class="kw">let </span>file = File { name, source };
-        <span class="kw">let </span>file_idx = <span class="self">self</span>.files.len();
-        <span class="self">self</span>.files.push(file);
+    </span><span class="kw">pub fn </span>add_file(<span class="kw-2">&amp;</span><span class="self">self</span>, name: String, source: String) -&gt; FileIdx {
+        <span class="kw">let </span>file = File {
+            name: name.into(),
+            source: source.into(),
+        };
+        <span class="kw">let </span>file_idx = <span class="self">self</span>.files.push(file);
         FileIdx(file_idx <span class="kw">as </span>u32)
     }
 
@@ -360,15 +340,9 @@
     }
 
     <span class="doccomment">/// Add a new position to the position table
-    </span><span class="kw">pub fn </span>add_pos(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        file: FileIdx,
-        start: usize,
-        end: usize,
-    ) -&gt; PosIdx {
+    </span><span class="kw">pub fn </span>add_pos(<span class="kw-2">&amp;</span><span class="self">self</span>, file: FileIdx, start: usize, end: usize) -&gt; PosIdx {
         <span class="kw">let </span>pos = PosData { file, start, end };
-        <span class="kw">let </span>pos_idx = <span class="self">self</span>.indices.len();
-        <span class="self">self</span>.indices.push(pos);
+        <span class="kw">let </span>pos_idx = <span class="self">self</span>.indices.push(pos);
         PosIdx(pos_idx <span class="kw">as </span>u32)
     }
 
@@ -380,28 +354,27 @@
 <span class="doccomment">/// The global position table
 </span><span class="kw">pub struct </span>GlobalPositionTable;
 
-<span class="macro">lazy_static!</span> {
-    <span class="kw">static </span><span class="kw-2">ref </span>GPOS_TABLE: RwLock&lt;PositionTable&gt; =
-        RwLock::new(PositionTable::default());
-}
+<span class="kw">static </span>GPOS_TABLE: LazyLock&lt;PositionTable&gt; = LazyLock::new(PositionTable::new);
 
 <span class="kw">impl </span>GlobalPositionTable {
-    <span class="doccomment">/// Return reference to a global [PositionTable].
-    ///
-    /// # Safety
-    ///
-    /// You may not call this function after any call to [`Self::as_ref`].
-    </span><span class="kw">pub fn </span>as_mut() -&gt; RwLockWriteGuard&lt;<span class="lifetime">'static</span>, PositionTable&gt; {
-        GPOS_TABLE
-            .try_write()
-            .expect(<span class="string">"failed to get write lock for global position table"</span>)
+    <span class="kw">fn </span>get_pos(pos: PosIdx) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>PosData {
+        GPOS_TABLE.get_pos(pos)
     }
 
-    <span class="doccomment">/// Return an immutable reference to the global position table
-    </span><span class="kw">pub fn </span>as_ref() -&gt; RwLockReadGuard&lt;<span class="lifetime">'static</span>, PositionTable&gt; {
-        GPOS_TABLE
-            .try_read()
-            .expect(<span class="string">"failed to get read lock for global position table"</span>)
+    <span class="kw">fn </span>get_file_data(file: FileIdx) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>File {
+        GPOS_TABLE.get_file_data(file)
+    }
+
+    <span class="kw">pub fn </span>get_source(file: FileIdx) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
+        GPOS_TABLE.get_source(file)
+    }
+
+    <span class="kw">pub fn </span>add_file(name: String, source: String) -&gt; FileIdx {
+        GPOS_TABLE.add_file(name, source)
+    }
+
+    <span class="kw">pub fn </span>add_pos(file: FileIdx, start: usize, end: usize) -&gt; PosIdx {
+        GPOS_TABLE.add_pos(file, start, end)
     }
 }
 
@@ -433,10 +406,9 @@
     /// 1. lines associated with this span
     /// 2. start position of the first line in span
     /// 3. line number of the span
-    </span><span class="kw">fn </span>get_lines(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (Vec&lt;String&gt;, usize, usize) {
-        <span class="kw">let </span>table = GlobalPositionTable::as_ref();
-        <span class="kw">let </span>pos_d = table.get_pos(<span class="self">self</span>.<span class="number">0</span>);
-        <span class="kw">let </span>file = <span class="kw-2">&amp;</span>table.get_file_data(pos_d.file).source;
+    </span><span class="kw">fn </span>get_lines(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (Vec&lt;<span class="kw-2">&amp;</span>str&gt;, usize, usize) {
+        <span class="kw">let </span>pos_d = GlobalPositionTable::get_pos(<span class="self">self</span>.<span class="number">0</span>);
+        <span class="kw">let </span>file = <span class="kw-2">&amp;*</span>GlobalPositionTable::get_file_data(pos_d.file).source;
 
         <span class="kw">let </span>lines = file.split(<span class="string">'\n'</span>).collect_vec();
         <span class="kw">let </span><span class="kw-2">mut </span>pos: usize = <span class="number">0</span>;
@@ -462,20 +434,15 @@
             pos = next_pos + <span class="number">1</span>;
             linum += <span class="number">1</span>;
         }
-        (
-            buf.into_iter().map(|str| str.to_owned()).collect(),
-            out_idx,
-            out_line,
-        )
+        (buf, out_idx, out_line)
     }
 
     <span class="doccomment">/// returns:
     /// 1. the name of the file the span is in
     /// 2. the (inclusive) range of lines within the span
-    </span><span class="kw">pub fn </span>get_line_num(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (String, (usize, usize)) {
-        <span class="kw">let </span>table = GlobalPositionTable::as_ref();
-        <span class="kw">let </span>pos_data = table.get_pos(<span class="self">self</span>.<span class="number">0</span>);
-        <span class="kw">let </span>file_name = table.get_file_data(pos_data.file).name.clone();
+    </span><span class="kw">pub fn </span>get_line_num(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="kw-2">&amp;</span>str, (usize, usize)) {
+        <span class="kw">let </span>pos_data = GlobalPositionTable::get_pos(<span class="self">self</span>.<span class="number">0</span>);
+        <span class="kw">let </span>file_name = <span class="kw-2">&amp;</span>GlobalPositionTable::get_file_data(pos_data.file).name;
         <span class="kw">let </span>(buf, <span class="kw">_</span>, line_num) = <span class="self">self</span>.get_lines();
         <span class="comment">//reformat to return the range (inclusive)
         </span><span class="kw">let </span>rng = (line_num, line_num + buf.len() - <span class="number">1</span>);
@@ -484,13 +451,12 @@
 
     <span class="doccomment">/// Format this position with the error message `err_msg`
     </span><span class="kw">pub fn </span>format_raw&lt;S: AsRef&lt;str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, err_msg: S) -&gt; String {
-        <span class="kw">let </span>table = GlobalPositionTable::as_ref();
-        <span class="kw">let </span>pos_d = table.get_pos(<span class="self">self</span>.<span class="number">0</span>);
+        <span class="kw">let </span>pos_d = GlobalPositionTable::get_pos(<span class="self">self</span>.<span class="number">0</span>);
 
         <span class="kw">let </span>(lines, pos, linum) = <span class="self">self</span>.get_lines();
         <span class="kw">let </span><span class="kw-2">mut </span>buf = String::new();
 
-        <span class="kw">let </span>l = lines[<span class="number">0</span>].as_str();
+        <span class="kw">let </span>l = lines[<span class="number">0</span>];
         <span class="kw">let </span>linum_text = <span class="macro">format!</span>(<span class="string">"{} "</span>, linum);
         <span class="kw">let </span>linum_space: String = <span class="string">" "</span>.repeat(linum_text.len());
         <span class="kw">let </span>mark: String = <span class="string">"^"</span>.repeat(cmp::min(
@@ -513,9 +479,8 @@
 
     <span class="doccomment">/// Format this position with filename header and the error message `err_msg`
     </span><span class="kw">pub fn </span>format&lt;S: AsRef&lt;str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, err_msg: S) -&gt; String {
-        <span class="kw">let </span>table = GlobalPositionTable::as_ref();
-        <span class="kw">let </span>pos_d = table.get_pos(<span class="self">self</span>.<span class="number">0</span>);
-        <span class="kw">let </span>name = <span class="kw-2">&amp;</span>table.get_file_data(pos_d.file).name;
+        <span class="kw">let </span>pos_d = GlobalPositionTable::get_pos(<span class="self">self</span>.<span class="number">0</span>);
+        <span class="kw">let </span>name = <span class="kw-2">&amp;*</span>GlobalPositionTable::get_file_data(pos_d.file).name;
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = name.to_string();
         <span class="macro">writeln!</span>(buf).unwrap();
@@ -523,17 +488,16 @@
         buf
     }
 
-    <span class="kw">pub fn </span>get_location(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (String, usize, usize) {
-        <span class="kw">let </span>table = GlobalPositionTable::as_ref();
-        <span class="kw">let </span>pos_d = table.get_pos(<span class="self">self</span>.<span class="number">0</span>);
-        <span class="kw">let </span>name = table.get_file_data(pos_d.file).name.clone();
+    <span class="kw">pub fn </span>get_location(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="kw-2">&amp;</span>str, usize, usize) {
+        <span class="kw">let </span>pos_d = GlobalPositionTable::get_pos(<span class="self">self</span>.<span class="number">0</span>);
+        <span class="kw">let </span>name = <span class="kw-2">&amp;*</span>GlobalPositionTable::get_file_data(pos_d.file).name;
         (name, pos_d.start, pos_d.end)
     }
 
     <span class="doccomment">/// Visualizes the span without any message or marking
     </span><span class="kw">pub fn </span>show(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="kw">let </span>(lines, <span class="kw">_</span>, linum) = <span class="self">self</span>.get_lines();
-        <span class="kw">let </span>l = lines[<span class="number">0</span>].as_str();
+        <span class="kw">let </span>l = lines[<span class="number">0</span>];
         <span class="kw">let </span>linum_text = <span class="macro">format!</span>(<span class="string">"{} "</span>, linum);
         <span class="macro">format!</span>(<span class="string">"{}|{}\n"</span>, linum_text, l)
     }
