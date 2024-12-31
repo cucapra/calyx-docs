@@ -7773,7 +7773,8 @@ fud2 is an experiment in building a new driver that works like fud that adds som
 Someday, fud2 may supplant fud, but it needs more work before it is ready to do that.
 Until then, fud remains your first choice for all your build-related needs.</p>
 <h2 id="set-up-1"><a class="header" href="#set-up-1">Set Up</a></h2>
-<p>fud2 is a Rust tool, so you can build it along with everything else in this monorepo with <code>cargo build</code>.
+<p>If you would like to use <code>fud2</code> as is, and already have Calyx installed, you can <code>cargo install --path fud2</code> from this repository's root to automatically add the binary to your path.</p>
+<p>Alternatively, if you would like to work on development of <code>fud2</code> and/or keep up with the latest changes when you <code>git pull</code>, you can build it along with everything else in this monorepo with <code>cargo build</code>.
 You might then want to do something like <code>ln -s `pwd`/target/debug/fud2 ~/.local/bin</code> for easy access to the <code>fud2</code> binary.</p>
 <p>fud2 depends on <a href="https://ninja-build.org">Ninja</a>.
 Install it using your OS package manager or by downloading a binary.</p>
