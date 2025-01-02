@@ -580,7 +580,7 @@ We currently generate <code>kernel.xml</code> ourselves (with the <code>xilinx-x
 <h4 id="our-completion-workflow"><a class="header" href="#our-completion-workflow">Our Completion Workflow</a></h4>
 <p>The first step is to produce an <code>.xo</code> file.
 We also use <a href="https://github.com/calyxir/calyx/blob/master/fud/bitstream/gen_xo.tcl">a static Tcl script, <code>gen_xo.tcl</code>,</a> which is a simplified version of <a href="https://github.com/Xilinx/Vitis-Tutorials/blob/2021.1/Hardware_Acceleration/Feature_Tutorials/01-rtl_kernel_workflow/reference-files/scripts/package_kernel.tcl">a script from Xilinx's Vitis tutorials</a>.
-The gist of this script is that it creates a Vivado project, adds the source files, twiddles some settings, and then uses the <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/package_xo-Command"><code>package_xo</code> command</a> to read stuff from this project as an "IP directory" and produce an <code>.xo</code> file.
+The gist of this script is that it creates a Vivado project, adds the source files, twiddles some settings, and then uses the <a href="https://docs.amd.com/r/en-US/ug1702-vitis-accelerated-reference/package_xo-Command"><code>package_xo</code> command</a> to read stuff from this project as an "IP directory" and produce an <code>.xo</code> file.
 The Vivado command line looks roughly like this:</p>
 <pre><code>vivado -mode batch -source gen_xo.tcl -tclargs xclbin/kernel.xo
 </code></pre>

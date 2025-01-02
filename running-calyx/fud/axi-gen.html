@@ -436,8 +436,8 @@ and how the fud-generated AXI interface behaves as of 2022-9-11.</p>
 we are interested in executing on an FPGA.
 <code>toplevel.v</code> wraps our SystemVerilog implementation and contains
 the AXI interface for each memory marked <a href="https://docs.calyxir.org/lang/attributes.html?highlight=external#external"><code>@external</code></a> in a Calyx program.
-Our <code>toplevel.v</code> and <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/RTL-Kernel-XML-File"><code>kernel.xml</code></a> is what our Xilinx tools interface with.
-Our toplevel adheres to the Xilinx <a href="https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Kernel-Interface-Requirements">kernel interface requirements</a>.
+Our <code>toplevel.v</code> and <a href="https://docs.amd.com/r/en-US/ug1702-vitis-accelerated-reference/RTL-Kernel-XML-File"><code>kernel.xml</code></a> is what our Xilinx tools interface with.
+Our toplevel adheres to the Xilinx <a href="https://docs.amd.com/r/en-US/ug1701-vitis-accelerated-embedded/RTL-Kernel-Interface-Requirements">kernel interface requirements</a>.
 <code>kernel.xml</code> defines register maps and ports of our
 toplevel module used by our Xilinx tools.</p>
 <p>For more information on the generation of the files mentioned above see <a href="https://docs.calyxir.org/running-calyx/fud/xilinx.html?highlight=synthesis#how-it-works">how the Xilinx Toolchain works</a></p>
