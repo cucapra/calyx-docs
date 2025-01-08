@@ -188,6 +188,21 @@
 <a href="#188" id="188">188</a>
 <a href="#189" id="189">189</a>
 <a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::pass_manager::PassResult;
 <span class="kw">use </span><span class="kw">crate</span>::passes::{
@@ -269,7 +284,8 @@
         pm.register_pass::&lt;RemoveIds&gt;()<span class="question-mark">?</span>;
         pm.register_pass::&lt;ExternalToRef&gt;()<span class="question-mark">?</span>;
 
-        pm.register_pass::&lt;ProfilerInstrumentation&gt;()<span class="question-mark">?</span>;
+        <span class="comment">// instrumentation pass to collect profiling information
+        </span>pm.register_pass::&lt;ProfilerInstrumentation&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">//add metadata
         </span>pm.register_pass::&lt;Metadata&gt;()<span class="question-mark">?</span>;
@@ -343,6 +359,20 @@
             pm,
             <span class="string">"all"</span>,
             [<span class="string">"validate"</span>, <span class="string">"pre-opt"</span>, <span class="string">"compile"</span>, <span class="string">"post-opt"</span>, <span class="string">"lower"</span>,]
+        );
+
+        <span class="comment">// profiler flow for pass explorer access
+        </span><span class="macro">register_alias!</span>(
+            pm,
+            <span class="string">"profiler"</span>,
+            [
+                StaticInliner,
+                CompileStatic,
+                CompileRepeat,
+                CompileInvoke,
+                ProfilerInstrumentation,
+                <span class="string">"all"
+            </span>]
         );
 
         <span class="comment">// Compilation flow with no optimizations enables
