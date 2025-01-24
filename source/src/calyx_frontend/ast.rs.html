@@ -461,9 +461,11 @@
 <a href="#461" id="461">461</a>
 <a href="#462" id="462">462</a>
 <a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx
 </span><span class="kw">use </span><span class="kw">super</span>::parser;
-<span class="kw">use crate</span>::{Attributes, PortDef, Primitive};
+<span class="kw">use crate</span>::{source_info::SourceInfoTable, Attributes, PortDef, Primitive};
 <span class="kw">use </span>atty::Stream;
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, GPosIdx, Id, PosString};
 <span class="kw">use </span>std::{num::NonZeroU64, path::PathBuf};
@@ -477,8 +479,10 @@
     </span><span class="kw">pub </span>components: Vec&lt;ComponentDef&gt;,
     <span class="doccomment">/// Extern statements and any primitive declarations in them.
     </span><span class="kw">pub </span>externs: Vec&lt;(<span class="prelude-ty">Option</span>&lt;PosString&gt;, Vec&lt;Primitive&gt;)&gt;,
-    <span class="doccomment">/// Optional opaque metadata
+    <span class="doccomment">/// Optional opaque metadata.
     </span><span class="kw">pub </span>metadata: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Optional Source Info table
+    </span><span class="kw">pub </span>source_info_table: <span class="prelude-ty">Option</span>&lt;SourceInfoTable&gt;,
 }
 
 <span class="kw">impl </span>NamespaceDef {

@@ -23,6 +23,8 @@
 <a href="#23" id="23">23</a>
 <a href="#24" id="24">24</a>
 <a href="#25" id="25">25</a>
+<a href="#26" id="26">26</a>
+<a href="#27" id="27">27</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Frontend parsing and AST representation.
 //!
 //! Defines the frontend AST and the parser.
@@ -31,6 +33,7 @@
 
 </span><span class="kw">pub mod </span>ast;
 <span class="kw">pub mod </span>parser;
+<span class="kw">pub mod </span>source_info;
 
 <span class="kw">mod </span>attribute;
 <span class="kw">mod </span>attributes;
@@ -42,7 +45,8 @@
 
 <span class="kw">pub use </span>ast::NamespaceDef;
 <span class="kw">pub use </span>attribute::{
-    Attribute, BoolAttr, InternalAttr, NumAttr, DEPRECATED_ATTRIBUTES,
+    Attribute, BoolAttr, InternalAttr, NumAttr, SetAttr, SetAttribute,
+    DEPRECATED_ATTRIBUTES,
 };
 <span class="kw">pub use </span>attributes::{Attributes, GetAttributes};
 <span class="kw">pub use </span>common::{Direction, PortDef, Primitive, Width};

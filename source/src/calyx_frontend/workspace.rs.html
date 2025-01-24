@@ -320,11 +320,14 @@
 <a href="#320" id="320">320</a>
 <a href="#321" id="321">321</a>
 <a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
 </pre></div><pre class="rust"><code><span class="kw">use super</span>::{
     ast::{ComponentDef, NamespaceDef},
     parser,
 };
-<span class="kw">use </span><span class="kw">crate</span>::LibrarySignatures;
+<span class="kw">use crate</span>::{source_info::SourceInfoTable, LibrarySignatures};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, WithPos};
 <span class="kw">use </span>std::{
     collections::HashSet,
@@ -370,8 +373,10 @@
     </span><span class="kw">pub </span>lib: LibrarySignatures,
     <span class="doccomment">/// Original import statements present in the top-level file.
     </span><span class="kw">pub </span>original_imports: Vec&lt;String&gt;,
-    <span class="doccomment">/// Optional opaque metadata attached to the top-level file
+    <span class="doccomment">/// Optional opaque metadata attached to the top-level file.
     </span><span class="kw">pub </span>metadata: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Optional source info table attached to the top-level file
+    </span><span class="kw">pub </span>source_info_table: <span class="prelude-ty">Option</span>&lt;SourceInfoTable&gt;,
 }
 
 <span class="kw">impl </span>Workspace {
@@ -603,6 +608,7 @@
         <span class="comment">// TODO (griffin): Probably not a great idea to clone the metadata
         // string but it works for now
         </span>ws.metadata = ns.metadata.clone();
+        ws.source_info_table = ns.source_info_table.clone();
 
         <span class="comment">// Merge the initial namespace
         </span><span class="kw">let </span>parent_canonical = parent_path.canonicalize().map_err(|err| {

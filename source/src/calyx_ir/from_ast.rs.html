@@ -1321,6 +1321,7 @@
 <a href="#1321" id="1321">1321</a>
 <a href="#1322" id="1322">1322</a>
 <a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
 </pre></div><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Cell, CellType, Component,
     Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
@@ -1568,6 +1569,7 @@
         entrypoint,
         extra_opts: <span class="macro">vec!</span>[],
         metadata: workspace.metadata,
+        source_info_table: workspace.source_info_table,
     })
 }
 
