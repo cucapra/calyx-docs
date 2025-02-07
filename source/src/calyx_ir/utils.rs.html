@@ -118,6 +118,8 @@
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
 <a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Helpers used to examine calyx programs. Used in Xilinx and Yxi backends among others.
 </span><span class="kw">use super</span>::{BoolAttr, Cell, Component, RRC};
 <span class="kw">use </span>calyx_utils::Id;
@@ -155,6 +157,7 @@
 
 <span class="doccomment">/// Parameters for std memories
 </span><span class="kw">pub struct </span>MemInfo {
+    <span class="kw">pub </span>name: String,
     <span class="kw">pub </span>memory_type: MemoryType,
     <span class="kw">pub </span>data_width: u64,
     <span class="kw">pub </span>dimensions: u64,
@@ -205,6 +208,7 @@
                     };
                   <span class="kw">let </span>total_size = dimension_sizes.clone().iter().product();
                   MemInfo {
+                      name: mem.name().to_string(),
                       memory_type: mem_type,
                       data_width: mem.get_parameter(<span class="string">"WIDTH"</span>).unwrap(),
                       dimensions,
