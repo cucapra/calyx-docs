@@ -646,7 +646,7 @@ We must prepend <code>ref_</code> to the names of any memories, and <code>in_</c
 <h2 id="building-the-program"><a class="header" href="#building-the-program">Building the Program</a></h2>
 <p>Finally, we build the program.</p>
 <pre><code class="language-python">def build():
-    prog = cb.Builder()
+    prog = cb.Builder(fileinfo_base_path=os.path.dirname(os.path.realpath(__file__)))
     insert_adder_component(prog)
     diff_comp = insert_abs_diff_component(prog)
     insert_mux_component(prog, diff_comp)
