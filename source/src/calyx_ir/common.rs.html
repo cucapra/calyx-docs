@@ -61,7 +61,10 @@
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
 <a href="#62" id="62">62</a>
-<a href="#63" id="63">63</a></pre></div><pre class="rust"><code><span class="kw">use </span>calyx_utils::GetName;
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a></pre></div><pre class="rust"><code><span class="kw">use </span>calyx_utils::GetName;
 <span class="attr">#[cfg(debug_assertions)]
 </span><span class="kw">use </span>calyx_utils::Id;
 <span class="kw">use </span>std::cell::RefCell;
@@ -95,7 +98,10 @@
     </span><span class="kw">pub fn </span>upgrade(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RRC&lt;T&gt; {
         <span class="kw">let </span><span class="prelude-val">Some</span>(r) = <span class="self">self</span>.internal.upgrade() <span class="kw">else </span>{
             <span class="attr">#[cfg(debug_assertions)]
-            </span><span class="macro">unreachable!</span>(<span class="string">"weak reference points to a dropped value. Original object's name: `{}'"</span>, <span class="self">self</span>.debug_name);
+            </span><span class="macro">unreachable!</span>(
+                <span class="string">"weak reference points to a dropped value. Original object's name: `{}'"</span>,
+                <span class="self">self</span>.debug_name
+            );
             <span class="attr">#[cfg(not(debug_assertions))]
             </span><span class="macro">unreachable!</span>(<span class="string">"weak reference points to a dropped value."</span>);
         };

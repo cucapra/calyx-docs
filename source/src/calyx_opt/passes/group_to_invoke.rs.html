@@ -347,7 +347,10 @@
 <a href="#346" id="346">346</a>
 <a href="#347" id="347">347</a>
 <a href="#348" id="348">348</a>
-<a href="#349" id="349">349</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::AssignmentAnalysis;
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::AssignmentAnalysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>calyx_ir::{GetAttributes, RRC};
@@ -641,10 +644,10 @@
                     <span class="kw">return</span>;
                 } <span class="kw">else if </span>!assign.guard.is_true() {
                     <span class="macro">log::info!</span>(
-                            <span class="string">"Cannot transform `{}` due to guarded write to @go port: {}"</span>,
-                            group_name,
-                            ir::Printer::assignment_to_str(assign)
-                        );
+                        <span class="string">"Cannot transform `{}` due to guarded write to @go port: {}"</span>,
+                        group_name,
+                        ir::Printer::assignment_to_str(assign)
+                    );
                     <span class="kw">return</span>;
                 } <span class="kw">else if </span>assign.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>) {
                     go_wr_cnt += <span class="number">1</span>;
@@ -659,16 +662,16 @@
             </span><span class="kw">if </span>assign.src == done_port {
                 <span class="kw">if </span>done_wr_cnt &gt; <span class="number">0 </span>{
                     <span class="macro">log::info!</span>(
-                            <span class="string">"Cannot transform `{}` due to multiple writes to @done port"</span>,
-                            group_name,
-                        );
+                        <span class="string">"Cannot transform `{}` due to multiple writes to @done port"</span>,
+                        group_name,
+                    );
                     <span class="kw">return</span>;
                 } <span class="kw">else if </span>!assign.guard.is_true() {
                     <span class="macro">log::info!</span>(
-                            <span class="string">"Cannot transform `{}` due to guarded write to @done port: {}"</span>,
-                            group_name,
-                            ir::Printer::assignment_to_str(assign)
-                        );
+                        <span class="string">"Cannot transform `{}` due to guarded write to @done port: {}"</span>,
+                        group_name,
+                        ir::Printer::assignment_to_str(assign)
+                    );
                     <span class="kw">return</span>;
                 } <span class="kw">else if </span>assign.dst == <span class="kw-2">*</span>group_done_port {
                     done_wr_cnt += <span class="number">1</span>;
@@ -688,7 +691,10 @@
             );
             <span class="kw">return</span>;
         } <span class="kw">else if </span>done_wr_cnt != <span class="number">1 </span>{
-            <span class="macro">log::info!</span>(<span class="string">"Cannot transform `{}` because there are no writes to @done port"</span>, group_name);
+            <span class="macro">log::info!</span>(
+                <span class="string">"Cannot transform `{}` because there are no writes to @done port"</span>,
+                group_name
+            );
             <span class="kw">return</span>;
         }
 

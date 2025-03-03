@@ -804,8 +804,8 @@
 <a href="#803" id="803">803</a>
 <a href="#804" id="804">804</a></pre></div><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
-<span class="kw">use </span><span class="kw">crate</span>::Nothing;
+</span><span class="kw">use </span><span class="kw">crate</span>::Nothing;
+<span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
 
 <span class="kw">use super</span>::{
     Attributes, Direction, GetAttributes, Guard, Id, PortDef, RRC, WRC,
@@ -813,7 +813,7 @@
 <span class="kw">use </span>calyx_frontend::{Attribute, BoolAttr};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, GetName};
 <span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>smallvec::{smallvec, SmallVec};
+<span class="kw">use </span>smallvec::{SmallVec, smallvec};
 <span class="kw">use </span>std::hash::Hash;
 <span class="kw">use </span>std::rc::Rc;
 

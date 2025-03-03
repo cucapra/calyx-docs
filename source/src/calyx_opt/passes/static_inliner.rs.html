@@ -751,12 +751,26 @@
 <a href="#750" id="750">750</a>
 <a href="#751" id="751">751</a>
 <a href="#752" id="752">752</a>
-<a href="#753" id="753">753</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::GraphColoring;
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::GraphColoring;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
 };
-<span class="kw">use </span>calyx_ir::structure;
 <span class="kw">use </span>calyx_ir::LibrarySignatures;
+<span class="kw">use </span>calyx_ir::structure;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, StaticTiming};
 <span class="kw">use </span>calyx_utils::CalyxResult;
 <span class="kw">use </span>ir::build_assignments;
@@ -1142,7 +1156,10 @@
                         <span class="comment">// first recursively call each stmt in par, and turn each stmt
                         // into static group g.
                         </span><span class="kw">let </span>g = <span class="self">self</span>.inline_static_control(stmt, builder);
-                        <span class="macro">assert!</span>(g.borrow().get_latency() == stmt_latency, <span class="string">"static group latency doesn't match static stmt latency"</span>);
+                        <span class="macro">assert!</span>(
+                            g.borrow().get_latency() == stmt_latency,
+                            <span class="string">"static group latency doesn't match static stmt latency"
+                        </span>);
                         <span class="comment">// get the assignments from g
                         </span><span class="kw">let </span><span class="kw-2">mut </span>g_assigns: Vec&lt;
                             ir::Assignment&lt;ir::StaticTiming&gt;,
@@ -1343,7 +1360,10 @@
                 <span class="kw">let </span>fbranch_latency = fbranch.get_latency();
                 <span class="kw">let </span>max_latency =
                     std::cmp::max(tbranch_latency, fbranch_latency);
-                <span class="macro">assert_eq!</span>(max_latency, <span class="kw-2">*</span>latency, <span class="string">"if group latency and max of the if branch latencies do not match"</span>);
+                <span class="macro">assert_eq!</span>(
+                    max_latency, <span class="kw-2">*</span>latency,
+                    <span class="string">"if group latency and max of the if branch latencies do not match"
+                </span>);
 
                 <span class="comment">// Inline assignments in tbranch and fbranch, and get resulting
                 // tgroup_assigns and fgroup_assigns
@@ -1362,7 +1382,11 @@
                         <span class="kw">_ </span>=&gt; {
                             <span class="kw">let </span>fgroup =
                                 <span class="self">self</span>.inline_static_control(fbranch, builder);
-                            <span class="macro">assert_eq!</span>(fbranch_latency, fgroup.borrow().get_latency(), <span class="string">"false branch and false branch group latency do not match"</span>);
+                            <span class="macro">assert_eq!</span>(
+                                fbranch_latency,
+                                fgroup.borrow().get_latency(),
+                                <span class="string">"false branch and false branch group latency do not match"
+                            </span>);
                             <span class="kw">let </span>fgroup_assigns: Vec&lt;
                                 ir::Assignment&lt;ir::StaticTiming&gt;,
                             &gt; = fgroup.borrow_mut().assignments.clone();
@@ -1463,7 +1487,11 @@
                     builder.add_static_group(<span class="string">"static_repeat"</span>, <span class="kw-2">*</span>latency);
                 <span class="comment">// turn body into a group body_group by recursively calling inline_static_control
                 </span><span class="kw">let </span>body_group = <span class="self">self</span>.inline_static_control(body, builder);
-                <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>latency, (num_repeats * body_group.borrow().get_latency()), <span class="string">"latency of static repeat is not equal to num_repeats * latency of body"</span>);
+                <span class="macro">assert_eq!</span>(
+                    <span class="kw-2">*</span>latency,
+                    (num_repeats * body_group.borrow().get_latency()),
+                    <span class="string">"latency of static repeat is not equal to num_repeats * latency of body"
+                </span>);
                 <span class="comment">// the assignments in the repeat group should simply trigger the
                 // body group. So the static group will literally look like:
                 // static group static_repeat &lt;num_repeats * body_latency&gt; {body[go] = 1'd1;}

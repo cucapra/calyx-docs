@@ -1470,7 +1470,36 @@
 <a href="#1469" id="1469">1469</a>
 <a href="#1470" id="1470">1470</a>
 <a href="#1471" id="1471">1471</a>
-<a href="#1472" id="1472">1472</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
+<a href="#1472" id="1472">1472</a>
+<a href="#1473" id="1473">1473</a>
+<a href="#1474" id="1474">1474</a>
+<a href="#1475" id="1475">1475</a>
+<a href="#1476" id="1476">1476</a>
+<a href="#1477" id="1477">1477</a>
+<a href="#1478" id="1478">1478</a>
+<a href="#1479" id="1479">1479</a>
+<a href="#1480" id="1480">1480</a>
+<a href="#1481" id="1481">1481</a>
+<a href="#1482" id="1482">1482</a>
+<a href="#1483" id="1483">1483</a>
+<a href="#1484" id="1484">1484</a>
+<a href="#1485" id="1485">1485</a>
+<a href="#1486" id="1486">1486</a>
+<a href="#1487" id="1487">1487</a>
+<a href="#1488" id="1488">1488</a>
+<a href="#1489" id="1489">1489</a>
+<a href="#1490" id="1490">1490</a>
+<a href="#1491" id="1491">1491</a>
+<a href="#1492" id="1492">1492</a>
+<a href="#1493" id="1493">1493</a>
+<a href="#1494" id="1494">1494</a>
+<a href="#1495" id="1495">1495</a>
+<a href="#1496" id="1496">1496</a>
+<a href="#1497" id="1497">1497</a>
+<a href="#1498" id="1498">1498</a>
+<a href="#1499" id="1499">1499</a>
+<a href="#1500" id="1500">1500</a>
+<a href="#1501" id="1501">1501</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::passes;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
@@ -1478,7 +1507,7 @@
 <span class="kw">use </span>calyx_ir::{
     <span class="self">self </span><span class="kw">as </span>ir, BoolAttr, Cell, GetAttributes, LibrarySignatures, Printer, RRC,
 };
-<span class="kw">use </span>calyx_ir::{build_assignments, guard, structure, Id};
+<span class="kw">use </span>calyx_ir::{Id, build_assignments, guard, structure};
 <span class="kw">use </span>calyx_utils::Error;
 <span class="kw">use </span>calyx_utils::{CalyxResult, OutputFile};
 <span class="kw">use </span>ir::Nothing;
@@ -1528,30 +1557,38 @@
             exits.push((cur_state, <span class="macro">guard!</span>(group[<span class="string">"done"</span>])))
         }
         ir::Control::Seq(ir::Seq { stmts, .. }) =&gt; {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(stmt) = stmts.last() { control_exits(stmt, exits) }
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(stmt) = stmts.last() {
+                control_exits(stmt, exits)
+            }
         }
         ir::Control::If(ir::If {
             tbranch, fbranch, ..
         }) =&gt; {
-            control_exits(
-                tbranch, exits,
-            );
-            control_exits(
-                fbranch, exits,
-            )
+            control_exits(tbranch, exits);
+            control_exits(fbranch, exits)
         }
         ir::Control::While(ir::While { body, port, .. }) =&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>loop_exits = <span class="macro">vec!</span>[];
             control_exits(body, <span class="kw-2">&amp;mut </span>loop_exits);
             <span class="comment">// Loop exits only happen when the loop guard is false
-            </span>exits.extend(loop_exits.into_iter().map(|(s, g)| {
-                (s, g &amp; !ir::Guard::from(port.clone()))
-            }));
-        },
-        ir::Control::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"`repeat` statements should have been compiled away. Run `{}` before this pass."</span>, passes::CompileRepeat::name()),
-        ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"`invoke` statements should have been compiled away. Run `{}` before this pass."</span>, passes::CompileInvoke::name()),
+            </span>exits.extend(
+                loop_exits
+                    .into_iter()
+                    .map(|(s, g)| (s, g &amp; !ir::Guard::from(port.clone()))),
+            );
+        }
+        ir::Control::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+            <span class="string">"`repeat` statements should have been compiled away. Run `{}` before this pass."</span>,
+            passes::CompileRepeat::name()
+        ),
+        ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+            <span class="string">"`invoke` statements should have been compiled away. Run `{}` before this pass."</span>,
+            passes::CompileInvoke::name()
+        ),
         ir::Control::Par(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
-        ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">" static control should have been compiled away. Run the static compilation passes before this pass"</span>)
+        ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+            <span class="string">" static control should have been compiled away. Run the static compilation passes before this pass"
+        </span>),
     }
 }
 
@@ -1603,7 +1640,7 @@
             <span class="kw">let </span>new_fsm = attributes.has(ir::BoolAttr::NewFSM);
             <span class="comment">// if new_fsm is true, then insert attribute at the seq, and then
             // start over counting states from 0
-            </span><span class="kw">let </span><span class="kw-2">mut </span>cur = <span class="kw">if </span>new_fsm{
+            </span><span class="kw">let </span><span class="kw-2">mut </span>cur = <span class="kw">if </span>new_fsm {
                 attributes.insert(NODE_ID, cur_state);
                 <span class="number">0
             </span>} <span class="kw">else </span>{
@@ -1614,14 +1651,13 @@
             });
             <span class="comment">// If new_fsm is true then we want to return cur_state + 1, since this
             // seq should really only take up 1 "state" on the "outer" fsm
-            </span><span class="kw">if </span>new_fsm{
-                cur_state + <span class="number">1
-            </span>} <span class="kw">else </span>{
-                cur
-            }
+            </span><span class="kw">if </span>new_fsm { cur_state + <span class="number">1 </span>} <span class="kw">else </span>{ cur }
         }
         ir::Control::If(ir::If {
-            tbranch, fbranch, attributes, ..
+            tbranch,
+            fbranch,
+            attributes,
+            ..
         }) =&gt; {
             <span class="kw">let </span>new_fsm = attributes.has(ir::BoolAttr::NewFSM);
             <span class="comment">// if new_fsm is true, then we want to add an attribute to this
@@ -1638,25 +1674,19 @@
             </span>} <span class="kw">else </span>{
                 cur_state
             };
-            <span class="kw">let </span>tru_nxt = compute_unique_ids(
-                tbranch, cur
-            );
-            <span class="kw">let </span>false_nxt = compute_unique_ids(
-                fbranch, tru_nxt
-            );
+            <span class="kw">let </span>tru_nxt = compute_unique_ids(tbranch, cur);
+            <span class="kw">let </span>false_nxt = compute_unique_ids(fbranch, tru_nxt);
             <span class="comment">// If new_fsm is true then we want to return cur_state + 1, since this
             // if stmt should really only take up 1 "state" on the "outer" fsm
-            </span><span class="kw">if </span>new_fsm {
-                cur_state + <span class="number">1
-            </span>} <span class="kw">else </span>{
-                false_nxt
-            }
+            </span><span class="kw">if </span>new_fsm { cur_state + <span class="number">1 </span>} <span class="kw">else </span>{ false_nxt }
         }
-        ir::Control::While(ir::While { body, attributes, .. }) =&gt; {
+        ir::Control::While(ir::While {
+            body, attributes, ..
+        }) =&gt; {
             <span class="kw">let </span>new_fsm = attributes.has(ir::BoolAttr::NewFSM);
             <span class="comment">// if new_fsm is true, then we want to add an attribute to this
             // control statement
-            </span><span class="kw">if </span>new_fsm{
+            </span><span class="kw">if </span>new_fsm {
                 attributes.insert(NODE_ID, cur_state);
             }
             <span class="comment">// If the program starts with a branch then branches can't get
@@ -1671,16 +1701,20 @@
             <span class="kw">let </span>body_nxt = compute_unique_ids(body, cur);
             <span class="comment">// If new_fsm is true then we want to return cur_state + 1, since this
             // while loop should really only take up 1 "state" on the "outer" fsm
-            </span><span class="kw">if </span>new_fsm{
-                cur_state + <span class="number">1
-            </span>} <span class="kw">else </span>{
-                body_nxt
-            }
+            </span><span class="kw">if </span>new_fsm { cur_state + <span class="number">1 </span>} <span class="kw">else </span>{ body_nxt }
         }
         ir::Control::Empty(<span class="kw">_</span>) =&gt; cur_state,
-        ir::Control::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"`repeat` statements should have been compiled away. Run `{}` before this pass."</span>, passes::CompileRepeat::name()),
-        ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"`invoke` statements should have been compiled away. Run `{}` before this pass."</span>, passes::CompileInvoke::name()),
-        ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"static control should have been compiled away. Run the static compilation passes before this pass"</span>)
+        ir::Control::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+            <span class="string">"`repeat` statements should have been compiled away. Run `{}` before this pass."</span>,
+            passes::CompileRepeat::name()
+        ),
+        ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+            <span class="string">"`invoke` statements should have been compiled away. Run `{}` before this pass."</span>,
+            passes::CompileInvoke::name()
+        ),
+        ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+            <span class="string">"static control should have been compiled away. Run the static compilation passes before this pass"
+        </span>),
     }
 }
 
@@ -1818,7 +1852,8 @@
 
         <span class="macro">debug_assert!</span>(
             petgraph::algo::connected_components(<span class="kw-2">&amp;</span>graph) == <span class="number">1</span>,
-            <span class="string">"State transition graph has unreachable states (graph has more than one connected component)."</span>);
+            <span class="string">"State transition graph has unreachable states (graph has more than one connected component)."
+        </span>);
     }
 
     <span class="doccomment">/// Return the max state in the transition graph
@@ -2187,71 +2222,86 @@
         </span>has_fast_guarantee: bool,
     ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
         <span class="kw">match </span>con {
-        <span class="comment">// See explanation of FSM states generated in [ir::TopDownCompileControl].
-        </span>ir::Control::Enable(ir::Enable { group, attributes }) =&gt; {
-            <span class="kw">let </span>cur_state = attributes.get(NODE_ID).unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">"Group `{}` does not have node_id information"</span>, group.borrow().name()));
-            <span class="comment">// If there is exactly one previous transition state with a `true`
-            // guard, then merge this state into previous state.
-            // This happens when the first control statement is an enable not
-            // inside a branch.
-            </span><span class="kw">let </span>(cur_state, prev_states) = <span class="kw">if </span>preds.len() == <span class="number">1 </span>&amp;&amp; preds[<span class="number">0</span>].<span class="number">1</span>.is_true() {
-                (preds[<span class="number">0</span>].<span class="number">0</span>, <span class="macro">vec!</span>[])
-            } <span class="kw">else </span>{
-                (cur_state, preds)
-            };
+            <span class="comment">// See explanation of FSM states generated in [ir::TopDownCompileControl].
+            </span>ir::Control::Enable(ir::Enable { group, attributes }) =&gt; {
+                <span class="kw">let </span>cur_state = attributes.get(NODE_ID).unwrap_or_else(|| {
+                    <span class="macro">panic!</span>(
+                        <span class="string">"Group `{}` does not have node_id information"</span>,
+                        group.borrow().name()
+                    )
+                });
+                <span class="comment">// If there is exactly one previous transition state with a `true`
+                // guard, then merge this state into previous state.
+                // This happens when the first control statement is an enable not
+                // inside a branch.
+                </span><span class="kw">let </span>(cur_state, prev_states) =
+                    <span class="kw">if </span>preds.len() == <span class="number">1 </span>&amp;&amp; preds[<span class="number">0</span>].<span class="number">1</span>.is_true() {
+                        (preds[<span class="number">0</span>].<span class="number">0</span>, <span class="macro">vec!</span>[])
+                    } <span class="kw">else </span>{
+                        (cur_state, preds)
+                    };
 
-            <span class="comment">// Add group to mapping for emitting group JSON info
-            </span><span class="self">self</span>.groups_to_states.insert(FSMStateInfo { id: cur_state, group: group.borrow().name() });
+                <span class="comment">// Add group to mapping for emitting group JSON info
+                </span><span class="self">self</span>.groups_to_states.insert(FSMStateInfo {
+                    id: cur_state,
+                    group: group.borrow().name(),
+                });
 
-            <span class="kw">let </span>not_done = !<span class="macro">guard!</span>(group[<span class="string">"done"</span>]);
-            <span class="kw">let </span>signal_on = <span class="self">self</span>.builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
+                <span class="kw">let </span>not_done = !<span class="macro">guard!</span>(group[<span class="string">"done"</span>]);
+                <span class="kw">let </span>signal_on = <span class="self">self</span>.builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
 
-            <span class="comment">// Activate this group in the current state
-            </span><span class="kw">let </span>en_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
-                group[<span class="string">"go"</span>] = not_done <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
-            );
-            <span class="self">self
-                </span>.enables
-                .entry(cur_state)
-                .or_default()
-                .extend(en_go);
+                <span class="comment">// Activate this group in the current state
+                </span><span class="kw">let </span>en_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
+                    group[<span class="string">"go"</span>] = not_done <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
+                );
+                <span class="self">self</span>.enables.entry(cur_state).or_default().extend(en_go);
 
-            <span class="comment">// Activate group in the cycle when previous state signals done.
-            // NOTE: We explicilty do not add `not_done` to the guard.
-            // See explanation in [ir::TopDownCompileControl] to understand
-            // why.
-            </span><span class="kw">if </span>early_transitions || has_fast_guarantee {
-                <span class="kw">for </span>(st, g) <span class="kw">in </span><span class="kw-2">&amp;</span>prev_states {
-                    <span class="kw">let </span>early_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
-                        group[<span class="string">"go"</span>] = g <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
-                    );
-                    <span class="self">self</span>.enables.entry(<span class="kw-2">*</span>st).or_default().extend(early_go);
+                <span class="comment">// Activate group in the cycle when previous state signals done.
+                // NOTE: We explicilty do not add `not_done` to the guard.
+                // See explanation in [ir::TopDownCompileControl] to understand
+                // why.
+                </span><span class="kw">if </span>early_transitions || has_fast_guarantee {
+                    <span class="kw">for </span>(st, g) <span class="kw">in </span><span class="kw-2">&amp;</span>prev_states {
+                        <span class="kw">let </span>early_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
+                            group[<span class="string">"go"</span>] = g <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
+                        );
+                        <span class="self">self</span>.enables.entry(<span class="kw-2">*</span>st).or_default().extend(early_go);
+                    }
                 }
+
+                <span class="kw">let </span>transitions = prev_states
+                    .into_iter()
+                    .map(|(st, guard)| (st, cur_state, guard));
+                <span class="self">self</span>.transitions.extend(transitions);
+
+                <span class="kw">let </span>done_cond = <span class="macro">guard!</span>(group[<span class="string">"done"</span>]);
+                <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(cur_state, done_cond)])
             }
-
-            <span class="kw">let </span>transitions = prev_states
-                .into_iter()
-                .map(|(st, guard)| (st, cur_state, guard));
-            <span class="self">self</span>.transitions.extend(transitions);
-
-            <span class="kw">let </span>done_cond = <span class="macro">guard!</span>(group[<span class="string">"done"</span>]);
-            <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(cur_state, done_cond)])
+            ir::Control::Seq(seq) =&gt; {
+                <span class="self">self</span>.calc_seq_recur(seq, preds, early_transitions)
+            }
+            ir::Control::If(if_stmt) =&gt; {
+                <span class="self">self</span>.calc_if_recur(if_stmt, preds, early_transitions)
+            }
+            ir::Control::While(while_stmt) =&gt; {
+                <span class="self">self</span>.calc_while_recur(while_stmt, preds, early_transitions)
+            }
+            ir::Control::Par(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
+            ir::Control::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                <span class="string">"`repeat` statements should have been compiled away. Run `{}` before this pass."</span>,
+                passes::CompileRepeat::name()
+            ),
+            ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                <span class="string">"`invoke` statements should have been compiled away. Run `{}` before this pass."</span>,
+                passes::CompileInvoke::name()
+            ),
+            ir::Control::Empty(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                <span class="string">"`calculate_states_recur` should not see an `empty` control."
+            </span>),
+            ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                <span class="string">"static control should have been compiled away. Run the static compilation passes before this pass"
+            </span>),
         }
-        ir::Control::Seq(seq) =&gt; {
-            <span class="self">self</span>.calc_seq_recur(seq, preds, early_transitions)
-        }
-        ir::Control::If(if_stmt) =&gt; {
-            <span class="self">self</span>.calc_if_recur(if_stmt, preds, early_transitions)
-        }
-        ir::Control::While(while_stmt) =&gt; {
-            <span class="self">self</span>.calc_while_recur(while_stmt, preds, early_transitions)
-        }
-        ir::Control::Par(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
-        ir::Control::Repeat(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"`repeat` statements should have been compiled away. Run `{}` before this pass."</span>, passes::CompileRepeat::name()),
-        ir::Control::Invoke(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"`invoke` statements should have been compiled away. Run `{}` before this pass."</span>, passes::CompileInvoke::name()),
-        ir::Control::Empty(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"`calculate_states_recur` should not see an `empty` control."</span>),
-        ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"static control should have been compiled away. Run the static compilation passes before this pass"</span>)
-    }
     }
 
     <span class="doccomment">/// Builds a finite state machine for `seq` represented by a [Schedule].
@@ -2292,7 +2342,11 @@
         </span>early_transitions: bool,
     ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
         <span class="kw">if </span>if_stmt.cond.is_some() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">"{}: Found group `{}` in with position of if. This should have compiled away."</span>, TopDownCompileControl::name(), if_stmt.cond.as_ref().unwrap().borrow().name())));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                <span class="string">"{}: Found group `{}` in with position of if. This should have compiled away."</span>,
+                TopDownCompileControl::name(),
+                if_stmt.cond.as_ref().unwrap().borrow().name()
+            )));
         }
         <span class="kw">let </span>port_guard: ir::Guard&lt;Nothing&gt; = Rc::clone(<span class="kw-2">&amp;</span>if_stmt.port).into();
         <span class="comment">// Previous states transitioning into true branch need the conditional
@@ -2345,7 +2399,11 @@
         </span>early_transitions: bool,
     ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
         <span class="kw">if </span>while_stmt.cond.is_some() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(<span class="string">"{}: Found group `{}` in with position of if. This should have compiled away."</span>, TopDownCompileControl::name(), while_stmt.cond.as_ref().unwrap().borrow().name())));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+                <span class="string">"{}: Found group `{}` in with position of if. This should have compiled away."</span>,
+                TopDownCompileControl::name(),
+                while_stmt.cond.as_ref().unwrap().borrow().name()
+            )));
         }
 
         <span class="kw">let </span>port_guard: ir::Guard&lt;Nothing&gt; = Rc::clone(<span class="kw-2">&amp;</span>while_stmt.port).into();

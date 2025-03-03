@@ -468,11 +468,7 @@
 <a href="#467" id="467">467</a>
 <a href="#468" id="468">468</a>
 <a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
+<a href="#470" id="470">470</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     AssignmentAnalysis, GraphColoring, LiveRangeAnalysis, ShareSet,
     StaticParTiming,
 };
@@ -480,10 +476,10 @@
     Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
 };
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
-<span class="kw">use </span>calyx_ir::{rewriter, BoolAttr};
+<span class="kw">use </span>calyx_ir::{BoolAttr, rewriter};
 <span class="kw">use </span>calyx_utils::{CalyxResult, OutputFile};
 <span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>serde_json::{json, Value};
+<span class="kw">use </span>serde_json::{Value, json};
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="comment">// function to turn cell types to string when we are building the json for
@@ -610,26 +606,26 @@
                 <span class="string">"print-share-freqs"</span>,
                 <span class="string">"print sharing frequencies"</span>,
                 ParseVal::OutStream(OutputFile::Null),
-                PassOpt::parse_outstream
+                PassOpt::parse_outstream,
             ),
             PassOpt::new(
                 <span class="string">"bounds"</span>,
                 <span class="string">"maximum amount of sharing for combinational components, registers, and other components. Negative valye means no bound"</span>,
                 ParseVal::List(<span class="macro">vec!</span>[]),
-                PassOpt::parse_num_list
+                PassOpt::parse_num_list,
             ),
             PassOpt::new(
                 <span class="string">"print-par-timing"</span>,
                 <span class="string">"print timing information for `par` blocks"</span>,
                 ParseVal::OutStream(OutputFile::Null),
-                PassOpt::parse_outstream
+                PassOpt::parse_outstream,
             ),
             PassOpt::new(
                 <span class="string">"calyx-2020"</span>,
                 <span class="string">"share using the Calyx 2020 settings: no component sharing, only share registers/combinational components"</span>,
                 ParseVal::Bool(<span class="bool-val">false</span>),
-                PassOpt::parse_bool
-            )
+                PassOpt::parse_bool,
+            ),
         ]
     }
 }
@@ -888,11 +884,7 @@
                     // otherwise, look at the actual self.bounds values to
                     // get the bounds
                     </span><span class="kw">if </span><span class="self">self</span>.calyx_2020 {
-                        <span class="kw">if </span>is_comb || is_reg {
-                            <span class="kw-2">&amp;</span><span class="prelude-val">None
-                        </span>} <span class="kw">else </span>{
-                            <span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="number">1</span>)
-                        }
+                        <span class="kw">if </span>is_comb || is_reg { <span class="kw-2">&amp;</span><span class="prelude-val">None </span>} <span class="kw">else </span>{ <span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="number">1</span>) }
                     } <span class="kw">else if </span>is_comb {
                         comb_bound
                     } <span class="kw">else if </span>is_reg {

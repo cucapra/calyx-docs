@@ -630,7 +630,7 @@
     Action, ConstructVisitor, Named, Order, ParseVal, PassOpt, VisResult,
     Visitor,
 };
-<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, rewriter, GetAttributes, LibrarySignatures, RRC};
+<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes, LibrarySignatures, RRC, rewriter};
 <span class="kw">use </span>calyx_utils::Error;
 <span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>itertools::Itertools;
@@ -1053,13 +1053,13 @@
                         )
                     })
                     .join(<span class="string">"\n"</span>);
-                <span class="kw">return </span><span class="prelude-val">Err</span>(
-                    Error::pass_assumption(
-                        <span class="self">Self</span>::name(),
-                        <span class="macro">format!</span>(
-                            <span class="string">"Instance `{}.{instance}` invoked with multiple parameters (currently unsupported):\n{bindings_str}"</span>,
-                            comp.name,
-                        )));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::pass_assumption(
+                    <span class="self">Self</span>::name(),
+                    <span class="macro">format!</span>(
+                        <span class="string">"Instance `{}.{instance}` invoked with multiple parameters (currently unsupported):\n{bindings_str}"</span>,
+                        comp.name,
+                    ),
+                ));
             }
         }
 

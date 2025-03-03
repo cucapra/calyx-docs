@@ -298,10 +298,10 @@
 <a href="#297" id="297">297</a>
 <a href="#298" id="298">298</a></pre></div><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Id, PortIterator, RRC};
 <span class="kw">use </span>petgraph::{
+    Direction::{Incoming, Outgoing},
     algo,
     graph::{DiGraph, NodeIndex},
     visit::EdgeRef,
-    Direction::{Incoming, Outgoing},
 };
 <span class="kw">use </span>std::fmt::{Display, Write};
 <span class="kw">use </span>std::{collections::HashMap, rc::Rc};
@@ -428,7 +428,7 @@
                                 Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.graph[node_idx])
                             },
                         ),
-                    ))
+                    ));
                 }
                 ir::Direction::Output =&gt; (),
             }

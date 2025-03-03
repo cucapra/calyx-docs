@@ -342,7 +342,17 @@
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a></pre></div><pre class="rust"><code><span class="kw">use </span>calyx_utils::{CalyxResult, Error, Id};
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a></pre></div><pre class="rust"><code><span class="kw">use </span>calyx_utils::{CalyxResult, Error, Id};
 <span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>strum::EnumCount;
 <span class="kw">use </span>strum_macros::{AsRefStr, EnumCount, EnumString, FromRepr};
@@ -581,7 +591,10 @@
         } <span class="kw">else </span>{
             <span class="comment">// Reject attributes that all caps since those are reserved for internal attributes
             </span><span class="kw">if </span>s.to_uppercase() == s {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::misc(<span class="macro">format!</span>(<span class="string">"Invalid attribute: {}. All caps attributes are reserved for internal use."</span>, s)));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::misc(<span class="macro">format!</span>(
+                    <span class="string">"Invalid attribute: {}. All caps attributes are reserved for internal use."</span>,
+                    s
+                )));
             }
             <span class="prelude-val">Ok</span>(SetAttribute::Unknown(s.into()))
         }
@@ -621,16 +634,23 @@
             <span class="prelude-val">Ok</span>(Attribute::Num(n))
         } <span class="kw">else </span>{
             <span class="kw">if </span>DEPRECATED_ATTRIBUTES.contains(<span class="kw-2">&amp;</span>s) {
-                <span class="macro">log::warn!</span>(<span class="string">"The attribute @{s} is deprecated and will be ignored by the compiler."</span>);
+                <span class="macro">log::warn!</span>(
+                    <span class="string">"The attribute @{s} is deprecated and will be ignored by the compiler."
+                </span>);
             }
 
             <span class="kw">if let </span><span class="prelude-val">Ok</span>(SetAttribute::Set(<span class="kw">_</span>)) = SetAttribute::from_str(s) {
-                <span class="macro">log::warn!</span>(<span class="string">"Set attribute {s} incorrectly written as a standard attribute, i.e. '@{s}(..)' or '\"{s}\" = ..'. This will be ignored by the compiler. Instead write '@{s}{{..}}' or '\"{s}\" = {{..}}'."</span>);
+                <span class="macro">log::warn!</span>(
+                    <span class="string">"Set attribute {s} incorrectly written as a standard attribute, i.e. '@{s}(..)' or '\"{s}\" = ..'. This will be ignored by the compiler. Instead write '@{s}{{..}}' or '\"{s}\" = {{..}}'."
+                </span>);
             }
 
             <span class="comment">// Reject attributes that all caps since those are reserved for internal attributes
             </span><span class="kw">if </span>s.to_uppercase() == s {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::misc(<span class="macro">format!</span>(<span class="string">"Invalid attribute: {}. All caps attributes are reserved for internal use."</span>, s)));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::misc(<span class="macro">format!</span>(
+                    <span class="string">"Invalid attribute: {}. All caps attributes are reserved for internal use."</span>,
+                    s
+                )));
             }
             <span class="prelude-val">Ok</span>(Attribute::Unknown(s.into()))
         }

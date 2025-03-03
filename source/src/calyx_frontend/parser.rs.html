@@ -1526,23 +1526,23 @@
 <a href="#1525" id="1525">1525</a></pre></div><pre class="rust"><code><span class="attr">#![allow(clippy::upper_case_acronyms)]
 
 </span><span class="doccomment">//! Parser for Calyx programs.
-</span><span class="kw">use </span><span class="kw">super</span>::ast::{
+</span><span class="kw">use </span><span class="kw">super</span>::Attributes;
+<span class="kw">use </span><span class="kw">super</span>::ast::{
     <span class="self">self</span>, BitNum, Control, GuardComp <span class="kw">as </span>GC, GuardExpr, NumType, StaticGuardExpr,
 };
-<span class="kw">use </span><span class="kw">super</span>::Attributes;
 <span class="kw">use crate</span>::{
+    Attribute, Direction, PortDef, Primitive, Width,
     attribute::SetAttribute,
     attributes::ParseAttributeWrapper,
     source_info::{
         FileId <span class="kw">as </span>MetadataFileId, LineNum, PositionId, SourceInfoResult,
         SourceInfoTable,
     },
-    Attribute, Direction, PortDef, Primitive, Width,
 };
-<span class="kw">use </span>calyx_utils::{<span class="self">self</span>, float, CalyxResult, Id, PosString};
+<span class="kw">use </span>calyx_utils::{<span class="self">self</span>, CalyxResult, Id, PosString, float};
 <span class="kw">use </span>calyx_utils::{FileIdx, GPosIdx, GlobalPositionTable};
 <span class="kw">use </span>pest::pratt_parser::{Assoc, Op, PrattParser};
-<span class="kw">use </span>pest_consume::{match_nodes, Error, Parser};
+<span class="kw">use </span>pest_consume::{Error, Parser, match_nodes};
 <span class="kw">use </span>std::io::Read;
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::str::FromStr;

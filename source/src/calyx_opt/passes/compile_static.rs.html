@@ -1391,17 +1391,45 @@
 <a href="#1390" id="1390">1390</a>
 <a href="#1391" id="1391">1391</a>
 <a href="#1392" id="1392">1392</a>
-<a href="#1393" id="1393">1393</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
+<a href="#1393" id="1393">1393</a>
+<a href="#1394" id="1394">1394</a>
+<a href="#1395" id="1395">1395</a>
+<a href="#1396" id="1396">1396</a>
+<a href="#1397" id="1397">1397</a>
+<a href="#1398" id="1398">1398</a>
+<a href="#1399" id="1399">1399</a>
+<a href="#1400" id="1400">1400</a>
+<a href="#1401" id="1401">1401</a>
+<a href="#1402" id="1402">1402</a>
+<a href="#1403" id="1403">1403</a>
+<a href="#1404" id="1404">1404</a>
+<a href="#1405" id="1405">1405</a>
+<a href="#1406" id="1406">1406</a>
+<a href="#1407" id="1407">1407</a>
+<a href="#1408" id="1408">1408</a>
+<a href="#1409" id="1409">1409</a>
+<a href="#1410" id="1410">1410</a>
+<a href="#1411" id="1411">1411</a>
+<a href="#1412" id="1412">1412</a>
+<a href="#1413" id="1413">1413</a>
+<a href="#1414" id="1414">1414</a>
+<a href="#1415" id="1415">1415</a>
+<a href="#1416" id="1416">1416</a>
+<a href="#1417" id="1417">1417</a>
+<a href="#1418" id="1418">1418</a>
+<a href="#1419" id="1419">1419</a>
+<a href="#1420" id="1420">1420</a>
+<a href="#1421" id="1421">1421</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     GraphColoring, Node, ParNodes, SingleNode, StateType, StaticFSM,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
 };
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Nothing, PortParent};
-<span class="kw">use </span>calyx_ir::{guard, structure, GetAttributes};
+<span class="kw">use </span>calyx_ir::{GetAttributes, guard, structure};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
 <span class="kw">use </span>core::panic;
-<span class="kw">use </span>ir::{build_assignments, RRC};
+<span class="kw">use </span>ir::{RRC, build_assignments};
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::collections::{BTreeMap, HashMap, HashSet};
 <span class="kw">use </span>std::ops::Not;
@@ -1624,7 +1652,10 @@
         <span class="comment">// assume that there are only static enables left.
         // if there are any other type of static control, then error out.
         </span><span class="kw">let </span>ir::StaticControl::Enable(s) = sc <span class="kw">else </span>{
-            <span class="macro">unreachable!</span>(<span class="string">"Non-Enable Static Control should have been compiled away. Run {} to do this"</span>, <span class="kw">crate</span>::passes::StaticInliner::name());
+            <span class="macro">unreachable!</span>(
+                <span class="string">"Non-Enable Static Control should have been compiled away. Run {} to do this"</span>,
+                <span class="kw">crate</span>::passes::StaticInliner::name()
+            );
         };
 
         <span class="kw">let </span>sgroup = s.group.borrow_mut();
@@ -1902,9 +1933,10 @@
                 } <span class="kw">else </span>{
                     (beg1, end1)
                 }
-
             }
-            ir::Guard::Or(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">"Shouldn't try to get interval from guard if there is an 'or' in the guard"</span>),
+            ir::Guard::Or(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(
+                <span class="string">"Shouldn't try to get interval from guard if there is an 'or' in the guard"
+            </span>),
         }
     }
 
@@ -2200,7 +2232,10 @@
             }
             ir::Control::Static(sc) =&gt; {
                 <span class="kw">let </span>ir::StaticControl::Enable(s) = sc <span class="kw">else </span>{
-                    <span class="macro">unreachable!</span>(<span class="string">"Non-Enable Static Control should have been compiled away. Run {} to do this"</span>, <span class="kw">crate</span>::passes::StaticInliner::name());
+                    <span class="macro">unreachable!</span>(
+                        <span class="string">"Non-Enable Static Control should have been compiled away. Run {} to do this"</span>,
+                        <span class="kw">crate</span>::passes::StaticInliner::name()
+                    );
                 };
                 <span class="macro">vec!</span>[s.group.borrow().name()]
             }
@@ -2219,32 +2254,45 @@
         comp_sig: RRC&lt;ir::Cell&gt;,
     ) -&gt; ir::Guard&lt;ir::Nothing&gt; {
         <span class="kw">match </span>guard {
-        ir::Guard::Or(l, r) =&gt; {
-            <span class="kw">let </span>left =
-                <span class="self">Self</span>::make_guard_dyn_one_cycle_static_comp(<span class="kw-2">*</span>l, Rc::clone(<span class="kw-2">&amp;</span>comp_sig));
-            <span class="kw">let </span>right = <span class="self">Self</span>::make_guard_dyn_one_cycle_static_comp(<span class="kw-2">*</span>r, Rc::clone(<span class="kw-2">&amp;</span>comp_sig));
-            ir::Guard::or(left, right)
-        }
-        ir::Guard::And(l, r) =&gt; {
-            <span class="kw">let </span>left = <span class="self">Self</span>::make_guard_dyn_one_cycle_static_comp(<span class="kw-2">*</span>l, Rc::clone(<span class="kw-2">&amp;</span>comp_sig));
-            <span class="kw">let </span>right = <span class="self">Self</span>::make_guard_dyn_one_cycle_static_comp(<span class="kw-2">*</span>r, Rc::clone(<span class="kw-2">&amp;</span>comp_sig));
-            ir::Guard::and(left, right)
-        }
-        ir::Guard::Not(g) =&gt; {
-            <span class="kw">let </span>f = <span class="self">Self</span>::make_guard_dyn_one_cycle_static_comp(<span class="kw-2">*</span>g, Rc::clone(<span class="kw-2">&amp;</span>comp_sig));
-            ir::Guard::Not(Box::new(f))
-        }
-        ir::Guard::Info(t) =&gt; {
-            <span class="kw">match </span>t.get_interval() {
-                (<span class="number">0</span>, <span class="number">1</span>) =&gt; <span class="macro">guard!</span>(comp_sig[<span class="string">"go"</span>]),
-                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"This function is implemented for 1 cycle static components, only %0 can exist as timing guard"</span>),
-
+            ir::Guard::Or(l, r) =&gt; {
+                <span class="kw">let </span>left = <span class="self">Self</span>::make_guard_dyn_one_cycle_static_comp(
+                    <span class="kw-2">*</span>l,
+                    Rc::clone(<span class="kw-2">&amp;</span>comp_sig),
+                );
+                <span class="kw">let </span>right = <span class="self">Self</span>::make_guard_dyn_one_cycle_static_comp(
+                    <span class="kw-2">*</span>r,
+                    Rc::clone(<span class="kw-2">&amp;</span>comp_sig),
+                );
+                ir::Guard::or(left, right)
             }
+            ir::Guard::And(l, r) =&gt; {
+                <span class="kw">let </span>left = <span class="self">Self</span>::make_guard_dyn_one_cycle_static_comp(
+                    <span class="kw-2">*</span>l,
+                    Rc::clone(<span class="kw-2">&amp;</span>comp_sig),
+                );
+                <span class="kw">let </span>right = <span class="self">Self</span>::make_guard_dyn_one_cycle_static_comp(
+                    <span class="kw-2">*</span>r,
+                    Rc::clone(<span class="kw-2">&amp;</span>comp_sig),
+                );
+                ir::Guard::and(left, right)
+            }
+            ir::Guard::Not(g) =&gt; {
+                <span class="kw">let </span>f = <span class="self">Self</span>::make_guard_dyn_one_cycle_static_comp(
+                    <span class="kw-2">*</span>g,
+                    Rc::clone(<span class="kw-2">&amp;</span>comp_sig),
+                );
+                ir::Guard::Not(Box::new(f))
+            }
+            ir::Guard::Info(t) =&gt; <span class="kw">match </span>t.get_interval() {
+                (<span class="number">0</span>, <span class="number">1</span>) =&gt; <span class="macro">guard!</span>(comp_sig[<span class="string">"go"</span>]),
+                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(
+                    <span class="string">"This function is implemented for 1 cycle static components, only %0 can exist as timing guard"
+                </span>),
+            },
+            ir::Guard::CompOp(op, l, r) =&gt; ir::Guard::CompOp(op, l, r),
+            ir::Guard::Port(p) =&gt; ir::Guard::Port(p),
+            ir::Guard::True =&gt; ir::Guard::True,
         }
-        ir::Guard::CompOp(op, l, r) =&gt; ir::Guard::CompOp(op, l, r),
-        ir::Guard::Port(p) =&gt; ir::Guard::Port(p),
-        ir::Guard::True =&gt; ir::Guard::True,
-    }
     }
 
     <span class="comment">// Used for assignments in a one cycle static component.
@@ -2538,7 +2586,12 @@
                 ir::Control::Static(ir::StaticControl::Enable(sen)) =&gt; {
                     <span class="prelude-val">Some</span>(sen.group.borrow().name())
                 }
-                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(<span class="string">"Non-Enable Static Control should have been compiled away. Run {} to do this"</span>, <span class="kw">crate</span>::passes::StaticInliner::name()))),
+                <span class="kw">_ </span>=&gt; {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
+                        <span class="string">"Non-Enable Static Control should have been compiled away. Run {} to do this"</span>,
+                        <span class="kw">crate</span>::passes::StaticInliner::name()
+                    )));
+                }
             }
         } <span class="kw">else </span>{
             <span class="prelude-val">None
@@ -2621,7 +2674,10 @@
         <span class="comment">// Assume that there are only static enables left.
         // If there are any other type of static control, then error out.
         </span><span class="kw">let </span>ir::StaticControl::Enable(s) = sc <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(<span class="string">"Non-Enable Static Control should have been compiled away. Run {} to do this"</span>, <span class="kw">crate</span>::passes::StaticInliner::name())));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
+                <span class="string">"Non-Enable Static Control should have been compiled away. Run {} to do this"</span>,
+                <span class="kw">crate</span>::passes::StaticInliner::name()
+            )));
         };
 
         <span class="kw">let </span>sgroup = s.group.borrow_mut();

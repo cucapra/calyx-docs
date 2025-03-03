@@ -223,9 +223,11 @@
 <a href="#222" id="222">222</a>
 <a href="#223" id="223">223</a>
 <a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use crate</span>::{analysis::GraphAnalysis, passes::TopDownCompileControl};
-<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, structure, LibrarySignatures, RRC};
+<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures, RRC, structure};
 <span class="kw">use </span>calyx_utils::Error;
 <span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>std::{collections::HashMap, rc::Rc};
@@ -330,11 +332,13 @@
         </span><span class="kw">let </span>top_level = <span class="kw">match </span><span class="kw-2">&amp;*</span>comp.control.borrow() {
             ir::Control::Empty(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Stop),
             ir::Control::Enable(en) =&gt; Rc::clone(<span class="kw-2">&amp;</span>en.group),
-            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="macro">format!</span>(
                     <span class="string">"{}: Control shoudl be a single enable. Try running `{}` before inlining."</span>,
                     <span class="self">Self</span>::name(),
-                    TopDownCompileControl::name()))
-            )
+                    TopDownCompileControl::name()
+                )));
+            }
         };
 
         <span class="kw">let </span>this_comp = Rc::clone(<span class="kw-2">&amp;</span>comp.signature);

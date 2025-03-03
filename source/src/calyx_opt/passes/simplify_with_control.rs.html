@@ -261,9 +261,11 @@
 <a href="#260" id="260">260</a>
 <a href="#261" id="261">261</a>
 <a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
-<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, structure, GetAttributes, LibrarySignatures, RRC};
+<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes, LibrarySignatures, RRC, structure};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
@@ -516,8 +518,10 @@
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
         <span class="kw">if </span>comp.is_static() {
-            <span class="kw">let </span>msg =
-                <span class="macro">format!</span>(<span class="string">"Static Component {} has combinational groups which is not supported"</span>, comp.name);
+            <span class="kw">let </span>msg = <span class="macro">format!</span>(
+                <span class="string">"Static Component {} has combinational groups which is not supported"</span>,
+                comp.name
+            );
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::pass_assumption(<span class="self">Self</span>::name(), msg)
                 .with_pos(<span class="kw-2">&amp;</span>comp.attributes));
         }

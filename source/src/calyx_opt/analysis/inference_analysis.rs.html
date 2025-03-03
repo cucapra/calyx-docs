@@ -589,8 +589,9 @@
 <a href="#588" id="588">588</a>
 <a href="#589" id="589">589</a>
 <a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::AssignmentAnalysis;
-<span class="kw">use </span><span class="kw">crate</span>::analysis::{compute_static::WithStatic, GraphAnalysis};
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::AssignmentAnalysis;
+<span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphAnalysis, compute_static::WithStatic};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes, RRC};
 <span class="kw">use </span>ir::CellType;
 <span class="kw">use </span>itertools::Itertools;
@@ -622,11 +623,7 @@
     <span class="doccomment">/// Returns the latency associated with the provided @go port if present
     </span><span class="kw">pub fn </span>get_latency(<span class="kw-2">&amp;</span><span class="self">self</span>, go_port: <span class="kw-2">&amp;</span>ir::Id) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
         <span class="self">self</span>.ports.iter().find_map(|(go, <span class="kw">_</span>, lat)| {
-            <span class="kw">if </span>go == go_port {
-                <span class="prelude-val">Some</span>(<span class="kw-2">*</span>lat)
-            } <span class="kw">else </span>{
-                <span class="prelude-val">None
-            </span>}
+            <span class="kw">if </span>go == go_port { <span class="prelude-val">Some</span>(<span class="kw-2">*</span>lat) } <span class="kw">else </span>{ <span class="prelude-val">None </span>}
         })
     }
 
@@ -924,46 +921,51 @@
     </span><span class="kw">fn </span>contains_dyn_writes(<span class="kw-2">&amp;</span><span class="self">self</span>, graph: <span class="kw-2">&amp;</span>GraphAnalysis) -&gt; bool {
         <span class="kw">for </span>port <span class="kw">in </span><span class="kw-2">&amp;</span>graph.ports() {
             <span class="kw">match </span><span class="kw-2">&amp;</span>port.borrow().parent {
-              ir::PortParent::Cell(cell_wrf) =&gt; {
-                  <span class="kw">let </span>cr = cell_wrf.upgrade();
-                  <span class="kw">let </span>cell = cr.borrow();
-                  <span class="kw">if let </span><span class="prelude-val">Some</span>(ports) =
-                      cell.type_name().and_then(|c| <span class="self">self</span>.latency_data.get(<span class="kw-2">&amp;</span>c))
-                  {
-                      <span class="kw">let </span>name = <span class="kw-2">&amp;</span>port.borrow().name;
-                      <span class="kw">if </span>ports.is_go(name) {
-                          <span class="kw">for </span>write_port <span class="kw">in </span>graph.writes_to(<span class="kw-2">&amp;</span>port.borrow()) {
-                              <span class="kw">if </span>!<span class="self">self
-                                  </span>.is_done_port_or_const(<span class="kw-2">&amp;</span>write_port.borrow())
-                              {
-                                  <span class="macro">log::debug!</span>(
-                                      <span class="string">"`{}` is not a done port"</span>,
-                                      write_port.borrow().canonical(),
-                                  );
-                                  <span class="kw">return </span><span class="bool-val">true</span>;
-                              }
-                          }
-                      }
-                  }
-              }
-              ir::PortParent::Group(<span class="kw">_</span>) =&gt; {
-                  <span class="kw">if </span>port.borrow().name == <span class="string">"done" </span>{
-                      <span class="kw">for </span>write_port <span class="kw">in </span>graph.writes_to(<span class="kw-2">&amp;</span>port.borrow()) {
-                          <span class="kw">if </span>!<span class="self">self</span>.is_done_port_or_const(<span class="kw-2">&amp;</span>write_port.borrow())
-                          {
-                              <span class="macro">log::debug!</span>(
-                                  <span class="string">"`{}` is not a done port"</span>,
-                                  write_port.borrow().canonical(),
-                              );
-                              <span class="kw">return </span><span class="bool-val">true</span>;
-                          }
-                      }
-                  }
-              }
+                ir::PortParent::Cell(cell_wrf) =&gt; {
+                    <span class="kw">let </span>cr = cell_wrf.upgrade();
+                    <span class="kw">let </span>cell = cr.borrow();
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(ports) =
+                        cell.type_name().and_then(|c| <span class="self">self</span>.latency_data.get(<span class="kw-2">&amp;</span>c))
+                    {
+                        <span class="kw">let </span>name = <span class="kw-2">&amp;</span>port.borrow().name;
+                        <span class="kw">if </span>ports.is_go(name) {
+                            <span class="kw">for </span>write_port <span class="kw">in </span>graph.writes_to(<span class="kw-2">&amp;</span>port.borrow()) {
+                                <span class="kw">if </span>!<span class="self">self
+                                    </span>.is_done_port_or_const(<span class="kw-2">&amp;</span>write_port.borrow())
+                                {
+                                    <span class="macro">log::debug!</span>(
+                                        <span class="string">"`{}` is not a done port"</span>,
+                                        write_port.borrow().canonical(),
+                                    );
+                                    <span class="kw">return </span><span class="bool-val">true</span>;
+                                }
+                            }
+                        }
+                    }
+                }
+                ir::PortParent::Group(<span class="kw">_</span>) =&gt; {
+                    <span class="kw">if </span>port.borrow().name == <span class="string">"done" </span>{
+                        <span class="kw">for </span>write_port <span class="kw">in </span>graph.writes_to(<span class="kw-2">&amp;</span>port.borrow()) {
+                            <span class="kw">if </span>!<span class="self">self</span>.is_done_port_or_const(<span class="kw-2">&amp;</span>write_port.borrow())
+                            {
+                                <span class="macro">log::debug!</span>(
+                                    <span class="string">"`{}` is not a done port"</span>,
+                                    write_port.borrow().canonical(),
+                                );
+                                <span class="kw">return </span><span class="bool-val">true</span>;
+                            }
+                        }
+                    }
+                }
 
-              ir::PortParent::StaticGroup(<span class="kw">_</span>) =&gt; <span class="comment">// done ports of static groups should clearly NOT have static latencies
-              </span><span class="macro">panic!</span>(<span class="string">"Have not decided how to handle static groups in infer-static-timing"</span>),
-          }
+                ir::PortParent::StaticGroup(<span class="kw">_</span>) =&gt;
+                <span class="comment">// done ports of static groups should clearly NOT have static latencies
+                </span>{
+                    <span class="macro">panic!</span>(
+                        <span class="string">"Have not decided how to handle static groups in infer-static-timing"
+                    </span>)
+                }
+            }
         }
         <span class="bool-val">false
     </span>}

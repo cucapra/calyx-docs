@@ -315,7 +315,13 @@
 <a href="#314" id="314">314</a>
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{<span class="self">self</span>, AssignmentAnalysis};
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{<span class="self">self</span>, AssignmentAnalysis};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, DiagnosticContext, DiagnosticPass, Named,
     VisResult, Visitor,
@@ -507,7 +513,12 @@
                 {
                     <span class="comment">// If the cell is combinational and not driven by continuous assignments
                     </span><span class="kw">if </span><span class="kw-2">*</span>is_comb &amp;&amp; !<span class="self">self</span>.cont_cells.contains(<span class="kw-2">&amp;</span>cell.name()) {
-                        <span class="kw">let </span>msg = <span class="macro">format!</span>(<span class="string">"Port `{}.{}` is an output port on combinational primitive `{}` and will always output 0. Add a `with` statement to the `while` statement to ensure it has a valid value during execution."</span>, cell.name(), port.name, prim_name);
+                        <span class="kw">let </span>msg = <span class="macro">format!</span>(
+                            <span class="string">"Port `{}.{}` is an output port on combinational primitive `{}` and will always output 0. Add a `with` statement to the `while` statement to ensure it has a valid value during execution."</span>,
+                            cell.name(),
+                            port.name,
+                            prim_name
+                        );
                         <span class="comment">// Use dummy Id to get correct source location for error
                         </span><span class="self">self</span>.diag
                             .err(Error::papercut(msg).with_pos(<span class="kw-2">&amp;</span>s.attributes));
@@ -538,7 +549,12 @@
                 {
                     <span class="comment">// If the cell is combinational and not driven by continuous assignments
                     </span><span class="kw">if </span><span class="kw-2">*</span>is_comb &amp;&amp; !<span class="self">self</span>.cont_cells.contains(<span class="kw-2">&amp;</span>cell.name()) {
-                        <span class="kw">let </span>msg = <span class="macro">format!</span>(<span class="string">"Port `{}.{}` is an output port on combinational primitive `{}` and will always output 0. Add a `with` statement to the `if` statement to ensure it has a valid value during execution."</span>, cell.name(), port.name, prim_name);
+                        <span class="kw">let </span>msg = <span class="macro">format!</span>(
+                            <span class="string">"Port `{}.{}` is an output port on combinational primitive `{}` and will always output 0. Add a `with` statement to the `if` statement to ensure it has a valid value during execution."</span>,
+                            cell.name(),
+                            port.name,
+                            prim_name
+                        );
                         <span class="comment">// Use dummy Id to get correct source location for error
                         </span><span class="self">self</span>.diag
                             .err(Error::papercut(msg).with_pos(<span class="kw-2">&amp;</span>s.attributes));
@@ -583,14 +599,12 @@
                             .sorted()
                             .map(|port| <span class="macro">format!</span>(<span class="string">"{}.{}"</span>, inst.clone(), port))
                             .join(<span class="string">", "</span>);
-                        <span class="kw">let </span>msg =
-                            <span class="macro">format!</span>(<span class="string">"Required signal not driven inside the group.\
+                        <span class="kw">let </span>msg = <span class="macro">format!</span>(
+                            <span class="string">"Required signal not driven inside the group.\
                                         \nWhen reading the port `{}.{}', the ports [{}] must be written to.\
                                         \nThe primitive type `{}' requires this invariant."</span>,
-                                    inst,
-                                    read,
-                                    missing,
-                                    comp_type);
+                            inst, read, missing, comp_type
+                        );
                         <span class="self">self</span>.diag.err(Error::papercut(msg).with_pos(pos));
                     }
                 }
@@ -618,14 +632,12 @@
                         .sorted()
                         .map(|port| <span class="macro">format!</span>(<span class="string">"{}.{}"</span>, inst, port))
                         .join(<span class="string">", "</span>);
-                    <span class="kw">let </span>msg =
-                        <span class="macro">format!</span>(<span class="string">"Required signal not driven inside the group. \
+                    <span class="kw">let </span>msg = <span class="macro">format!</span>(
+                        <span class="string">"Required signal not driven inside the group. \
                                  When writing to the port `{}.{}', the ports [{}] must also be written to. \
                                  The primitive type `{}' specifies this using a @write_together spec."</span>,
-                                inst,
-                                first,
-                                missing,
-                                comp_type);
+                        inst, first, missing, comp_type
+                    );
                     <span class="self">self</span>.diag.err(Error::papercut(msg).with_pos(pos));
                 }
             }

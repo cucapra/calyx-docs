@@ -156,7 +156,8 @@
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a></pre></div><pre class="rust"><code><span class="kw">use </span>itertools::Itertools;
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a></pre></div><pre class="rust"><code><span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>petgraph::matrix_graph::{MatrixGraph, NodeIndex, UnMatrix, Zero};
 <span class="kw">use </span>petgraph::visit::IntoEdgeReferences;
 <span class="kw">use </span>std::{collections::HashMap, fmt::Display, hash::Hash};
@@ -260,7 +261,8 @@
     </span><span class="kw">pub fn </span>add_node(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: T) {
         <span class="macro">debug_assert!</span>(
             !<span class="self">self</span>.index_map.contains_key(<span class="kw-2">&amp;</span>node),
-            <span class="string">"Attempted to add pre-existing node to WeightGraph. Client code should ensure that this never happens."</span>);
+            <span class="string">"Attempted to add pre-existing node to WeightGraph. Client code should ensure that this never happens."
+        </span>);
         <span class="kw">let </span>idx = <span class="self">self</span>.graph.add_node(());
         <span class="self">self</span>.index_map.insert(node, idx);
     }

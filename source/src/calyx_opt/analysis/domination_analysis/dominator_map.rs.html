@@ -754,12 +754,24 @@
 <a href="#753" id="753">753</a>
 <a href="#754" id="754">754</a>
 <a href="#755" id="755">755</a>
-<a href="#756" id="756">756</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
+    ControlId, ShareSet,
     domination_analysis::{
         node_analysis::{NodeReads, NodeSearch},
         static_par_domination::StaticParDomination,
     },
-    ControlId, ShareSet,
 };
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>ir::GenericControl;
@@ -1262,8 +1274,7 @@
                             <span class="string">"should not pattern match agaisnt empty in update_map()"
                         </span>)
                     }
-                    ir::Control::Invoke(<span class="kw">_</span>)
-                    | ir::Control::Enable(<span class="kw">_</span>) =&gt; {
+                    ir::Control::Invoke(<span class="kw">_</span>) | ir::Control::Enable(<span class="kw">_</span>) =&gt; {
                         <span class="self">self</span>.update_node(pred, cur_id);
                     }
                     ir::Control::Seq(ir::Seq { stmts, .. }) =&gt; {
@@ -1275,12 +1286,13 @@
                             nxt = <span class="self">self
                                 </span>.exits_map
                                 .get(<span class="kw-2">&amp;</span>id)
-                                .unwrap_or(pred
-                                    <span class="comment">// If the exits map is empty, then it means the
-                                    // current stmt is `Repeat 0`/Empty.
-                                    // So the predecessors for the nxt stmt are the
-                                    // same as the predecessors for the current stmt
-                                </span>).clone();
+                                .unwrap_or(
+                                    pred, <span class="comment">// If the exits map is empty, then it means the
+                                         // current stmt is `Repeat 0`/Empty.
+                                         // So the predecessors for the nxt stmt are the
+                                         // same as the predecessors for the current stmt
+                                </span>)
+                                .clone();
                             p = <span class="kw-2">&amp;</span>nxt;
                         }
                     }
@@ -1290,7 +1302,11 @@
                             <span class="self">self</span>.update_map(main_c, id, pred);
                         }
                     }
-                    ir::Control::Repeat(ir::Repeat { body, num_repeats, .. }) =&gt; {
+                    ir::Control::Repeat(ir::Repeat {
+                        body,
+                        num_repeats,
+                        ..
+                    }) =&gt; {
                         <span class="kw">if </span><span class="kw-2">*</span>num_repeats != <span class="number">0 </span>{
                             <span class="kw">let </span>body_id = get_id::&lt;<span class="bool-val">true</span>&gt;(body);
                             <span class="self">self</span>.update_map(main_c, body_id, pred);
@@ -1335,7 +1351,9 @@
                             ControlId::get_guaranteed_attribute(c, END_ID);
                         <span class="self">self</span>.update_node(<span class="kw-2">&amp;</span>if_guard_set, end_id)
                     }
-                    ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">"when matching c in GenericControl::Dynamic(c), c shouldn't be Static Control"</span>)
+                    ir::Control::Static(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(
+                        <span class="string">"when matching c in GenericControl::Dynamic(c), c shouldn't be Static Control"
+                    </span>),
                 };
             }
             <span class="prelude-val">Some</span>(GenericControl::Static(sc)) =&gt; {
@@ -1368,10 +1386,12 @@
                     <span class="kw">match </span><span class="self">Self</span>::get_static_control(id, stmt) {
                         <span class="prelude-val">None </span>=&gt; (),
                         <span class="prelude-val">Some</span>(GenericControl::Dynamic(<span class="kw">_</span>)) =&gt; {
-                            <span class="macro">unreachable!</span>(<span class="string">"Got a GenericControl::Dynamic when we called get_static_control"</span>)
+                            <span class="macro">unreachable!</span>(
+                                <span class="string">"Got a GenericControl::Dynamic when we called get_static_control"
+                            </span>)
                         }
                         <span class="prelude-val">Some</span>(GenericControl::Static(sc)) =&gt; {
-                            <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc))
+                            <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc));
                         }
                     }
                 }
@@ -1382,19 +1402,23 @@
             }) =&gt; {
                 <span class="kw">match </span><span class="self">Self</span>::get_static_control(id, tbranch) {
                     <span class="prelude-val">Some</span>(GenericControl::Dynamic(<span class="kw">_</span>)) =&gt; {
-                        <span class="macro">unreachable!</span>(<span class="string">"Got a GenericControl::Dynamic when we called get_static_control"</span>)
+                        <span class="macro">unreachable!</span>(
+                            <span class="string">"Got a GenericControl::Dynamic when we called get_static_control"
+                        </span>)
                     }
                     <span class="prelude-val">Some</span>(GenericControl::Static(sc)) =&gt; {
-                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc))
+                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc));
                     }
                     <span class="prelude-val">None </span>=&gt; (),
                 }
                 <span class="kw">match </span><span class="self">Self</span>::get_static_control(id, fbranch) {
                     <span class="prelude-val">Some</span>(GenericControl::Dynamic(<span class="kw">_</span>)) =&gt; {
-                        <span class="macro">unreachable!</span>(<span class="string">"Got a GenericControl::Dynamic when we called get_static_control"</span>)
+                        <span class="macro">unreachable!</span>(
+                            <span class="string">"Got a GenericControl::Dynamic when we called get_static_control"
+                        </span>)
                     }
                     <span class="prelude-val">Some</span>(GenericControl::Static(sc)) =&gt; {
-                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc))
+                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc));
                     }
                     <span class="prelude-val">None </span>=&gt; (),
                 };
@@ -1422,10 +1446,10 @@
                     <span class="kw">match </span><span class="self">Self</span>::get_control(id, stmt) {
                         <span class="prelude-val">None </span>=&gt; (),
                         <span class="prelude-val">Some</span>(GenericControl::Dynamic(c)) =&gt; {
-                            <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(c))
+                            <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(c));
                         }
                         <span class="prelude-val">Some</span>(GenericControl::Static(sc)) =&gt; {
-                            <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc))
+                            <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc));
                         }
                     }
                 }
@@ -1439,19 +1463,19 @@
             }) =&gt; {
                 <span class="kw">match </span><span class="self">Self</span>::get_control(id, tbranch) {
                     <span class="prelude-val">Some</span>(GenericControl::Dynamic(c)) =&gt; {
-                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(c))
+                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(c));
                     }
                     <span class="prelude-val">Some</span>(GenericControl::Static(sc)) =&gt; {
-                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc))
+                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc));
                     }
                     <span class="prelude-val">None </span>=&gt; (),
                 }
                 <span class="kw">match </span><span class="self">Self</span>::get_control(id, fbranch) {
                     <span class="prelude-val">Some</span>(GenericControl::Dynamic(c)) =&gt; {
-                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(c))
+                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(c));
                     }
                     <span class="prelude-val">Some</span>(GenericControl::Static(sc)) =&gt; {
-                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc))
+                        <span class="kw">return </span><span class="prelude-val">Some</span>(GenericControl::from(sc));
                     }
                     <span class="prelude-val">None </span>=&gt; (),
                 };

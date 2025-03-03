@@ -120,7 +120,10 @@
 <a href="#119" id="119">119</a>
 <a href="#120" id="120">120</a>
 <a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a></pre></div><pre class="rust"><code><span class="doccomment">//! Helpers used to examine calyx programs. Used in Xilinx and Yxi backends among others.
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a></pre></div><pre class="rust"><code><span class="doccomment">//! Helpers used to examine calyx programs. Used in Xilinx and Yxi backends among others.
 </span><span class="kw">use super</span>::{BoolAttr, Cell, Component, RRC};
 <span class="kw">use </span>calyx_utils::Id;
 <span class="attr">#[cfg(feature = <span class="string">"serialize"</span>)]
@@ -239,7 +242,10 @@
     </span>} <span class="kw">else if </span>mem_name.contains(<span class="string">"d4"</span>) {
         <span class="number">4
     </span>} <span class="kw">else </span>{
-        <span class="macro">panic!</span>(<span class="string">"Cell {} does not seem to be a memory primitive. Memory primitives are expected to have 1-4 dimensions inclusive."</span>, mem_name);
+        <span class="macro">panic!</span>(
+            <span class="string">"Cell {} does not seem to be a memory primitive. Memory primitives are expected to have 1-4 dimensions inclusive."</span>,
+            mem_name
+        );
     }
 }
 </code></pre></div></section></main></body></html>

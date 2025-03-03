@@ -1322,14 +1322,16 @@
 <a href="#1321" id="1321">1321</a>
 <a href="#1322" id="1322">1322</a>
 <a href="#1323" id="1323">1323</a>
-<a href="#1324" id="1324">1324</a></pre></div><pre class="rust"><code><span class="kw">use super</span>::{
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a></pre></div><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attributes, BackendConf, Builder, Cell, CellType, Component,
     Context, Control, Direction, GetAttributes, Guard, Id, Invoke,
-    LibrarySignatures, Port, PortDef, StaticControl, StaticInvoke,
-    RESERVED_NAMES, RRC,
+    LibrarySignatures, Port, PortDef, RESERVED_NAMES, RRC, StaticControl,
+    StaticInvoke,
 };
 <span class="kw">use crate</span>::{Nothing, PortComp, StaticTiming};
-<span class="kw">use </span>calyx_frontend::{ast, BoolAttr, NumAttr, Workspace};
+<span class="kw">use </span>calyx_frontend::{BoolAttr, NumAttr, Workspace, ast};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, GPosIdx, WithPos};
 <span class="kw">use </span>itertools::Itertools;
 
@@ -2057,7 +2059,9 @@
     {
         <span class="prelude-val">Some</span>(s) =&gt; s.get_latency(),
         <span class="prelude-val">None </span>=&gt; {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(<span class="string">"empty par block"</span>.to_string()))
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::malformed_control(
+                <span class="string">"empty par block"</span>.to_string(),
+            ));
         }
     };
     assert_latencies_eq(latency, inferred_latency);
@@ -2237,7 +2241,7 @@
         } =&gt; {
             <span class="kw">return </span>build_static_seq(
                 stmts, attributes, latency, builder, sig_ctx,
-            )
+            );
         }
         ast::Control::StaticPar {
             stmts,
@@ -2246,7 +2250,7 @@
         } =&gt; {
             <span class="kw">return </span>build_static_par(
                 stmts, attributes, latency, builder, sig_ctx,
-            )
+            );
         }
         ast::Control::StaticIf {
             port,
@@ -2257,7 +2261,7 @@
         } =&gt; {
             <span class="kw">return </span>build_static_if(
                 port, <span class="kw-2">*</span>tbranch, <span class="kw-2">*</span>fbranch, attributes, latency, builder, sig_ctx,
-            )
+            );
         }
         ast::Control::StaticRepeat {
             attributes,
@@ -2270,7 +2274,7 @@
                 builder,
                 attributes,
                 sig_ctx,
-            )
+            );
         }
         ast::Control::Par { .. }
         | ast::Control::If { .. }

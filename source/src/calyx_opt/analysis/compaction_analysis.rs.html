@@ -198,7 +198,12 @@
 <a href="#197" id="197">197</a>
 <a href="#198" id="198">198</a>
 <a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{ControlOrder, PromotionAnalysis};
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{ControlOrder, PromotionAnalysis};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>ir::GetAttributes;
 <span class="kw">use </span>itertools::Itertools;
@@ -382,7 +387,12 @@
             <span class="comment">// Double checking that we have built the static par correctly.
             </span><span class="kw">let </span>max: <span class="prelude-ty">Option</span>&lt;u64&gt; =
                 par_control_threads.iter().map(|c| c.get_latency()).max();
-            <span class="macro">assert!</span>(max.unwrap() == total_time, <span class="string">"The schedule expects latency {}. The static par that was built has latency {}"</span>, total_time, max.unwrap());
+            <span class="macro">assert!</span>(
+                max.unwrap() == total_time,
+                <span class="string">"The schedule expects latency {}. The static par that was built has latency {}"</span>,
+                total_time,
+                max.unwrap()
+            );
 
             <span class="kw">let </span><span class="kw-2">mut </span>s_par = ir::StaticControl::Par(ir::StaticPar {
                 stmts: par_control_threads,
