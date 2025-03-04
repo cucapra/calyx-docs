@@ -203,7 +203,11 @@
 <a href="#202" id="202">202</a>
 <a href="#203" id="203">203</a>
 <a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a></pre></div><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a></pre></div><pre class="rust"><code><span class="doccomment">//! Defines the default passes available to [PassManager].
 </span><span class="kw">use </span><span class="kw">crate</span>::pass_manager::PassResult;
 <span class="kw">use </span><span class="kw">crate</span>::passes::{
     AddGuard, Canonicalize, CellShare, ClkInsertion, CollapseControl, CombProp,
@@ -366,12 +370,16 @@
             pm,
             <span class="string">"profiler"</span>,
             [
+                <span class="string">"validate"</span>,
                 StaticInliner,
                 CompileStatic,
                 CompileRepeat,
                 CompileInvoke,
                 ProfilerInstrumentation,
-                <span class="string">"all"
+                <span class="string">"pre-opt"</span>,
+                <span class="string">"compile"</span>,
+                <span class="string">"post-opt"</span>,
+                <span class="string">"lower"
             </span>]
         );
 
