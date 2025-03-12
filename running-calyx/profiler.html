@@ -24,9 +24,9 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
@@ -430,6 +430,7 @@
 <p>In order to run the profiler, you need:</p>
 <ul>
 <li><a href="./fud2/index.html">fud2</a></li>
+<li>Internal tools within the Calyx repository; run <code>cargo build --all</code> to build all of them.</li>
 <li>The Python <a href="https://github.com/cirosantilli/vcdvcd"><code>vcdvcd</code> library</a>. Running <code>fud2 env init</code> should install this for you.</li>
 <li>A clone of Brendan Gregg's Flamegraph repository: <a href="https://github.com/brendangregg/FlameGraph">https://github.com/brendangregg/FlameGraph</a></li>
 </ul>
@@ -447,6 +448,7 @@ script = "/home/ayaka/projects/FlameGraph/flamegraph.pl"
 <p>If you retain the fud2 build directory with the <code>--keep</code> option or the <code>--dir</code> option, you will find additional profiler output files in <code>&lt;FUD2_BUILD_DIRECTORY&gt;/profiler-out</code>:</p>
 <ul>
 <li><code>scaled-flame.svg</code>: A scaled flame graph, where a cycle is divided between the parallel arms in execution. So, if arm A and arm B were executing on a single cycle, the flame graph would account for 0.5 cycles in arm A and 0.5 cycles in arm B.</li>
+<li><code>timeline-dump.json</code>: A JSON file in the <a href="https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview?tab=t.0#heading=h.yr4qxyxotyw">Google Trace Event Format</a>. Inputting this file into <a href="https://ui.perfetto.dev/">Perfetto UI</a> can help visualize a timeline of your Calyx/ADL program's simulation.</li>
 <li><code>aggregate.dot.png</code>: A tree summary of the execution of the program. Nodes (groups and cells) are labeled with the number of times the node was a leaf, and edges are labeled with the number of cycles that edge was activated.</li>
 <li><code>rank{i}.dot.png</code>: A tree representation of the <code>i</code>th most active stack picture. <code>rankings.csv</code> lists the specific cycles that each ranked tree was active for.</li>
 </ul>
