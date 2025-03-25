@@ -82,7 +82,10 @@
 <a href="#81" id="81">81</a>
 <a href="#82" id="82">82</a>
 <a href="#83" id="83">83</a>
-<a href="#84" id="84">84</a></pre></div><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a></pre></div><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
 <span class="kw">mod </span>clk_insertion;
@@ -92,6 +95,7 @@
 <span class="kw">mod </span>compile_repeat;
 <span class="kw">mod </span>compile_static;
 <span class="kw">mod </span>component_inliner;
+<span class="kw">mod </span>constant_port_prop;
 <span class="kw">mod </span>dead_assignment_removal;
 <span class="kw">mod </span>dead_cell_removal;
 <span class="kw">mod </span>dead_group_removal;
@@ -111,6 +115,7 @@
 <span class="kw">mod </span>static_inference;
 <span class="kw">mod </span>static_inliner;
 <span class="kw">mod </span>static_promotion;
+
 <span class="comment">// mod simplify_guards;
 </span><span class="kw">mod </span>add_guard;
 <span class="kw">mod </span>data_path_infer;
@@ -134,6 +139,7 @@
 <span class="kw">pub use </span>compile_repeat::CompileRepeat;
 <span class="kw">pub use </span>compile_static::CompileStatic;
 <span class="kw">pub use </span>component_inliner::ComponentInliner;
+<span class="kw">pub use </span>constant_port_prop::ConstantPortProp;
 <span class="kw">pub use </span>data_path_infer::DataPathInfer;
 <span class="kw">pub use </span>dead_assignment_removal::DeadAssignmentRemoval;
 <span class="kw">pub use </span>dead_cell_removal::DeadCellRemoval;
