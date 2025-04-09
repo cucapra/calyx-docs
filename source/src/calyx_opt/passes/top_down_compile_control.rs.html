@@ -1499,7 +1499,50 @@
 <a href="#1498" id="1498">1498</a>
 <a href="#1499" id="1499">1499</a>
 <a href="#1500" id="1500">1500</a>
-<a href="#1501" id="1501">1501</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
+<a href="#1501" id="1501">1501</a>
+<a href="#1502" id="1502">1502</a>
+<a href="#1503" id="1503">1503</a>
+<a href="#1504" id="1504">1504</a>
+<a href="#1505" id="1505">1505</a>
+<a href="#1506" id="1506">1506</a>
+<a href="#1507" id="1507">1507</a>
+<a href="#1508" id="1508">1508</a>
+<a href="#1509" id="1509">1509</a>
+<a href="#1510" id="1510">1510</a>
+<a href="#1511" id="1511">1511</a>
+<a href="#1512" id="1512">1512</a>
+<a href="#1513" id="1513">1513</a>
+<a href="#1514" id="1514">1514</a>
+<a href="#1515" id="1515">1515</a>
+<a href="#1516" id="1516">1516</a>
+<a href="#1517" id="1517">1517</a>
+<a href="#1518" id="1518">1518</a>
+<a href="#1519" id="1519">1519</a>
+<a href="#1520" id="1520">1520</a>
+<a href="#1521" id="1521">1521</a>
+<a href="#1522" id="1522">1522</a>
+<a href="#1523" id="1523">1523</a>
+<a href="#1524" id="1524">1524</a>
+<a href="#1525" id="1525">1525</a>
+<a href="#1526" id="1526">1526</a>
+<a href="#1527" id="1527">1527</a>
+<a href="#1528" id="1528">1528</a>
+<a href="#1529" id="1529">1529</a>
+<a href="#1530" id="1530">1530</a>
+<a href="#1531" id="1531">1531</a>
+<a href="#1532" id="1532">1532</a>
+<a href="#1533" id="1533">1533</a>
+<a href="#1534" id="1534">1534</a>
+<a href="#1535" id="1535">1535</a>
+<a href="#1536" id="1536">1536</a>
+<a href="#1537" id="1537">1537</a>
+<a href="#1538" id="1538">1538</a>
+<a href="#1539" id="1539">1539</a>
+<a href="#1540" id="1540">1540</a>
+<a href="#1541" id="1541">1541</a>
+<a href="#1542" id="1542">1542</a>
+<a href="#1543" id="1543">1543</a>
+<a href="#1544" id="1544">1544</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
 <span class="kw">use </span><span class="kw">crate</span>::passes;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
@@ -1790,6 +1833,7 @@
 </span><span class="attr">#[derive(PartialEq, Eq, Hash, Clone, Serialize)]
 </span><span class="kw">enum </span>ProfilingInfo {
     Fsm(FSMInfo),
+    Par(ParInfo),
     SingleEnable(SingleEnableInfo),
 }
 
@@ -1801,6 +1845,23 @@
     </span><span class="kw">pub </span>component: Id,
     <span class="attr">#[serde(serialize_with = <span class="string">"id_serialize_passthrough"</span>)]
     </span><span class="kw">pub </span>group: Id,
+}
+
+<span class="attr">#[derive(PartialEq, Eq, Hash, Clone, Serialize)]
+</span><span class="kw">struct </span>ParInfo {
+    <span class="attr">#[serde(serialize_with = <span class="string">"id_serialize_passthrough"</span>)]
+    </span><span class="kw">pub </span>component: Id,
+    <span class="attr">#[serde(serialize_with = <span class="string">"id_serialize_passthrough"</span>)]
+    </span><span class="kw">pub </span>par_group: Id,
+    <span class="kw">pub </span>child_groups: Vec&lt;ParChildInfo&gt;,
+}
+
+<span class="attr">#[derive(PartialEq, Eq, Hash, Clone, Serialize)]
+</span><span class="kw">struct </span>ParChildInfo {
+    <span class="attr">#[serde(serialize_with = <span class="string">"id_serialize_passthrough"</span>)]
+    </span><span class="kw">pub </span>group: Id,
+    <span class="attr">#[serde(serialize_with = <span class="string">"id_serialize_passthrough"</span>)]
+    </span><span class="kw">pub </span>register: Id,
 }
 
 <span class="doccomment">/// Information to be serialized for a single FSM
@@ -2635,8 +2696,8 @@
     </span>dump_fsm_json: <span class="prelude-ty">Option</span>&lt;OutputFile&gt;,
     <span class="doccomment">/// Enable early transitions
     </span>early_transitions: bool,
-    <span class="doccomment">/// Bookkeeping for FSM ids for groups across all FSMs in the program
-    </span>fsm_groups: HashSet&lt;ProfilingInfo&gt;,
+    <span class="doccomment">/// Profiling: Bookkeeping for TDCC-generated register/group information (FSMs, par groups)
+    </span>profiling_info: HashSet&lt;ProfilingInfo&gt;,
     <span class="doccomment">/// How many states the dynamic FSM must have before picking binary over one-hot
     </span>one_hot_cutoff: u64,
     <span class="doccomment">/// Number of states the dynamic FSM must have before picking duplicate over single register
@@ -2684,7 +2745,7 @@
             dump_fsm: opts[<span class="kw-2">&amp;</span><span class="string">"dump-fsm"</span>].bool(),
             dump_fsm_json: opts[<span class="kw-2">&amp;</span><span class="string">"dump-fsm-json"</span>].not_null_outstream(),
             early_transitions: opts[<span class="kw-2">&amp;</span><span class="string">"early-transitions"</span>].bool(),
-            fsm_groups: HashSet::new(),
+            profiling_info: HashSet::new(),
             one_hot_cutoff: opts[<span class="kw-2">&amp;</span><span class="string">"one-hot-cutoff"</span>]
                 .pos_num()
                 .expect(<span class="string">"requires non-negative OHE cutoff parameter"</span>),
@@ -2771,7 +2832,7 @@
             <span class="kw">if let </span><span class="prelude-val">Some</span>(enable_info) =
                 extract_single_enable(<span class="kw-2">&amp;mut </span>con, comp.name)
             {
-                <span class="self">self</span>.fsm_groups
+                <span class="self">self</span>.profiling_info
                     .insert(ProfilingInfo::SingleEnable(enable_info));
             }
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Stop);
@@ -2799,8 +2860,11 @@
         <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>s.attributes);
 
         <span class="comment">// Compile schedule and return the group.
-        </span><span class="kw">let </span>seq_group =
-            sch.realize_schedule(<span class="self">self</span>.dump_fsm, <span class="kw-2">&amp;mut </span><span class="self">self</span>.fsm_groups, fsm_impl);
+        </span><span class="kw">let </span>seq_group = sch.realize_schedule(
+            <span class="self">self</span>.dump_fsm,
+            <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
+            fsm_impl,
+        );
 
         <span class="comment">// Add NODE_ID to compiled group.
         </span><span class="kw">let </span><span class="kw-2">mut </span>en = ir::Control::enable(seq_group);
@@ -2827,8 +2891,11 @@
         <span class="comment">// Compile schedule and return the group.
         </span>sch.calculate_states_if(i, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
         <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>i.attributes);
-        <span class="kw">let </span>if_group =
-            sch.realize_schedule(<span class="self">self</span>.dump_fsm, <span class="kw-2">&amp;mut </span><span class="self">self</span>.fsm_groups, fsm_impl);
+        <span class="kw">let </span>if_group = sch.realize_schedule(
+            <span class="self">self</span>.dump_fsm,
+            <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
+            fsm_impl,
+        );
 
         <span class="comment">// Add NODE_ID to compiled group.
         </span><span class="kw">let </span><span class="kw-2">mut </span>en = ir::Control::enable(if_group);
@@ -2855,8 +2922,11 @@
         <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>w.attributes);
 
         <span class="comment">// Compile schedule and return the group.
-        </span><span class="kw">let </span>if_group =
-            sch.realize_schedule(<span class="self">self</span>.dump_fsm, <span class="kw-2">&amp;mut </span><span class="self">self</span>.fsm_groups, fsm_impl);
+        </span><span class="kw">let </span>if_group = sch.realize_schedule(
+            <span class="self">self</span>.dump_fsm,
+            <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
+            fsm_impl,
+        );
 
         <span class="comment">// Add NODE_ID to compiled group.
         </span><span class="kw">let </span><span class="kw-2">mut </span>en = ir::Control::enable(if_group);
@@ -2887,12 +2957,15 @@
         <span class="comment">// Registers to save the done signal from each child.
         </span><span class="kw">let </span><span class="kw-2">mut </span>done_regs = Vec::with_capacity(s.stmts.len());
 
+        <span class="comment">// Profiling: record each par child (arm)'s group and done register
+        </span><span class="kw">let </span><span class="kw-2">mut </span>child_infos = Vec::with_capacity(s.stmts.len());
+
         <span class="comment">// For each child, build the enabling logic.
         </span><span class="kw">for </span>con <span class="kw">in </span><span class="kw-2">&amp;</span>s.stmts {
             <span class="kw">let </span>group = <span class="kw">match </span>con {
                 <span class="comment">// Do not compile enables
                 </span>ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
-                    <span class="self">self</span>.fsm_groups.insert(ProfilingInfo::SingleEnable(
+                    <span class="self">self</span>.profiling_info.insert(ProfilingInfo::SingleEnable(
                         SingleEnableInfo {
                             group: group.borrow().name(),
                             component: builder.component.name,
@@ -2907,7 +2980,7 @@
                     <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>s.attributes);
                     sch.realize_schedule(
                         <span class="self">self</span>.dump_fsm,
-                        <span class="kw-2">&amp;mut </span><span class="self">self</span>.fsm_groups,
+                        <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
                         fsm_impl,
                     )
                 }
@@ -2927,8 +3000,18 @@
                 pd[<span class="string">"write_en"</span>] = group_done <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
             );
             par_group.borrow_mut().assignments.extend(assigns);
-            done_regs.push(pd)
+            child_infos.push(ParChildInfo {
+                group: group.borrow().name(),
+                register: pd.borrow().name(),
+            });
+            done_regs.push(pd);
         }
+        <span class="comment">// Profiling: save collected information about this par
+        </span><span class="self">self</span>.profiling_info.insert(ProfilingInfo::Par(ParInfo {
+            component: builder.component.name,
+            par_group: par_group.borrow().name(),
+            child_groups: child_infos,
+        }));
 
         <span class="comment">// Done condition for this group
         </span><span class="kw">let </span>done_guard = done_regs
@@ -2983,8 +3066,11 @@
         <span class="comment">// Add assignments for the final states
         </span>sch.calculate_states(<span class="kw-2">&amp;</span>control.borrow(), <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
         <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>attrs);
-        <span class="kw">let </span>comp_group =
-            sch.realize_schedule(<span class="self">self</span>.dump_fsm, <span class="kw-2">&amp;mut </span><span class="self">self</span>.fsm_groups, fsm_impl);
+        <span class="kw">let </span>comp_group = sch.realize_schedule(
+            <span class="self">self</span>.dump_fsm,
+            <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
+            fsm_impl,
+        );
 
         <span class="prelude-val">Ok</span>(Action::change(ir::Control::enable(comp_group)))
     }
@@ -2994,7 +3080,7 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(json_out_file) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.dump_fsm_json {
             <span class="kw">let _ </span>= serde_json::to_writer_pretty(
                 json_out_file.get_write(),
-                <span class="kw-2">&amp;</span><span class="self">self</span>.fsm_groups,
+                <span class="kw-2">&amp;</span><span class="self">self</span>.profiling_info,
             );
         }
         <span class="prelude-val">Ok</span>(Action::Continue)
