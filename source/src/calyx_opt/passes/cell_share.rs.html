@@ -468,19 +468,76 @@
 <a href="#467" id="467">467</a>
 <a href="#468" id="468">468</a>
 <a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
+<a href="#504" id="504">504</a>
+<a href="#505" id="505">505</a>
+<a href="#506" id="506">506</a>
+<a href="#507" id="507">507</a>
+<a href="#508" id="508">508</a>
+<a href="#509" id="509">509</a>
+<a href="#510" id="510">510</a>
+<a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     AssignmentAnalysis, GraphColoring, LiveRangeAnalysis, ShareSet,
     StaticParTiming,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
 };
-<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
+<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, Id};
 <span class="kw">use </span>calyx_ir::{BoolAttr, rewriter};
 <span class="kw">use </span>calyx_utils::{CalyxResult, OutputFile};
 <span class="kw">use </span>itertools::Itertools;
+<span class="kw">use </span>serde::Serialize;
 <span class="kw">use </span>serde_json::{Value, json};
-<span class="kw">use </span>std::collections::{HashMap, HashSet};
+<span class="kw">use </span>std::collections::{BTreeMap, HashMap, HashSet};
 
 <span class="comment">// function to turn cell types to string when we are building the json for
 // share_freqs
@@ -503,6 +560,22 @@
             <span class="macro">format!</span>(<span class="string">"Const_{val}_{width}"</span>)
         }
     }
+}
+
+<span class="attr">#[derive(PartialEq, Eq, Hash, Clone, Serialize)]
+</span><span class="kw">struct </span>ShareEntry {
+    <span class="attr">#[serde(serialize_with = <span class="string">"id_serialize_passthrough"</span>)]
+    </span>original: Id, <span class="comment">// cell to be replaced
+    </span><span class="attr">#[serde(serialize_with = <span class="string">"id_serialize_passthrough"</span>)]
+    </span>new: Id, <span class="comment">// replacement cell (shared)
+    </span>cell_type: String,
+}
+
+<span class="kw">fn </span>id_serialize_passthrough&lt;S&gt;(id: <span class="kw-2">&amp;</span>Id, ser: S) -&gt; <span class="prelude-ty">Result</span>&lt;S::Ok, S::Error&gt;
+<span class="kw">where
+    </span>S: serde::Serializer,
+{
+    id.to_string().serialize(ser)
 }
 
 <span class="doccomment">/// Given a [LiveRangeAnalysis] that specifies the "share" and "state_share" cells
@@ -590,6 +663,11 @@
     <span class="doccomment">/// whether or not to print the share_freqs
     </span>print_share_freqs: <span class="prelude-ty">Option</span>&lt;OutputFile&gt;,
     print_par_timing: <span class="prelude-ty">Option</span>&lt;OutputFile&gt;,
+
+    <span class="doccomment">/// whether or not to print the share mappings
+    </span>emit_share_map: <span class="prelude-ty">Option</span>&lt;OutputFile&gt;,
+    <span class="doccomment">/// Bookkeeping for share mappings, using a BTreeMap for output determinism.
+    </span>shared_cells: BTreeMap&lt;String, Vec&lt;ShareEntry&gt;&gt;,
 }
 
 <span class="kw">impl </span>Named <span class="kw">for </span>CellShare {
@@ -605,6 +683,12 @@
             PassOpt::new(
                 <span class="string">"print-share-freqs"</span>,
                 <span class="string">"print sharing frequencies"</span>,
+                ParseVal::OutStream(OutputFile::Null),
+                PassOpt::parse_outstream,
+            ),
+            PassOpt::new(
+                <span class="string">"emit-share-map"</span>,
+                <span class="string">"emit json file of shared cells"</span>,
                 ParseVal::OutStream(OutputFile::Null),
                 PassOpt::parse_outstream,
             ),
@@ -649,6 +733,8 @@
             bounds: opts[<span class="string">"bounds"</span>].num_list_exact::&lt;<span class="number">3</span>&gt;(),
             print_par_timing: opts[<span class="string">"print-par-timing"</span>].not_null_outstream(),
             print_share_freqs: opts[<span class="string">"print-share-freqs"</span>].not_null_outstream(),
+            emit_share_map: opts[<span class="string">"emit-share-map"</span>].not_null_outstream(),
+            shared_cells: BTreeMap::new(),
         })
     }
 
@@ -780,6 +866,9 @@
                 .or_default()
                 .push(cell.borrow().name());
         }
+
+        <span class="comment">// List of cell maps
+        </span><span class="kw">let </span><span class="kw-2">mut </span>cell_map_list = Vec::new();
 
         <span class="comment">// Maps cell type to conflict graph (will be used to perform coloring)
         </span><span class="kw">let </span><span class="kw-2">mut </span>graphs_by_type: HashMap&lt;ir::CellType, GraphColoring&lt;ir::Id&gt;&gt; =
@@ -920,6 +1009,18 @@
             </span><span class="self">self</span>.print_share_json();
         }
 
+        <span class="kw">for </span>(id, cell_ref) <span class="kw">in </span>coloring.iter() {
+            cell_map_list.push(ShareEntry {
+                original: <span class="kw-2">*</span>id,
+                new: cell_ref.borrow().name(),
+                cell_type: cell_type_to_string(<span class="kw-2">&amp;</span>cell_ref.borrow().prototype),
+            });
+        }
+        <span class="comment">// sort entries by original cell name to avoid output nondeterminism
+        </span>cell_map_list.sort_by(|c1, c2| c1.original.cmp(<span class="kw-2">&amp;</span>c2.original));
+        <span class="self">self</span>.shared_cells
+            .insert(comp.name.to_string(), cell_map_list);
+
         <span class="comment">// Rewrite assignments using the coloring generated.
         </span><span class="kw">let </span>rewriter = ir::Rewriter {
             cell_map: coloring,
@@ -935,6 +1036,17 @@
         <span class="comment">// Rewrite control uses of ports
         </span>rewriter.rewrite_control(<span class="kw-2">&amp;mut </span>comp.control.borrow_mut());
 
+        <span class="prelude-val">Ok</span>(Action::Stop)
+    }
+
+    <span class="doccomment">/// If requested, emit share map json after all components are processed
+    </span><span class="kw">fn </span>finish_context(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _ctx: <span class="kw-2">&amp;mut </span>calyx_ir::Context) -&gt; VisResult {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(json_out_file) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.emit_share_map {
+            <span class="kw">let _ </span>= serde_json::to_writer_pretty(
+                json_out_file.get_write(),
+                <span class="kw-2">&amp;</span><span class="self">self</span>.shared_cells,
+            );
+        }
         <span class="prelude-val">Ok</span>(Action::Stop)
     }
 }
