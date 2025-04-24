@@ -607,7 +607,21 @@
 <a href="#606" id="606">606</a>
 <a href="#607" id="607">607</a>
 <a href="#608" id="608">608</a>
-<a href="#609" id="609">609</a></pre></div><pre class="rust"><code><span class="doccomment">//! Implements a visitor for `ir::Control` programs.
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a></pre></div><pre class="rust"><code><span class="doccomment">//! Implements a visitor for `ir::Control` programs.
 //! Program passes implemented as the Visitor are directly invoked on
 //! [`ir::Context`] to compile every [`ir::Component`] using the pass.
 </span><span class="kw">use </span><span class="kw">super</span>::action::{Action, VisResult};
@@ -902,6 +916,17 @@
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 
+    <span class="doccomment">/// Executed at an [ir::FSMEnable] node.
+    </span><span class="kw">fn </span>fsm_enable(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        _s: <span class="kw-2">&amp;mut </span>ir::FSMEnable,
+        _comp: <span class="kw-2">&amp;mut </span>Component,
+        _sigs: <span class="kw-2">&amp;</span>LibrarySignatures,
+        _comps: <span class="kw-2">&amp;</span>[ir::Component],
+    ) -&gt; VisResult {
+        <span class="prelude-val">Ok</span>(Action::Continue)
+    }
+
     <span class="doccomment">/// Executed at an [ir::StaticEnable] node.
     </span><span class="kw">fn </span>static_enable(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1100,6 +1125,9 @@
                 })<span class="question-mark">?</span>,
             Control::Enable(ctrl) =&gt; {
                 visitor.enable(ctrl, component, sigs, comps)<span class="question-mark">?
+            </span>}
+            Control::FSMEnable(ctrl) =&gt; {
+                visitor.fsm_enable(ctrl, component, sigs, comps)<span class="question-mark">?
             </span>}
             Control::Static(sctrl) =&gt; visitor
                 .start_static_control(sctrl, component, sigs, comps)<span class="question-mark">?

@@ -89,9 +89,9 @@
 <span class="kw">pub use </span>component::{Component, IdList};
 <span class="kw">pub use </span>context::{BackendConf, Context};
 <span class="kw">pub use </span>control::{
-    Cloner, Control, Empty, Enable, GenericControl, If, Invoke, Par, Repeat,
-    Seq, StaticControl, StaticEnable, StaticIf, StaticInvoke, StaticPar,
-    StaticRepeat, StaticSeq, While,
+    Cloner, Control, Empty, Enable, FSMEnable, GenericControl, If, Invoke, Par,
+    Repeat, Seq, StaticControl, StaticEnable, StaticIf, StaticInvoke,
+    StaticPar, StaticRepeat, StaticSeq, While,
 };
 <span class="kw">pub use </span>flat_guard::{FlatGuard, GuardPool, GuardRef};
 <span class="kw">pub use </span>guard::{Guard, Nothing, PortComp, StaticTiming};
@@ -99,8 +99,8 @@
 <span class="kw">pub use </span>reserved_names::RESERVED_NAMES;
 <span class="kw">pub use </span>rewriter::Rewriter;
 <span class="kw">pub use </span>structure::{
-    Assignment, Binding, Canonical, Cell, CellType, CombGroup, Group, Port,
-    PortIterator, PortParent, StaticGroup,
+    Assignment, Binding, Canonical, Cell, CellType, CombGroup, FSM, Group,
+    Port, PortIterator, PortParent, StaticGroup, Transition,
 };
 
 <span class="comment">// Re-export types from the frontend.

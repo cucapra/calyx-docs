@@ -127,7 +127,19 @@
 <a href="#126" id="126">126</a>
 <a href="#127" id="127">127</a>
 <a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::AssignmentAnalysis;
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::AssignmentAnalysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, LibrarySignatures};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
@@ -196,6 +208,7 @@
         }
 
         <span class="comment">// We only need to consider write set of the continuous assignments
+        // and the register that controls an FSM
         </span><span class="kw">let </span>writes = comp
             .continuous_assignments
             .iter()
@@ -219,10 +232,21 @@
             };
 
             <span class="comment">// For all the assignments not in the write set, add a default assignment
-            </span><span class="kw">let </span>cell_writes = writes
+            // if the assignment does not write to an FSM-controlling register
+            </span><span class="kw">let </span><span class="kw-2">mut </span>cell_writes: Vec&lt;ir::RRC&lt;ir::Port&gt;&gt; = writes
                 .get(<span class="kw-2">&amp;</span>cell.name())
                 .unwrap_or(<span class="kw-2">&amp;</span>mt)
                 .iter()
+                .map(ir::RRC::clone)
+                .collect();
+
+            <span class="kw">if </span>cell.attributes.has(ir::BoolAttr::FSMControl) {
+                cell_writes
+                    .extend(cell.ports().into_iter().map(ir::RRC::clone));
+            }
+
+            <span class="kw">let </span>cell_writes = cell_writes
+                .into_iter()
                 .map(|p| {
                     <span class="kw">let </span>p = p.borrow();
                     p.name
@@ -230,7 +254,7 @@
                 .collect_vec();
 
             assigns.extend(
-                required.iter().filter(|p| !cell_writes.contains(p)).map(
+                required.iter().filter(|p| (!cell_writes.contains(p))).map(
                     |name| {
                         <span class="kw">let </span>port = cell.get(name);
                         <span class="kw">let </span>zero = builder.add_constant(<span class="number">0</span>, port.borrow().width);

@@ -303,7 +303,9 @@
 <a href="#302" id="302">302</a>
 <a href="#303" id="303">303</a>
 <a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a></pre></div><pre class="rust"><code><span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a></pre></div><pre class="rust"><code><span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 
 <span class="kw">const </span>NODE_ID: ir::Attribute =
     ir::Attribute::Internal(ir::InternalAttr::NODE_ID);
@@ -485,6 +487,7 @@
                 <span class="self">Self</span>::compute_unique_ids_static(s, cur_state, two_if_ids)
             }
             ir::Control::Empty(<span class="kw">_</span>) =&gt; cur_state,
+            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
         }
     }
 
@@ -597,6 +600,7 @@
             ir::Control::Static(s) =&gt; {
                 <span class="self">Self</span>::add_static_enable_ids_static(s, cur_state)
             }
+            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
         }
     }
 

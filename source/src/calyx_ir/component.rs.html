@@ -440,10 +440,23 @@
 <a href="#439" id="439">439</a>
 <a href="#440" id="440">440</a>
 <a href="#441" id="441">441</a>
-<a href="#442" id="442">442</a></pre></div><pre class="rust"><code><span class="kw">use super</span>::{
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a></pre></div><pre class="rust"><code><span class="kw">use super</span>::{
     Assignment, Attribute, Attributes, BoolAttr, Builder, Cell, CellType,
-    CombGroup, Control, Direction, GetName, Group, Id, NumAttr, PortDef, RRC,
-    StaticGroup,
+    CombGroup, Control, Direction, FSM, GetName, Group, Id, NumAttr, PortDef,
+    RRC, StaticGroup,
 };
 <span class="kw">use </span><span class="kw">crate</span>::Nothing;
 <span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
@@ -479,6 +492,8 @@
     </span><span class="kw">pub </span>cells: IdList&lt;Cell&gt;,
     <span class="doccomment">/// Groups of assignment wires.
     </span><span class="kw">pub </span>groups: IdList&lt;Group&gt;,
+    <span class="doccomment">/// FSMs generated during compilation.
+    </span><span class="kw">pub </span>fsms: IdList&lt;FSM&gt;,
     <span class="doccomment">/// Groups of assignment wires
     </span><span class="kw">pub </span>static_groups: IdList&lt;StaticGroup&gt;,
     <span class="doccomment">/// Groups of assignment wires.
@@ -573,6 +588,7 @@
             signature: this_sig,
             cells: IdList::default(),
             groups: IdList::default(),
+            fsms: IdList::default(),
             static_groups: IdList::default(),
             comb_groups: IdList::default(),
             continuous_assignments: <span class="macro">vec!</span>[],
@@ -595,6 +611,11 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.groups
     }
 
+    <span class="doccomment">/// get the component's fsms
+    </span><span class="kw">pub fn </span>get_fsms(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>IdList&lt;FSM&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.fsms
+    }
+
     <span class="doccomment">/// gets the component's static groups
     </span><span class="kw">pub fn </span>get_static_groups(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>IdList&lt;StaticGroup&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.static_groups
@@ -603,6 +624,11 @@
     <span class="doccomment">/// gets the component's groups
     </span><span class="kw">pub fn </span>get_groups_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>IdList&lt;Group&gt; {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.groups
+    }
+
+    <span class="doccomment">/// gets mutable access to the component's fsms
+    </span><span class="kw">pub fn </span>get_fsms_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>IdList&lt;FSM&gt; {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.fsms
     }
 
     <span class="doccomment">/// gets the component's groups

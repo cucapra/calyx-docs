@@ -681,7 +681,10 @@
 <a href="#680" id="680">680</a>
 <a href="#681" id="681">681</a>
 <a href="#682" id="682">682</a>
-<a href="#683" id="683">683</a></pre></div><pre class="rust"><code><span class="doccomment">//! Calculate the reaching definitions in a control program.
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a></pre></div><pre class="rust"><code><span class="doccomment">//! Calculate the reaching definitions in a control program.
 </span><span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::cmp::Ordering;
@@ -1361,6 +1364,9 @@
         }
         ir::Control::Static(sc) =&gt; {
             build_reaching_def_static(sc, reach, killed, rd, counter)
+        }
+        ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; {
+            <span class="macro">todo!</span>(<span class="string">"should not encounter fsm nodes"</span>)
         }
     }
 }

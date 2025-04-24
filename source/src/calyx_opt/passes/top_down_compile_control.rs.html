@@ -1542,22 +1542,208 @@
 <a href="#1541" id="1541">1541</a>
 <a href="#1542" id="1542">1542</a>
 <a href="#1543" id="1543">1543</a>
-<a href="#1544" id="1544">1544</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::math_utilities::get_bit_width_from;
-<span class="kw">use </span><span class="kw">crate</span>::passes;
+<a href="#1544" id="1544">1544</a>
+<a href="#1545" id="1545">1545</a>
+<a href="#1546" id="1546">1546</a>
+<a href="#1547" id="1547">1547</a>
+<a href="#1548" id="1548">1548</a>
+<a href="#1549" id="1549">1549</a>
+<a href="#1550" id="1550">1550</a>
+<a href="#1551" id="1551">1551</a>
+<a href="#1552" id="1552">1552</a>
+<a href="#1553" id="1553">1553</a>
+<a href="#1554" id="1554">1554</a>
+<a href="#1555" id="1555">1555</a>
+<a href="#1556" id="1556">1556</a>
+<a href="#1557" id="1557">1557</a>
+<a href="#1558" id="1558">1558</a>
+<a href="#1559" id="1559">1559</a>
+<a href="#1560" id="1560">1560</a>
+<a href="#1561" id="1561">1561</a>
+<a href="#1562" id="1562">1562</a>
+<a href="#1563" id="1563">1563</a>
+<a href="#1564" id="1564">1564</a>
+<a href="#1565" id="1565">1565</a>
+<a href="#1566" id="1566">1566</a>
+<a href="#1567" id="1567">1567</a>
+<a href="#1568" id="1568">1568</a>
+<a href="#1569" id="1569">1569</a>
+<a href="#1570" id="1570">1570</a>
+<a href="#1571" id="1571">1571</a>
+<a href="#1572" id="1572">1572</a>
+<a href="#1573" id="1573">1573</a>
+<a href="#1574" id="1574">1574</a>
+<a href="#1575" id="1575">1575</a>
+<a href="#1576" id="1576">1576</a>
+<a href="#1577" id="1577">1577</a>
+<a href="#1578" id="1578">1578</a>
+<a href="#1579" id="1579">1579</a>
+<a href="#1580" id="1580">1580</a>
+<a href="#1581" id="1581">1581</a>
+<a href="#1582" id="1582">1582</a>
+<a href="#1583" id="1583">1583</a>
+<a href="#1584" id="1584">1584</a>
+<a href="#1585" id="1585">1585</a>
+<a href="#1586" id="1586">1586</a>
+<a href="#1587" id="1587">1587</a>
+<a href="#1588" id="1588">1588</a>
+<a href="#1589" id="1589">1589</a>
+<a href="#1590" id="1590">1590</a>
+<a href="#1591" id="1591">1591</a>
+<a href="#1592" id="1592">1592</a>
+<a href="#1593" id="1593">1593</a>
+<a href="#1594" id="1594">1594</a>
+<a href="#1595" id="1595">1595</a>
+<a href="#1596" id="1596">1596</a>
+<a href="#1597" id="1597">1597</a>
+<a href="#1598" id="1598">1598</a>
+<a href="#1599" id="1599">1599</a>
+<a href="#1600" id="1600">1600</a>
+<a href="#1601" id="1601">1601</a>
+<a href="#1602" id="1602">1602</a>
+<a href="#1603" id="1603">1603</a>
+<a href="#1604" id="1604">1604</a>
+<a href="#1605" id="1605">1605</a>
+<a href="#1606" id="1606">1606</a>
+<a href="#1607" id="1607">1607</a>
+<a href="#1608" id="1608">1608</a>
+<a href="#1609" id="1609">1609</a>
+<a href="#1610" id="1610">1610</a>
+<a href="#1611" id="1611">1611</a>
+<a href="#1612" id="1612">1612</a>
+<a href="#1613" id="1613">1613</a>
+<a href="#1614" id="1614">1614</a>
+<a href="#1615" id="1615">1615</a>
+<a href="#1616" id="1616">1616</a>
+<a href="#1617" id="1617">1617</a>
+<a href="#1618" id="1618">1618</a>
+<a href="#1619" id="1619">1619</a>
+<a href="#1620" id="1620">1620</a>
+<a href="#1621" id="1621">1621</a>
+<a href="#1622" id="1622">1622</a>
+<a href="#1623" id="1623">1623</a>
+<a href="#1624" id="1624">1624</a>
+<a href="#1625" id="1625">1625</a>
+<a href="#1626" id="1626">1626</a>
+<a href="#1627" id="1627">1627</a>
+<a href="#1628" id="1628">1628</a>
+<a href="#1629" id="1629">1629</a>
+<a href="#1630" id="1630">1630</a>
+<a href="#1631" id="1631">1631</a>
+<a href="#1632" id="1632">1632</a>
+<a href="#1633" id="1633">1633</a>
+<a href="#1634" id="1634">1634</a>
+<a href="#1635" id="1635">1635</a>
+<a href="#1636" id="1636">1636</a>
+<a href="#1637" id="1637">1637</a>
+<a href="#1638" id="1638">1638</a>
+<a href="#1639" id="1639">1639</a>
+<a href="#1640" id="1640">1640</a>
+<a href="#1641" id="1641">1641</a>
+<a href="#1642" id="1642">1642</a>
+<a href="#1643" id="1643">1643</a>
+<a href="#1644" id="1644">1644</a>
+<a href="#1645" id="1645">1645</a>
+<a href="#1646" id="1646">1646</a>
+<a href="#1647" id="1647">1647</a>
+<a href="#1648" id="1648">1648</a>
+<a href="#1649" id="1649">1649</a>
+<a href="#1650" id="1650">1650</a>
+<a href="#1651" id="1651">1651</a>
+<a href="#1652" id="1652">1652</a>
+<a href="#1653" id="1653">1653</a>
+<a href="#1654" id="1654">1654</a>
+<a href="#1655" id="1655">1655</a>
+<a href="#1656" id="1656">1656</a>
+<a href="#1657" id="1657">1657</a>
+<a href="#1658" id="1658">1658</a>
+<a href="#1659" id="1659">1659</a>
+<a href="#1660" id="1660">1660</a>
+<a href="#1661" id="1661">1661</a>
+<a href="#1662" id="1662">1662</a>
+<a href="#1663" id="1663">1663</a>
+<a href="#1664" id="1664">1664</a>
+<a href="#1665" id="1665">1665</a>
+<a href="#1666" id="1666">1666</a>
+<a href="#1667" id="1667">1667</a>
+<a href="#1668" id="1668">1668</a>
+<a href="#1669" id="1669">1669</a>
+<a href="#1670" id="1670">1670</a>
+<a href="#1671" id="1671">1671</a>
+<a href="#1672" id="1672">1672</a>
+<a href="#1673" id="1673">1673</a>
+<a href="#1674" id="1674">1674</a>
+<a href="#1675" id="1675">1675</a>
+<a href="#1676" id="1676">1676</a>
+<a href="#1677" id="1677">1677</a>
+<a href="#1678" id="1678">1678</a>
+<a href="#1679" id="1679">1679</a>
+<a href="#1680" id="1680">1680</a>
+<a href="#1681" id="1681">1681</a>
+<a href="#1682" id="1682">1682</a>
+<a href="#1683" id="1683">1683</a>
+<a href="#1684" id="1684">1684</a>
+<a href="#1685" id="1685">1685</a>
+<a href="#1686" id="1686">1686</a>
+<a href="#1687" id="1687">1687</a>
+<a href="#1688" id="1688">1688</a>
+<a href="#1689" id="1689">1689</a>
+<a href="#1690" id="1690">1690</a>
+<a href="#1691" id="1691">1691</a>
+<a href="#1692" id="1692">1692</a>
+<a href="#1693" id="1693">1693</a>
+<a href="#1694" id="1694">1694</a>
+<a href="#1695" id="1695">1695</a>
+<a href="#1696" id="1696">1696</a>
+<a href="#1697" id="1697">1697</a>
+<a href="#1698" id="1698">1698</a>
+<a href="#1699" id="1699">1699</a>
+<a href="#1700" id="1700">1700</a>
+<a href="#1701" id="1701">1701</a>
+<a href="#1702" id="1702">1702</a>
+<a href="#1703" id="1703">1703</a>
+<a href="#1704" id="1704">1704</a>
+<a href="#1705" id="1705">1705</a>
+<a href="#1706" id="1706">1706</a>
+<a href="#1707" id="1707">1707</a>
+<a href="#1708" id="1708">1708</a>
+<a href="#1709" id="1709">1709</a>
+<a href="#1710" id="1710">1710</a>
+<a href="#1711" id="1711">1711</a>
+<a href="#1712" id="1712">1712</a>
+<a href="#1713" id="1713">1713</a>
+<a href="#1714" id="1714">1714</a>
+<a href="#1715" id="1715">1715</a>
+<a href="#1716" id="1716">1716</a>
+<a href="#1717" id="1717">1717</a>
+<a href="#1718" id="1718">1718</a>
+<a href="#1719" id="1719">1719</a>
+<a href="#1720" id="1720">1720</a>
+<a href="#1721" id="1721">1721</a>
+<a href="#1722" id="1722">1722</a>
+<a href="#1723" id="1723">1723</a>
+<a href="#1724" id="1724">1724</a>
+<a href="#1725" id="1725">1725</a>
+<a href="#1726" id="1726">1726</a>
+<a href="#1727" id="1727">1727</a>
+<a href="#1728" id="1728">1728</a>
+<a href="#1729" id="1729">1729</a>
+<a href="#1730" id="1730">1730</a>
+<a href="#1731" id="1731">1731</a>
+<a href="#1732" id="1732">1732</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::passes;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
 };
 <span class="kw">use </span>calyx_ir::{
-    <span class="self">self </span><span class="kw">as </span>ir, BoolAttr, Cell, GetAttributes, LibrarySignatures, Printer, RRC,
+    <span class="self">self </span><span class="kw">as </span>ir, BoolAttr, Cell, GetAttributes, Id, LibrarySignatures, Printer,
+    RRC, build_assignments, guard, structure,
 };
-<span class="kw">use </span>calyx_ir::{Id, build_assignments, guard, structure};
-<span class="kw">use </span>calyx_utils::Error;
-<span class="kw">use </span>calyx_utils::{CalyxResult, OutputFile};
+<span class="kw">use </span>calyx_utils::{CalyxResult, Error, OutputFile, math::bits_needed_for};
 <span class="kw">use </span>ir::Nothing;
 <span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>petgraph::graph::DiGraph;
 <span class="kw">use </span>serde::Serialize;
-<span class="kw">use </span>std::collections::{HashMap, HashSet};
+<span class="kw">use </span>std::collections::{HashMap, HashSet, VecDeque};
 <span class="kw">use </span>std::io::Write;
 <span class="kw">use </span>std::rc::Rc;
 
@@ -1598,6 +1784,10 @@
         ir::Control::Enable(ir::Enable { group, attributes }) =&gt; {
             <span class="kw">let </span>cur_state = attributes.get(NODE_ID).unwrap();
             exits.push((cur_state, <span class="macro">guard!</span>(group[<span class="string">"done"</span>])))
+        }
+        ir::Control::FSMEnable(ir::FSMEnable { attributes, fsm }) =&gt; {
+            <span class="kw">let </span>cur_state = attributes.get(NODE_ID).unwrap();
+            exits.push((cur_state, <span class="macro">guard!</span>(fsm[<span class="string">"done"</span>])))
         }
         ir::Control::Seq(ir::Seq { stmts, .. }) =&gt; {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(stmt) = stmts.last() {
@@ -1669,6 +1859,10 @@
 </span><span class="kw">fn </span>compute_unique_ids(con: <span class="kw-2">&amp;mut </span>ir::Control, cur_state: u64) -&gt; u64 {
     <span class="kw">match </span>con {
         ir::Control::Enable(ir::Enable { attributes, .. }) =&gt; {
+            attributes.insert(NODE_ID, cur_state);
+            cur_state + <span class="number">1
+        </span>}
+        ir::Control::FSMEnable(ir::FSMEnable { attributes, .. }) =&gt; {
             attributes.insert(NODE_ID, cur_state);
             cur_state + <span class="number">1
         </span>}
@@ -1822,6 +2016,8 @@
     </span><span class="kw">pub </span>groups_to_states: HashSet&lt;FSMStateInfo&gt;,
     <span class="doccomment">/// Assigments that should be enabled in a given state.
     </span><span class="kw">pub </span>enables: HashMap&lt;u64, Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;&gt;,
+    <span class="doccomment">/// FSMs that should be triggered in a given state.
+    </span><span class="kw">pub </span>fsm_enables: HashMap&lt;u64, Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;&gt;,
     <span class="doccomment">/// Transition from one state to another when the guard is true.
     </span><span class="kw">pub </span>transitions: Vec&lt;(u64, u64, ir::Guard&lt;Nothing&gt;)&gt;,
     <span class="doccomment">/// The component builder. The reference has a shorter lifetime than the builder itself
@@ -1896,6 +2092,7 @@
         Schedule {
             groups_to_states: HashSet::new(),
             enables: HashMap::new(),
+            fsm_enables: HashMap::new(),
             transitions: Vec::new(),
             builder,
         }
@@ -2029,7 +2226,7 @@
         <span class="comment">// get fsm bit width and build constant emitting fsm first state
         </span><span class="kw">let </span>(fsm_size, first_state) = <span class="kw">match </span>fsm_rep.encoding {
             RegisterEncoding::Binary =&gt; {
-                <span class="kw">let </span>fsm_size = get_bit_width_from(fsm_rep.last_state + <span class="number">1</span>);
+                <span class="kw">let </span>fsm_size = bits_needed_for(fsm_rep.last_state + <span class="number">1</span>);
                 (fsm_size, builder.add_constant(<span class="number">0</span>, fsm_size))
             }
             RegisterEncoding::OneHot =&gt; {
@@ -2251,6 +2448,81 @@
 
         group
     }
+
+    <span class="kw">fn </span>realize_fsm(<span class="self">self</span>, dump_fsm: bool) -&gt; RRC&lt;ir::FSM&gt; {
+        <span class="comment">// ensure schedule is valid
+        </span><span class="self">self</span>.validate();
+
+        <span class="comment">// compute final state and fsm_size, and register initial fsm
+        </span><span class="kw">let </span>fsm = <span class="self">self</span>.builder.add_fsm(<span class="string">"fsm"</span>);
+
+        <span class="kw">if </span>dump_fsm {
+            <span class="self">self</span>.display(<span class="macro">format!</span>(
+                <span class="string">"{}:{}"</span>,
+                <span class="self">self</span>.builder.component.name,
+                fsm.borrow().name()
+            ));
+        }
+
+        <span class="comment">// map each source state to a list of conditional transitions
+        </span><span class="kw">let </span><span class="kw-2">mut </span>transitions_map: HashMap&lt;u64, Vec&lt;(ir::Guard&lt;Nothing&gt;, u64)&gt;&gt; =
+            HashMap::new();
+        <span class="self">self</span>.transitions.into_iter().for_each(
+            |(s, e, g)| <span class="kw">match </span>transitions_map.get_mut(<span class="kw-2">&amp;</span>(s + <span class="number">1</span>)) {
+                <span class="prelude-val">Some</span>(next_states) =&gt; next_states.push((g, e + <span class="number">1</span>)),
+                <span class="prelude-val">None </span>=&gt; {
+                    transitions_map.insert(s + <span class="number">1</span>, <span class="macro">vec!</span>[(g, e + <span class="number">1</span>)]);
+                }
+            },
+        );
+
+        <span class="comment">// push the cases of the fsm to the fsm instantiation
+        </span><span class="kw">let </span>(<span class="kw-2">mut </span>transitions, <span class="kw-2">mut </span>assignments): (
+            VecDeque&lt;ir::Transition&gt;,
+            VecDeque&lt;Vec&lt;ir::Assignment&lt;Nothing&gt;&gt;&gt;,
+        ) = transitions_map
+            .drain()
+            .sorted_by(|(s1, <span class="kw">_</span>), (s2, <span class="kw">_</span>)| s1.cmp(s2))
+            .map(|(state, <span class="kw-2">mut </span>cond_dsts)| {
+                <span class="kw">let </span>assigns = <span class="kw">match </span><span class="self">self</span>.fsm_enables.get(<span class="kw-2">&amp;</span>(state - <span class="number">1</span>)) {
+                    <span class="prelude-val">None </span>=&gt; <span class="macro">vec!</span>[],
+                    <span class="prelude-val">Some</span>(assigns) =&gt; assigns.clone(),
+                };
+                <span class="comment">// self-loop if all other guards are not met;
+                // should be at the end of the conditional destinations vec!
+                </span>cond_dsts.push((ir::Guard::True, state));
+
+                (ir::Transition::Conditional(cond_dsts), assigns)
+            })
+            .unzip();
+
+        <span class="comment">// insert transition condition from 0 to 1
+        </span><span class="kw">let </span>true_guard = ir::Guard::True;
+        assignments.push_front(<span class="macro">vec!</span>[]);
+        transitions.push_front(ir::Transition::Conditional(<span class="macro">vec!</span>[
+            (<span class="macro">guard!</span>(fsm[<span class="string">"start"</span>]), <span class="number">1</span>),
+            (true_guard.clone(), <span class="number">0</span>),
+        ]));
+
+        <span class="comment">// insert transition from final calc state to `done` state
+        </span><span class="kw">let </span>signal_on = <span class="self">self</span>.builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
+        <span class="kw">let </span>assign = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
+            fsm[<span class="string">"done"</span>] = true_guard <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
+        );
+        assignments.push_back(assign.to_vec());
+        transitions.push_back(ir::Transition::Unconditional(<span class="number">0</span>));
+
+        fsm.borrow_mut().assignments.extend(assignments);
+        fsm.borrow_mut().transitions.extend(transitions);
+
+        <span class="comment">// register group enables dependent on fsm state as assignments in the
+        // relevant state's assignment section
+        </span><span class="self">self</span>.enables.into_iter().for_each(|(state, state_enables)| {
+            fsm.borrow_mut()
+                .extend_state_assignments(state + <span class="number">1</span>, state_enables);
+        });
+        fsm
+    }
 }
 
 <span class="doccomment">/// Represents an edge from a predeccesor to the current control node.
@@ -2283,6 +2555,56 @@
         </span>has_fast_guarantee: bool,
     ) -&gt; CalyxResult&lt;Vec&lt;PredEdge&gt;&gt; {
         <span class="kw">match </span>con {
+            ir::Control::FSMEnable(ir::FSMEnable { fsm, attributes }) =&gt; {
+                <span class="kw">let </span>cur_state = attributes.get(NODE_ID).unwrap_or_else(|| {
+                    <span class="macro">panic!</span>(
+                        <span class="string">"Group `{}` does not have state_id information"</span>,
+                        fsm.borrow().name()
+                    )
+                });
+                <span class="kw">let </span>(cur_state, prev_states) =
+                    <span class="kw">if </span>preds.len() == <span class="number">1 </span>&amp;&amp; preds[<span class="number">0</span>].<span class="number">1</span>.is_true() {
+                        (preds[<span class="number">0</span>].<span class="number">0</span>, <span class="macro">vec!</span>[])
+                    } <span class="kw">else </span>{
+                        (cur_state, preds)
+                    };
+                <span class="comment">// Add group to mapping for emitting group JSON info
+                </span><span class="self">self</span>.groups_to_states.insert(FSMStateInfo {
+                    id: cur_state,
+                    group: fsm.borrow().name(),
+                });
+
+                <span class="kw">let </span>not_done = !<span class="macro">guard!</span>(fsm[<span class="string">"done"</span>]);
+                <span class="kw">let </span>signal_on = <span class="self">self</span>.builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
+
+                <span class="comment">// Activate this fsm in the current state
+                </span><span class="kw">let </span>en_go: [ir::Assignment&lt;Nothing&gt;; <span class="number">1</span>] = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
+                    fsm[<span class="string">"start"</span>] = not_done <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
+                );
+
+                <span class="self">self</span>.fsm_enables.entry(cur_state).or_default().extend(en_go);
+
+                <span class="comment">// Enable FSM to be triggered by states besides the most recent
+                </span><span class="kw">if </span>early_transitions || has_fast_guarantee {
+                    <span class="kw">for </span>(st, g) <span class="kw">in </span><span class="kw-2">&amp;</span>prev_states {
+                        <span class="kw">let </span>early_go = <span class="macro">build_assignments!</span>(<span class="self">self</span>.builder;
+                            fsm[<span class="string">"start"</span>] = g <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
+                        );
+                        <span class="self">self</span>.fsm_enables
+                            .entry(<span class="kw-2">*</span>st)
+                            .or_default()
+                            .extend(early_go);
+                    }
+                }
+
+                <span class="kw">let </span>transitions = prev_states
+                    .into_iter()
+                    .map(|(st, guard)| (st, cur_state, guard));
+                <span class="self">self</span>.transitions.extend(transitions);
+
+                <span class="kw">let </span>done_cond = <span class="macro">guard!</span>(fsm[<span class="string">"done"</span>]);
+                <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[(cur_state, done_cond)])
+            }
             <span class="comment">// See explanation of FSM states generated in [ir::TopDownCompileControl].
             </span>ir::Control::Enable(ir::Enable { group, attributes }) =&gt; {
                 <span class="kw">let </span>cur_state = attributes.get(NODE_ID).unwrap_or_else(|| {
@@ -2698,6 +3020,8 @@
     </span>early_transitions: bool,
     <span class="doccomment">/// Profiling: Bookkeeping for TDCC-generated register/group information (FSMs, par groups)
     </span>profiling_info: HashSet&lt;ProfilingInfo&gt;,
+    <span class="doccomment">/// Decides whether FSMs are emitted as normal (inlined) or such that synthesis tool infers + optimizes FSM
+    </span>infer_fsms: bool,
     <span class="doccomment">/// How many states the dynamic FSM must have before picking binary over one-hot
     </span>one_hot_cutoff: u64,
     <span class="doccomment">/// Number of states the dynamic FSM must have before picking duplicate over single register
@@ -2746,6 +3070,7 @@
             dump_fsm_json: opts[<span class="kw-2">&amp;</span><span class="string">"dump-fsm-json"</span>].not_null_outstream(),
             early_transitions: opts[<span class="kw-2">&amp;</span><span class="string">"early-transitions"</span>].bool(),
             profiling_info: HashSet::new(),
+            infer_fsms: opts[<span class="kw-2">&amp;</span><span class="string">"infer-fsms"</span>].bool(),
             one_hot_cutoff: opts[<span class="kw-2">&amp;</span><span class="string">"one-hot-cutoff"</span>]
                 .pos_num()
                 .expect(<span class="string">"requires non-negative OHE cutoff parameter"</span>),
@@ -2790,6 +3115,12 @@
                 PassOpt::parse_bool,
             ),
             PassOpt::new(
+                <span class="string">"infer-fsms"</span>,
+                <span class="string">"Emits FSMs that are inferred and optimized by Vivado toolchain"</span>,
+                ParseVal::Bool(<span class="bool-val">false</span>),
+                PassOpt::parse_bool,
+            ),
+            PassOpt::new(
                 <span class="string">"one-hot-cutoff"</span>,
                 <span class="string">"Threshold at and below which a one-hot encoding is used for dynamic group scheduling"</span>,
                 ParseVal::Num(<span class="number">0</span>),
@@ -2828,19 +3159,25 @@
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
         <span class="kw">let </span><span class="kw-2">mut </span>con = comp.control.borrow_mut();
-        <span class="kw">if </span><span class="macro">matches!</span>(<span class="kw-2">*</span>con, ir::Control::Empty(..) | ir::Control::Enable(..)) {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(enable_info) =
-                extract_single_enable(<span class="kw-2">&amp;mut </span>con, comp.name)
-            {
-                <span class="self">self</span>.profiling_info
-                    .insert(ProfilingInfo::SingleEnable(enable_info));
+        <span class="kw">match </span><span class="kw-2">*</span>con {
+            <span class="comment">// If there's one top-level FSM at the beginning of the traversal,
+            // the control tree is likely entirely static and has already been compiled.
+            // In that case, just move on without wrapping that FSM in another dynamic FSM.
+            </span>ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(Action::Stop),
+            ir::Control::Empty(<span class="kw">_</span>) | ir::Control::Enable(<span class="kw">_</span>) =&gt; {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(enable_info) =
+                    extract_single_enable(<span class="kw-2">&amp;mut </span>con, comp.name)
+                {
+                    <span class="self">self</span>.profiling_info
+                        .insert(ProfilingInfo::SingleEnable(enable_info));
+                }
+                <span class="prelude-val">Ok</span>(Action::Stop)
             }
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(Action::Stop);
+            <span class="kw">_ </span>=&gt; {
+                compute_unique_ids(<span class="kw-2">&amp;mut </span>con, <span class="number">0</span>);
+                <span class="prelude-val">Ok</span>(Action::Continue)
+            }
         }
-
-        compute_unique_ids(<span class="kw-2">&amp;mut </span>con, <span class="number">0</span>);
-        <span class="comment">// IRPrinter::write_control(&amp;con, 0, &amp;mut std::io::stderr());
-        </span><span class="prelude-val">Ok</span>(Action::Continue)
     }
 
     <span class="kw">fn </span>finish_seq(
@@ -2856,22 +3193,26 @@
         }
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="kw">let </span><span class="kw-2">mut </span>sch = Schedule::from(<span class="kw-2">&amp;mut </span>builder);
+
         sch.calculate_states_seq(s, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
-        <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>s.attributes);
 
-        <span class="comment">// Compile schedule and return the group.
-        </span><span class="kw">let </span>seq_group = sch.realize_schedule(
-            <span class="self">self</span>.dump_fsm,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
-            fsm_impl,
-        );
+        <span class="comment">// compile schedule and return the enable node
+        </span><span class="kw">let </span><span class="kw-2">mut </span>seq_enable = <span class="kw">if </span><span class="self">self</span>.infer_fsms {
+            ir::Control::fsm_enable(sch.realize_fsm(<span class="self">self</span>.dump_fsm))
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>s.attributes);
+            ir::Control::enable(sch.realize_schedule(
+                <span class="self">self</span>.dump_fsm,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
+                fsm_impl,
+            ))
+        };
 
-        <span class="comment">// Add NODE_ID to compiled group.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>en = ir::Control::enable(seq_group);
-        <span class="kw">let </span>node_id = s.attributes.get(NODE_ID).unwrap();
-        en.get_mut_attributes().insert(NODE_ID, node_id);
+        <span class="comment">// Add NODE_ID to compiled enable.
+        </span><span class="kw">let </span>state_id = s.attributes.get(NODE_ID).unwrap();
+        seq_enable.get_mut_attributes().insert(NODE_ID, state_id);
 
-        <span class="prelude-val">Ok</span>(Action::change(en))
+        <span class="prelude-val">Ok</span>(Action::change(seq_enable))
     }
 
     <span class="kw">fn </span>finish_if(
@@ -2888,21 +3229,25 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="kw">let </span><span class="kw-2">mut </span>sch = Schedule::from(<span class="kw-2">&amp;mut </span>builder);
 
+        sch.calculate_states_if(i, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
+
         <span class="comment">// Compile schedule and return the group.
-        </span>sch.calculate_states_if(i, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
-        <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>i.attributes);
-        <span class="kw">let </span>if_group = sch.realize_schedule(
-            <span class="self">self</span>.dump_fsm,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
-            fsm_impl,
-        );
+        </span><span class="kw">let </span><span class="kw-2">mut </span>if_enable = <span class="kw">if </span><span class="self">self</span>.infer_fsms {
+            ir::Control::fsm_enable(sch.realize_fsm(<span class="self">self</span>.dump_fsm))
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>i.attributes);
+            ir::Control::enable(sch.realize_schedule(
+                <span class="self">self</span>.dump_fsm,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
+                fsm_impl,
+            ))
+        };
 
         <span class="comment">// Add NODE_ID to compiled group.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>en = ir::Control::enable(if_group);
-        <span class="kw">let </span>node_id = i.attributes.get(NODE_ID).unwrap();
-        en.get_mut_attributes().insert(NODE_ID, node_id);
+        </span><span class="kw">let </span>node_id = i.attributes.get(NODE_ID).unwrap();
+        if_enable.get_mut_attributes().insert(NODE_ID, node_id);
 
-        <span class="prelude-val">Ok</span>(Action::change(en))
+        <span class="prelude-val">Ok</span>(Action::change(if_enable))
     }
 
     <span class="kw">fn </span>finish_while(
@@ -2919,25 +3264,28 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="kw">let </span><span class="kw-2">mut </span>sch = Schedule::from(<span class="kw-2">&amp;mut </span>builder);
         sch.calculate_states_while(w, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
-        <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>w.attributes);
 
-        <span class="comment">// Compile schedule and return the group.
-        </span><span class="kw">let </span>if_group = sch.realize_schedule(
-            <span class="self">self</span>.dump_fsm,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
-            fsm_impl,
-        );
+        <span class="comment">// compile schedule and return the enable node
+        </span><span class="kw">let </span><span class="kw-2">mut </span>while_enable = <span class="kw">if </span><span class="self">self</span>.infer_fsms {
+            ir::Control::fsm_enable(sch.realize_fsm(<span class="self">self</span>.dump_fsm))
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>w.attributes);
+            ir::Control::enable(sch.realize_schedule(
+                <span class="self">self</span>.dump_fsm,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
+                fsm_impl,
+            ))
+        };
 
-        <span class="comment">// Add NODE_ID to compiled group.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>en = ir::Control::enable(if_group);
-        <span class="kw">let </span>node_id = w.attributes.get(NODE_ID).unwrap();
-        en.get_mut_attributes().insert(NODE_ID, node_id);
+        <span class="comment">// Add NODE_ID to compiled enable.
+        </span><span class="kw">let </span>node_id = w.attributes.get(NODE_ID).unwrap();
+        while_enable.get_mut_attributes().insert(NODE_ID, node_id);
 
-        <span class="prelude-val">Ok</span>(Action::change(en))
+        <span class="prelude-val">Ok</span>(Action::change(while_enable))
     }
 
     <span class="doccomment">/// Compile each child in `par` block separately so each child can make
-    /// progress indepdendently.
+    /// progress independently.
     </span><span class="kw">fn </span>finish_par(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         s: <span class="kw-2">&amp;mut </span>ir::Par,
@@ -2958,53 +3306,77 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>done_regs = Vec::with_capacity(s.stmts.len());
 
         <span class="comment">// Profiling: record each par child (arm)'s group and done register
-        </span><span class="kw">let </span><span class="kw-2">mut </span>child_infos = Vec::with_capacity(s.stmts.len());
+        </span><span class="kw">let </span>child_infos = Vec::with_capacity(s.stmts.len());
 
         <span class="comment">// For each child, build the enabling logic.
         </span><span class="kw">for </span>con <span class="kw">in </span><span class="kw-2">&amp;</span>s.stmts {
-            <span class="kw">let </span>group = <span class="kw">match </span>con {
-                <span class="comment">// Do not compile enables
-                </span>ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
-                    <span class="self">self</span>.profiling_info.insert(ProfilingInfo::SingleEnable(
-                        SingleEnableInfo {
-                            group: group.borrow().name(),
-                            component: builder.component.name,
-                        },
-                    ));
-                    Rc::clone(group)
-                }
-                <span class="comment">// Compile complex schedule and return the group.
-                </span><span class="kw">_ </span>=&gt; {
+            <span class="comment">// Build circuitry to enable and disable this group.
+
+            </span><span class="kw">if </span><span class="self">self</span>.infer_fsms {
+                <span class="macro">structure!</span>(builder;
+                    <span class="kw">let </span>pd = prim std_reg(<span class="number">1</span>);
+                );
+
+                <span class="kw">let </span>fsm = {
                     <span class="kw">let </span><span class="kw-2">mut </span>sch = Schedule::from(<span class="kw-2">&amp;mut </span>builder);
                     sch.calculate_states(con, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
-                    <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>s.attributes);
-                    sch.realize_schedule(
-                        <span class="self">self</span>.dump_fsm,
-                        <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
-                        fsm_impl,
-                    )
-                }
+                    sch.realize_fsm(<span class="self">self</span>.dump_fsm)
+                };
+                <span class="kw">let </span>fsm_start = !(<span class="macro">guard!</span>(pd[<span class="string">"out"</span>] | fsm[<span class="string">"done"</span>]));
+                <span class="kw">let </span>fsm_done = <span class="macro">guard!</span>(fsm[<span class="string">"done"</span>]);
+
+                <span class="comment">// Save the done condition of fsm in `pd`.
+                </span><span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
+                    fsm[<span class="string">"start"</span>] = fsm_start <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
+                    pd[<span class="string">"in"</span>] = fsm_done <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
+                    pd[<span class="string">"write_en"</span>] = fsm_done <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
+                );
+
+                par_group.borrow_mut().assignments.extend(assigns);
+                done_regs.push(pd)
+            } <span class="kw">else </span>{
+                <span class="kw">let </span>group = <span class="kw">match </span>con {
+                    <span class="comment">// Do not compile enables
+                    </span>ir::Control::Enable(ir::Enable { group, .. }) =&gt; {
+                        <span class="self">self</span>.profiling_info.insert(
+                            ProfilingInfo::SingleEnable(SingleEnableInfo {
+                                group: group.borrow().name(),
+                                component: builder.component.name,
+                            }),
+                        );
+                        Rc::clone(group)
+                    }
+                    <span class="comment">// Compile complex schedule and return the group.
+                    </span><span class="kw">_ </span>=&gt; {
+                        <span class="kw">let </span><span class="kw-2">mut </span>sch = Schedule::from(<span class="kw-2">&amp;mut </span>builder);
+                        sch.calculate_states(con, <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
+                        <span class="kw">let </span>fsm_impl =
+                            <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>s.attributes);
+                        sch.realize_schedule(
+                            <span class="self">self</span>.dump_fsm,
+                            <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
+                            fsm_impl,
+                        )
+                    }
+                };
+
+                <span class="macro">structure!</span>(builder;
+                    <span class="kw">let </span>pd = prim std_reg(<span class="number">1</span>);
+                );
+
+                <span class="kw">let </span>group_go = !(<span class="macro">guard!</span>(pd[<span class="string">"out"</span>] | group[<span class="string">"done"</span>]));
+                <span class="kw">let </span>group_done = <span class="macro">guard!</span>(group[<span class="string">"done"</span>]);
+
+                <span class="comment">// Save the done condition of group in `pd`.
+                </span><span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
+                    group[<span class="string">"go"</span>] = group_go <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
+                    pd[<span class="string">"in"</span>] = group_done <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
+                    pd[<span class="string">"write_en"</span>] = group_done <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
+                );
+
+                par_group.borrow_mut().assignments.extend(assigns);
+                done_regs.push(pd)
             };
-
-            <span class="comment">// Build circuitry to enable and disable this group.
-            </span><span class="macro">structure!</span>(builder;
-                <span class="kw">let </span>pd = prim std_reg(<span class="number">1</span>);
-            );
-            <span class="kw">let </span>group_go = !(<span class="macro">guard!</span>(pd[<span class="string">"out"</span>] | group[<span class="string">"done"</span>]));
-            <span class="kw">let </span>group_done = <span class="macro">guard!</span>(group[<span class="string">"done"</span>]);
-
-            <span class="comment">// Save the done condition in a register.
-            </span><span class="kw">let </span>assigns = <span class="macro">build_assignments!</span>(builder;
-                group[<span class="string">"go"</span>] = group_go <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
-                pd[<span class="string">"in"</span>] = group_done <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
-                pd[<span class="string">"write_en"</span>] = group_done <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
-            );
-            par_group.borrow_mut().assignments.extend(assigns);
-            child_infos.push(ParChildInfo {
-                group: group.borrow().name(),
-                register: pd.borrow().name(),
-            });
-            done_regs.push(pd);
         }
         <span class="comment">// Profiling: save collected information about this par
         </span><span class="self">self</span>.profiling_info.insert(ProfilingInfo::Par(ParInfo {
@@ -3059,20 +3431,24 @@
     ) -&gt; VisResult {
         <span class="kw">let </span>control = Rc::clone(<span class="kw-2">&amp;</span>comp.control);
         <span class="kw">let </span>attrs = comp.attributes.clone();
-
         <span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
         <span class="kw">let </span><span class="kw-2">mut </span>sch = Schedule::from(<span class="kw-2">&amp;mut </span>builder);
 
         <span class="comment">// Add assignments for the final states
         </span>sch.calculate_states(<span class="kw-2">&amp;</span>control.borrow(), <span class="self">self</span>.early_transitions)<span class="question-mark">?</span>;
-        <span class="kw">let </span>fsm_impl = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>attrs);
-        <span class="kw">let </span>comp_group = sch.realize_schedule(
-            <span class="self">self</span>.dump_fsm,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
-            fsm_impl,
-        );
 
-        <span class="prelude-val">Ok</span>(Action::change(ir::Control::enable(comp_group)))
+        <span class="kw">let </span>control_node = <span class="kw">if </span><span class="self">self</span>.infer_fsms {
+            ir::Control::fsm_enable(sch.realize_fsm(<span class="self">self</span>.dump_fsm))
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>fsm_rep = <span class="self">self</span>.get_representation(<span class="kw-2">&amp;</span>sch, <span class="kw-2">&amp;</span>attrs);
+            ir::Control::enable(sch.realize_schedule(
+                <span class="self">self</span>.dump_fsm,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.profiling_info,
+                fsm_rep,
+            ))
+        };
+
+        <span class="prelude-val">Ok</span>(Action::change(control_node))
     }
 
     <span class="doccomment">/// If requested, emit FSM json after all components are processed

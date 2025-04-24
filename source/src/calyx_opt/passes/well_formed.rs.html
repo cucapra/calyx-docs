@@ -917,7 +917,9 @@
 <a href="#916" id="916">916</a>
 <a href="#917" id="917">917</a>
 <a href="#918" id="918">918</a>
-<a href="#919" id="919">919</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
+<a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
+<a href="#921" id="921">921</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{DiagnosticContext, DiagnosticPass, DiagnosticResult};
 <span class="kw">use </span>calyx_ir::{
     <span class="self">self </span><span class="kw">as </span>ir, Cell, CellType, Component, GetAttributes, LibrarySignatures,
@@ -939,7 +941,9 @@
     <span class="comment">// if port parent is hole then obviously not static
     </span><span class="kw">let </span>parent_cell = <span class="kw">match </span><span class="kw-2">&amp;</span>port.parent {
         ir::PortParent::Cell(cell_wref) =&gt; cell_wref.upgrade(),
-        ir::PortParent::Group(<span class="kw">_</span>) | ir::PortParent::StaticGroup(<span class="kw">_</span>) =&gt; {
+        ir::PortParent::Group(<span class="kw">_</span>)
+        | ir::PortParent::StaticGroup(<span class="kw">_</span>)
+        | ir::PortParent::FSM(<span class="kw">_</span>) =&gt; {
             <span class="kw">return </span><span class="bool-val">false</span>;
         }
     };

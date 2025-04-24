@@ -381,7 +381,8 @@
 <a href="#380" id="380">380</a>
 <a href="#381" id="381">381</a>
 <a href="#382" id="382">382</a>
-<a href="#383" id="383">383</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
 };
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
@@ -668,6 +669,7 @@
             }
             ir::PortParent::Group(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
             ir::PortParent::StaticGroup(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
+            ir::PortParent::FSM(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
         }
     }
 

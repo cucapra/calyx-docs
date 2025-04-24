@@ -590,7 +590,25 @@
 <a href="#589" id="589">589</a>
 <a href="#590" id="590">590</a>
 <a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::AssignmentAnalysis;
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::AssignmentAnalysis;
 <span class="kw">use </span><span class="kw">crate</span>::analysis::{GraphAnalysis, compute_static::WithStatic};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes, RRC};
 <span class="kw">use </span>ir::CellType;
@@ -958,6 +976,21 @@
                     }
                 }
 
+                ir::PortParent::FSM(<span class="kw">_</span>) =&gt; {
+                    <span class="kw">if </span>port.borrow().name == <span class="string">"done" </span>{
+                        <span class="kw">for </span>write_port <span class="kw">in </span>graph.writes_to(<span class="kw-2">&amp;</span>port.borrow()) {
+                            <span class="kw">if </span>!<span class="self">self</span>.is_done_port_or_const(<span class="kw-2">&amp;</span>write_port.borrow())
+                            {
+                                <span class="macro">log::debug!</span>(
+                                    <span class="string">"`{}` is not a done port"</span>,
+                                    write_port.borrow().canonical(),
+                                );
+                                <span class="kw">return </span><span class="bool-val">true</span>;
+                            }
+                        }
+                    }
+                }
+
                 ir::PortParent::StaticGroup(<span class="kw">_</span>) =&gt;
                 <span class="comment">// done ports of static groups should clearly NOT have static latencies
                 </span>{
@@ -1098,6 +1131,9 @@
                 <span class="kw">for </span>stmt <span class="kw">in </span>stmts {
                     <span class="self">Self</span>::remove_promotable_attribute(stmt);
                 }
+            }
+            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; {
+                <span class="macro">todo!</span>()
             }
         }
     }

@@ -85,7 +85,9 @@
 <a href="#84" id="84">84</a>
 <a href="#85" id="85">85</a>
 <a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a></pre></div><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a></pre></div><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
 <span class="kw">mod </span>clk_insertion;
@@ -105,16 +107,17 @@
 <span class="kw">mod </span>group_to_seq;
 <span class="kw">mod </span>infer_share;
 <span class="kw">mod </span>lower_guards;
-<span class="kw">pub mod </span>math_utilities;
 <span class="kw">mod </span>merge_assign;
 <span class="kw">mod </span>papercut;
 <span class="kw">mod </span>profiler_instrumentation;
 <span class="kw">mod </span>reset_insertion;
 <span class="kw">mod </span>simplify_static_guards;
+<span class="kw">mod </span>static_fsm_allocation;
 <span class="kw">mod </span>static_fsm_opts;
 <span class="kw">mod </span>static_inference;
 <span class="kw">mod </span>static_inliner;
 <span class="kw">mod </span>static_promotion;
+<span class="kw">mod </span>static_repeat_fsm_allocation;
 
 <span class="comment">// mod simplify_guards;
 </span><span class="kw">mod </span>add_guard;
@@ -151,7 +154,6 @@
 <span class="kw">pub use </span>group_to_seq::GroupToSeq;
 <span class="kw">pub use </span>infer_share::InferShare;
 <span class="kw">pub use </span>lower_guards::LowerGuards;
-<span class="kw">pub use </span>math_utilities::get_bit_width_from;
 <span class="kw">pub use </span>merge_assign::MergeAssign;
 <span class="kw">pub use </span>papercut::Papercut;
 <span class="kw">pub use </span>profiler_instrumentation::ProfilerInstrumentation;
@@ -159,10 +161,12 @@
 <span class="kw">pub use </span>reset_insertion::ResetInsertion;
 <span class="kw">pub use </span>simplify_static_guards::SimplifyStaticGuards;
 <span class="kw">pub use </span>simplify_with_control::SimplifyWithControl;
+<span class="kw">pub use </span>static_fsm_allocation::StaticFSMAllocation;
 <span class="kw">pub use </span>static_fsm_opts::StaticFSMOpts;
 <span class="kw">pub use </span>static_inference::StaticInference;
 <span class="kw">pub use </span>static_inliner::StaticInliner;
 <span class="kw">pub use </span>static_promotion::StaticPromotion;
+<span class="kw">pub use </span>static_repeat_fsm_allocation::StaticRepeatFSMAllocation;
 <span class="kw">pub use </span>unroll_bound::UnrollBounded;
 <span class="comment">// pub use simplify_guards::SimplifyGuards;
 </span><span class="kw">pub use </span>add_guard::AddGuard;

@@ -1419,7 +1419,14 @@
 <a href="#1418" id="1418">1418</a>
 <a href="#1419" id="1419">1419</a>
 <a href="#1420" id="1420">1420</a>
-<a href="#1421" id="1421">1421</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
+<a href="#1421" id="1421">1421</a>
+<a href="#1422" id="1422">1422</a>
+<a href="#1423" id="1423">1423</a>
+<a href="#1424" id="1424">1424</a>
+<a href="#1425" id="1425">1425</a>
+<a href="#1426" id="1426">1426</a>
+<a href="#1427" id="1427">1427</a>
+<a href="#1428" id="1428">1428</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     GraphColoring, Node, ParNodes, SingleNode, StateType, StaticFSM,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
@@ -1774,6 +1781,9 @@
                     <span class="self">Self</span>::add_par_conflicts(stmt, fsm_trees, conflict_graph);
                 }
             }
+            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; {
+                <span class="macro">todo!</span>(<span class="string">"should not encounter fsm nodes"</span>)
+            }
         }
     }
 
@@ -2023,7 +2033,7 @@
                         <span class="macro">panic!</span>(<span class="string">""</span>)
                     }
                 }
-                PortParent::Group(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">""</span>),
+                PortParent::Group(<span class="kw">_</span>) | PortParent::FSM(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">""</span>),
                 PortParent::StaticGroup(sgroup) =&gt; {
                     <span class="macro">assert!</span>(assign.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>));
                     <span class="kw">let </span>(beg, end) = <span class="self">Self</span>::get_interval_from_guard(
@@ -2116,7 +2126,7 @@
             <span class="comment">// Looking for static_child[go] = %[i:j] ? 1'd1; to build children.
             </span><span class="kw">match </span><span class="kw-2">&amp;</span>assign.dst.borrow().parent {
                 PortParent::Cell(<span class="kw">_</span>) =&gt; (),
-                PortParent::Group(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">""</span>),
+                PortParent::Group(<span class="kw">_</span>) | PortParent::FSM(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">""</span>),
                 PortParent::StaticGroup(sgroup) =&gt; {
                     <span class="macro">assert!</span>(assign.src.borrow().is_constant(<span class="number">1</span>, <span class="number">1</span>));
                     <span class="kw">let </span>(beg, end) = <span class="self">Self</span>::get_interval_from_guard(
@@ -2238,6 +2248,9 @@
                     );
                 };
                 <span class="macro">vec!</span>[s.group.borrow().name()]
+            }
+            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; {
+                <span class="macro">todo!</span>(<span class="string">"should not encounter fsm nodes"</span>)
             }
         }
     }
@@ -2439,6 +2452,7 @@
                         <span class="comment">// Don't add assignment to `group[done]`
                         </span>PortParent::Group(<span class="kw">_</span>) =&gt; dst.name != <span class="string">"done"</span>,
                         PortParent::StaticGroup(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+                        PortParent::FSM(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
                     }
                 }),
             );

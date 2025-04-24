@@ -241,7 +241,10 @@
 <a href="#240" id="240">240</a>
 <a href="#241" id="241">241</a>
 <a href="#242" id="242">242</a>
-<a href="#243" id="243">243</a></pre></div><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a></pre></div><pre class="rust"><code><span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::rc::Rc;
 
@@ -468,6 +471,9 @@
             }
             ir::Control::Static(<span class="kw">_</span>) =&gt; c.take_static_control(),
             ir::Control::Invoke(s) =&gt; <span class="self">self</span>.convert_invoke_to_static(s),
+            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; {
+                <span class="macro">todo!</span>(<span class="string">"should not encounter fsm nodes"</span>)
+            }
         }
     }
 

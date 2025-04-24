@@ -316,7 +316,10 @@
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
 <a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ControlId;
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::ControlId;
 <span class="kw">use </span>calyx_ir <span class="kw">as </span>ir;
 <span class="kw">use </span>std::{
     collections::{HashMap, HashSet},
@@ -630,6 +633,9 @@
             }
             ir::Control::Static(sc) =&gt; {
                 <span class="self">self</span>.build_time_map_static(sc, <span class="prelude-val">None</span>, <span class="bool-val">true</span>);
+            }
+            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; {
+                <span class="macro">todo!</span>()
             }
         }
     }

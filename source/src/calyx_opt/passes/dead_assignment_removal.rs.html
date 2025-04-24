@@ -143,7 +143,12 @@
 <a href="#142" id="142">142</a>
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 
@@ -274,14 +279,19 @@
             </span>drop(group);
 
             gr.borrow_mut().assignments.retain(|assign| {
-                <span class="kw">let </span>dst = assign.dst.borrow();
-                <span class="comment">// if dst is a combinational component that is not protected,
-                // the assignment is removed if it is not used
-                </span><span class="kw">if </span>dst.parent_is_comb() &amp;&amp; !dst.parent_is_protected() {
-                    <span class="kw">return </span>used_combs.contains(<span class="kw-2">&amp;</span>dst.get_parent_name());
+                <span class="kw">if </span>assign.dst.borrow().parent_is_fsm() {
+                    <span class="comment">// otherwise, assignments to FSMs would be marked as dead
+                    </span><span class="bool-val">true
+                </span>} <span class="kw">else </span>{
+                    <span class="kw">let </span>dst = assign.dst.borrow();
+                    <span class="comment">// if dst is a combinational component that is not protected,
+                    // the assignment is removed if it is not used
+                    </span><span class="kw">if </span>dst.parent_is_comb() &amp;&amp; !dst.parent_is_protected() {
+                        <span class="kw">return </span>used_combs.contains(<span class="kw-2">&amp;</span>dst.get_parent_name());
+                    }
+                    <span class="comment">// Make sure that the assignment's guard it not false
+                    </span>!assign.guard.is_false()
                 }
-                <span class="comment">// Make sure that the assignment's guard it not false
-                </span>!assign.guard.is_false()
             });
         }
 

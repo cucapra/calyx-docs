@@ -275,7 +275,9 @@
 <a href="#274" id="274">274</a>
 <a href="#275" id="275">275</a>
 <a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a></pre></div><pre class="rust"><code><span class="kw">use </span>linked_hash_map::LinkedHashMap;
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a></pre></div><pre class="rust"><code><span class="kw">use </span>linked_hash_map::LinkedHashMap;
 
 <span class="kw">use </span><span class="kw">crate</span>::control::StaticInvoke;
 <span class="kw">use crate</span>::{<span class="self">self </span><span class="kw">as </span>ir, RRC};
@@ -488,6 +490,7 @@
     </span><span class="kw">pub fn </span>rewrite_control(<span class="kw-2">&amp;</span><span class="self">self</span>, c: <span class="kw-2">&amp;mut </span>ir::Control) {
         <span class="kw">match </span>c {
             ir::Control::Empty(<span class="kw">_</span>) =&gt; (),
+
             ir::Control::Enable(en) =&gt; {
                 <span class="kw">let </span>g = <span class="kw-2">&amp;</span>en.group.borrow().name();
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(new_group) = <span class="self">self</span>.group_map.get(g) {
@@ -535,6 +538,7 @@
             }
             ir::Control::Invoke(inv) =&gt; <span class="self">self</span>.rewrite_invoke(inv),
             ir::Control::Static(s) =&gt; <span class="self">self</span>.rewrite_static_control(s),
+            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
         }
     }
 

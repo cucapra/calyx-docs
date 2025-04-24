@@ -352,7 +352,16 @@
 <a href="#351" id="351">351</a>
 <a href="#352" id="352">352</a>
 <a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a></pre></div><pre class="rust"><code><span class="kw">use </span>calyx_utils::{CalyxResult, Error, Id};
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a></pre></div><pre class="rust"><code><span class="kw">use </span>calyx_utils::{CalyxResult, Error, Id};
 <span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>strum::EnumCount;
 <span class="kw">use </span>strum_macros::{AsRefStr, EnumCount, EnumString, FromRepr};
@@ -433,6 +442,12 @@
     <span class="attr">#[strum(serialize = <span class="string">"protected"</span>)]
     </span><span class="doccomment">/// Indicate that the cell should not be removed or shared during optimization.
     </span>Protected,
+    <span class="attr">#[strum(serialize = <span class="string">"fsm_control"</span>)]
+    </span><span class="doccomment">/// Protects a cell controlling an FSM from being removed
+    </span>FSMControl,
+    <span class="attr">#[strum(serialize = <span class="string">"one_state"</span>)]
+    </span><span class="doccomment">/// Indicates that a StaticEnable should be allocated only one state in an FSM
+    </span>OneState,
 }
 
 <span class="kw">impl </span>From&lt;BoolAttr&gt; <span class="kw">for </span>Attribute {
@@ -481,6 +496,8 @@
     /// dynamic.
     /// Therefore, we only place if we can *guarantee* the interval of the component.
     </span>Interval,
+    <span class="attr">#[strum(serialize = <span class="string">"state"</span>)]
+    </span>State,
 }
 <span class="kw">impl </span>From&lt;NumAttr&gt; <span class="kw">for </span>Attribute {
     <span class="kw">fn </span>from(attr: NumAttr) -&gt; <span class="self">Self </span>{
@@ -506,6 +523,7 @@
     LOOP,
     START,
     END,
+    SCHEDULE_ID,
 }
 <span class="kw">impl </span>From&lt;InternalAttr&gt; <span class="kw">for </span>Attribute {
     <span class="kw">fn </span>from(attr: InternalAttr) -&gt; <span class="self">Self </span>{

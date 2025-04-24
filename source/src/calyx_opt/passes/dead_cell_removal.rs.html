@@ -208,7 +208,20 @@
 <a href="#207" id="207">207</a>
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir};
 <span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::iter;
@@ -246,8 +259,9 @@
             <span class="bool-val">true
         </span>} <span class="kw">else </span>{
             <span class="kw">let </span>parent = <span class="kw-2">&amp;</span>dst.get_parent_name();
-            <span class="kw">let </span>out =
-                <span class="self">self</span>.all_reads.contains(parent) || wire_reads.contains(parent);
+            <span class="kw">let </span>out = <span class="self">self</span>.all_reads.contains(parent)
+                || wire_reads.contains(parent)
+                || asgn.dst.borrow().parent_is_fsm();
             <span class="kw">if </span>!out {
                 <span class="macro">log::debug!</span>(
                     <span class="string">"`{}' because `{}' is unused"</span>,
@@ -339,6 +353,18 @@
         _sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
+        <span class="comment">// Add cells required by any FSM
+        </span><span class="self">self</span>.all_reads.extend(comp.fsms.iter().flat_map(|fsm| {
+            fsm.borrow().get_called_port_parents(
+                |cell_names: <span class="kw-2">&amp;mut </span>Vec&lt;ir::Id&gt;, port: <span class="kw-2">&amp;</span>ir::RRC&lt;ir::Port&gt;| {
+                    <span class="kw">if let </span>ir::PortParent::Cell(group_wref) =
+                        <span class="kw-2">&amp;</span>port.borrow().parent
+                    {
+                        cell_names.push(group_wref.upgrade().borrow().name());
+                    }
+                },
+            )
+        }));
         <span class="comment">// Add @external cells, @protected cells and ref cells.
         </span><span class="self">self</span>.all_reads.extend(
             comp.cells
