@@ -538,7 +538,7 @@
             }
             ir::Control::Invoke(inv) =&gt; <span class="self">self</span>.rewrite_invoke(inv),
             ir::Control::Static(s) =&gt; <span class="self">self</span>.rewrite_static_control(s),
-            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
+            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; (),
         }
     }
 
