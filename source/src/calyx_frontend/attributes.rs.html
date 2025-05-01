@@ -321,7 +321,17 @@
 <a href="#320" id="320">320</a>
 <a href="#321" id="321">321</a>
 <a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::Attribute;
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::Attribute;
 <span class="kw">use crate</span>::{InlineAttributes, attribute::SetAttribute};
 <span class="kw">use </span>calyx_utils::{CalyxResult, GPosIdx, WithPos};
 <span class="kw">use </span>itertools::Itertools;
@@ -434,6 +444,16 @@
                 <span class="self">self</span>.hinfo.attrs.insert(attr, val);
             }
         }
+    }
+    <span class="kw">pub fn </span>insert_set&lt;S&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: S, val: u32)
+    <span class="kw">where
+        </span>S: Into&lt;SetAttribute&gt;,
+    {
+        <span class="self">self</span>.hinfo
+            .set_attrs
+            .entry(key.into())
+            .or_default()
+            .insert(val);
     }
 
     <span class="doccomment">/// Get the value associated with an attribute key
