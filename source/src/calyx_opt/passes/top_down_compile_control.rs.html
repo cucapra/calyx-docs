@@ -1730,7 +1730,11 @@
 <a href="#1729" id="1729">1729</a>
 <a href="#1730" id="1730">1730</a>
 <a href="#1731" id="1731">1731</a>
-<a href="#1732" id="1732">1732</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::passes;
+<a href="#1732" id="1732">1732</a>
+<a href="#1733" id="1733">1733</a>
+<a href="#1734" id="1734">1734</a>
+<a href="#1735" id="1735">1735</a>
+<a href="#1736" id="1736">1736</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::passes;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, ParseVal, PassOpt, VisResult, Visitor,
 };
@@ -3306,7 +3310,7 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>done_regs = Vec::with_capacity(s.stmts.len());
 
         <span class="comment">// Profiling: record each par child (arm)'s group and done register
-        </span><span class="kw">let </span>child_infos = Vec::with_capacity(s.stmts.len());
+        </span><span class="kw">let </span><span class="kw-2">mut </span>child_infos = Vec::with_capacity(s.stmts.len());
 
         <span class="comment">// For each child, build the enabling logic.
         </span><span class="kw">for </span>con <span class="kw">in </span><span class="kw-2">&amp;</span>s.stmts {
@@ -3374,6 +3378,10 @@
                     pd[<span class="string">"write_en"</span>] = group_done <span class="question-mark">? </span>signal_on[<span class="string">"out"</span>];
                 );
 
+                child_infos.push(ParChildInfo {
+                    group: group.borrow().name(),
+                    register: pd.borrow().name(),
+                });
                 par_group.borrow_mut().assignments.extend(assigns);
                 done_regs.push(pd)
             };
