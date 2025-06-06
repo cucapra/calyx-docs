@@ -323,12 +323,40 @@
 <a href="#322" id="322">322</a>
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a></pre></div><pre class="rust"><code><span class="kw">use super</span>::{
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a></pre></div><pre class="rust"><code><span class="kw">use super</span>::{
     ast::{ComponentDef, NamespaceDef},
     parser,
 };
 <span class="kw">use crate</span>::{LibrarySignatures, source_info::SourceInfoTable};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error, WithPos};
+<span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>std::{
     collections::HashSet,
     path::{Path, PathBuf},
@@ -385,11 +413,11 @@
     /// An import path is first resolved as an absolute or
     /// relative(-to-`parent`) path, and if no file exists at either such
     /// extended path exists, it assumed to be under the library path
-    /// `lib_path`.
+    /// `lib_paths`.
     </span><span class="kw">fn </span>canonicalize_import&lt;S&gt;(
         import: S,
         parent: <span class="kw-2">&amp;</span>Path,
-        lib_path: <span class="kw-2">&amp;</span>Path,
+        lib_paths: <span class="kw-2">&amp;</span>[PathBuf],
     ) -&gt; CalyxResult&lt;PathBuf&gt;
     <span class="kw">where
         </span>S: AsRef&lt;Path&gt; + Clone + WithPos,
@@ -399,22 +427,42 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(import.as_ref().to_path_buf());
         }
 
-        <span class="kw">let </span>relative_import = parent.join(import.clone());
+        <span class="kw">let </span>relative_import = parent.join(<span class="kw-2">&amp;</span>import);
         <span class="kw">if </span>relative_import.exists() {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(relative_import);
         }
 
-        <span class="kw">let </span>library_import = lib_path.join(import.clone());
-        <span class="kw">if </span>library_import.exists() {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(library_import);
-        }
+        <span class="kw">let </span>library_imports: Vec&lt;<span class="kw">_</span>&gt; = lib_paths
+            .iter()
+            .filter_map(|lib_path| {
+                <span class="kw">let </span>library_import = lib_path.join(<span class="kw-2">&amp;</span>import);
+                library_import.exists().then_some(library_import)
+            })
+            .collect();
 
-        <span class="prelude-val">Err</span>(Error::invalid_file(
-            <span class="macro">format!</span>(<span class="string">"Import path `{}` found neither as an absolute path, nor in the parent ({}), nor in library path ({})"</span>,
-            import.as_ref().to_string_lossy(),
-            parent.to_string_lossy(),
-            lib_path.to_string_lossy()
-        )).with_pos(<span class="kw-2">&amp;</span>import))
+        <span class="kw">match </span>library_imports.len() {
+            <span class="number">0 </span>=&gt; {
+                <span class="prelude-val">Err</span>(Error::invalid_file(<span class="macro">format!</span>(
+                    <span class="string">"Import path `{}` found neither as an absolute path, nor in the parent ({}), nor in library path ({})"</span>,
+                    import.as_ref().to_string_lossy(),
+                    parent.to_string_lossy(),
+                    lib_paths.iter().map(|p| p.to_string_lossy()).format(<span class="string">", "</span>)
+                ))
+                .with_pos(<span class="kw-2">&amp;</span>import))
+            }
+            <span class="number">1 </span>=&gt; <span class="prelude-val">Ok</span>(library_imports.into_iter().next().unwrap()),
+            <span class="kw">_ </span>=&gt; {
+                <span class="prelude-val">Err</span>(Error::misc(<span class="macro">format!</span>(
+                    <span class="string">"Import path `{}` found in multiple library paths ({})"</span>,
+                    import.as_ref().to_string_lossy(),
+                    library_imports
+                        .iter()
+                        .map(|p| p.to_string_lossy())
+                        .format(<span class="string">", "</span>)
+                ))
+                .with_pos(<span class="kw-2">&amp;</span>import))
+            }
+        }
     }
 
     <span class="comment">// Get the absolute path to an extern. Extern can only exist on paths
@@ -476,11 +524,11 @@
     /// program.
     </span><span class="kw">pub fn </span>construct(
         file: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
-        lib_path: <span class="kw-2">&amp;</span>Path,
+        lib_paths: <span class="kw-2">&amp;</span>[PathBuf],
     ) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
         <span class="self">Self</span>::construct_with_all_deps::&lt;<span class="bool-val">false</span>&gt;(
             file.iter().cloned().collect(),
-            lib_path,
+            lib_paths,
         )
     }
 
@@ -488,11 +536,11 @@
     /// imported dependencies.
     </span><span class="kw">pub fn </span>construct_shallow(
         file: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
-        lib_path: <span class="kw-2">&amp;</span>Path,
+        lib_paths: <span class="kw-2">&amp;</span>[PathBuf],
     ) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
         <span class="self">Self</span>::construct_with_all_deps::&lt;<span class="bool-val">true</span>&gt;(
             file.iter().cloned().collect(),
-            lib_path,
+            lib_paths,
         )
     }
 
@@ -519,7 +567,7 @@
         is_source: bool,
         parent: <span class="kw-2">&amp;</span>Path,
         shallow: bool,
-        lib_path: <span class="kw-2">&amp;</span>Path,
+        lib_paths: <span class="kw-2">&amp;</span>[PathBuf],
     ) -&gt; CalyxResult&lt;Vec&lt;(PathBuf, bool)&gt;&gt; {
         <span class="comment">// Canonicalize the extern paths and add them
         </span><span class="kw">for </span>(path, exts) <span class="kw">in </span>ns.externs {
@@ -563,7 +611,7 @@
             .imports
             .into_iter()
             .map(|p| {
-                <span class="self">Self</span>::canonicalize_import(p, parent, lib_path)
+                <span class="self">Self</span>::canonicalize_import(p, parent, lib_paths)
                     .map(|s| (s, <span class="bool-val">false</span>))
             })
             .collect::&lt;CalyxResult&lt;<span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
@@ -576,7 +624,7 @@
     /// If in doubt, set SHALLOW to false.
     </span><span class="kw">pub fn </span>construct_with_all_deps&lt;<span class="kw">const </span>SHALLOW: bool&gt;(
         <span class="kw-2">mut </span>files: Vec&lt;PathBuf&gt;,
-        lib_path: <span class="kw-2">&amp;</span>Path,
+        lib_paths: <span class="kw-2">&amp;</span>[PathBuf],
     ) -&gt; CalyxResult&lt;<span class="self">Self</span>&gt; {
         <span class="comment">// Construct initial namespace. If `files` is empty, then we're reading from the standard input.
         </span><span class="kw">let </span>first = files.pop();
@@ -593,13 +641,19 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>already_imported: HashSet&lt;PathBuf&gt; = HashSet::new();
 
         <span class="kw">let </span><span class="kw-2">mut </span>ws = Workspace::default();
-        <span class="kw">let </span>abs_lib_path = lib_path.canonicalize().map_err(|err| {
-            Error::invalid_file(<span class="macro">format!</span>(
-                <span class="string">"Failed to canonicalize library path `{}`: {}"</span>,
-                lib_path.to_string_lossy(),
-                err
-            ))
-        })<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>abs_lib_paths: Vec&lt;<span class="kw">_</span>&gt; = lib_paths
+            .iter()
+            .map(|lib_path| {
+                lib_path.canonicalize().map_err(|err| {
+                    Error::invalid_file(<span class="macro">format!</span>(
+                        <span class="string">"Failed to canonicalize library path `{}`: {}"</span>,
+                        lib_path.to_string_lossy(),
+                        err
+                    ))
+                })
+            })
+            .collect::&lt;CalyxResult&lt;<span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
 
         <span class="comment">// Add original imports to workspace
         </span>ws.original_imports =
@@ -623,7 +677,7 @@
             <span class="bool-val">true</span>,
             <span class="kw-2">&amp;</span>parent_canonical,
             <span class="bool-val">false</span>,
-            <span class="kw-2">&amp;</span>abs_lib_path,
+            <span class="kw-2">&amp;</span>abs_lib_paths,
         )<span class="question-mark">?</span>;
         dependencies.append(<span class="kw-2">&amp;mut </span>deps);
 
@@ -639,7 +693,7 @@
                 source,
                 <span class="kw-2">&amp;</span>parent,
                 SHALLOW,
-                <span class="kw-2">&amp;</span>abs_lib_path,
+                <span class="kw-2">&amp;</span>abs_lib_paths,
             )<span class="question-mark">?</span>;
             dependencies.append(<span class="kw-2">&amp;mut </span>deps);
 
