@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Atom","Control","GuardComp","GuardExpr","NumType","Port","StaticGuardExpr"],"struct":["BitNum","Cell","ComponentDef","Group","Guard","NamespaceDef","Proto","StaticGroup","StaticGuard","StaticWire","Wire"],"type":["CompGuard"]};
+window.SIDEBAR_ITEMS = {"enum":["Atom","Control","GuardComp","GuardExpr","NumType","Port","StaticGuardExpr","Transition"],"struct":["BitNum","Cell","ComponentDef","FSMState","Fsm","Group","Guard","NamespaceDef","Proto","StaticGroup","StaticGuard","StaticWire","Wire"],"type":["CompGuard"]};

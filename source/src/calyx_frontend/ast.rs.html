@@ -463,7 +463,45 @@
 <a href="#462" id="462">462</a>
 <a href="#463" id="463">463</a>
 <a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a></pre></div><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a></pre></div><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx
 </span><span class="kw">use </span><span class="kw">super</span>::parser;
 <span class="kw">use crate</span>::{Attributes, PortDef, Primitive, source_info::SourceInfoTable};
 <span class="kw">use </span>atty::Stream;
@@ -522,6 +560,8 @@
     </span><span class="kw">pub </span>groups: Vec&lt;Group&gt;,
     <span class="doccomment">/// List of StaticGroups
     </span><span class="kw">pub </span>static_groups: Vec&lt;StaticGroup&gt;,
+    <span class="doccomment">/// List of fsms
+    </span><span class="kw">pub </span>fsms: Vec&lt;Fsm&gt;,
     <span class="doccomment">/// List of continuous assignments
     </span><span class="kw">pub </span>continuous_assignments: Vec&lt;Wire&gt;,
     <span class="doccomment">/// Single control statement for this component.
@@ -550,6 +590,7 @@
             cells: Vec::new(),
             groups: Vec::new(),
             static_groups: Vec::new(),
+            fsms: Vec::new(),
             continuous_assignments: Vec::new(),
             control: Control::empty(),
             attributes: Attributes::default(),
@@ -719,6 +760,41 @@
     <span class="kw">pub </span>wires: Vec&lt;StaticWire&gt;,
     <span class="kw">pub </span>attributes: Attributes,
     <span class="kw">pub </span>latency: NonZeroU64,
+}
+
+<span class="attr">#[derive(Debug)]
+</span><span class="doccomment">/// The next state transition for an FSM.
+///
+/// Transitions are either `Unconditional` (always transition to one specific state) or
+/// `Conditional` (with a set of guards mapping to next states). For the `Conditional` case, we
+/// have a list of guards and their corresponding states; the last entry in this list is the
+/// default transition.
+</span><span class="kw">pub enum </span>Transition {
+    Unconditional(u64),
+    Conditional(Vec&lt;(<span class="prelude-ty">Option</span>&lt;GuardExpr&gt;, u64)&gt;),
+}
+
+<span class="attr">#[derive(Debug)]
+</span><span class="doccomment">/// A single state in an FSM.
+///
+/// A `FSMRule` consists of the set of assignments that are active in a given state and the
+/// transitions from this state to other states. The assignments are a list of wires, like a
+/// `group` definition.
+</span><span class="kw">pub struct </span>FSMState {
+    <span class="kw">pub </span>assignments: Vec&lt;Wire&gt;,
+    <span class="kw">pub </span>transition: Transition,
+}
+
+<span class="attr">#[derive(Debug)]
+</span><span class="doccomment">/// A fsm block has a name, attributes, and `FSMRule`s
+/// that correspond to all the states within the fsm.
+</span><span class="kw">pub struct </span>Fsm {
+    <span class="comment">// Name of the fsm construct
+    </span><span class="kw">pub </span>name: Id,
+    <span class="comment">// Attributes attached to this fsm
+    </span><span class="kw">pub </span>attributes: Attributes,
+    <span class="comment">// A list of rules, indexed by state.
+    </span><span class="kw">pub </span>fsm_states: Vec&lt;FSMState&gt;,
 }
 
 <span class="doccomment">/// Data for the `-&gt;` structure statement.
