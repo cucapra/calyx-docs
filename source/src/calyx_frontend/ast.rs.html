@@ -501,7 +501,8 @@
 <a href="#500" id="500">500</a>
 <a href="#501" id="501">501</a>
 <a href="#502" id="502">502</a>
-<a href="#503" id="503">503</a></pre></div><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx
+<a href="#503" id="503">503</a>
+<a href="#504" id="504">504</a></pre></div><pre class="rust"><code><span class="doccomment">//! Abstract Syntax Tree for Calyx
 </span><span class="kw">use </span><span class="kw">super</span>::parser;
 <span class="kw">use crate</span>::{Attributes, PortDef, Primitive, source_info::SourceInfoTable};
 <span class="kw">use </span>atty::Stream;
@@ -612,9 +613,10 @@
     /// currently being defined.
     </span>This { port: Id },
 
-    <span class="doccomment">/// `group[name]` parses into `Hole { group, name }`
-    /// and is a hole named `name` on group `group`
-    </span>Hole { group: Id, name: Id },
+    <span class="doccomment">/// `struct_elem[name]` parses into `Hole { struct_elem, name }`
+    /// and is a hole named `name` on `struct_elem`, which is the
+    /// name of either a group or an FSM
+    </span>Hole { struct_elem: Id, name: Id },
 }
 
 <span class="comment">// ===================================
