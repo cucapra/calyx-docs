@@ -455,9 +455,9 @@
 script = "/home/ayaka/projects/FlameGraph/flamegraph.pl"
 </code></pre>
 <h2 id="basic-use"><a class="header" href="#basic-use">Basic Use</a></h2>
-<p>To obtain a flame graph, run fud2 with an SVG output file:</p>
+<p>To obtain a flame graph from a Calyx file, run fud2 with an SVG output file and the <code>--through profiler</code> option:</p>
 <p>ex)</p>
-<pre><code>fud2 tests/correctness/pow.futil -o pow.svg -s sim.data=tests/correctness/pow.futil.data
+<pre><code>fud2 tests/correctness/pow.futil -o pow.svg --through profiler -s sim.data=tests/correctness/pow.futil.data
 </code></pre>
 <p>The produced flame graph is "flattened", which means that each parallel arm gets its own "cycle". So, if arm A and arm B were executing on a single cycle, the flame graph would account for a cycle in arm A and a cycle in arm B. You can view and interact with the flame graph using your favorite web browser.</p>
 <p>If you retain the fud2 build directory with the <code>--keep</code> option or the <code>--dir</code> option, you will find additional profiler output files in <code>&lt;FUD2_BUILD_DIRECTORY&gt;/profiler-out</code>:</p>
