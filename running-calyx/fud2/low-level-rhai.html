@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>fud2: Experimental Driver - Calyx Documentation</title>
+        <title>Low Level Rhai - Calyx Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -437,153 +437,123 @@
 }
 
 </style>
-<h1 id="fud2-an-experimental-successor-to-fud"><a class="header" href="#fud2-an-experimental-successor-to-fud">fud2: An Experimental Successor to fud</a></h1>
-<p><a href="./fud/index.html">fud</a> is the compiler driver tool for orchestrating the Calyx ecosystem.
-fud2 is an experiment in building a new driver that works like fud that adds some fundamental new capabilities and resolves some underlying problems.</p>
-<p>"Original" fud is still the right tool for almost all jobs; fud2 is in an experimental phase and does not support everything fud can do.
-Someday, fud2 may supplant fud, but it needs more work before it is ready to do that.
-Until then, fud remains your first choice for all your build-related needs.</p>
-<h2 id="set-up"><a class="header" href="#set-up">Set Up</a></h2>
-<p>If you would like to use <code>fud2</code> as is, and already have Calyx installed, you can <code>cargo install --path fud2</code> from this repository's root to automatically add the binary to your path.</p>
-<p>Alternatively, if you would like to work on development of <code>fud2</code> and/or keep up with the latest changes when you <code>git pull</code>, you can build it along with everything else in this monorepo with <code>cargo build</code>.
-You might then want to do something like <code>ln -s `pwd`/target/debug/fud2 ~/.local/bin</code> for easy access to the <code>fud2</code> binary.</p>
-<p>fud2 depends on <a href="https://ninja-build.org">Ninja</a>.
-Install it using your OS package manager or by downloading a binary.</p>
-<h3 id="configuration"><a class="header" href="#configuration">Configuration</a></h3>
-<p>Run the following command to edit <code>fud2</code>'s configuration file (usually <code>~/.config/fud2.toml</code>):</p>
-<pre><code>$ fud2 edit-config
+<h1 id="low-level-rhai"><a class="header" href="#low-level-rhai">Low Level Rhai</a></h1>
+<p><code>fud2</code> generates Ninja build files. Low level Rhai gives more control over what generated build files look like.</p>
+<blockquote>
+<p>We recommend reading the <a href="./index.html#the-design-of-fud2">The Design of fud2</a> section in the <a href="./index.html">fud2</a> main page before referencing this API.</p>
+</blockquote>
+<h2 id="example-script-in-low-level-rhai"><a class="header" href="#example-script-in-low-level-rhai">Example Script in Low Level Rhai</a></h2>
+<p>A common routine for using low level Rhai is:</p>
+<ol>
+<li>Define states</li>
+<li>Define "setup" functions that register variables and rules</li>
+<li>Define a "builder" function that produces commands using variables and rules created from (2)</li>
+<li>Define an op that uses "setup" functions and the "builder" function to produce the target state from the start state</li>
+</ol>
+<p>"Setup" and "builder" functions are normal Rhai functions that use the Emitter API.</p>
+<p>We'll walk through how to write a script that adds support for using the <code>calyx</code> compiler.</p>
+<p>Like in <a href="./high-level-rhai.html">High Level Rhai</a>, we need to define some states:</p>
+<pre><code class="language-rust ignore">export const calyx_state = state("calyx", ["futil"]);
+export const verilog_state = state("verilog", ["sv", "v"]);</code></pre>
+<p>These two lines define a <code>calyx</code> state and a <code>verilog</code> state. The <code>export</code> prefix means that these variables will be accessible to other scripts that <code>import "calyx"</code>.</p>
+<p>Next we'll define a "setup" procedure to define some rules that will be useful.</p>
+<pre><code class="language-rust ignore">// allows calyx_setup to be used in other scripts
+export const calyx_setup = calyx_setup;
+
+// a "setup" function is just a normal Rhai function that takes in an emitter
+// defines Ninja vars and rules
+fn calyx_setup(e) {
+   // define a Ninja var from the fud2.toml config
+   e.config_var("calyx-base", "calyx.base");
+   // define a Ninja var from either the config, or a default derived from calyx-base
+   e.config_var_or("calyx-exe", "calyx.exe", "$calyx-base/target/debug/calyx");
+   // define a Ninja var from cli options, or with a default
+   e.config_var_or("args", "calyx.args", "");
+   // define a rule to run the Calyx compiler
+   e.rule("calyx", "$calyx-exe -l $calyx-base -b $backend $args $in &gt; $out");
+}</code></pre>
+<p>And now we can define the actual operation that will transform <code>calyx</code> files into <code>verilog</code> files.</p>
+<pre><code class="language-rust ignore">op(
+  "calyx-to-verilog",      // operation name
+  [calyx_setup],           // required "setup" functions
+  calyx_state,             // input state
+  verilog_state,           // output state
+  |e, input, output| {     // "build" function - constructs Ninja build command
+    e.build_cmd([output], "calyx", [input], []) ;
+    e.arg("backend", "verilog");
+  }
+);</code></pre>
+<h2 id="low-level-rhai-api"><a class="header" href="#low-level-rhai-api">Low Level Rhai API</a></h2>
+<h3 id="defining-states"><a class="header" href="#defining-states">Defining states</a></h3>
+<pre><code>state(&lt;name&gt;, [&lt;ext1&gt;, &lt;ext2&gt;, .. ])
 </code></pre>
-<p>Add these lines:</p>
-<pre><code class="language-toml">[calyx]
-base = "&lt;path to calyx checkout&gt;"
+<p>Defines a state with the name <code>&lt;name&gt;</code> where files can have extensions <code>&lt;ext1&gt;</code>, <code>&lt;ext2&gt;</code>, etc. <code>&lt;name&gt;</code> and extensions are all strings.</p>
+<h3 id="defining-operations"><a class="header" href="#defining-operations">Defining operations</a></h3>
+<pre><code>op(&lt;op name&gt;, [&lt;setup1&gt;, &lt;setup2&gt;, ..], &lt;input state&gt;, &lt;output state&gt;, &lt;emit function&gt;)
 </code></pre>
-<h3 id="environment-setup"><a class="header" href="#environment-setup">Environment Setup</a></h3>
-<p>Some parts of Calyx and <code>fud2</code> require setting up and installing various python packages. With Python removing support for installing packages system wide, it's recommended to install relevant packages into a python virtual environment. <code>fud2</code> can set up this environment for you and instruct <code>fud2</code> to automatically run relevant tools in the correct virtual environment.</p>
-<p>To do this, simply run:</p>
-<pre><code>$ fud2 env init
+<p>Defines an op with name <code>&lt;op name&gt;</code> that generates <code>&lt;output state&gt;</code> from <code>&lt;input state&gt;</code>. <code>&lt;op name&gt;</code> is a string, and <code>&lt;input state&gt;</code> and <code>&lt;output state&gt;</code> are states.</p>
+<p>The op uses the setup functions <code>&lt;setup1&gt;, &lt;setup2&gt;, ..</code> to create vars and rules, and the <code>&lt;emit function&gt;</code> to produce commands.</p>
+<p>A "setup" function is simply a function that takes in an emitter. It usually calls functions that <a href="#creating-variables">create variables</a> and <a href="#defining-rules">define rules</a>.</p>
+<p>The "builder" function would have the following declaration:</p>
+<pre><code>|e, input, output| { ... }
 </code></pre>
-<p>There may be some cases where you want to manually interact with the python virtual environment. The virtual environment is installed to <code>$XDG_DATA_HOME/fud2/venv</code> (usually <code>~/.local/share/fud2/venv</code>). You can activate the virtual environment in your current shell with:</p>
-<pre><code>$ fud2 env activate
+<p>where <code>e</code> is an emitter, and <code>input</code> and <code>output</code> are strings containing the filenames of the input and output of the operation. It usually calls functions that <a href="#building-commands">build commands</a>.</p>
+<br>
+<pre><code>rule([&lt;setup1&gt;, &lt;setup2&gt;, ..], &lt;input state&gt;, &lt;output state&gt;, &lt;rule name&gt;)
 </code></pre>
-<p>Now you're ready to use fud2.</p>
-<h2 id="general-use"><a class="header" href="#general-use">General Use</a></h2>
-<p>You can see complete command-line documentation with <code>fud2 --help</code>.
-But generally, you want to do something like this:</p>
-<pre><code>$ fud2 &lt;IN&gt; -o &lt;OUT&gt;
+<p>Defines an op from <code>&lt;input state&gt;</code> to <code>&lt;output state&gt;</code> that consists of only running the rule <code>&lt;rule name&gt;</code> using "setup" functions <code>&lt;setup1&gt;</code>, <code>&lt;setup2&gt;</code>, etc.</p>
+<p><code>&lt;setup1&gt;</code>, <code>&lt;setup2&gt;</code>, etc. are "setup" functions. <code>&lt;input state&gt;</code> and <code>&lt;output_state&gt;</code> are states, and <code>&lt;rule name&gt;</code> is a string.</p>
+<h3 id="emitter-api"><a class="header" href="#emitter-api">Emitter API</a></h3>
+<p>Functions listed in this section are methods of the Emitter, which can be called to create variables, rules, and commands in the produced Ninja file.</p>
+<h4 id="creating-variables"><a class="header" href="#creating-variables">Creating variables</a></h4>
+<pre><code>var_(&lt;variable name&gt;, &lt;filename&gt;)
 </code></pre>
-<p>For example, use this to compile a Calyx program to Verilog:</p>
-<pre><code>$ fud2 foo.futil -o bar.sv
+<p>Defines a Ninja variable <code>&lt;variable name&gt;</code> which refers to the file <code>&lt;filename&gt;</code>. Both <code>&lt;variable name&gt;</code> and <code>&lt;filename&gt;</code> are strings.</p>
+<br>
+<pre><code>config_var(&lt;variable name&gt;, &lt;configuration path&gt;)
 </code></pre>
-<p>fud2 tries to automatically guess the input and output formats using filename extensions.
-If that doesn't work, you can choose for it with <code>--from &lt;state&gt;</code> and <code>--to &lt;state&gt;</code>;
-for example, this is a more explicit version of the above:</p>
-<pre><code>$ fud2 foo.futil -o bar.sv --from calyx --to verilog
+<p>Defines a Ninja variable <code>&lt;variable name&gt;</code> using the value obtained from <code>&lt;configuration path&gt;</code> from the configuration file. If the config value is undefined, raises an error. Both <code>&lt;variable name&gt;</code> and <code>&lt;configuration path&gt;</code> are strings.</p>
+<br>
+<pre><code>config_var_or(&lt;variable name&gt;, &lt;configuration path&gt;, &lt;default&gt;)
 </code></pre>
-<p>You can also omit the input and output filenames to instead use stdin and stdout.
-In that case, <code>--from</code> and <code>--to</code> respectively are required.
-So here's yet another way to do the same thing:</p>
-<pre><code>$ fud2 --from calyx --to verilog &lt; foo.futil &gt; bar.sv
+<p>Defines a Ninja variable <code>&lt;variable name&gt;</code> using the value obtained from <code>&lt;configuration path&gt;</code> from the configuration file if the value exists, or <code>&lt;default&gt;</code> otherwise. Both <code>&lt;variable name&gt;</code> and <code>&lt;configuration path&gt;</code> are strings.</p>
+<br>
+<pre><code>config_val(&lt;config var&gt;)
 </code></pre>
-<p>This is handy if you just want to print the result of a build to the console:</p>
-<pre><code>$ fud2 foo.futil --to verilog
+<p>Returns the value of the configuration variable <code>&lt;config var&gt;</code> with the value provided. Panics if the configuration variable does not have a value.</p>
+<br>
+<pre><code>config_constrained_or(&lt;config var&gt;, [&lt;valid val1&gt;, &lt;valid val2&gt;, ..], &lt;default&gt;)
 </code></pre>
-<p>Some operations use other configuration options, which can come from either your <code>fud2.toml</code> or the command line.
-Use <code>--set key=value</code> to override any such option.</p>
-<h2 id="advanced-options"><a class="header" href="#advanced-options">Advanced Options</a></h2>
-<p>Use <code>fud2 --help</code> for an overview of the command-line interface.
-Here are some options you might need:</p>
-<ul>
-<li>By default, fud2 runs the build in a directory called <code>.fud2</code> within the working directory. It automatically deletes this directory when the build is done.
-<ul>
-<li>It can be useful to keep this build directory around for debugging or as a "cache" for future builds. Use <code>--keep</code> to prevent fud2 from deleting the build directory.</li>
-<li>You can also tell fud2 to use a different build directory with <code>--dir</code>. If you give it an existing directory, it will never be deleted, even without <code>--keep</code>. (Only "fresh" build directories are automatically cleaned up.)</li>
-</ul>
-</li>
-<li>If you don't like the operation path that fud2 selected for your build, you can control it with <code>--through &lt;OP&gt;</code>. fud2 will search the operation graph for a path that contains that op. You can provide this option multiple times; fud2 will look for paths that contain <em>all</em> these operations, in order.</li>
-<li>You can choose one of several modes with <code>-m &lt;NAME&gt;</code>:
-<ul>
-<li><code>run</code>: Actually execute a build. The default.</li>
-<li><code>gen</code>: Generate the Ninja build file in the build directory, but don't actually run the build. The default <code>run</code> mode is therefore approximately like doing <code>fud2 -m gen &amp;&amp; ninja -C .fud2</code>.</li>
-<li><code>emit</code>: Just print the Ninja build file to stdout. The <code>gen</code> mode is therefore approximately <code>fud2 -m emit &gt; .fud2/build.ninja</code>.</li>
-<li><code>plan</code>: Print a brief description of the plan, i.e., the sequence of operations that the build would run.</li>
-<li><code>dot</code>: Print a <a href="https://graphviz.org">GraphViz</a> depiction of the plan. Try <code>fud2 -m dot | dot -Tpdf &gt; graph.pdf</code> and take a look.</li>
-<li><code>cmds</code>: Print the commands Ninja would run when executing the plan, but do not execute them.</li>
-</ul>
-</li>
-</ul>
-<p>There are also some subcommands for doing things other than building stuff:</p>
-<ul>
-<li><code>fud2 edit-config</code>: Open the fud2 configuration file in <code>$EDITOR</code>.</li>
-<li><code>fud2 list</code>: Print out all the available states and operations.</li>
-<li><code>fud2 get-rsrc FILE</code>: Fetch a <em>resource file</em> and place it in the working directory. You typically do not need to use this interactively; it is used during builds to obtain files included with fud2 that are necessary for a given build.</li>
-</ul>
-<h2 id="the-design-of-fud2"><a class="header" href="#the-design-of-fud2">The Design of fud2</a></h2>
-<div class="warning">
-<p>This section is about the <em>implementation</em> of fud2; it is only relevant if you want to work on it yourself.
-No need to read any farther if all you want is to <em>use</em> fud2.</p>
-</div>
-<h3 id="fud2-is-a-command-orchestrator"><a class="header" href="#fud2-is-a-command-orchestrator">fud2 is a Command Orchestrator</a></h3>
-<p>fud2 consists of two pieces, which are two separate Rust crates:</p>
-<ul>
-<li>FudCore (the <code>fud-core</code> crate): is a <em>generic compiler driver</em> library. This library is not specific to Calyx and could hypothetically be used to build a fud2-like driver for any compiler ecosystem. Clients of the <code>fud-core</code> library work by constructing a <code>Driver</code> object that encapsulates a set of <em>states</em> and <em>operations</em> that define the driver's behavior.</li>
-<li>fud2 itself is a program that uses the FudCore library. All of the Calyx-specific logic lives in <code>fud2</code>. For the most part, all of the code in the <code>fud2</code> crate consists of declaring a bunch of states and operations. The <code>main</code> function does little more than dispatch to the resulting <code>Driver</code> object's generic command-line interface.</li>
-</ul>
-<p>The central design philosophy of FudCore (and by extension, fud2 itself) is that its sole job is to orchestrate external functionality.
-All that functionality must be available as separate tools that can be invoked via the command line.
-This is an important goal because it means the driver has a clear, discrete goal: <em>all it does</em> is decide on a list of commands to execute to perform a build.
-All the "interesting work" must be delegated to separate tools outside of the driver.
-This philosophy has both advantages and disadvantages:</p>
-<ul>
-<li>On the positive side, it forces all the interesting logic to be invokable via a command that you, the user, can run equally well yourself. So if something is going wrong, there is <em>always</em> a command line you can copy and paste into your terminal to reproduce the problem at that particular step. It also means that the input and output of every step must be written to files in the filesystem, so you can easily inspect the intermediate state between every command. This file-based operation also means that fud2 builds are parallel and incremental by default.</li>
-<li>On the other hand, requiring everything to be separate commands means that fud2 has a complicated dependency story. It is not a monolith: to get meaningful work done, you currently have to install a bunch of Python components (among other things) so fud2 can invoke them. (We hope to mitigate the logistical pain this incurs over time, but we're not there yet.) Also, writing everything to a file in between each step comes at a performance cost. Someday, it may be a performance bottleneck that two steps in a build cannot simply exchange their data directly, through memory, and must serialize everything to disk first. (This has not been a problem in practice yet.)</li>
-</ul>
-<p>If you want to extend fud2 to do something new, the consequence is that you first need to come up with a sequence of commands that do that thing.
-If necessary, you may find that you need to create new executables to do some minor glue tasks that would otherwise be implicit.
-Then "all you need to do" is teach fud2 to execute those commands.</p>
-<h3 id="states-operations-and-setups"><a class="header" href="#states-operations-and-setups">States, Operations, and Setups</a></h3>
-<p>You can think of a FudCore driver as a graph, where the vertices are <em>states</em> and the edges are <em>operations</em>.
-(In fact, this is literally the graph you can visualize with <code>-m dot</code>.)
-Any build is a transformation from one state to another, traversing a path through this graph.
-The operations (edges) along this path are the commands that must be executed to transform a file from the initial state to the final state.</p>
-<p>To make fud2 do something new, you probably want to add one or more operations, and you may need to add new states.
-Aside from declaring the source and destination states,
-operations generate chunks of <a href="https://ninja-build.org">Ninja</a> code.
-So to implement an operation, you write a Rust function with this signature:</p>
-<pre><code>fn build(emitter: &amp;mut Emitter, input: &amp;str, output: &amp;str)
+<p>Returns the value of the configuration variable <code>&lt;config var&gt;</code> if the value provided is valid, i.e. contained within <code>[&lt;valid val1&gt;, &lt;valid val2&gt;, ..]</code>. Panics if the value is not valid.</p>
+<p>If configuration variable <code>&lt;config var&gt;</code> was not provided, then <code>&lt;default&gt;</code> will be returned.</p>
+<p><code>&lt;config var&gt;</code>, all <code>&lt;valid val&gt;</code>s, and <code>&lt;default&gt;</code> are all strings.</p>
+<br>
+<pre><code>external_path(&lt;path&gt;)
 </code></pre>
-<p>Here, <code>emitter</code> is a wrapper around an output stream with a bunch of utility functions for printing out lines of Ninja code.
-<code>input</code> and <code>output</code> are filenames.
-So your job in this function is to print (at least) a Ninja <code>build</code> command that produces <code>output</code> as a target and uses <code>input</code> as a dependency.
-For example, the Calyx-to-Verilog compiler operation might emit this chunk of Ninja code:</p>
-<pre><code>build bar.sv: calyx foo.futil
-  backend = verilog
+<p>Returns a <code>Utf8PathBuf</code> to an external file described by <code>&lt;path&gt;</code>. The input <code>path</code> may be relative to our original invocation; we make it relative to the build directory so it can safely be used in the Ninja file.</p>
+<h4 id="defining-rules"><a class="header" href="#defining-rules">Defining rules</a></h4>
+<pre><code>rule(&lt;rule name&gt;, &lt;shell command&gt;)
 </code></pre>
-<p>when the <code>input</code> argument above is <code>"foo.futil"</code> and the <code>output</code> is <code>"bar.sv"</code>.
-(The FudCore library will conjure these filenames for you; your job in this operation is just to use them as is.)</p>
-<p>Notice here that the generated Ninja chunk is using a build rule called <code>calyx</code>.
-This also needs to be defined.
-To set up things like variables and build rules that operations can use, FudCore has a separate concept called <em>setups</em>.
-A setup is a function that generates some Ninja code that might be shared among multiple operations (or multiple instances of the same operation).
-For example, our setup for Calyx compilation generates code like this:</p>
-<pre><code>calyx-base = /path/to/calyx
-calyx-exe = $calyx-base/target/debug/calyx
-rule calyx
-  command = $calyx-exe -l $calyx-base -b $backend $args $in &gt; $out
+<p>Registers a shell command <code>&lt;shell command&gt;</code> under the Ninja rule name <code>&lt;rule name&gt;</code>. Both <code>&lt;rule name&gt;</code> and <code>&lt;shell command&gt;</code> are strings.</p>
+<h4 id="building-commands"><a class="header" href="#building-commands">Building commands</a></h4>
+<pre><code>build_cmd([&lt;target&gt;], &lt;rule&gt;, [&lt;dep1&gt;, &lt;dep2&gt;, ..], [&lt;implicit_dep1&gt;, &lt;implicit_dep2&gt;, ..])
 </code></pre>
-<p>That is, it defines two Ninja variables and one Ninja rule—the one that our build command above uses.
-We <em>could</em> have designed FudCore without a separation between setups and operations, so this rule would get declared right next to the <code>build</code> command above.
-But that would end up duplicating a lot of setup code that really only needs to appear once.
-So that's why setups exist: to share a single stanza of Ninja scaffolding code between multiple operations.</p>
+<p>Emits a Ninja build command that generates the build target <code>&lt;target&gt;</code> with the rule <code>&lt;rule&gt;</code> by using <code>&lt;dep1&gt;, ..</code> and <code>&lt;implicit_dep1&gt;, ..</code>.</p>
+<p><code>&lt;target&gt;</code> replaces <code>$out</code> in <code>&lt;rule&gt;</code>, and <code>&lt;dep1&gt;</code> replaces <code>$in</code> in <code>&lt;rule&gt;</code> (if there are multiple dependencies, then a string containg all dependencies with spaces in between is passed in). <code>&lt;implicit_dep1&gt;, ..</code> should be strings containing variable names defined previously defined via setups referred as <code>$&lt;var name&gt;</code>.</p>
+<br>
+<pre><code>arg(&lt;arg name&gt;, &lt;value&gt;)
+</code></pre>
+<p>Adds the argument <code>&lt;arg name&gt;</code> to the preceding rule or build command with the value <code>&lt;value&gt;</code>.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../running-calyx/fud/resource-estimation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../running-calyx/fud2/high-level-rhai.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../../running-calyx/fud2/rhai-api.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../running-calyx/interfacing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -593,11 +563,11 @@ So that's why setups exist: to share a single stanza of Ninja scaffolding code b
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../running-calyx/fud/resource-estimation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../running-calyx/fud2/high-level-rhai.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../../running-calyx/fud2/rhai-api.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../running-calyx/interfacing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
