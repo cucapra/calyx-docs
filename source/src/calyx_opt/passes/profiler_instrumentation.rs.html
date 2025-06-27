@@ -368,17 +368,82 @@
 <a href="#367" id="367">367</a>
 <a href="#368" id="368">368</a>
 <a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a></pre></div><pre class="rust"><code><span class="kw">use </span>core::panic;
+<span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
-<span class="kw">use </span>calyx_ir::{
-    <span class="self">self </span><span class="kw">as </span>ir, BoolAttr, Guard, Id, Nothing, NumAttr, StaticTiming,
-};
+<span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, BoolAttr, Guard, Id, Nothing, NumAttr};
 <span class="kw">use </span>calyx_utils::CalyxResult;
 
 <span class="doccomment">/// Adds probe wires to each group (includes static groups and comb groups) to detect when a group is active.
 /// Used by the profiler.
 </span><span class="kw">pub struct </span>ProfilerInstrumentation {}
+
+<span class="doccomment">/// Mapping group names to constructs (groups/primitives/cells) that the group enabled,
+/// along with the guard that was involved in the assignment.
+</span><span class="kw">type </span>CallsFromGroupMap&lt;T&gt; = HashMap&lt;Id, Vec&lt;(Id, ir::Guard&lt;T&gt;)&gt;&gt;;
 
 <span class="kw">impl </span>Named <span class="kw">for </span>ProfilerInstrumentation {
     <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
@@ -405,6 +470,385 @@
     <span class="kw">fn </span>clear_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {}
 }
 
+<span class="doccomment">/// Creates probe cells and assignments pertaining to standard groups.
+</span><span class="kw">fn </span>group(comp: <span class="kw-2">&amp;mut </span>ir::Component, sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures) {
+    <span class="comment">// groups to groups that they enabled
+    </span><span class="kw">let </span><span class="kw-2">mut </span>structural_enable_map: CallsFromGroupMap&lt;Nothing&gt; = HashMap::new();
+    <span class="comment">// groups to cells (from non-primitive components) that they invoked
+    </span><span class="kw">let </span><span class="kw-2">mut </span>cell_invoke_map: CallsFromGroupMap&lt;Nothing&gt; = HashMap::new();
+    <span class="comment">// groups to primitives that they invoked
+    </span><span class="kw">let </span><span class="kw-2">mut </span>primitive_invoke_map: CallsFromGroupMap&lt;Nothing&gt; = HashMap::new();
+    <span class="kw">let </span>group_names = comp
+        .groups
+        .iter()
+        .map(|group| group.borrow().name())
+        .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+
+    <span class="comment">// Dynamic groups: iterate and check for structural enables, cell invokes, and primitive enables
+    </span><span class="kw">for </span>group_ref <span class="kw">in </span>comp.groups.iter() {
+        <span class="kw">let </span>group = <span class="kw-2">&amp;</span>group_ref.borrow();
+        <span class="comment">// set to prevent adding multiple probes for a combinational primitive enabled by the group
+        </span><span class="kw">let </span><span class="kw-2">mut </span>comb_primitives_covered = HashSet::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>primitive_vec: Vec&lt;(Id, ir::Guard&lt;Nothing&gt;)&gt; = Vec::new();
+        <span class="kw">for </span>assignment_ref <span class="kw">in </span>group.assignments.iter() {
+            <span class="kw">let </span>dst_borrow = assignment_ref.dst.borrow();
+            <span class="kw">if let </span>ir::PortParent::Group(parent_group_ref) = <span class="kw-2">&amp;</span>dst_borrow.parent
+            {
+                <span class="kw">if </span>dst_borrow.name == <span class="string">"go" </span>{
+                    <span class="comment">// found an invocation of go
+                    </span><span class="kw">let </span>invoked_group_name =
+                        parent_group_ref.upgrade().borrow().name();
+                    <span class="kw">let </span>guard = <span class="kw-2">*</span>(assignment_ref.guard.clone());
+                    <span class="kw">match </span>structural_enable_map.get_mut(<span class="kw-2">&amp;</span>invoked_group_name) {
+                        <span class="prelude-val">Some</span>(vec_ref) =&gt; vec_ref.push((group.name(), guard)),
+                        <span class="prelude-val">None </span>=&gt; {
+                            structural_enable_map.insert(
+                                invoked_group_name,
+                                <span class="macro">vec!</span>[(group.name(), guard)],
+                            );
+                        }
+                    }
+                }
+            }
+            <span class="kw">if let </span>ir::PortParent::Cell(cell_ref) = <span class="kw-2">&amp;</span>dst_borrow.parent {
+                <span class="kw">match </span>cell_ref.upgrade().borrow().prototype.clone() {
+                    calyx_ir::CellType::Primitive {
+                        name: <span class="kw">_</span>,
+                        param_binding: <span class="kw">_</span>,
+                        is_comb,
+                        latency: <span class="kw">_</span>,
+                    } =&gt; {
+                        <span class="kw">let </span>cell_name = cell_ref.upgrade().borrow().name();
+                        <span class="kw">if </span>is_comb {
+                            <span class="comment">// collecting primitives for area utilization; we want to avoid adding the same primitive twice!
+                            </span><span class="kw">if </span>comb_primitives_covered.insert(cell_name) {
+                                primitive_vec.push((cell_name, Guard::True));
+                            }
+                        } <span class="kw">else if </span>dst_borrow.has_attribute(NumAttr::Go) {
+                            <span class="comment">// non-combinational primitives
+                            </span><span class="kw">let </span>guard = Guard::and(
+                                <span class="kw-2">*</span>(assignment_ref.guard.clone()),
+                                Guard::port(ir::rrc(
+                                    assignment_ref.src.borrow().clone(),
+                                )),
+                            );
+                            primitive_vec.push((cell_name, guard));
+                        }
+                    }
+                    calyx_ir::CellType::Component { name: <span class="kw">_ </span>} =&gt; {
+                        <span class="kw">if </span>dst_borrow.has_attribute(NumAttr::Go) {
+                            <span class="kw">let </span>cell_name = cell_ref.upgrade().borrow().name();
+                            <span class="kw">let </span>guard = <span class="kw-2">*</span>(assignment_ref.guard.clone());
+                            <span class="kw">match </span>cell_invoke_map.get_mut(<span class="kw-2">&amp;</span>group.name()) {
+                                <span class="prelude-val">Some</span>(vec_ref) =&gt; {
+                                    vec_ref.push((cell_name, guard));
+                                }
+                                <span class="prelude-val">None </span>=&gt; {
+                                    cell_invoke_map.insert(
+                                        group.name(),
+                                        <span class="macro">vec!</span>[(cell_name, guard)],
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    <span class="kw">_ </span>=&gt; (),
+                }
+            }
+        }
+        primitive_invoke_map.insert(group_ref.borrow().name(), primitive_vec);
+    }
+
+    <span class="comment">// create probe cells and assignments
+    </span><span class="kw">let </span>group_name_assign_and_cell = create_assignments(
+        comp,
+        sigs,
+        <span class="kw-2">&amp;</span>group_names,
+        <span class="prelude-val">Some</span>(structural_enable_map),
+        <span class="prelude-val">Some</span>(cell_invoke_map),
+        <span class="prelude-val">Some</span>(primitive_invoke_map),
+    );
+
+    <span class="comment">// Add created assignments to each group and their corresponding probe cells
+    </span><span class="kw">for </span>group <span class="kw">in </span>comp.groups.iter() {
+        <span class="kw">for </span>(group_name, asgn, cell) <span class="kw">in </span>group_name_assign_and_cell.iter() {
+            <span class="kw">if </span>group.borrow().name() == group_name {
+                group.borrow_mut().assignments.push(asgn.clone());
+                comp.cells.add(cell.to_owned());
+            }
+        }
+    }
+}
+
+<span class="doccomment">/// Creates probe cells and assignments pertaining to combinational groups.
+</span><span class="kw">fn </span>combinational_group(comp: <span class="kw-2">&amp;mut </span>ir::Component, sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures) {
+    <span class="comment">// NOTE: combinational groups cannot structurally enable other groups
+
+    // groups to cells (from non-primitive components) that they invoked
+    </span><span class="kw">let </span><span class="kw-2">mut </span>cell_invoke_map: CallsFromGroupMap&lt;Nothing&gt; = HashMap::new();
+    <span class="comment">// groups to primitives that they invoked
+    </span><span class="kw">let </span><span class="kw-2">mut </span>primitive_invoke_map: CallsFromGroupMap&lt;Nothing&gt; = HashMap::new();
+
+    <span class="kw">let </span>group_names = comp
+        .comb_groups
+        .iter()
+        .map(|group| group.borrow().name())
+        .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+
+    <span class="kw">for </span>group_ref <span class="kw">in </span>comp.comb_groups.iter() {
+        <span class="kw">let </span>group = <span class="kw-2">&amp;</span>group_ref.borrow();
+        <span class="kw">let </span><span class="kw-2">mut </span>comb_primitives_covered = HashSet::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>comb_cells_covered = HashSet::new();
+
+        <span class="kw">for </span>assignment_ref <span class="kw">in </span>group.assignments.iter() {
+            <span class="kw">let </span>dst_borrow = assignment_ref.dst.borrow();
+            <span class="kw">if let </span>ir::PortParent::Cell(cell_ref) = <span class="kw-2">&amp;</span>dst_borrow.parent {
+                <span class="kw">match </span>cell_ref.upgrade().borrow().prototype.clone() {
+                    calyx_ir::CellType::Primitive {
+                        name: <span class="kw">_</span>,
+                        param_binding: <span class="kw">_</span>,
+                        is_comb,
+                        latency: <span class="kw">_</span>,
+                    } =&gt; {
+                        <span class="kw">let </span>cell_name = cell_ref.upgrade().borrow().name();
+                        <span class="kw">if </span>is_comb {
+                            <span class="comment">// collecting primitives for area utilization; we want to avoid adding the same primitive twice!
+                            </span><span class="kw">if </span>comb_primitives_covered.insert(cell_name) {
+                                <span class="kw">match </span>primitive_invoke_map
+                                    .get_mut(<span class="kw-2">&amp;</span>group.name())
+                                {
+                                    <span class="prelude-val">Some</span>(vec_ref) =&gt; {
+                                        vec_ref.push((cell_name, Guard::True));
+                                    }
+                                    <span class="prelude-val">None </span>=&gt; {
+                                        primitive_invoke_map.insert(
+                                            group.name(),
+                                            <span class="macro">vec!</span>[(cell_name, Guard::True)],
+                                        );
+                                    }
+                                }
+                            }
+                        } <span class="kw">else if </span>dst_borrow.has_attribute(NumAttr::Go) {
+                            <span class="macro">panic!</span>(
+                                <span class="string">"Non-combinational primitive {} invoked inside of combinational group {}!"</span>,
+                                dst_borrow.canonical(),
+                                group.name()
+                            )
+                        }
+                    }
+                    calyx_ir::CellType::Component { name: <span class="kw">_ </span>} =&gt; {
+                        <span class="kw">let </span>cell_name = cell_ref.upgrade().borrow().name();
+                        <span class="kw">if </span>dst_borrow.name == <span class="string">"go" </span>{
+                            <span class="macro">panic!</span>(
+                                <span class="string">"Non-combinational cell {} invoked inside of combinational group {}!"</span>,
+                                cell_name,
+                                group.name()
+                            );
+                        } <span class="kw">else if </span>comb_cells_covered.insert(cell_name) {
+                            <span class="kw">let </span>guard = <span class="kw-2">*</span>(assignment_ref.guard.clone());
+                            <span class="kw">match </span>cell_invoke_map.get_mut(<span class="kw-2">&amp;</span>group.name()) {
+                                <span class="prelude-val">Some</span>(vec_ref) =&gt; {
+                                    vec_ref.push((cell_name, guard));
+                                }
+                                <span class="prelude-val">None </span>=&gt; {
+                                    cell_invoke_map.insert(
+                                        group.name(),
+                                        <span class="macro">vec!</span>[(cell_name, guard)],
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    <span class="kw">_ </span>=&gt; (),
+                }
+            }
+        }
+    }
+
+    <span class="kw">let </span>group_name_asgn_and_cell = create_assignments(
+        comp,
+        sigs,
+        <span class="kw-2">&amp;</span>group_names,
+        <span class="prelude-val">None</span>, <span class="comment">// assuming no structural enables within comb groups
+        </span><span class="prelude-val">Some</span>(cell_invoke_map),
+        <span class="prelude-val">Some</span>(primitive_invoke_map),
+    );
+
+    <span class="comment">// Comb: Add created assignments to each group
+    </span><span class="kw">for </span>comb_group <span class="kw">in </span>comp.comb_groups.iter() {
+        <span class="kw">for </span>(comb_group_name, asgn, cell) <span class="kw">in </span>group_name_asgn_and_cell.iter() {
+            <span class="kw">if </span>comb_group.borrow().name() == comb_group_name {
+                comb_group.borrow_mut().assignments.push(asgn.clone());
+                comp.cells.add(cell.to_owned());
+            }
+        }
+    }
+}
+
+<span class="doccomment">/// Creates probe cells and assignments pertaining to static groups.
+</span><span class="kw">fn </span>static_group(comp: <span class="kw-2">&amp;mut </span>ir::Component, sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures) {
+    <span class="kw">let </span>group_names = comp
+        .static_groups
+        .iter()
+        .map(|group| group.borrow().name())
+        .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+
+    <span class="comment">// TODO: create probes for structural enables, cell invokes, and primitive invokes
+
+    </span><span class="kw">let </span>group_name_assign_and_cell =
+        create_assignments(comp, sigs, <span class="kw-2">&amp;</span>group_names, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
+
+    <span class="comment">// Add created assignments to each group
+    </span><span class="kw">for </span>static_group <span class="kw">in </span>comp.static_groups.iter() {
+        <span class="kw">for </span>(static_group_name, asgn, cell) <span class="kw">in </span>group_name_assign_and_cell.iter()
+        {
+            <span class="kw">if </span>static_group.borrow().name() == static_group_name {
+                static_group.borrow_mut().assignments.push(asgn.clone());
+                comp.cells.add(cell.to_owned());
+            }
+        }
+    }
+}
+
+<span class="doccomment">/// Creates all probe cells and assignments for a certain kind of .
+/// Returns a Vec where each element is (GROUP, ASGN, CELL) where
+/// GROUP is the group to write the assignment in,
+/// ASGN is the probe assignment to insert into the group,
+/// CELL is the generated probe wire to add to cells
+</span><span class="kw">fn </span>create_assignments&lt;T: Clone&gt;(
+    comp: <span class="kw-2">&amp;mut </span>ir::Component,
+    sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
+    group_names: <span class="kw-2">&amp;</span>[Id],
+    structural_enable_map_opt: <span class="prelude-ty">Option</span>&lt;CallsFromGroupMap&lt;T&gt;&gt;,
+    cell_invoke_map_opt: <span class="prelude-ty">Option</span>&lt;CallsFromGroupMap&lt;T&gt;&gt;,
+    primitive_invoke_map_opt: <span class="prelude-ty">Option</span>&lt;CallsFromGroupMap&lt;T&gt;&gt;,
+) -&gt; Vec&lt;(
+    Id,
+    calyx_ir::Assignment&lt;T&gt;,
+    std::rc::Rc&lt;std::cell::RefCell&lt;calyx_ir::Cell&gt;&gt;,
+)&gt; {
+    <span class="kw">let </span>delimiter = <span class="string">"___"</span>;
+    <span class="kw">let </span>comp_name = comp.name;
+    <span class="comment">// build probe and assignments for every group (dynamic and static) + all structural invokes
+    </span><span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
+    <span class="kw">let </span>one = builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
+
+    <span class="comment">// (group name, assignment to insert, probe cell to insert) for each probe we want to insert
+    // we assume that each probe cell will only have one assignment.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>group_name_assign_and_cell = Vec::new();
+
+    <span class="comment">// probe and assignments for group enable (this group is currently active)
+    </span><span class="kw">for </span>group_name <span class="kw">in </span>group_names.iter() {
+        <span class="comment">// store group and component name (differentiate between groups of the same name under different components)
+        </span><span class="kw">let </span>name =
+            <span class="macro">format!</span>(<span class="string">"{}{}{}_group_probe"</span>, group_name, delimiter, comp_name);
+        <span class="kw">let </span>probe_cell = builder.add_primitive(name, <span class="string">"std_wire"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
+        <span class="kw">let </span>probe_asgn: ir::Assignment&lt;T&gt; = builder.build_assignment(
+            probe_cell.borrow().get(<span class="string">"in"</span>),
+            one.borrow().get(<span class="string">"out"</span>),
+            Guard::True,
+        );
+        <span class="comment">// the probes should be @control because they should have value 0 whenever the corresponding group is not active.
+        </span>probe_cell.borrow_mut().add_attribute(BoolAttr::Control, <span class="number">1</span>);
+        probe_cell
+            .borrow_mut()
+            .add_attribute(BoolAttr::Protected, <span class="number">1</span>);
+        group_name_assign_and_cell.push((<span class="kw-2">*</span>group_name, probe_asgn, probe_cell));
+    }
+
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(sem) = structural_enable_map_opt {
+        <span class="comment">// probe and assignments for structural enables (this group is structurally enabling a child group)
+        </span><span class="kw">for </span>(invoked_group_name, parent_groups) <span class="kw">in </span>sem.iter() {
+            <span class="kw">for </span>(parent_group, guard) <span class="kw">in </span>parent_groups.iter() {
+                <span class="kw">let </span>probe_cell_name = <span class="macro">format!</span>(
+                    <span class="string">"{}{}{}{}{}_se_probe"</span>,
+                    invoked_group_name,
+                    delimiter,
+                    parent_group,
+                    delimiter,
+                    comp_name
+                );
+                <span class="kw">let </span>probe_cell =
+                    builder.add_primitive(probe_cell_name, <span class="string">"std_wire"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
+                probe_cell.borrow_mut().add_attribute(BoolAttr::Control, <span class="number">1</span>);
+                probe_cell
+                    .borrow_mut()
+                    .add_attribute(BoolAttr::Protected, <span class="number">1</span>);
+                <span class="kw">let </span>probe_asgn: ir::Assignment&lt;T&gt; = builder.build_assignment(
+                    probe_cell.borrow().get(<span class="string">"in"</span>),
+                    one.borrow().get(<span class="string">"out"</span>),
+                    guard.clone(),
+                );
+                group_name_assign_and_cell.push((
+                    <span class="kw-2">*</span>parent_group,
+                    probe_asgn,
+                    probe_cell,
+                ));
+            }
+        }
+    }
+
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(cell_invoke_map) = cell_invoke_map_opt {
+        <span class="comment">// probe cell and assignments for structural cell invocations (the group is structurally invoking a cell.)
+        </span><span class="kw">for </span>(invoker_group, invoked_cells) <span class="kw">in </span>cell_invoke_map.iter() {
+            <span class="kw">for </span>(invoked_cell, guard) <span class="kw">in </span>invoked_cells {
+                <span class="kw">let </span>probe_cell_name = <span class="macro">format!</span>(
+                    <span class="string">"{}{}{}{}{}_cell_probe"</span>,
+                    invoked_cell,
+                    delimiter,
+                    invoker_group,
+                    delimiter,
+                    comp_name
+                );
+                <span class="kw">let </span>probe_cell =
+                    builder.add_primitive(probe_cell_name, <span class="string">"std_wire"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
+                probe_cell.borrow_mut().add_attribute(BoolAttr::Control, <span class="number">1</span>);
+                probe_cell
+                    .borrow_mut()
+                    .add_attribute(BoolAttr::Protected, <span class="number">1</span>);
+                <span class="comment">// NOTE: this probe is active for the duration of the whole group. Hence, it may be active even when the cell itself is inactive.
+                </span><span class="kw">let </span>probe_asgn: ir::Assignment&lt;T&gt; = builder.build_assignment(
+                    probe_cell.borrow().get(<span class="string">"in"</span>),
+                    one.borrow().get(<span class="string">"out"</span>),
+                    guard.clone(),
+                );
+                group_name_assign_and_cell.push((
+                    <span class="kw-2">*</span>invoker_group,
+                    probe_asgn,
+                    probe_cell,
+                ));
+            }
+        }
+    }
+
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(primitive_invoke_map) = primitive_invoke_map_opt {
+        <span class="comment">// probe and assignments for primitive invocations (this group is activating a primitive)
+        </span><span class="kw">for </span>(group, primitive_invs) <span class="kw">in </span>primitive_invoke_map.iter() {
+            <span class="kw">for </span>(primitive_cell_name, guard) <span class="kw">in </span>primitive_invs.iter() {
+                <span class="kw">let </span>probe_cell_name = <span class="macro">format!</span>(
+                    <span class="string">"{}{}{}{}{}_primitive_probe"</span>,
+                    primitive_cell_name, delimiter, group, delimiter, comp_name
+                );
+                <span class="kw">let </span>probe_cell =
+                    builder.add_primitive(probe_cell_name, <span class="string">"std_wire"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
+                probe_cell.borrow_mut().add_attribute(BoolAttr::Control, <span class="number">1</span>);
+                probe_cell
+                    .borrow_mut()
+                    .add_attribute(BoolAttr::Protected, <span class="number">1</span>);
+                <span class="kw">let </span>probe_asgn: ir::Assignment&lt;T&gt; = builder.build_assignment(
+                    probe_cell.borrow().get(<span class="string">"in"</span>),
+                    one.borrow().get(<span class="string">"out"</span>),
+                    guard.clone(),
+                );
+                group_name_assign_and_cell
+                    .push((<span class="kw-2">*</span>group, probe_asgn, probe_cell));
+            }
+        }
+    }
+
+    group_name_assign_and_cell
+}
+
 <span class="kw">impl </span>Visitor <span class="kw">for </span>ProfilerInstrumentation {
     <span class="kw">fn </span>start(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -412,329 +856,9 @@
         sigs: <span class="kw-2">&amp;</span>ir::LibrarySignatures,
         _comps: <span class="kw-2">&amp;</span>[ir::Component],
     ) -&gt; VisResult {
-        <span class="kw">let </span>delimiter = <span class="string">"___"</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>acc = <span class="number">0</span>;
-        <span class="kw">let </span>comp_name = comp.name;
-        <span class="kw">let </span><span class="kw-2">mut </span>structural_enable_map: HashMap&lt;
-            Id,
-            Vec&lt;(Id, ir::Guard&lt;Nothing&gt;)&gt;,
-        &gt; = HashMap::new();
-        <span class="comment">// groups to cells (from non-primitive components) that they invoked
-        </span><span class="kw">let </span><span class="kw-2">mut </span>cell_invoke_map: HashMap&lt;Id, Vec&lt;Id&gt;&gt; = HashMap::new();
-        <span class="comment">// groups to primitives that they invoked
-        </span><span class="kw">let </span><span class="kw-2">mut </span>primitive_invoke_map: HashMap&lt;
-            Id,
-            Vec&lt;(Id, ir::Guard&lt;Nothing&gt;)&gt;,
-        &gt; = HashMap::new();
-        <span class="comment">// child_group --&gt; [(parent_group, Guard)]
-        </span><span class="kw">let </span>group_names = comp
-            .groups
-            .iter()
-            .map(|group| group.borrow().name())
-            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>comb_group_names = comp
-            .comb_groups
-            .iter()
-            .map(|group| group.borrow().name())
-            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>static_group_names = comp
-            .static_groups
-            .iter()
-            .map(|group| group.borrow().name())
-            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="comment">// Dynamic groups: iterate and check for structural enables, cell invokes, and primitive enables
-        </span><span class="kw">for </span>group_ref <span class="kw">in </span>comp.groups.iter() {
-            <span class="kw">let </span>group = <span class="kw-2">&amp;</span>group_ref.borrow();
-            <span class="comment">// set to prevent adding multiple probes for a combinational primitive enabled by the group
-            </span><span class="kw">let </span><span class="kw-2">mut </span>comb_primitives_covered = HashSet::new();
-            <span class="kw">let </span><span class="kw-2">mut </span>primitive_vec: Vec&lt;(Id, ir::Guard&lt;Nothing&gt;)&gt; = Vec::new();
-            <span class="kw">for </span>assigment_ref <span class="kw">in </span>group.assignments.iter() {
-                <span class="kw">let </span>dst_borrow = assigment_ref.dst.borrow();
-                <span class="kw">if let </span>ir::PortParent::Group(parent_group_ref) =
-                    <span class="kw-2">&amp;</span>dst_borrow.parent
-                {
-                    <span class="kw">if </span>dst_borrow.name == <span class="string">"go" </span>{
-                        <span class="comment">// found an invocation of go
-                        </span><span class="kw">let </span>invoked_group_name =
-                            parent_group_ref.upgrade().borrow().name();
-                        <span class="kw">let </span>guard = <span class="kw-2">*</span>(assigment_ref.guard.clone());
-                        <span class="kw">match </span>structural_enable_map.get_mut(<span class="kw-2">&amp;</span>invoked_group_name)
-                        {
-                            <span class="prelude-val">Some</span>(vec_ref) =&gt; {
-                                vec_ref.push((group.name(), guard))
-                            }
-                            <span class="prelude-val">None </span>=&gt; {
-                                structural_enable_map.insert(
-                                    invoked_group_name,
-                                    <span class="macro">vec!</span>[(group.name(), guard)],
-                                );
-                            }
-                        }
-                        acc += <span class="number">1</span>; <span class="comment">// really sad hack for obtaining the number of structural enables
-                    </span>}
-                }
-                <span class="kw">if let </span>ir::PortParent::Cell(cell_ref) = <span class="kw-2">&amp;</span>dst_borrow.parent {
-                    <span class="kw">match </span>cell_ref.upgrade().borrow().prototype.clone() {
-                        calyx_ir::CellType::Primitive {
-                            name: <span class="kw">_</span>,
-                            param_binding: <span class="kw">_</span>,
-                            is_comb,
-                            latency: <span class="kw">_</span>,
-                        } =&gt; {
-                            <span class="kw">let </span>cell_name = cell_ref.upgrade().borrow().name();
-                            <span class="kw">if </span>is_comb {
-                                <span class="comment">// collecting primitives for area utilization; we want to avoid adding the same primitive twice!
-                                </span><span class="kw">if </span>comb_primitives_covered.insert(cell_name) {
-                                    primitive_vec
-                                        .push((cell_name, Guard::True));
-                                }
-                            } <span class="kw">else if </span>dst_borrow.has_attribute(NumAttr::Go) {
-                                <span class="comment">// non-combinational primitives
-                                </span><span class="kw">let </span>guard = Guard::and(
-                                    <span class="kw-2">*</span>(assigment_ref.guard.clone()),
-                                    Guard::port(ir::rrc(
-                                        assigment_ref.src.borrow().clone(),
-                                    )),
-                                );
-                                primitive_vec.push((cell_name, guard));
-                            }
-                        }
-                        calyx_ir::CellType::Component { name: <span class="kw">_ </span>} =&gt; {
-                            <span class="kw">if </span>dst_borrow.name == <span class="string">"go" </span>{
-                                <span class="kw">let </span>cell_name =
-                                    cell_ref.upgrade().borrow().name();
-                                <span class="kw">match </span>cell_invoke_map.get_mut(<span class="kw-2">&amp;</span>group.name()) {
-                                    <span class="prelude-val">Some</span>(vec_ref) =&gt; {
-                                        vec_ref.push(cell_name);
-                                    }
-                                    <span class="prelude-val">None </span>=&gt; {
-                                        cell_invoke_map.insert(
-                                            group.name(),
-                                            <span class="macro">vec!</span>[cell_name],
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                        <span class="kw">_ </span>=&gt; (),
-                    }
-                }
-            }
-            primitive_invoke_map
-                .insert(group_ref.borrow().name(), primitive_vec);
-        }
-        <span class="comment">// build probe and assignments for every group (dynamic and static) + all structural invokes
-        </span><span class="kw">let </span><span class="kw-2">mut </span>builder = ir::Builder::new(comp, sigs);
-        <span class="kw">let </span>one = builder.add_constant(<span class="number">1</span>, <span class="number">1</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>group_name_assign_and_cell = Vec::with_capacity(acc);
-        <span class="kw">let </span><span class="kw-2">mut </span>comb_group_name_assign_and_cell =
-            Vec::with_capacity(comb_group_names.len());
-        <span class="kw">let </span><span class="kw-2">mut </span>static_group_name_assign_and_cell =
-            Vec::with_capacity(static_group_names.len()); <span class="comment">// TODO: adjust when we figure out how to get primitives w/in static groups
-        </span>{
-            <span class="comment">// Comb: probe and assignments for group (this group is currently active)
-            </span><span class="kw">for </span>comb_group_name <span class="kw">in </span>comb_group_names.into_iter() {
-                <span class="comment">// store group and component name (differentiate between groups of the same name under different components)
-                </span><span class="kw">let </span>name = <span class="macro">format!</span>(
-                    <span class="string">"{}{}{}_group_probe"</span>,
-                    comb_group_name, delimiter, comp_name
-                );
-                <span class="kw">let </span>probe_cell = builder.add_primitive(name, <span class="string">"std_wire"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
-                <span class="kw">let </span>probe_asgn: ir::Assignment&lt;Nothing&gt; = builder
-                    .build_assignment(
-                        probe_cell.borrow().get(<span class="string">"in"</span>),
-                        one.borrow().get(<span class="string">"out"</span>),
-                        Guard::True,
-                    );
-                <span class="comment">// the probes should be @control because they should have value 0 whenever the corresponding group is not active.
-                </span>probe_cell.borrow_mut().add_attribute(BoolAttr::Control, <span class="number">1</span>);
-                probe_cell
-                    .borrow_mut()
-                    .add_attribute(BoolAttr::Protected, <span class="number">1</span>);
-                comb_group_name_assign_and_cell.push((
-                    comb_group_name,
-                    probe_asgn,
-                    probe_cell,
-                ));
-            }
-            <span class="comment">// Static: probe and assignments for group (this group is currently active)
-            </span><span class="kw">for </span>static_group_name <span class="kw">in </span>static_group_names.into_iter() {
-                <span class="comment">// store group and component name (differentiate between groups of the same name under different components)
-                </span><span class="kw">let </span>name = <span class="macro">format!</span>(
-                    <span class="string">"{}{}{}_group_probe"</span>,
-                    static_group_name, delimiter, comp_name
-                );
-                <span class="kw">let </span>probe_cell = builder.add_primitive(name, <span class="string">"std_wire"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
-                <span class="kw">let </span>probe_asgn: ir::Assignment&lt;StaticTiming&gt; = builder
-                    .build_assignment(
-                        probe_cell.borrow().get(<span class="string">"in"</span>),
-                        one.borrow().get(<span class="string">"out"</span>),
-                        Guard::True,
-                    );
-                <span class="comment">// the probes should be @control because they should have value 0 whenever the corresponding group is not active.
-                </span>probe_cell.borrow_mut().add_attribute(BoolAttr::Control, <span class="number">1</span>);
-                probe_cell
-                    .borrow_mut()
-                    .add_attribute(BoolAttr::Protected, <span class="number">1</span>);
-                static_group_name_assign_and_cell.push((
-                    static_group_name,
-                    probe_asgn,
-                    probe_cell,
-                ));
-            }
-            <span class="comment">// Dynamic: probe and assignments for group (this group is currently active)
-            </span><span class="kw">for </span>group_name <span class="kw">in </span>group_names.into_iter() {
-                <span class="comment">// store group and component name (differentiate between groups of the same name under different components)
-                </span><span class="kw">let </span>name = <span class="macro">format!</span>(
-                    <span class="string">"{}{}{}_group_probe"</span>,
-                    group_name, delimiter, comp_name
-                );
-                <span class="kw">let </span>probe_cell = builder.add_primitive(name, <span class="string">"std_wire"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
-                <span class="kw">let </span>probe_asgn: ir::Assignment&lt;Nothing&gt; = builder
-                    .build_assignment(
-                        probe_cell.borrow().get(<span class="string">"in"</span>),
-                        one.borrow().get(<span class="string">"out"</span>),
-                        Guard::True,
-                    );
-                <span class="comment">// the probes should be @control because they should have value 0 whenever the corresponding group is not active.
-                </span>probe_cell.borrow_mut().add_attribute(BoolAttr::Control, <span class="number">1</span>);
-                probe_cell
-                    .borrow_mut()
-                    .add_attribute(BoolAttr::Protected, <span class="number">1</span>);
-                group_name_assign_and_cell
-                    .push((group_name, probe_asgn, probe_cell));
-            }
-            <span class="comment">// probe and assignments for primitive invocations (this group is activating a primitive)
-            </span><span class="kw">for </span>(group, primitive_invs) <span class="kw">in </span>primitive_invoke_map.iter() {
-                <span class="kw">for </span>(primitive_cell_name, guard) <span class="kw">in </span>primitive_invs.iter() {
-                    <span class="kw">let </span>probe_cell_name = <span class="macro">format!</span>(
-                        <span class="string">"{}{}{}{}{}_primitive_probe"</span>,
-                        primitive_cell_name,
-                        delimiter,
-                        group,
-                        delimiter,
-                        comp_name
-                    );
-                    <span class="kw">let </span>probe_cell = builder.add_primitive(
-                        probe_cell_name,
-                        <span class="string">"std_wire"</span>,
-                        <span class="kw-2">&amp;</span>[<span class="number">1</span>],
-                    );
-                    probe_cell.borrow_mut().add_attribute(BoolAttr::Control, <span class="number">1</span>);
-                    probe_cell
-                        .borrow_mut()
-                        .add_attribute(BoolAttr::Protected, <span class="number">1</span>);
-                    <span class="kw">let </span>probe_asgn: ir::Assignment&lt;Nothing&gt; = builder
-                        .build_assignment(
-                            probe_cell.borrow().get(<span class="string">"in"</span>),
-                            one.borrow().get(<span class="string">"out"</span>),
-                            guard.clone(),
-                        );
-                    group_name_assign_and_cell
-                        .push((<span class="kw-2">*</span>group, probe_asgn, probe_cell));
-                }
-            }
-            <span class="comment">// probe and assignments for structural enables (this group is structurally enabling a child group)
-            </span><span class="kw">for </span>(invoked_group_name, parent_groups) <span class="kw">in
-                </span>structural_enable_map.iter()
-            {
-                <span class="kw">for </span>(parent_group, guard) <span class="kw">in </span>parent_groups.iter() {
-                    <span class="kw">let </span>probe_cell_name = <span class="macro">format!</span>(
-                        <span class="string">"{}{}{}{}{}_se_probe"</span>,
-                        invoked_group_name,
-                        delimiter,
-                        parent_group,
-                        delimiter,
-                        comp_name
-                    );
-                    <span class="kw">let </span>probe_cell = builder.add_primitive(
-                        probe_cell_name,
-                        <span class="string">"std_wire"</span>,
-                        <span class="kw-2">&amp;</span>[<span class="number">1</span>],
-                    );
-                    probe_cell.borrow_mut().add_attribute(BoolAttr::Control, <span class="number">1</span>);
-                    probe_cell
-                        .borrow_mut()
-                        .add_attribute(BoolAttr::Protected, <span class="number">1</span>);
-                    <span class="kw">let </span>probe_asgn: ir::Assignment&lt;Nothing&gt; = builder
-                        .build_assignment(
-                            probe_cell.borrow().get(<span class="string">"in"</span>),
-                            one.borrow().get(<span class="string">"out"</span>),
-                            guard.clone(),
-                        );
-                    group_name_assign_and_cell.push((
-                        <span class="kw-2">*</span>parent_group,
-                        probe_asgn,
-                        probe_cell,
-                    ));
-                }
-            }
-            <span class="comment">// probe cell and assignments for structural cell invocations (the group is structurally invoking a cell.)
-            </span><span class="kw">for </span>(invoker_group, invoked_cells) <span class="kw">in </span>cell_invoke_map.iter() {
-                <span class="kw">for </span>invoked_cell <span class="kw">in </span>invoked_cells {
-                    <span class="kw">let </span>probe_cell_name = <span class="macro">format!</span>(
-                        <span class="string">"{}{}{}{}{}_cell_probe"</span>,
-                        invoked_cell,
-                        delimiter,
-                        invoker_group,
-                        delimiter,
-                        comp_name
-                    );
-                    <span class="kw">let </span>probe_cell = builder.add_primitive(
-                        probe_cell_name,
-                        <span class="string">"std_wire"</span>,
-                        <span class="kw-2">&amp;</span>[<span class="number">1</span>],
-                    );
-                    probe_cell.borrow_mut().add_attribute(BoolAttr::Control, <span class="number">1</span>);
-                    probe_cell
-                        .borrow_mut()
-                        .add_attribute(BoolAttr::Protected, <span class="number">1</span>);
-                    <span class="comment">// NOTE: this probe is active for the duration of the whole group. Hence, it may be active even when the cell itself is inactive.
-                    </span><span class="kw">let </span>probe_asgn: ir::Assignment&lt;Nothing&gt; = builder
-                        .build_assignment(
-                            probe_cell.borrow().get(<span class="string">"in"</span>),
-                            one.borrow().get(<span class="string">"out"</span>),
-                            Guard::True,
-                        );
-                    group_name_assign_and_cell.push((
-                        <span class="kw-2">*</span>invoker_group,
-                        probe_asgn,
-                        probe_cell,
-                    ));
-                }
-            }
-        }
-        <span class="comment">// Dynamic: Add created assignments to each group
-        </span><span class="kw">for </span>group <span class="kw">in </span>comp.groups.iter() {
-            <span class="kw">for </span>(group_name, asgn, cell) <span class="kw">in </span>group_name_assign_and_cell.iter() {
-                <span class="kw">if </span>group.borrow().name() == group_name {
-                    group.borrow_mut().assignments.push(asgn.clone());
-                    comp.cells.add(cell.to_owned());
-                }
-            }
-        }
-        <span class="comment">// Comb: Add created assignments to each group
-        </span><span class="kw">for </span>comb_group <span class="kw">in </span>comp.comb_groups.iter() {
-            <span class="kw">for </span>(comb_group_name, asgn, cell) <span class="kw">in
-                </span>comb_group_name_assign_and_cell.iter()
-            {
-                <span class="kw">if </span>comb_group.borrow().name() == comb_group_name {
-                    comb_group.borrow_mut().assignments.push(asgn.clone());
-                    comp.cells.add(cell.to_owned());
-                }
-            }
-        }
-        <span class="comment">// Static: Add created assignments to each group
-        </span><span class="kw">for </span>static_group <span class="kw">in </span>comp.static_groups.iter() {
-            <span class="kw">for </span>(static_group_name, asgn, cell) <span class="kw">in
-                </span>static_group_name_assign_and_cell.iter()
-            {
-                <span class="kw">if </span>static_group.borrow().name() == static_group_name {
-                    static_group.borrow_mut().assignments.push(asgn.clone());
-                    comp.cells.add(cell.to_owned());
-                }
-            }
-        }
+        group(comp, sigs);
+        combinational_group(comp, sigs);
+        static_group(comp, sigs);
         <span class="prelude-val">Ok</span>(Action::Continue)
     }
 }
