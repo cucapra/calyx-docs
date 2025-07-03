@@ -172,7 +172,16 @@
 <a href="#171" id="171">171</a>
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, ConstructVisitor, Named, VisResult, Visitor};
 
 <span class="comment">//use calyx_frontend::SetAttr::Pos;
 </span><span class="kw">use </span>calyx_ir::GetAttributes;
@@ -251,13 +260,22 @@
         // components have attributes !!
         // check if file exists for component definition
         </span><span class="kw">let </span>binding = comp.attributes.copy_span();
-        <span class="kw">let </span>(file, _bs) = binding.get_line_num();
+        <span class="kw">let </span>(file, (line, <span class="kw">_</span>)) = binding.get_line_num();
 
         <span class="comment">// add file to source table (if not already in)
         </span><span class="kw">if </span>!<span class="self">self</span>.file_ids.contains_key(file) {
             <span class="kw">let </span>id = <span class="self">self</span>.src_table.push_file(PathBuf::from(file));
             <span class="self">self</span>.file_ids.insert(String::from(file), id);
         }
+
+        <span class="comment">// add source position of the component itself
+        </span><span class="kw">let </span>component_file_id = <span class="self">self</span>.file_ids.get(file).unwrap();
+        <span class="kw">let </span>component_pos = <span class="self">self
+            </span>.src_table
+            .push_position(<span class="kw-2">*</span>component_file_id, LineNum::new(line <span class="kw">as </span>u32));
+        comp.attributes
+            .insert_set(calyx_frontend::SetAttr::Pos, component_pos.value());
+
         <span class="comment">// visit all groups in component
         </span><span class="kw">for </span>rrcgrp <span class="kw">in </span>comp.groups.iter() {
             <span class="kw">let </span><span class="kw-2">mut </span>grp = rrcgrp.borrow_mut();
