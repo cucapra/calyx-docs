@@ -87,7 +87,9 @@
 <a href="#86" id="86">86</a>
 <a href="#87" id="87">87</a>
 <a href="#88" id="88">88</a>
-<a href="#89" id="89">89</a></pre></div><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a></pre></div><pre class="rust"><code><span class="doccomment">//! Passes for the Calyx compiler.
 </span><span class="kw">mod </span>canonical;
 <span class="kw">mod </span>cell_share;
 <span class="kw">mod </span>clk_insertion;
@@ -118,6 +120,7 @@
 <span class="kw">mod </span>static_inliner;
 <span class="kw">mod </span>static_promotion;
 <span class="kw">mod </span>static_repeat_fsm_allocation;
+<span class="kw">mod </span>uniquefy_enables;
 
 <span class="comment">// mod simplify_guards;
 </span><span class="kw">mod </span>add_guard;
@@ -167,6 +170,7 @@
 <span class="kw">pub use </span>static_inliner::StaticInliner;
 <span class="kw">pub use </span>static_promotion::StaticPromotion;
 <span class="kw">pub use </span>static_repeat_fsm_allocation::StaticRepeatFSMAllocation;
+<span class="kw">pub use </span>uniquefy_enables::UniquefyEnables;
 <span class="kw">pub use </span>unroll_bound::UnrollBounded;
 <span class="comment">// pub use simplify_guards::SimplifyGuards;
 </span><span class="kw">pub use </span>add_guard::AddGuard;
