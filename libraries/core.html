@@ -594,9 +594,9 @@ is combinational.</p>
 </ul>
 <hr />
 <h3 id="std_bit_slicein_width-start_idx-end_idx-out_width"><a class="header" href="#std_bit_slicein_width-start_idx-end_idx-out_width"><code>std_bit_slice&lt;IN_WIDTH, START_IDX, END_IDX, OUT_WIDTH&gt;</code></a></h3>
-<p>Extract the bit-string starting at <code>START_IDX</code> and ending at <code>END_IDX - 1</code> from <code>in</code>.
+<p>Extract the bit-string starting at <code>START_IDX</code> and ending at <code>END_IDX</code> from <code>in</code>.
 This is computed as <code>in[END_IDX:START_IDX]</code>.<code>OUT_WIDTH</code> must be specified to
-be <code>END_WIDTH - START_WITH</code> wide when instantiating the module.</p>
+be <code>END_WIDTH - START_WIDTH</code> wide when instantiating the module.</p>
 <p><strong>Inputs:</strong></p>
 <ul>
 <li><code>in: IN_WIDTH</code> - An IN_WIDTH-bit value.</li>
