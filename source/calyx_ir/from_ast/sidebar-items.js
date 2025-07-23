@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["ast_to_ir"]};
+window.SIDEBAR_ITEMS = {"fn":["ast_to_ir"],"struct":["AstConversionConfig"]};

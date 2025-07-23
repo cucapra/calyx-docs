@@ -22,7 +22,7 @@ The following example shows how to parse a Calyx program and generate the core d
   <span class="comment">// Parse the calyx program
   </span><span class="kw">let </span>ws = frontend::Workspace::construct(<span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(file), <span class="kw-2">&amp;</span>lib_path)<span class="question-mark">?</span>;
   <span class="comment">// Convert it into an ir::Context
-  </span><span class="kw">let </span><span class="kw-2">mut </span>ctx = ir::from_ast::ast_to_ir(ws)<span class="question-mark">?</span>;
+  </span><span class="kw">let </span><span class="kw-2">mut </span>ctx = ir::from_ast::ast_to_ir(ws, AstConversionConfig::default())<span class="question-mark">?</span>;
   <span class="comment">// Print out the components in the program
   </span><span class="kw">let </span>out = <span class="kw-2">&amp;mut </span>std::io::stdout();
   <span class="kw">for </span>comp <span class="kw">in </span><span class="kw-2">&amp;</span>ctx.components {

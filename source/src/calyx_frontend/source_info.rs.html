@@ -696,7 +696,7 @@
         <span class="comment">// write file table
         </span><span class="macro">writeln!</span>(f, <span class="string">"FILES"</span>)<span class="question-mark">?</span>;
         <span class="kw">for </span>(file, path) <span class="kw">in </span><span class="self">self</span>.file_map.iter().sorted_by_key(|(k, <span class="kw">_</span>)| <span class="kw-2">**</span>k) {
-            <span class="macro">writeln!</span>(f, <span class="string">"{file}: {}"</span>, path.display())<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(f, <span class="string">"  {file}: {}"</span>, path.display())<span class="question-mark">?</span>;
         }
 
         <span class="comment">// write the position table
@@ -704,7 +704,7 @@
         <span class="kw">for </span>(position, SourceLocation { line, file }) <span class="kw">in
             </span><span class="self">self</span>.position_map.iter().sorted_by_key(|(k, <span class="kw">_</span>)| <span class="kw-2">**</span>k)
         {
-            <span class="macro">writeln!</span>(f, <span class="string">"{position}: {file} {line}"</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(f, <span class="string">"  {position}: {file} {line}"</span>)<span class="question-mark">?</span>;
         }
 
         <span class="macro">writeln!</span>(f, <span class="string">"}}#"</span>)
