@@ -263,8 +263,32 @@
 <a href="#262" id="262">262</a>
 <a href="#263" id="263">263</a>
 <a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis;
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{Action, Named, VisResult, Visitor};
+<span class="kw">use </span>calyx_frontend::SetAttr;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, GetAttributes, LibrarySignatures, RRC, structure};
 <span class="kw">use </span>calyx_utils::{CalyxResult, Error};
 <span class="kw">use </span>std::collections::HashMap;
@@ -455,18 +479,31 @@
             s.port.borrow().canonical(),
         );
         <span class="kw">let </span>(port_ref, cond_ref) = <span class="self">self</span>.port_rewrite.get(<span class="kw-2">&amp;</span>key).unwrap();
-        <span class="kw">let </span>cond_in_body = ir::Control::static_enable(Rc::clone(cond_ref));
+        <span class="kw">let </span><span class="kw-2">mut </span>cond_in_body = ir::Control::static_enable(Rc::clone(cond_ref));
+        cond_in_body
+            .get_mut_attributes()
+            .copy_from_set(<span class="kw-2">&amp;</span>s.attributes, <span class="macro">vec!</span>[SetAttr::Pos]);
         <span class="kw">let </span>body = std::mem::replace(s.body.as_mut(), ir::Control::empty());
-        <span class="kw">let </span>new_body = ir::Control::seq(<span class="macro">vec!</span>[body, cond_in_body]);
+        <span class="kw">let </span><span class="kw-2">mut </span>new_body = ir::Control::seq(<span class="macro">vec!</span>[body, cond_in_body]);
+        new_body
+            .get_mut_attributes()
+            .copy_from_set(<span class="kw-2">&amp;</span>s.attributes, <span class="macro">vec!</span>[SetAttr::Pos]);
         <span class="kw">let </span><span class="kw-2">mut </span>while_ =
             ir::Control::while_(Rc::clone(port_ref), <span class="prelude-val">None</span>, Box::new(new_body));
         <span class="kw">let </span>attrs = while_.get_mut_attributes();
-        <span class="kw-2">*</span>attrs = std::mem::take(<span class="kw-2">&amp;mut </span>s.attributes);
-        <span class="kw">let </span>cond_before_body = ir::Control::static_enable(Rc::clone(cond_ref));
-        <span class="prelude-val">Ok</span>(Action::change(ir::Control::seq(<span class="macro">vec!</span>[
-            cond_before_body,
-            while_,
-        ])))
+        <span class="kw-2">*</span>attrs = s.attributes.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>cond_before_body =
+            ir::Control::static_enable(Rc::clone(cond_ref));
+        cond_before_body
+            .get_mut_attributes()
+            .copy_from_set(<span class="kw-2">&amp;</span>s.attributes, <span class="macro">vec!</span>[SetAttr::Pos]);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>new_seq = ir::Control::seq(<span class="macro">vec!</span>[cond_before_body, while_]);
+        new_seq
+            .get_mut_attributes()
+            .copy_from_set(<span class="kw-2">&amp;</span>s.attributes, <span class="macro">vec!</span>[SetAttr::Pos]);
+
+        <span class="prelude-val">Ok</span>(Action::change(new_seq))
     }
 
     <span class="doccomment">/// Transforms a `if-with` into a `seq-if` which first runs the cond group
@@ -506,9 +543,18 @@
             Box::new(fbranch),
         );
         <span class="kw">let </span>attrs = if_.get_mut_attributes();
-        <span class="kw-2">*</span>attrs = std::mem::take(<span class="kw-2">&amp;mut </span>s.attributes);
-        <span class="kw">let </span>cond = ir::Control::static_enable(Rc::clone(cond_ref));
-        <span class="prelude-val">Ok</span>(Action::change(ir::Control::seq(<span class="macro">vec!</span>[cond, if_])))
+        <span class="kw-2">*</span>attrs = s.attributes.clone();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>cond = ir::Control::static_enable(Rc::clone(cond_ref));
+        cond.get_mut_attributes()
+            .copy_from_set(<span class="kw-2">&amp;</span>s.attributes, <span class="macro">vec!</span>[SetAttr::Pos]);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>new_seq = ir::Control::seq(<span class="macro">vec!</span>[cond, if_]);
+        new_seq
+            .get_mut_attributes()
+            .copy_from_set(<span class="kw-2">&amp;</span>s.attributes, <span class="macro">vec!</span>[SetAttr::Pos]);
+
+        <span class="prelude-val">Ok</span>(Action::change(new_seq))
     }
 
     <span class="kw">fn </span>finish(

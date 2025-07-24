@@ -690,13 +690,22 @@
 <a href="#689" id="689">689</a>
 <a href="#690" id="690">690</a>
 <a href="#691" id="691">691</a>
-<a href="#692" id="692">692</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{
     CompactionAnalysis, InferenceAnalysis, PromotionAnalysis,
 };
 <span class="kw">use </span><span class="kw">crate</span>::traversal::{
     Action, ConstructVisitor, Named, Order, ParseVal, PassOpt, VisResult,
     Visitor,
 };
+<span class="kw">use </span>calyx_frontend::SetAttr;
 <span class="kw">use </span>calyx_ir::{<span class="self">self </span><span class="kw">as </span>ir, BoolAttr, LibrarySignatures};
 <span class="kw">use </span>calyx_utils::CalyxResult;
 <span class="kw">use </span>ir::GetAttributes;
@@ -1184,6 +1193,9 @@
                 attributes: ir::Attributes::default(),
             })
         };
+        new_ctrl
+            .get_mut_attributes()
+            .copy_from_set(<span class="kw-2">&amp;</span>s.attributes, <span class="macro">vec!</span>[SetAttr::Pos]);
         <span class="self">self</span>.inference_analysis.fixup_ctrl(<span class="kw-2">&amp;mut </span>new_ctrl);
 
         <span class="comment">// this might be part of a larger issue where passes remove some attributes they shouldn't
@@ -1238,10 +1250,14 @@
             .partition(PromotionAnalysis::can_be_promoted);
         new_stmts.extend(<span class="self">self</span>.promote_vec_par_heuristic(<span class="kw-2">&amp;mut </span>builder, s_stmts));
         new_stmts.extend(d_stmts);
-        <span class="kw">let </span>new_par = ir::Control::Par(ir::Par {
+        <span class="kw">let </span><span class="kw-2">mut </span>new_par = ir::Control::Par(ir::Par {
             stmts: new_stmts,
             attributes: ir::Attributes::default(),
         });
+        <span class="comment">// port position attribute of original par node to the new par node
+        </span>new_par
+            .get_mut_attributes()
+            .copy_from_set(<span class="kw-2">&amp;</span>s.attributes, <span class="macro">vec!</span>[SetAttr::Pos]);
         <span class="prelude-val">Ok</span>(Action::change(new_par))
     }
 
