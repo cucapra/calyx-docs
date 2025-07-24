@@ -532,13 +532,13 @@ So make a file called something like <code>data.json</code> containing something
 <p>The <code>mem</code> key means we're providing the initial value for our memory called <code>mem</code>.
 We have one (unsigned integer) data element, and we indicate the bit width (32 bits).</p>
 <p>If you want to see how this Calyx program compiles to Verilog, here's the <a href="../running-calyx/fud/index.html">fud</a> incantation you need:</p>
-<pre><code>fud exec language-tutorial-mem.futil --to verilog
+<pre><code>fud2 language-tutorial-mem.futil --to verilog
 </code></pre>
 <p>Not terribly interesting!
 However, one nice thing you can do with programs is execute them.</p>
 <p>To run our program using <a href="http://iverilog.icarus.com">Icarus Verilog</a>, do this:</p>
-<pre><code>fud exec language-tutorial-mem.futil --to dat --through icarus-verilog \
-    -s verilog.data data.json
+<pre><code>fud2 language-tutorial-mem.futil --to dat --through icarus \
+    -s sim.data=data.json
 </code></pre>
 <p>Using <code>--to dat</code> asks fud to run the program, and the extra <code>-s verilog.data &lt;filename&gt;</code> argument tells it where to find the input data.
 The <code>--through icarus-verilog</code> option tells fud which Verilog simulator to use (see <a href="../running-calyx/fud/index.html">the chapter about fud</a> for alternatives such as <a href="https://www.veripool.org/wiki/verilator">Verilator</a>).
@@ -581,7 +581,7 @@ Add one line to activate <code>the_answer</code> and then finish:</p>
 <p>If you execute this program, it should do the same thing as the original group-free version: <code>mem</code> ends up with 42 in it.
 But now we're controlling things with an execution schedule.</p>
 <p>If you're curious to see how the Calyx compiler lowers this program to a Verilog-like structural form of Calyx, you can do this:</p>
-<pre><code>fud exec language-tutorial-mem.futil --to calyx-lowered
+<pre><code>calyx language-tutorial-mem.futil
 </code></pre>
 <p>Notably, you'll see <code>control {}</code> in the output, meaning that the compiler has eliminated all the control statements and replaced them with continuous assignments in <code>wires</code>.</p>
 <blockquote>

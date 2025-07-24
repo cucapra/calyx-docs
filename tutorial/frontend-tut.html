@@ -483,10 +483,6 @@ sos := reduce 1 (acc, i &lt;- squares) 0 { acc + i }
 <p>Next, install the <code>mrxl</code> binary:</p>
 <pre><code>cd frontends/mrxl &amp;&amp; flit install -s &amp;&amp; cd -
 </code></pre>
-<p>Register the <code>mrxl</code> binary with <code>fud</code>:</p>
-<pre><code>fud register mrxl -p frontends/mrxl/fud/mrxl.py
-</code></pre>
-<p>Now, running <code>fud check</code> should report that the <code>mrxl</code> binary is correctly installed.</p>
 <h3 id="running-mrxl"><a class="header" href="#running-mrxl">Running MrXL</a></h3>
 <p>Run:</p>
 <pre><code>mrxl frontends/mrxl/test/sos.mrxl --data frontends/mrxl/test/sos.mrxl.data --interpret
@@ -619,9 +615,10 @@ component main() -&gt; () {
 <h2 id="simulating-our-example-with-verilog"><a class="header" href="#simulating-our-example-with-verilog">Simulating our example with Verilog</a></h2>
 <p>Finally, let us go the whole hog: we compile our MrXL program to Calyx, compile it to Verilog, then simulate it using <a href="https://www.veripool.org/wiki/verilator">Verilator</a>.</p>
 <p>Run:</p>
-<pre><code>fud e --from mrxl frontends/mrxl/test/sos.mrxl --to dat --through verilog -s mrxl.data frontends/mrxl/test/sos.mrxl.data
+<pre><code>mrxl --convert --data frontends/mrxl/test/sos.mrxl.data frontends/mrxl/test/sos.mrxl &gt; sos.data
+fud2 --from mrxl frontends/mrxl/test/sos.mrxl --to dat --through verilator -s sim.data=sos.data
 </code></pre>
-<p>The above command takes a MrXL program, <code>sos.mrxl</code>, and generates results with Verilator using the MrXL data file <code>sos.mrxl.data</code>.</p>
+<p>The above commands take a MrXL program, <code>sos.mrxl</code>, and generates results with Verilator using the MrXL data file <code>sos.mrxl.data</code>.</p>
 <h1 id="compiling-mrxl-into-calyx"><a class="header" href="#compiling-mrxl-into-calyx">Compiling MrXL into Calyx</a></h1>
 <p>Calyx is an infrastructure for designing <em>domain-specific languages</em> (DSL) which can generate efficient hardware.
 The rest of the tutorial will show you how to implement such a DSL by studying <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrxl/mrxl/gen_calyx.py">the MrXL-to-Calyx compiler</a>, written in Python.</p>
@@ -729,7 +726,7 @@ At a high level, we want to generate the following pieces of hardware:</p>
 <li>An adder to increment the value of the index.</li>
 <li>Whatever hardware is needed to implement the loop body computation.</li>
 </ol>
-<p>We have implemented exactly this, and you have been using it thus far with the <code>fud</code> invocations that we have provided you.</p>
+<p>We have implemented exactly this, and you have been using it thus far with the <code>fud2</code> invocations that we have provided you.</p>
 <p>However, it is time to get your hands dirty.
 We provide a <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrxl/mrxl/gen_calyx.py#L171-L191">stub implementation</a> of <code>map</code> in <code>gen_calyx.py</code>:</p>
 <pre><code class="language-python">def my_map_impl(
@@ -756,10 +753,10 @@ We provide a <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrx
 </code></pre>
 <p>You are invited to try implementing map yourself according to the outline given in the description by filling in the body of this function.</p>
 <p>To run <code>mrxl</code> with <code>my_map_impl</code> instead of our implementation, pass the <code>--my-map</code> flag:</p>
-<pre><code class="language-sh">fud e --from mrxl test/sos.mrxl \
-        --to dat --through verilog \
-        -s mrxl.flags "--my-map "  \
-        -s mrxl.data test/sos.mrxl.data
+<pre><code class="language-sh">fud2 --from mrxl test/sos.mrxl \
+     --to dat --through verilator \
+     -s mrxl.flags="--my-map "  \
+     -s sim.data=sos.data
 </code></pre>
 <p>If you are feeling good about your implementation, skip to <a href="#adding-parallelization">the next section</a>!
 If you'd like to read through the details of our implementation – or build yours in tandem – continue on with the rest of this section.</p>
@@ -856,7 +853,7 @@ The parallelism factor <code>2</code> specifies that two copies of the loop bodi
 <li>We need to generate <em>multiple copies</em> of the hardware we generated above because, again, adders and multipliers are physical resources and can only support one computation at a time.</li>
 </ol>
 <p>To produce the full Calyx program for the above example, run the following from the root of the Calyx repository:</p>
-<pre><code>fud e --from mrxl --to calyx frontends/mrxl/test/squares.mrxl
+<pre><code>fud2 --from mrxl --to calyx frontends/mrxl/test/squares.mrxl
 </code></pre>
 <h3 id="memory-banking"><a class="header" href="#memory-banking">Memory banking</a></h3>
 <!-- Let us look back at our example featuring a parallel `map`:
@@ -894,11 +891,11 @@ Though nontrivial, this data-banking can also be <a href="#aside-supplying-data-
 </code></pre>
 <p>The <a href="../lang/ref.html#par"><code>par</code> operator</a> executes all the loops in parallel which use distinct computational resources.
 As specified by the language specification, <a href="../lang/ref.html#par">conflicting resource usage is undefined behavior</a>.</p>
-<p>You can use <code>fud</code> to compile the MrXL program and run it with some data:</p>
-<pre><code>fud e --from mrxl --to dat \
-      --through verilog \
-      -s mrxl.data frontends/mrxl/test/squares.mrxl.data \
-      frontends/mrxl/test/squares.mrxl
+<p>You can use <code>fud2</code> to compile the MrXL program and run it with some data:</p>
+<pre><code>fud2 --from mrxl --to dat \
+     --through verilator \
+     -s sim.data=squares.data \
+     frontends/mrxl/test/squares.mrxl
 </code></pre>
 <blockquote>
 <p>The <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrxl/mrxl/gen_calyx.py">complete implementation</a> shows the necessary code to create physical memory banks and create an outer loop to generate distinct hardware for each copy of the loop.</p>
@@ -1013,7 +1010,7 @@ We can keep MrXL-native data files relatively light and add this <code>format</c
 <p>And we can generate this automatically. Try it yourself:</p>
 <pre><code>mrxl frontends/mrxl/test/squares.mrxl --data frontends/mrxl/test/squares.mrxl.data --convert
 </code></pre>
-<p>This transformation is achieved using a <a href="../running-calyx/fud/index.html"><code>fud</code></a> pass that converts MrXL-native data files into Calyx-native data files.</p>
+<p>This transformation is achieved using a <a href="../running-calyx/fud2"><code>fud2</code></a> pass that converts MrXL-native data files into Calyx-native data files.</p>
 
                     </main>
 

@@ -467,13 +467,9 @@ bit width <code>32</code>, input size <code>4</code>, and modulus value <code>97
 during each stage of the pipeline. This requires installing PrettyTable:</p>
 <pre><code>pip3 install prettytable numpy
 </code></pre>
-<h2 id="fud-stage"><a class="header" href="#fud-stage">Fud Stage</a></h2>
-<p>The NTT pipeline defines an <a href="../running-calyx/fud/external.html">external fud stage</a> to
-transform configuration files into Calyx programs.
-To install, run:</p>
-<pre><code>fud register ntt -p frontends/ntt-pipeline/fud/ntt.py &amp;&amp; fud check
-</code></pre>
-<p>This should report the newly installed <code>ntt</code> stage in the configuration.</p>
+<h2 id="fud2-op"><a class="header" href="#fud2-op">fud2 Op</a></h2>
+<p>fud2 comes with an op for generating NTT implementations built-in.
+Use <code>--from ntt</code>.</p>
 <h2 id="configuration-files"><a class="header" href="#configuration-files">Configuration Files</a></h2>
 <p>Configurations files simply specify command line parameters:</p>
 <pre><code class="language-json">{

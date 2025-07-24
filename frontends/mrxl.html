@@ -459,20 +459,11 @@ dot := reduce 4 (a, b &lt;- prodvec) 0 { a + b }
 <p>The numbers that come right after <code>map</code> and <code>reduce</code> (<code>16</code> and <code>4</code> respectively) are "parallelism factors" that guide the generation of hardware.
 The explanation on this page is relatively brief; see the <a href="../tutorial/frontend-tut.html">frontend tutorial</a> for a more detailed explanation of the language. In particular, the <a href="../tutorial/frontend-tut.html#example-sum-of-squares">sum of squares</a> example is a good place to start.</p>
 <h2 id="install"><a class="header" href="#install">Install</a></h2>
-<p>First, install the <a href="../calyx-py.html">calyx-py</a> library.</p>
-<p>The MrXL implementation is in Python and uses <a href="https://flit.readthedocs.io/en/latest/index.html">Flit</a>.
-Install Flit (<code>pip install flit</code> or similar), and then type the
-following after changing your directory to <code>frontends/mrxl</code>:</p>
-<pre><code>flit install --symlink
+<p>You can run the MrXL implementation using <a href="https://docs.astral.sh/uv/">uv</a>.
+Type this in the <code>mrxl</code> directory:</p>
+<pre><code>uv run mrxl --help
 </code></pre>
-<p>This creates a symbolic link to the present directory and installs the <code>mrxl</code> command line tool.</p>
-<p>By default, <a href="../running-calyx/fud">fud</a> looks for the <code>mrxl</code> executable to enable
-the <code>mrxl</code> compilation stage.
-Type <code>fud check</code> to make sure <code>fud</code> reports that the <code>mrxl</code> compiler has been
-found. If it does not, run the following while still in <code>frontends/mrxl</code>.</p>
-<pre><code>fud register mrxl -p fud/mrxl.py
-</code></pre>
-<p>Run <code>fud check</code> again to ensure that <code>fud</code> sees <code>mrxl</code>.</p>
+<p><a href="../running-calyx/fud2">fud2</a> also comes with an op for compiling MrXL programs to Calyx.</p>
 <h2 id="interpreting-mrxl"><a class="header" href="#interpreting-mrxl">Interpreting MrXL</a></h2>
 <p>To run the program through the MrXL interpreter, execute:</p>
 <pre><code>mrxl &lt;prog&gt;.mrxl --data &lt;prog&gt;.mrxl.data --interpret
@@ -491,15 +482,15 @@ Similarly, we also provide <code>add.mrxl</code> and <code>sum.mrxl</code>, alon
 <pre><code>mrxl test/dot.mrxl
 </code></pre>
 <p>In order to run the compiler through <code>fud</code>, pass the <code>--from mrxl</code> and <code>--to calyx</code> flags:</p>
-<pre><code>fud e --from mrxl &lt;prog.mrxl&gt; --to calyx
+<pre><code>fud2 --from mrxl &lt;prog.mrxl&gt; --to calyx
 </code></pre>
 <p>And finally, the real prize.
 In order to compile MrXL to Calyx and then simulate the Calyx code in Verilog, run:</p>
-<pre><code>fud e --from mrxl &lt;prog&gt;.mrxl --to dat --through verilog -s mrxl.data &lt;prog&gt;.mrxl.data
+<pre><code>mrxl --convert --data &lt;prog&gt;.mrxl.data &gt; something.dat
+fud2 --from mrxl &lt;prog&gt;.mrxl --to dat --through verilator -s sim.data=something.dat
 </code></pre>
 <p>An aside: MrXL permits a simplified data format, which is what we have been looking at in our <code>&lt;prog&gt;.mrxl.data</code> files.
-Files of this form need to be beefed up with additional information so that Verilog (and similar simulators) can work with them.
-We did this beefing up "on the fly" in the incantation above, but it is interesting to see the changes we made.</p>
+Files of this form need to be beefed up with additional information so that Verilog (and similar simulators) can work with them.</p>
 <p>See this with:</p>
 <pre><code>mrxl &lt;prog&gt;.mrxl --data &lt;prog&gt;.mrxl.data --convert
 </code></pre>

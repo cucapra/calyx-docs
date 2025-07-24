@@ -461,21 +461,17 @@ chmod +x ./fuse
 <p>The Dahlia compiler can be run using the <code>./fuse</code> binary:</p>
 <pre><code>./fuse --help
 </code></pre>
-<p>Finally, configure <code>fud</code> to use the Dahlia compiler:</p>
-<pre><code>fud c stages.dahlia.exec &lt;path to Dahlia repository&gt;/fuse
+<p>Finally, configure <code>fud2</code> to use the Dahlia compiler.
+Type <code>fud2 edit-config</code> and add a line like this:</p>
+<pre><code>dahlia = "&lt;path to Dahlia repository&gt;/fuse"
 </code></pre>
-<p>Use <code>fud</code> to check if the compiler was installed correctly:</p>
-<pre><code>fud check
-</code></pre>
-<p><code>fud</code> should report that the Dahlia compiler is available and has the right
-version.</p>
 <p>If something went wrong, try following the <a href="https://github.com/cucapra/dahlia#set-it-up">instructions</a> to build the Dahlia
 compiler from its repository.</p>
 <h2 id="compiling-dahlia-to-calyx"><a class="header" href="#compiling-dahlia-to-calyx">Compiling Dahlia to Calyx</a></h2>
 <p>Dahlia programs can be compiled to Calyx using:</p>
-<pre><code>fud e --from dahlia &lt;input file&gt; --to calyx
+<pre><code>fud2 --from dahlia &lt;input file&gt; --to calyx
 </code></pre>
-<p>The Dahlia backed for Calyx is neither <em>complete</em> nor <em>stable</em>. If you find
+<p>The Dahlia backend for Calyx is neither <em>complete</em> nor <em>stable</em>. If you find
 a confusing error or wrong program, please open an <a href="https://github.com/cucapra/dahlia/issues">issue</a>.</p>
 
                     </main>

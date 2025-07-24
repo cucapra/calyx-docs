@@ -447,7 +447,7 @@
 
 </style>
 <h1 id="data-format"><a class="header" href="#data-format">Data Format</a></h1>
-<p>Calyx's <a href="../running-calyx/fud/index.html"><code>fud</code></a>-based workflows specifies a JSON-based data format which can be used with software simulators.</p>
+<p>Calyx's <a href="../running-calyx/fud2"><code>fud2</code></a>-based workflows specifies a JSON-based data format which can be used with software simulators.</p>
 <h2 id="external-memories"><a class="header" href="#external-memories">External memories</a></h2>
 <p>First, a Calyx program must mark memories using the <a href="attributes.html#external"><code>@external</code> attribute</a> to tell the compiler that the memory is used as either an input or an ouput.</p>
 <pre><code>component main() {
@@ -505,11 +505,11 @@ The <code>@external</code> attribute can <strong>only be used</strong> on the <a
 <p>All software simulators supported by <code>fud</code>, including <a href="../running-calyx/fud/index.html#verilator">Verilator</a> and <a href="../running-calyx/fud/index.html#icarus-verilog">Icarus Verilog</a>, as well as the <a href="../running-calyx/interpreter.html">Calyx interpreter</a> can use this data format.
 To pass a JSON file with initial values, use the <code>-s verilog.data</code> flag:</p>
 <pre><code class="language-bash"># Use Icarus Verilog
-fud e --to dat --through icarus-verilog &lt;CALYX FILE&gt; -s verilog.data &lt;JSON&gt;
+fud2 --to dat --through icarus &lt;CALYX FILE&gt; -s sim.data=&lt;JSON&gt;
 # Use Verilator
-fud e --to dat --through verilog &lt;CALYX FILE&gt; -s verilog.data &lt;JSON&gt;
-# Use the Calyx Interpreter
-fud e --to interpreter-out &lt;CALYX FILE&gt; -s verilog.data &lt;JSON&gt;
+fud2 --to dat --through verilator &lt;CALYX FILE&gt; -s sim.data=&lt;JSON&gt;
+# Use Cider, the Calyx interpreter
+fud2 --to dat --through cider &lt;CALYX FILE&gt; -s sim.data=&lt;JSON&gt;
 </code></pre>
 <h2 id="generating-random-values"><a class="header" href="#generating-random-values">Generating Random Values</a></h2>
 <p>Often times, it can be useful to automatically generate random values for a large memory. The <a href="../tools/data-gen.html">data-gen</a> tool takes a Calyx program as an input and automatically generates random values for each memory marked with <code>@external</code> in the above data format.</p>

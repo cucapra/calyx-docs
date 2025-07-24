@@ -512,37 +512,32 @@ Install the following tools:</p>
 <p>If everything has been installed correctly, this should not produce any failing
 tests.</p>
 <h2 id="installing-the-command-line-driver"><a class="header" href="#installing-the-command-line-driver">Installing the Command-Line Driver</a></h2>
-<p><a href="./running-calyx/fud">The Calyx driver</a> wraps the various compiler frontends and
+<p><a href="./running-calyx/fud2">The Calyx driver</a>, called fud2, wraps the various compiler frontends and
 backends to simplify running Calyx programs.
 Start at the root of the repository.</p>
-<p>Install <a href="https://flit.readthedocs.io/en/latest/">Flit</a>:</p>
-<pre><code>pip3 install flit
+<p>Install fud2 using Cargo:</p>
+<pre><code>cargo install --path fud2
 </code></pre>
-<p>Install <a href="builder/calyx-py.html"><code>calyx-py</code></a>:</p>
-<pre><code>cd calyx-py &amp;&amp; flit install -s &amp;&amp; cd -
+<p>fud2 requires <a href="https://ninja-build.org/manual.html">Ninja</a> and <a href="https://docs.astral.sh/uv/">uv</a>, so install those if you don't already have them.
+For example, use <code>brew install ninja uv</code> on macOS or <code>apt-get install ninja-build</code> followed by <code>curl -LsSf https://astral.sh/uv/install.sh | sh</code> on Debian/Ubuntu.</p>
+<p>Configure fud2 by typing:</p>
+<pre><code>fud2 edit-config
 </code></pre>
-<p>Install <code>fud</code>:</p>
-<pre><code>flit -f fud/pyproject.toml install -s --deps production
+<p>And put this in the resulting TOML file:</p>
+<pre><code class="language-toml">[calyx]
+base = "&lt;path to Calyx repository&gt;"
 </code></pre>
-<p>Configure <code>fud</code>:</p>
-<pre><code>fud config --create global.root &lt;full path to Calyx repository&gt;
+<p>Finally, use this to set up fud2's Python environment:</p>
+<pre><code>fud2 env init
 </code></pre>
-<p>Check the <code>fud</code> configuration:</p>
-<pre><code>fud check
-</code></pre>
-<p><code>fud</code> will report certain tools are not available. This is expected.</p>
+<p>You can read [more about setting up and using fud2][fud2] if you're curious.</p>
 <h2 id="simulation"><a class="header" href="#simulation">Simulation</a></h2>
 <p>There are three ways to run Calyx programs:
 <a href="https://www.veripool.org/wiki/verilator">Verilator</a>, <a href="http://iverilog.icarus.com">Icarus Verilog</a>, and Calyx's native <a href="./running-calyx/interpreter.html">interpreter</a>.
 You'll want to set up at least one of these options so you can try out your code.</p>
 <p>Icarus Verilog is an easy way to get started on most platforms.
 On a Mac, you can install it via <a href="https://brew.sh">Homebrew</a> by typing <code>brew install icarus-verilog</code>.
-On Ubuntu, <a href="https://iverilog.fandom.com/wiki/Installation_Guide#Installation_From_Source">install from source</a>.
-Then install the relevant <a href="./running-calyx/fud/index.html#icarus-verilog">fud support</a> by running:</p>
-<pre><code>fud register icarus-verilog -p fud/icarus/icarus.py
-</code></pre>
-<p>Type <code>fud check</code> to make sure the new stage is working.
-Some missing tools are again expected; just pay attention to the report for <code>stages.icarus-verilog.exec</code>.</p>
+On Ubuntu, <a href="https://iverilog.fandom.com/wiki/Installation_Guide#Installation_From_Source">install from source</a>.</p>
 <p>It is worth saying a little about the alternatives.
 You could consider:</p>
 <ol>
@@ -551,11 +546,11 @@ You could consider:</p>
 </ol>
 <h2 id="running-a-hardware-design"><a class="header" href="#running-a-hardware-design">Running a Hardware Design</a></h2>
 <p>You're all set to run a Calyx hardware design now. Run the following command:</p>
-<pre><code>fud e examples/tutorial/language-tutorial-iterate.futil \
-  -s verilog.data examples/tutorial/data.json \
-  --to dat --through icarus-verilog -v
+<pre><code>fud2 examples/tutorial/language-tutorial-iterate.futil \
+  -s sim.data=examples/tutorial/data.json \
+  --to dat --through icarus
 </code></pre>
-<p>(Change the last bit to <code>--through verilog</code> to use Verilator instead.)</p>
+<p>(Change the last bit to <code>--through verilator</code> to use Verilator instead.)</p>
 <p>This command will compile <code>examples/tutorial/language-tutorial-iterate.futil</code> to Verilog
 using the Calyx compiler, simulate the design using the data in <code>examples/tutorial/data.json</code>, and generate a JSON representation of the
 final memory state.</p>
@@ -564,8 +559,7 @@ final memory state.</p>
 <ul>
 <li><a href="./tools/editor-highlighting.html">How can I setup syntax highlighting in my editor?</a></li>
 <li><a href="./tutorial/language-tut.html">How does the language work?</a></li>
-<li><a href="./running-calyx/fud/index.html#dahlia-fronted">How do I install Calyx frontends?</a></li>
-<li><a href="./running-calyx/fud/examples.html">Where can I see further examples with <code>fud</code>?</a></li>
+<li><a href="./running-calyx/fud2#general-use">Where can I see further examples with <code>fud2</code>?</a></li>
 <li><a href="./tutorial/frontend-tut.html">How do I write a frontend for Calyx?</a></li>
 </ul>
 
