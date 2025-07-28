@@ -526,6 +526,26 @@ Here are some options you might need:</p>
 <li><code>fud2 list</code>: Print out all the available states and operations.</li>
 <li><code>fud2 get-rsrc FILE</code>: Fetch a <em>resource file</em> and place it in the working directory. You typically do not need to use this interactively; it is used during builds to obtain files included with fud2 that are necessary for a given build.</li>
 </ul>
+<h3 id="timing-extraction"><a class="header" href="#timing-extraction">Timing Extraction</a></h3>
+<p>When using the <code>run</code> command, it can sometimes be useful to know how long
+individuals parts of the build are taking. You can use the <code>--csv &lt;CSV_FILE&gt;</code> to
+emit a csv of timing information collected during the build. This will output a
+csv containing the name of the generated file and the time it took to build in
+milliseconds.</p>
+<p>For example running</p>
+<pre><code>fud2 --from calyx --to jq --through icarus -s sim.data=tests/correctness/invoke-with.futil.data -s calyx.flags=' --nested' -s verilog.cycle_limit=500 -s jq.expr=".memories" tests/correctness/invoke-with.futil -q --csv timing.csv
+</code></pre>
+<p>will produce a file <code>timing.csv</code> with contents like</p>
+<pre><code class="language-csv">filename,duration
+verilog-noverify.sv,24
+json-dat.py,25
+tb.sv,25
+sim.exe,18
+sim_data,141
+sim.log,143
+dat.json,133
+_to_stdout_jq.jq,7
+</code></pre>
 <h2 id="the-design-of-fud2"><a class="header" href="#the-design-of-fud2">The Design of fud2</a></h2>
 <div class="warning">
 <p>This section is about the <em>implementation</em> of fud2; it is only relevant if you want to work on it yourself.
