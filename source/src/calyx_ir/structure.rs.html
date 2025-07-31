@@ -1,1983 +1,991 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/ir/src/structure.rs`."><title>structure.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-46132b98.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="calyx_ir" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.1 (4eb161250 2025-03-15)" data-channel="1.85.1" data-search-js="search-75f5ac3e.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">calyx_ir/</div>structure.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
-<a href="#1" id="1">1</a>
-<a href="#2" id="2">2</a>
-<a href="#3" id="3">3</a>
-<a href="#4" id="4">4</a>
-<a href="#5" id="5">5</a>
-<a href="#6" id="6">6</a>
-<a href="#7" id="7">7</a>
-<a href="#8" id="8">8</a>
-<a href="#9" id="9">9</a>
-<a href="#10" id="10">10</a>
-<a href="#11" id="11">11</a>
-<a href="#12" id="12">12</a>
-<a href="#13" id="13">13</a>
-<a href="#14" id="14">14</a>
-<a href="#15" id="15">15</a>
-<a href="#16" id="16">16</a>
-<a href="#17" id="17">17</a>
-<a href="#18" id="18">18</a>
-<a href="#19" id="19">19</a>
-<a href="#20" id="20">20</a>
-<a href="#21" id="21">21</a>
-<a href="#22" id="22">22</a>
-<a href="#23" id="23">23</a>
-<a href="#24" id="24">24</a>
-<a href="#25" id="25">25</a>
-<a href="#26" id="26">26</a>
-<a href="#27" id="27">27</a>
-<a href="#28" id="28">28</a>
-<a href="#29" id="29">29</a>
-<a href="#30" id="30">30</a>
-<a href="#31" id="31">31</a>
-<a href="#32" id="32">32</a>
-<a href="#33" id="33">33</a>
-<a href="#34" id="34">34</a>
-<a href="#35" id="35">35</a>
-<a href="#36" id="36">36</a>
-<a href="#37" id="37">37</a>
-<a href="#38" id="38">38</a>
-<a href="#39" id="39">39</a>
-<a href="#40" id="40">40</a>
-<a href="#41" id="41">41</a>
-<a href="#42" id="42">42</a>
-<a href="#43" id="43">43</a>
-<a href="#44" id="44">44</a>
-<a href="#45" id="45">45</a>
-<a href="#46" id="46">46</a>
-<a href="#47" id="47">47</a>
-<a href="#48" id="48">48</a>
-<a href="#49" id="49">49</a>
-<a href="#50" id="50">50</a>
-<a href="#51" id="51">51</a>
-<a href="#52" id="52">52</a>
-<a href="#53" id="53">53</a>
-<a href="#54" id="54">54</a>
-<a href="#55" id="55">55</a>
-<a href="#56" id="56">56</a>
-<a href="#57" id="57">57</a>
-<a href="#58" id="58">58</a>
-<a href="#59" id="59">59</a>
-<a href="#60" id="60">60</a>
-<a href="#61" id="61">61</a>
-<a href="#62" id="62">62</a>
-<a href="#63" id="63">63</a>
-<a href="#64" id="64">64</a>
-<a href="#65" id="65">65</a>
-<a href="#66" id="66">66</a>
-<a href="#67" id="67">67</a>
-<a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a>
-<a href="#70" id="70">70</a>
-<a href="#71" id="71">71</a>
-<a href="#72" id="72">72</a>
-<a href="#73" id="73">73</a>
-<a href="#74" id="74">74</a>
-<a href="#75" id="75">75</a>
-<a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
-<a href="#81" id="81">81</a>
-<a href="#82" id="82">82</a>
-<a href="#83" id="83">83</a>
-<a href="#84" id="84">84</a>
-<a href="#85" id="85">85</a>
-<a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a>
-<a href="#88" id="88">88</a>
-<a href="#89" id="89">89</a>
-<a href="#90" id="90">90</a>
-<a href="#91" id="91">91</a>
-<a href="#92" id="92">92</a>
-<a href="#93" id="93">93</a>
-<a href="#94" id="94">94</a>
-<a href="#95" id="95">95</a>
-<a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a>
-<a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
-<a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
-<a href="#162" id="162">162</a>
-<a href="#163" id="163">163</a>
-<a href="#164" id="164">164</a>
-<a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
-<a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
-<a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
-<a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
-<a href="#239" id="239">239</a>
-<a href="#240" id="240">240</a>
-<a href="#241" id="241">241</a>
-<a href="#242" id="242">242</a>
-<a href="#243" id="243">243</a>
-<a href="#244" id="244">244</a>
-<a href="#245" id="245">245</a>
-<a href="#246" id="246">246</a>
-<a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
-<a href="#250" id="250">250</a>
-<a href="#251" id="251">251</a>
-<a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
-<a href="#328" id="328">328</a>
-<a href="#329" id="329">329</a>
-<a href="#330" id="330">330</a>
-<a href="#331" id="331">331</a>
-<a href="#332" id="332">332</a>
-<a href="#333" id="333">333</a>
-<a href="#334" id="334">334</a>
-<a href="#335" id="335">335</a>
-<a href="#336" id="336">336</a>
-<a href="#337" id="337">337</a>
-<a href="#338" id="338">338</a>
-<a href="#339" id="339">339</a>
-<a href="#340" id="340">340</a>
-<a href="#341" id="341">341</a>
-<a href="#342" id="342">342</a>
-<a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a>
-<a href="#345" id="345">345</a>
-<a href="#346" id="346">346</a>
-<a href="#347" id="347">347</a>
-<a href="#348" id="348">348</a>
-<a href="#349" id="349">349</a>
-<a href="#350" id="350">350</a>
-<a href="#351" id="351">351</a>
-<a href="#352" id="352">352</a>
-<a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a>
-<a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
-<a href="#357" id="357">357</a>
-<a href="#358" id="358">358</a>
-<a href="#359" id="359">359</a>
-<a href="#360" id="360">360</a>
-<a href="#361" id="361">361</a>
-<a href="#362" id="362">362</a>
-<a href="#363" id="363">363</a>
-<a href="#364" id="364">364</a>
-<a href="#365" id="365">365</a>
-<a href="#366" id="366">366</a>
-<a href="#367" id="367">367</a>
-<a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
-<a href="#373" id="373">373</a>
-<a href="#374" id="374">374</a>
-<a href="#375" id="375">375</a>
-<a href="#376" id="376">376</a>
-<a href="#377" id="377">377</a>
-<a href="#378" id="378">378</a>
-<a href="#379" id="379">379</a>
-<a href="#380" id="380">380</a>
-<a href="#381" id="381">381</a>
-<a href="#382" id="382">382</a>
-<a href="#383" id="383">383</a>
-<a href="#384" id="384">384</a>
-<a href="#385" id="385">385</a>
-<a href="#386" id="386">386</a>
-<a href="#387" id="387">387</a>
-<a href="#388" id="388">388</a>
-<a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
-<a href="#393" id="393">393</a>
-<a href="#394" id="394">394</a>
-<a href="#395" id="395">395</a>
-<a href="#396" id="396">396</a>
-<a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
-<a href="#400" id="400">400</a>
-<a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
-<a href="#403" id="403">403</a>
-<a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
-<a href="#408" id="408">408</a>
-<a href="#409" id="409">409</a>
-<a href="#410" id="410">410</a>
-<a href="#411" id="411">411</a>
-<a href="#412" id="412">412</a>
-<a href="#413" id="413">413</a>
-<a href="#414" id="414">414</a>
-<a href="#415" id="415">415</a>
-<a href="#416" id="416">416</a>
-<a href="#417" id="417">417</a>
-<a href="#418" id="418">418</a>
-<a href="#419" id="419">419</a>
-<a href="#420" id="420">420</a>
-<a href="#421" id="421">421</a>
-<a href="#422" id="422">422</a>
-<a href="#423" id="423">423</a>
-<a href="#424" id="424">424</a>
-<a href="#425" id="425">425</a>
-<a href="#426" id="426">426</a>
-<a href="#427" id="427">427</a>
-<a href="#428" id="428">428</a>
-<a href="#429" id="429">429</a>
-<a href="#430" id="430">430</a>
-<a href="#431" id="431">431</a>
-<a href="#432" id="432">432</a>
-<a href="#433" id="433">433</a>
-<a href="#434" id="434">434</a>
-<a href="#435" id="435">435</a>
-<a href="#436" id="436">436</a>
-<a href="#437" id="437">437</a>
-<a href="#438" id="438">438</a>
-<a href="#439" id="439">439</a>
-<a href="#440" id="440">440</a>
-<a href="#441" id="441">441</a>
-<a href="#442" id="442">442</a>
-<a href="#443" id="443">443</a>
-<a href="#444" id="444">444</a>
-<a href="#445" id="445">445</a>
-<a href="#446" id="446">446</a>
-<a href="#447" id="447">447</a>
-<a href="#448" id="448">448</a>
-<a href="#449" id="449">449</a>
-<a href="#450" id="450">450</a>
-<a href="#451" id="451">451</a>
-<a href="#452" id="452">452</a>
-<a href="#453" id="453">453</a>
-<a href="#454" id="454">454</a>
-<a href="#455" id="455">455</a>
-<a href="#456" id="456">456</a>
-<a href="#457" id="457">457</a>
-<a href="#458" id="458">458</a>
-<a href="#459" id="459">459</a>
-<a href="#460" id="460">460</a>
-<a href="#461" id="461">461</a>
-<a href="#462" id="462">462</a>
-<a href="#463" id="463">463</a>
-<a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a>
-<a href="#466" id="466">466</a>
-<a href="#467" id="467">467</a>
-<a href="#468" id="468">468</a>
-<a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
-<a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
-<a href="#484" id="484">484</a>
-<a href="#485" id="485">485</a>
-<a href="#486" id="486">486</a>
-<a href="#487" id="487">487</a>
-<a href="#488" id="488">488</a>
-<a href="#489" id="489">489</a>
-<a href="#490" id="490">490</a>
-<a href="#491" id="491">491</a>
-<a href="#492" id="492">492</a>
-<a href="#493" id="493">493</a>
-<a href="#494" id="494">494</a>
-<a href="#495" id="495">495</a>
-<a href="#496" id="496">496</a>
-<a href="#497" id="497">497</a>
-<a href="#498" id="498">498</a>
-<a href="#499" id="499">499</a>
-<a href="#500" id="500">500</a>
-<a href="#501" id="501">501</a>
-<a href="#502" id="502">502</a>
-<a href="#503" id="503">503</a>
-<a href="#504" id="504">504</a>
-<a href="#505" id="505">505</a>
-<a href="#506" id="506">506</a>
-<a href="#507" id="507">507</a>
-<a href="#508" id="508">508</a>
-<a href="#509" id="509">509</a>
-<a href="#510" id="510">510</a>
-<a href="#511" id="511">511</a>
-<a href="#512" id="512">512</a>
-<a href="#513" id="513">513</a>
-<a href="#514" id="514">514</a>
-<a href="#515" id="515">515</a>
-<a href="#516" id="516">516</a>
-<a href="#517" id="517">517</a>
-<a href="#518" id="518">518</a>
-<a href="#519" id="519">519</a>
-<a href="#520" id="520">520</a>
-<a href="#521" id="521">521</a>
-<a href="#522" id="522">522</a>
-<a href="#523" id="523">523</a>
-<a href="#524" id="524">524</a>
-<a href="#525" id="525">525</a>
-<a href="#526" id="526">526</a>
-<a href="#527" id="527">527</a>
-<a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
-<a href="#531" id="531">531</a>
-<a href="#532" id="532">532</a>
-<a href="#533" id="533">533</a>
-<a href="#534" id="534">534</a>
-<a href="#535" id="535">535</a>
-<a href="#536" id="536">536</a>
-<a href="#537" id="537">537</a>
-<a href="#538" id="538">538</a>
-<a href="#539" id="539">539</a>
-<a href="#540" id="540">540</a>
-<a href="#541" id="541">541</a>
-<a href="#542" id="542">542</a>
-<a href="#543" id="543">543</a>
-<a href="#544" id="544">544</a>
-<a href="#545" id="545">545</a>
-<a href="#546" id="546">546</a>
-<a href="#547" id="547">547</a>
-<a href="#548" id="548">548</a>
-<a href="#549" id="549">549</a>
-<a href="#550" id="550">550</a>
-<a href="#551" id="551">551</a>
-<a href="#552" id="552">552</a>
-<a href="#553" id="553">553</a>
-<a href="#554" id="554">554</a>
-<a href="#555" id="555">555</a>
-<a href="#556" id="556">556</a>
-<a href="#557" id="557">557</a>
-<a href="#558" id="558">558</a>
-<a href="#559" id="559">559</a>
-<a href="#560" id="560">560</a>
-<a href="#561" id="561">561</a>
-<a href="#562" id="562">562</a>
-<a href="#563" id="563">563</a>
-<a href="#564" id="564">564</a>
-<a href="#565" id="565">565</a>
-<a href="#566" id="566">566</a>
-<a href="#567" id="567">567</a>
-<a href="#568" id="568">568</a>
-<a href="#569" id="569">569</a>
-<a href="#570" id="570">570</a>
-<a href="#571" id="571">571</a>
-<a href="#572" id="572">572</a>
-<a href="#573" id="573">573</a>
-<a href="#574" id="574">574</a>
-<a href="#575" id="575">575</a>
-<a href="#576" id="576">576</a>
-<a href="#577" id="577">577</a>
-<a href="#578" id="578">578</a>
-<a href="#579" id="579">579</a>
-<a href="#580" id="580">580</a>
-<a href="#581" id="581">581</a>
-<a href="#582" id="582">582</a>
-<a href="#583" id="583">583</a>
-<a href="#584" id="584">584</a>
-<a href="#585" id="585">585</a>
-<a href="#586" id="586">586</a>
-<a href="#587" id="587">587</a>
-<a href="#588" id="588">588</a>
-<a href="#589" id="589">589</a>
-<a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a>
-<a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
-<a href="#597" id="597">597</a>
-<a href="#598" id="598">598</a>
-<a href="#599" id="599">599</a>
-<a href="#600" id="600">600</a>
-<a href="#601" id="601">601</a>
-<a href="#602" id="602">602</a>
-<a href="#603" id="603">603</a>
-<a href="#604" id="604">604</a>
-<a href="#605" id="605">605</a>
-<a href="#606" id="606">606</a>
-<a href="#607" id="607">607</a>
-<a href="#608" id="608">608</a>
-<a href="#609" id="609">609</a>
-<a href="#610" id="610">610</a>
-<a href="#611" id="611">611</a>
-<a href="#612" id="612">612</a>
-<a href="#613" id="613">613</a>
-<a href="#614" id="614">614</a>
-<a href="#615" id="615">615</a>
-<a href="#616" id="616">616</a>
-<a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
-<a href="#619" id="619">619</a>
-<a href="#620" id="620">620</a>
-<a href="#621" id="621">621</a>
-<a href="#622" id="622">622</a>
-<a href="#623" id="623">623</a>
-<a href="#624" id="624">624</a>
-<a href="#625" id="625">625</a>
-<a href="#626" id="626">626</a>
-<a href="#627" id="627">627</a>
-<a href="#628" id="628">628</a>
-<a href="#629" id="629">629</a>
-<a href="#630" id="630">630</a>
-<a href="#631" id="631">631</a>
-<a href="#632" id="632">632</a>
-<a href="#633" id="633">633</a>
-<a href="#634" id="634">634</a>
-<a href="#635" id="635">635</a>
-<a href="#636" id="636">636</a>
-<a href="#637" id="637">637</a>
-<a href="#638" id="638">638</a>
-<a href="#639" id="639">639</a>
-<a href="#640" id="640">640</a>
-<a href="#641" id="641">641</a>
-<a href="#642" id="642">642</a>
-<a href="#643" id="643">643</a>
-<a href="#644" id="644">644</a>
-<a href="#645" id="645">645</a>
-<a href="#646" id="646">646</a>
-<a href="#647" id="647">647</a>
-<a href="#648" id="648">648</a>
-<a href="#649" id="649">649</a>
-<a href="#650" id="650">650</a>
-<a href="#651" id="651">651</a>
-<a href="#652" id="652">652</a>
-<a href="#653" id="653">653</a>
-<a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
-<a href="#656" id="656">656</a>
-<a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a>
-<a href="#659" id="659">659</a>
-<a href="#660" id="660">660</a>
-<a href="#661" id="661">661</a>
-<a href="#662" id="662">662</a>
-<a href="#663" id="663">663</a>
-<a href="#664" id="664">664</a>
-<a href="#665" id="665">665</a>
-<a href="#666" id="666">666</a>
-<a href="#667" id="667">667</a>
-<a href="#668" id="668">668</a>
-<a href="#669" id="669">669</a>
-<a href="#670" id="670">670</a>
-<a href="#671" id="671">671</a>
-<a href="#672" id="672">672</a>
-<a href="#673" id="673">673</a>
-<a href="#674" id="674">674</a>
-<a href="#675" id="675">675</a>
-<a href="#676" id="676">676</a>
-<a href="#677" id="677">677</a>
-<a href="#678" id="678">678</a>
-<a href="#679" id="679">679</a>
-<a href="#680" id="680">680</a>
-<a href="#681" id="681">681</a>
-<a href="#682" id="682">682</a>
-<a href="#683" id="683">683</a>
-<a href="#684" id="684">684</a>
-<a href="#685" id="685">685</a>
-<a href="#686" id="686">686</a>
-<a href="#687" id="687">687</a>
-<a href="#688" id="688">688</a>
-<a href="#689" id="689">689</a>
-<a href="#690" id="690">690</a>
-<a href="#691" id="691">691</a>
-<a href="#692" id="692">692</a>
-<a href="#693" id="693">693</a>
-<a href="#694" id="694">694</a>
-<a href="#695" id="695">695</a>
-<a href="#696" id="696">696</a>
-<a href="#697" id="697">697</a>
-<a href="#698" id="698">698</a>
-<a href="#699" id="699">699</a>
-<a href="#700" id="700">700</a>
-<a href="#701" id="701">701</a>
-<a href="#702" id="702">702</a>
-<a href="#703" id="703">703</a>
-<a href="#704" id="704">704</a>
-<a href="#705" id="705">705</a>
-<a href="#706" id="706">706</a>
-<a href="#707" id="707">707</a>
-<a href="#708" id="708">708</a>
-<a href="#709" id="709">709</a>
-<a href="#710" id="710">710</a>
-<a href="#711" id="711">711</a>
-<a href="#712" id="712">712</a>
-<a href="#713" id="713">713</a>
-<a href="#714" id="714">714</a>
-<a href="#715" id="715">715</a>
-<a href="#716" id="716">716</a>
-<a href="#717" id="717">717</a>
-<a href="#718" id="718">718</a>
-<a href="#719" id="719">719</a>
-<a href="#720" id="720">720</a>
-<a href="#721" id="721">721</a>
-<a href="#722" id="722">722</a>
-<a href="#723" id="723">723</a>
-<a href="#724" id="724">724</a>
-<a href="#725" id="725">725</a>
-<a href="#726" id="726">726</a>
-<a href="#727" id="727">727</a>
-<a href="#728" id="728">728</a>
-<a href="#729" id="729">729</a>
-<a href="#730" id="730">730</a>
-<a href="#731" id="731">731</a>
-<a href="#732" id="732">732</a>
-<a href="#733" id="733">733</a>
-<a href="#734" id="734">734</a>
-<a href="#735" id="735">735</a>
-<a href="#736" id="736">736</a>
-<a href="#737" id="737">737</a>
-<a href="#738" id="738">738</a>
-<a href="#739" id="739">739</a>
-<a href="#740" id="740">740</a>
-<a href="#741" id="741">741</a>
-<a href="#742" id="742">742</a>
-<a href="#743" id="743">743</a>
-<a href="#744" id="744">744</a>
-<a href="#745" id="745">745</a>
-<a href="#746" id="746">746</a>
-<a href="#747" id="747">747</a>
-<a href="#748" id="748">748</a>
-<a href="#749" id="749">749</a>
-<a href="#750" id="750">750</a>
-<a href="#751" id="751">751</a>
-<a href="#752" id="752">752</a>
-<a href="#753" id="753">753</a>
-<a href="#754" id="754">754</a>
-<a href="#755" id="755">755</a>
-<a href="#756" id="756">756</a>
-<a href="#757" id="757">757</a>
-<a href="#758" id="758">758</a>
-<a href="#759" id="759">759</a>
-<a href="#760" id="760">760</a>
-<a href="#761" id="761">761</a>
-<a href="#762" id="762">762</a>
-<a href="#763" id="763">763</a>
-<a href="#764" id="764">764</a>
-<a href="#765" id="765">765</a>
-<a href="#766" id="766">766</a>
-<a href="#767" id="767">767</a>
-<a href="#768" id="768">768</a>
-<a href="#769" id="769">769</a>
-<a href="#770" id="770">770</a>
-<a href="#771" id="771">771</a>
-<a href="#772" id="772">772</a>
-<a href="#773" id="773">773</a>
-<a href="#774" id="774">774</a>
-<a href="#775" id="775">775</a>
-<a href="#776" id="776">776</a>
-<a href="#777" id="777">777</a>
-<a href="#778" id="778">778</a>
-<a href="#779" id="779">779</a>
-<a href="#780" id="780">780</a>
-<a href="#781" id="781">781</a>
-<a href="#782" id="782">782</a>
-<a href="#783" id="783">783</a>
-<a href="#784" id="784">784</a>
-<a href="#785" id="785">785</a>
-<a href="#786" id="786">786</a>
-<a href="#787" id="787">787</a>
-<a href="#788" id="788">788</a>
-<a href="#789" id="789">789</a>
-<a href="#790" id="790">790</a>
-<a href="#791" id="791">791</a>
-<a href="#792" id="792">792</a>
-<a href="#793" id="793">793</a>
-<a href="#794" id="794">794</a>
-<a href="#795" id="795">795</a>
-<a href="#796" id="796">796</a>
-<a href="#797" id="797">797</a>
-<a href="#798" id="798">798</a>
-<a href="#799" id="799">799</a>
-<a href="#800" id="800">800</a>
-<a href="#801" id="801">801</a>
-<a href="#802" id="802">802</a>
-<a href="#803" id="803">803</a>
-<a href="#804" id="804">804</a>
-<a href="#805" id="805">805</a>
-<a href="#806" id="806">806</a>
-<a href="#807" id="807">807</a>
-<a href="#808" id="808">808</a>
-<a href="#809" id="809">809</a>
-<a href="#810" id="810">810</a>
-<a href="#811" id="811">811</a>
-<a href="#812" id="812">812</a>
-<a href="#813" id="813">813</a>
-<a href="#814" id="814">814</a>
-<a href="#815" id="815">815</a>
-<a href="#816" id="816">816</a>
-<a href="#817" id="817">817</a>
-<a href="#818" id="818">818</a>
-<a href="#819" id="819">819</a>
-<a href="#820" id="820">820</a>
-<a href="#821" id="821">821</a>
-<a href="#822" id="822">822</a>
-<a href="#823" id="823">823</a>
-<a href="#824" id="824">824</a>
-<a href="#825" id="825">825</a>
-<a href="#826" id="826">826</a>
-<a href="#827" id="827">827</a>
-<a href="#828" id="828">828</a>
-<a href="#829" id="829">829</a>
-<a href="#830" id="830">830</a>
-<a href="#831" id="831">831</a>
-<a href="#832" id="832">832</a>
-<a href="#833" id="833">833</a>
-<a href="#834" id="834">834</a>
-<a href="#835" id="835">835</a>
-<a href="#836" id="836">836</a>
-<a href="#837" id="837">837</a>
-<a href="#838" id="838">838</a>
-<a href="#839" id="839">839</a>
-<a href="#840" id="840">840</a>
-<a href="#841" id="841">841</a>
-<a href="#842" id="842">842</a>
-<a href="#843" id="843">843</a>
-<a href="#844" id="844">844</a>
-<a href="#845" id="845">845</a>
-<a href="#846" id="846">846</a>
-<a href="#847" id="847">847</a>
-<a href="#848" id="848">848</a>
-<a href="#849" id="849">849</a>
-<a href="#850" id="850">850</a>
-<a href="#851" id="851">851</a>
-<a href="#852" id="852">852</a>
-<a href="#853" id="853">853</a>
-<a href="#854" id="854">854</a>
-<a href="#855" id="855">855</a>
-<a href="#856" id="856">856</a>
-<a href="#857" id="857">857</a>
-<a href="#858" id="858">858</a>
-<a href="#859" id="859">859</a>
-<a href="#860" id="860">860</a>
-<a href="#861" id="861">861</a>
-<a href="#862" id="862">862</a>
-<a href="#863" id="863">863</a>
-<a href="#864" id="864">864</a>
-<a href="#865" id="865">865</a>
-<a href="#866" id="866">866</a>
-<a href="#867" id="867">867</a>
-<a href="#868" id="868">868</a>
-<a href="#869" id="869">869</a>
-<a href="#870" id="870">870</a>
-<a href="#871" id="871">871</a>
-<a href="#872" id="872">872</a>
-<a href="#873" id="873">873</a>
-<a href="#874" id="874">874</a>
-<a href="#875" id="875">875</a>
-<a href="#876" id="876">876</a>
-<a href="#877" id="877">877</a>
-<a href="#878" id="878">878</a>
-<a href="#879" id="879">879</a>
-<a href="#880" id="880">880</a>
-<a href="#881" id="881">881</a>
-<a href="#882" id="882">882</a>
-<a href="#883" id="883">883</a>
-<a href="#884" id="884">884</a>
-<a href="#885" id="885">885</a>
-<a href="#886" id="886">886</a>
-<a href="#887" id="887">887</a>
-<a href="#888" id="888">888</a>
-<a href="#889" id="889">889</a>
-<a href="#890" id="890">890</a>
-<a href="#891" id="891">891</a>
-<a href="#892" id="892">892</a>
-<a href="#893" id="893">893</a>
-<a href="#894" id="894">894</a>
-<a href="#895" id="895">895</a>
-<a href="#896" id="896">896</a>
-<a href="#897" id="897">897</a>
-<a href="#898" id="898">898</a>
-<a href="#899" id="899">899</a>
-<a href="#900" id="900">900</a>
-<a href="#901" id="901">901</a>
-<a href="#902" id="902">902</a>
-<a href="#903" id="903">903</a>
-<a href="#904" id="904">904</a>
-<a href="#905" id="905">905</a>
-<a href="#906" id="906">906</a>
-<a href="#907" id="907">907</a>
-<a href="#908" id="908">908</a>
-<a href="#909" id="909">909</a>
-<a href="#910" id="910">910</a>
-<a href="#911" id="911">911</a>
-<a href="#912" id="912">912</a>
-<a href="#913" id="913">913</a>
-<a href="#914" id="914">914</a>
-<a href="#915" id="915">915</a>
-<a href="#916" id="916">916</a>
-<a href="#917" id="917">917</a>
-<a href="#918" id="918">918</a>
-<a href="#919" id="919">919</a>
-<a href="#920" id="920">920</a>
-<a href="#921" id="921">921</a>
-<a href="#922" id="922">922</a>
-<a href="#923" id="923">923</a>
-<a href="#924" id="924">924</a>
-<a href="#925" id="925">925</a>
-<a href="#926" id="926">926</a>
-<a href="#927" id="927">927</a>
-<a href="#928" id="928">928</a>
-<a href="#929" id="929">929</a>
-<a href="#930" id="930">930</a>
-<a href="#931" id="931">931</a>
-<a href="#932" id="932">932</a>
-<a href="#933" id="933">933</a>
-<a href="#934" id="934">934</a>
-<a href="#935" id="935">935</a>
-<a href="#936" id="936">936</a>
-<a href="#937" id="937">937</a>
-<a href="#938" id="938">938</a>
-<a href="#939" id="939">939</a>
-<a href="#940" id="940">940</a>
-<a href="#941" id="941">941</a>
-<a href="#942" id="942">942</a>
-<a href="#943" id="943">943</a>
-<a href="#944" id="944">944</a>
-<a href="#945" id="945">945</a>
-<a href="#946" id="946">946</a>
-<a href="#947" id="947">947</a>
-<a href="#948" id="948">948</a>
-<a href="#949" id="949">949</a>
-<a href="#950" id="950">950</a>
-<a href="#951" id="951">951</a>
-<a href="#952" id="952">952</a>
-<a href="#953" id="953">953</a>
-<a href="#954" id="954">954</a>
-<a href="#955" id="955">955</a>
-<a href="#956" id="956">956</a>
-<a href="#957" id="957">957</a>
-<a href="#958" id="958">958</a>
-<a href="#959" id="959">959</a>
-<a href="#960" id="960">960</a>
-<a href="#961" id="961">961</a>
-<a href="#962" id="962">962</a>
-<a href="#963" id="963">963</a>
-<a href="#964" id="964">964</a>
-<a href="#965" id="965">965</a>
-<a href="#966" id="966">966</a>
-<a href="#967" id="967">967</a>
-<a href="#968" id="968">968</a>
-<a href="#969" id="969">969</a>
-<a href="#970" id="970">970</a>
-<a href="#971" id="971">971</a>
-<a href="#972" id="972">972</a>
-<a href="#973" id="973">973</a>
-<a href="#974" id="974">974</a>
-<a href="#975" id="975">975</a>
-<a href="#976" id="976">976</a>
-<a href="#977" id="977">977</a>
-<a href="#978" id="978">978</a>
-<a href="#979" id="979">979</a>
-<a href="#980" id="980">980</a>
-<a href="#981" id="981">981</a>
-<a href="#982" id="982">982</a>
-<a href="#983" id="983">983</a>
-<a href="#984" id="984">984</a>
-<a href="#985" id="985">985</a>
-<a href="#986" id="986">986</a>
-<a href="#987" id="987">987</a>
-<a href="#988" id="988">988</a>
-<a href="#989" id="989">989</a>
-<a href="#990" id="990">990</a>
-<a href="#991" id="991">991</a></pre></div><pre class="rust"><code><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
-
-</span><span class="kw">use </span><span class="kw">crate</span>::Nothing;
-<span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
-
-<span class="kw">use super</span>::{
-    Attributes, Direction, GetAttributes, Guard, Id, PortDef, RRC, WRC,
-};
-<span class="kw">use </span>calyx_frontend::{Attribute, BoolAttr};
-<span class="kw">use </span>calyx_utils::{CalyxResult, Error, GetName};
-<span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>smallvec::{SmallVec, smallvec};
-<span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::hash::Hash;
-<span class="kw">use </span>std::rc::Rc;
-
-<span class="doccomment">/// Ports can come from Cells or Groups
-</span><span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub enum </span>PortParent {
-    Cell(WRC&lt;Cell&gt;),
-    Group(WRC&lt;Group&gt;),
-    StaticGroup(WRC&lt;StaticGroup&gt;),
-    FSM(WRC&lt;FSM&gt;),
-}
-
-<span class="doccomment">/// Represents a port on a cell.
-</span><span class="attr">#[derive(Debug, Clone)]
-#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
-</span><span class="kw">pub struct </span>Port {
-    <span class="doccomment">/// Name of the port
-    </span><span class="kw">pub </span>name: Id,
-    <span class="doccomment">/// Width of the port
-    </span><span class="kw">pub </span>width: u64,
-    <span class="doccomment">/// Direction of the port
-    </span><span class="kw">pub </span>direction: Direction,
-    <span class="doccomment">/// Weak pointer to this port's parent
-    </span><span class="kw">pub </span>parent: PortParent,
-    <span class="doccomment">/// Attributes associated with this port.
-    </span><span class="kw">pub </span>attributes: Attributes,
-}
-
-<span class="doccomment">/// Canonical name of a Port
-</span><span class="attr">#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-</span><span class="kw">pub struct </span>Canonical {
-    <span class="kw">pub </span>cell: Id,
-    <span class="kw">pub </span>port: Id,
-}
-
-<span class="kw">impl </span>Canonical {
-    <span class="kw">pub const fn </span>new(cell: Id, port: Id) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ cell, port }
-    }
-}
-
-<span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>Canonical {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">"{}.{}"</span>, <span class="self">self</span>.cell, <span class="self">self</span>.port)
-    }
-}
-
-<span class="kw">impl </span>Port {
-    <span class="doccomment">/// Checks if this port is a hole
-    </span><span class="kw">pub fn </span>is_hole(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.parent, PortParent::Group(<span class="kw">_</span>))
-            || <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.parent, PortParent::StaticGroup(<span class="kw">_</span>))
-    }
-
-    <span class="doccomment">/// Returns the parent of the [Port] which must be [Cell]. Throws an error
-    /// otherwise.
-    </span><span class="kw">pub fn </span>cell_parent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RRC&lt;Cell&gt; {
-        <span class="kw">if let </span>PortParent::Cell(cell_wref) = <span class="kw-2">&amp;</span><span class="self">self</span>.parent {
-            <span class="kw">return </span>cell_wref.upgrade();
-        }
-        <span class="macro">unreachable!</span>(<span class="string">"This port should have a cell parent"</span>)
-    }
-
-    <span class="doccomment">/// Checks if this port is a constant of value: `val`.
-    </span><span class="kw">pub fn </span>is_constant(<span class="kw-2">&amp;</span><span class="self">self</span>, val: u64, width: u64) -&gt; bool {
-        <span class="kw">if let </span>PortParent::Cell(cell) = <span class="kw-2">&amp;</span><span class="self">self</span>.parent {
-            <span class="kw">match </span>cell.upgrade().borrow().prototype {
-                CellType::Constant { val: v, width: w } =&gt; {
-                    v == val &amp;&amp; width == w
-                }
-                <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-            }
-        } <span class="kw">else </span>{
-            <span class="bool-val">false
-        </span>}
-    }
-
-    <span class="doccomment">/// Gets name of parent object.
-    </span><span class="kw">pub fn </span>get_parent_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
-        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.parent {
-            PortParent::Cell(cell) =&gt; cell.upgrade().borrow().name,
-            PortParent::Group(group) =&gt; group.upgrade().borrow().name,
-            PortParent::FSM(fsm) =&gt; fsm.upgrade().borrow().name,
-            PortParent::StaticGroup(group) =&gt; group.upgrade().borrow().name,
-        }
-    }
-
-    <span class="doccomment">/// Checks if parent is combinational component
-    </span><span class="kw">pub fn </span>parent_is_comb(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.parent {
-            PortParent::Cell(cell) =&gt; cell.upgrade().borrow().is_comb_cell(),
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
-    }
-
-    <span class="doccomment">/// Checks if parent is a protected cell
-    </span><span class="kw">pub fn </span>parent_is_protected(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.parent {
-            PortParent::Cell(cell) =&gt; {
-                cell.upgrade().borrow().attributes.has(BoolAttr::Protected)
-            }
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
-    }
-
-    <span class="doccomment">/// Checks if the parent is an FSM. Assignments to these always need to be maintained.
-    </span><span class="kw">pub fn </span>parent_is_fsm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.parent, PortParent::FSM(..))
-    }
-
-    <span class="doccomment">/// Get the canonical representation for this Port.
-    </span><span class="kw">pub fn </span>canonical(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Canonical {
-        Canonical {
-            cell: <span class="self">self</span>.get_parent_name(),
-            port: <span class="self">self</span>.name,
-        }
-    }
-
-    <span class="doccomment">/// Returns the value of an attribute if present
-    </span><span class="kw">pub fn </span>get_attribute&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
-    <span class="kw">where
-        </span>A: Into&lt;Attribute&gt;,
-    {
-        <span class="self">self</span>.get_attributes().get(attr)
-    }
-
-    <span class="doccomment">/// Returns true if the node has a specific attribute
-    </span><span class="kw">pub fn </span>has_attribute&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; bool
-    <span class="kw">where
-        </span>A: Into&lt;Attribute&gt;,
-    {
-        <span class="self">self</span>.get_attributes().has(attr)
-    }
-
-    <span class="doccomment">/// Returns true if the widths, name, direction, and attributes of 2 ports match.
-    /// This is different than `==` equivalence, which only looks at parent and name.
-    </span><span class="kw">pub fn </span>type_equivalent(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Port) -&gt; bool {
-        <span class="self">self</span>.width == other.width
-            &amp;&amp; <span class="self">self</span>.direction == other.direction
-            &amp;&amp; <span class="self">self</span>.name == other.name
-            &amp;&amp; <span class="self">self</span>.attributes == other.attributes
-    }
-}
-
-<span class="kw">impl </span>GetAttributes <span class="kw">for </span>Port {
-    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
-    }
-
-    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
-    }
-}
-
-<span class="kw">impl </span>PartialEq <span class="kw">for </span>Port {
-    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
-        <span class="self">self</span>.get_parent_name() == other.get_parent_name()
-            &amp;&amp; <span class="self">self</span>.name == other.name
-    }
-}
-
-<span class="kw">impl </span>Eq <span class="kw">for </span>Port {}
-
-<span class="doccomment">/// Wraps generic iterators over ports to allow functions to build and return port iterators in
-/// different ways.
-</span><span class="kw">pub struct </span>PortIterator&lt;<span class="lifetime">'a</span>&gt; {
-    port_iter: Box&lt;<span class="kw">dyn </span>Iterator&lt;Item = RRC&lt;Port&gt;&gt; + <span class="lifetime">'a</span>&gt;,
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PortIterator&lt;<span class="lifetime">'a</span>&gt; {
-    <span class="doccomment">/// Construct a new PortIterator from an iterator over ports.
-    </span><span class="kw">pub fn </span>new&lt;T&gt;(iter: T) -&gt; <span class="self">Self
-    </span><span class="kw">where
-        </span>T: Iterator&lt;Item = RRC&lt;Port&gt;&gt; + <span class="lifetime">'a</span>,
-    {
-        PortIterator {
-            port_iter: Box::new(iter),
-        }
-    }
-
-    <span class="doccomment">/// Returns an empty iterator over ports.
-    </span><span class="kw">pub fn </span>empty() -&gt; <span class="self">Self </span>{
-        PortIterator {
-            port_iter: Box::new(std::iter::empty()),
-        }
-    }
-}
-
-<span class="kw">impl </span>Iterator <span class="kw">for </span>PortIterator&lt;<span class="lifetime">'_</span>&gt; {
-    <span class="kw">type </span>Item = RRC&lt;Port&gt;;
-
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="self">self</span>.port_iter.next()
-    }
-}
-
-<span class="doccomment">/// Alias for bindings
-</span><span class="kw">pub type </span>Binding = SmallVec&lt;[(Id, u64); <span class="number">5</span>]&gt;;
-
-<span class="doccomment">/// The type for a Cell
-</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
-</span><span class="kw">pub enum </span>CellType {
-    <span class="doccomment">/// Cell constructed using a primitive definition
-    </span>Primitive {
-        <span class="doccomment">/// Name of the primitive cell used to instantiate this cell.
-        </span>name: Id,
-        <span class="doccomment">/// Bindings for the parameters. Uses Vec to retain the input order.
-        </span>param_binding: Box&lt;Binding&gt;,
-        <span class="doccomment">/// True iff this is a combinational primitive
-        </span>is_comb: bool,
-        <span class="doccomment">/// (Optional) latency of the primitive
-        </span>latency: <span class="prelude-ty">Option</span>&lt;std::num::NonZeroU64&gt;,
-    },
-    <span class="doccomment">/// Cell constructed using a Calyx component
-    </span>Component {
-        <span class="doccomment">/// Name of the component used to instantiate this cell.
-        </span>name: Id,
-    },
-    <span class="doccomment">/// This cell represents the current component
-    </span>ThisComponent,
-    <span class="doccomment">/// Cell representing a Constant
-    </span>Constant {
-        <span class="doccomment">/// Value of this constant
-        </span>val: u64,
-        <span class="doccomment">/// Width of this constant
-        </span>width: u64,
-    },
-}
-
-<span class="kw">impl </span>CellType {
-    <span class="doccomment">/// Return the name associated with this CellType if present
-    </span><span class="kw">pub fn </span>get_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Id&gt; {
-        <span class="kw">match </span><span class="self">self </span>{
-            CellType::Primitive { name, .. } | CellType::Component { name } =&gt; {
-                <span class="prelude-val">Some</span>(<span class="kw-2">*</span>name)
-            }
-            CellType::ThisComponent | CellType::Constant { .. } =&gt; <span class="prelude-val">None</span>,
-        }
-    }
-
-    <span class="doccomment">/// Generate string representation of CellType appropriate for error messages.
-    </span><span class="kw">pub fn </span>surface_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
-        <span class="kw">match </span><span class="self">self </span>{
-            CellType::Primitive {
-                name,
-                param_binding,
-                ..
-            } =&gt; <span class="prelude-val">Some</span>(<span class="macro">format!</span>(
-                <span class="string">"{}({})"</span>,
-                name,
-                param_binding.iter().map(|(<span class="kw">_</span>, v)| v.to_string()).join(<span class="string">", "</span>)
-            )),
-            CellType::Component { name } =&gt; <span class="prelude-val">Some</span>(name.to_string()),
-            CellType::ThisComponent | CellType::Constant { .. } =&gt; <span class="prelude-val">None</span>,
-        }
-    }
-}
-
-<span class="doccomment">/// Represents an instantiated cell.
-</span><span class="attr">#[derive(Debug, Clone)]
-#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
-</span><span class="kw">pub struct </span>Cell {
-    <span class="doccomment">/// Name of this cell.
-    </span>name: Id,
-    <span class="doccomment">/// Ports on this cell
-    </span><span class="kw">pub </span>ports: SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">10</span>]&gt;,
-    <span class="doccomment">/// Underlying type for this cell
-    </span><span class="kw">pub </span>prototype: CellType,
-    <span class="doccomment">/// Attributes for this group.
-    </span><span class="kw">pub </span>attributes: Attributes,
-    <span class="doccomment">/// Whether the cell is external
-    </span>reference: bool,
-}
-
-<span class="kw">impl </span>GetAttributes <span class="kw">for </span>Cell {
-    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
-    }
-
-    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
-    }
-}
-
-<span class="kw">impl </span>Cell {
-    <span class="doccomment">/// Construct a cell
-    </span><span class="kw">pub fn </span>new(name: Id, prototype: CellType) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            name,
-            ports: <span class="macro">smallvec!</span>[],
-            prototype,
-            attributes: Attributes::default(),
-            reference: <span class="bool-val">false</span>,
-        }
-    }
-
-    <span class="doccomment">///Get a boolean describing whether the cell is external.
-    </span><span class="kw">pub fn </span>is_reference(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.reference
-    }
-
-    <span class="doccomment">///Set the external field
-    </span><span class="kw">pub fn </span>set_reference(<span class="kw-2">&amp;mut </span><span class="self">self</span>, reference: bool) -&gt; bool {
-        <span class="self">self</span>.reference = reference;
-        <span class="self">self</span>.reference
-    }
-
-    <span class="doccomment">/// Get a reference to the named port if it exists.
-    </span><span class="kw">pub fn </span>find&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;
-    <span class="kw">where
-        </span>S: std::fmt::Display + Clone,
-        Id: PartialEq&lt;S&gt;,
-    {
-        <span class="self">self</span>.ports
-            .iter()
-            .find(|<span class="kw-2">&amp;</span>g| g.borrow().name == name)
-            .map(Rc::clone)
-    }
-
-    <span class="doccomment">/// Return all ports that have the attribute `attr`.
-    </span><span class="kw">pub fn </span>find_all_with_attr&lt;A&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        attr: A,
-    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;Port&gt;&gt; + <span class="lifetime">'_
-    </span><span class="kw">where
-        </span>A: Into&lt;Attribute&gt;,
-    {
-        <span class="kw">let </span>attr = attr.into();
-        <span class="self">self</span>.ports
-            .iter()
-            .filter(<span class="kw">move </span>|<span class="kw-2">&amp;</span>p| p.borrow().attributes.has(attr))
-            .map(Rc::clone)
-    }
-
-    <span class="doccomment">/// Return the unique port with the given attribute.
-    /// If multiple ports have the same attribute, then we panic.
-    /// If there are not ports with the give attribute, then we return None.
-    </span><span class="kw">pub fn </span>find_unique_with_attr&lt;A&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        attr: A,
-    ) -&gt; CalyxResult&lt;<span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;&gt;
-    <span class="kw">where
-        </span>A: Into&lt;Attribute&gt;,
-    {
-        <span class="kw">let </span>attr = attr.into();
-        <span class="kw">let </span><span class="kw-2">mut </span>ports = <span class="self">self</span>.find_all_with_attr(attr);
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = ports.next() {
-            <span class="kw">if </span>ports.next().is_some() {
-                <span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
-                    <span class="string">"Multiple ports with attribute `{}` found on cell `{}`"</span>,
-                    attr, <span class="self">self</span>.name
-                )))
-            } <span class="kw">else </span>{
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(port))
-            }
-        } <span class="kw">else </span>{
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
-        }
-    }
-
-    <span class="doccomment">/// Get a reference to the named port and throw an error if it doesn't
-    /// exist.
-    </span><span class="kw">pub fn </span>get&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; RRC&lt;Port&gt;
-    <span class="kw">where
-        </span>S: std::fmt::Display + Clone,
-        Id: PartialEq&lt;S&gt;,
-    {
-        <span class="self">self</span>.find(name.clone()).unwrap_or_else(|| {
-            <span class="macro">panic!</span>(
-                <span class="string">"Port `{name}' not found on cell `{}'. Known ports are: {}"</span>,
-                <span class="self">self</span>.name,
-                <span class="self">self</span>.ports
-                    .iter()
-                    .map(|p| p.borrow().name.to_string())
-                    .join(<span class="string">","</span>)
-            )
-        })
-    }
-
-    <span class="doccomment">/// Returns true iff this cell is an instance of a Calyx-defined component.
-    </span><span class="kw">pub fn </span>is_component(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.prototype, CellType::Component { .. })
-    }
-
-    <span class="doccomment">/// Returns true iff this cell is the signature of the current component
-    </span><span class="kw">pub fn </span>is_this(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.prototype, CellType::ThisComponent)
-    }
-
-    <span class="doccomment">/// Returns true if this is an instance of a primitive. If the optional name is provided then
-    /// only returns true if the primitive has the given name.
-    </span><span class="kw">pub fn </span>is_primitive&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, prim: <span class="prelude-ty">Option</span>&lt;S&gt;) -&gt; bool
-    <span class="kw">where
-        </span>Id: PartialEq&lt;S&gt;,
-    {
-        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.prototype {
-            CellType::Primitive { name, .. } =&gt; {
-                prim.as_ref().map(|p| name == p).unwrap_or(<span class="bool-val">true</span>)
-            }
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
-    }
-
-    <span class="doccomment">/// Get the unique port with the given attribute.
-    /// Panic if no port with the attribute is found and returns an error if multiple ports with the attribute are found.
-    </span><span class="kw">pub fn </span>get_unique_with_attr&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; CalyxResult&lt;RRC&lt;Port&gt;&gt;
-    <span class="kw">where
-        </span>A: Into&lt;Attribute&gt; + std::fmt::Display + Copy,
-    {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.find_unique_with_attr(attr)<span class="question-mark">?</span>.unwrap_or_else(|| {
-            <span class="macro">panic!</span>(
-                <span class="string">"Port with attribute `{attr}' not found on cell `{}'"</span>,
-                <span class="self">self</span>.name,
-            )
-        }))
-    }
-
-    <span class="doccomment">/// Returns the name of the component that is this cells type.
-    </span><span class="kw">pub fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Id&gt; {
-        <span class="self">self</span>.prototype.get_name()
-    }
-
-    <span class="doccomment">/// Get parameter binding from the prototype used to build this cell.
-    </span><span class="kw">pub fn </span>get_parameter&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, param: S) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
-    <span class="kw">where
-        </span>Id: PartialEq&lt;S&gt;,
-    {
-        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.prototype {
-            CellType::Primitive { param_binding, .. } =&gt; param_binding
-                .iter()
-                .find(|(key, <span class="kw">_</span>)| <span class="kw-2">*</span>key == param)
-                .map(|(<span class="kw">_</span>, val)| <span class="kw-2">*</span>val),
-            CellType::Component { .. } =&gt; <span class="prelude-val">None</span>,
-            CellType::ThisComponent =&gt; <span class="prelude-val">None</span>,
-            CellType::Constant { .. } =&gt; <span class="prelude-val">None</span>,
-        }
-    }
-
-    <span class="doccomment">/// Return the canonical name for the cell generated to represent this
-    /// (val, width) constant.
-    </span><span class="kw">pub fn </span>constant_name(val: u64, width: u64) -&gt; Id {
-        <span class="macro">format!</span>(<span class="string">"_{}_{}"</span>, val, width).into()
-    }
-
-    <span class="doccomment">/// Return the value associated with this attribute key.
-    </span><span class="kw">pub fn </span>get_attribute&lt;A: Into&lt;Attribute&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
-        <span class="self">self</span>.attributes.get(attr.into())
-    }
-
-    <span class="doccomment">/// Add a new attribute to the group.
-    </span><span class="kw">pub fn </span>add_attribute&lt;A: Into&lt;Attribute&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: A, value: u64) {
-        <span class="self">self</span>.attributes.insert(attr.into(), value);
-    }
-
-    <span class="doccomment">/// Grants immutable access to the name of this cell.
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
-        <span class="self">self</span>.name
-    }
-
-    <span class="doccomment">/// Returns a reference to all [super::Port] attached to this cells.
-    </span><span class="kw">pub fn </span>ports(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">10</span>]&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.ports
-    }
-
-    <span class="comment">// Get the signature of this cell as a vector. Each element corresponds to a port in the Cell.
-    </span><span class="kw">pub fn </span>get_signature(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;PortDef&lt;u64&gt;&gt; {
-        <span class="self">self</span>.ports
-            .iter()
-            .map(|port_ref| {
-                <span class="kw">let </span>port = port_ref.borrow();
-                PortDef::new(
-                    port.name,
-                    port.width,
-                    port.direction.clone(),
-                    port.attributes.clone(),
-                )
-            })
-            .collect()
-    }
-
-    <span class="comment">// returns true if cell is comb, false otherwise
-    // note that this component/component cannot be combinational
-    // XXX(rachit): Combinational components are now supported so this function returns
-    // the wrong answer when the parent is a combinational component
-    </span><span class="kw">pub fn </span>is_comb_cell(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="self">self</span>.prototype {
-            CellType::Primitive { is_comb, .. } =&gt; is_comb,
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
-    }
-}
-
-<span class="doccomment">/// Represents a guarded assignment in the program
-</span><span class="attr">#[derive(Clone, Debug)]
-#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
-</span><span class="kw">pub struct </span>Assignment&lt;T&gt; {
-    <span class="doccomment">/// The destination for the assignment.
-    </span><span class="kw">pub </span>dst: RRC&lt;Port&gt;,
-
-    <span class="doccomment">/// The source for the assignment.
-    </span><span class="kw">pub </span>src: RRC&lt;Port&gt;,
-
-    <span class="doccomment">/// The guard for this assignment.
-    </span><span class="kw">pub </span>guard: Box&lt;Guard&lt;T&gt;&gt;,
-
-    <span class="doccomment">/// Attributes for this assignment.
-    </span><span class="kw">pub </span>attributes: Attributes,
-}
-
-<span class="kw">impl</span>&lt;T&gt; Assignment&lt;T&gt; {
-    <span class="doccomment">/// Build a new unguarded assignment
-    </span><span class="kw">pub fn </span>new(dst: RRC&lt;Port&gt;, src: RRC&lt;Port&gt;) -&gt; <span class="self">Self </span>{
-        <span class="macro">assert!</span>(
-            dst.borrow().direction == Direction::Input,
-            <span class="string">"{} is not in input port"</span>,
-            dst.borrow().canonical()
-        );
-        <span class="macro">assert!</span>(
-            src.borrow().direction == Direction::Output,
-            <span class="string">"{} is not in output port"</span>,
-            src.borrow().canonical()
-        );
-        <span class="self">Self </span>{
-            dst,
-            src,
-            guard: Box::new(Guard::True),
-            attributes: Attributes::default(),
-        }
-    }
-
-    <span class="doccomment">/// Apply function `f` to each port contained within the assignment and
-    /// replace the port with the generated value if not None.
-    </span><span class="kw">pub fn </span>for_each_port&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F)
-    <span class="kw">where
-        </span>F: FnMut(<span class="kw-2">&amp;</span>RRC&lt;Port&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;,
-    {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(new_src) = f(<span class="kw-2">&amp;</span><span class="self">self</span>.src) {
-            <span class="self">self</span>.src = new_src;
-        }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(new_dst) = f(<span class="kw-2">&amp;</span><span class="self">self</span>.dst) {
-            <span class="self">self</span>.dst = new_dst;
-        }
-        <span class="self">self</span>.guard.for_each(<span class="kw-2">&amp;mut </span>|port| f(<span class="kw-2">&amp;</span>port).map(Guard::port))
-    }
-
-    <span class="doccomment">/// Iterate through all ports contained within the assignment.
-    </span><span class="kw">pub fn </span>iter_ports(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;Port&gt;&gt; {
-        <span class="self">self</span>.guard
-            .all_ports()
-            .into_iter()
-            .chain(std::iter::once(Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.dst)))
-            .chain(std::iter::once(Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.src)))
-    }
-
-    <span class="doccomment">/// Mutate the guard `g` of the assignment in-place to be `g AND addition`
-    </span><span class="kw">pub fn </span>and_guard(<span class="kw-2">&amp;mut </span><span class="self">self</span>, addition: Guard&lt;T&gt;)
-    <span class="kw">where
-        </span>T: Eq,
-    {
-        <span class="kw">if </span>!(addition.is_true()) {
-            <span class="self">self</span>.guard.update(|g| g.and(addition));
-        }
-    }
-}
-
-<span class="kw">impl </span>From&lt;Assignment&lt;Nothing&gt;&gt; <span class="kw">for </span>Assignment&lt;StaticTiming&gt; {
-    <span class="doccomment">/// Turns a normal assignment into a static assignment
-    </span><span class="kw">fn </span>from(assgn: Assignment&lt;Nothing&gt;) -&gt; Assignment&lt;StaticTiming&gt; {
-        Assignment {
-            dst: Rc::clone(<span class="kw-2">&amp;</span>assgn.dst),
-            src: Rc::clone(<span class="kw-2">&amp;</span>assgn.src),
-            guard: Box::new(Guard::from(<span class="kw-2">*</span>assgn.guard)),
-            attributes: assgn.attributes,
-        }
-    }
-}
-
-<span class="kw">impl </span>From&lt;Assignment&lt;StaticTiming&gt;&gt; <span class="kw">for </span>Assignment&lt;Nothing&gt; {
-    <span class="doccomment">/// Turns a static assignment into a normal assignment by getting rid of
-    /// all `Info&lt;StaticTiming&gt;` leaves from the guard of the assignment.
-    </span><span class="kw">fn </span>from(<span class="kw-2">mut </span>assgn: Assignment&lt;StaticTiming&gt;) -&gt; Assignment&lt;Nothing&gt; {
-        assgn.guard.as_mut().remove_static_timing_info();
-        Assignment {
-            dst: Rc::clone(<span class="kw-2">&amp;</span>assgn.dst),
-            src: Rc::clone(<span class="kw-2">&amp;</span>assgn.src),
-            guard: Box::new(Guard::from(<span class="kw-2">*</span>assgn.guard)),
-            attributes: assgn.attributes,
-        }
-    }
-}
-
-<span class="kw">impl</span>&lt;StaticTiming&gt; Assignment&lt;StaticTiming&gt; {
-    <span class="doccomment">/// Apply function `f` to each port contained within the assignment and
-    /// replace the port with the generated value if not None.
-    </span><span class="kw">pub fn </span>for_each_interval&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F)
-    <span class="kw">where
-        </span>F: FnMut(<span class="kw-2">&amp;mut </span>StaticTiming) -&gt; <span class="prelude-ty">Option</span>&lt;Guard&lt;StaticTiming&gt;&gt;,
-    {
-        <span class="self">self</span>.guard.for_each_info(<span class="kw-2">&amp;mut </span>|interval| f(interval))
-    }
-}
-
-<span class="attr">#[derive(Debug, Clone)]
-#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
-</span><span class="kw">pub enum </span>Transition {
-    Unconditional(u64),
-    Conditional(Vec&lt;(Guard&lt;Nothing&gt;, u64)&gt;),
-}
-
-<span class="kw">impl </span>Transition {
-    <span class="kw">pub fn </span>new_uncond(s: u64) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::Unconditional(s)
-    }
-}
-
-<span class="doccomment">/// A Group of assignments that perform a logical action.
-</span><span class="attr">#[derive(Debug)]
-#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
-</span><span class="kw">pub struct </span>Group {
-    <span class="doccomment">/// Name of this group
-    </span>name: Id,
-
-    <span class="doccomment">/// The assignments used in this group
-    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&lt;Nothing&gt;&gt;,
-
-    <span class="doccomment">/// Holes for this group
-    </span><span class="kw">pub </span>holes: SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">3</span>]&gt;,
-
-    <span class="doccomment">/// Attributes for this group.
-    </span><span class="kw">pub </span>attributes: Attributes,
-}
-<span class="kw">impl </span>Group {
-    <span class="kw">pub fn </span>new(name: Id) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            name,
-            assignments: <span class="macro">vec!</span>[],
-            holes: <span class="macro">smallvec!</span>[],
-            attributes: Attributes::default(),
-        }
-    }
-
-    <span class="doccomment">/// Get a reference to the named hole if it exists.
-    </span><span class="kw">pub fn </span>find&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;
-    <span class="kw">where
-        </span>S: std::fmt::Display,
-        Id: PartialEq&lt;S&gt;,
-    {
-        <span class="self">self</span>.holes
-            .iter()
-            .find(|<span class="kw-2">&amp;</span>g| g.borrow().name == name)
-            .map(Rc::clone)
-    }
-
-    <span class="doccomment">/// Get a reference to the named hole or panic.
-    </span><span class="kw">pub fn </span>get&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; RRC&lt;Port&gt;
-    <span class="kw">where
-        </span>S: std::fmt::Display + Clone,
-        Id: PartialEq&lt;S&gt;,
-    {
-        <span class="self">self</span>.find(name.clone()).unwrap_or_else(|| {
-            <span class="macro">panic!</span>(<span class="string">"Hole `{name}' not found on group `{}'"</span>, <span class="self">self</span>.name)
-        })
-    }
-
-    <span class="doccomment">/// Returns the index to the done assignment in the group.
-    </span><span class="kw">fn </span>find_done_cond(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.assignments
-            .iter()
-            .position(|assign| {
-                <span class="kw">let </span>dst = assign.dst.borrow();
-                dst.is_hole() &amp;&amp; dst.name == <span class="string">"done"
-            </span>})
-            .unwrap_or_else(|| {
-                <span class="macro">panic!</span>(<span class="string">"Group `{}' has no done condition"</span>, <span class="self">self</span>.name)
-            })
-    }
-
-    <span class="doccomment">/// Returns a reference to the assignment in the group that writes to the done condition.
-    </span><span class="kw">pub fn </span>done_cond(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Assignment&lt;Nothing&gt; {
-        <span class="kw">let </span>idx = <span class="self">self</span>.find_done_cond();
-        <span class="kw-2">&amp;</span><span class="self">self</span>.assignments[idx]
-    }
-
-    <span class="doccomment">/// Returns a mutable reference to the assignment in the group that writes to the done
-    /// condition.
-    </span><span class="kw">pub fn </span>done_cond_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Assignment&lt;Nothing&gt; {
-        <span class="kw">let </span>idx = <span class="self">self</span>.find_done_cond();
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>.assignments[idx]
-    }
-
-    <span class="doccomment">/// The name of this group.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
-        <span class="self">self</span>.name
-    }
-
-    <span class="doccomment">/// The attributes of this group.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Attributes&gt; {
-        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.attributes)
-    }
-
-    <span class="kw">pub fn </span>remove_attribute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: Attribute) {
-        <span class="self">self</span>.attributes.remove(attr);
-    }
-}
-
-<span class="doccomment">/// A Group of assignments that perform a logical action.
-</span><span class="attr">#[derive(Debug)]
-#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
-</span><span class="kw">pub struct </span>StaticGroup {
-    <span class="doccomment">/// Name of this group
-    </span>name: Id,
-
-    <span class="doccomment">/// The assignments used in this group
-    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&lt;StaticTiming&gt;&gt;,
-
-    <span class="doccomment">/// Holes for this group
-    </span><span class="kw">pub </span>holes: SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">3</span>]&gt;,
-
-    <span class="doccomment">/// Attributes for this group.
-    </span><span class="kw">pub </span>attributes: Attributes,
-
-    <span class="doccomment">/// Latency of static group
-    </span><span class="kw">pub </span>latency: u64,
-}
-
-<span class="doccomment">///implement the StaticGroup struct
-</span><span class="kw">impl </span>StaticGroup {
-    <span class="kw">pub fn </span>new(name: Id, latency: u64) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            name,
-            assignments: <span class="macro">vec!</span>[],
-            holes: <span class="macro">smallvec!</span>[],
-            attributes: Attributes::default(),
-            latency,
-        }
-    }
-
-    <span class="kw">pub fn </span>get_latency(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.latency
-    }
-
-    <span class="doccomment">/// Get a reference to the named hole if it exists.
-    </span><span class="kw">pub fn </span>find&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;
-    <span class="kw">where
-        </span>S: std::fmt::Display,
-        Id: PartialEq&lt;S&gt;,
-    {
-        <span class="self">self</span>.holes
-            .iter()
-            .find(|<span class="kw-2">&amp;</span>g| g.borrow().name == name)
-            .map(Rc::clone)
-    }
-
-    <span class="doccomment">/// Get a reference to the named hole or panic.
-    </span><span class="kw">pub fn </span>get&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; RRC&lt;Port&gt;
-    <span class="kw">where
-        </span>S: std::fmt::Display + Clone,
-        Id: PartialEq&lt;S&gt;,
-    {
-        <span class="self">self</span>.find(name.clone()).unwrap_or_else(|| {
-            <span class="macro">panic!</span>(<span class="string">"Hole `{name}' not found on group `{}'"</span>, <span class="self">self</span>.name)
-        })
-    }
-
-    <span class="doccomment">/// The name of this group.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
-        <span class="self">self</span>.name
-    }
-
-    <span class="doccomment">/// The attributes of this group.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Attributes&gt; {
-        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.attributes)
-    }
-
-    <span class="kw">pub fn </span>remove_attribute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: Attribute) {
-        <span class="self">self</span>.attributes.remove(attr);
-    }
-}
-
-<span class="doccomment">/// A combinational group.
-/// A combinational group does not have any holes and should only contain assignments that should
-/// will be combinationally active
-</span><span class="attr">#[derive(Debug)]
-#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
-</span><span class="kw">pub struct </span>CombGroup {
-    <span class="doccomment">/// Name of this group
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) name: Id,
-
-    <span class="doccomment">/// The assignments used in this group
-    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&lt;Nothing&gt;&gt;,
-
-    <span class="doccomment">/// Attributes for this group.
-    </span><span class="kw">pub </span>attributes: Attributes,
-}
-<span class="kw">impl </span>CombGroup {
-    <span class="doccomment">/// The name of this group.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
-        <span class="self">self</span>.name
-    }
-
-    <span class="doccomment">/// The attributes of this group.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Attributes&gt; {
-        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.attributes)
-    }
-}
-
-<span class="attr">#[derive(Debug)]
-#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
-</span><span class="kw">pub struct </span>FSM {
-    <span class="doccomment">/// Name of this construct
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) name: Id,
-    <span class="doccomment">/// Attributes for this FSM
-    </span><span class="kw">pub </span>attributes: Attributes,
-    <span class="doccomment">/// State indexes into assignments that are supposed to be enabled at that state
-    </span><span class="kw">pub </span>assignments: Vec&lt;Vec&lt;Assignment&lt;Nothing&gt;&gt;&gt;,
-    <span class="doccomment">/// State indexes into (potentially guarded) next states
-    </span><span class="kw">pub </span>transitions: Vec&lt;Transition&gt;,
-    <span class="comment">// Wire representing fsm output
-    </span><span class="kw">pub </span>wires: SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">2</span>]&gt;,
-}
-
-<span class="kw">impl </span>FSM {
-    <span class="doccomment">/// Grants immutable access to the name of this cell.
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
-        <span class="self">self</span>.name
-    }
-
-    <span class="doccomment">/// Constructs a new FSM construct using a list of cases and a name
-    </span><span class="kw">pub fn </span>new(name: Id) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            name,
-            assignments: <span class="macro">vec!</span>[],
-            transitions: <span class="macro">vec!</span>[],
-            wires: SmallVec::new(),
-            attributes: Attributes::default(),
-        }
-    }
-
-    <span class="doccomment">/// Get a reference to the named hole if it exists.
-    </span><span class="kw">pub fn </span>find&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;
-    <span class="kw">where
-        </span>S: std::fmt::Display,
-        Id: PartialEq&lt;S&gt;,
-    {
-        <span class="self">self</span>.wires
-            .iter()
-            .find(|<span class="kw-2">&amp;</span>g| g.borrow().name == name)
-            .map(Rc::clone)
-    }
-
-    <span class="kw">pub fn </span>get&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; RRC&lt;Port&gt;
-    <span class="kw">where
-        </span>S: std::fmt::Display + Clone,
-        Id: PartialEq&lt;S&gt;,
-    {
-        <span class="self">self</span>.find(name.clone()).unwrap_or_else(|| {
-            <span class="macro">panic!</span>(<span class="string">"Wire `{name}' not found on group `{}'"</span>, <span class="self">self</span>.name)
-        })
-    }
-
-    <span class="doccomment">/// Extend the FSM with new transitions and assignments. Will panic if
-    /// the lengths are not consistent.
-    </span><span class="kw">pub fn </span>extend_fsm&lt;A, T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, assigns: A, transitions: T)
-    <span class="kw">where
-        </span>A: IntoIterator&lt;Item = Vec&lt;Assignment&lt;Nothing&gt;&gt;&gt;,
-        T: IntoIterator&lt;Item = Transition&gt;,
-    {
-        <span class="self">self</span>.assignments.extend(assigns);
-        <span class="self">self</span>.transitions.extend(transitions);
-    }
-
-    <span class="doccomment">/// Extend the assignments that are supposed to be active at a given state.
-    </span><span class="kw">pub fn </span>extend_state_assignments&lt;I&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, state: u64, assigns: I)
-    <span class="kw">where
-        </span>I: IntoIterator&lt;Item = Assignment&lt;Nothing&gt;&gt;,
-    {
-        <span class="kw">let </span>msg = <span class="macro">format!</span>(<span class="string">"State {state} does not exist in FSM"</span>);
-        <span class="self">self</span>.assignments
-            .get_mut(state <span class="kw">as </span>usize)
-            .expect(<span class="kw-2">&amp;</span>msg)
-            .extend(assigns);
-    }
-
-    <span class="doccomment">/// Returns a list of names of the groups, cells, or other port parents used
-    /// by the FSM. Requires as an argument a function that can
-    /// in-place update a Vec with the name of kinds of port parents you care about.
-    </span><span class="kw">pub fn </span>get_called_port_parents&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, push_parent_name: F) -&gt; Vec&lt;Id&gt;
-    <span class="kw">where
-        </span>F: Fn(<span class="kw-2">&amp;mut </span>Vec&lt;Id&gt;, <span class="kw-2">&amp;</span>RRC&lt;Port&gt;),
-    {
-        <span class="self">self</span>.transitions
-            .iter()
-            .zip(<span class="self">self</span>.assignments.iter())
-            .flat_map(|(state_transitions, state_assignments)| {
-                <span class="kw">let </span><span class="kw-2">mut </span>parent_names = <span class="macro">vec!</span>[];
-
-                <span class="comment">// if transitions uses the specified kind of port parent, add its Id
-                </span><span class="kw">if let </span>Transition::Conditional(conds) = state_transitions {
-                    <span class="kw">for </span>(guard, <span class="kw">_</span>) <span class="kw">in </span>conds.iter() {
-                        guard.all_ports().iter().for_each(|port| {
-                            push_parent_name(<span class="kw-2">&amp;mut </span>parent_names, port)
-                        });
-                    }
-                }
-                <span class="comment">// if assignments uses the specified kind of port parent, add its Id
-                </span><span class="kw">for </span>assign <span class="kw">in </span>state_assignments.iter() {
-                    assign.iter_ports().for_each(|port| {
-                        push_parent_name(<span class="kw-2">&amp;mut </span>parent_names, <span class="kw-2">&amp;</span>port);
-                    });
-                }
-                parent_names
-            })
-            .collect()
-    }
-
-    <span class="doccomment">/// Each element of the resulting Vec is a collection of assignments writing
-    /// to the same destination port, where the `usize` value represents the
-    /// FSM state at which the assignment should take place.
-    </span><span class="kw">pub fn </span>merge_assignments(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;Vec&lt;(usize, Assignment&lt;Nothing&gt;)&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>assigns_by_port: HashMap&lt;
-            Canonical,
-            Vec&lt;(usize, Assignment&lt;Nothing&gt;)&gt;,
-        &gt; = HashMap::new();
-        <span class="kw">for </span>(case, assigns_at_state) <span class="kw">in </span><span class="self">self</span>.assignments.iter().enumerate() {
-            <span class="kw">for </span>assign <span class="kw">in </span>assigns_at_state.iter() {
-                <span class="kw">let </span>dest_port = assign.dst.borrow().canonical();
-                assigns_by_port
-                    .entry(dest_port)
-                    .and_modify(|assigns_at_port| {
-                        assigns_at_port.push((case, assign.clone()));
-                    })
-                    .or_insert(<span class="macro">vec!</span>[(case, assign.clone())]);
-            }
-        }
-        assigns_by_port
-            .into_values()
-            <span class="comment">// order by state, for better appearance when emitted
-            </span>.sorted_by(|a, b| a.first().unwrap().<span class="number">0</span>.cmp(<span class="kw-2">&amp;</span>b.first().unwrap().<span class="number">0</span>))
-            .collect()
-    }
-}
-
-<span class="kw">impl </span>GetName <span class="kw">for </span>Cell {
-    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
-        <span class="self">self</span>.name()
-    }
-}
-
-<span class="kw">impl </span>GetName <span class="kw">for </span>Group {
-    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
-        <span class="self">self</span>.name()
-    }
-}
-
-<span class="kw">impl </span>GetName <span class="kw">for </span>CombGroup {
-    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
-        <span class="self">self</span>.name()
-    }
-}
-
-<span class="kw">impl </span>GetName <span class="kw">for </span>FSM {
-    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
-        <span class="self">self</span>.name()
-    }
-}
-
-<span class="kw">impl </span>GetName <span class="kw">for </span>StaticGroup {
-    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
-        <span class="self">self</span>.name()
-    }
-}
-</code></pre></div></section></main></body></html>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `calyx/ir/src/structure.rs`."><title>structure.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-1a91846b.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="calyx_ir" data-themes="" data-resource-suffix="" data-rustdoc-version="1.88.0 (6b00bc388 2025-06-23)" data-channel="1.88.0" data-search-js="search-f7877310.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../../static.files/src-script-63605ae7.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-7ef8a74a.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">calyx_ir/</div>structure.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Representation for structure (wires and cells) in a Calyx program.
+<a href=#2 id=2 data-nosnippet>2</a>
+<a href=#3 id=3 data-nosnippet>3</a></span><span class="kw">use </span><span class="kw">crate</span>::Nothing;
+<a href=#4 id=4 data-nosnippet>4</a><span class="kw">use </span><span class="kw">crate</span>::guard::StaticTiming;
+<a href=#5 id=5 data-nosnippet>5</a>
+<a href=#6 id=6 data-nosnippet>6</a><span class="kw">use super</span>::{
+<a href=#7 id=7 data-nosnippet>7</a>    Attributes, Direction, GetAttributes, Guard, Id, PortDef, RRC, WRC,
+<a href=#8 id=8 data-nosnippet>8</a>};
+<a href=#9 id=9 data-nosnippet>9</a><span class="kw">use </span>calyx_frontend::{Attribute, BoolAttr};
+<a href=#10 id=10 data-nosnippet>10</a><span class="kw">use </span>calyx_utils::{CalyxResult, Error, GetName};
+<a href=#11 id=11 data-nosnippet>11</a><span class="kw">use </span>itertools::Itertools;
+<a href=#12 id=12 data-nosnippet>12</a><span class="kw">use </span>smallvec::{SmallVec, smallvec};
+<a href=#13 id=13 data-nosnippet>13</a><span class="kw">use </span>std::collections::HashMap;
+<a href=#14 id=14 data-nosnippet>14</a><span class="kw">use </span>std::hash::Hash;
+<a href=#15 id=15 data-nosnippet>15</a><span class="kw">use </span>std::rc::Rc;
+<a href=#16 id=16 data-nosnippet>16</a>
+<a href=#17 id=17 data-nosnippet>17</a><span class="doccomment">/// Ports can come from Cells or Groups
+<a href=#18 id=18 data-nosnippet>18</a></span><span class="attr">#[derive(Debug, Clone)]
+<a href=#19 id=19 data-nosnippet>19</a></span><span class="kw">pub enum </span>PortParent {
+<a href=#20 id=20 data-nosnippet>20</a>    Cell(WRC&lt;Cell&gt;),
+<a href=#21 id=21 data-nosnippet>21</a>    Group(WRC&lt;Group&gt;),
+<a href=#22 id=22 data-nosnippet>22</a>    StaticGroup(WRC&lt;StaticGroup&gt;),
+<a href=#23 id=23 data-nosnippet>23</a>    FSM(WRC&lt;FSM&gt;),
+<a href=#24 id=24 data-nosnippet>24</a>}
+<a href=#25 id=25 data-nosnippet>25</a>
+<a href=#26 id=26 data-nosnippet>26</a><span class="doccomment">/// Represents a port on a cell.
+<a href=#27 id=27 data-nosnippet>27</a></span><span class="attr">#[derive(Debug, Clone)]
+<a href=#28 id=28 data-nosnippet>28</a>#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
+<a href=#29 id=29 data-nosnippet>29</a></span><span class="kw">pub struct </span>Port {
+<a href=#30 id=30 data-nosnippet>30</a>    <span class="doccomment">/// Name of the port
+<a href=#31 id=31 data-nosnippet>31</a>    </span><span class="kw">pub </span>name: Id,
+<a href=#32 id=32 data-nosnippet>32</a>    <span class="doccomment">/// Width of the port
+<a href=#33 id=33 data-nosnippet>33</a>    </span><span class="kw">pub </span>width: u64,
+<a href=#34 id=34 data-nosnippet>34</a>    <span class="doccomment">/// Direction of the port
+<a href=#35 id=35 data-nosnippet>35</a>    </span><span class="kw">pub </span>direction: Direction,
+<a href=#36 id=36 data-nosnippet>36</a>    <span class="doccomment">/// Weak pointer to this port's parent
+<a href=#37 id=37 data-nosnippet>37</a>    </span><span class="kw">pub </span>parent: PortParent,
+<a href=#38 id=38 data-nosnippet>38</a>    <span class="doccomment">/// Attributes associated with this port.
+<a href=#39 id=39 data-nosnippet>39</a>    </span><span class="kw">pub </span>attributes: Attributes,
+<a href=#40 id=40 data-nosnippet>40</a>}
+<a href=#41 id=41 data-nosnippet>41</a>
+<a href=#42 id=42 data-nosnippet>42</a><span class="doccomment">/// Canonical name of a Port
+<a href=#43 id=43 data-nosnippet>43</a></span><span class="attr">#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+<a href=#44 id=44 data-nosnippet>44</a></span><span class="kw">pub struct </span>Canonical {
+<a href=#45 id=45 data-nosnippet>45</a>    <span class="kw">pub </span>cell: Id,
+<a href=#46 id=46 data-nosnippet>46</a>    <span class="kw">pub </span>port: Id,
+<a href=#47 id=47 data-nosnippet>47</a>}
+<a href=#48 id=48 data-nosnippet>48</a>
+<a href=#49 id=49 data-nosnippet>49</a><span class="kw">impl </span>Canonical {
+<a href=#50 id=50 data-nosnippet>50</a>    <span class="kw">pub const fn </span>new(cell: Id, port: Id) -&gt; <span class="self">Self </span>{
+<a href=#51 id=51 data-nosnippet>51</a>        <span class="self">Self </span>{ cell, port }
+<a href=#52 id=52 data-nosnippet>52</a>    }
+<a href=#53 id=53 data-nosnippet>53</a>}
+<a href=#54 id=54 data-nosnippet>54</a>
+<a href=#55 id=55 data-nosnippet>55</a><span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>Canonical {
+<a href=#56 id=56 data-nosnippet>56</a>    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+<a href=#57 id=57 data-nosnippet>57</a>        <span class="macro">write!</span>(f, <span class="string">"{}.{}"</span>, <span class="self">self</span>.cell, <span class="self">self</span>.port)
+<a href=#58 id=58 data-nosnippet>58</a>    }
+<a href=#59 id=59 data-nosnippet>59</a>}
+<a href=#60 id=60 data-nosnippet>60</a>
+<a href=#61 id=61 data-nosnippet>61</a><span class="kw">impl </span>Port {
+<a href=#62 id=62 data-nosnippet>62</a>    <span class="doccomment">/// Checks if this port is a hole
+<a href=#63 id=63 data-nosnippet>63</a>    </span><span class="kw">pub fn </span>is_hole(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+<a href=#64 id=64 data-nosnippet>64</a>        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.parent, PortParent::Group(<span class="kw">_</span>))
+<a href=#65 id=65 data-nosnippet>65</a>            || <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.parent, PortParent::StaticGroup(<span class="kw">_</span>))
+<a href=#66 id=66 data-nosnippet>66</a>    }
+<a href=#67 id=67 data-nosnippet>67</a>
+<a href=#68 id=68 data-nosnippet>68</a>    <span class="doccomment">/// Returns the parent of the [Port] which must be [Cell]. Throws an error
+<a href=#69 id=69 data-nosnippet>69</a>    /// otherwise.
+<a href=#70 id=70 data-nosnippet>70</a>    </span><span class="kw">pub fn </span>cell_parent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RRC&lt;Cell&gt; {
+<a href=#71 id=71 data-nosnippet>71</a>        <span class="kw">if let </span>PortParent::Cell(cell_wref) = <span class="kw-2">&amp;</span><span class="self">self</span>.parent {
+<a href=#72 id=72 data-nosnippet>72</a>            <span class="kw">return </span>cell_wref.upgrade();
+<a href=#73 id=73 data-nosnippet>73</a>        }
+<a href=#74 id=74 data-nosnippet>74</a>        <span class="macro">unreachable!</span>(<span class="string">"This port should have a cell parent"</span>)
+<a href=#75 id=75 data-nosnippet>75</a>    }
+<a href=#76 id=76 data-nosnippet>76</a>
+<a href=#77 id=77 data-nosnippet>77</a>    <span class="doccomment">/// Checks if this port is a constant of value: `val`.
+<a href=#78 id=78 data-nosnippet>78</a>    </span><span class="kw">pub fn </span>is_constant(<span class="kw-2">&amp;</span><span class="self">self</span>, val: u64, width: u64) -&gt; bool {
+<a href=#79 id=79 data-nosnippet>79</a>        <span class="kw">if let </span>PortParent::Cell(cell) = <span class="kw-2">&amp;</span><span class="self">self</span>.parent {
+<a href=#80 id=80 data-nosnippet>80</a>            <span class="kw">match </span>cell.upgrade().borrow().prototype {
+<a href=#81 id=81 data-nosnippet>81</a>                CellType::Constant { val: v, width: w } =&gt; {
+<a href=#82 id=82 data-nosnippet>82</a>                    v == val &amp;&amp; width == w
+<a href=#83 id=83 data-nosnippet>83</a>                }
+<a href=#84 id=84 data-nosnippet>84</a>                <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
+<a href=#85 id=85 data-nosnippet>85</a>            }
+<a href=#86 id=86 data-nosnippet>86</a>        } <span class="kw">else </span>{
+<a href=#87 id=87 data-nosnippet>87</a>            <span class="bool-val">false
+<a href=#88 id=88 data-nosnippet>88</a>        </span>}
+<a href=#89 id=89 data-nosnippet>89</a>    }
+<a href=#90 id=90 data-nosnippet>90</a>
+<a href=#91 id=91 data-nosnippet>91</a>    <span class="doccomment">/// Gets name of parent object.
+<a href=#92 id=92 data-nosnippet>92</a>    </span><span class="kw">pub fn </span>get_parent_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+<a href=#93 id=93 data-nosnippet>93</a>        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.parent {
+<a href=#94 id=94 data-nosnippet>94</a>            PortParent::Cell(cell) =&gt; cell.upgrade().borrow().name,
+<a href=#95 id=95 data-nosnippet>95</a>            PortParent::Group(group) =&gt; group.upgrade().borrow().name,
+<a href=#96 id=96 data-nosnippet>96</a>            PortParent::FSM(fsm) =&gt; fsm.upgrade().borrow().name,
+<a href=#97 id=97 data-nosnippet>97</a>            PortParent::StaticGroup(group) =&gt; group.upgrade().borrow().name,
+<a href=#98 id=98 data-nosnippet>98</a>        }
+<a href=#99 id=99 data-nosnippet>99</a>    }
+<a href=#100 id=100 data-nosnippet>100</a>
+<a href=#101 id=101 data-nosnippet>101</a>    <span class="doccomment">/// Checks if parent is combinational component
+<a href=#102 id=102 data-nosnippet>102</a>    </span><span class="kw">pub fn </span>parent_is_comb(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+<a href=#103 id=103 data-nosnippet>103</a>        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.parent {
+<a href=#104 id=104 data-nosnippet>104</a>            PortParent::Cell(cell) =&gt; cell.upgrade().borrow().is_comb_cell(),
+<a href=#105 id=105 data-nosnippet>105</a>            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
+<a href=#106 id=106 data-nosnippet>106</a>        }
+<a href=#107 id=107 data-nosnippet>107</a>    }
+<a href=#108 id=108 data-nosnippet>108</a>
+<a href=#109 id=109 data-nosnippet>109</a>    <span class="doccomment">/// Checks if parent is a protected cell
+<a href=#110 id=110 data-nosnippet>110</a>    </span><span class="kw">pub fn </span>parent_is_protected(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+<a href=#111 id=111 data-nosnippet>111</a>        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.parent {
+<a href=#112 id=112 data-nosnippet>112</a>            PortParent::Cell(cell) =&gt; {
+<a href=#113 id=113 data-nosnippet>113</a>                cell.upgrade().borrow().attributes.has(BoolAttr::Protected)
+<a href=#114 id=114 data-nosnippet>114</a>            }
+<a href=#115 id=115 data-nosnippet>115</a>            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
+<a href=#116 id=116 data-nosnippet>116</a>        }
+<a href=#117 id=117 data-nosnippet>117</a>    }
+<a href=#118 id=118 data-nosnippet>118</a>
+<a href=#119 id=119 data-nosnippet>119</a>    <span class="doccomment">/// Checks if the parent is an FSM. Assignments to these always need to be maintained.
+<a href=#120 id=120 data-nosnippet>120</a>    </span><span class="kw">pub fn </span>parent_is_fsm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+<a href=#121 id=121 data-nosnippet>121</a>        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.parent, PortParent::FSM(..))
+<a href=#122 id=122 data-nosnippet>122</a>    }
+<a href=#123 id=123 data-nosnippet>123</a>
+<a href=#124 id=124 data-nosnippet>124</a>    <span class="doccomment">/// Get the canonical representation for this Port.
+<a href=#125 id=125 data-nosnippet>125</a>    </span><span class="kw">pub fn </span>canonical(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Canonical {
+<a href=#126 id=126 data-nosnippet>126</a>        Canonical {
+<a href=#127 id=127 data-nosnippet>127</a>            cell: <span class="self">self</span>.get_parent_name(),
+<a href=#128 id=128 data-nosnippet>128</a>            port: <span class="self">self</span>.name,
+<a href=#129 id=129 data-nosnippet>129</a>        }
+<a href=#130 id=130 data-nosnippet>130</a>    }
+<a href=#131 id=131 data-nosnippet>131</a>
+<a href=#132 id=132 data-nosnippet>132</a>    <span class="doccomment">/// Returns the value of an attribute if present
+<a href=#133 id=133 data-nosnippet>133</a>    </span><span class="kw">pub fn </span>get_attribute&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
+<a href=#134 id=134 data-nosnippet>134</a>    <span class="kw">where
+<a href=#135 id=135 data-nosnippet>135</a>        </span>A: Into&lt;Attribute&gt;,
+<a href=#136 id=136 data-nosnippet>136</a>    {
+<a href=#137 id=137 data-nosnippet>137</a>        <span class="self">self</span>.get_attributes().get(attr)
+<a href=#138 id=138 data-nosnippet>138</a>    }
+<a href=#139 id=139 data-nosnippet>139</a>
+<a href=#140 id=140 data-nosnippet>140</a>    <span class="doccomment">/// Returns true if the node has a specific attribute
+<a href=#141 id=141 data-nosnippet>141</a>    </span><span class="kw">pub fn </span>has_attribute&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; bool
+<a href=#142 id=142 data-nosnippet>142</a>    <span class="kw">where
+<a href=#143 id=143 data-nosnippet>143</a>        </span>A: Into&lt;Attribute&gt;,
+<a href=#144 id=144 data-nosnippet>144</a>    {
+<a href=#145 id=145 data-nosnippet>145</a>        <span class="self">self</span>.get_attributes().has(attr)
+<a href=#146 id=146 data-nosnippet>146</a>    }
+<a href=#147 id=147 data-nosnippet>147</a>
+<a href=#148 id=148 data-nosnippet>148</a>    <span class="doccomment">/// Returns true if the widths, name, direction, and attributes of 2 ports match.
+<a href=#149 id=149 data-nosnippet>149</a>    /// This is different than `==` equivalence, which only looks at parent and name.
+<a href=#150 id=150 data-nosnippet>150</a>    </span><span class="kw">pub fn </span>type_equivalent(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Port) -&gt; bool {
+<a href=#151 id=151 data-nosnippet>151</a>        <span class="self">self</span>.width == other.width
+<a href=#152 id=152 data-nosnippet>152</a>            &amp;&amp; <span class="self">self</span>.direction == other.direction
+<a href=#153 id=153 data-nosnippet>153</a>            &amp;&amp; <span class="self">self</span>.name == other.name
+<a href=#154 id=154 data-nosnippet>154</a>            &amp;&amp; <span class="self">self</span>.attributes == other.attributes
+<a href=#155 id=155 data-nosnippet>155</a>    }
+<a href=#156 id=156 data-nosnippet>156</a>}
+<a href=#157 id=157 data-nosnippet>157</a>
+<a href=#158 id=158 data-nosnippet>158</a><span class="kw">impl </span>GetAttributes <span class="kw">for </span>Port {
+<a href=#159 id=159 data-nosnippet>159</a>    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
+<a href=#160 id=160 data-nosnippet>160</a>        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
+<a href=#161 id=161 data-nosnippet>161</a>    }
+<a href=#162 id=162 data-nosnippet>162</a>
+<a href=#163 id=163 data-nosnippet>163</a>    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
+<a href=#164 id=164 data-nosnippet>164</a>        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
+<a href=#165 id=165 data-nosnippet>165</a>    }
+<a href=#166 id=166 data-nosnippet>166</a>}
+<a href=#167 id=167 data-nosnippet>167</a>
+<a href=#168 id=168 data-nosnippet>168</a><span class="kw">impl </span>PartialEq <span class="kw">for </span>Port {
+<a href=#169 id=169 data-nosnippet>169</a>    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+<a href=#170 id=170 data-nosnippet>170</a>        <span class="self">self</span>.get_parent_name() == other.get_parent_name()
+<a href=#171 id=171 data-nosnippet>171</a>            &amp;&amp; <span class="self">self</span>.name == other.name
+<a href=#172 id=172 data-nosnippet>172</a>    }
+<a href=#173 id=173 data-nosnippet>173</a>}
+<a href=#174 id=174 data-nosnippet>174</a>
+<a href=#175 id=175 data-nosnippet>175</a><span class="kw">impl </span>Eq <span class="kw">for </span>Port {}
+<a href=#176 id=176 data-nosnippet>176</a>
+<a href=#177 id=177 data-nosnippet>177</a><span class="doccomment">/// Wraps generic iterators over ports to allow functions to build and return port iterators in
+<a href=#178 id=178 data-nosnippet>178</a>/// different ways.
+<a href=#179 id=179 data-nosnippet>179</a></span><span class="kw">pub struct </span>PortIterator&lt;<span class="lifetime">'a</span>&gt; {
+<a href=#180 id=180 data-nosnippet>180</a>    port_iter: Box&lt;<span class="kw">dyn </span>Iterator&lt;Item = RRC&lt;Port&gt;&gt; + <span class="lifetime">'a</span>&gt;,
+<a href=#181 id=181 data-nosnippet>181</a>}
+<a href=#182 id=182 data-nosnippet>182</a>
+<a href=#183 id=183 data-nosnippet>183</a><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PortIterator&lt;<span class="lifetime">'a</span>&gt; {
+<a href=#184 id=184 data-nosnippet>184</a>    <span class="doccomment">/// Construct a new PortIterator from an iterator over ports.
+<a href=#185 id=185 data-nosnippet>185</a>    </span><span class="kw">pub fn </span>new&lt;T&gt;(iter: T) -&gt; <span class="self">Self
+<a href=#186 id=186 data-nosnippet>186</a>    </span><span class="kw">where
+<a href=#187 id=187 data-nosnippet>187</a>        </span>T: Iterator&lt;Item = RRC&lt;Port&gt;&gt; + <span class="lifetime">'a</span>,
+<a href=#188 id=188 data-nosnippet>188</a>    {
+<a href=#189 id=189 data-nosnippet>189</a>        PortIterator {
+<a href=#190 id=190 data-nosnippet>190</a>            port_iter: Box::new(iter),
+<a href=#191 id=191 data-nosnippet>191</a>        }
+<a href=#192 id=192 data-nosnippet>192</a>    }
+<a href=#193 id=193 data-nosnippet>193</a>
+<a href=#194 id=194 data-nosnippet>194</a>    <span class="doccomment">/// Returns an empty iterator over ports.
+<a href=#195 id=195 data-nosnippet>195</a>    </span><span class="kw">pub fn </span>empty() -&gt; <span class="self">Self </span>{
+<a href=#196 id=196 data-nosnippet>196</a>        PortIterator {
+<a href=#197 id=197 data-nosnippet>197</a>            port_iter: Box::new(std::iter::empty()),
+<a href=#198 id=198 data-nosnippet>198</a>        }
+<a href=#199 id=199 data-nosnippet>199</a>    }
+<a href=#200 id=200 data-nosnippet>200</a>}
+<a href=#201 id=201 data-nosnippet>201</a>
+<a href=#202 id=202 data-nosnippet>202</a><span class="kw">impl </span>Iterator <span class="kw">for </span>PortIterator&lt;<span class="lifetime">'_</span>&gt; {
+<a href=#203 id=203 data-nosnippet>203</a>    <span class="kw">type </span>Item = RRC&lt;Port&gt;;
+<a href=#204 id=204 data-nosnippet>204</a>
+<a href=#205 id=205 data-nosnippet>205</a>    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+<a href=#206 id=206 data-nosnippet>206</a>        <span class="self">self</span>.port_iter.next()
+<a href=#207 id=207 data-nosnippet>207</a>    }
+<a href=#208 id=208 data-nosnippet>208</a>}
+<a href=#209 id=209 data-nosnippet>209</a>
+<a href=#210 id=210 data-nosnippet>210</a><span class="doccomment">/// Alias for bindings
+<a href=#211 id=211 data-nosnippet>211</a></span><span class="kw">pub type </span>Binding = SmallVec&lt;[(Id, u64); <span class="number">5</span>]&gt;;
+<a href=#212 id=212 data-nosnippet>212</a>
+<a href=#213 id=213 data-nosnippet>213</a><span class="doccomment">/// The type for a Cell
+<a href=#214 id=214 data-nosnippet>214</a></span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+<a href=#215 id=215 data-nosnippet>215</a>#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
+<a href=#216 id=216 data-nosnippet>216</a></span><span class="kw">pub enum </span>CellType {
+<a href=#217 id=217 data-nosnippet>217</a>    <span class="doccomment">/// Cell constructed using a primitive definition
+<a href=#218 id=218 data-nosnippet>218</a>    </span>Primitive {
+<a href=#219 id=219 data-nosnippet>219</a>        <span class="doccomment">/// Name of the primitive cell used to instantiate this cell.
+<a href=#220 id=220 data-nosnippet>220</a>        </span>name: Id,
+<a href=#221 id=221 data-nosnippet>221</a>        <span class="doccomment">/// Bindings for the parameters. Uses Vec to retain the input order.
+<a href=#222 id=222 data-nosnippet>222</a>        </span>param_binding: Box&lt;Binding&gt;,
+<a href=#223 id=223 data-nosnippet>223</a>        <span class="doccomment">/// True iff this is a combinational primitive
+<a href=#224 id=224 data-nosnippet>224</a>        </span>is_comb: bool,
+<a href=#225 id=225 data-nosnippet>225</a>        <span class="doccomment">/// (Optional) latency of the primitive
+<a href=#226 id=226 data-nosnippet>226</a>        </span>latency: <span class="prelude-ty">Option</span>&lt;std::num::NonZeroU64&gt;,
+<a href=#227 id=227 data-nosnippet>227</a>    },
+<a href=#228 id=228 data-nosnippet>228</a>    <span class="doccomment">/// Cell constructed using a Calyx component
+<a href=#229 id=229 data-nosnippet>229</a>    </span>Component {
+<a href=#230 id=230 data-nosnippet>230</a>        <span class="doccomment">/// Name of the component used to instantiate this cell.
+<a href=#231 id=231 data-nosnippet>231</a>        </span>name: Id,
+<a href=#232 id=232 data-nosnippet>232</a>    },
+<a href=#233 id=233 data-nosnippet>233</a>    <span class="doccomment">/// This cell represents the current component
+<a href=#234 id=234 data-nosnippet>234</a>    </span>ThisComponent,
+<a href=#235 id=235 data-nosnippet>235</a>    <span class="doccomment">/// Cell representing a Constant
+<a href=#236 id=236 data-nosnippet>236</a>    </span>Constant {
+<a href=#237 id=237 data-nosnippet>237</a>        <span class="doccomment">/// Value of this constant
+<a href=#238 id=238 data-nosnippet>238</a>        </span>val: u64,
+<a href=#239 id=239 data-nosnippet>239</a>        <span class="doccomment">/// Width of this constant
+<a href=#240 id=240 data-nosnippet>240</a>        </span>width: u64,
+<a href=#241 id=241 data-nosnippet>241</a>    },
+<a href=#242 id=242 data-nosnippet>242</a>}
+<a href=#243 id=243 data-nosnippet>243</a>
+<a href=#244 id=244 data-nosnippet>244</a><span class="kw">impl </span>CellType {
+<a href=#245 id=245 data-nosnippet>245</a>    <span class="doccomment">/// Return the name associated with this CellType if present
+<a href=#246 id=246 data-nosnippet>246</a>    </span><span class="kw">pub fn </span>get_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Id&gt; {
+<a href=#247 id=247 data-nosnippet>247</a>        <span class="kw">match </span><span class="self">self </span>{
+<a href=#248 id=248 data-nosnippet>248</a>            CellType::Primitive { name, .. } | CellType::Component { name } =&gt; {
+<a href=#249 id=249 data-nosnippet>249</a>                <span class="prelude-val">Some</span>(<span class="kw-2">*</span>name)
+<a href=#250 id=250 data-nosnippet>250</a>            }
+<a href=#251 id=251 data-nosnippet>251</a>            CellType::ThisComponent | CellType::Constant { .. } =&gt; <span class="prelude-val">None</span>,
+<a href=#252 id=252 data-nosnippet>252</a>        }
+<a href=#253 id=253 data-nosnippet>253</a>    }
+<a href=#254 id=254 data-nosnippet>254</a>
+<a href=#255 id=255 data-nosnippet>255</a>    <span class="doccomment">/// Generate string representation of CellType appropriate for error messages.
+<a href=#256 id=256 data-nosnippet>256</a>    </span><span class="kw">pub fn </span>surface_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
+<a href=#257 id=257 data-nosnippet>257</a>        <span class="kw">match </span><span class="self">self </span>{
+<a href=#258 id=258 data-nosnippet>258</a>            CellType::Primitive {
+<a href=#259 id=259 data-nosnippet>259</a>                name,
+<a href=#260 id=260 data-nosnippet>260</a>                param_binding,
+<a href=#261 id=261 data-nosnippet>261</a>                ..
+<a href=#262 id=262 data-nosnippet>262</a>            } =&gt; <span class="prelude-val">Some</span>(<span class="macro">format!</span>(
+<a href=#263 id=263 data-nosnippet>263</a>                <span class="string">"{}({})"</span>,
+<a href=#264 id=264 data-nosnippet>264</a>                name,
+<a href=#265 id=265 data-nosnippet>265</a>                param_binding.iter().map(|(<span class="kw">_</span>, v)| v.to_string()).join(<span class="string">", "</span>)
+<a href=#266 id=266 data-nosnippet>266</a>            )),
+<a href=#267 id=267 data-nosnippet>267</a>            CellType::Component { name } =&gt; <span class="prelude-val">Some</span>(name.to_string()),
+<a href=#268 id=268 data-nosnippet>268</a>            CellType::ThisComponent | CellType::Constant { .. } =&gt; <span class="prelude-val">None</span>,
+<a href=#269 id=269 data-nosnippet>269</a>        }
+<a href=#270 id=270 data-nosnippet>270</a>    }
+<a href=#271 id=271 data-nosnippet>271</a>}
+<a href=#272 id=272 data-nosnippet>272</a>
+<a href=#273 id=273 data-nosnippet>273</a><span class="doccomment">/// Represents an instantiated cell.
+<a href=#274 id=274 data-nosnippet>274</a></span><span class="attr">#[derive(Debug, Clone)]
+<a href=#275 id=275 data-nosnippet>275</a>#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
+<a href=#276 id=276 data-nosnippet>276</a></span><span class="kw">pub struct </span>Cell {
+<a href=#277 id=277 data-nosnippet>277</a>    <span class="doccomment">/// Name of this cell.
+<a href=#278 id=278 data-nosnippet>278</a>    </span>name: Id,
+<a href=#279 id=279 data-nosnippet>279</a>    <span class="doccomment">/// Ports on this cell
+<a href=#280 id=280 data-nosnippet>280</a>    </span><span class="kw">pub </span>ports: SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">10</span>]&gt;,
+<a href=#281 id=281 data-nosnippet>281</a>    <span class="doccomment">/// Underlying type for this cell
+<a href=#282 id=282 data-nosnippet>282</a>    </span><span class="kw">pub </span>prototype: CellType,
+<a href=#283 id=283 data-nosnippet>283</a>    <span class="doccomment">/// Attributes for this group.
+<a href=#284 id=284 data-nosnippet>284</a>    </span><span class="kw">pub </span>attributes: Attributes,
+<a href=#285 id=285 data-nosnippet>285</a>    <span class="doccomment">/// Whether the cell is external
+<a href=#286 id=286 data-nosnippet>286</a>    </span>reference: bool,
+<a href=#287 id=287 data-nosnippet>287</a>}
+<a href=#288 id=288 data-nosnippet>288</a>
+<a href=#289 id=289 data-nosnippet>289</a><span class="kw">impl </span>GetAttributes <span class="kw">for </span>Cell {
+<a href=#290 id=290 data-nosnippet>290</a>    <span class="kw">fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Attributes {
+<a href=#291 id=291 data-nosnippet>291</a>        <span class="kw-2">&amp;</span><span class="self">self</span>.attributes
+<a href=#292 id=292 data-nosnippet>292</a>    }
+<a href=#293 id=293 data-nosnippet>293</a>
+<a href=#294 id=294 data-nosnippet>294</a>    <span class="kw">fn </span>get_mut_attributes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Attributes {
+<a href=#295 id=295 data-nosnippet>295</a>        <span class="kw-2">&amp;mut </span><span class="self">self</span>.attributes
+<a href=#296 id=296 data-nosnippet>296</a>    }
+<a href=#297 id=297 data-nosnippet>297</a>}
+<a href=#298 id=298 data-nosnippet>298</a>
+<a href=#299 id=299 data-nosnippet>299</a><span class="kw">impl </span>Cell {
+<a href=#300 id=300 data-nosnippet>300</a>    <span class="doccomment">/// Construct a cell
+<a href=#301 id=301 data-nosnippet>301</a>    </span><span class="kw">pub fn </span>new(name: Id, prototype: CellType) -&gt; <span class="self">Self </span>{
+<a href=#302 id=302 data-nosnippet>302</a>        <span class="self">Self </span>{
+<a href=#303 id=303 data-nosnippet>303</a>            name,
+<a href=#304 id=304 data-nosnippet>304</a>            ports: <span class="macro">smallvec!</span>[],
+<a href=#305 id=305 data-nosnippet>305</a>            prototype,
+<a href=#306 id=306 data-nosnippet>306</a>            attributes: Attributes::default(),
+<a href=#307 id=307 data-nosnippet>307</a>            reference: <span class="bool-val">false</span>,
+<a href=#308 id=308 data-nosnippet>308</a>        }
+<a href=#309 id=309 data-nosnippet>309</a>    }
+<a href=#310 id=310 data-nosnippet>310</a>
+<a href=#311 id=311 data-nosnippet>311</a>    <span class="doccomment">///Get a boolean describing whether the cell is external.
+<a href=#312 id=312 data-nosnippet>312</a>    </span><span class="kw">pub fn </span>is_reference(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+<a href=#313 id=313 data-nosnippet>313</a>        <span class="self">self</span>.reference
+<a href=#314 id=314 data-nosnippet>314</a>    }
+<a href=#315 id=315 data-nosnippet>315</a>
+<a href=#316 id=316 data-nosnippet>316</a>    <span class="doccomment">///Set the external field
+<a href=#317 id=317 data-nosnippet>317</a>    </span><span class="kw">pub fn </span>set_reference(<span class="kw-2">&amp;mut </span><span class="self">self</span>, reference: bool) -&gt; bool {
+<a href=#318 id=318 data-nosnippet>318</a>        <span class="self">self</span>.reference = reference;
+<a href=#319 id=319 data-nosnippet>319</a>        <span class="self">self</span>.reference
+<a href=#320 id=320 data-nosnippet>320</a>    }
+<a href=#321 id=321 data-nosnippet>321</a>
+<a href=#322 id=322 data-nosnippet>322</a>    <span class="doccomment">/// Get a reference to the named port if it exists.
+<a href=#323 id=323 data-nosnippet>323</a>    </span><span class="kw">pub fn </span>find&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;
+<a href=#324 id=324 data-nosnippet>324</a>    <span class="kw">where
+<a href=#325 id=325 data-nosnippet>325</a>        </span>S: std::fmt::Display + Clone,
+<a href=#326 id=326 data-nosnippet>326</a>        Id: PartialEq&lt;S&gt;,
+<a href=#327 id=327 data-nosnippet>327</a>    {
+<a href=#328 id=328 data-nosnippet>328</a>        <span class="self">self</span>.ports
+<a href=#329 id=329 data-nosnippet>329</a>            .iter()
+<a href=#330 id=330 data-nosnippet>330</a>            .find(|<span class="kw-2">&amp;</span>g| g.borrow().name == name)
+<a href=#331 id=331 data-nosnippet>331</a>            .map(Rc::clone)
+<a href=#332 id=332 data-nosnippet>332</a>    }
+<a href=#333 id=333 data-nosnippet>333</a>
+<a href=#334 id=334 data-nosnippet>334</a>    <span class="doccomment">/// Return all ports that have the attribute `attr`.
+<a href=#335 id=335 data-nosnippet>335</a>    </span><span class="kw">pub fn </span>find_all_with_attr&lt;A&gt;(
+<a href=#336 id=336 data-nosnippet>336</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#337 id=337 data-nosnippet>337</a>        attr: A,
+<a href=#338 id=338 data-nosnippet>338</a>    ) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;Port&gt;&gt; + <span class="lifetime">'_
+<a href=#339 id=339 data-nosnippet>339</a>    </span><span class="kw">where
+<a href=#340 id=340 data-nosnippet>340</a>        </span>A: Into&lt;Attribute&gt;,
+<a href=#341 id=341 data-nosnippet>341</a>    {
+<a href=#342 id=342 data-nosnippet>342</a>        <span class="kw">let </span>attr = attr.into();
+<a href=#343 id=343 data-nosnippet>343</a>        <span class="self">self</span>.ports
+<a href=#344 id=344 data-nosnippet>344</a>            .iter()
+<a href=#345 id=345 data-nosnippet>345</a>            .filter(<span class="kw">move </span>|<span class="kw-2">&amp;</span>p| p.borrow().attributes.has(attr))
+<a href=#346 id=346 data-nosnippet>346</a>            .map(Rc::clone)
+<a href=#347 id=347 data-nosnippet>347</a>    }
+<a href=#348 id=348 data-nosnippet>348</a>
+<a href=#349 id=349 data-nosnippet>349</a>    <span class="doccomment">/// Return the unique port with the given attribute.
+<a href=#350 id=350 data-nosnippet>350</a>    /// If multiple ports have the same attribute, then we panic.
+<a href=#351 id=351 data-nosnippet>351</a>    /// If there are not ports with the give attribute, then we return None.
+<a href=#352 id=352 data-nosnippet>352</a>    </span><span class="kw">pub fn </span>find_unique_with_attr&lt;A&gt;(
+<a href=#353 id=353 data-nosnippet>353</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#354 id=354 data-nosnippet>354</a>        attr: A,
+<a href=#355 id=355 data-nosnippet>355</a>    ) -&gt; CalyxResult&lt;<span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;&gt;
+<a href=#356 id=356 data-nosnippet>356</a>    <span class="kw">where
+<a href=#357 id=357 data-nosnippet>357</a>        </span>A: Into&lt;Attribute&gt;,
+<a href=#358 id=358 data-nosnippet>358</a>    {
+<a href=#359 id=359 data-nosnippet>359</a>        <span class="kw">let </span>attr = attr.into();
+<a href=#360 id=360 data-nosnippet>360</a>        <span class="kw">let </span><span class="kw-2">mut </span>ports = <span class="self">self</span>.find_all_with_attr(attr);
+<a href=#361 id=361 data-nosnippet>361</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = ports.next() {
+<a href=#362 id=362 data-nosnippet>362</a>            <span class="kw">if </span>ports.next().is_some() {
+<a href=#363 id=363 data-nosnippet>363</a>                <span class="prelude-val">Err</span>(Error::malformed_structure(<span class="macro">format!</span>(
+<a href=#364 id=364 data-nosnippet>364</a>                    <span class="string">"Multiple ports with attribute `{}` found on cell `{}`"</span>,
+<a href=#365 id=365 data-nosnippet>365</a>                    attr, <span class="self">self</span>.name
+<a href=#366 id=366 data-nosnippet>366</a>                )))
+<a href=#367 id=367 data-nosnippet>367</a>            } <span class="kw">else </span>{
+<a href=#368 id=368 data-nosnippet>368</a>                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(port))
+<a href=#369 id=369 data-nosnippet>369</a>            }
+<a href=#370 id=370 data-nosnippet>370</a>        } <span class="kw">else </span>{
+<a href=#371 id=371 data-nosnippet>371</a>            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+<a href=#372 id=372 data-nosnippet>372</a>        }
+<a href=#373 id=373 data-nosnippet>373</a>    }
+<a href=#374 id=374 data-nosnippet>374</a>
+<a href=#375 id=375 data-nosnippet>375</a>    <span class="doccomment">/// Get a reference to the named port and throw an error if it doesn't
+<a href=#376 id=376 data-nosnippet>376</a>    /// exist.
+<a href=#377 id=377 data-nosnippet>377</a>    </span><span class="kw">pub fn </span>get&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; RRC&lt;Port&gt;
+<a href=#378 id=378 data-nosnippet>378</a>    <span class="kw">where
+<a href=#379 id=379 data-nosnippet>379</a>        </span>S: std::fmt::Display + Clone,
+<a href=#380 id=380 data-nosnippet>380</a>        Id: PartialEq&lt;S&gt;,
+<a href=#381 id=381 data-nosnippet>381</a>    {
+<a href=#382 id=382 data-nosnippet>382</a>        <span class="self">self</span>.find(name.clone()).unwrap_or_else(|| {
+<a href=#383 id=383 data-nosnippet>383</a>            <span class="macro">panic!</span>(
+<a href=#384 id=384 data-nosnippet>384</a>                <span class="string">"Port `{name}' not found on cell `{}'. Known ports are: {}"</span>,
+<a href=#385 id=385 data-nosnippet>385</a>                <span class="self">self</span>.name,
+<a href=#386 id=386 data-nosnippet>386</a>                <span class="self">self</span>.ports
+<a href=#387 id=387 data-nosnippet>387</a>                    .iter()
+<a href=#388 id=388 data-nosnippet>388</a>                    .map(|p| p.borrow().name.to_string())
+<a href=#389 id=389 data-nosnippet>389</a>                    .join(<span class="string">","</span>)
+<a href=#390 id=390 data-nosnippet>390</a>            )
+<a href=#391 id=391 data-nosnippet>391</a>        })
+<a href=#392 id=392 data-nosnippet>392</a>    }
+<a href=#393 id=393 data-nosnippet>393</a>
+<a href=#394 id=394 data-nosnippet>394</a>    <span class="doccomment">/// Returns true iff this cell is an instance of a Calyx-defined component.
+<a href=#395 id=395 data-nosnippet>395</a>    </span><span class="kw">pub fn </span>is_component(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+<a href=#396 id=396 data-nosnippet>396</a>        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.prototype, CellType::Component { .. })
+<a href=#397 id=397 data-nosnippet>397</a>    }
+<a href=#398 id=398 data-nosnippet>398</a>
+<a href=#399 id=399 data-nosnippet>399</a>    <span class="doccomment">/// Returns true iff this cell is the signature of the current component
+<a href=#400 id=400 data-nosnippet>400</a>    </span><span class="kw">pub fn </span>is_this(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+<a href=#401 id=401 data-nosnippet>401</a>        <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.prototype, CellType::ThisComponent)
+<a href=#402 id=402 data-nosnippet>402</a>    }
+<a href=#403 id=403 data-nosnippet>403</a>
+<a href=#404 id=404 data-nosnippet>404</a>    <span class="doccomment">/// Returns true if this is an instance of a primitive. If the optional name is provided then
+<a href=#405 id=405 data-nosnippet>405</a>    /// only returns true if the primitive has the given name.
+<a href=#406 id=406 data-nosnippet>406</a>    </span><span class="kw">pub fn </span>is_primitive&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, prim: <span class="prelude-ty">Option</span>&lt;S&gt;) -&gt; bool
+<a href=#407 id=407 data-nosnippet>407</a>    <span class="kw">where
+<a href=#408 id=408 data-nosnippet>408</a>        </span>Id: PartialEq&lt;S&gt;,
+<a href=#409 id=409 data-nosnippet>409</a>    {
+<a href=#410 id=410 data-nosnippet>410</a>        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.prototype {
+<a href=#411 id=411 data-nosnippet>411</a>            CellType::Primitive { name, .. } =&gt; {
+<a href=#412 id=412 data-nosnippet>412</a>                prim.as_ref().map(|p| name == p).unwrap_or(<span class="bool-val">true</span>)
+<a href=#413 id=413 data-nosnippet>413</a>            }
+<a href=#414 id=414 data-nosnippet>414</a>            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
+<a href=#415 id=415 data-nosnippet>415</a>        }
+<a href=#416 id=416 data-nosnippet>416</a>    }
+<a href=#417 id=417 data-nosnippet>417</a>
+<a href=#418 id=418 data-nosnippet>418</a>    <span class="doccomment">/// Get the unique port with the given attribute.
+<a href=#419 id=419 data-nosnippet>419</a>    /// Panic if no port with the attribute is found and returns an error if multiple ports with the attribute are found.
+<a href=#420 id=420 data-nosnippet>420</a>    </span><span class="kw">pub fn </span>get_unique_with_attr&lt;A&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; CalyxResult&lt;RRC&lt;Port&gt;&gt;
+<a href=#421 id=421 data-nosnippet>421</a>    <span class="kw">where
+<a href=#422 id=422 data-nosnippet>422</a>        </span>A: Into&lt;Attribute&gt; + std::fmt::Display + Copy,
+<a href=#423 id=423 data-nosnippet>423</a>    {
+<a href=#424 id=424 data-nosnippet>424</a>        <span class="prelude-val">Ok</span>(<span class="self">self</span>.find_unique_with_attr(attr)<span class="question-mark">?</span>.unwrap_or_else(|| {
+<a href=#425 id=425 data-nosnippet>425</a>            <span class="macro">panic!</span>(
+<a href=#426 id=426 data-nosnippet>426</a>                <span class="string">"Port with attribute `{attr}' not found on cell `{}'"</span>,
+<a href=#427 id=427 data-nosnippet>427</a>                <span class="self">self</span>.name,
+<a href=#428 id=428 data-nosnippet>428</a>            )
+<a href=#429 id=429 data-nosnippet>429</a>        }))
+<a href=#430 id=430 data-nosnippet>430</a>    }
+<a href=#431 id=431 data-nosnippet>431</a>
+<a href=#432 id=432 data-nosnippet>432</a>    <span class="doccomment">/// Returns the name of the component that is this cells type.
+<a href=#433 id=433 data-nosnippet>433</a>    </span><span class="kw">pub fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Id&gt; {
+<a href=#434 id=434 data-nosnippet>434</a>        <span class="self">self</span>.prototype.get_name()
+<a href=#435 id=435 data-nosnippet>435</a>    }
+<a href=#436 id=436 data-nosnippet>436</a>
+<a href=#437 id=437 data-nosnippet>437</a>    <span class="doccomment">/// Get parameter binding from the prototype used to build this cell.
+<a href=#438 id=438 data-nosnippet>438</a>    </span><span class="kw">pub fn </span>get_parameter&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, param: S) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt;
+<a href=#439 id=439 data-nosnippet>439</a>    <span class="kw">where
+<a href=#440 id=440 data-nosnippet>440</a>        </span>Id: PartialEq&lt;S&gt;,
+<a href=#441 id=441 data-nosnippet>441</a>    {
+<a href=#442 id=442 data-nosnippet>442</a>        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.prototype {
+<a href=#443 id=443 data-nosnippet>443</a>            CellType::Primitive { param_binding, .. } =&gt; param_binding
+<a href=#444 id=444 data-nosnippet>444</a>                .iter()
+<a href=#445 id=445 data-nosnippet>445</a>                .find(|(key, <span class="kw">_</span>)| <span class="kw-2">*</span>key == param)
+<a href=#446 id=446 data-nosnippet>446</a>                .map(|(<span class="kw">_</span>, val)| <span class="kw-2">*</span>val),
+<a href=#447 id=447 data-nosnippet>447</a>            CellType::Component { .. } =&gt; <span class="prelude-val">None</span>,
+<a href=#448 id=448 data-nosnippet>448</a>            CellType::ThisComponent =&gt; <span class="prelude-val">None</span>,
+<a href=#449 id=449 data-nosnippet>449</a>            CellType::Constant { .. } =&gt; <span class="prelude-val">None</span>,
+<a href=#450 id=450 data-nosnippet>450</a>        }
+<a href=#451 id=451 data-nosnippet>451</a>    }
+<a href=#452 id=452 data-nosnippet>452</a>
+<a href=#453 id=453 data-nosnippet>453</a>    <span class="doccomment">/// Return the canonical name for the cell generated to represent this
+<a href=#454 id=454 data-nosnippet>454</a>    /// (val, width) constant.
+<a href=#455 id=455 data-nosnippet>455</a>    </span><span class="kw">pub fn </span>constant_name(val: u64, width: u64) -&gt; Id {
+<a href=#456 id=456 data-nosnippet>456</a>        <span class="macro">format!</span>(<span class="string">"_{val}_{width}"</span>).into()
+<a href=#457 id=457 data-nosnippet>457</a>    }
+<a href=#458 id=458 data-nosnippet>458</a>
+<a href=#459 id=459 data-nosnippet>459</a>    <span class="doccomment">/// Return the value associated with this attribute key.
+<a href=#460 id=460 data-nosnippet>460</a>    </span><span class="kw">pub fn </span>get_attribute&lt;A: Into&lt;Attribute&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, attr: A) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+<a href=#461 id=461 data-nosnippet>461</a>        <span class="self">self</span>.attributes.get(attr.into())
+<a href=#462 id=462 data-nosnippet>462</a>    }
+<a href=#463 id=463 data-nosnippet>463</a>
+<a href=#464 id=464 data-nosnippet>464</a>    <span class="doccomment">/// Add a new attribute to the group.
+<a href=#465 id=465 data-nosnippet>465</a>    </span><span class="kw">pub fn </span>add_attribute&lt;A: Into&lt;Attribute&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: A, value: u64) {
+<a href=#466 id=466 data-nosnippet>466</a>        <span class="self">self</span>.attributes.insert(attr.into(), value);
+<a href=#467 id=467 data-nosnippet>467</a>    }
+<a href=#468 id=468 data-nosnippet>468</a>
+<a href=#469 id=469 data-nosnippet>469</a>    <span class="doccomment">/// Grants immutable access to the name of this cell.
+<a href=#470 id=470 data-nosnippet>470</a>    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+<a href=#471 id=471 data-nosnippet>471</a>        <span class="self">self</span>.name
+<a href=#472 id=472 data-nosnippet>472</a>    }
+<a href=#473 id=473 data-nosnippet>473</a>
+<a href=#474 id=474 data-nosnippet>474</a>    <span class="doccomment">/// Returns a reference to all [super::Port] attached to this cells.
+<a href=#475 id=475 data-nosnippet>475</a>    </span><span class="kw">pub fn </span>ports(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">10</span>]&gt; {
+<a href=#476 id=476 data-nosnippet>476</a>        <span class="kw-2">&amp;</span><span class="self">self</span>.ports
+<a href=#477 id=477 data-nosnippet>477</a>    }
+<a href=#478 id=478 data-nosnippet>478</a>
+<a href=#479 id=479 data-nosnippet>479</a>    <span class="comment">// Get the signature of this cell as a vector. Each element corresponds to a port in the Cell.
+<a href=#480 id=480 data-nosnippet>480</a>    </span><span class="kw">pub fn </span>get_signature(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;PortDef&lt;u64&gt;&gt; {
+<a href=#481 id=481 data-nosnippet>481</a>        <span class="self">self</span>.ports
+<a href=#482 id=482 data-nosnippet>482</a>            .iter()
+<a href=#483 id=483 data-nosnippet>483</a>            .map(|port_ref| {
+<a href=#484 id=484 data-nosnippet>484</a>                <span class="kw">let </span>port = port_ref.borrow();
+<a href=#485 id=485 data-nosnippet>485</a>                PortDef::new(
+<a href=#486 id=486 data-nosnippet>486</a>                    port.name,
+<a href=#487 id=487 data-nosnippet>487</a>                    port.width,
+<a href=#488 id=488 data-nosnippet>488</a>                    port.direction.clone(),
+<a href=#489 id=489 data-nosnippet>489</a>                    port.attributes.clone(),
+<a href=#490 id=490 data-nosnippet>490</a>                )
+<a href=#491 id=491 data-nosnippet>491</a>            })
+<a href=#492 id=492 data-nosnippet>492</a>            .collect()
+<a href=#493 id=493 data-nosnippet>493</a>    }
+<a href=#494 id=494 data-nosnippet>494</a>
+<a href=#495 id=495 data-nosnippet>495</a>    <span class="comment">// returns true if cell is comb, false otherwise
+<a href=#496 id=496 data-nosnippet>496</a>    // note that this component/component cannot be combinational
+<a href=#497 id=497 data-nosnippet>497</a>    // XXX(rachit): Combinational components are now supported so this function returns
+<a href=#498 id=498 data-nosnippet>498</a>    // the wrong answer when the parent is a combinational component
+<a href=#499 id=499 data-nosnippet>499</a>    </span><span class="kw">pub fn </span>is_comb_cell(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+<a href=#500 id=500 data-nosnippet>500</a>        <span class="kw">match </span><span class="self">self</span>.prototype {
+<a href=#501 id=501 data-nosnippet>501</a>            CellType::Primitive { is_comb, .. } =&gt; is_comb,
+<a href=#502 id=502 data-nosnippet>502</a>            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
+<a href=#503 id=503 data-nosnippet>503</a>        }
+<a href=#504 id=504 data-nosnippet>504</a>    }
+<a href=#505 id=505 data-nosnippet>505</a>}
+<a href=#506 id=506 data-nosnippet>506</a>
+<a href=#507 id=507 data-nosnippet>507</a><span class="doccomment">/// Represents a guarded assignment in the program
+<a href=#508 id=508 data-nosnippet>508</a></span><span class="attr">#[derive(Clone, Debug)]
+<a href=#509 id=509 data-nosnippet>509</a>#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
+<a href=#510 id=510 data-nosnippet>510</a></span><span class="kw">pub struct </span>Assignment&lt;T&gt; {
+<a href=#511 id=511 data-nosnippet>511</a>    <span class="doccomment">/// The destination for the assignment.
+<a href=#512 id=512 data-nosnippet>512</a>    </span><span class="kw">pub </span>dst: RRC&lt;Port&gt;,
+<a href=#513 id=513 data-nosnippet>513</a>
+<a href=#514 id=514 data-nosnippet>514</a>    <span class="doccomment">/// The source for the assignment.
+<a href=#515 id=515 data-nosnippet>515</a>    </span><span class="kw">pub </span>src: RRC&lt;Port&gt;,
+<a href=#516 id=516 data-nosnippet>516</a>
+<a href=#517 id=517 data-nosnippet>517</a>    <span class="doccomment">/// The guard for this assignment.
+<a href=#518 id=518 data-nosnippet>518</a>    </span><span class="kw">pub </span>guard: Box&lt;Guard&lt;T&gt;&gt;,
+<a href=#519 id=519 data-nosnippet>519</a>
+<a href=#520 id=520 data-nosnippet>520</a>    <span class="doccomment">/// Attributes for this assignment.
+<a href=#521 id=521 data-nosnippet>521</a>    </span><span class="kw">pub </span>attributes: Attributes,
+<a href=#522 id=522 data-nosnippet>522</a>}
+<a href=#523 id=523 data-nosnippet>523</a>
+<a href=#524 id=524 data-nosnippet>524</a><span class="kw">impl</span>&lt;T&gt; Assignment&lt;T&gt; {
+<a href=#525 id=525 data-nosnippet>525</a>    <span class="doccomment">/// Build a new unguarded assignment
+<a href=#526 id=526 data-nosnippet>526</a>    </span><span class="kw">pub fn </span>new(dst: RRC&lt;Port&gt;, src: RRC&lt;Port&gt;) -&gt; <span class="self">Self </span>{
+<a href=#527 id=527 data-nosnippet>527</a>        <span class="macro">assert!</span>(
+<a href=#528 id=528 data-nosnippet>528</a>            dst.borrow().direction == Direction::Input,
+<a href=#529 id=529 data-nosnippet>529</a>            <span class="string">"{} is not in input port"</span>,
+<a href=#530 id=530 data-nosnippet>530</a>            dst.borrow().canonical()
+<a href=#531 id=531 data-nosnippet>531</a>        );
+<a href=#532 id=532 data-nosnippet>532</a>        <span class="macro">assert!</span>(
+<a href=#533 id=533 data-nosnippet>533</a>            src.borrow().direction == Direction::Output,
+<a href=#534 id=534 data-nosnippet>534</a>            <span class="string">"{} is not in output port"</span>,
+<a href=#535 id=535 data-nosnippet>535</a>            src.borrow().canonical()
+<a href=#536 id=536 data-nosnippet>536</a>        );
+<a href=#537 id=537 data-nosnippet>537</a>        <span class="self">Self </span>{
+<a href=#538 id=538 data-nosnippet>538</a>            dst,
+<a href=#539 id=539 data-nosnippet>539</a>            src,
+<a href=#540 id=540 data-nosnippet>540</a>            guard: Box::new(Guard::True),
+<a href=#541 id=541 data-nosnippet>541</a>            attributes: Attributes::default(),
+<a href=#542 id=542 data-nosnippet>542</a>        }
+<a href=#543 id=543 data-nosnippet>543</a>    }
+<a href=#544 id=544 data-nosnippet>544</a>
+<a href=#545 id=545 data-nosnippet>545</a>    <span class="doccomment">/// Apply function `f` to each port contained within the assignment and
+<a href=#546 id=546 data-nosnippet>546</a>    /// replace the port with the generated value if not None.
+<a href=#547 id=547 data-nosnippet>547</a>    </span><span class="kw">pub fn </span>for_each_port&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F)
+<a href=#548 id=548 data-nosnippet>548</a>    <span class="kw">where
+<a href=#549 id=549 data-nosnippet>549</a>        </span>F: FnMut(<span class="kw-2">&amp;</span>RRC&lt;Port&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;,
+<a href=#550 id=550 data-nosnippet>550</a>    {
+<a href=#551 id=551 data-nosnippet>551</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(new_src) = f(<span class="kw-2">&amp;</span><span class="self">self</span>.src) {
+<a href=#552 id=552 data-nosnippet>552</a>            <span class="self">self</span>.src = new_src;
+<a href=#553 id=553 data-nosnippet>553</a>        }
+<a href=#554 id=554 data-nosnippet>554</a>        <span class="kw">if let </span><span class="prelude-val">Some</span>(new_dst) = f(<span class="kw-2">&amp;</span><span class="self">self</span>.dst) {
+<a href=#555 id=555 data-nosnippet>555</a>            <span class="self">self</span>.dst = new_dst;
+<a href=#556 id=556 data-nosnippet>556</a>        }
+<a href=#557 id=557 data-nosnippet>557</a>        <span class="self">self</span>.guard.for_each(<span class="kw-2">&amp;mut </span>|port| f(<span class="kw-2">&amp;</span>port).map(Guard::port))
+<a href=#558 id=558 data-nosnippet>558</a>    }
+<a href=#559 id=559 data-nosnippet>559</a>
+<a href=#560 id=560 data-nosnippet>560</a>    <span class="doccomment">/// Iterate through all ports contained within the assignment.
+<a href=#561 id=561 data-nosnippet>561</a>    </span><span class="kw">pub fn </span>iter_ports(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = RRC&lt;Port&gt;&gt; {
+<a href=#562 id=562 data-nosnippet>562</a>        <span class="self">self</span>.guard
+<a href=#563 id=563 data-nosnippet>563</a>            .all_ports()
+<a href=#564 id=564 data-nosnippet>564</a>            .into_iter()
+<a href=#565 id=565 data-nosnippet>565</a>            .chain(std::iter::once(Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.dst)))
+<a href=#566 id=566 data-nosnippet>566</a>            .chain(std::iter::once(Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.src)))
+<a href=#567 id=567 data-nosnippet>567</a>    }
+<a href=#568 id=568 data-nosnippet>568</a>
+<a href=#569 id=569 data-nosnippet>569</a>    <span class="doccomment">/// Mutate the guard `g` of the assignment in-place to be `g AND addition`
+<a href=#570 id=570 data-nosnippet>570</a>    </span><span class="kw">pub fn </span>and_guard(<span class="kw-2">&amp;mut </span><span class="self">self</span>, addition: Guard&lt;T&gt;)
+<a href=#571 id=571 data-nosnippet>571</a>    <span class="kw">where
+<a href=#572 id=572 data-nosnippet>572</a>        </span>T: Eq,
+<a href=#573 id=573 data-nosnippet>573</a>    {
+<a href=#574 id=574 data-nosnippet>574</a>        <span class="kw">if </span>!(addition.is_true()) {
+<a href=#575 id=575 data-nosnippet>575</a>            <span class="self">self</span>.guard.update(|g| g.and(addition));
+<a href=#576 id=576 data-nosnippet>576</a>        }
+<a href=#577 id=577 data-nosnippet>577</a>    }
+<a href=#578 id=578 data-nosnippet>578</a>}
+<a href=#579 id=579 data-nosnippet>579</a>
+<a href=#580 id=580 data-nosnippet>580</a><span class="kw">impl </span>From&lt;Assignment&lt;Nothing&gt;&gt; <span class="kw">for </span>Assignment&lt;StaticTiming&gt; {
+<a href=#581 id=581 data-nosnippet>581</a>    <span class="doccomment">/// Turns a normal assignment into a static assignment
+<a href=#582 id=582 data-nosnippet>582</a>    </span><span class="kw">fn </span>from(assgn: Assignment&lt;Nothing&gt;) -&gt; Assignment&lt;StaticTiming&gt; {
+<a href=#583 id=583 data-nosnippet>583</a>        Assignment {
+<a href=#584 id=584 data-nosnippet>584</a>            dst: Rc::clone(<span class="kw-2">&amp;</span>assgn.dst),
+<a href=#585 id=585 data-nosnippet>585</a>            src: Rc::clone(<span class="kw-2">&amp;</span>assgn.src),
+<a href=#586 id=586 data-nosnippet>586</a>            guard: Box::new(Guard::from(<span class="kw-2">*</span>assgn.guard)),
+<a href=#587 id=587 data-nosnippet>587</a>            attributes: assgn.attributes,
+<a href=#588 id=588 data-nosnippet>588</a>        }
+<a href=#589 id=589 data-nosnippet>589</a>    }
+<a href=#590 id=590 data-nosnippet>590</a>}
+<a href=#591 id=591 data-nosnippet>591</a>
+<a href=#592 id=592 data-nosnippet>592</a><span class="kw">impl </span>From&lt;Assignment&lt;StaticTiming&gt;&gt; <span class="kw">for </span>Assignment&lt;Nothing&gt; {
+<a href=#593 id=593 data-nosnippet>593</a>    <span class="doccomment">/// Turns a static assignment into a normal assignment by getting rid of
+<a href=#594 id=594 data-nosnippet>594</a>    /// all `Info&lt;StaticTiming&gt;` leaves from the guard of the assignment.
+<a href=#595 id=595 data-nosnippet>595</a>    </span><span class="kw">fn </span>from(<span class="kw-2">mut </span>assgn: Assignment&lt;StaticTiming&gt;) -&gt; Assignment&lt;Nothing&gt; {
+<a href=#596 id=596 data-nosnippet>596</a>        assgn.guard.as_mut().remove_static_timing_info();
+<a href=#597 id=597 data-nosnippet>597</a>        Assignment {
+<a href=#598 id=598 data-nosnippet>598</a>            dst: Rc::clone(<span class="kw-2">&amp;</span>assgn.dst),
+<a href=#599 id=599 data-nosnippet>599</a>            src: Rc::clone(<span class="kw-2">&amp;</span>assgn.src),
+<a href=#600 id=600 data-nosnippet>600</a>            guard: Box::new(Guard::from(<span class="kw-2">*</span>assgn.guard)),
+<a href=#601 id=601 data-nosnippet>601</a>            attributes: assgn.attributes,
+<a href=#602 id=602 data-nosnippet>602</a>        }
+<a href=#603 id=603 data-nosnippet>603</a>    }
+<a href=#604 id=604 data-nosnippet>604</a>}
+<a href=#605 id=605 data-nosnippet>605</a>
+<a href=#606 id=606 data-nosnippet>606</a><span class="kw">impl</span>&lt;StaticTiming&gt; Assignment&lt;StaticTiming&gt; {
+<a href=#607 id=607 data-nosnippet>607</a>    <span class="doccomment">/// Apply function `f` to each port contained within the assignment and
+<a href=#608 id=608 data-nosnippet>608</a>    /// replace the port with the generated value if not None.
+<a href=#609 id=609 data-nosnippet>609</a>    </span><span class="kw">pub fn </span>for_each_interval&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F)
+<a href=#610 id=610 data-nosnippet>610</a>    <span class="kw">where
+<a href=#611 id=611 data-nosnippet>611</a>        </span>F: FnMut(<span class="kw-2">&amp;mut </span>StaticTiming) -&gt; <span class="prelude-ty">Option</span>&lt;Guard&lt;StaticTiming&gt;&gt;,
+<a href=#612 id=612 data-nosnippet>612</a>    {
+<a href=#613 id=613 data-nosnippet>613</a>        <span class="self">self</span>.guard.for_each_info(<span class="kw-2">&amp;mut </span>|interval| f(interval))
+<a href=#614 id=614 data-nosnippet>614</a>    }
+<a href=#615 id=615 data-nosnippet>615</a>}
+<a href=#616 id=616 data-nosnippet>616</a>
+<a href=#617 id=617 data-nosnippet>617</a><span class="attr">#[derive(Debug, Clone)]
+<a href=#618 id=618 data-nosnippet>618</a>#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
+<a href=#619 id=619 data-nosnippet>619</a></span><span class="kw">pub enum </span>Transition {
+<a href=#620 id=620 data-nosnippet>620</a>    Unconditional(u64),
+<a href=#621 id=621 data-nosnippet>621</a>    Conditional(Vec&lt;(Guard&lt;Nothing&gt;, u64)&gt;),
+<a href=#622 id=622 data-nosnippet>622</a>}
+<a href=#623 id=623 data-nosnippet>623</a>
+<a href=#624 id=624 data-nosnippet>624</a><span class="kw">impl </span>Transition {
+<a href=#625 id=625 data-nosnippet>625</a>    <span class="kw">pub fn </span>new_uncond(s: u64) -&gt; <span class="self">Self </span>{
+<a href=#626 id=626 data-nosnippet>626</a>        <span class="self">Self</span>::Unconditional(s)
+<a href=#627 id=627 data-nosnippet>627</a>    }
+<a href=#628 id=628 data-nosnippet>628</a>}
+<a href=#629 id=629 data-nosnippet>629</a>
+<a href=#630 id=630 data-nosnippet>630</a><span class="doccomment">/// A Group of assignments that perform a logical action.
+<a href=#631 id=631 data-nosnippet>631</a></span><span class="attr">#[derive(Debug)]
+<a href=#632 id=632 data-nosnippet>632</a>#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
+<a href=#633 id=633 data-nosnippet>633</a></span><span class="kw">pub struct </span>Group {
+<a href=#634 id=634 data-nosnippet>634</a>    <span class="doccomment">/// Name of this group
+<a href=#635 id=635 data-nosnippet>635</a>    </span>name: Id,
+<a href=#636 id=636 data-nosnippet>636</a>
+<a href=#637 id=637 data-nosnippet>637</a>    <span class="doccomment">/// The assignments used in this group
+<a href=#638 id=638 data-nosnippet>638</a>    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&lt;Nothing&gt;&gt;,
+<a href=#639 id=639 data-nosnippet>639</a>
+<a href=#640 id=640 data-nosnippet>640</a>    <span class="doccomment">/// Holes for this group
+<a href=#641 id=641 data-nosnippet>641</a>    </span><span class="kw">pub </span>holes: SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">3</span>]&gt;,
+<a href=#642 id=642 data-nosnippet>642</a>
+<a href=#643 id=643 data-nosnippet>643</a>    <span class="doccomment">/// Attributes for this group.
+<a href=#644 id=644 data-nosnippet>644</a>    </span><span class="kw">pub </span>attributes: Attributes,
+<a href=#645 id=645 data-nosnippet>645</a>}
+<a href=#646 id=646 data-nosnippet>646</a><span class="kw">impl </span>Group {
+<a href=#647 id=647 data-nosnippet>647</a>    <span class="kw">pub fn </span>new(name: Id) -&gt; <span class="self">Self </span>{
+<a href=#648 id=648 data-nosnippet>648</a>        <span class="self">Self </span>{
+<a href=#649 id=649 data-nosnippet>649</a>            name,
+<a href=#650 id=650 data-nosnippet>650</a>            assignments: <span class="macro">vec!</span>[],
+<a href=#651 id=651 data-nosnippet>651</a>            holes: <span class="macro">smallvec!</span>[],
+<a href=#652 id=652 data-nosnippet>652</a>            attributes: Attributes::default(),
+<a href=#653 id=653 data-nosnippet>653</a>        }
+<a href=#654 id=654 data-nosnippet>654</a>    }
+<a href=#655 id=655 data-nosnippet>655</a>
+<a href=#656 id=656 data-nosnippet>656</a>    <span class="doccomment">/// Get a reference to the named hole if it exists.
+<a href=#657 id=657 data-nosnippet>657</a>    </span><span class="kw">pub fn </span>find&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;
+<a href=#658 id=658 data-nosnippet>658</a>    <span class="kw">where
+<a href=#659 id=659 data-nosnippet>659</a>        </span>S: std::fmt::Display,
+<a href=#660 id=660 data-nosnippet>660</a>        Id: PartialEq&lt;S&gt;,
+<a href=#661 id=661 data-nosnippet>661</a>    {
+<a href=#662 id=662 data-nosnippet>662</a>        <span class="self">self</span>.holes
+<a href=#663 id=663 data-nosnippet>663</a>            .iter()
+<a href=#664 id=664 data-nosnippet>664</a>            .find(|<span class="kw-2">&amp;</span>g| g.borrow().name == name)
+<a href=#665 id=665 data-nosnippet>665</a>            .map(Rc::clone)
+<a href=#666 id=666 data-nosnippet>666</a>    }
+<a href=#667 id=667 data-nosnippet>667</a>
+<a href=#668 id=668 data-nosnippet>668</a>    <span class="doccomment">/// Get a reference to the named hole or panic.
+<a href=#669 id=669 data-nosnippet>669</a>    </span><span class="kw">pub fn </span>get&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; RRC&lt;Port&gt;
+<a href=#670 id=670 data-nosnippet>670</a>    <span class="kw">where
+<a href=#671 id=671 data-nosnippet>671</a>        </span>S: std::fmt::Display + Clone,
+<a href=#672 id=672 data-nosnippet>672</a>        Id: PartialEq&lt;S&gt;,
+<a href=#673 id=673 data-nosnippet>673</a>    {
+<a href=#674 id=674 data-nosnippet>674</a>        <span class="self">self</span>.find(name.clone()).unwrap_or_else(|| {
+<a href=#675 id=675 data-nosnippet>675</a>            <span class="macro">panic!</span>(<span class="string">"Hole `{name}' not found on group `{}'"</span>, <span class="self">self</span>.name)
+<a href=#676 id=676 data-nosnippet>676</a>        })
+<a href=#677 id=677 data-nosnippet>677</a>    }
+<a href=#678 id=678 data-nosnippet>678</a>
+<a href=#679 id=679 data-nosnippet>679</a>    <span class="doccomment">/// Returns the index to the done assignment in the group.
+<a href=#680 id=680 data-nosnippet>680</a>    </span><span class="kw">fn </span>find_done_cond(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+<a href=#681 id=681 data-nosnippet>681</a>        <span class="self">self</span>.assignments
+<a href=#682 id=682 data-nosnippet>682</a>            .iter()
+<a href=#683 id=683 data-nosnippet>683</a>            .position(|assign| {
+<a href=#684 id=684 data-nosnippet>684</a>                <span class="kw">let </span>dst = assign.dst.borrow();
+<a href=#685 id=685 data-nosnippet>685</a>                dst.is_hole() &amp;&amp; dst.name == <span class="string">"done"
+<a href=#686 id=686 data-nosnippet>686</a>            </span>})
+<a href=#687 id=687 data-nosnippet>687</a>            .unwrap_or_else(|| {
+<a href=#688 id=688 data-nosnippet>688</a>                <span class="macro">panic!</span>(<span class="string">"Group `{}' has no done condition"</span>, <span class="self">self</span>.name)
+<a href=#689 id=689 data-nosnippet>689</a>            })
+<a href=#690 id=690 data-nosnippet>690</a>    }
+<a href=#691 id=691 data-nosnippet>691</a>
+<a href=#692 id=692 data-nosnippet>692</a>    <span class="doccomment">/// Returns a reference to the assignment in the group that writes to the done condition.
+<a href=#693 id=693 data-nosnippet>693</a>    </span><span class="kw">pub fn </span>done_cond(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Assignment&lt;Nothing&gt; {
+<a href=#694 id=694 data-nosnippet>694</a>        <span class="kw">let </span>idx = <span class="self">self</span>.find_done_cond();
+<a href=#695 id=695 data-nosnippet>695</a>        <span class="kw-2">&amp;</span><span class="self">self</span>.assignments[idx]
+<a href=#696 id=696 data-nosnippet>696</a>    }
+<a href=#697 id=697 data-nosnippet>697</a>
+<a href=#698 id=698 data-nosnippet>698</a>    <span class="doccomment">/// Returns a mutable reference to the assignment in the group that writes to the done
+<a href=#699 id=699 data-nosnippet>699</a>    /// condition.
+<a href=#700 id=700 data-nosnippet>700</a>    </span><span class="kw">pub fn </span>done_cond_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Assignment&lt;Nothing&gt; {
+<a href=#701 id=701 data-nosnippet>701</a>        <span class="kw">let </span>idx = <span class="self">self</span>.find_done_cond();
+<a href=#702 id=702 data-nosnippet>702</a>        <span class="kw-2">&amp;mut </span><span class="self">self</span>.assignments[idx]
+<a href=#703 id=703 data-nosnippet>703</a>    }
+<a href=#704 id=704 data-nosnippet>704</a>
+<a href=#705 id=705 data-nosnippet>705</a>    <span class="doccomment">/// The name of this group.
+<a href=#706 id=706 data-nosnippet>706</a>    </span><span class="attr">#[inline]
+<a href=#707 id=707 data-nosnippet>707</a>    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+<a href=#708 id=708 data-nosnippet>708</a>        <span class="self">self</span>.name
+<a href=#709 id=709 data-nosnippet>709</a>    }
+<a href=#710 id=710 data-nosnippet>710</a>
+<a href=#711 id=711 data-nosnippet>711</a>    <span class="doccomment">/// The attributes of this group.
+<a href=#712 id=712 data-nosnippet>712</a>    </span><span class="attr">#[inline]
+<a href=#713 id=713 data-nosnippet>713</a>    </span><span class="kw">pub fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Attributes&gt; {
+<a href=#714 id=714 data-nosnippet>714</a>        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.attributes)
+<a href=#715 id=715 data-nosnippet>715</a>    }
+<a href=#716 id=716 data-nosnippet>716</a>
+<a href=#717 id=717 data-nosnippet>717</a>    <span class="kw">pub fn </span>remove_attribute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: Attribute) {
+<a href=#718 id=718 data-nosnippet>718</a>        <span class="self">self</span>.attributes.remove(attr);
+<a href=#719 id=719 data-nosnippet>719</a>    }
+<a href=#720 id=720 data-nosnippet>720</a>}
+<a href=#721 id=721 data-nosnippet>721</a>
+<a href=#722 id=722 data-nosnippet>722</a><span class="doccomment">/// A Group of assignments that perform a logical action.
+<a href=#723 id=723 data-nosnippet>723</a></span><span class="attr">#[derive(Debug)]
+<a href=#724 id=724 data-nosnippet>724</a>#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
+<a href=#725 id=725 data-nosnippet>725</a></span><span class="kw">pub struct </span>StaticGroup {
+<a href=#726 id=726 data-nosnippet>726</a>    <span class="doccomment">/// Name of this group
+<a href=#727 id=727 data-nosnippet>727</a>    </span>name: Id,
+<a href=#728 id=728 data-nosnippet>728</a>
+<a href=#729 id=729 data-nosnippet>729</a>    <span class="doccomment">/// The assignments used in this group
+<a href=#730 id=730 data-nosnippet>730</a>    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&lt;StaticTiming&gt;&gt;,
+<a href=#731 id=731 data-nosnippet>731</a>
+<a href=#732 id=732 data-nosnippet>732</a>    <span class="doccomment">/// Holes for this group
+<a href=#733 id=733 data-nosnippet>733</a>    </span><span class="kw">pub </span>holes: SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">3</span>]&gt;,
+<a href=#734 id=734 data-nosnippet>734</a>
+<a href=#735 id=735 data-nosnippet>735</a>    <span class="doccomment">/// Attributes for this group.
+<a href=#736 id=736 data-nosnippet>736</a>    </span><span class="kw">pub </span>attributes: Attributes,
+<a href=#737 id=737 data-nosnippet>737</a>
+<a href=#738 id=738 data-nosnippet>738</a>    <span class="doccomment">/// Latency of static group
+<a href=#739 id=739 data-nosnippet>739</a>    </span><span class="kw">pub </span>latency: u64,
+<a href=#740 id=740 data-nosnippet>740</a>}
+<a href=#741 id=741 data-nosnippet>741</a>
+<a href=#742 id=742 data-nosnippet>742</a><span class="doccomment">///implement the StaticGroup struct
+<a href=#743 id=743 data-nosnippet>743</a></span><span class="kw">impl </span>StaticGroup {
+<a href=#744 id=744 data-nosnippet>744</a>    <span class="kw">pub fn </span>new(name: Id, latency: u64) -&gt; <span class="self">Self </span>{
+<a href=#745 id=745 data-nosnippet>745</a>        <span class="self">Self </span>{
+<a href=#746 id=746 data-nosnippet>746</a>            name,
+<a href=#747 id=747 data-nosnippet>747</a>            assignments: <span class="macro">vec!</span>[],
+<a href=#748 id=748 data-nosnippet>748</a>            holes: <span class="macro">smallvec!</span>[],
+<a href=#749 id=749 data-nosnippet>749</a>            attributes: Attributes::default(),
+<a href=#750 id=750 data-nosnippet>750</a>            latency,
+<a href=#751 id=751 data-nosnippet>751</a>        }
+<a href=#752 id=752 data-nosnippet>752</a>    }
+<a href=#753 id=753 data-nosnippet>753</a>
+<a href=#754 id=754 data-nosnippet>754</a>    <span class="kw">pub fn </span>get_latency(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+<a href=#755 id=755 data-nosnippet>755</a>        <span class="self">self</span>.latency
+<a href=#756 id=756 data-nosnippet>756</a>    }
+<a href=#757 id=757 data-nosnippet>757</a>
+<a href=#758 id=758 data-nosnippet>758</a>    <span class="doccomment">/// Get a reference to the named hole if it exists.
+<a href=#759 id=759 data-nosnippet>759</a>    </span><span class="kw">pub fn </span>find&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;
+<a href=#760 id=760 data-nosnippet>760</a>    <span class="kw">where
+<a href=#761 id=761 data-nosnippet>761</a>        </span>S: std::fmt::Display,
+<a href=#762 id=762 data-nosnippet>762</a>        Id: PartialEq&lt;S&gt;,
+<a href=#763 id=763 data-nosnippet>763</a>    {
+<a href=#764 id=764 data-nosnippet>764</a>        <span class="self">self</span>.holes
+<a href=#765 id=765 data-nosnippet>765</a>            .iter()
+<a href=#766 id=766 data-nosnippet>766</a>            .find(|<span class="kw-2">&amp;</span>g| g.borrow().name == name)
+<a href=#767 id=767 data-nosnippet>767</a>            .map(Rc::clone)
+<a href=#768 id=768 data-nosnippet>768</a>    }
+<a href=#769 id=769 data-nosnippet>769</a>
+<a href=#770 id=770 data-nosnippet>770</a>    <span class="doccomment">/// Get a reference to the named hole or panic.
+<a href=#771 id=771 data-nosnippet>771</a>    </span><span class="kw">pub fn </span>get&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; RRC&lt;Port&gt;
+<a href=#772 id=772 data-nosnippet>772</a>    <span class="kw">where
+<a href=#773 id=773 data-nosnippet>773</a>        </span>S: std::fmt::Display + Clone,
+<a href=#774 id=774 data-nosnippet>774</a>        Id: PartialEq&lt;S&gt;,
+<a href=#775 id=775 data-nosnippet>775</a>    {
+<a href=#776 id=776 data-nosnippet>776</a>        <span class="self">self</span>.find(name.clone()).unwrap_or_else(|| {
+<a href=#777 id=777 data-nosnippet>777</a>            <span class="macro">panic!</span>(<span class="string">"Hole `{name}' not found on group `{}'"</span>, <span class="self">self</span>.name)
+<a href=#778 id=778 data-nosnippet>778</a>        })
+<a href=#779 id=779 data-nosnippet>779</a>    }
+<a href=#780 id=780 data-nosnippet>780</a>
+<a href=#781 id=781 data-nosnippet>781</a>    <span class="doccomment">/// The name of this group.
+<a href=#782 id=782 data-nosnippet>782</a>    </span><span class="attr">#[inline]
+<a href=#783 id=783 data-nosnippet>783</a>    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+<a href=#784 id=784 data-nosnippet>784</a>        <span class="self">self</span>.name
+<a href=#785 id=785 data-nosnippet>785</a>    }
+<a href=#786 id=786 data-nosnippet>786</a>
+<a href=#787 id=787 data-nosnippet>787</a>    <span class="doccomment">/// The attributes of this group.
+<a href=#788 id=788 data-nosnippet>788</a>    </span><span class="attr">#[inline]
+<a href=#789 id=789 data-nosnippet>789</a>    </span><span class="kw">pub fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Attributes&gt; {
+<a href=#790 id=790 data-nosnippet>790</a>        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.attributes)
+<a href=#791 id=791 data-nosnippet>791</a>    }
+<a href=#792 id=792 data-nosnippet>792</a>
+<a href=#793 id=793 data-nosnippet>793</a>    <span class="kw">pub fn </span>remove_attribute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attr: Attribute) {
+<a href=#794 id=794 data-nosnippet>794</a>        <span class="self">self</span>.attributes.remove(attr);
+<a href=#795 id=795 data-nosnippet>795</a>    }
+<a href=#796 id=796 data-nosnippet>796</a>}
+<a href=#797 id=797 data-nosnippet>797</a>
+<a href=#798 id=798 data-nosnippet>798</a><span class="doccomment">/// A combinational group.
+<a href=#799 id=799 data-nosnippet>799</a>/// A combinational group does not have any holes and should only contain assignments that should
+<a href=#800 id=800 data-nosnippet>800</a>/// will be combinationally active
+<a href=#801 id=801 data-nosnippet>801</a></span><span class="attr">#[derive(Debug)]
+<a href=#802 id=802 data-nosnippet>802</a>#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
+<a href=#803 id=803 data-nosnippet>803</a></span><span class="kw">pub struct </span>CombGroup {
+<a href=#804 id=804 data-nosnippet>804</a>    <span class="doccomment">/// Name of this group
+<a href=#805 id=805 data-nosnippet>805</a>    </span><span class="kw">pub</span>(<span class="kw">super</span>) name: Id,
+<a href=#806 id=806 data-nosnippet>806</a>
+<a href=#807 id=807 data-nosnippet>807</a>    <span class="doccomment">/// The assignments used in this group
+<a href=#808 id=808 data-nosnippet>808</a>    </span><span class="kw">pub </span>assignments: Vec&lt;Assignment&lt;Nothing&gt;&gt;,
+<a href=#809 id=809 data-nosnippet>809</a>
+<a href=#810 id=810 data-nosnippet>810</a>    <span class="doccomment">/// Attributes for this group.
+<a href=#811 id=811 data-nosnippet>811</a>    </span><span class="kw">pub </span>attributes: Attributes,
+<a href=#812 id=812 data-nosnippet>812</a>}
+<a href=#813 id=813 data-nosnippet>813</a><span class="kw">impl </span>CombGroup {
+<a href=#814 id=814 data-nosnippet>814</a>    <span class="doccomment">/// The name of this group.
+<a href=#815 id=815 data-nosnippet>815</a>    </span><span class="attr">#[inline]
+<a href=#816 id=816 data-nosnippet>816</a>    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+<a href=#817 id=817 data-nosnippet>817</a>        <span class="self">self</span>.name
+<a href=#818 id=818 data-nosnippet>818</a>    }
+<a href=#819 id=819 data-nosnippet>819</a>
+<a href=#820 id=820 data-nosnippet>820</a>    <span class="doccomment">/// The attributes of this group.
+<a href=#821 id=821 data-nosnippet>821</a>    </span><span class="attr">#[inline]
+<a href=#822 id=822 data-nosnippet>822</a>    </span><span class="kw">pub fn </span>get_attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Attributes&gt; {
+<a href=#823 id=823 data-nosnippet>823</a>        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.attributes)
+<a href=#824 id=824 data-nosnippet>824</a>    }
+<a href=#825 id=825 data-nosnippet>825</a>}
+<a href=#826 id=826 data-nosnippet>826</a>
+<a href=#827 id=827 data-nosnippet>827</a><span class="attr">#[derive(Debug)]
+<a href=#828 id=828 data-nosnippet>828</a>#[cfg_attr(feature = <span class="string">"serialize"</span>, derive(serde::Serialize))]
+<a href=#829 id=829 data-nosnippet>829</a></span><span class="kw">pub struct </span>FSM {
+<a href=#830 id=830 data-nosnippet>830</a>    <span class="doccomment">/// Name of this construct
+<a href=#831 id=831 data-nosnippet>831</a>    </span><span class="kw">pub</span>(<span class="kw">super</span>) name: Id,
+<a href=#832 id=832 data-nosnippet>832</a>    <span class="doccomment">/// Attributes for this FSM
+<a href=#833 id=833 data-nosnippet>833</a>    </span><span class="kw">pub </span>attributes: Attributes,
+<a href=#834 id=834 data-nosnippet>834</a>    <span class="doccomment">/// State indexes into assignments that are supposed to be enabled at that state
+<a href=#835 id=835 data-nosnippet>835</a>    </span><span class="kw">pub </span>assignments: Vec&lt;Vec&lt;Assignment&lt;Nothing&gt;&gt;&gt;,
+<a href=#836 id=836 data-nosnippet>836</a>    <span class="doccomment">/// State indexes into (potentially guarded) next states
+<a href=#837 id=837 data-nosnippet>837</a>    </span><span class="kw">pub </span>transitions: Vec&lt;Transition&gt;,
+<a href=#838 id=838 data-nosnippet>838</a>    <span class="comment">// Wire representing fsm output
+<a href=#839 id=839 data-nosnippet>839</a>    </span><span class="kw">pub </span>wires: SmallVec&lt;[RRC&lt;Port&gt;; <span class="number">2</span>]&gt;,
+<a href=#840 id=840 data-nosnippet>840</a>}
+<a href=#841 id=841 data-nosnippet>841</a>
+<a href=#842 id=842 data-nosnippet>842</a><span class="kw">impl </span>FSM {
+<a href=#843 id=843 data-nosnippet>843</a>    <span class="doccomment">/// Grants immutable access to the name of this cell.
+<a href=#844 id=844 data-nosnippet>844</a>    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+<a href=#845 id=845 data-nosnippet>845</a>        <span class="self">self</span>.name
+<a href=#846 id=846 data-nosnippet>846</a>    }
+<a href=#847 id=847 data-nosnippet>847</a>
+<a href=#848 id=848 data-nosnippet>848</a>    <span class="doccomment">/// Constructs a new FSM construct using a list of cases and a name
+<a href=#849 id=849 data-nosnippet>849</a>    </span><span class="kw">pub fn </span>new(name: Id) -&gt; <span class="self">Self </span>{
+<a href=#850 id=850 data-nosnippet>850</a>        <span class="self">Self </span>{
+<a href=#851 id=851 data-nosnippet>851</a>            name,
+<a href=#852 id=852 data-nosnippet>852</a>            assignments: <span class="macro">vec!</span>[],
+<a href=#853 id=853 data-nosnippet>853</a>            transitions: <span class="macro">vec!</span>[],
+<a href=#854 id=854 data-nosnippet>854</a>            wires: SmallVec::new(),
+<a href=#855 id=855 data-nosnippet>855</a>            attributes: Attributes::default(),
+<a href=#856 id=856 data-nosnippet>856</a>        }
+<a href=#857 id=857 data-nosnippet>857</a>    }
+<a href=#858 id=858 data-nosnippet>858</a>
+<a href=#859 id=859 data-nosnippet>859</a>    <span class="doccomment">/// Get a reference to the named hole if it exists.
+<a href=#860 id=860 data-nosnippet>860</a>    </span><span class="kw">pub fn </span>find&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; <span class="prelude-ty">Option</span>&lt;RRC&lt;Port&gt;&gt;
+<a href=#861 id=861 data-nosnippet>861</a>    <span class="kw">where
+<a href=#862 id=862 data-nosnippet>862</a>        </span>S: std::fmt::Display,
+<a href=#863 id=863 data-nosnippet>863</a>        Id: PartialEq&lt;S&gt;,
+<a href=#864 id=864 data-nosnippet>864</a>    {
+<a href=#865 id=865 data-nosnippet>865</a>        <span class="self">self</span>.wires
+<a href=#866 id=866 data-nosnippet>866</a>            .iter()
+<a href=#867 id=867 data-nosnippet>867</a>            .find(|<span class="kw-2">&amp;</span>g| g.borrow().name == name)
+<a href=#868 id=868 data-nosnippet>868</a>            .map(Rc::clone)
+<a href=#869 id=869 data-nosnippet>869</a>    }
+<a href=#870 id=870 data-nosnippet>870</a>
+<a href=#871 id=871 data-nosnippet>871</a>    <span class="kw">pub fn </span>get&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: S) -&gt; RRC&lt;Port&gt;
+<a href=#872 id=872 data-nosnippet>872</a>    <span class="kw">where
+<a href=#873 id=873 data-nosnippet>873</a>        </span>S: std::fmt::Display + Clone,
+<a href=#874 id=874 data-nosnippet>874</a>        Id: PartialEq&lt;S&gt;,
+<a href=#875 id=875 data-nosnippet>875</a>    {
+<a href=#876 id=876 data-nosnippet>876</a>        <span class="self">self</span>.find(name.clone()).unwrap_or_else(|| {
+<a href=#877 id=877 data-nosnippet>877</a>            <span class="macro">panic!</span>(<span class="string">"Wire `{name}' not found on group `{}'"</span>, <span class="self">self</span>.name)
+<a href=#878 id=878 data-nosnippet>878</a>        })
+<a href=#879 id=879 data-nosnippet>879</a>    }
+<a href=#880 id=880 data-nosnippet>880</a>
+<a href=#881 id=881 data-nosnippet>881</a>    <span class="doccomment">/// Extend the FSM with new transitions and assignments. Will panic if
+<a href=#882 id=882 data-nosnippet>882</a>    /// the lengths are not consistent.
+<a href=#883 id=883 data-nosnippet>883</a>    </span><span class="kw">pub fn </span>extend_fsm&lt;A, T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, assigns: A, transitions: T)
+<a href=#884 id=884 data-nosnippet>884</a>    <span class="kw">where
+<a href=#885 id=885 data-nosnippet>885</a>        </span>A: IntoIterator&lt;Item = Vec&lt;Assignment&lt;Nothing&gt;&gt;&gt;,
+<a href=#886 id=886 data-nosnippet>886</a>        T: IntoIterator&lt;Item = Transition&gt;,
+<a href=#887 id=887 data-nosnippet>887</a>    {
+<a href=#888 id=888 data-nosnippet>888</a>        <span class="self">self</span>.assignments.extend(assigns);
+<a href=#889 id=889 data-nosnippet>889</a>        <span class="self">self</span>.transitions.extend(transitions);
+<a href=#890 id=890 data-nosnippet>890</a>    }
+<a href=#891 id=891 data-nosnippet>891</a>
+<a href=#892 id=892 data-nosnippet>892</a>    <span class="doccomment">/// Extend the assignments that are supposed to be active at a given state.
+<a href=#893 id=893 data-nosnippet>893</a>    </span><span class="kw">pub fn </span>extend_state_assignments&lt;I&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, state: u64, assigns: I)
+<a href=#894 id=894 data-nosnippet>894</a>    <span class="kw">where
+<a href=#895 id=895 data-nosnippet>895</a>        </span>I: IntoIterator&lt;Item = Assignment&lt;Nothing&gt;&gt;,
+<a href=#896 id=896 data-nosnippet>896</a>    {
+<a href=#897 id=897 data-nosnippet>897</a>        <span class="kw">let </span>msg = <span class="macro">format!</span>(<span class="string">"State {state} does not exist in FSM"</span>);
+<a href=#898 id=898 data-nosnippet>898</a>        <span class="self">self</span>.assignments
+<a href=#899 id=899 data-nosnippet>899</a>            .get_mut(state <span class="kw">as </span>usize)
+<a href=#900 id=900 data-nosnippet>900</a>            .expect(<span class="kw-2">&amp;</span>msg)
+<a href=#901 id=901 data-nosnippet>901</a>            .extend(assigns);
+<a href=#902 id=902 data-nosnippet>902</a>    }
+<a href=#903 id=903 data-nosnippet>903</a>
+<a href=#904 id=904 data-nosnippet>904</a>    <span class="doccomment">/// Returns a list of names of the groups, cells, or other port parents used
+<a href=#905 id=905 data-nosnippet>905</a>    /// by the FSM. Requires as an argument a function that can
+<a href=#906 id=906 data-nosnippet>906</a>    /// in-place update a Vec with the name of kinds of port parents you care about.
+<a href=#907 id=907 data-nosnippet>907</a>    </span><span class="kw">pub fn </span>get_called_port_parents&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, push_parent_name: F) -&gt; Vec&lt;Id&gt;
+<a href=#908 id=908 data-nosnippet>908</a>    <span class="kw">where
+<a href=#909 id=909 data-nosnippet>909</a>        </span>F: Fn(<span class="kw-2">&amp;mut </span>Vec&lt;Id&gt;, <span class="kw-2">&amp;</span>RRC&lt;Port&gt;),
+<a href=#910 id=910 data-nosnippet>910</a>    {
+<a href=#911 id=911 data-nosnippet>911</a>        <span class="self">self</span>.transitions
+<a href=#912 id=912 data-nosnippet>912</a>            .iter()
+<a href=#913 id=913 data-nosnippet>913</a>            .zip(<span class="self">self</span>.assignments.iter())
+<a href=#914 id=914 data-nosnippet>914</a>            .flat_map(|(state_transitions, state_assignments)| {
+<a href=#915 id=915 data-nosnippet>915</a>                <span class="kw">let </span><span class="kw-2">mut </span>parent_names = <span class="macro">vec!</span>[];
+<a href=#916 id=916 data-nosnippet>916</a>
+<a href=#917 id=917 data-nosnippet>917</a>                <span class="comment">// if transitions uses the specified kind of port parent, add its Id
+<a href=#918 id=918 data-nosnippet>918</a>                </span><span class="kw">if let </span>Transition::Conditional(conds) = state_transitions {
+<a href=#919 id=919 data-nosnippet>919</a>                    <span class="kw">for </span>(guard, <span class="kw">_</span>) <span class="kw">in </span>conds.iter() {
+<a href=#920 id=920 data-nosnippet>920</a>                        guard.all_ports().iter().for_each(|port| {
+<a href=#921 id=921 data-nosnippet>921</a>                            push_parent_name(<span class="kw-2">&amp;mut </span>parent_names, port)
+<a href=#922 id=922 data-nosnippet>922</a>                        });
+<a href=#923 id=923 data-nosnippet>923</a>                    }
+<a href=#924 id=924 data-nosnippet>924</a>                }
+<a href=#925 id=925 data-nosnippet>925</a>                <span class="comment">// if assignments uses the specified kind of port parent, add its Id
+<a href=#926 id=926 data-nosnippet>926</a>                </span><span class="kw">for </span>assign <span class="kw">in </span>state_assignments.iter() {
+<a href=#927 id=927 data-nosnippet>927</a>                    assign.iter_ports().for_each(|port| {
+<a href=#928 id=928 data-nosnippet>928</a>                        push_parent_name(<span class="kw-2">&amp;mut </span>parent_names, <span class="kw-2">&amp;</span>port);
+<a href=#929 id=929 data-nosnippet>929</a>                    });
+<a href=#930 id=930 data-nosnippet>930</a>                }
+<a href=#931 id=931 data-nosnippet>931</a>                parent_names
+<a href=#932 id=932 data-nosnippet>932</a>            })
+<a href=#933 id=933 data-nosnippet>933</a>            .collect()
+<a href=#934 id=934 data-nosnippet>934</a>    }
+<a href=#935 id=935 data-nosnippet>935</a>
+<a href=#936 id=936 data-nosnippet>936</a>    <span class="doccomment">/// Each element of the resulting Vec is a collection of assignments writing
+<a href=#937 id=937 data-nosnippet>937</a>    /// to the same destination port, where the `usize` value represents the
+<a href=#938 id=938 data-nosnippet>938</a>    /// FSM state at which the assignment should take place.
+<a href=#939 id=939 data-nosnippet>939</a>    </span><span class="kw">pub fn </span>merge_assignments(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;Vec&lt;(usize, Assignment&lt;Nothing&gt;)&gt;&gt; {
+<a href=#940 id=940 data-nosnippet>940</a>        <span class="kw">let </span><span class="kw-2">mut </span>assigns_by_port: HashMap&lt;
+<a href=#941 id=941 data-nosnippet>941</a>            Canonical,
+<a href=#942 id=942 data-nosnippet>942</a>            Vec&lt;(usize, Assignment&lt;Nothing&gt;)&gt;,
+<a href=#943 id=943 data-nosnippet>943</a>        &gt; = HashMap::new();
+<a href=#944 id=944 data-nosnippet>944</a>        <span class="kw">for </span>(case, assigns_at_state) <span class="kw">in </span><span class="self">self</span>.assignments.iter().enumerate() {
+<a href=#945 id=945 data-nosnippet>945</a>            <span class="kw">for </span>assign <span class="kw">in </span>assigns_at_state.iter() {
+<a href=#946 id=946 data-nosnippet>946</a>                <span class="kw">let </span>dest_port = assign.dst.borrow().canonical();
+<a href=#947 id=947 data-nosnippet>947</a>                assigns_by_port
+<a href=#948 id=948 data-nosnippet>948</a>                    .entry(dest_port)
+<a href=#949 id=949 data-nosnippet>949</a>                    .and_modify(|assigns_at_port| {
+<a href=#950 id=950 data-nosnippet>950</a>                        assigns_at_port.push((case, assign.clone()));
+<a href=#951 id=951 data-nosnippet>951</a>                    })
+<a href=#952 id=952 data-nosnippet>952</a>                    .or_insert(<span class="macro">vec!</span>[(case, assign.clone())]);
+<a href=#953 id=953 data-nosnippet>953</a>            }
+<a href=#954 id=954 data-nosnippet>954</a>        }
+<a href=#955 id=955 data-nosnippet>955</a>        assigns_by_port
+<a href=#956 id=956 data-nosnippet>956</a>            .into_values()
+<a href=#957 id=957 data-nosnippet>957</a>            <span class="comment">// order by state, for better appearance when emitted
+<a href=#958 id=958 data-nosnippet>958</a>            </span>.sorted_by(|a, b| a.first().unwrap().<span class="number">0</span>.cmp(<span class="kw-2">&amp;</span>b.first().unwrap().<span class="number">0</span>))
+<a href=#959 id=959 data-nosnippet>959</a>            .collect()
+<a href=#960 id=960 data-nosnippet>960</a>    }
+<a href=#961 id=961 data-nosnippet>961</a>}
+<a href=#962 id=962 data-nosnippet>962</a>
+<a href=#963 id=963 data-nosnippet>963</a><span class="kw">impl </span>GetName <span class="kw">for </span>Cell {
+<a href=#964 id=964 data-nosnippet>964</a>    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+<a href=#965 id=965 data-nosnippet>965</a>        <span class="self">self</span>.name()
+<a href=#966 id=966 data-nosnippet>966</a>    }
+<a href=#967 id=967 data-nosnippet>967</a>}
+<a href=#968 id=968 data-nosnippet>968</a>
+<a href=#969 id=969 data-nosnippet>969</a><span class="kw">impl </span>GetName <span class="kw">for </span>Group {
+<a href=#970 id=970 data-nosnippet>970</a>    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+<a href=#971 id=971 data-nosnippet>971</a>        <span class="self">self</span>.name()
+<a href=#972 id=972 data-nosnippet>972</a>    }
+<a href=#973 id=973 data-nosnippet>973</a>}
+<a href=#974 id=974 data-nosnippet>974</a>
+<a href=#975 id=975 data-nosnippet>975</a><span class="kw">impl </span>GetName <span class="kw">for </span>CombGroup {
+<a href=#976 id=976 data-nosnippet>976</a>    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+<a href=#977 id=977 data-nosnippet>977</a>        <span class="self">self</span>.name()
+<a href=#978 id=978 data-nosnippet>978</a>    }
+<a href=#979 id=979 data-nosnippet>979</a>}
+<a href=#980 id=980 data-nosnippet>980</a>
+<a href=#981 id=981 data-nosnippet>981</a><span class="kw">impl </span>GetName <span class="kw">for </span>FSM {
+<a href=#982 id=982 data-nosnippet>982</a>    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+<a href=#983 id=983 data-nosnippet>983</a>        <span class="self">self</span>.name()
+<a href=#984 id=984 data-nosnippet>984</a>    }
+<a href=#985 id=985 data-nosnippet>985</a>}
+<a href=#986 id=986 data-nosnippet>986</a>
+<a href=#987 id=987 data-nosnippet>987</a><span class="kw">impl </span>GetName <span class="kw">for </span>StaticGroup {
+<a href=#988 id=988 data-nosnippet>988</a>    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+<a href=#989 id=989 data-nosnippet>989</a>        <span class="self">self</span>.name()
+<a href=#990 id=990 data-nosnippet>990</a>    }
+<a href=#991 id=991 data-nosnippet>991</a>}</code></pre></div></section></main></body></html>
