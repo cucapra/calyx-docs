@@ -51,9 +51,9 @@
 <a href=#51 id=51 data-nosnippet>51</a>            ir::Control::Repeat(rep) =&gt; rep.update_static(extra),
 <a href=#52 id=52 data-nosnippet>52</a>            ir::Control::Invoke(inv) =&gt; inv.update_static(extra),
 <a href=#53 id=53 data-nosnippet>53</a>            ir::Control::Enable(en) =&gt; en.update_static(<span class="kw-2">&amp;</span>()),
-<a href=#54 id=54 data-nosnippet>54</a>            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
-<a href=#55 id=55 data-nosnippet>55</a>            ir::Control::Empty(<span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>(<span class="number">0</span>),
-<a href=#56 id=56 data-nosnippet>56</a>            ir::Control::Static(sc) =&gt; <span class="prelude-val">Some</span>(sc.get_latency()),
+<a href=#54 id=54 data-nosnippet>54</a>            ir::Control::Empty(<span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>(<span class="number">0</span>),
+<a href=#55 id=55 data-nosnippet>55</a>            ir::Control::Static(sc) =&gt; <span class="prelude-val">Some</span>(sc.get_latency()),
+<a href=#56 id=56 data-nosnippet>56</a>            ir::Control::FSMEnable(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
 <a href=#57 id=57 data-nosnippet>57</a>        }
 <a href=#58 id=58 data-nosnippet>58</a>    }
 <a href=#59 id=59 data-nosnippet>59</a>}

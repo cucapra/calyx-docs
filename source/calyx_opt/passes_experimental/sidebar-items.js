@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["CompileSync","CompileSyncWithoutSyncReg","DiscoverExternal","ExternalToRef","HoleInliner","Metadata","ParToSeq","RegisterUnsharing"]};
+window.SIDEBAR_ITEMS = {"struct":["CompileSync","CompileSyncWithoutSyncReg","DiscoverExternal","ExternalToRef","FSMAnnotator","HoleInliner","Metadata","ParToSeq","RegisterUnsharing"]};
