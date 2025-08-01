@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>fud2: Experimental Driver - Calyx Documentation</title>
+        <title>fud2: The Calyx Driver - Calyx Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -446,55 +446,62 @@
 }
 
 </style>
-<h1 id="fud2-an-experimental-successor-to-fud"><a class="header" href="#fud2-an-experimental-successor-to-fud">fud2: An Experimental Successor to fud</a></h1>
-<p><a href="./fud/index.html">fud</a> is the compiler driver tool for orchestrating the Calyx ecosystem.
-fud2 is an experiment in building a new driver that works like fud that adds some fundamental new capabilities and resolves some underlying problems.</p>
-<p>"Original" fud is still the right tool for almost all jobs; fud2 is in an experimental phase and does not support everything fud can do.
-Someday, fud2 may supplant fud, but it needs more work before it is ready to do that.
-Until then, fud remains your first choice for all your build-related needs.</p>
+<h1 id="fud2-the-calyx-driver"><a class="header" href="#fud2-the-calyx-driver">fud2: The Calyx Driver</a></h1>
+<p>fud2 is the compiler driver tool for orchestrating the Calyx ecosystem.</p>
+<p>Working with Calyx involves a lot of command-line tools. For example, an
+incomplete yet daunting list of CLI tools used by Calyx is:</p>
+<ul>
+<li>All the Calyx [frontends][]</li>
+<li>Calyx compiler and its various command line tools</li>
+<li>Verilator, the Verilog simulation framework used to test Calyx-generated designs</li>
+<li>Waveform viewers to see the results of simulation</li>
+</ul>
+<p>fud2 aims to provide a simple interface for using these toolchains and executing them in a pipeline.
+The source for fud2 is <a href="https://github.com/calyxir/calyx/tree/master/fud2">here</a>.</p>
+<p>"Original" <a href="./fud/index.html">fud</a> was replaced by fud2 in a push to add some fundamental new capabilities and resolve some underlying problems with fud.</p>
 <h2 id="set-up"><a class="header" href="#set-up">Set Up</a></h2>
-<p>If you would like to use <code>fud2</code> as is, and already have Calyx installed, you can <code>cargo install --path fud2</code> from this repository's root to automatically add the binary to your path.</p>
-<p>Alternatively, if you would like to work on development of <code>fud2</code> and/or keep up with the latest changes when you <code>git pull</code>, you can build it along with everything else in this monorepo with <code>cargo build</code>.
+<p>If you already have Calyx installed, you can <code>cargo install --path fud2</code> from this repository's root to automatically add the binary to your path.</p>
+<p>Alternatively, if you would like to work on development of fud2 and/or keep up with the latest changes when you <code>git pull</code>, you can build it along with everything else in this monorepo with <code>cargo build</code>.
 You might then want to do something like <code>ln -s `pwd`/target/debug/fud2 ~/.local/bin</code> for easy access to the <code>fud2</code> binary.</p>
 <p>fud2 depends on <a href="https://ninja-build.org">Ninja</a>.
 Install it using your OS package manager or by downloading a binary.</p>
 <h3 id="configuration"><a class="header" href="#configuration">Configuration</a></h3>
-<p>Run the following command to edit <code>fud2</code>'s configuration file (usually <code>~/.config/fud2.toml</code>):</p>
-<pre><code>$ fud2 edit-config
+<p>Run the following command to edit fud2's configuration file (usually <code>~/.config/fud2.toml</code>):</p>
+<pre><code class="language-sh">fud2 edit-config
 </code></pre>
 <p>Add these lines:</p>
 <pre><code class="language-toml">[calyx]
 base = "&lt;path to calyx checkout&gt;"
 </code></pre>
 <h3 id="environment-setup"><a class="header" href="#environment-setup">Environment Setup</a></h3>
-<p>Some parts of Calyx and <code>fud2</code> require setting up and installing various python packages. With Python removing support for installing packages system wide, it's recommended to install relevant packages into a python virtual environment. <code>fud2</code> can set up this environment for you and instruct <code>fud2</code> to automatically run relevant tools in the correct virtual environment.</p>
+<p>Some parts of Calyx and fud2 require setting up and installing various python packages. With Python removing support for installing packages system wide, it's recommended to install relevant packages into a python virtual environment. fud2 can set up this environment for you and instruct fud2 to automatically run relevant tools in the correct virtual environment.</p>
 <p>To do this, simply run:</p>
-<pre><code>$ fud2 env init
+<pre><code>fud2 env init
 </code></pre>
 <p>There may be some cases where you want to manually interact with the python virtual environment. The virtual environment is installed to <code>$XDG_DATA_HOME/fud2/venv</code> (usually <code>~/.local/share/fud2/venv</code>). You can activate the virtual environment in your current shell with:</p>
-<pre><code>$ fud2 env activate
+<pre><code>fud2 env activate
 </code></pre>
-<p>Now you're ready to use fud2.</p>
+<p>Now you're ready to use <code>fud2</code>.</p>
 <h2 id="general-use"><a class="header" href="#general-use">General Use</a></h2>
 <p>You can see complete command-line documentation with <code>fud2 --help</code>.
 But generally, you want to do something like this:</p>
-<pre><code>$ fud2 &lt;IN&gt; -o &lt;OUT&gt;
+<pre><code>fud2 &lt;IN&gt; -o &lt;OUT&gt;
 </code></pre>
 <p>For example, use this to compile a Calyx program to Verilog:</p>
-<pre><code>$ fud2 foo.futil -o bar.sv
+<pre><code>fud2 foo.futil -o bar.sv
 </code></pre>
-<p>fud2 tries to automatically guess the input and output formats using filename extensions.
+<p><code>fud2</code> tries to automatically guess the input and output formats using filename extensions.
 If that doesn't work, you can choose for it with <code>--from &lt;state&gt;</code> and <code>--to &lt;state&gt;</code>;
 for example, this is a more explicit version of the above:</p>
-<pre><code>$ fud2 foo.futil -o bar.sv --from calyx --to verilog
+<pre><code>fud2 foo.futil -o bar.sv --from calyx --to verilog
 </code></pre>
 <p>You can also omit the input and output filenames to instead use stdin and stdout.
 In that case, <code>--from</code> and <code>--to</code> respectively are required.
 So here's yet another way to do the same thing:</p>
-<pre><code>$ fud2 --from calyx --to verilog &lt; foo.futil &gt; bar.sv
+<pre><code>fud2 --from calyx --to verilog &lt; foo.futil &gt; bar.sv
 </code></pre>
 <p>This is handy if you just want to print the result of a build to the console:</p>
-<pre><code>$ fud2 foo.futil --to verilog
+<pre><code>fud2 foo.futil --to verilog
 </code></pre>
 <p>Some operations use other configuration options, which can come from either your <code>fud2.toml</code> or the command line.
 Use <code>--set key=value</code> to override any such option.</p>
@@ -502,13 +509,13 @@ Use <code>--set key=value</code> to override any such option.</p>
 <p>Use <code>fud2 --help</code> for an overview of the command-line interface.
 Here are some options you might need:</p>
 <ul>
-<li>By default, fud2 runs the build in a directory called <code>.fud2</code> within the working directory. It automatically deletes this directory when the build is done.
+<li>By default, <code>fud2</code> runs the build in a directory called <code>.fud2</code> within the working directory. It automatically deletes this directory when the build is done.
 <ul>
-<li>It can be useful to keep this build directory around for debugging or as a "cache" for future builds. Use <code>--keep</code> to prevent fud2 from deleting the build directory.</li>
-<li>You can also tell fud2 to use a different build directory with <code>--dir</code>. If you give it an existing directory, it will never be deleted, even without <code>--keep</code>. (Only "fresh" build directories are automatically cleaned up.)</li>
+<li>It can be useful to keep this build directory around for debugging or as a "cache" for future builds. Use <code>--keep</code> to prevent <code>fud2</code> from deleting the build directory.</li>
+<li>You can also tell <code>fud2</code> to use a different build directory with <code>--dir</code>. If you give it an existing directory, it will never be deleted, even without <code>--keep</code>. (Only "fresh" build directories are automatically cleaned up.)</li>
 </ul>
 </li>
-<li>If you don't like the operation path that fud2 selected for your build, you can control it with <code>--through &lt;OP&gt;</code>. fud2 will search the operation graph for a path that contains that op. You can provide this option multiple times; fud2 will look for paths that contain <em>all</em> these operations, in order.</li>
+<li>If you don't like the operation path that <code>fud2</code> selected for your build, you can control it with <code>--through &lt;OP&gt;</code>. <code>fud2</code> will search the operation graph for a path that contains that op. You can provide this option multiple times; <code>fud2</code> will look for paths that contain <em>all</em> these operations, in order.</li>
 <li>You can choose one of several modes with <code>-m &lt;NAME&gt;</code>:
 <ul>
 <li><code>run</code>: Actually execute a build. The default.</li>
@@ -522,9 +529,9 @@ Here are some options you might need:</p>
 </ul>
 <p>There are also some subcommands for doing things other than building stuff:</p>
 <ul>
-<li><code>fud2 edit-config</code>: Open the fud2 configuration file in <code>$EDITOR</code>.</li>
+<li><code>fud2 edit-config</code>: Open the <code>fud2</code> configuration file in <code>$EDITOR</code>.</li>
 <li><code>fud2 list</code>: Print out all the available states and operations.</li>
-<li><code>fud2 get-rsrc FILE</code>: Fetch a <em>resource file</em> and place it in the working directory. You typically do not need to use this interactively; it is used during builds to obtain files included with fud2 that are necessary for a given build.</li>
+<li><code>fud2 get-rsrc FILE</code>: Fetch a <em>resource file</em> and place it in the working directory. You typically do not need to use this interactively; it is used during builds to obtain files included with <code>fud2</code> that are necessary for a given build.</li>
 </ul>
 <h3 id="timing-extraction"><a class="header" href="#timing-extraction">Timing Extraction</a></h3>
 <p>When using the <code>run</code> command, it can sometimes be useful to know how long
@@ -533,7 +540,7 @@ emit a csv of timing information collected during the build. This will output a
 csv containing the name of the generated file and the time it took to build in
 milliseconds.</p>
 <p>For example running</p>
-<pre><code>fud2 --from calyx --to jq --through icarus -s sim.data=tests/correctness/invoke-with.futil.data -s calyx.flags=' --nested' -s verilog.cycle_limit=500 -s jq.expr=".memories" tests/correctness/invoke-with.futil -q --csv timing.csv
+<pre><code class="language-sh">fud2 --from calyx --to jq --through icarus -s sim.data=tests/correctness/invoke-with.futil.data -s calyx.flags=' --nested' -s verilog.cycle_limit=500 -s jq.expr=".memories" tests/correctness/invoke-with.futil -q --csv timing.csv
 </code></pre>
 <p>will produce a file <code>timing.csv</code> with contents like</p>
 <pre><code class="language-csv">filename,duration
@@ -555,7 +562,7 @@ No need to read any farther if all you want is to <em>use</em> fud2.</p>
 <p>fud2 consists of two pieces, which are two separate Rust crates:</p>
 <ul>
 <li>FudCore (the <code>fud-core</code> crate): is a <em>generic compiler driver</em> library. This library is not specific to Calyx and could hypothetically be used to build a fud2-like driver for any compiler ecosystem. Clients of the <code>fud-core</code> library work by constructing a <code>Driver</code> object that encapsulates a set of <em>states</em> and <em>operations</em> that define the driver's behavior.</li>
-<li>fud2 itself is a program that uses the FudCore library. All of the Calyx-specific logic lives in <code>fud2</code>. For the most part, all of the code in the <code>fud2</code> crate consists of declaring a bunch of states and operations. The <code>main</code> function does little more than dispatch to the resulting <code>Driver</code> object's generic command-line interface.</li>
+<li>fud2 itself is a program that uses the FudCore library. All of the Calyx-specific logic lives in fud2. For the most part, all of the code in the <code>fud2</code> crate consists of declaring a bunch of states and operations. The <code>main</code> function does little more than dispatch to the resulting <code>Driver</code> object's generic command-line interface.</li>
 </ul>
 <p>The central design philosophy of FudCore (and by extension, fud2 itself) is that its sole job is to orchestrate external functionality.
 All that functionality must be available as separate tools that can be invoked via the command line.
@@ -608,7 +615,7 @@ So that's why setups exist: to share a single stanza of Ninja scaffolding code b
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../running-calyx/fud/resource-estimation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../lang/attributes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -622,7 +629,7 @@ So that's why setups exist: to share a single stanza of Ninja scaffolding code b
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../running-calyx/fud/resource-estimation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../lang/attributes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 

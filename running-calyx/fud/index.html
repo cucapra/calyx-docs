@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>fud: The Calyx Driver - Calyx Documentation</title>
+        <title>fud: Legacy Driver - Calyx Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -446,38 +446,29 @@
 }
 
 </style>
-<h1 id="fud-the-calyx-driver"><a class="header" href="#fud-the-calyx-driver"><code>fud</code>: The Calyx Driver</a></h1>
-<p>Working with Calyx involves a lot of command-line tools. For example, an
-incomplete yet daunting list of CLI tools used by Calyx is:</p>
-<ul>
-<li>All the Calyx <a href="../../frontends/index.html">frontends</a>.</li>
-<li>Calyx compiler and its various command line tools</li>
-<li>Verilator, the Verilog simulation framework used to test Calyx-generated designs.</li>
-<li>Waveform viewers to see the results of simulation</li>
-</ul>
-<p><code>fud</code> aims to provide a simple interface for using these toolchains and executing them in a pipeline.
-The source for fud is <a href="https://github.com/calyxir/calyx/tree/master/fud">here</a>.</p>
+<h1 id="fud-legacy-driver"><a class="header" href="#fud-legacy-driver">fud: Legacy Driver</a></h1>
+<p>fud is the legacy compiler driver tool. Its successor, [fud2][], is now recommended for all use cases by default, although fud still receives some support.</p>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <blockquote>
-<p>Fud requires Python 3.9 or higher to work correctly.</p>
+<p>fud requires Python 3.9 or higher to work correctly.</p>
 </blockquote>
-<p><code>fud</code> currently has a dependency on <a href="builder/calyx-py.html">calyx-py</a>, which you need to install first.</p>
-<p>You need <a href="https://docs.astral.sh/uv/">uv</a> to install <code>fud</code>.
+<p>fud currently has a dependency on <a href="builder/calyx-py.html">calyx-py</a>, which you need to install first.</p>
+<p>You need <a href="https://docs.astral.sh/uv/">uv</a> to install fud.
 Follow its <a href="https://docs.astral.sh/uv/#installation">installation instructions</a>.
 Then:</p>
 <pre><code class="language-bash">uv tool install ./fud
 </code></pre>
-<p>If you are working on <code>fud</code> itself, you can install it with a symlink with:</p>
+<p>If you are working on fud itself, you can install it with a symlink with:</p>
 <pre><code class="language-bash">uv tool install -e ./fud
 </code></pre>
-<p>Finally, point <code>fud</code> to the root of the repository:</p>
+<p>Finally, point fud to the root of the repository:</p>
 <pre><code>fud config global.root &lt;full path to Calyx repository&gt;
 </code></pre>
 <h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
-<p>Fud uses a global configuration file to locate tool paths and default values.
+<p>fud uses a global configuration file to locate tool paths and default values.
 To view the configuration, use <code>fud c</code> or <code>fud config</code>.</p>
 <p><strong>Check.</strong>
-Fud can automatically check if your configuration is valid and can help you set
+fud can automatically check if your configuration is valid and can help you set
 certain variables. Perform this check with:</p>
 <pre><code class="language-bash">fud check
 </code></pre>
@@ -492,8 +483,8 @@ For example, the following command updates the path to the Calyx compiler.</p>
 <pre><code class="language-bash">fud config stages.calyx.exec ./target/debug/calyx
 </code></pre>
 <h2 id="adding-backends"><a class="header" href="#adding-backends">Adding Backends</a></h2>
-<p><code>fud</code> wraps both frontends and backends for Calyx.
-For a useful <code>fud</code> installation, you need to configure the Verilator
+<p>fud wraps both frontends and backends for Calyx.
+For a useful fud installation, you need to configure the Verilator
 backend and accompanying tools.</p>
 <h3 id="verilator"><a class="header" href="#verilator">Verilator</a></h3>
 <p>We use the open source <a href="https://www.veripool.org/wiki/verilator">Verilator</a> tool to simulate Verilog programs
@@ -510,7 +501,7 @@ make
 sudo make install
 </code></pre>
 <p>Run <code>fud check</code> to make sure you have the right version. We currently require &gt;=v5.002 of Verilator with fud.</p>
-<p>By default, <code>fud</code> will use the <code>verilator</code> executable to run Verilator.
+<p>By default, fud will use the <code>verilator</code> executable to run Verilator.
 To use a different binary, configure the path by:</p>
 <pre><code>fud config stages.verilog.exec &lt;binary&gt;
 </code></pre>
@@ -521,12 +512,12 @@ easier analysis with the command line.</p>
 <pre><code class="language-bash">cargo install vcdump
 </code></pre>
 <h3 id="icarus-verilog"><a class="header" href="#icarus-verilog">Icarus Verilog</a></h3>
-<p><code>fud</code> also supports <a href="http://iverilog.icarus.com/">Icarus Verilog</a> as a simulation backend.
+<p>fud also supports <a href="http://iverilog.icarus.com/">Icarus Verilog</a> as a simulation backend.
 Since Icarus Verilog interprets programs, it can often be faster than
 <code>verilator</code>.
 First <a href="https://iverilog.fandom.com/wiki/Installation_Guide">install Icarus Verilog</a> and ensure that <code>iverilog</code> and
 <code>vvp</code> are on your path.
-Next, register the <code>icarus-verilog</code> external stage with <code>fud</code>:</p>
+Next, register the <code>icarus-verilog</code> external stage with fud:</p>
 <pre><code>fud register icarus-verilog -p fud/icarus/icarus.py
 </code></pre>
 <p>To test the simulation backend, run:</p>
@@ -534,14 +525,14 @@ Next, register the <code>icarus-verilog</code> external stage with <code>fud</co
 </code></pre>
 <p>Registering this stage will define multiple paths in the fud transformation
 graph between <code>futil</code> and the <code>vcd</code> and <code>dat</code> stages.
-If you'd like <code>fud</code> to default to <code>verilog</code> stage, give it a <a href="./multiple-paths.html#using-stage-priority">high
+If you'd like fud to default to <code>verilog</code> stage, give it a <a href="./multiple-paths.html#using-stage-priority">high
 priority</a>:</p>
 <pre><code>fud c stages.verilog.priority 1
 </code></pre>
 <h2 id="dahlia-frontend"><a class="header" href="#dahlia-frontend">Dahlia Frontend</a></h2>
-<p>In order to use the Dahlia frontend with Fud, first <a href="../../frontends/dahlia.html">install
+<p>In order to use the Dahlia frontend with fud, first <a href="../../frontends/dahlia.html">install
 Dahlia</a>.
-Once Dahlia is compiled, point <code>fud</code> to the Dahlia compiler binary:</p>
+Once Dahlia is compiled, point fud to the Dahlia compiler binary:</p>
 <pre><code class="language-bash">fud config stages.dahlia.exec &lt;full path to dahlia repo&gt;/fuse
 </code></pre>
 <h2 id="python-frontends-systolic-array-ntt-mrxl-tvm-relay"><a class="header" href="#python-frontends-systolic-array-ntt-mrxl-tvm-relay">Python frontends (Systolic array, NTT, MrXL, TVM Relay)</a></h2>
@@ -557,37 +548,37 @@ Once Dahlia is compiled, point <code>fud</code> to the Dahlia compiler binary:</
 <li><a href="../../frontends/ntt.html">NTT</a>:
 <ul>
 <li>Install dependencies: <code>pip3 install prettytable</code></li>
-<li>Install external <code>fud</code> stage: <code>fud register ntt -p frontends/ntt-pipeline/fud/ntt.py</code></li>
+<li>Install external fud stage: <code>fud register ntt -p frontends/ntt-pipeline/fud/ntt.py</code></li>
 </ul>
 </li>
 <li><a href="../../frontends/mrxl.html">MrXL</a>:
 <ul>
 <li>Install <code>mrxl</code> binary: <code>cd frontends/mrxl &amp;&amp; flit install -s</code></li>
-<li>Install <code>mrxl</code> <a href="./external.html">external stage</a> for <code>fud</code>: <code>fud register mrxl -p frontends/mrxl/fud/mrxl.py</code></li>
+<li>Install <code>mrxl</code> <a href="./external.html">external stage</a> for fud: <code>fud register mrxl -p frontends/mrxl/fud/mrxl.py</code></li>
 </ul>
 </li>
 <li><a href="../../frontends/tvm-relay.html">TVM Relay</a>: See instructions.</li>
 </ul>
 <h2 id="adding-synthesis-backends"><a class="header" href="#adding-synthesis-backends">Adding Synthesis Backends</a></h2>
-<p><code>fud</code> supports wraps the Vivado (<code>synth-verilog</code>) and Vivado HLS (<code>vivado-hls</code>)
+<p>fud supports wraps the Vivado (<code>synth-verilog</code>) and Vivado HLS (<code>vivado-hls</code>)
 tools to generate area and resource estimates for Calyx designs.
 See <a href="./xilinx.html">the instructions</a> to configure them.</p>
 <h2 id="working-with-stages"><a class="header" href="#working-with-stages">Working with Stages</a></h2>
-<p>Fud is structured as a sequence of stages that transform inputs of one form
+<p>fud is structured as a sequence of stages that transform inputs of one form
 to outputs.</p>
 <p><strong>Stages.</strong>
-<code>fud</code> transforms a file in one stage into a file in a later stage.
+fud transforms a file in one stage into a file in a later stage.
 The <code>--from</code> and <code>--to</code> options specify the input and output stages to the
 <code>fud exec</code> subcommand.
 Use <code>fud info</code> to view all possible stages.</p>
 <p><strong>Guessing stages.</strong>
-<code>fud</code> will try to guess the starting stage by looking at the extension of the
+fud will try to guess the starting stage by looking at the extension of the
 input file and output file (if specified using the <code>-o</code> flag).
 If it fails to guess correctly or doesn't know about the extension, you can
 manually set the stages using <code>--to</code> and <code>--from</code>.</p>
 <h2 id="profiling"><a class="header" href="#profiling">Profiling</a></h2>
-<p>Fud provides some very basic profiling tools through the use of the <code>--dump_prof</code> (or <code>-pr</code>) flag.
-You can get overall stage durations for a <code>fud</code> run by simply using <code>-pr</code>.
+<p>fud provides some very basic profiling tools through the use of the <code>--dump_prof</code> (or <code>-pr</code>) flag.
+You can get overall stage durations for a fud run by simply using <code>-pr</code>.
 For example,</p>
 <pre><code class="language-bash">  fud e examples/dahlia/dot-product.fuse --to dat \
   -s verilog.data examples/dahlia/dot-product.fuse.data \
@@ -629,7 +620,7 @@ simulate                        0.161
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../lang/attributes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../running-calyx/fud2/low-level-rhai.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -643,7 +634,7 @@ simulate                        0.161
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../lang/attributes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../running-calyx/fud2/low-level-rhai.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
