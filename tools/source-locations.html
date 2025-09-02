@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Attributes - Calyx Documentation</title>
+        <title>Source Location Metadata - Calyx Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -446,219 +446,60 @@
 }
 
 </style>
-<h1 id="attributes"><a class="header" href="#attributes">Attributes</a></h1>
-<p>Calyx has an attribute system that allows information to be associated with
-every basic Calyx construct. This information can then be used to optimize the program
-or change how the program is compiled.</p>
-<p>Attributes can decorate lots of things in Calyx: components, groups, cells, ports, and control statements.
-The syntax looks like <code>name&lt;"attr"=value&gt;</code> for components and groups or <code>@attr(value)</code> for other constructs.
-Attributes always map keys to values.
-Because it's common to have a "Boolean" attribute that always maps to the value 1, the syntax <code>@attr</code> is a shorthand for <code>@attr(1)</code>.</p>
-<p>Here is the syntax for attributes in different parts of the AST:</p>
-<h4 id="component-and-port-attributes"><a class="header" href="#component-and-port-attributes"><strong>Component and Port Attributes</strong></a></h4>
-<pre><code>component main&lt;"static"=10&gt;(@go go: 1) -&gt; (@done done: 1) {
- ...
-}
-</code></pre>
-<h4 id="cell-attributes"><a class="header" href="#cell-attributes"><strong>Cell Attributes</strong></a></h4>
-<pre><code>cells {
-  @external mem = comb_mem_d1(32, 8, 4);
-  reg = std_reg(32);
-  ...
-}
-</code></pre>
-<h4 id="group-attributes"><a class="header" href="#group-attributes"><strong>Group Attributes</strong></a></h4>
-<pre><code>group cond&lt;"promotable"=1&gt; {
-  ...
-}
-</code></pre>
-<h4 id="control-attributes"><a class="header" href="#control-attributes"><strong>Control Attributes</strong></a></h4>
-<pre><code>control {
-  @promotable(3) seq {
-    @promotable(1) A;
-    @promotable(2) B;
-  }
-}
-</code></pre>
-<h2 id="meaning-of-attributes"><a class="header" href="#meaning-of-attributes">Meaning of Attributes</a></h2>
-<h3 id="toplevel"><a class="header" href="#toplevel"><code>toplevel</code></a></h3>
-<p>The entrypoint for the Calyx program. If no component has this attribute, then
-the compiler looks for a component named <code>main</code>. If neither is found, the
-compiler errors out.</p>
-<h3 id="go-done-clk-and-reset"><a class="header" href="#go-done-clk-and-reset"><code>go</code>, <code>done</code>, <code>clk</code> and <code>reset</code></a></h3>
-<p>These four ports are part of the interface to Calyx components.
-These are automatically added by the parser if they are missing from the component definition.
-<code>go</code> and <code>done</code> provide the mechanism for how an "outer" component invokes an "inner" cell that it contains.
-<code>clk</code> and <code>reset</code> thread through the global clock and resetting signal in a design.</p>
-<h3 id="nointerface"><a class="header" href="#nointerface"><code>nointerface</code></a></h3>
-<p>By default, interface ports are automatically added to a component by the parser if they are missing.
-Adding this attribute disables this behavior.</p>
-<h3 id="external"><a class="header" href="#external"><code>external</code></a></h3>
-<p>The <code>external</code> attribute has meaning when it is attached to a cell.
-It has two meanings:</p>
+<h1 id="source-location-metadata"><a class="header" href="#source-location-metadata">Source Location Metadata</a></h1>
+<p>Calyx is an intermediate language (IL) for Accelerator Design
+Languages (ADLs), higher-level languages that target hardware. It is
+helpful to be able to map Calyx code to the original ADL code. The
+Source Location Metadata format is used by the Calyx compiler and
+tools to map back Calyx to ADL.</p>
+<p>The source location comes in three parts:</p>
 <ol>
-<li>If the <code>externalize</code> compiler alias is enabled, the cell is turned into an "external"
-cell by exposing all its ports through the current component and rewriting
-assignments to the use the ports. See the documentation on <a href="https://docs.rs/calyx-opt/latest/calyx_opt/passes/struct.Externalize.html">externalize</a> for more information.</li>
-<li>If the cell is a memory and has an <code>external</code> attribute on it, the Verilog backend (<code>-b verilog</code>) generates code to read <code>&lt;cell_name&gt;.dat</code> to initialize the memory state and dumps out its final value after execution.</li>
+<li>
+<p>Components, cells, groups, and control blocks/statements contain the <code>pos</code> attribute that tracks a unique <strong>position ID</strong>.</p>
+</li>
+<li>
+<p>A <code>FILES</code> table that maps unique <strong>file IDs</strong> to corresponding files.</p>
+</li>
+<li>
+<p>A <code>POSITIONS</code> table that maps position IDs to file IDs and the line numbers.</p>
+</li>
 </ol>
-<h3 id="staticn"><a class="header" href="#staticn"><code>static(n)</code></a></h3>
-<p>This is now deprecated. See the <a href="#promotable(n)">promotable</a> and <a href="#interval(n)">interval</a>
-attributes.</p>
-<h3 id="promotablen"><a class="header" href="#promotablen"><code>promotable(n)</code></a></h3>
-<p>Can be attached to groups, control, and <code>@go</code> ports of components.
-This tells the compiler how long the group/control would take if it were promoted
-to static.
-This is just a hint, and is free to be ignored by the compiler.
-However, the compiler may use it in the <code>static-promotion</code> pass to upgrade dynamic
-constructs to <code>static&lt;n&gt;</code> ones.</p>
-<h3 id="intervaln"><a class="header" href="#intervaln"><code>interval(n)</code></a></h3>
-<p>This can be attached to the <code>@go</code> ports of dynamic components (both primitives or
-Calyx-defined components).
-This tells the compiler that if you assert the <code>@go</code> port for cycles <code>[0,n)</code>, then
-the done signal will be asserted on cycle <code>n</code>.
-This is different from <code>@promotable</code> since it provides a guarantee rather than a hint.
-Attach <code>@interval</code> to <code>@go</code> ports essentially means that the component can serve
-"double duty": it can be used in both static and dynamic contexts.
-This is common for things like registers.</p>
-<h3 id="inline"><a class="header" href="#inline"><code>inline</code></a></h3>
-<p>Used by the <code>inline</code> pass on cell definitions. Instructs the pass to completely
-inline the instance into the parent component and replace all <code>invoke</code>s of the
-instance with the control program of the instance.</p>
-<h3 id="stable"><a class="header" href="#stable"><code>stable</code></a></h3>
-<p>Used by the <code>canonicalize</code> pass.
-Only meaningful on output ports and states that their value is provided by
-a sequential element and is therefore available outside combinational time.</p>
-<p>For example, after invoking a multiplier, the value on its <code>out</code> port remains
-latched till the next invocation.</p>
-<p>For example</p>
-<pre><code>cells {
-  m = std_mult_pipe(32);
-}
-wires {
-  group use_m_out { // uses m.out }
-}
-control {
-  invoke m(left = 32'd10, right = 32'd4)();
-  use_m_out;
-}
-</code></pre>
-<p>The value of <code>m.out</code> in <code>use_m_out</code> will be <code>32'd40</code>.</p>
-<p>This annotation is currently used by the primitives library and the Dahlia
-frontend.</p>
-<h3 id="share"><a class="header" href="#share"><code>share</code></a></h3>
-<p>Can be attached to a component and indicates that a component can be shared
-across groups. This is used by the <code>-p cell-share</code> to decide which components
-can be shared.</p>
-<h3 id="state_share"><a class="header" href="#state_share"><code>state_share</code></a></h3>
-<p>Can be attached to a component and indicates that a component can be shared
-across groups. Different than <code>share</code> since <code>state_share</code> components can have
-internal state.
-This is used by <code>-p cell-share</code> to decide which components can be shared.
-Specifically, a component is state shareable if each write to
-that component makes any previous writes to the component irrelevant.
-The definition of a "write to a component" is an activiation of
-the component's "go" port, followed by a read of the component's "done" port (in
-other words, the read of a "done" port still counts as part of a "write" to the
-component).
-For <code>c1</code> and <code>c2</code>, instances of a state_shareable component:
-instantiate <code>c1</code>                        instantiate <code>c2</code>
-<em>any write to <code>c1</code></em>                     <em>any write to <code>c2</code></em>
-<em>write value <code>v</code> to port <code>p</code> in <code>c1</code></em>   <em>write value <code>v</code> to port <code>p</code> in <code>c2</code></em>
-<code>c1</code> and <code>c2</code> should be equal.</p>
-<h3 id="boundn"><a class="header" href="#boundn"><code>bound(n)</code></a></h3>
-<p>Used in <code>infer-static-timing</code> and <code>static-timing</code> when the number of iterations
-of a <code>While</code> control is known statically, as indicated by <code>n</code>.</p>
-<h3 id="generated"><a class="header" href="#generated"><code>generated</code></a></h3>
-<p>Added by <a href="https://docs.rs/calyx-ir/latest/calyx_ir/struct.Builder.html"><code>ir::Builder</code></a> to denote that the cell was added by a pass.</p>
-<h3 id="clk"><a class="header" href="#clk"><code>clk</code></a></h3>
-<p>Marks the special clock signal inserted by the <code>clk-insertion</code> pass, which helps with lowering to RTL languages that require an explicit clock.</p>
-<h3 id="write_togethern"><a class="header" href="#write_togethern"><code>write_together(n)</code></a></h3>
-<p>Used by the <code>papercut</code> pass.
-Defines a group <code>n</code> of signals that all must be driven together:</p>
-<pre><code>primitive comb_mem_d2&lt;"static"=1&gt;[WIDTH, D0_SIZE, D1_SIZE, D0_IDX_SIZE, D1_IDX_SIZE](
-  @write_together(2) addr0: D0_IDX_SIZE,
-  @write_together(2) addr1: D1_IDX_SIZE,
-  @write_together(1) write_data: WIDTH,
-  @write_together(1) @go write_en: 1,
-  ...
-) -&gt; (...);
-</code></pre>
-<p>This defines two groups.
-The first group requires that <code>write_en</code> and <code>write_data</code> signals together
-while the second requires that <code>addr0</code> and <code>addr1</code> are driven together.</p>
-<p>Note that <code>@write_together</code> specifications cannot encode implication of the
-form "if port <code>x</code> is driven then <code>y</code> should be driven".</p>
-<h3 id="read_togethern"><a class="header" href="#read_togethern"><code>read_together(n)</code></a></h3>
-<p>Used by <code>papercut</code> and <code>canonicalize</code>.
-Defines a combinational path <code>n</code> between a set of an input ports and an output
-port.</p>
-<pre><code>primitive comb_mem_d1&lt;"static"=1&gt;[WIDTH, SIZE, IDX_SIZE](
-  @read_together(1) addr0: IDX_SIZE, ...
-) -&gt; (
-  @read_together(1) read_data: WIDTH, ...
-);
-</code></pre>
-<p>This requires that when <code>read_data</code> is used then <code>addr0</code> must be driven.
-Note that each group must have exactly one output port in it.</p>
-<h3 id="data"><a class="header" href="#data"><code>@data</code></a></h3>
-<p>Marks a cell or a port as a <em>purely datapath</em> component, i.e., the output does not propagate into a guard or another control signal. See <a href="https://github.com/calyxir/calyx/issues/1169">this issue</a> for the full set of constraints.</p>
-<p>When we have following two conditions:</p>
-<ol>
-<li>An input port is marked with <code>@data</code> in the component definitions, and</li>
-<li>The cell instance is marked as <code>@data</code></li>
-</ol>
-<p>The backend generates <code>'x</code> as the default value for the assignment to the port instead of <code>'0</code>. Additionally, if the port has exactly one assignment, the backend removes the guard entirely and produces a continuous assignment.</p>
-<p>This represents the optimization:</p>
-<pre><code>cells {
-  @data cell = cell_component();
-}
-wires {
-  cell.in = g ? out : 'x
-}
-</code></pre>
-<p>into:</p>
-<pre><code>// cells are same as before
-wires {
-  cell.in = out;
-}
-</code></pre>
-<p>Since the value <code>'x</code> can be replaced with anything.
-(Currently Calyx does not support assignments of the form <code>rhs = guard ? lhs1: lhs2</code>,
-so the syntax isn't 100% accurate.
-This optimization happens when translating from Calyx to Verilog.
-At some point we may want to make this optimization happen during a Calyx pass.)</p>
-<p><code>@data</code> can also appear on the output ports of a Calyx component.
-This represents when we want to optimize assignments to the port <em>within a Calyx component</em>.
-Consider the following example:</p>
-<pre><code>component main() -&gt;(...@data out_write_data: 32....) {
-  ...
+<p>The <code>FILES</code> and <code>POSITIONS</code> tables are in the <code>sourceinfo</code> metadata block at the end of the Calyx file.</p>
+<p>For example, here is a shortened Calyx program with source location metadata:</p>
+<pre><code>component main&lt;"pos"={0}&gt;() -&gt; () {
+  cells { ... }
   wires {
-    out_write_data = g ? out : 'x // we want to optimize to out_write_data = out
+    group write&lt;"pos"={1}&gt; { ... }
+    ...
+  }
+  control {
+    @pos{2} write;
   }
 }
+
+sourceinfo #{
+FILES
+  0: source.py
+POSITIONS
+  0: 0 6
+  1: 0 15
+  2: 0 25
+  ...
+}
 </code></pre>
-<p>Note that we are trying to perform this optimization <em>within the component</em>, i.e.,
-<code>out_write_data</code> is a port on the signature of the component itself, not an instance.
-Also note that in this case, <code>@data</code> appears on the <em>output</em> port of the component's signature.
-When <code>@data</code> appears on an output port of a Calyx component, it means that assignments
-to this port <em>within</em> the component will get the "default to <code>'x</code>" semantics and optimizations.
-Note that there is no requirement of having the "cell instance is marked as <code>@data</code>",
-as before.</p>
-<h3 id="protected"><a class="header" href="#protected"><code>@protected</code></a></h3>
-<p>Marks that the cell should not be removed or shared during optimization.</p>
-<h3 id="pos"><a class="header" href="#pos"><code>@pos</code></a></h3>
-<p>Contains the position IDs for <a href="../tools/source-locations.html">source location(s)</a> of the marked component/cell/group/control statement. Note that <code>@pos</code> is a set attribute (uses curly brace syntax) and can contain multiple values.</p>
+<p>Here, the component <code>main</code> has a position ID 0, the group <code>write</code> has a position ID 1, and the control statement enabling <code>write</code> has a position ID 2. The <code>FILES</code> map maps the file ID 0 to <code>source.py</code>. From this information, we can use the <code>POSITIONS</code> map to find that <code>main</code> was defined in <code>source.py</code> line 6, the group <code>write</code> was defined in <code>source.py</code> line 15, and the enable for <code>write</code> was defined in <code>source.py</code> line 25.</p>
+<h3 id="calyx-positions"><a class="header" href="#calyx-positions">Calyx positions</a></h3>
+<p>In order to track source locations of a Calyx program, use the <code>metadata-table-generation</code> pass.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../lang/undefined.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../dev/calyx-pass-explorer.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../running-calyx/fud2/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../contributors.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -668,11 +509,11 @@ as before.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../lang/undefined.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../dev/calyx-pass-explorer.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../running-calyx/fud2/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../contributors.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
