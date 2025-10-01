@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["SourceInfoTableError"],"struct":["FileId","LineNum","LineNumCreationError","PositionId","SourceInfoTable","SourceLocation"],"type":["SourceInfoResult"]};
+window.SIDEBAR_ITEMS = {"enum":["SourceInfoTableError","SourceLookupError"],"struct":["FileId","LineNum","LineNumCreationError","PositionId","SourceInfoTable","SourceLocation"],"type":["SourceInfoResult"]};
