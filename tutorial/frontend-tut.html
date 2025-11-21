@@ -12,21 +12,20 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
 
@@ -38,10 +37,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex.js";
+            window.path_to_searchindex_js = "../searchindex-7bb61c73.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../toc-27fedee3.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -55,7 +54,7 @@
             </div>
         </div>
     </div>
-    <div id="body-container">
+    <div id="mdbook-body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
@@ -84,12 +83,12 @@
             html.classList.add("js");
         </script>
 
-        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
             let sidebar = null;
-            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -104,39 +103,39 @@
             }
         </script>
 
-        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
                 <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
             </noscript>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
             </div>
         </nav>
 
-        <div id="page-wrapper" class="page-wrapper">
+        <div id="mdbook-page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
-                <div id="menu-bar" class="menu-bar sticky">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
-                            <i class="fa fa-bars"></i>
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
                         </label>
-                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
-                            <i class="fa fa-paint-brush"></i>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
                         </button>
-                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
-                            <i class="fa fa-search"></i>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
                         </button>
                     </div>
 
@@ -144,328 +143,59 @@
 
                     <div class="right-buttons">
                         <a href="../print.html" title="Print this book" aria-label="Print this book">
-                            <i id="print-button" class="fa fa-print"></i>
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
                         </a>
 
                     </div>
                 </div>
 
-                <div id="search-wrapper" class="hidden">
-                    <form id="searchbar-outer" class="searchbar-outer">
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
                         <div class="search-wrapper">
-                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
                             <div class="spinner-wrapper">
-                                <i class="fa fa-spinner fa-spin"></i>
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
                             </div>
                         </div>
                     </form>
-                    <div id="searchresults-outer" class="searchresults-outer hidden">
-                        <div id="searchresults-header" class="searchresults-header"></div>
-                        <ul id="searchresults">
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
                         </ul>
                     </div>
                 </div>
 
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
                 <script>
-                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
-                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
-                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
                         link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
                     });
                 </script>
 
-                <div id="content" class="content">
+                <div id="mdbook-content" class="content">
                     <main>
-                        <style>
-.mdbook-callouts {
-  padding: 8px 16px;
-  margin-bottom: 16px;
-  border-radius: 4px;
-  /* border-left: 0.25em solid var(--mdbook-callouts-color); */
-  background: var(--mdbook-callouts-background);
-}
-
-.mdbook-callouts > *:first-child {
-  margin-top: 0;
-}
-
-.mdbook-callouts > *:last-child {
-  margin-bottom: 0;
-}
-
-.mdbook-callouts-title {
-  display: flex;
-  font-weight: 600;
-  align-items: center;
-  line-height: 1;
-  color: var(--mdbook-callouts-color);
-  text-transform: capitalize;
-}
-
-.mdbook-callouts-icon {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  margin-right: 0.2em;
-  background-color: currentColor;
-  -webkit-mask: no-repeat center / 100%;
-  mask: no-repeat center / 100%;
-  -webkit-mask-image: var(--mdbook-callouts-icon);
-  mask-image: var(--mdbook-callouts-icon);
-}
-
-/* icons at: https://lucide.dev/icons/ */
-
-.mdbook-callouts-info {
-  --mdbook-callouts-color: rgb(var(--color-blue-rgb));
-  --mdbook-callouts-background: rgba(var(--color-blue-rgb), 0.1);
-  /* https://lucide.dev/icons/info */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWluZm8iPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8+PHBhdGggZD0iTTEyIDE2di00Ii8+PHBhdGggZD0iTTEyIDhoLjAxIi8+PC9zdmc+');
-}
-
-.mdbook-callouts-abstract,
-.mdbook-callouts-summary,
-.mdbook-callouts-tldr {
-  --mdbook-callouts-color: rgb(var(--color-cyan-rgb));
-  --mdbook-callouts-background: rgba(var(--color-cyan-rgb), 0.1);
-  /* https://lucide.dev/icons/clipboard-list */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNsaXBib2FyZC1saXN0Ij48cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI0IiB4PSI4IiB5PSIyIiByeD0iMSIgcnk9IjEiLz48cGF0aCBkPSJNMTYgNGgyYTIgMiAwIDAgMSAyIDJ2MTRhMiAyIDAgMCAxLTIgMkg2YTIgMiAwIDAgMS0yLTJWNmEyIDIgMCAwIDEgMi0yaDIiLz48cGF0aCBkPSJNMTIgMTFoNCIvPjxwYXRoIGQ9Ik0xMiAxNmg0Ii8+PHBhdGggZD0iTTggMTFoLjAxIi8+PHBhdGggZD0iTTggMTZoLjAxIi8+PC9zdmc+');
-}
-
-.mdbook-callouts-todo {
-  --mdbook-callouts-color: rgb(var(--color-blue-rgb));
-  --mdbook-callouts-background: rgba(var(--color-blue-rgb), 0.1);
-  /* https://lucide.dev/icons/check-circle-2 */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZWNrLWNpcmNsZS0yIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIvPjxwYXRoIGQ9Im05IDEyIDIgMiA0LTQiLz48L3N2Zz4=');
-}
-
-.mdbook-callouts-note {
-  --mdbook-callouts-color: rgb(var(--color-blue-rgb));
-  --mdbook-callouts-background: rgba(var(--color-blue-rgb), 0.1);
-  /* https://lucide.dev/icons/pencil */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXBlbmNpbCI+PHBhdGggZD0iTTE3IDNhMi44NSAyLjgzIDAgMSAxIDQgNEw3LjUgMjAuNSAyIDIybDEuNS01LjVaIi8+PHBhdGggZD0ibTE1IDUgNCA0Ii8+PC9zdmc+');
-}
-
-.mdbook-callouts-tip,
-.mdbook-callouts-hint {
-  --mdbook-callouts-color: rgb(var(--color-cyan-rgb));
-  --mdbook-callouts-background: rgba(var(--color-cyan-rgb), 0.1);
-  /* https://lucide.dev/icons/flame */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWZsYW1lIj48cGF0aCBkPSJNOC41IDE0LjVBMi41IDIuNSAwIDAgMCAxMSAxMmMwLTEuMzgtLjUtMi0xLTMtMS4wNzItMi4xNDMtLjIyNC00LjA1NCAyLTYgLjUgMi41IDIgNC45IDQgNi41IDIgMS42IDMgMy41IDMgNS41YTcgNyAwIDEgMS0xNCAwYzAtMS4xNTMuNDMzLTIuMjk0IDEtM2EyLjUgMi41IDAgMCAwIDIuNSAyLjV6Ii8+PC9zdmc+');
-}
-
-.mdbook-callouts-important {
-  --mdbook-callouts-color: rgb(var(--color-purple-rgb));
-  --mdbook-callouts-background: rgba(var(--color-purple-rgb), 0.1);
-  /* https://lucide.dev/icons/alert-circle */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWFsZXJ0LWNpcmNsZSI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiLz48bGluZSB4MT0iMTIiIHgyPSIxMiIgeTE9IjgiIHkyPSIxMiIvPjxsaW5lIHgxPSIxMiIgeDI9IjEyLjAxIiB5MT0iMTYiIHkyPSIxNiIvPjwvc3ZnPg==');
-}
-
-.mdbook-callouts-success,
-.mdbook-callouts-check,
-.mdbook-callouts-done {
-  --mdbook-callouts-color: rgb(var(--color-green-rgb));
-  --mdbook-callouts-background: rgba(var(--color-green-rgb), 0.1);
-  /* https://lucide.dev/icons/check */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZWNrIj48cGF0aCBkPSJNMjAgNiA5IDE3bC01LTUiLz48L3N2Zz4=');
-}
-
-.mdbook-callouts-question,
-.mdbook-callouts-help,
-.mdbook-callouts-faq {
-  --mdbook-callouts-color: rgb(var(--color-pink-rgb));
-  --mdbook-callouts-background: rgba(var(--color-pink-rgb), 0.1);
-  /* https://lucide.dev/icons/help-circle */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWhlbHAtY2lyY2xlIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIvPjxwYXRoIGQ9Ik05LjA5IDlhMyAzIDAgMCAxIDUuODMgMWMwIDItMyAzLTMgMyIvPjxwYXRoIGQ9Ik0xMiAxN2guMDEiLz48L3N2Zz4=');
-}
-
-.mdbook-callouts-coding {
-  --mdbook-callouts-color: rgb(var(--color-green-rgb));
-  --mdbook-callouts-background: rgba(var(--color-green-rgb), 0.1);
-  /* https://lucide.dev/icons/help-circle */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNvZGUiPjxwb2x5bGluZSBwb2ludHM9IjE2IDE4IDIyIDEyIDE2IDYiLz48cG9seWxpbmUgcG9pbnRzPSI4IDYgMiAxMiA4IDE4Ii8+PC9zdmc+');
-}
-
-.mdbook-callouts-challenge {
-  --mdbook-callouts-color: rgb(var(--color-red-rgb));
-  --mdbook-callouts-background: rgba(var(--color-red-rgb), 0.1);
-  /* https://lucide.dev/icons/help-circle */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXN3b3JkcyI+PHBvbHlsaW5lIHBvaW50cz0iMTQuNSAxNy41IDMgNiAzIDMgNiAzIDE3LjUgMTQuNSIvPjxsaW5lIHgxPSIxMyIgeDI9IjE5IiB5MT0iMTkiIHkyPSIxMyIvPjxsaW5lIHgxPSIxNiIgeDI9IjIwIiB5MT0iMTYiIHkyPSIyMCIvPjxsaW5lIHgxPSIxOSIgeDI9IjIxIiB5MT0iMjEiIHkyPSIxOSIvPjxwb2x5bGluZSBwb2ludHM9IjE0LjUgNi41IDE4IDMgMjEgMyAyMSA2IDE3LjUgOS41Ii8+PGxpbmUgeDE9IjUiIHgyPSI5IiB5MT0iMTQiIHkyPSIxOCIvPjxsaW5lIHgxPSI3IiB4Mj0iNCIgeTE9IjE3IiB5Mj0iMjAiLz48bGluZSB4MT0iMyIgeDI9IjUiIHkxPSIxOSIgeTI9IjIxIi8+PC9zdmc+');
-}
-
-.mdbook-callouts-warning,
-.mdbook-callouts-warn,
-.mdbook-callouts-attention {
-  --mdbook-callouts-color: rgb(var(--color-orange-rgb));
-  --mdbook-callouts-background: rgba(var(--color-orange-rgb), 0.1);
-  /* https://lucide.dev/icons/alert-triangle */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWFsZXJ0LXRyaWFuZ2xlIj48cGF0aCBkPSJtMjEuNzMgMTgtOC0xNGEyIDIgMCAwIDAtMy40OCAwbC04IDE0QTIgMiAwIDAgMCA0IDIxaDE2YTIgMiAwIDAgMCAxLjczLTNaIi8+PHBhdGggZD0iTTEyIDl2NCIvPjxwYXRoIGQ9Ik0xMiAxN2guMDEiLz48L3N2Zz4=');
-}
-
-.mdbook-callouts-caution {
-  --mdbook-callouts-color: rgb(var(--color-red-rgb));
-  --mdbook-callouts-background: rgba(var(--color-red-rgb), 0.1);
-  /* https://lucide.dev/icons/shield-alert */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNoaWVsZC1hbGVydCI+PHBhdGggZD0iTTEyIDIyczgtNCA4LTEwVjVsLTgtMy04IDN2N2MwIDYgOCAxMCA4IDEwIi8+PHBhdGggZD0iTTEyIDh2NCIvPjxwYXRoIGQ9Ik0xMiAxNmguMDEiLz48L3N2Zz4=');
-}
-
-.mdbook-callouts-failure,
-.mdbook-callouts-fail,
-.mdbook-callouts-missing {
-  --mdbook-callouts-color: rgb(var(--color-red-rgb));
-  --mdbook-callouts-background: rgba(var(--color-red-rgb), 0.1);
-  /* https://lucide.dev/icons/x */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXgiPjxwYXRoIGQ9Ik0xOCA2IDYgMTgiLz48cGF0aCBkPSJtNiA2IDEyIDEyIi8+PC9zdmc+');
-}
-
-.mdbook-callouts-error,
-.mdbook-callouts-danger {
-  --mdbook-callouts-color: rgb(var(--color-red-rgb));
-  --mdbook-callouts-background: rgba(var(--color-red-rgb), 0.1);
-  /* https://lucide.dev/icons/zap */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXphcCI+PHBvbHlnb24gcG9pbnRzPSIxMyAyIDMgMTQgMTIgMTQgMTEgMjIgMjEgMTAgMTIgMTAgMTMgMiIvPjwvc3ZnPg==');
-}
-
-.mdbook-callouts-bug {
-  --mdbook-callouts-color: rgb(var(--color-red-rgb));
-  --mdbook-callouts-background: rgba(var(--color-red-rgb), 0.1);
-  /* https://lucide.dev/icons/bug */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWJ1ZyI+PHBhdGggZD0ibTggMiAxLjg4IDEuODgiLz48cGF0aCBkPSJNMTQuMTIgMy44OCAxNiAyIi8+PHBhdGggZD0iTTkgNy4xM3YtMWEzLjAwMyAzLjAwMyAwIDEgMSA2IDB2MSIvPjxwYXRoIGQ9Ik0xMiAyMGMtMy4zIDAtNi0yLjctNi02di0zYTQgNCAwIDAgMSA0LTRoNGE0IDQgMCAwIDEgNCA0djNjMCAzLjMtMi43IDYtNiA2Ii8+PHBhdGggZD0iTTEyIDIwdi05Ii8+PHBhdGggZD0iTTYuNTMgOUM0LjYgOC44IDMgNy4xIDMgNSIvPjxwYXRoIGQ9Ik02IDEzSDIiLz48cGF0aCBkPSJNMyAyMWMwLTIuMSAxLjctMy45IDMuOC00Ii8+PHBhdGggZD0iTTIwLjk3IDVjMCAyLjEtMS42IDMuOC0zLjUgNCIvPjxwYXRoIGQ9Ik0yMiAxM2gtNCIvPjxwYXRoIGQ9Ik0xNy4yIDE3YzIuMS4xIDMuOCAxLjkgMy44IDQiLz48L3N2Zz4=');
-}
-
-.mdbook-callouts-examples,
-.mdbook-callouts-example {
-  --mdbook-callouts-color: rgb(var(--color-purple-rgb));
-  --mdbook-callouts-background: rgba(var(--color-purple-rgb), 0.1);
-  /* https://lucide.dev/icons/list */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWxpc3QiPjxsaW5lIHgxPSI4IiB4Mj0iMjEiIHkxPSI2IiB5Mj0iNiIvPjxsaW5lIHgxPSI4IiB4Mj0iMjEiIHkxPSIxMiIgeTI9IjEyIi8+PGxpbmUgeDE9IjgiIHgyPSIyMSIgeTE9IjE4IiB5Mj0iMTgiLz48bGluZSB4MT0iMyIgeDI9IjMuMDEiIHkxPSI2IiB5Mj0iNiIvPjxsaW5lIHgxPSIzIiB4Mj0iMy4wMSIgeTE9IjEyIiB5Mj0iMTIiLz48bGluZSB4MT0iMyIgeDI9IjMuMDEiIHkxPSIxOCIgeTI9IjE4Ii8+PC9zdmc+');
-}
-
-.mdbook-callouts-quote {
-  --mdbook-callouts-color: rgb(158, 158, 158);
-  --mdbook-callouts-background: rgba(158, 158, 158, 0.1);
-  /* https://lucide.dev/icons/quote */
-  --mdbook-callouts-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXF1b3RlIj48cGF0aCBkPSJNMyAyMWMzIDAgNy0xIDctOFY1YzAtMS4yNS0uNzU2LTIuMDE3LTItMkg0Yy0xLjI1IDAtMiAuNzUtMiAxLjk3MlYxMWMwIDEuMjUuNzUgMiAyIDIgMSAwIDEgMCAxIDF2MWMwIDEtMSAyLTIgMnMtMSAuMDA4LTEgMS4wMzFWMjBjMCAxIDAgMSAxIDF6Ii8+PHBhdGggZD0iTTE1IDIxYzMgMCA3LTEgNy04VjVjMC0xLjI1LS43NTctMi4wMTctMi0yaC00Yy0xLjI1IDAtMiAuNzUtMiAxLjk3MlYxMWMwIDEuMjUuNzUgMiAyIDJoLjc1YzAgMi4yNS4yNSA0LTIuNzUgNHYzYzAgMSAwIDEgMSAxeiIvPjwvc3ZnPg==');
-}
-
-
-.ayu {
-  --color-red-rgb: 251, 70, 76;
-  --color-red: #fb464c;
-  --color-orange-rgb: 233, 151, 63;
-  --color-orange: #e9973f;
-  --color-yellow-rgb: 224, 222, 113;
-  --color-yellow: #e0de71;
-  --color-green-rgb: 68, 207, 110;
-  --color-green: #44cf6e;
-  --color-cyan-rgb: 83, 223, 221;
-  --color-cyan: #53dfdd;
-  --color-blue-rgb: 2, 122, 255;
-  --color-blue: #027aff;
-  --color-purple-rgb: 168, 130, 255;
-  --color-purple: #a882ff;
-  --color-pink-rgb: 250, 153, 205;
-  --color-pink: #fa99cd;
-}
-
-.light {
-  --color-red-rgb: 233, 49, 71;
-  --color-red: #e93147;
-  --color-orange-rgb: 236, 117, 0;
-  --color-orange: #ec7500;
-  --color-yellow-rgb: 224, 172, 0;
-  --color-yellow: #e0ac00;
-  --color-green-rgb: 8, 185, 78;
-  --color-green: #08b94e;
-  --color-cyan-rgb: 0, 191, 188;
-  --color-cyan: #00bfbc;
-  --color-blue-rgb: 8, 109, 221;
-  --color-blue: #086ddd;
-  --color-purple-rgb: 120, 82, 238;
-  --color-purple: #7852ee;
-  --color-pink-rgb: 213, 57, 132;
-  --color-pink: #d53984;
-}
-
-.coal {
-  --color-red-rgb: 251, 70, 76;
-  --color-red: #fb464c;
-  --color-orange-rgb: 233, 151, 63;
-  --color-orange: #e9973f;
-  --color-yellow-rgb: 224, 222, 113;
-  --color-yellow: #e0de71;
-  --color-green-rgb: 68, 207, 110;
-  --color-green: #44cf6e;
-  --color-cyan-rgb: 83, 223, 221;
-  --color-cyan: #53dfdd;
-  --color-blue-rgb: 2, 122, 255;
-  --color-blue: #027aff;
-  --color-purple-rgb: 168, 130, 255;
-  --color-purple: #a882ff;
-  --color-pink-rgb: 250, 153, 205;
-  --color-pink: #fa99cd;
-}
-
-.navy {
-  --color-red-rgb: 251, 70, 76;
-  --color-red: #fb464c;
-  --color-orange-rgb: 233, 151, 63;
-  --color-orange: #e9973f;
-  --color-yellow-rgb: 224, 222, 113;
-  --color-yellow: #e0de71;
-  --color-green-rgb: 68, 207, 110;
-  --color-green: #44cf6e;
-  --color-cyan-rgb: 83, 223, 221;
-  --color-cyan: #53dfdd;
-  --color-blue-rgb: 2, 122, 255;
-  --color-blue: #027aff;
-  --color-purple-rgb: 168, 130, 255;
-  --color-purple: #a882ff;
-  --color-pink-rgb: 250, 153, 205;
-  --color-pink: #fa99cd;
-}
-
-.rust {
-  --color-red-rgb: 233, 49, 71;
-  --color-red: #e93147;
-  --color-orange-rgb: 236, 117, 0;
-  --color-orange: #ec7500;
-  --color-yellow-rgb: 224, 172, 0;
-  --color-yellow: #e0ac00;
-  --color-green-rgb: 8, 185, 78;
-  --color-green: #08b94e;
-  --color-cyan-rgb: 0, 191, 188;
-  --color-cyan: #00bfbc;
-  --color-blue-rgb: 8, 109, 221;
-  --color-blue: #086ddd;
-  --color-purple-rgb: 120, 82, 238;
-  --color-purple: #7852ee;
-  --color-pink-rgb: 213, 57, 132;
-  --color-pink: #d53984;
-}
-
-</style>
-<h1 id="building-a-frontend-for-calyx"><a class="header" href="#building-a-frontend-for-calyx">Building a Frontend for Calyx</a></h1>
+                        <h1 id="building-a-frontend-for-calyx"><a class="header" href="#building-a-frontend-for-calyx">Building a Frontend for Calyx</a></h1>
 <blockquote>
-<p>This tutorial assumes that you have already worked through the <a href="./language-tut.html">Calyx tutorial</a>. You won't get very much out of it by itself!</p>
+<p>This tutorial assumes that you have already worked through the <a href="./language-tut.html">Calyx tutorial</a>. You won’t get very much out of it by itself!</p>
 </blockquote>
 <p>In the <a href="./language-tut.html">Calyx tutorial</a> you wrote Calyx code by hand.
-This is (probably) a good way to build character, but it's no way to live.
+This is (probably) a good way to build character, but it’s no way to live.
 Indeed, Calyx was <em>designed</em> to be a compiler IL, and not a human-facing language.</p>
-<p>In this tutorial, we're going to learn all about this by building a DSL-to-hardware compiler for a toy language that we wish to accelerate.
+<p>In this tutorial, we’re going to learn all about this by building a DSL-to-hardware compiler for a toy language that we wish to accelerate.
 We will compile the DSL to Calyx, and then let Calyx take us to hardware.</p>
 <h1 id="mrxl-overview"><a class="header" href="#mrxl-overview">MrXL Overview</a></h1>
 <p>Meet MrXL, our toy DSL.
 MrXL lets you define arrays and registers and then perform <code>map</code> and <code>reduce</code> operations.</p>
 <h2 id="example-sum-of-squares"><a class="header" href="#example-sum-of-squares">Example: sum of squares</a></h2>
-<p>Here's a MrXL program that squares and then sums the values of an input array:</p>
+<p>Here’s a MrXL program that squares and then sums the values of an input array:</p>
 <pre><code>input avec: int[4]
 output sos: int
 squares := map 1 (a &lt;- avec) { a * a }
 sos := reduce 1 (acc, i &lt;- squares) 0 { acc + i }
 </code></pre>
-<p>This short program shows off all of MrXL's features, so let's pick it apart line by line:</p>
+<p>This short program shows off all of MrXL’s features, so let’s pick it apart line by line:</p>
 <ol>
 <li>We specify an array, <code>avec</code>, which will have four integers. The <code>input</code> keyword means that an external harness will populate the array.</li>
 <li>We specify <code>sos</code>, a register. The <code>output</code> keyword means that we will populate <code>sos</code> in our program.</li>
@@ -637,7 +367,7 @@ The rest of the tutorial will show you how to implement such a DSL by studying <
 <li>Generating Calyx code.</li>
 </ol>
 <h2 id="parsing-mrxl-into-an-ast"><a class="header" href="#parsing-mrxl-into-an-ast">Parsing MrXL into an AST</a></h2>
-<p>To start, we'll parse the MrXL program into a Python AST representation.
+<p>To start, we’ll parse the MrXL program into a Python AST representation.
 We choose to represent <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrxl/mrxl/ast.py">AST</a> nodes with <a href="https://docs.python.org/3/library/dataclasses.html">Python dataclasses</a>.
 A program is a sequence of array/register declarations followed by computation statements:</p>
 <pre><code class="language-python">@dataclass
@@ -647,7 +377,7 @@ class Prog:
     stmts: List[Stmt]  # Map and reduce statements
 </code></pre>
 <p><code>Decl</code> nodes correspond to array declarations such as <code>input avec: int[4]</code>.
-They carry information about whether the array is an <code>input</code> or <code>output</code>, the array's name, and the type of the array's elements:</p>
+They carry information about whether the array is an <code>input</code> or <code>output</code>, the array’s name, and the type of the array’s elements:</p>
 <pre><code class="language-python">@dataclass
 class Decl:
     """Declaration of a memory."""
@@ -678,7 +408,7 @@ hardware instances to perform some logical task (e.g, incrementing a register).
 Finally, the <a href="../lang/ref.html#the-control-operators">control section</a> <em>schedules</em> the execution of groups using control operators such as <code>seq</code>, <code>par</code>, and <code>while</code>.</p>
 <p>We perform syntax-directed compilation by walking over the nodes of the AST and generating <code>cells</code>, <code>wires</code>, and <code>control</code> operations.</p>
 <h3 id="an-embedded-dsl-that-generates-calyx"><a class="header" href="#an-embedded-dsl-that-generates-calyx">An Embedded DSL that Generates Calyx</a></h3>
-<p>To make it easy to generate hardware, we'll use Calyx's <a href="../calyx-py.html"><code>builder</code> module</a> written in Python:</p>
+<p>To make it easy to generate hardware, we’ll use Calyx’s <a href="../calyx-py.html"><code>builder</code> module</a> written in Python:</p>
 <pre><code class="language-python">import calyx.builder as cb
 
 prog = cb.Builder() # A Calyx program
@@ -687,7 +417,7 @@ main = prog.component("main") # Create a component named "main"
 <h3 id="decl-nodes"><a class="header" href="#decl-nodes"><code>Decl</code> nodes</a></h3>
 <p><code>Decl</code> nodes instantiate new memories and registers.
 We need these to be instantiated in the <code>cells</code> section of our Calyx output.
-We use Calyx's <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0ed7bf949a61/primitives/compile.futil#L22"><code>std_reg</code></a> and <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0ed7bf949a61/primitives/compile.futil#L22"><code>comb_mem_d1</code></a> primitives to represent <a href="https://github.com/calyxir/calyx/blob/master/primitives/compile.futil#L31">registers</a> and <a href="https://github.com/calyxir/calyx/blob/master/primitives/core.sv#L220">memories</a>:</p>
+We use Calyx’s <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0ed7bf949a61/primitives/compile.futil#L22"><code>std_reg</code></a> and <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0ed7bf949a61/primitives/compile.futil#L22"><code>comb_mem_d1</code></a> primitives to represent <a href="https://github.com/calyxir/calyx/blob/master/primitives/compile.futil#L31">registers</a> and <a href="https://github.com/calyxir/calyx/blob/master/primitives/core.sv#L220">memories</a>:</p>
 <pre><code class="language-C">import "primitives/core.futil"; // Import standard library
 
 component main() -&gt; () {
@@ -700,7 +430,7 @@ component main() -&gt; () {
   ...
 }
 </code></pre>
-<p>For each <code>Decl</code> node, we need to determine if we're instantiating a memory or a register, translate the node into a corresponding Calyx declaration, and place the declaration inside the <code>cells</code> section of our generated program.</p>
+<p>For each <code>Decl</code> node, we need to determine if we’re instantiating a memory or a register, translate the node into a corresponding Calyx declaration, and place the declaration inside the <code>cells</code> section of our generated program.</p>
 <p>If a memory is used in a parallel <code>map</code> or <code>reduce</code>, we might need to create different physical banks for it.
 We explain why <a href="#memory-banking">below</a>.
 We <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0ed7bf949a61/frontends/mrxl/mrxl/gen_calyx.py#L312">define a function</a> to walk over the AST and compute the parallelism factor for each memory:</p>
@@ -714,11 +444,11 @@ We <a href="https://github.com/calyxir/calyx/blob/45075345ae2858b23a599d65d94b0e
                 )
 </code></pre>
 <p>The <code>main.mem_d1</code> call is a function defined by the Calyx builder module to instantiate memories for a component.
-By setting <code>is_external=True</code>, we're indicating that a memory declaration is a part of the component's input-output interface.</p>
+By setting <code>is_external=True</code>, we’re indicating that a memory declaration is a part of the component’s input-output interface.</p>
 <h2 id="compiling-map-operations"><a class="header" href="#compiling-map-operations">Compiling <code>map</code> operations</a></h2>
 <p>For every <code>map</code> or <code>reduce</code> node, we need to generate Calyx code that iterates over an array, performs some kind of computation, and then stores the result of that computation.
-For <code>map</code> operations, we'll perform a computation on every element of an input array, and then store the answers in a result array.
-We can use Calyx's <a href="../lang/ref.html#while">while loops</a> to do this.
+For <code>map</code> operations, we’ll perform a computation on every element of an input array, and then store the answers in a result array.
+We can use Calyx’s <a href="../lang/ref.html#while">while loops</a> to do this.
 At a high level, we want to generate the following pieces of hardware:</p>
 <ol>
 <li>A register to store the current value of the loop index.</li>
@@ -759,7 +489,7 @@ We provide a <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrx
      -s sim.data=sos.data
 </code></pre>
 <p>If you are feeling good about your implementation, skip to <a href="#adding-parallelization">the next section</a>!
-If you'd like to read through the details of our implementation – or build yours in tandem – continue on with the rest of this section.</p>
+If you’d like to read through the details of our implementation – or build yours in tandem – continue on with the rest of this section.</p>
 <h3 id="loop-condition"><a class="header" href="#loop-condition">Loop condition</a></h3>
 <p>We define a <a href="../lang/ref.html#comb-group-definitions">combinational group</a> to perform the comparison <code>idx &lt; arr_size</code> that uses an <code>lt</code> cell:</p>
 <pre><code class="language-python">    group_name = f"cond_{suffix}"
@@ -780,11 +510,11 @@ If you'd like to read through the details of our implementation – or build you
         idx.write_en = 1
         incr.done = idx.done
 </code></pre>
-<p>We provide the index's previous value and the constant <code>1</code> to <code>adder</code>, and write the adder's output into the register (<code>idx</code>).
-Because we're performing a stateful update of the register, we must wait for the register to state that it has committed the write.
-We do this by setting the group's <code>done</code> condition to track the register's <code>done</code> signal.</p>
+<p>We provide the index’s previous value and the constant <code>1</code> to <code>adder</code>, and write the adder’s output into the register (<code>idx</code>).
+Because we’re performing a stateful update of the register, we must wait for the register to state that it has committed the write.
+We do this by setting the group’s <code>done</code> condition to track the register’s <code>done</code> signal.</p>
 <h3 id="body-computation"><a class="header" href="#body-computation">Body computation</a></h3>
-<p>The final piece of the puzzle is the body's computation.
+<p>The final piece of the puzzle is the body’s computation.
 The corresponding group indexes into the input memories:</p>
 <pre><code class="language-python">        with comp.group(f"eval_body_{suffix}") as evl:
             # Index each array
@@ -793,7 +523,7 @@ The corresponding group indexes into the input memories:</p>
                 mem = comp.get_cell(f"{name2arr[bind.dst[0]]}")
                 mem.addr0 = idx.out
 </code></pre>
-<p>Because the builder module is an embedded DSL, we can simply use Python's <code>for</code> loop to generate all the required assignments for indexing.</p>
+<p>Because the builder module is an embedded DSL, we can simply use Python’s <code>for</code> loop to generate all the required assignments for indexing.</p>
 <p>This code instantiates an adder or a multiplier depending on the computation needed using the <code>expr_to_port</code> helper function:</p>
 <pre><code class="language-python">        if body.operation == "mul":
             operation = comp.cell(
@@ -814,11 +544,11 @@ The corresponding group indexes into the input memories:</p>
                 out_mem.write_en = 1
             evl.done = out_mem.done
 </code></pre>
-<p>This final operation is complicated because we must account for whether we're using an adder or a multiplier.
+<p>This final operation is complicated because we must account for whether we’re using an adder or a multiplier.
 Adders are <em>combinational</em>–they produce their output immediately–while multipliers are <em>sequential</em> and require multiple cycles to produce its output.</p>
 <p>When using a mutliplier, we need to explicitly set its <code>go</code> signal to one and only write the output from the multiplier into the memory when its <code>done</code> signal is asserted.
-We do this by assigning the memory's <code>write_en</code> (write enable) signal to the multiplier's done signal.
-Finally, the group's computation is done when the memory write is committed.</p>
+We do this by assigning the memory’s <code>write_en</code> (write enable) signal to the multiplier’s done signal.
+Finally, the group’s computation is done when the memory write is committed.</p>
 <h3 id="generating-control"><a class="header" href="#generating-control">Generating control</a></h3>
 <p>Once we have generated the hardware needed for our computation, we can schedule its computation using <a href="../lang/ref.html#the-control-operators">control operators</a>:</p>
 <pre><code class="language-py">            While(
@@ -836,7 +566,7 @@ Finally, the group's computation is done when the memory write is committed.</p>
 Then, it sequentially executes the computation for the body and increments the loop index.</p>
 <blockquote>
 <p>Take a breather! You now understand the basics of compiling DSLs to Calyx.
-However, we're not done yet; we build hardware because we want things to be fast and efficient, so the next part will teach you how to parallelize MrXL programs.</p>
+However, we’re not done yet; we build hardware because we want things to be fast and efficient, so the next part will teach you how to parallelize MrXL programs.</p>
 </blockquote>
 <h2 id="adding-parallelization"><a class="header" href="#adding-parallelization">Adding parallelization</a></h2>
 <p>MrXL allows us to parallelize our <code>map</code> operations.</p>
@@ -872,13 +602,13 @@ But more interestingly, compile this to Calyx IL with:
 ```
 mrxl frontends/mrxl/test/squares.mrxl
 ``` -->
-<p>There's a lot going on in the Calyx code, but the thing to focus on is this.
+<p>There’s a lot going on in the Calyx code, but the thing to focus on is this.
 To take advantage of the parallelism in the program, the MrXL compiler assumes that the input memory <code>avec</code> is split into two <em>banks</em>, <code>avec_b0</code> and <code>avec_b1</code>.
 Look for these in the Calyx code.</p>
 <p>Why do we do this? Memories in Calyx can only support one read/write per cycle of the clock, so if we keep <code>avec</code> around as one memory, our attempts at parallelization will be thwarted simply because we will be bottlenecked when accessing our data.
 Splitting <code>avec</code> into two banks allows us to read/write into two logical spots of <code>avec</code> in parallel.</p>
 <p>Banking comes with an additional responsibility.
-When driving data to the memories, we can't just supply values for a memory <code>avec</code>.
+When driving data to the memories, we can’t just supply values for a memory <code>avec</code>.
 The memory <code>avec</code> exists logically in our minds, but Calyx now only knows about <code>avec_b0</code> and <code>avec_b1</code>.
 We must drive data to <em>these</em>.
 Though nontrivial, this data-banking can also be <a href="#aside-supplying-data-to-mrxl-programs">handled automatically</a>; all the necessary information is in the MrXL source program.</p>
@@ -903,7 +633,7 @@ As specified by the language specification, <a href="../lang/ref.html#par">confl
 <h1 id="further-steps"><a class="header" href="#further-steps">Further Steps</a></h1>
 <p>Congratulations, you know about as much about MrXL as we do!
 The small size of the language makes it a nice sandbox for you to play in.
-We mentioned that the restrictions placed on the language can be lifted by beefing up the compiler, and here's your chance to give it a whirl!</p>
+We mentioned that the restrictions placed on the language can be lifted by beefing up the compiler, and here’s your chance to give it a whirl!</p>
 <p>Here are some of those restrictions again, along with pointers about how to lift them.</p>
 <ol>
 <li>
@@ -912,9 +642,9 @@ We mentioned that the restrictions placed on the language can be lifted by beefi
 </blockquote>
 <p>Say you wanted to add subtraction and division to the mix.
 We have set you up for success: the MrXL parser already parses <code>-</code> and <code>/</code> into <code>sub</code> and <code>div</code> respectively.
-Now, in <code>gen_calyx.py</code>, you need to check for "sub" and "div" as possible binary operations, and then invoke the appropriate cell-builders of the <code>builder</code> library.
+Now, in <code>gen_calyx.py</code>, you need to check for “sub” and “div” as possible binary operations, and then invoke the appropriate cell-builders of the <code>builder</code> library.
 For reference, see how the <code>+</code> and <code>*</code> operations are handled at present.
-For "fun", take a look at how Calyx implements <a href="https://github.com/calyxir/calyx/blob/master/primitives/binary_operators.sv#L27-L45">multiplication</a>, and how that maps to the existing invocation to create a 32-bit multiplication cell using the <code>builder</code>!</p>
+For “fun”, take a look at how Calyx implements <a href="https://github.com/calyxir/calyx/blob/master/primitives/binary_operators.sv#L27-L45">multiplication</a>, and how that maps to the existing invocation to create a 32-bit multiplication cell using the <code>builder</code>!</p>
 </li>
 <li>
 <blockquote>
@@ -925,7 +655,7 @@ One way to perform reductions in parallel is using <em>reduction trees</em>.
 To get you started, we provide a toy implementation using the <code>builder</code> <a href="https://github.com/calyxir/calyx/blob/master/calyx-py/test/reduction_tree.py">here</a>.
 That example is rather brittle: it takes exactly 16 inputs, banked into four arrays, and adds their values together.
 Try incorporating this brittle version into your MrXL-to-Calyx compiler at first, and you can later think about generalizing it to any (commutative) operation, memories of any length, and any parallelism factor.</p>
-<p>If you'd like to read more about reduction trees, you can check out <a href="http://www.cs.ucr.edu/~nael/217-f15/lectures/217-lec10.pdf">these slides</a> from David Kirk and Wen-mei W. Hwu.</p>
+<p>If you’d like to read more about reduction trees, you can check out <a href="http://www.cs.ucr.edu/~nael/217-f15/lectures/217-lec10.pdf">these slides</a> from David Kirk and Wen-mei W. Hwu.</p>
 </li>
 <li>
 <blockquote>
@@ -945,11 +675,11 @@ They are lighter in two ways.</p>
 <p>Calyx requires cells to be allocated for the output cells.
 Instead of asking the user to supply zeroed-out arrays and registers for output cells, we can infer the need for these output cells from the source code.
 We can then add these on to the MrXL-native data files to make them amenable to Calyx.</p>
-<p>Additionally, because MrXL supports only a few kinds of data, some interesting parameters of Calyx-native data files turn into "just boilerplate" in MrXL-native data.
+<p>Additionally, because MrXL supports only a few kinds of data, some interesting parameters of Calyx-native data files turn into “just boilerplate” in MrXL-native data.
 We can keep MrXL-native data files relatively light and add this <code>format</code> information automatically.</p>
 <h2 id="example-squaresmrxldata"><a class="header" href="#example-squaresmrxldata">Example: <code>squares.mrxl.data</code></a></h2>
 <p>Let us look at these changes in practice.</p>
-<p>We write <code>avec</code>'s values as a straightforward array:</p>
+<p>We write <code>avec</code>’s values as a straightforward array:</p>
 <pre><code class="language-json">{
 	"avec": [
 			0,
@@ -1017,11 +747,11 @@ We can keep MrXL-native data files relatively light and add this <code>format</c
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                             <a rel="prev" href="../builder/walkthrough.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
                             <a rel="next prefetch" href="../frontends/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
                         <div style="clear: both"></div>
@@ -1031,16 +761,21 @@ We can keep MrXL-native data files relatively light and add this <code>format</c
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                     <a rel="prev" href="../builder/walkthrough.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
                     <a rel="next prefetch" href="../frontends/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
 
         </div>
 
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
 
 
 
@@ -1049,13 +784,13 @@ We can keep MrXL-native data files relatively light and add this <code>format</c
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
 
         <!-- Custom JS scripts -->
 
