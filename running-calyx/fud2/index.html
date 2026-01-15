@@ -37,7 +37,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-7bb61c73.js";
+            window.path_to_searchindex_js = "../../searchindex-94412a93.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-ed8c4c3b.js"></script>
@@ -254,6 +254,7 @@ Here are some options you might need:</p>
 <li><code>plan</code>: Print a brief description of the plan, i.e., the sequence of operations that the build would run.</li>
 <li><code>dot</code>: Print a <a href="https://graphviz.org">GraphViz</a> depiction of the plan. Try <code>fud2 -m dot | dot -Tpdf &gt; graph.pdf</code> and take a look.</li>
 <li><code>cmds</code>: Print the commands Ninja would run when executing the plan, but do not execute them.</li>
+<li><code>emit-json</code>: Prints a <code>json</code> representation of a build to stdout. If saved to a file, this build script can be run using <code>fud2 --planner json &lt; build.json</code></li>
 </ul>
 </li>
 </ul>
@@ -341,6 +342,15 @@ rule calyx
 We <em>could</em> have designed FudCore without a separation between setups and operations, so this rule would get declared right next to the <code>build</code> command above.
 But that would end up duplicating a lot of setup code that really only needs to appear once.
 So that’s why setups exist: to share a single stanza of Ninja scaffolding code between multiple operations.</p>
+<h3 id="planners"><a class="header" href="#planners">Planners</a></h3>
+<p>Planners are the part of FudCore which figures out which ops need to run. Given a list of input files, output states, and required ops, the planner returns a list of ops annotated with each op’s input and output files. This list of ops is what gets lowered to Ninja. FudCore provides multiple planners, each having different behavior. The planner to use can be specified with the <code>--planner</code> argument. The current supported list is:</p>
+<ul>
+<li><code>legacy</code>: This planner assumes ops only have a singular input and output state. It additionally assume the user only provides a single input and wants a single output. It then finds the shortest path of ops from the input state to the output state.</li>
+<li><code>enumerate</code>: Given a list of input and output states, this planner enumerates over all subsets of ops until finding a set of ops which brings the input states to the output states.</li>
+<li><code>sat</code>: This planner encodes the relation between ops, the inputs, and the desired outputs into a SAT instance and then uses <a href="https://github.com/chrjabs/rustsat">rustsat’s</a> minisat backend to solve this, finding a set of ops. The encoding is documented <a href="https://github.com/calyxir/calyx/blob/main/fud2/fud-core/src/exec/plan/sat_planner.rs">here</a>.</li>
+<li><code>json</code>: This planner parses build scripts emitted by <code>--mode emit-json</code> from stdin. It then runs this script, ignoring user supplied inputs and outputs.</li>
+</ul>
+<p>All of these planners face ambiguity when assigning filenames to states. For example, if there is file <code>f1.state1</code> and <code>f2.state1</code> and an op taking a file in state1, the planners do not know which file to provide to the op. Currently this ambiguity is resolved arbitrarily and cannot be controlled by the user. This can cause problems. <a href="https://github.com/calyxir/calyx/issues/2612">#2612</a> is the relevant issue.</p>
 
                     </main>
 
