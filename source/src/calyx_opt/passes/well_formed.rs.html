@@ -244,7 +244,7 @@
 <a href=#244 id=244 data-nosnippet>244</a>    <span class="kw">let </span>dsts = dsts1.chain(dsts2);
 <a href=#245 id=245 data-nosnippet>245</a>    <span class="kw">let </span>dst_grps = dsts
 <a href=#246 id=246 data-nosnippet>246</a>        .sorted_by(|(dst1, <span class="kw">_</span>), (dst2, <span class="kw">_</span>)| ir::Canonical::cmp(dst1, dst2))
-<a href=#247 id=247 data-nosnippet>247</a>        .group_by(|(dst, <span class="kw">_</span>)| dst.clone());
+<a href=#247 id=247 data-nosnippet>247</a>        .chunk_by(|(dst, <span class="kw">_</span>)| dst.clone());
 <a href=#248 id=248 data-nosnippet>248</a>
 <a href=#249 id=249 data-nosnippet>249</a>    <span class="kw">for </span>(<span class="kw">_</span>, group) <span class="kw">in </span><span class="kw-2">&amp;</span>dst_grps {
 <a href=#250 id=250 data-nosnippet>250</a>        <span class="kw">let </span>assigns = group.collect_vec();
