@@ -37,7 +37,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-cd3920bb.js";
+            window.path_to_searchindex_js = "../../searchindex-2a959263.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-ed8c4c3b.js"></script>
@@ -197,7 +197,7 @@ You might then want to do something like <code>ln -s `pwd`/target/debug/fud2 ~/.
 Install it using your OS package manager or by downloading a binary.</p>
 <h3 id="configuration"><a class="header" href="#configuration">Configuration</a></h3>
 <p>Run the following command to edit fud2’s configuration file (usually <code>~/.config/fud2.toml</code>):</p>
-<pre><code class="language-sh">fud2 edit-config
+<pre><code class="language-sh">fud2 config edit
 </code></pre>
 <p>Add these lines:</p>
 <pre><code class="language-toml">[calyx]
@@ -260,7 +260,7 @@ Here are some options you might need:</p>
 </ul>
 <p>There are also some subcommands for doing things other than building stuff:</p>
 <ul>
-<li><code>fud2 edit-config</code>: Open the <code>fud2</code> configuration file in <code>$EDITOR</code>.</li>
+<li><code>fud2 config edit</code>: Open the <code>fud2</code> configuration file in <code>$EDITOR</code>.</li>
 <li><code>fud2 list</code>: Print out all the available states and operations.</li>
 <li><code>fud2 get-rsrc FILE</code>: Fetch a <em>resource file</em> and place it in the working directory. You typically do not need to use this interactively; it is used during builds to obtain files included with <code>fud2</code> that are necessary for a given build.</li>
 </ul>
