@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-2a959263.js";
+            window.path_to_searchindex_js = "../searchindex-70534f9a.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ed8c4c3b.js"></script>
@@ -221,6 +221,15 @@ firtool = "&lt;path to extracted firtool directory&gt;/bin/firtool"
   }
 }
 </code></pre>
+<h3 id="adding-systemverilog-primitives-for-firrtl"><a class="header" href="#adding-systemverilog-primitives-for-firrtl">Adding SystemVerilog Primitives for <code>firrtl</code></a></h3>
+<p>To add primitives to <code>firrtl</code>, you would add the SystemVerilog implementation of the primitive to the file, <code>fud2/rsrc/primitives-for-firrtl.sv</code></p>
+<h3 id="adding-firrtl-primitives-for-firrtl-with-primitives"><a class="header" href="#adding-firrtl-primitives-for-firrtl-with-primitives">Adding Firrtl Primitives for <code>firrtl-with-primitives</code></a></h3>
+<ol>
+<li><strong>Create a Template:</strong> Add a <code>.fir</code> file to <code>tools/firrtl/templates/</code>. The filename should match the primitive name (e.g., <code>std_add.fir</code>).</li>
+<li><strong>Define the Interface:</strong> The template must define a <code>module</code> whose ports (names and widths) match the <a href="https://docs.calyxir.org/libraries/core.html">Calyx primitive library</a>.</li>
+<li><strong>Update the Replacement Map:</strong> If your FIRRTL primitive template uses unique parameters (those that are not in the SV definition of the primitive), update the replacement map logic in <code>tools/firrtl/generate-firrtl-with-primitives.py</code>.</li>
+<li><strong>Testing:</strong> Add a <code>runt</code> test in <code>tests/firrtl/primitive-templates</code> to ensure the new implementation generates valid FIRRTL and produces correct simulation results.</li>
+</ol>
 
                     </main>
 
