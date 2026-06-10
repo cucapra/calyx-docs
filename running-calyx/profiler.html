@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-70534f9a.js";
+            window.path_to_searchindex_js = "../searchindex-bb3bc527.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-7167e813.js"></script>
@@ -186,7 +186,6 @@
 <li>Internal tools within the Calyx repository; run <code>cargo build --all</code> to build all of them.</li>
 <li>The Python <a href="https://github.com/cirosantilli/vcdvcd"><code>vcdvcd</code> library</a>. Running <code>fud2 env init</code> should install this for you.</li>
 <li>A clone of Brendan Gregg’s Flamegraph repository: <a href="https://github.com/brendangregg/FlameGraph">https://github.com/brendangregg/FlameGraph</a></li>
-<li><a href="https://graphviz.org/download/">Graphviz</a></li>
 </ul>
 <p>Then, you need to edit your fud2 configuration file to specify the location of <code>flamegraph.pl</code> within the <code>Flamegraph</code> repository:</p>
 <p>ex)</p>
@@ -202,9 +201,34 @@ script = "/home/ayaka/projects/FlameGraph/flamegraph.pl"
 <p>If you retain the fud2 build directory with the <code>--keep</code> option or the <code>--dir</code> option, you will find additional profiler output files in <code>&lt;FUD2_BUILD_DIRECTORY&gt;/profiler-out</code>:</p>
 <ul>
 <li><code>scaled-flame.svg</code>: A scaled flame graph, where a cycle is divided between the parallel arms in execution. So, if arm A and arm B were executing on a single cycle, the flame graph would account for 0.5 cycles in arm A and 0.5 cycles in arm B.</li>
-<li><code>timeline-dump.json</code>: A JSON file in the <a href="https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview?tab=t.0#heading=h.yr4qxyxotyw">Google Trace Event Format</a>. Inputting this file into <a href="https://ui.perfetto.dev/">Perfetto UI</a> can help visualize a timeline of your Calyx/ADL program’s simulation.</li>
-<li><code>aggregate.dot.png</code>: A tree summary of the execution of the program. Nodes (groups and cells) are labeled with the number of times the node was a leaf, and edges are labeled with the number of cycles that edge was activated.</li>
-<li><code>rank{i}.dot.png</code>: A tree representation of the <code>i</code>th most active stack picture. <code>rankings.csv</code> lists the specific cycles that each ranked tree was active for.</li>
+<li><code>timeline_trace.pftrace</code>: A file in Perfetto’s native protobuf trace format. Inputting this file into <a href="https://ui.perfetto.dev/">Perfetto UI</a> will visualize a timeline of your Calyx program’s simulation.</li>
+</ul>
+<h3 id="running-the-profiler-for-adl-programs"><a class="header" href="#running-the-profiler-for-adl-programs">Running the profiler for ADL programs</a></h3>
+<p>Currently, the profiler supports programs written in Dahlia and Calyx-Py.</p>
+<h4 id="dahlia-profiling"><a class="header" href="#dahlia-profiling">Dahlia Profiling</a></h4>
+<p>Dahlia programs can be profiled by using the <code>dahlia-profiler</code> op instead of the <code>profiler</code> op.</p>
+<p>ex)</p>
+<pre><code>fud2 examples/dahlia/dot-product.fuse -o svgs/dot-product.svg --through dahlia-profiler -s sim.data=examples/dahlia/dot-product.fuse.data
+</code></pre>
+<p><strong>Note</strong>: The <code>svg</code> file outputted is the flattened flame graph at the Calyx level, so we highly recommend retaining the fud2 build directory.</p>
+<p>If you retain the fud2 build directory with the <code>--keep</code> option or the <code>--dir</code> option, you will find additional Dahlia profiler output files in <code>&lt;FUD2_BUILD_DIRECTORY&gt;/profiler-out</code> (on top of the Calyx profiler output files listed in <code>Basic Use</code>):</p>
+<ul>
+<li><code>dahlia-flat-flame.svg</code>: A flattened flame graph at the Dahlia level.</li>
+<li><code>dahlia-scaled-flame.svg</code>: A scaled flame graph at the Dahlia level.</li>
+<li><code>dahlia_timeline_trace.pftrace</code>: A timeline view file at the Dahlia level in Perfetto’s native protobuf trace format. Inputting this file into <a href="https://ui.perfetto.dev/">Perfetto UI</a> will visualize a timeline of your Dahlia program’s simulation.</li>
+</ul>
+<h4 id="calyx-py-profiling"><a class="header" href="#calyx-py-profiling">Calyx-py Profiling</a></h4>
+<p>Calyx-py programs can be profiled by using the <code>calyx-py-profiler</code> op. If the program has an argument, you can provide the arguments into the profiler simulation run via the <code>profiler.py-args</code> argument.</p>
+<p>ex)</p>
+<pre><code>fud2 frontends/queues/tests/strict/strict_6flow_test.py -o svgs/strict_6flow_test.svg --through calyx-py-profiler -s sim.data=frontends/queues/tests/strict/strict_6flow_test.data -s profiler.py-args="20000 --keepgoing"
+</code></pre>
+<p><strong>Note</strong>: The <code>svg</code> file outputted is the flattened flame graph at the Calyx level, so we highly recommend retaining the fud2 build directory.</p>
+<p>If you retain the fud2 build directory with the <code>--keep</code> option or the <code>--dir</code> option, you will find additional Calyx-py profiler output files in <code>&lt;FUD2_BUILD_DIRECTORY&gt;/profiler-out</code> (on top of the Calyx profiler output files listed in <code>Basic Use</code>):</p>
+<ul>
+<li><code>mixed-flat-flame.svg</code>: A flattened flame graph that shows both Calyx-py names and Calyx names.</li>
+<li><code>mixed-scaled-flame.svg</code>: A scaled flame graph that shows both Calyx-py names and Calyx names.</li>
+<li><code>py-flat-flame.svg</code>: A flattened flame graph at the Calyx-py level.</li>
+<li><code>py-scaled-flame.svg</code>: A scaled flame graph at the Calyx-py level.</li>
 </ul>
 
                     </main>
