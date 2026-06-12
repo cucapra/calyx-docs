@@ -38,7 +38,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-bb3bc527.js";
+            window.path_to_searchindex_js = "searchindex-9cf91d34.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-7167e813.js"></script>
@@ -2237,6 +2237,24 @@ fn calyx_setup(e) {
 <pre><code>|e, input, output| { ... }
 </code></pre>
 <p>where <code>e</code> is an emitter, and <code>input</code> and <code>output</code> are strings containing the filenames of the input and output of the operation. It usually calls functions that <a href="#building-commands">build commands</a>.</p>
+<br>
+<pre><code>op_multi(
+  &lt;op name&gt;,
+  [&lt;setup1&gt;, &lt;setup2&gt;, ..],
+  [&lt;input state0&gt;, &lt;input state1&gt;, ...],
+  [&lt;output state0&gt;, &lt;output state1&gt;, ...],
+  &lt;emit function&gt;
+)
+</code></pre>
+<p>Defines an op with name <code>&lt;op name&gt;</code> that generates specified output states from specified input states.
+<code>&lt;op name&gt;</code> is a string and each of <code>&lt;input staten&gt;</code>/<code>&lt;output staten&gt;</code> are states.</p>
+<p>Each of <code>&lt;setup1&gt;, &lt;setup2&gt;, ...</code> are functions with the purpose of creating vars and rules used by <code>&lt;emit function&gt;</code>.
+<code>&lt;emit function&gt;</code> typically produces commands.</p>
+<p>For more information about these “setups” see the documentation for <code>op</code>.</p>
+<p>The <code>&lt;emit function&gt;</code> or “builder” usually calls <a href="#building-commands">build commands</a> to build files. It is a function of the form</p>
+<pre><code>|e, inputs, outputs| { ... }
+</code></pre>
+<p>where <code>inputs</code> and <code>outputs</code> are arrays of strings containing the filenames of the inputs and outputs to the op.</p>
 <br>
 <pre><code>rule([&lt;setup1&gt;, &lt;setup2&gt;, ..], &lt;input state&gt;, &lt;output state&gt;, &lt;rule name&gt;)
 </code></pre>
