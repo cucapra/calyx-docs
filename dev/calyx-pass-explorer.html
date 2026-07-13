@@ -15,8 +15,8 @@
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-0392ca55.css">
-        <link rel="stylesheet" href="../css/chrome-fc474251.css">
+        <link rel="stylesheet" href="../css/general-e96d0476.css">
+        <link rel="stylesheet" href="../css/chrome-d279d366.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-97dc8f9f.js";
+            window.path_to_searchindex_js = "../searchindex-9ed8dcd3.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-7167e813.js"></script>
@@ -187,7 +187,7 @@ It’s a command line tool that provides an interactive interface for visualizin
 how different passes affect the source code.
 It’s been used to debug and develop new compiler passes as well as implement new features in the compiler, so I hope you can find it useful too!</p>
 <blockquote>
-<p><img src="https://raw.githubusercontent.com/calyxir/calyx/main/tools/calyx-pass-explorer/example_v0.0.0.png" alt="Example running of the tool">
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="https://raw.githubusercontent.com/calyxir/calyx/main/tools/calyx-pass-explorer/example_v0.0.0.png" alt="Example running of the tool"><span class="img-wrapper"><img src="https://raw.githubusercontent.com/calyxir/calyx/main/tools/calyx-pass-explorer/example_v0.0.0.png" alt="Example running of the tool"></span></label>
 <em>The above image depicts the tool’s interface in v0.0.0.
 As of writing this documentation, it’s on v0.2.1.</em></p>
 </blockquote>
@@ -238,11 +238,11 @@ Incidentally, I used this file to test my implementation of the
 tool to help develop it!</p>
 <p>We’ll first run <code>calyx-pass-explorer example0.futil</code>.
 You should get something horrific like</p>
-<p><img src="assets/horrific-interface.png" alt="Lots of random text output that doesn’t make sense"></p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="assets/horrific-interface.png" alt="Lots of random text output that doesn’t make sense"><span class="img-wrapper"><img src="assets/horrific-interface.png" alt="Lots of random text output that doesn’t make sense"></span></label></p>
 <blockquote class="blockquote-tag blockquote-tag-tip">
 <p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p>
 <p>If you get this message:
-<img src="assets/calyx-missing.png" alt="Calyx executable could not be found">
+<label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="assets/calyx-missing.png" alt="Calyx executable could not be found"><span class="img-wrapper"><img src="assets/calyx-missing.png" alt="Calyx executable could not be found"></span></label>
 You should setup <code>fud</code> or pass the path explicitly with <code>-e</code>, as suggested.
 However, we’re going to update this later to look at <code>fud2</code> as well because
 <code>fud</code> is now officially deprecated.</p>
@@ -251,7 +251,7 @@ However, we’re going to update this later to look at <code>fud2</code> as well
 standard library components we don’t really care too much about.
 What we really want is to focus on what happens to, <em>e.g.</em>, the <code>main</code> component.
 To do that, we just pass <code>-c main</code> (or <code>--component main</code>) as a flag:</p>
-<p><img src="assets/well-formed.png" alt="Running the tool and visualizing how the well-formed pass affects the main component"></p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="assets/well-formed.png" alt="Running the tool and visualizing how the well-formed pass affects the main component"><span class="img-wrapper"><img src="assets/well-formed.png" alt="Running the tool and visualizing how the well-formed pass affects the main component"></span></label></p>
 <p>That’s a lot better, but it’s still quite a bit of information.
 Let’s break it down.</p>
 <ul>
@@ -334,7 +334,7 @@ I wrote a custom <a href="https://github.com/calyxir/calyx/blob/main/tools/calyx
 
         <script src="../clipboard-1626706a.min.js"></script>
         <script src="../highlight-abc7f01d.js"></script>
-        <script src="../book-c22b7243.js"></script>
+        <script src="../book-609e4cb8.js"></script>
 
         <!-- Custom JS scripts -->
 
