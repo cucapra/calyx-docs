@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-9ed8dcd3.js";
+            window.path_to_searchindex_js = "../searchindex-09acfbae.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-7167e813.js"></script>
@@ -180,7 +180,7 @@
 <p>Calyx programs can be translated into the <a href="https://bar.eecs.berkeley.edu/projects/firrtl.html">FIRRTL</a> intermediate language. <!-- TODO: Link OSDA paper when it goes on arxiv --></p>
 <h2 id="basic-use"><a class="header" href="#basic-use">Basic Use</a></h2>
 <p>To translate an example program to FIRRTL, try:</p>
-<pre><code>$ cargo run examples/tutorial/language-tutorial-iterate.futil -p external-to-ref -p all -b firrtl
+<pre><code>$ cargo run examples/tutorial/language-tutorial-iterate.futil -p external-to-ref -x external-to-ref:activate=true -p all -b firrtl
 </code></pre>
 <h2 id="running-with-fud2"><a class="header" href="#running-with-fud2">Running with <code>fud2</code></a></h2>
 <p>The FIRRTL backend can also be run through fud2, which we recommend using.</p>
