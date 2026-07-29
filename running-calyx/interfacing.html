@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-4890c485.js";
+            window.path_to_searchindex_js = "../searchindex-397cb238.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-7167e813.js"></script>
@@ -215,17 +215,17 @@ to test a Calyx-generated Verilog design.</p>
 <p>In order to be able to actually write to our register, we need to drive our <code>reset</code> and
 <code>go</code> signals in our cocotb test:</p>
 <pre><code class="language-python"># Required for all cocotb testbenches. Included for completeness.
-cocotb.start_soon(Clock(main.clk, 2, units="ns").start()) 
+cocotb.start_soon(Clock(main.clk, 2, units="ns").start())
 
 # Reset Calyx-generated control registers
 main.reset.value = 1
-await ClockCycles(main.clk, 5) #wait a bit
+await ClockCycles(main.clk, 5)  # wait a bit
 main.reset.value = 0
 
 # Start execution of control sequence
 main.go.value = 1
 
-#At this point our Calyx program is done
+# At this point our Calyx program is done
 await RisingEdge(main.done)
 </code></pre>
 

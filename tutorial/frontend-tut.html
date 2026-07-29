@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-4890c485.js";
+            window.path_to_searchindex_js = "../searchindex-397cb238.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-7167e813.js"></script>
@@ -373,8 +373,8 @@ A program is a sequence of array/register declarations followed by computation s
 <pre><code class="language-python">@dataclass
 class Prog:
     """A MrXL program."""
-    decls: List[Decl]  # Memory declarations
-    stmts: List[Stmt]  # Map and reduce statements
+    decls: list[Decl]  # Memory declarations
+    stmts: list[Stmt]  # Map and reduce statements
 </code></pre>
 <p><code>Decl</code> nodes correspond to array declarations such as <code>input avec: int[4]</code>.
 They carry information about whether the array is an <code>input</code> or <code>output</code>, the array’s name, and the type of the array’s elements:</p>
@@ -391,7 +391,7 @@ They contain further nested nodes representing the function-header and -body, an
 class Stmt:
     """A statement in the program."""
     dst: str
-    operation: Union[Map, Reduce]
+    operation: Map | Reduce
 </code></pre>
 <p>We elide further details, but point you to the <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrxl/mrxl/ast.py">AST</a>, which defines all the nodes we need to represent a MrXL program.</p>
 <h2 id="generating-calyx-code"><a class="header" href="#generating-calyx-code">Generating Calyx code</a></h2>
@@ -411,8 +411,8 @@ Finally, the <a href="../lang/ref.html#the-control-operators">control section</a
 <p>To make it easy to generate hardware, we’ll use Calyx’s <a href="../calyx-py.html"><code>builder</code> module</a> written in Python:</p>
 <pre><code class="language-python">import calyx.builder as cb
 
-prog = cb.Builder() # A Calyx program
-main = prog.component("main") # Create a component named "main"
+prog = cb.Builder()  # A Calyx program
+main = prog.component("main")  # Create a component named "main"
 </code></pre>
 <h3 id="decl-nodes"><a class="header" href="#decl-nodes"><code>Decl</code> nodes</a></h3>
 <p><code>Decl</code> nodes instantiate new memories and registers.

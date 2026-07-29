@@ -38,7 +38,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-4890c485.js";
+            window.path_to_searchindex_js = "searchindex-397cb238.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-7167e813.js"></script>
@@ -2831,11 +2831,11 @@ external stage with:</p>
 </code></pre>
 <p>The following defines a stage that transforms <a href="#mrxl">MrXL</a> programs to Calyx
 programs.</p>
-<pre><code class="language-python">from fud.stages import Stage, SourceType, Source
-from fud.utils import shell, TmpDir
-from fud.errors import MissingDynamicConfiguration
+<pre><code class="language-python">from pathlib import Path
 
-from pathlib import Path
+from fud.errors import MissingDynamicConfiguration
+from fud.stages import Source, SourceType, Stage
+from fud.utils import TmpDir, shell
 
 # The temporary filename used for converting mrxl.data to verilog.data
 _DATA_FILE = "data.json"
@@ -2910,7 +2910,7 @@ class MrXLStage(Stage):
 
         @builder.step(description=cmd)
         def run_mrxl(mrxl_prog: SourceType.Path) -&gt; SourceType.Stream:
-            return shell(f"{cmd} {str(mrxl_prog)} {flags}")
+            return shell(f"{cmd} {mrxl_prog!s} {flags}")
 
         # Define a schedule using the steps.
         # A schedule *looks* like an imperative program but actually represents
@@ -2990,7 +2990,7 @@ class MrXLDataStage(Stage):
             """
             Converts MrXL input into calyx input
             """
-            return shell(f"{cmd} {str(mrxl_prog.data)} --data {data_path} --convert")
+            return shell(f"{cmd} {mrxl_prog.data!s} --data {data_path} --convert")
 
         # Define a schedule using the steps.
         # A schedule *looks* like an imperative program but actually represents
@@ -3206,17 +3206,17 @@ to test a Calyx-generated Verilog design.</p>
 <p>In order to be able to actually write to our register, we need to drive our <code>reset</code> and
 <code>go</code> signals in our cocotb test:</p>
 <pre><code class="language-python"># Required for all cocotb testbenches. Included for completeness.
-cocotb.start_soon(Clock(main.clk, 2, units="ns").start()) 
+cocotb.start_soon(Clock(main.clk, 2, units="ns").start())
 
 # Reset Calyx-generated control registers
 main.reset.value = 1
-await ClockCycles(main.clk, 5) #wait a bit
+await ClockCycles(main.clk, 5)  # wait a bit
 main.reset.value = 0
 
 # Start execution of control sequence
 main.go.value = 1
 
-#At this point our Calyx program is done
+# At this point our Calyx program is done
 await RisingEdge(main.done)
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -4643,8 +4643,9 @@ The command requires <a href="https://flit.readthedocs.io/en/latest/">flit</a>, 
 <h2 id="hello-calyx-world"><a class="header" href="#hello-calyx-world">Hello, Calyx World!</a></h2>
 <p>We will start by using the <code>calyx</code> library to generate a simple Calyx program.
 Glance through the Python code below, which is also available at <a href="https://github.com/calyxir/calyx/blob/master/calyx-py/test/helloworld.py"><code>helloworld.py</code></a>.</p>
-<pre><code class="language-python">import calyx.builder as cb
-import os
+<pre><code class="language-python">import os
+
+import calyx.builder as cb
 
 
 def insert_adder_component(prog):
@@ -4706,11 +4707,11 @@ sourceinfo #{
 FILES 
   0: helloworld.py
 POSITIONS 
-  0: 0 6
-  1: 0 12
-  2: 0 13
-  3: 0 15
-  4: 0 25
+  0: 0 7
+  1: 0 13
+  2: 0 14
+  3: 0 16
+  4: 0 26
 }#
 </code></pre>
 <h2 id="walkthrough"><a class="header" href="#walkthrough">Walkthrough</a></h2>
@@ -5263,8 +5264,8 @@ A program is a sequence of array/register declarations followed by computation s
 <pre><code class="language-python">@dataclass
 class Prog:
     """A MrXL program."""
-    decls: List[Decl]  # Memory declarations
-    stmts: List[Stmt]  # Map and reduce statements
+    decls: list[Decl]  # Memory declarations
+    stmts: list[Stmt]  # Map and reduce statements
 </code></pre>
 <p><code>Decl</code> nodes correspond to array declarations such as <code>input avec: int[4]</code>.
 They carry information about whether the array is an <code>input</code> or <code>output</code>, the array’s name, and the type of the array’s elements:</p>
@@ -5281,7 +5282,7 @@ They contain further nested nodes representing the function-header and -body, an
 class Stmt:
     """A statement in the program."""
     dst: str
-    operation: Union[Map, Reduce]
+    operation: Map | Reduce
 </code></pre>
 <p>We elide further details, but point you to the <a href="https://github.com/calyxir/calyx/blob/master/frontends/mrxl/mrxl/ast.py">AST</a>, which defines all the nodes we need to represent a MrXL program.</p>
 <h2 id="generating-calyx-code"><a class="header" href="#generating-calyx-code">Generating Calyx code</a></h2>
@@ -5301,8 +5302,8 @@ Finally, the <a href="#the-control-operators">control section</a> <em>schedules<
 <p>To make it easy to generate hardware, we’ll use Calyx’s <a href="calyx-py.html"><code>builder</code> module</a> written in Python:</p>
 <pre><code class="language-python">import calyx.builder as cb
 
-prog = cb.Builder() # A Calyx program
-main = prog.component("main") # Create a component named "main"
+prog = cb.Builder()  # A Calyx program
+main = prog.component("main")  # Create a component named "main"
 </code></pre>
 <h3 id="decl-nodes"><a class="header" href="#decl-nodes"><code>Decl</code> nodes</a></h3>
 <p><code>Decl</code> nodes instantiate new memories and registers.
