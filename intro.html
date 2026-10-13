@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-397cb238.js";
+            window.path_to_searchindex_js = "searchindex-818f43d4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-7167e813.js"></script>
@@ -251,8 +251,9 @@ Start at the root of the repository.</p>
 <p>fud2 requires <a href="https://ninja-build.org/manual.html">Ninja</a> and <a href="https://docs.astral.sh/uv/">uv</a>, so install those if you don’t already have them.
 For example, use <code>brew install ninja uv</code> on macOS or <code>apt-get install ninja-build</code> followed by <code>curl -LsSf https://astral.sh/uv/install.sh | sh</code> on Debian/Ubuntu.</p>
 <p>Configure fud2 by typing:</p>
-<pre><code>fud2 config edit
+<pre><code>fud2 config edit -e vi 
 </code></pre>
+<p>(The <code>-e vi</code> argument tells <code>fud2</code> to open the config file in <a href="https://en.wikipedia.org/wiki/Vi_(text_editor)">vi</a>; if you want, you can replace <code>vi</code> with another editor.)</p>
 <p>And put this in the resulting TOML file:</p>
 <pre><code class="language-toml">[calyx]
 base = "&lt;absolute path to Calyx repository&gt;"
@@ -275,7 +276,8 @@ You could consider:</p>
 <li>Using the <a href="./running-calyx/interpreter.html">interpreter</a> to avoid RTL simulation altogether.</li>
 </ol>
 <h2 id="running-a-hardware-design"><a class="header" href="#running-a-hardware-design">Running a Hardware Design</a></h2>
-<p>You’re all set to run a Calyx hardware design now. Run the following command:</p>
+<p>You’re all set to run a Calyx hardware design now.</p>
+<p>First, run <code>cargo build -p auxin</code> to build <a href="https://github.com/calyxir/calyx/tree/main/tools/auxin">Auxin</a>, our data conversion tool. Then, run the following command:</p>
 <pre><code>fud2 examples/tutorial/language-tutorial-iterate.futil \
   -s sim.data=examples/tutorial/data.json \
   --to dat --through icarus

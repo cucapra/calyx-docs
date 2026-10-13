@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-397cb238.js";
+            window.path_to_searchindex_js = "../searchindex-818f43d4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-7167e813.js"></script>
@@ -249,9 +249,13 @@ The second group simply saves the value on the output port. Importantly,
 we don’t have to set the <code>go</code> signal of the component to high because we
 don’t need to save a new value into it.
 The component executes the two groups in-order.</p>
-<p>To see the output from running this component, run the command:</p>
-<pre><code>fud2 examples/futil/multi-component.futil --to vcd
+<p>To see the output from running this component, run the following:</p>
+<pre><code>echo '{}' &gt; empty.json
+fud2 examples/futil/multi-component.futil --to vcd -s sim.data=empty.json 
 </code></pre>
+<p>(Note: we need to first create an empty JSON file <code>empty.json</code>, as fud2 expects
+a JSON data file for simulation even when the design has no memories; an empty
+JSON file suffices here.)</p>
 
                     </main>
 

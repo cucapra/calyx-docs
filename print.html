@@ -38,7 +38,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-397cb238.js";
+            window.path_to_searchindex_js = "searchindex-818f43d4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-7167e813.js"></script>
@@ -252,8 +252,9 @@ Start at the root of the repository.</p>
 <p>fud2 requires <a href="https://ninja-build.org/manual.html">Ninja</a> and <a href="https://docs.astral.sh/uv/">uv</a>, so install those if you don’t already have them.
 For example, use <code>brew install ninja uv</code> on macOS or <code>apt-get install ninja-build</code> followed by <code>curl -LsSf https://astral.sh/uv/install.sh | sh</code> on Debian/Ubuntu.</p>
 <p>Configure fud2 by typing:</p>
-<pre><code>fud2 config edit
+<pre><code>fud2 config edit -e vi 
 </code></pre>
+<p>(The <code>-e vi</code> argument tells <code>fud2</code> to open the config file in <a href="https://en.wikipedia.org/wiki/Vi_(text_editor)">vi</a>; if you want, you can replace <code>vi</code> with another editor.)</p>
 <p>And put this in the resulting TOML file:</p>
 <pre><code class="language-toml">[calyx]
 base = "&lt;absolute path to Calyx repository&gt;"
@@ -276,7 +277,8 @@ You could consider:</p>
 <li>Using the <a href="#cider-the-calyx-interpreter--debugger">interpreter</a> to avoid RTL simulation altogether.</li>
 </ol>
 <h2 id="running-a-hardware-design"><a class="header" href="#running-a-hardware-design">Running a Hardware Design</a></h2>
-<p>You’re all set to run a Calyx hardware design now. Run the following command:</p>
+<p>You’re all set to run a Calyx hardware design now.</p>
+<p>First, run <code>cargo build -p auxin</code> to build <a href="https://github.com/calyxir/calyx/tree/main/tools/auxin">Auxin</a>, our data conversion tool. Then, run the following command:</p>
 <pre><code>fud2 examples/tutorial/language-tutorial-iterate.futil \
   -s sim.data=examples/tutorial/data.json \
   --to dat --through icarus
@@ -325,14 +327,19 @@ Every component definition has three sections:</p>
 </ul>
 <p>We’ll fill these sections up minimally in the next sections.</p>
 <h2 id="a-memory-cell"><a class="header" href="#a-memory-cell">A Memory Cell</a></h2>
-<p>Let’s turn our skeleton into a tiny, nearly no-op Calyx program.
-We’ll start by adding a memory component to the cells:</p>
+<p>Let’s turn our skeleton into a tiny, nearly no-op Calyx program.</p>
+<p>First, we add an extra <code>import</code> statement to import a library for memories supporting
+combinational (same-cycle) reads:</p>
+<pre><code>import "primitives/memories/comb.futil";
+</code></pre>
+<p>Then, we’ll add a memory component to the cells:</p>
 <pre><code>  cells {
     @external mem = comb_mem_d1(32, 1, 1);
   }
 </code></pre>
 <p>This new line declares a new cell called <code>mem</code> and the primitive component <code>comb_mem_d1</code> represents a 1D memory.
-You can see the definition of <code>comb_mem_d1</code>, and all the other standard components, in the <code>primitives/core.futil</code> library we imported.</p>
+You can see the definition of <code>comb_mem_d1</code> in the <code>primitives/memories/comb.futil</code> library we imported.
+(The definition of other standard components are visible in <code>primitives/core.futil</code>.)</p>
 <p>This one has three parameters:
 the data width (here, 32 bits),
 the number of elements (just one),
@@ -431,6 +438,8 @@ But now we’re controlling things with an execution schedule.</p>
 <p>If you’re curious to see how the Calyx compiler lowers this program to a Verilog-like structural form of Calyx, you can do this:</p>
 <pre><code>calyx language-tutorial-mem.futil
 </code></pre>
+<p>(Note: if you installed Calyx from source, you’ll need to first build the compiler by doing <code>cargo build</code>,
+then execute the compiler binary on this program by doing <code>./target/debug/calyx language-tutorial-mem.futil</code>.)</p>
 <p>Notably, you’ll see <code>control {}</code> in the output, meaning that the compiler has eliminated all the control statements and replaced them with continuous assignments in <code>wires</code>.</p>
 <blockquote>
 <p>The complete program for this section is available under <a href="https://github.com/calyxir/calyx/blob/master/examples/tutorial/language-tutorial-control.futil">examples/tutorial/language-tutorial-control.futil</a>.</p>
@@ -557,7 +566,7 @@ the condition can be run combinationally:</p>
 </code></pre>
 <p>By comparing with 8, we should now be running our loop body 8 times.</p>
 <p>Try running this program again.
-The output should be the result of adding 4 to the initial value 8 times, so 10 + 8 × 4.</p>
+The output should be the result of adding 4 to the initial value 8 times, so 10 + 8 × 4, which is 42.</p>
 <blockquote>
 <p>The complete program for this section is available under <a href="https://github.com/calyxir/calyx/blob/master/examples/tutorial/language-tutorial-iterate.futil">examples/tutorial/language-tutorial-iterate.futil</a>.</p>
 </blockquote>
@@ -636,9 +645,13 @@ The second group simply saves the value on the output port. Importantly,
 we don’t have to set the <code>go</code> signal of the component to high because we
 don’t need to save a new value into it.
 The component executes the two groups in-order.</p>
-<p>To see the output from running this component, run the command:</p>
-<pre><code>fud2 examples/futil/multi-component.futil --to vcd
+<p>To see the output from running this component, run the following:</p>
+<pre><code>echo '{}' &gt; empty.json
+fud2 examples/futil/multi-component.futil --to vcd -s sim.data=empty.json 
 </code></pre>
+<p>(Note: we need to first create an empty JSON file <code>empty.json</code>, as fud2 expects
+a JSON data file for simulation even when the design has no memories; an empty
+JSON file suffices here.)</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="passing-cells-by-reference"><a class="header" href="#passing-cells-by-reference">Passing Cells by Reference</a></h1>
 <p>One question that may arise when using Calyx as a backend is how to
@@ -5098,6 +5111,12 @@ sos := reduce 1 (acc, i &lt;- squares) 0 { acc + i }
 <blockquote>
 <p>If you are going through this tutorial in the <a href="https://github.com/calyxir/calyx/pkgs/container/calyx">Docker container</a>, you can skip these installation steps and jump to <a href="#running-mrxl"><em>Running MrXL</em></a> just below.</p>
 </blockquote>
+<p>Install the <code>mrxl</code> binary, together with the <a href="calyx-py.html"><code>builder</code> library</a> it depends on, by running this command from the repository root (you will need <a href="https://docs.astral.sh/uv/">uv</a>):</p>
+<pre><code>uv tool install --editable ./frontends/mrxl --with-editable ./calyx-py
+</code></pre>
+<p>Since both packages are installed in uv’s <a href="https://docs.astral.sh/uv/pip/packages/#editable-packages">editable mode</a>,
+changes you make to the <code>mrxl</code> source as you follow this tutorial will take effect immediately (i.e., you don’t need to reinstall <code>mrxl</code>).</p>
+<p>(Note: if you get a warning saying that <code>mrxl</code> is not on your <code>PATH</code>, try running <code>uv tool update-shell</code>, then restart your shell.)</p>
 <p>First, install the <a href="calyx-py.html"><code>builder</code> library</a> by typing the following command from the repository root:</p>
 <pre><code>cd calyx-py &amp;&amp; flit install -s &amp;&amp; cd -
 </code></pre>
@@ -5343,7 +5362,7 @@ We can use Calyx’s <a href="#while">while loops</a> to do this.
 At a high level, we want to generate the following pieces of hardware:</p>
 <ol>
 <li>A register to store the current value of the loop index.</li>
-<li>A comparator to check of the loop index is less than the array size.</li>
+<li>A comparator to check if the loop index is less than the array size.</li>
 <li>An adder to increment the value of the index.</li>
 <li>Whatever hardware is needed to implement the loop body computation.</li>
 </ol>

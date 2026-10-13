@@ -37,7 +37,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-397cb238.js";
+            window.path_to_searchindex_js = "../searchindex-818f43d4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-7167e813.js"></script>
@@ -207,14 +207,19 @@ Every component definition has three sections:</p>
 </ul>
 <p>We’ll fill these sections up minimally in the next sections.</p>
 <h2 id="a-memory-cell"><a class="header" href="#a-memory-cell">A Memory Cell</a></h2>
-<p>Let’s turn our skeleton into a tiny, nearly no-op Calyx program.
-We’ll start by adding a memory component to the cells:</p>
+<p>Let’s turn our skeleton into a tiny, nearly no-op Calyx program.</p>
+<p>First, we add an extra <code>import</code> statement to import a library for memories supporting
+combinational (same-cycle) reads:</p>
+<pre><code>import "primitives/memories/comb.futil";
+</code></pre>
+<p>Then, we’ll add a memory component to the cells:</p>
 <pre><code>  cells {
     @external mem = comb_mem_d1(32, 1, 1);
   }
 </code></pre>
 <p>This new line declares a new cell called <code>mem</code> and the primitive component <code>comb_mem_d1</code> represents a 1D memory.
-You can see the definition of <code>comb_mem_d1</code>, and all the other standard components, in the <code>primitives/core.futil</code> library we imported.</p>
+You can see the definition of <code>comb_mem_d1</code> in the <code>primitives/memories/comb.futil</code> library we imported.
+(The definition of other standard components are visible in <code>primitives/core.futil</code>.)</p>
 <p>This one has three parameters:
 the data width (here, 32 bits),
 the number of elements (just one),
@@ -313,6 +318,8 @@ But now we’re controlling things with an execution schedule.</p>
 <p>If you’re curious to see how the Calyx compiler lowers this program to a Verilog-like structural form of Calyx, you can do this:</p>
 <pre><code>calyx language-tutorial-mem.futil
 </code></pre>
+<p>(Note: if you installed Calyx from source, you’ll need to first build the compiler by doing <code>cargo build</code>,
+then execute the compiler binary on this program by doing <code>./target/debug/calyx language-tutorial-mem.futil</code>.)</p>
 <p>Notably, you’ll see <code>control {}</code> in the output, meaning that the compiler has eliminated all the control statements and replaced them with continuous assignments in <code>wires</code>.</p>
 <blockquote>
 <p>The complete program for this section is available under <a href="https://github.com/calyxir/calyx/blob/master/examples/tutorial/language-tutorial-control.futil">examples/tutorial/language-tutorial-control.futil</a>.</p>
@@ -439,7 +446,7 @@ the condition can be run combinationally:</p>
 </code></pre>
 <p>By comparing with 8, we should now be running our loop body 8 times.</p>
 <p>Try running this program again.
-The output should be the result of adding 4 to the initial value 8 times, so 10 + 8 × 4.</p>
+The output should be the result of adding 4 to the initial value 8 times, so 10 + 8 × 4, which is 42.</p>
 <blockquote>
 <p>The complete program for this section is available under <a href="https://github.com/calyxir/calyx/blob/master/examples/tutorial/language-tutorial-iterate.futil">examples/tutorial/language-tutorial-iterate.futil</a>.</p>
 </blockquote>
